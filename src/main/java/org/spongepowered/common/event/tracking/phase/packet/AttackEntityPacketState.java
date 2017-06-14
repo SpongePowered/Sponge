@@ -47,8 +47,8 @@ final class AttackEntityPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
+//        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
+//        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
         // unused, to be removed and re-located when phase context is cleaned up
         //context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
         //context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));

@@ -103,7 +103,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -178,12 +177,11 @@ public final class ContainerUtil {
                         {
                             int i = RANDOM.nextInt(21) + 10;
 
-                            EntityItem entityitem = new EntityItem(worldServer, x + (double)f, y + (double)f1, z + (double)f2, itemStack.splitStack(i));
+                            EntityItem entityitem = new EntityItem(worldServer, x + f, y + f1, z + f2, itemStack.splitStack(i));
 
-                            float f3 = 0.05F;
-                            entityitem.motionX = RANDOM.nextGaussian() * 0.05000000074505806D;
-                            entityitem.motionY = RANDOM.nextGaussian() * 0.05000000074505806D + 0.20000000298023224D;
-                            entityitem.motionZ = RANDOM.nextGaussian() * 0.05000000074505806D;
+                            entityitem.motionX = RANDOM.nextGaussian() * 0.05;
+                            entityitem.motionY = RANDOM.nextGaussian() * 0.05 + 0.2;
+                            entityitem.motionZ = RANDOM.nextGaussian() * 0.05;
                             itemStacks.add(entityitem);
                         }
                     }
@@ -240,7 +238,7 @@ public final class ContainerUtil {
      * @param slots The slots of the Container
      * @return The generated fallback lens
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Lens<IInventory, ItemStack> generateLens(net.minecraft.inventory.Container container, SlotCollection slots) {
         // Get all inventories viewed in the Container & count slots & retain order
         Map<Optional<IInventory>, List<Slot>> viewed = container.inventorySlots.stream()
@@ -319,22 +317,22 @@ public final class ContainerUtil {
         }
         if (lens instanceof CraftingInventoryLens) {
             return new CraftingInventoryLensImpl(base,
-                    ((GridInventoryLens) lens).getWidth(),
-                    ((GridInventoryLens) lens).getHeight(),
-                    ((GridInventoryLens) lens).getStride(),
+                    ((GridInventoryLens<?,?>) lens).getWidth(),
+                    ((GridInventoryLens<?,?>) lens).getHeight(),
+                    ((GridInventoryLens<?,?>) lens).getStride(),
                     slots);
         }
         if (lens instanceof GridInventoryLens) {
             return new GridInventoryLensImpl(base,
-                    ((GridInventoryLens) lens).getWidth(),
-                    ((GridInventoryLens) lens).getHeight(),
-                    ((GridInventoryLens) lens).getStride(),
+                    ((GridInventoryLens<?,?>) lens).getWidth(),
+                    ((GridInventoryLens<?,?>) lens).getHeight(),
+                    ((GridInventoryLens<?,?>) lens).getStride(),
                     slots);
         }
         if (lens instanceof Inventory2DLens) {
             return new Inventory2DLensImpl(base,
-                    ((Inventory2DLens) lens).getWidth(),
-                    ((Inventory2DLens) lens).getHeight(),
+                    ((Inventory2DLens<?,?>) lens).getWidth(),
+                    ((Inventory2DLens<?,?>) lens).getHeight(),
                     slots);
         }
         return null;

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketUpdateBossInfo;
-import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;

@@ -26,19 +26,16 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketChatMessage;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 final class ChatPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
+//        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
         // unused, to be removed and re-located when phase context is cleaned up
-        //if (chatMessage.getMessage().contains("kill")) {
-        //    context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
-        //}
+//        if (chatMessage.getMessage().contains("kill")) {
+//            context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
+//        }
     }
 }

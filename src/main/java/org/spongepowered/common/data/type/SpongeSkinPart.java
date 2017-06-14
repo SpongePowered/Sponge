@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.type;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;

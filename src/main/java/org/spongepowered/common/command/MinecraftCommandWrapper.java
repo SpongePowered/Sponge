@@ -120,7 +120,6 @@ public class MinecraftCommandWrapper implements CommandCallable {
         // Below this is copied from CommandHandler.execute. This might need to be updated between versions.
         int affectedEntities = 1;
         if (usernameIndex > -1) {
-            @SuppressWarnings("unchecked")
             List<Entity> list = null;
             try {
                 list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
@@ -233,7 +232,6 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
-        @SuppressWarnings("unchecked")
         List<String> suggestions = this.command.getTabCompletions(SpongeImpl.getServer(),
                 WrapperICommandSender.of(source), arguments.split(" ", -1), targetPosition == null ? null : VecHelper.toBlockPos(targetPosition));
         if (suggestions == null) {
@@ -242,7 +240,6 @@ public class MinecraftCommandWrapper implements CommandCallable {
         return suggestions;
     }
 
-    @SuppressWarnings("unchecked")
     public List<String> getNames() {
         return ImmutableList.<String>builder().add(this.command.getName()).addAll(this.command.getAliases()).build();
     }

@@ -99,9 +99,8 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
             this.manipulators.remove(manipulator);
             this.removeCustomFromNbt(manipulator);
             return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
-        } else {
-            return DataTransactionResult.failNoData();
         }
+        return DataTransactionResult.failNoData();
     }
 
     @Override

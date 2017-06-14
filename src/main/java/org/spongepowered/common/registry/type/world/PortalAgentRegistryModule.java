@@ -101,9 +101,8 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
                 Class<?> clazz = Class.forName(portalAgentTypeClass);
                 if (Teleporter.class.isAssignableFrom(clazz)) {
                     return this.validatePortalAgent((Class<? extends Teleporter>) clazz);
-                } else {
-                    SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world " + worldName +". Falling back to default type...");
                 }
+                SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world " + worldName +". Falling back to default type...");
             } catch (ClassNotFoundException e) {
                 SpongeImpl.getLogger().error("Could not locate PortalAgentType class " + portalAgentTypeClass + " for world " + worldName +". Falling back to default type...");
             }

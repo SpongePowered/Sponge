@@ -105,7 +105,7 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
         if (this.settings == null) {
             this.settings = new ChunkGeneratorSettings.Factory().build();
         }
-        this.isVanilla = WorldGenConstants.isValid((IChunkGenerator) (Object) this, GenerationPopulator.class);
+        this.isVanilla = WorldGenConstants.isValid((IChunkGenerator) this, GenerationPopulator.class);
     }
 
     @Override
@@ -259,9 +259,8 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
     private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, Biome[] biomes, int x, int z, int width, int height) {
         if (this.isVanilla) {
             return biomes;
-        } else {
-            return this.world.getBiomeProvider().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
         }
+        return this.world.getBiomeProvider().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
     }
 
 }

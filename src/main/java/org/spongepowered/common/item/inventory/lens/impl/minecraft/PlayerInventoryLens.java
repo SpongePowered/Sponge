@@ -39,7 +39,6 @@ import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public class PlayerInventoryLens extends MinecraftLens {
@@ -74,7 +73,7 @@ public class PlayerInventoryLens extends MinecraftLens {
         base += INVENTORY_WIDTH * HOTBAR;
         this.main = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
         base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
-        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, base, EQUIPMENT, 1, slots);
+        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) this.player, base, EQUIPMENT, 1, slots);
         this.offhand = slots.getSlot(base + EQUIPMENT);
 
         // TODO Hotbar in Vanilla is part of the main inventory (first 9 slots) ; maybe wrap it in a Lens?

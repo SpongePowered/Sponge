@@ -289,9 +289,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public double getRegionalDifficultyFactor() {
         final boolean flag = this.world.getDifficulty() == EnumDifficulty.HARD;
         float moon = this.world.getCurrentMoonPhaseFactor();
-        float f2 = MathHelper.clamp(((float) this.world.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f2 = MathHelper.clamp((this.world.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
-        f3 += MathHelper.clamp((float) this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
+        f3 += MathHelper.clamp(this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
         f3 += MathHelper.clamp(moon * 0.25F, 0.0F, f2);
         return f3;
     }
@@ -746,7 +746,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return entities;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities(java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
@@ -1089,9 +1088,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (neighbor != null) {
             if (secondary != Direction.NONE) {
                 return neighbor.getNeighbor(secondary, shouldLoad);
-            } else {
-                return Optional.of(neighbor);
             }
+            return Optional.of(neighbor);
         }
 
         return Optional.empty();

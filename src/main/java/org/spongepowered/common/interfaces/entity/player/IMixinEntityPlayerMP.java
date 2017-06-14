@@ -31,11 +31,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
-
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 

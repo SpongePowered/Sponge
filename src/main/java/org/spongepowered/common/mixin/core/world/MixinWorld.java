@@ -283,9 +283,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
         if (this.isRemote) {
             return provider.createWorldBorder();
-        } else {
-            return ((IMixinWorldProvider) provider).createServerWorldBorder();
         }
+        return ((IMixinWorldProvider) provider).createServerWorldBorder();
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -553,7 +552,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.empty();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
         if (this.isRemote) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
@@ -591,9 +590,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
         if (tileEntity == null) {
             return Optional.empty();
-        } else {
-            return Optional.of((TileEntity) tileEntity);
         }
+        return Optional.of((TileEntity) tileEntity);
     }
 
     @Override
@@ -1219,10 +1217,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (((IMixinBlockPos) pos).isInvalidYPosition()) {
             // Sponge end
             return Blocks.AIR.getDefaultState();
-        } else {
-            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
-            return chunk.getBlockState(pos);
         }
+        net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+        return chunk.getBlockState(pos);
     }
 
     /**

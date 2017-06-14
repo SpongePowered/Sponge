@@ -53,7 +53,6 @@ public class MobSpawnerDataProcessor extends AbstractMultiDataSingleTargetProces
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(IMixinMobSpawner entity, Map<Key<?>, Object> values) {
         MobSpawnerBaseLogic logic = entity.getLogic();

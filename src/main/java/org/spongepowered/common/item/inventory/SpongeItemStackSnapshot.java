@@ -53,7 +53,6 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.item.MixinItemStack;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 
 import java.util.Collection;
@@ -188,7 +187,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         checkNotNull(containerClass);
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             if (containerClass.isInstance(manipulator)) {
-                return Optional.of((T) (Object) manipulator);
+                return Optional.of((T) manipulator);
             }
         }
         return Optional.empty();
@@ -200,16 +199,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final Optional<T> optional = get(containerClass);
         if (optional.isPresent()) {
             return optional;
-        } else {
-            Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
-            if (processorOptional.isPresent()) {
-                final Optional<DataManipulator<?, ?>> manipulatorOptional =  processorOptional.get().createFrom(this.privateStack);
-                if (manipulatorOptional.isPresent()) {
-                    return Optional.of((T) manipulatorOptional.get().asImmutable());
-                }
-            }
-            return Optional.empty();
         }
+        Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
+        if (processorOptional.isPresent()) {
+            final Optional<DataManipulator<?, ?>> manipulatorOptional =  processorOptional.get().createFrom(this.privateStack);
+            if (manipulatorOptional.isPresent()) {
+                return Optional.of((T) manipulatorOptional.get().asImmutable());
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -239,7 +237,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Optional<ItemStackSnapshot> with(BaseValue<?> value) {
-        return with((Key<BaseValue<Object>>) (Object) value.getKey(), (Object) value.get());
+        return with((Key<BaseValue<Object>>) value.getKey(), (Object) value.get());
     }
 
     @Override
@@ -349,9 +347,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public Optional<NBTTagCompound> getCompound() {
         if (this.compound != null) {
             return Optional.of(this.compound.copy());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -378,15 +375,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             return false;
         }
         SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
-        return count == that.count &&
-               damageValue == that.damageValue &&
-               Objects.equal(itemType, that.itemType) &&
-               Objects.equal(compound, that.compound) &&
-               Objects.equal(creatorUniqueId, that.creatorUniqueId);
+        return this.count == that.count &&
+               this.damageValue == that.damageValue &&
+               Objects.equal(this.itemType, that.itemType) &&
+               Objects.equal(this.compound, that.compound) &&
+               Objects.equal(this.creatorUniqueId, that.creatorUniqueId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(itemType, count, damageValue, compound, creatorUniqueId);
+        return Objects.hashCode(this.itemType, this.count, this.damageValue, this.compound, this.creatorUniqueId);
     }
 }

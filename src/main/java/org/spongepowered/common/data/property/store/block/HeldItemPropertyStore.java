@@ -44,9 +44,8 @@ public class HeldItemPropertyStore extends AbstractBlockPropertyStore<HeldItemPr
         final Item item = Item.getItemFromBlock(block.getBlock());
         if (item instanceof ItemBlock) {
             return Optional.of(new HeldItemProperty((ItemType) item));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
 }

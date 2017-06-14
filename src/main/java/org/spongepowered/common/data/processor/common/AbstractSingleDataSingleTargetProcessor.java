@@ -84,9 +84,8 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
                         builder.replace(old.get().getValues());
                     }
                     return builder.result(DataTransactionResult.Type.SUCCESS).success((ImmutableValue<?>) immutableValue).build();
-                } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
                 }
+                return builder.result(DataTransactionResult.Type.FAILURE).reject((ImmutableValue<?>) immutableValue).build();
             } catch (Exception e) {
                 SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject((ImmutableValue<?>) immutableValue).build();
@@ -99,10 +98,9 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
         if (!supports(dataHolder)) {
             return Optional.empty();
-        } else {
-            final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
-            return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
         }
+        final M merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
+        return Optional.of(manipulator.set(this.key, merged.get(this.key).get()));
     }
 
     @Override
@@ -125,11 +123,10 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     public Optional<M> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
             return Optional.empty();
-        } else {
-            final Optional<T> optional = getVal((Holder) dataHolder);
-            if (optional.isPresent()) {
-                return Optional.of(createManipulator().set(this.key, optional.get()));
-            }
+        }
+        final Optional<T> optional = getVal((Holder) dataHolder);
+        if (optional.isPresent()) {
+            return Optional.of(createManipulator().set(this.key, optional.get()));
         }
         return Optional.empty();
     }
@@ -159,9 +156,8 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     public final Optional<T> getValueFromContainer(ValueContainer<?> container) {
         if (!supports(container)) {
             return Optional.empty();
-        } else {
-            return getVal((Holder) container);
         }
+        return getVal((Holder) container);
     }
 
     @Override
@@ -169,9 +165,8 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
         final Optional<T> optionalValue = getValueFromContainer(container);
         if(optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")

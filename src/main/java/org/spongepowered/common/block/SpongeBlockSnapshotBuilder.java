@@ -147,7 +147,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder add(DataManipulator<?, ?> manipulator) {
-        return add((ImmutableDataManipulator<?, ?>) checkNotNull(manipulator, "manipulator").asImmutable());
+        return add(checkNotNull(manipulator, "manipulator").asImmutable());
     }
 
     @Override

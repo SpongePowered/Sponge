@@ -282,7 +282,6 @@ public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<Im
         return this.reapplicationDelayValue;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ImmutableListValue<PotionEffect> effects() {
         return this.immutablePotionEffectsValue;

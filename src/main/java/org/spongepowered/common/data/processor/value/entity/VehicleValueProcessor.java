@@ -58,9 +58,8 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
                 return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, vehicle.createSnapshot()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
-        } else {
-            return DataTransactionResult.failNoData();
         }
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -78,9 +77,8 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
         Entity entity = (Entity) container.ridingEntity;
         if (entity == null) {
             return Optional.empty();
-        } else {
-            return Optional.of(entity.createSnapshot());
         }
+        return Optional.of(entity.createSnapshot());
     }
 
     @Override

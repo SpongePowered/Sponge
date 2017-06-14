@@ -103,9 +103,8 @@ public class SpongeScheduler implements Scheduler {
     public Set<Task> getScheduledTasks(boolean async) {
         if (async) {
             return this.asyncScheduler.getScheduledTasks();
-        } else {
-            return this.syncScheduler.getScheduledTasks();
         }
+        return this.syncScheduler.getScheduledTasks();
     }
 
     @Override
@@ -157,17 +156,15 @@ public class SpongeScheduler implements Scheduler {
     private SchedulerBase getDelegate(Task task) {
         if (task.isAsynchronous()) {
             return this.asyncScheduler;
-        } else {
-            return this.syncScheduler;
         }
+        return this.syncScheduler;
     }
 
     private SchedulerBase getDelegate(ScheduledTask.TaskSynchronicity syncType) {
         if (syncType == ScheduledTask.TaskSynchronicity.ASYNCHRONOUS) {
             return this.asyncScheduler;
-        } else {
-            return this.syncScheduler;
         }
+        return this.syncScheduler;
     }
 
     String getNameFor(PluginContainer plugin, ScheduledTask.TaskSynchronicity syncType) {

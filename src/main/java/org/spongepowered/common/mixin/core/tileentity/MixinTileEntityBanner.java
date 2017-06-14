@@ -121,7 +121,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.patterns = new NBTTagList();
         for (PatternLayer layer : this.patternLayers) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((BannerPatternShape) (Object) layer.getShape()).getName());
+            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, layer.getShape().getName());
             compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
         }

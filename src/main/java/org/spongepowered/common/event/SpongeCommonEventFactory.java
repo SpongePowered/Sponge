@@ -306,7 +306,7 @@ public class SpongeCommonEventFactory {
         HashSet<Location<org.spongepowered.api.world.World>> locations = new HashSet<>();
         locations.add(new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ()));
 
-        BlockPistonStructureHelper movedBlocks = new BlockPistonStructureHelper((WorldServer) (Object) world, pos, direction, extending);
+        BlockPistonStructureHelper movedBlocks = new BlockPistonStructureHelper((WorldServer) world, pos, direction, extending);
         movedBlocks.canMove(); // calculates blocks to be moved
 
         Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
@@ -641,15 +641,14 @@ public class SpongeCommonEventFactory {
         if (event.isCancelled()) {
             player.closeScreen();
             return false;
-        } else {
-            // TODO - determine if/how we want to fire inventory events outside of click poaket handlers
-            //((IMixinContainer) player.openContainer).setCaptureInventory(true);
-            // Custom cursor
-            if (event.getCursorTransaction().getCustom().isPresent()) {
-                handleCustomCursor(player, event.getCursorTransaction().getFinal());
-            }
-            return true;
         }
+        // TODO - determine if/how we want to fire inventory events outside of click poaket handlers
+        //((IMixinContainer) player.openContainer).setCaptureInventory(true);
+        // Custom cursor
+        if (event.getCursorTransaction().getCustom().isPresent()) {
+            handleCustomCursor(player, event.getCursorTransaction().getFinal());
+        }
+        return true;
     }
 
     public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Cause cause, Container container, EntityPlayerMP player, ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor, boolean clientSource) {
@@ -716,9 +715,9 @@ public class SpongeCommonEventFactory {
                 case "EntityHorse":
                     // If Carrier is Horse open Inventory
                     if (inventory instanceof CarriedInventory) {
-                        if (((CarriedInventory) inventory).getCarrier().isPresent()
-                                && ((CarriedInventory) inventory).getCarrier().get() instanceof EntityHorse) {
-                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory) inventory).getCarrier().get()), (IInventory) inventory);
+                        if (((CarriedInventory<?>) inventory).getCarrier().isPresent()
+                                && ((CarriedInventory<?>) inventory).getCarrier().get() instanceof EntityHorse) {
+                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory<?>) inventory).getCarrier().get()), (IInventory) inventory);
                             container = player.openContainer;
                         }
                     }

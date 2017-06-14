@@ -33,7 +33,6 @@ import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.mixin.core.potion.MixinPotion;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.ArrayList;
@@ -79,7 +78,6 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
         return ImmutableList.copyOf(this.potionList);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void registerDefaults() {
         for (Potion potion : Potion.REGISTRY) {
@@ -91,7 +89,6 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
         }
     }
 
-    @SuppressWarnings("unchecked")
     @AdditionalRegistration
     public void additionalRegistration() { // I'm guessing that this should work very well.
         for (Potion potion : Potion.REGISTRY) {

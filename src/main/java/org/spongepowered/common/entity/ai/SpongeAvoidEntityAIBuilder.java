@@ -85,7 +85,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public AvoidEntityAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);

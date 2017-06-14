@@ -57,7 +57,7 @@ import java.util.Optional;
  */
 public class SpongeBanService implements BanService {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<Ban> getBans() {
         Collection<? extends Ban> bans = this.getProfileBans();
@@ -151,13 +151,13 @@ public class SpongeBanService implements BanService {
             User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.source(this).build(), (Ban.Profile) ban, user));
 
-            UserListUtils.addEntry(this.getUserBanList(), (UserListEntry) ban);
+            UserListUtils.addEntry(this.getUserBanList(), (UserListEntry<?>) ban);
         } else if (ban.getType().equals(BanTypes.IP)) {
             prevBan = this.getBanFor(((Ban.Ip) ban).getAddress());
 
             Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.source(this).build(), (Ban.Ip) ban));
 
-            UserListUtils.addEntry(this.getIPBanList(), (UserListEntry) ban);
+            UserListUtils.addEntry(this.getIPBanList(), (UserListEntry<?>) ban);
         } else {
             throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
         }

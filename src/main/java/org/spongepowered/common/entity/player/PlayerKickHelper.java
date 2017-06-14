@@ -28,28 +28,28 @@ import com.google.common.util.concurrent.Futures;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.SPacketDisconnect;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-
 
 /**
  * Function to kick a player.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public class PlayerKickHelper {
+
     private PlayerKickHelper() {
     }
 
     /**
-     * A {@link ITextComponent}-friendly version of {@link NetHandlerPlayServer#kickPlayerFromServer(String)}.
-     * This duplicates the code of that kick implementation pretty much exactly
+     * A {@link ITextComponent}-friendly version of
+     * {@link NetHandlerPlayServer#kickPlayerFromServer(String)}. This
+     * duplicates the code of that kick implementation pretty much exactly
      *
      * @param ply The player to kick
      * @param component The kick message
      */
     public static void kickPlayer(final EntityPlayerMP ply, final ITextComponent component) {
         ply.connection.getNetworkManager().sendPacket(new SPacketDisconnect(component),
-                                                                  future -> ply.connection.getNetworkManager().closeChannel(component));
+                future -> ply.connection.getNetworkManager().closeChannel(component));
         ply.connection.getNetworkManager().disableAutoRead();
         // fix this getServer.
         Futures.getUnchecked(ply.getServer().addScheduledTask(() -> ply.connection.getNetworkManager().checkDisconnected()));

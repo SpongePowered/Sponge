@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
@@ -63,7 +64,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockPistonBase.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -75,7 +76,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockPistonBase.FACING, DirectionResolver.getFor(dir)));
+            return Optional.of((BlockState) blockState.withProperty(BlockDirectional.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
@@ -86,6 +87,6 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor(blockState.getValue(BlockPistonBase.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockDirectional.FACING)));
     }
 }

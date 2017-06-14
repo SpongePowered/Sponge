@@ -61,7 +61,7 @@ public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdap
         ReusableLens<LargeChestInventoryLens> reuseLens = MinecraftLens.getLens(LargeChestInventoryLens.class,
                 this,
                 s -> new LargeChestInventoryLens(this, s),
-                () -> new SlotCollection.Builder().add(inventory.getSize()).build());
+                () -> new SlotCollection.Builder().add(this.inventory.getSize()).build());
         this.slots = reuseLens.getSlots();
         this.lens = reuseLens.getLens();
     }

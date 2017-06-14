@@ -459,11 +459,10 @@ public abstract class MixinEntity implements IMixinEntity {
         MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
         if (event.isCancelled()) {
             return false;
-        } else {
-            location = event.getToTransform().getLocation();
-            this.rotationPitch = (float) event.getToTransform().getPitch();
-            this.rotationYaw = (float) event.getToTransform().getYaw();
         }
+        location = event.getToTransform().getLocation();
+        this.rotationPitch = (float) event.getToTransform().getPitch();
+        this.rotationYaw = (float) event.getToTransform().getYaw();
 
         IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
@@ -1231,7 +1230,7 @@ public abstract class MixinEntity implements IMixinEntity {
         // Gotta stick with the client side handling things
         if (this.world.isRemote) {
             if (itemStackIn.getCount() != 0 && itemStackIn.getItem() != null) {
-                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
+                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + offsetY, this.posZ, itemStackIn);
                 entityitem.setDefaultPickupDelay();
                 this.world.spawnEntity(entityitem);
                 returnable.setReturnValue(entityitem);

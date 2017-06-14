@@ -25,9 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;

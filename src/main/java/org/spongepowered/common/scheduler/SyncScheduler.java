@@ -24,15 +24,10 @@
  */
 package org.spongepowered.common.scheduler;
 
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.WorldManager;
 
 public class SyncScheduler extends SchedulerBase {
 
@@ -57,16 +52,14 @@ public class SyncScheduler extends SchedulerBase {
             // The timestamp is based on the initial offset
             if (task.delayIsTicks) {
                 return this.counter;
-            } else {
-                return super.getTimestamp(task);
             }
+            return super.getTimestamp(task);
         } else if (task.getState().isActive) {
             // The timestamp is based on the period
             if (task.intervalIsTicks) {
                 return this.counter;
-            } else {
-                return super.getTimestamp(task);
             }
+            return super.getTimestamp(task);
         }
         return 0L;
     }

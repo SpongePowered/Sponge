@@ -45,13 +45,13 @@ public abstract class MixinNetHandlerPlayServer {
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_CHAT_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupChatSpamCheck(NetHandlerPlayServer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) serverController).getRealTimeTicks();
+        int ticks = (int) ((IMixinMinecraftServer) this.serverController).getRealTimeTicks();
         this.chatSpamThresholdCount = Math.max(0, this.chatSpamThresholdCount - ticks);
     }
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_DROP_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupDropSpamCheck(NetHandlerPlayServer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) serverController).getRealTimeTicks();
+        int ticks = (int) ((IMixinMinecraftServer) this.serverController).getRealTimeTicks();
         this.itemDropThreshold = Math.max(0, this.itemDropThreshold - ticks);
     }
 

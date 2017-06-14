@@ -112,9 +112,8 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     public Translation getTranslation() {
         if (shadow$isTamed()) {
             return new SpongeTranslation("entity.Cat.name");
-        } else {
-            return super.getTranslation();
         }
+        return super.getTranslation();
     }
 
 }

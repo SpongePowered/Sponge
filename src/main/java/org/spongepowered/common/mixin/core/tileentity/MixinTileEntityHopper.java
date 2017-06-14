@@ -63,6 +63,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @Shadow private int transferCooldown;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,

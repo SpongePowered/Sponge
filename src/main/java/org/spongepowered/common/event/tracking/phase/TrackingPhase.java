@@ -57,14 +57,11 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 public abstract class TrackingPhase {
-
-    private final List<TrackingPhase> children = new ArrayList<>();
 
     /**
      * The exit point of any phase. Every phase should have an unwinding
@@ -254,8 +251,6 @@ public abstract class TrackingPhase {
      * @return True if the entity was successfully captured
      */
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.world;
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());
@@ -299,10 +294,9 @@ public abstract class TrackingPhase {
         if (notifier.isPresent()) {
             builder.named(NamedCause.notifier(notifier.get()));
             return true;
-        } else {
-            mixinChunk.getBlockNotifier(pos).ifPresent(user -> builder.named(NamedCause.notifier(user)));
-            mixinChunk.getBlockOwner(pos).ifPresent(owner -> builder.named(NamedCause.owner(owner)));
         }
+        mixinChunk.getBlockNotifier(pos).ifPresent(user -> builder.named(NamedCause.notifier(user)));
+        mixinChunk.getBlockOwner(pos).ifPresent(owner -> builder.named(NamedCause.owner(owner)));
         return true;
     }
 

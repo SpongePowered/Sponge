@@ -41,7 +41,6 @@ final class DataTestUtil {
 
     private DataTestUtil() {}
 
-    @SuppressWarnings("unchecked")
     static List<Object[]> generateManipulatorTestObjects() throws Exception {
         final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> manipulatorBuilderMap = getBuilderMap();
         final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap = getDelegateMap();

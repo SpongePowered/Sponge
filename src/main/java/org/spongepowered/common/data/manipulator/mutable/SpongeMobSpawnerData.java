@@ -219,7 +219,7 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
         registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
         registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maximumEntities);
         registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> spawnRange);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> this.spawnRange);
         registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextEntityToSpawn);
         registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entities);
 

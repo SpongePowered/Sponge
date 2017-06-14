@@ -143,7 +143,7 @@ final class ExplosionState extends GeneralState {
 
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext context) {
         if (snapshots.isEmpty()) {
             return;

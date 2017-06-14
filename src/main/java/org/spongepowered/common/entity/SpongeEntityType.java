@@ -101,9 +101,8 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     private static Translation check(@Nullable Translation translation) {
         if (translation == null) {
             return UNKNOWN.getTranslation();
-        } else {
-            return translation;
         }
+        return translation;
     }
 
     @Override

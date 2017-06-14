@@ -29,7 +29,6 @@ import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.block.tileentity.Skull;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;

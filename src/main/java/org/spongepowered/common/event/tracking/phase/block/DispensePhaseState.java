@@ -46,7 +46,6 @@ final class DispensePhaseState extends BlockPhaseState {
     DispensePhaseState() {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     void unwind(PhaseContext phaseContext) {
         final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)

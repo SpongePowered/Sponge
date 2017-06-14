@@ -105,7 +105,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             List<Consumer<ChunkPreGenerationEvent>> eventListeners) {
 
         this.scheduler = Sponge.getScheduler();
-        int preferredTickInterval = scheduler.getPreferredTickInterval();
+        int preferredTickInterval = this.scheduler.getPreferredTickInterval();
 
         this.plugin = plugin;
         this.world = world;
@@ -141,7 +141,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         this.totalChunksToGenerate = (int) Math.pow(this.chunkRadius * 2 + 1, 2);
 
-        this.spongeTask = scheduler
+        this.spongeTask = this.scheduler
                 .createTaskBuilder()
                 .intervalTicks(preferredTickInterval)
                 .execute(this)
@@ -192,7 +192,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         // It's possible we haven't cancelled the task here, so we just make sure of it, and perform
         // some cleanup.
-        if (!scheduler.getTaskById(this.spongeTask.getUniqueId()).isPresent()) {
+        if (!this.scheduler.getTaskById(this.spongeTask.getUniqueId()).isPresent()) {
             cancel();
         }
 
@@ -201,12 +201,12 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
     @Override
     public void cancel() {
-        if (!isCancelled) {
+        if (!this.isCancelled) {
             if (this.eventListener != null) {
                 Sponge.getEventManager().unregisterListeners(this.eventListener);
             }
             this.spongeTask.cancel();
-            isCancelled = true;
+            this.isCancelled = true;
         }
     }
 
@@ -308,13 +308,8 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
     private void cancelTask(Task task) {
         // Don't fire multiple instances.
-        if (scheduler.getTaskById(task.getUniqueId()).isPresent()) {
-            Sponge.getEventManager().post(SpongeEventFactory.createChunkPreGenerationEventCancelled(
-                    this.cause,
-                    this,
-                    this.world
-            ));
-
+        if (this.scheduler.getTaskById(task.getUniqueId()).isPresent()) {
+            Sponge.getEventManager().post(SpongeEventFactory.createChunkPreGenerationEventCancelled(this.cause, this, this.world));
             task.cancel();
         }
 
@@ -439,7 +434,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         @Override
         public ChunkPreGenerate start() {
-            checkNotNull(plugin, "owner cannot be null");
+            checkNotNull(this.plugin, "owner cannot be null");
             checkArgument(this.chunksPerTick > 0 || this.tickPercent > 0, "Must use at least one of \"chunks per tick\" or \"tick percent limit\"");
 
             return new SpongeChunkPreGenerateTask(this.plugin, this.world, this.center, this.diameter, this.chunksPerTick, this.tickPercent,

@@ -26,7 +26,6 @@ package org.spongepowered.common.entity.ai.target;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
@@ -86,7 +85,7 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
         return this;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public FindNearestAttackableTargetAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);

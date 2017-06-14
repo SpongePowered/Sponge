@@ -92,9 +92,8 @@ public final class DataUtil {
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
         if (!checkNotNull(dataView).contains(checkNotNull(query))) {
             throw new InvalidDataException("Missing data for query: " + query.asString('.'));
-        } else {
-            return dataView;
         }
+        return dataView;
     }
 
     public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
@@ -108,9 +107,8 @@ public final class DataUtil {
         final Object object = dataView.get(key.getQuery()).get();
         if (clazz.isInstance(object)) {
             return (T) object;
-        } else {
-            throw new InvalidDataException("Could not cast to the correct class type!");
         }
+        throw new InvalidDataException("Could not cast to the correct class type!");
     }
 
     public static <T> T getData(final DataView dataView, final DataQuery query, Class<T> data) throws InvalidDataException {
@@ -118,9 +116,8 @@ public final class DataUtil {
         final Object object = dataView.get(query).get();
         if (data.isInstance(object)) {
             return (T) object;
-        } else {
-            throw new InvalidDataException("Data does not match!");
         }
+        throw new InvalidDataException("Data does not match!");
     }
 
     public static List<DataView> getSerializedManipulatorList(Iterable<DataManipulator<?, ?>> manipulators) {
@@ -149,7 +146,6 @@ public final class DataUtil {
         return builder.build();
     }
 
-    @SuppressWarnings("rawtypes")
     public static SerializedDataTransaction deserializeManipulatorList(List<DataView> containers) {
         checkNotNull(containers);
         final SerializedDataTransaction.Builder builder = SerializedDataTransaction.builder();
@@ -203,7 +199,6 @@ public final class DataUtil {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     public static ImmutableList<ImmutableDataManipulator<?, ?>> deserializeImmutableManipulatorList(List<DataView> containers) {
         checkNotNull(containers);
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
@@ -233,10 +228,8 @@ public final class DataUtil {
         final double z = view.getDouble(Queries.POSITION_Z).get();
         if (castToInt) {
             return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), (int) x, (int) y, (int) z);
-        } else {
-            return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
         }
-
+        return new Location<>(SpongeImpl.getGame().getServer().getWorld(worldUuid).get(), x, y, z);
     }
 
     public static Vector3i getPosition3i(DataView view) {
@@ -313,7 +306,6 @@ public final class DataUtil {
      * @param <I> The type of immutable data manipulator
      * @return The data processor
      */
-    @SuppressWarnings("unchecked")
     public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
         Class<T> mutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
@@ -351,7 +343,6 @@ public final class DataUtil {
      * @param <I> The type of ImmutableDataManipulator
      * @return The data processor
      */
-    @SuppressWarnings("unchecked")
     public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
     getImmutableProcessor(Class<I> immutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getDelegate(immutableClass));
@@ -378,7 +369,6 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().registerValueProcessor(key, valueProcessor);
     }
 
-    @SuppressWarnings("unchecked")
     public static <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
         return Optional.ofNullable((ValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
@@ -387,7 +377,6 @@ public final class DataUtil {
         return Optional.ofNullable(SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
 
-    @SuppressWarnings("unchecked")
     public static <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
         return Optional.ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) SpongeManipulatorRegistry.getInstance().getDelegate(key));
     }
@@ -397,12 +386,10 @@ public final class DataUtil {
         return new DelegateDataValidator(ImmutableList.of(), validationType);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<NbtDataProcessor<T, I>> getNbtProcessor(NbtDataType dataType, Class<T> clazz) {
         return Optional.ofNullable((NbtDataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, clazz));
     }
 
-    @SuppressWarnings("unchecked")
     public static <E, V extends BaseValue<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(NbtDataType dataType, Key<V> key) {
         return Optional.ofNullable((NbtValueProcessor<E, V>) SpongeManipulatorRegistry.getInstance().getNbtProcessor(dataType, key));
     }
@@ -426,11 +413,11 @@ public final class DataUtil {
     }
 
     public static DataRegistration<?, ?> getRegistrationFor(DataManipulator<?, ?> manipulator) {
-        return SpongeManipulatorRegistry.getInstance().getRegistrationFor((DataManipulator) manipulator);
+        return SpongeManipulatorRegistry.getInstance().getRegistrationFor(manipulator);
     }
 
     public static DataRegistration<?, ?> getRegistrationFor(ImmutableDataManipulator<?, ?> immutableDataManipulator) {
-        return SpongeManipulatorRegistry.getInstance().getRegistrationFor((ImmutableDataManipulator) immutableDataManipulator);
+        return SpongeManipulatorRegistry.getInstance().getRegistrationFor(immutableDataManipulator);
     }
 
     public static Optional<DataRegistration<?, ?>> getRegistrationFor(String id) {

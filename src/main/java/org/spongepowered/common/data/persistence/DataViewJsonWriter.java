@@ -130,7 +130,7 @@ public final class DataViewJsonWriter extends JsonWriter {
 
     @Override
     public JsonWriter name(String name) {
-        checkState(!this.stack.isEmpty() && pendingKey == null && peek() instanceof DataView);
+        checkState(!this.stack.isEmpty() && this.pendingKey == null && peek() instanceof DataView);
         this.pendingKey = DataQuery.of(name);
         return this;
     }
@@ -177,7 +177,7 @@ public final class DataViewJsonWriter extends JsonWriter {
 
     @Override
     public void close() throws IOException {
-        if (!stack.isEmpty()) {
+        if (!this.stack.isEmpty()) {
             throw new IOException("Incomplete document");
         }
     }

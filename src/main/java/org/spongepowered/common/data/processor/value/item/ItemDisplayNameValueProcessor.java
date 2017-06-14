@@ -53,7 +53,6 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
         return new SpongeValue<>(Keys.DISPLAY_NAME, Text.of(), defaultValue);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack container, Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
@@ -65,7 +64,6 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
         return true;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Optional<Text> getVal(ItemStack container) {
         if (container.getItem() == Items.WRITTEN_BOOK) {
@@ -80,9 +78,8 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
         if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
             final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -103,9 +100,8 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
                     SpongeImpl.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
-            } else {
-                return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
+            return builder.result(DataTransactionResult.Type.SUCCESS).build();
         }
         return DataTransactionResult.failNoData();    }
 }

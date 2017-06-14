@@ -37,7 +37,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.data.DyeableDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.util.ColorUtil;
 
 import java.util.Optional;
 
@@ -71,9 +70,8 @@ public class ItemDyeColorValueProcessor extends AbstractSpongeValueProcessor<Ite
     protected Optional<DyeColor> getVal(ItemStack container) {
         if(container.getItem().equals(Items.DYE)) {
             return Optional.of((DyeColor) (Object) EnumDyeColor.byDyeDamage(container.getItemDamage()));
-        } else {
-            return Optional.of((DyeColor) (Object) EnumDyeColor.byMetadata(container.getItemDamage()));
         }
+        return Optional.of((DyeColor) (Object) EnumDyeColor.byMetadata(container.getItemDamage()));
     }
 
     @Override

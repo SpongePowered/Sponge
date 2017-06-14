@@ -34,10 +34,7 @@ import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 
-import java.io.File;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 @Singleton

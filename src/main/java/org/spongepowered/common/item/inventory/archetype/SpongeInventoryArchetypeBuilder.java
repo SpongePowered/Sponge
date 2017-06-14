@@ -64,7 +64,7 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
     public InventoryArchetype build(String id, String name) {
         // TODO register archetype
         // TODO events
-        return new CompositeInventoryArchetype(id, name, types, properties);
+        return new CompositeInventoryArchetype(id, name, this.types, this.properties);
     }
 
     @Override

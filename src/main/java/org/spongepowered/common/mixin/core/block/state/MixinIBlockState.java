@@ -77,7 +77,7 @@ public interface MixinIBlockState extends IBlockState, BlockState {
     }
 
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     @Override
     default <T extends Comparable<T>> Optional<T> getTraitValue(BlockTrait<T> blockTrait) {
         for (Map.Entry<IProperty<?>, Comparable<?>> entry : getProperties().entrySet()) {

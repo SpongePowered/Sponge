@@ -52,7 +52,7 @@ public class ShouldFireTest extends InjectedTest {
 
         this.plugin = new Object();
         this.container = Mockito.mock(PluginContainer.class);
-        Mockito.when(manager.fromInstance(plugin)).thenReturn(Optional.of(this.container));
+        Mockito.when(manager.fromInstance(this.plugin)).thenReturn(Optional.of(this.container));
 
         this.resetStatics();
     }

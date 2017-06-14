@@ -496,7 +496,7 @@ public final class TrackingUtil {
      * @param context The phase context, only used by the phase for handling processes.
      * @return True if no events or transactions were cancelled
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState state, PhaseContext context) {
         if (snapshots.isEmpty()) {
             return false;
@@ -767,12 +767,12 @@ public final class TrackingUtil {
         final List<Entity> itemDrops = itemStacks.stream().map(itemStack -> {
                     final net.minecraft.item.ItemStack minecraftStack = itemStack.getStack();
                     float f = 0.5F;
-                    double offsetX = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                    double offsetY = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                    double offsetZ = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                    final double x = (double) position.getX() + offsetX;
-                    final double y = (double) position.getY() + offsetY;
-                    final double z = (double) position.getZ() + offsetZ;
+                    double offsetX = worldServer.rand.nextFloat() * f + (1.0F - f) * 0.5D;
+                    double offsetY = worldServer.rand.nextFloat() * f + (1.0F - f) * 0.5D;
+                    double offsetZ = worldServer.rand.nextFloat() * f + (1.0F - f) * 0.5D;
+                    final double x = position.getX() + offsetX;
+                    final double y = position.getY() + offsetY;
+                    final double z = position.getZ() + offsetZ;
                     EntityItem entityitem = new EntityItem(worldServer, x, y, z, minecraftStack);
                     entityitem.setDefaultPickupDelay();
                     return entityitem;

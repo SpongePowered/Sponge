@@ -39,7 +39,6 @@ import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityLlama.class)
 @Implements(@Interface(iface = Llama.class, prefix = "llama$", unique = true))
 public abstract class MixinEntityLlama extends MixinAbstractHorse implements Llama {

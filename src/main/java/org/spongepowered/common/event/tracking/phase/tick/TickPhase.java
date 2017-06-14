@@ -62,7 +62,6 @@ public final class TickPhase extends TrackingPhase {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void unwind(IPhaseState state, PhaseContext context) {
         ((TickPhaseState) state).processPostTick(context);

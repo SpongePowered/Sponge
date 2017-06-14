@@ -36,9 +36,10 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -47,8 +48,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -121,7 +120,6 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public SpongeEntitySnapshotBuilder from(Entity entity) {
         reset();
@@ -141,11 +139,10 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public SpongeEntitySnapshotBuilder add(DataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
-        return add((ImmutableDataManipulator) manipulator.asImmutable());
+        return add(manipulator.asImmutable());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -191,7 +188,6 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.manipulators.add(manipulator);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
         this.entityType = holder.getType();
@@ -208,7 +204,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         }
         this.manipulators = Lists.newArrayList();
         for (ImmutableDataManipulator<?, ?> manipulator : holder.getContainers()) {
-            add((ImmutableDataManipulator) manipulator);
+            add(manipulator);
         }
         if (holder instanceof SpongeEntitySnapshot) {
             this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);

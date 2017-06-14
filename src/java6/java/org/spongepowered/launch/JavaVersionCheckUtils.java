@@ -47,9 +47,8 @@ public class JavaVersionCheckUtils {
                     JOptionPane.showMessageDialog(null, error, "PEBKACException!", JOptionPane.ERROR_MESSAGE);
                 }
                 throw new RuntimeException(error);
-            } else {
-                System.out.println("You may be running an outdated version of Java. Any crashes from Sponge may require an update to Java.");
             }
+            System.out.println("You may be running an outdated version of Java. Any crashes from Sponge may require an update to Java.");
         }
     }
 

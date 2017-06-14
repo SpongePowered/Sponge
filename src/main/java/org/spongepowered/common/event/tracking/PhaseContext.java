@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -343,14 +342,12 @@ public class PhaseContext {
         return Optional.ofNullable(this.notifier);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<Entity> getCapturedEntities() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class)
                 .map(CapturedEntitiesSupplier::get)
                 .orElseThrow(TrackingUtil.throwWithContext("Intended to capture entity spawns!", this));
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<Entity> getCapturedEntitySupplier() throws IllegalStateException {
         if (this.capturedEntitiesSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity spawns!", this).get();
@@ -358,7 +355,6 @@ public class PhaseContext {
         return this.capturedEntitiesSupplier;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<EntityItem> getCapturedItems() throws IllegalStateException {
         if (this.capturedItemsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
@@ -366,7 +362,6 @@ public class PhaseContext {
         return this.capturedItemsSupplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<EntityItem> getCapturedItemsSupplier() throws IllegalStateException {
         if (this.capturedItemsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
@@ -374,14 +369,12 @@ public class PhaseContext {
         return this.capturedItemsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class)
                 .map(CapturedBlocksSupplier::get)
                 .orElseThrow(TrackingUtil.throwWithContext("Intended to capture block changes, but there is no list available!", this));
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<BlockSnapshot> getCapturedBlockSupplier() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
@@ -396,7 +389,6 @@ public class PhaseContext {
         return this.blockItemDropsSupplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {
         if (this.blockItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing block drops!", this).get();
@@ -404,7 +396,6 @@ public class PhaseContext {
         return this.blockItemDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, EntityItem> getBlockItemDropSupplier() throws IllegalStateException {
         if (this.blockItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to track block item drops!", this).get();
@@ -412,7 +403,6 @@ public class PhaseContext {
         return this.blockItemEntityDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, ItemDropData> getCapturedEntityDropSupplier() throws IllegalStateException {
         if (this.entityItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
@@ -420,7 +410,6 @@ public class PhaseContext {
         return this.entityItemDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
         if (this.entityItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
@@ -428,7 +417,6 @@ public class PhaseContext {
         return this.entityItemEntityDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<ItemDropData> getCapturedItemStackSupplier() throws IllegalStateException {
         if (this.capturedItemStackSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing ItemStack drops from entities!", this).get();

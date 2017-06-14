@@ -98,18 +98,17 @@ public class MixinChunk_Collisions {
                 }
 
                 return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
-            } else {
-                IModData_Collisions spongeEntity = phaseContext.getSource(IModData_Collisions.class).orElse(null);
-                if (spongeEntity != null) {
-                    if (spongeEntity.requiresCollisionsCacheRefresh()) {
-                        spongeEntity.initializeCollisionState(this.world);
-                        spongeEntity.requiresCollisionsCacheRefresh(false);
-                    }
-
-                    return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
-                }
-                return true;
             }
+            IModData_Collisions spongeEntity = phaseContext.getSource(IModData_Collisions.class).orElse(null);
+            if (spongeEntity != null) {
+                if (spongeEntity.requiresCollisionsCacheRefresh()) {
+                    spongeEntity.initializeCollisionState(this.world);
+                    spongeEntity.requiresCollisionsCacheRefresh(false);
+                }
+
+                return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
+            }
+            return true;
         }
 
         return true;

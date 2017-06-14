@@ -85,9 +85,8 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -98,9 +97,8 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -159,7 +157,6 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         return getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
         final UUID uuid = this.getTrackedUniqueId(nbtKey);

@@ -83,7 +83,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     @Override
     public SubjectCollection getContainingCollection() {
         SpongePermissionService permission = (SpongePermissionService) SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get();
-        return permission.getSubjects(SpongePermissionService.SUBJECTS_SYSTEM);
+        return permission.getSubjects(PermissionService.SUBJECTS_SYSTEM);
     }
 
     @Override

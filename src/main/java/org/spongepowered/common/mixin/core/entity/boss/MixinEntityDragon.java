@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.entity.boss;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.EnderCrystal;
@@ -42,8 +42,6 @@ import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(EntityDragon.class)
 public abstract class MixinEntityDragon extends MixinEntityLiving implements EnderDragon {

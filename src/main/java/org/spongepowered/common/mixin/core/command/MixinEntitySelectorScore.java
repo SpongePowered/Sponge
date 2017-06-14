@@ -30,8 +30,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 
-import java.util.UUID;
-
 @Mixin(targets = "net.minecraft.command.EntitySelector$7")
 public class MixinEntitySelectorScore {
 

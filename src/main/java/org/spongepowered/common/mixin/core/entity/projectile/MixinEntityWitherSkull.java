@@ -69,13 +69,11 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     public double getDamage() {
         if (this.damageSet) {
             return this.damage;
-        } else {
-            if (this.shootingEntity != null) {
-                return 8.0f;
-            } else {
-                return 5.0f;
-            }
         }
+        if (this.shootingEntity != null) {
+            return 8.0f;
+        }
+        return 5.0f;
     }
 
     public void setDamage(double damage) {
@@ -107,9 +105,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     public Cause getDetonationCause() {
         if (this.detonationCause != null) {
             return this.detonationCause;
-        } else {
-            return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
         }
+        return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
     }
 
     @Override

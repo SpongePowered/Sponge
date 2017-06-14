@@ -103,11 +103,11 @@ public class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task submit(Object plugin) {
-        PluginContainer pluginContainer = scheduler.checkPluginInstance(plugin);
+        PluginContainer pluginContainer = this.scheduler.checkPluginInstance(plugin);
         checkState(this.consumer != null, "Runnable task not set");
         String name;
         if (this.name == null) {
-            name = scheduler.getNameFor(pluginContainer, this.syncType);
+            name = this.scheduler.getNameFor(pluginContainer, this.syncType);
         } else {
             name = this.name;
         }
@@ -121,7 +121,7 @@ public class SpongeTaskBuilder implements Task.Builder {
             delayIsTicks = intervalIsTicks = false;
         }
         ScheduledTask task = new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, pluginContainer);
-        scheduler.submit(task);
+        this.scheduler.submit(task);
         return task;
     }
 

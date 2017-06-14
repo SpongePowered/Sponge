@@ -40,7 +40,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
 
@@ -75,11 +74,10 @@ public class SnapshotGenerationTest extends InjectedTest {
 
         this.plugin = new Object();
         PluginContainer container = Mockito.mock(PluginContainer.class);
-        Mockito.when(manager.fromInstance(plugin)).thenReturn(Optional.of(container));
+        Mockito.when(manager.fromInstance(this.plugin)).thenReturn(Optional.of(container));
 
         Cause cause = Cause.source(this).build();
         this.entity = Mockito.mock(Entity.class, withSettings().defaultAnswer(Mockito.RETURNS_MOCKS));
-        World world = Mockito.mock(World.class);
 
         this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity));
     }

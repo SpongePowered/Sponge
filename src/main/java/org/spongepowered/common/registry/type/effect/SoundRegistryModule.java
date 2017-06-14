@@ -85,7 +85,7 @@ public final class SoundRegistryModule implements AdditionalCatalogRegistryModul
     public void registerAdditionalCatalog(SoundType extraCatalog) {
         String catalogId = new ResourceLocation(checkNotNull(extraCatalog).getId().toLowerCase(Locale.ENGLISH)).toString();
         if(!this.soundMappings.containsKey(catalogId)) {
-            soundMappings.put(catalogId, extraCatalog);
+            this.soundMappings.put(catalogId, extraCatalog);
         }
     }
 

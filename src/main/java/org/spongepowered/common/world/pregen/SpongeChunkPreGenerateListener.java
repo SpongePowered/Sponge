@@ -46,7 +46,7 @@ public class SpongeChunkPreGenerateListener implements EventListener<ChunkPreGen
     public void handle(ChunkPreGenerationEvent event) throws Exception {
         ChunkPreGenerate preGenerate = event.getChunkPreGenerate();
         if (preGenerate instanceof SpongeChunkPreGenerateTask &&
-                ((SpongeChunkPreGenerateTask) preGenerate).getSpongeTask().getUniqueId().equals(task)) {
+                ((SpongeChunkPreGenerateTask) preGenerate).getSpongeTask().getUniqueId().equals(this.task)) {
             this.listeners.forEach(x -> x.accept(event));
         }
     }

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.EntityNotFoundException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandScoreboard;
 import net.minecraft.entity.Entity;

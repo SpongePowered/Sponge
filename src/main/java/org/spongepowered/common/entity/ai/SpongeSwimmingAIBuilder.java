@@ -59,7 +59,7 @@ public final class SpongeSwimmingAIBuilder implements SwimmingAITask.Builder {
     public SwimmingAITask build(Agent owner) {
         Preconditions.checkNotNull(owner);
         final SwimmingAITask task = (SwimmingAITask) new EntityAISwimming((EntityLiving) owner);
-        task.setSwimChance(chance);
+        task.setSwimChance(this.chance);
         return task;
     }
 }

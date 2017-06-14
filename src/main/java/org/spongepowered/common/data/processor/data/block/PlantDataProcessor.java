@@ -70,9 +70,8 @@ public class PlantDataProcessor extends AbstractCatalogDataProcessor<PlantType, 
     protected Optional<PlantType> getVal(ItemStack itemStack) {
         if (itemStack.getItem() == ItemTypes.RED_FLOWER) {
             return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.getType(EnumFlowerColor.RED, itemStack.getItemDamage()));
-        } else {
-            return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.getType(EnumFlowerColor.YELLOW, itemStack.getItemDamage()));
         }
+        return Optional.of((PlantType) (Object) BlockFlower.EnumFlowerType.getType(EnumFlowerColor.YELLOW, itemStack.getItemDamage()));
     }
 
     @Override

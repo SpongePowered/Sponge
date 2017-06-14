@@ -755,9 +755,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional
                     .<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -858,7 +857,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             short saveBehavior = 1;
             if (this.serializationBehavior == SerializationBehaviors.NONE) {
                 saveBehavior = -1;
-            } else if (serializationBehavior == SerializationBehaviors.MANUAL) {
+            } else if (this.serializationBehavior == SerializationBehaviors.MANUAL) {
                 saveBehavior = 0;
             }
             this.spongeNbt.setShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);

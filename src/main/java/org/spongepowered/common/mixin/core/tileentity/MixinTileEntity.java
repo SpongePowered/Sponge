@@ -111,7 +111,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
     private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
         if (clazz != null) {
@@ -252,7 +252,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public Timing getTimingsHandler() {
         if (this.timing == null) {
-            this.timing = SpongeTimings.getTileEntityTiming((org.spongepowered.api.block.tileentity.TileEntity) (Object) this);
+            this.timing = SpongeTimings.getTileEntityTiming(this);
         }
         return this.timing;
     }

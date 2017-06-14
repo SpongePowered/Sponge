@@ -37,7 +37,7 @@ public abstract class NamedInventoryState extends BasicInventoryPacketState {
 
     @Override
     public String toString() {
-        return name;
+        return this.name;
     }
 
 }

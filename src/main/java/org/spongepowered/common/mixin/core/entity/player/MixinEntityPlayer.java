@@ -31,8 +31,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.MultiPartEntityPart;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -46,7 +46,6 @@ import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
@@ -89,11 +88,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
@@ -114,7 +111,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
     private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
 
     @Shadow public Container inventoryContainer;
@@ -453,7 +449,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * @param targetEntity The target entity
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary

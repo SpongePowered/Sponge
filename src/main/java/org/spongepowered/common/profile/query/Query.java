@@ -91,9 +91,8 @@ public abstract class Query<V> implements Callable<V> {
             this.cache.add(t, true, null);
 
             return t;
-        } else {
-            throw new ProfileNotFoundException("Profile: " + profile);
         }
+        throw new ProfileNotFoundException("Profile: " + profile);
     }
 
     protected List<GameProfile> fromNames(Collection<String> names) throws ProfileNotFoundException {

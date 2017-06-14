@@ -95,21 +95,18 @@ public final class SpongeParticleHelper {
         Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
             return Block.getStateId((IBlockState) blockState.get());
-        } else {
-            Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
-            if (optSnapshot.isPresent()) {
-                ItemStackSnapshot snapshot = optSnapshot.get();
-                Optional<BlockType> blockType = snapshot.getType().getBlock();
-                if (blockType.isPresent()) {
-                    return Block.getStateId(((Block) blockType.get()).getStateFromMeta(
-                            ((SpongeItemStackSnapshot) snapshot).getDamageValue()));
-                } else {
-                    return 0;
-                }
-            } else {
-                return Block.getStateId((IBlockState) defaultBlockState.get());
-            }
         }
+        Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
+        if (optSnapshot.isPresent()) {
+            ItemStackSnapshot snapshot = optSnapshot.get();
+            Optional<BlockType> blockType = snapshot.getType().getBlock();
+            if (blockType.isPresent()) {
+                return Block.getStateId(((Block) blockType.get()).getStateFromMeta(
+                        ((SpongeItemStackSnapshot) snapshot).getDamageValue()));
+            }
+            return 0;
+        }
+        return Block.getStateId((IBlockState) defaultBlockState.get());
     }
 
     private static int getDirectionData(Direction direction) {

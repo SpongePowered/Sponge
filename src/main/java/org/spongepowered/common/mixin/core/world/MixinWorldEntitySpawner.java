@@ -374,7 +374,6 @@ public abstract class MixinWorldEntitySpawner {
      * @param collection
      * @return
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WEIGHTED_RANDOM_GET))
     private static WeightedRandom.Item onGetRandom(Random random, List<Biome.SpawnListEntry> collection) {
         Biome.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
@@ -382,7 +381,6 @@ public abstract class MixinWorldEntitySpawner {
         return entry;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private static void setEntityType(Class<? extends net.minecraft.entity.Entity> entityclass) {
         spawnerEntityType = EntityTypeRegistryModule.getInstance().getForClass(entityclass);
     }

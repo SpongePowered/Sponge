@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import com.google.common.collect.HashMultimap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.world.WorldServer;
@@ -35,7 +34,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -46,8 +44,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 public interface IPacketState extends IPhaseState {
 

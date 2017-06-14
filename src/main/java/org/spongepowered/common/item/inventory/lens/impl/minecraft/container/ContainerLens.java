@@ -62,7 +62,7 @@ public class ContainerLens extends MinecraftLens {
         }
 
         // Adding spanning children
-        for (Lens<IInventory, ItemStack> lens : viewedInventories) {
+        for (Lens<IInventory, ItemStack> lens : this.viewedInventories) {
             this.addSpanningChild(lens);
         }
     }

@@ -24,17 +24,13 @@
  */
 package org.spongepowered.common.service.pagination;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextStyles;
-
-import java.util.Collections;
-import java.util.Iterator;
-
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
 
 public class PaginationCalculatorTest {
 
@@ -43,16 +39,16 @@ public class PaginationCalculatorTest {
 
     @Before
     public void setUp() throws Exception {
-        pc = new PaginationCalculator(10);
-        src = mock(MessageReceiver.class);
+        this.pc = new PaginationCalculator(10);
+        this.src = mock(MessageReceiver.class);
     }
 
     @Test
     public void linesTest() throws Exception {
-        int lines = pc.getLinesPerPage(src);
+        int lines = this.pc.getLinesPerPage(this.src);
         assertEquals("Lines per page should be 10", 10, lines);
         //Current implementation doesn't use source, update tests once PaginationCalculator is actually source specific.
-        verifyZeroInteractions(src);
+        verifyZeroInteractions(this.src);
     }
 
 }

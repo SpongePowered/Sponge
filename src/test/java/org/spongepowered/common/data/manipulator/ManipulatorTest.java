@@ -63,7 +63,6 @@ public class ManipulatorTest {
         this.builder = builder;
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreateData() {
         try {
@@ -194,10 +193,9 @@ public class ManipulatorTest {
                 if (!optional.isPresent()) {
                     throw new IllegalArgumentException("[Serialization]: A builder did not translate the data manipulator: "
                         + this.dataName + "\n[Serialization]: Providing the DataContainer: " + container.toString());
-                } else {
-                    final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
-                    assertThat(manipulator.equals(deserialized), is(true));
                 }
+                final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
+                assertThat(manipulator.equals(deserialized), is(true));
             }
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException e) {
             throw new PEBKACException("Exceptions thrown trying to construct: " + this.dataName, e);

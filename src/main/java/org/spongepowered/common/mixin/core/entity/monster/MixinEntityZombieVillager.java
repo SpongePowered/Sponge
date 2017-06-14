@@ -29,7 +29,6 @@ import org.spongepowered.api.entity.living.monster.ZombieVillager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityZombieVillager.class)
 public abstract class MixinEntityZombieVillager extends MixinEntityZombie implements ZombieVillager {
 

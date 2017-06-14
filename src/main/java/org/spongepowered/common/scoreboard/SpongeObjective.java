@@ -54,7 +54,6 @@ public class SpongeObjective implements Objective {
     private ObjectiveDisplayMode displayMode;
     private Map<Text, Score> scores = new HashMap<>();
 
-    @SuppressWarnings("deprecation")
     public SpongeObjective(String name, Criterion criterion) {
         this.name = name;
         this.displayName = SpongeTexts.fromLegacy(name);
@@ -78,7 +77,6 @@ public class SpongeObjective implements Objective {
         this.updateDisplayName();
     }
 
-    @SuppressWarnings("deprecation")
     private void updateDisplayName() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.displayName = SpongeTexts.toLegacy(this.displayName);
@@ -144,10 +142,9 @@ public class SpongeObjective implements Objective {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void addScoreToScoreboard(net.minecraft.scoreboard.Scoreboard scoreboard, net.minecraft.scoreboard.Score score) {
         String name = score.scorePlayerName;
-        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = (Map)scoreboard.entitiesScoreObjectives.get(name);
+        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = scoreboard.entitiesScoreObjectives.get(name);
 
         if (scoreMap == null)
         {

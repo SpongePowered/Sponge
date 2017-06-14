@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("rawtypes")
 public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> {
 
     // InventoryAdapterClass -> LensClass -> Size -> ReusableLens

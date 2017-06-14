@@ -74,7 +74,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -83,7 +82,6 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -119,9 +117,7 @@ public interface PacketFunction {
             return;
         }
         //final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
         final World spongeWorld = EntityUtil.getSpongeWorld(player);
-        final CauseTracker causeTracker = CauseTracker.getInstance();
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
         if (state == PacketPhase.General.ATTACK_ENTITY) {
@@ -349,7 +345,6 @@ public interface PacketFunction {
     };
 
     @SuppressWarnings("unchecked") PacketFunction ACTION = (packet, state, player, context) -> {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
         final ItemStack usedStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
                 .orElse(null);
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
@@ -595,7 +590,6 @@ public interface PacketFunction {
     }
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
         context.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     if (items.isEmpty()) {
@@ -702,9 +696,6 @@ public interface PacketFunction {
         mixinContainer.setCaptureInventory(false);
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
-        final World spongeWorld = (World) mixinWorld;
-
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
@@ -731,8 +722,6 @@ public interface PacketFunction {
             return;
         }
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
-        final World spongeWorld = (World) mixinWorld;
-        final CauseTracker causeTracker = CauseTracker.getInstance();
 
         // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
@@ -966,8 +955,6 @@ public interface PacketFunction {
     };
 
     PacketFunction UNKNOWN_PACKET = (packet, state, player, context) -> {
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();
-        final CauseTracker causeTracker = CauseTracker.getInstance();
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, context));
         context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
             final Cause cause = Cause.source(EntitySpawnCause.builder()

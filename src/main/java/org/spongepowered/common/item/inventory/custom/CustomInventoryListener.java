@@ -37,7 +37,7 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
     private Inventory inventory;
     List<Consumer<InteractInventoryEvent>> consumers;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public CustomInventoryListener(Inventory inventory, List<Consumer<? extends InteractInventoryEvent>> consumers) {
         this.inventory = inventory;
         this.consumers = (List) ImmutableList.copyOf(consumers);

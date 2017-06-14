@@ -30,7 +30,6 @@ import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;

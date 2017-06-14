@@ -31,9 +31,6 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.weather.SpongeWeather;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RegisterCatalog(Weathers.class)
 public final class WeatherRegistryModule
     extends AbstractPrefixAlternateCatalogTypeRegistryModule<Weather>

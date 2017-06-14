@@ -84,7 +84,7 @@ public class UserCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Iterable<Subject> getAllSubjects() {
         return (Iterable) SpongeImpl.getGame().getServer().getOnlinePlayers();
         /*return ImmutableSet.copyOf(Iterables.concat(

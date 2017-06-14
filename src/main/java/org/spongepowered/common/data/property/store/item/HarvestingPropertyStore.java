@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.item;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.Block;
+import com.google.common.collect.ImmutableSet;  
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -41,23 +40,21 @@ import java.util.Set;
 
 public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<HarvestingProperty> {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected Optional<HarvestingProperty> getFor(ItemStack itemStack) {
         final Item item = itemStack.getItem();
         if (item instanceof ItemTool) {
             final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ItemTool) item).effectiveBlocks);
             return Optional.of(new HarvestingProperty(blocks));
-        } else {
-            final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);
-            final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
-            blockTypes.stream().filter(blockType -> item.canHarvestBlock((IBlockState) blockType.getDefaultState())).forEach(builder::add);
-            final ImmutableSet<BlockType> blocks = builder.build();
-            if (blocks.isEmpty()) {
-                return Optional.empty();
-            } else {
-                return Optional.of(new HarvestingProperty(blocks));
-            }
         }
+        final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);
+        final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
+        blockTypes.stream().filter(blockType -> item.canHarvestBlock((IBlockState) blockType.getDefaultState())).forEach(builder::add);
+        final ImmutableSet<BlockType> blocks = builder.build();
+        if (blocks.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new HarvestingProperty(blocks));
     }
 }

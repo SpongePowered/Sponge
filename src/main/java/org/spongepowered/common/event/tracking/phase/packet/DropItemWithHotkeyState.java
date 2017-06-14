@@ -74,7 +74,6 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
         for (Entity currentEntity : capturedEntities) {
             currentEntity.setCreator(playerMP.getUniqueID());
         }
-        final World spongeWorld = (World) playerMP.world;
 
         // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
         return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID ?

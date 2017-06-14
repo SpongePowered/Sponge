@@ -34,7 +34,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -92,9 +91,8 @@ public class SkullUtils {
             tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
                     .getBlockState(tileEntitySkull.getPos()), 3);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public static Optional<GameProfile> getProfile(ItemStack skull) {
@@ -128,15 +126,14 @@ public class SkullUtils {
         }
         if (profile.getPropertyMap().containsKey("textures")) {
             return profile;
-        } else {
-            // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
-            final CompletableFuture<GameProfile> future = Sponge.getGame().getServer().getGameProfileManager().fill(profile);
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to fill skull GameProfile for '" + profile + "'", e);
-                return profile;
-            }
+        }
+        // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
+        final CompletableFuture<GameProfile> future = Sponge.getGame().getServer().getGameProfileManager().fill(profile);
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            SpongeImpl.getLogger().debug("Exception while trying to fill skull GameProfile for '" + profile + "'", e);
+            return profile;
         }
     }
 

@@ -153,11 +153,10 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     public <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         if (!supports(checkNotNull(key))) {
             return Optional.empty();
-        } else {
-            E current = this.get(key).get();
-            final E newVal = checkNotNull(function.apply(current));
-            return this.with(key, newVal);
         }
+        E current = this.get(key).get();
+        final E newVal = checkNotNull(function.apply(current));
+        return this.with(key, newVal);
     }
 
     @Override
@@ -174,14 +173,13 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        if (supports((Class<ImmutableDataManipulator<?, ?>>) (Class) valueContainer.getClass())) {
+        if (supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
             return ((IMixinBlock) this.block).getStateWithData(this, valueContainer);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -207,38 +205,35 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     public BlockState merge(BlockState that) {
         if (!getType().equals(that.getType())) {
             return this;
-        } else {
-            BlockState temp = this;
-            for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                Optional<BlockState> optional = temp.with(manipulator);
-                if (optional.isPresent()) {
-                    temp = optional.get();
-                } else {
-                    return temp;
-                }
-            }
-            return temp;
         }
+        BlockState temp = this;
+        for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
+            Optional<BlockState> optional = temp.with(manipulator);
+            if (optional.isPresent()) {
+                temp = optional.get();
+            } else {
+                return temp;
+            }
+        }
+        return temp;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public BlockState merge(BlockState that, MergeFunction function) {
         if (!getType().equals(that.getType())) {
             return this;
-        } else {
-            BlockState temp = this;
-            for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
-                Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
-                if (optional.isPresent()) {
-                    temp = optional.get();
-                } else {
-                    return temp;
-                }
-            }
-            return temp;
         }
+        BlockState temp = this;
+        for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
+            @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
+            Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
+            if (optional.isPresent()) {
+                temp = optional.get();
+            } else {
+                return temp;
+            }
+        }
+        return temp;
     }
 
     @Override

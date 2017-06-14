@@ -31,9 +31,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.extra.fluid.FluidTypes;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
@@ -56,7 +54,6 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
         super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET, Keys.FLUID_ITEM_STACK);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack dataHolder, FluidStackSnapshot value) {
         // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
@@ -99,7 +96,6 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
         return new SpongeFluidItemData();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         /*

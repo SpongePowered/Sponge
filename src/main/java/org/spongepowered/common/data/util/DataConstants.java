@@ -136,8 +136,6 @@ public final class DataConstants {
     public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
             (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
 
-
-    @SuppressWarnings("deprecation")
     public static final class Catalog {
 
         public static final DyeColor DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
@@ -181,8 +179,6 @@ public final class DataConstants {
         }
     }
 
-
-    @SuppressWarnings("deprecation")
     public static final class Horse {
 
         public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;

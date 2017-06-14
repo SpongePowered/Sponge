@@ -173,9 +173,8 @@ public final class SpongeTabList implements TabList {
             TabListEntry entry = this.entries.remove(uniqueId);
             this.sendUpdate(entry, SPacketPlayerListItem.Action.REMOVE_PLAYER);
             return Optional.of(entry);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     /**

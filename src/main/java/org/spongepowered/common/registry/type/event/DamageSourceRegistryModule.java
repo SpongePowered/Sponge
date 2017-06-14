@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.event;
 
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSources;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
@@ -32,28 +32,28 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 @RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {
 
-    public static net.minecraft.util.DamageSource IGNORED_DAMAGE_SOURCE;
-    public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
-    public static net.minecraft.util.DamageSource DAMAGESOURCE_MELTING;
+    public static DamageSource IGNORED_DAMAGE_SOURCE;
+    public static DamageSource DAMAGESOURCE_POISON;
+    public static DamageSource DAMAGESOURCE_MELTING;
 
     @Override
     public void registerDefaults() {
         try {
             // These need to be instantiated after the DamageTypeRegistryModule has had a chance to register
             // the damage types, otherwise it will fail and have invalid types.
-            DAMAGESOURCE_POISON = (new net.minecraft.util.DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
-            DAMAGESOURCE_MELTING = (new net.minecraft.util.DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
-            IGNORED_DAMAGE_SOURCE = new net.minecraft.util.DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
-            DamageSources.class.getDeclaredField("DROWNING").set(null, (DamageSource) net.minecraft.util.DamageSource.DROWN);
-            DamageSources.class.getDeclaredField("FALLING").set(null, (DamageSource) net.minecraft.util.DamageSource.FALL);
-            DamageSources.class.getDeclaredField("FIRE_TICK").set(null, (DamageSource) net.minecraft.util.DamageSource.ON_FIRE);
-            DamageSources.class.getDeclaredField("GENERIC").set(null, (DamageSource) net.minecraft.util.DamageSource.GENERIC);
-            DamageSources.class.getDeclaredField("MAGIC").set(null, (DamageSource) net.minecraft.util.DamageSource.MAGIC);
+            DAMAGESOURCE_POISON = (new DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
+            DAMAGESOURCE_MELTING = (new DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
+            IGNORED_DAMAGE_SOURCE = new DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
+            DamageSources.class.getDeclaredField("DROWNING").set(null, DamageSource.DROWN);
+            DamageSources.class.getDeclaredField("FALLING").set(null, DamageSource.FALL);
+            DamageSources.class.getDeclaredField("FIRE_TICK").set(null, DamageSource.ON_FIRE);
+            DamageSources.class.getDeclaredField("GENERIC").set(null, DamageSource.GENERIC);
+            DamageSources.class.getDeclaredField("MAGIC").set(null, DamageSource.MAGIC);
             DamageSources.class.getDeclaredField("MELTING").set(null, DAMAGESOURCE_MELTING);
             DamageSources.class.getDeclaredField("POISON").set(null, DAMAGESOURCE_POISON);
-            DamageSources.class.getDeclaredField("STARVATION").set(null, (DamageSource) net.minecraft.util.DamageSource.STARVE);
-            DamageSources.class.getDeclaredField("WITHER").set(null, (DamageSource) net.minecraft.util.DamageSource.WITHER);
-            DamageSources.class.getDeclaredField("VOID").set(null, (DamageSource) net.minecraft.util.DamageSource.OUT_OF_WORLD);
+            DamageSources.class.getDeclaredField("STARVATION").set(null, DamageSource.STARVE);
+            DamageSources.class.getDeclaredField("WITHER").set(null, DamageSource.WITHER);
+            DamageSources.class.getDeclaredField("VOID").set(null, DamageSource.OUT_OF_WORLD);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -388,7 +388,6 @@ public final class CauseTracker {
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
      */
-    @SuppressWarnings("deprecation")
     public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final BlockPos notifyPos,
         final Block sourceBlock, @Nullable final BlockPos sourcePos) {
         final IBlockState iblockstate = ((WorldServer) mixinWorld).getBlockState(notifyPos);
@@ -690,7 +689,6 @@ public final class CauseTracker {
         }
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
-        final World spongeWorld = (World) minecraftEntity.world;
         final WorldServer worldServer = (WorldServer) minecraftEntity.world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
         // Sponge End - continue with vanilla mechanics

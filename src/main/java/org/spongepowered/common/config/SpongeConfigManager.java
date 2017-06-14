@@ -58,9 +58,8 @@ public class SpongeConfigManager implements ConfigManager {
         Optional<PluginContainer> container = Sponge.getPluginManager().fromInstance(instance);
         if (container.isPresent()) {
             return container.get();
-        } else {
-            throw new IllegalArgumentException("No container available for instance " + instance + ", is this actually a plugin?");
         }
+        throw new IllegalArgumentException("No container available for instance " + instance + ", is this actually a plugin?");
     }
 
     public static ConfigRoot getSharedRoot(PluginContainer container) {

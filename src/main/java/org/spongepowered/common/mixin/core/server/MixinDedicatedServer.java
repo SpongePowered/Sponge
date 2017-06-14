@@ -28,7 +28,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -37,21 +36,16 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
-import java.util.concurrent.FutureTask;
 
 @Mixin(DedicatedServer.class)
 public abstract class MixinDedicatedServer extends MinecraftServer implements Server {
@@ -102,7 +96,6 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     @Overwrite
     @Override
     public boolean isBlockProtected(net.minecraft.world.World worldIn, BlockPos pos, EntityPlayer playerIn) {
-        final WorldServer worldServer = (WorldServer) worldIn;
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();

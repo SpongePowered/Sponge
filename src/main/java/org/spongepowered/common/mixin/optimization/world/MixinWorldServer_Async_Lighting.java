@@ -59,136 +59,136 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
     @Override
     public boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk currentChunk, List<Chunk> neighbors) {
         // Sponge - This check is not needed as neighbors are checked in updateLightAsync
-        if (false && !this.isAreaLoaded(pos, 17, false)) {
-            return false;
-        } else {
-            final IMixinChunk spongeChunk = (IMixinChunk) currentChunk;
-            int i = 0;
-            int j = 0;
-            //this.profiler.startSection("getBrightness"); // Sponge - don't use profiler off of main thread
-            int k = this.getLightForAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
-            int l = this.getRawBlockLightAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
-            int i1 = pos.getX();
-            int j1 = pos.getY();
-            int k1 = pos.getZ();
+//        if (!this.isAreaLoaded(pos, 17, false)) {
+//            return false;
+//        } else {
+        final IMixinChunk spongeChunk = (IMixinChunk) currentChunk;
+        int i = 0;
+        int j = 0;
+        //this.profiler.startSection("getBrightness"); // Sponge - don't use profiler off of main thread
+        int k = this.getLightForAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
+        int l = this.getRawBlockLightAsync(lightType, pos, currentChunk, neighbors); // Sponge - use thread safe method
+        int i1 = pos.getX();
+        int j1 = pos.getY();
+        int k1 = pos.getZ();
 
-            if (l > k) {
-                this.lightUpdateBlockList[j++] = 133152;
-            } else if (l < k) {
-                this.lightUpdateBlockList[j++] = 133152 | k << 18;
-
-                while (i < j) {
-                    int l1 = this.lightUpdateBlockList[i++];
-                    int i2 = (l1 & 63) - 32 + i1;
-                    int j2 = (l1 >> 6 & 63) - 32 + j1;
-                    int k2 = (l1 >> 12 & 63) - 32 + k1;
-                    int l2 = l1 >> 18 & 15;
-                    BlockPos blockpos = new BlockPos(i2, j2, k2);
-                    int i3 = this.getLightForAsync(lightType, blockpos, currentChunk, neighbors); // Sponge - use thread safe method
-
-                    if (i3 == l2) {
-                        this.setLightForAsync(lightType, blockpos, 0, currentChunk, neighbors); // Sponge - use thread safe method
-
-                        if (l2 > 0) {
-                            int j3 = MathHelper.abs(i2 - i1);
-                            int k3 = MathHelper.abs(j2 - j1);
-                            int l3 = MathHelper.abs(k2 - k1);
-
-                            if (j3 + k3 + l3 < 17) {
-                                BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
-
-                                for (EnumFacing enumfacing : EnumFacing.values()) {
-                                    int i4 = i2 + enumfacing.getFrontOffsetX();
-                                    int j4 = j2 + enumfacing.getFrontOffsetY();
-                                    int k4 = k2 + enumfacing.getFrontOffsetZ();
-                                    blockpos$pooledmutableblockpos.setPos(i4, j4, k4);
-                                    // Sponge start - get chunk safely
-                                    final Chunk pooledChunk = this.getLightChunk(blockpos$pooledmutableblockpos, currentChunk, neighbors);
-                                    if (pooledChunk == null) {
-                                        continue;
-                                    }
-                                    int l4 = Math.max(1, pooledChunk.getBlockState(blockpos$pooledmutableblockpos).getLightOpacity());
-                                    i3 = this.getLightForAsync(lightType, blockpos$pooledmutableblockpos, currentChunk, neighbors);
-                                    // Sponge end
-
-                                    if (i3 == l2 - l4 && j < this.lightUpdateBlockList.length) {
-                                        this.lightUpdateBlockList[j++] = i4 - i1 + 32 | j4 - j1 + 32 << 6 | k4 - k1 + 32 << 12 | l2 - l4 << 18;
-                                    }
-                                }
-
-                                blockpos$pooledmutableblockpos.release();
-                            }
-                        }
-                    }
-                }
-
-                i = 0;
-            }
-
-            //this.profiler.endSection(); // Sponge - don't use profiler off of main thread
-            //this.profiler.startSection("checkedPosition < toCheckCount"); // Sponge - don't use profiler off of main thread
+        if (l > k) {
+            this.lightUpdateBlockList[j++] = 133152;
+        } else if (l < k) {
+            this.lightUpdateBlockList[j++] = 133152 | k << 18;
 
             while (i < j) {
-                int i5 = this.lightUpdateBlockList[i++];
-                int j5 = (i5 & 63) - 32 + i1;
-                int k5 = (i5 >> 6 & 63) - 32 + j1;
-                int l5 = (i5 >> 12 & 63) - 32 + k1;
-                BlockPos blockpos1 = new BlockPos(j5, k5, l5);
-                int i6 = this.getLightForAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
-                int j6 = this.getRawBlockLightAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
+                int l1 = this.lightUpdateBlockList[i++];
+                int i2 = (l1 & 63) - 32 + i1;
+                int j2 = (l1 >> 6 & 63) - 32 + j1;
+                int k2 = (l1 >> 12 & 63) - 32 + k1;
+                int l2 = l1 >> 18 & 15;
+                BlockPos blockpos = new BlockPos(i2, j2, k2);
+                int i3 = this.getLightForAsync(lightType, blockpos, currentChunk, neighbors); // Sponge - use thread safe method
 
-                if (j6 != i6) {
-                    this.setLightForAsync(lightType, blockpos1, j6, currentChunk, neighbors); // Sponge - use thread safe method
+                if (i3 == l2) {
+                    this.setLightForAsync(lightType, blockpos, 0, currentChunk, neighbors); // Sponge - use thread safe method
 
-                    if (j6 > i6) {
-                        int k6 = Math.abs(j5 - i1);
-                        int l6 = Math.abs(k5 - j1);
-                        int i7 = Math.abs(l5 - k1);
-                        boolean flag = j < this.lightUpdateBlockList.length - 6;
+                    if (l2 > 0) {
+                        int j3 = MathHelper.abs(i2 - i1);
+                        int k3 = MathHelper.abs(j2 - j1);
+                        int l3 = MathHelper.abs(k2 - k1);
 
-                        if (k6 + l6 + i7 < 17 && flag) {
-                            // Sponge start - use thread safe method getLightForAsync
-                            if (this.getLightForAsync(lightType, blockpos1.west(), currentChunk, neighbors) < j6) {
-                                this.lightUpdateBlockList[j++] = j5 - 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
+                        if (j3 + k3 + l3 < 17) {
+                            BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+                            for (EnumFacing enumfacing : EnumFacing.values()) {
+                                int i4 = i2 + enumfacing.getFrontOffsetX();
+                                int j4 = j2 + enumfacing.getFrontOffsetY();
+                                int k4 = k2 + enumfacing.getFrontOffsetZ();
+                                blockpos$pooledmutableblockpos.setPos(i4, j4, k4);
+                                // Sponge start - get chunk safely
+                                final Chunk pooledChunk = this.getLightChunk(blockpos$pooledmutableblockpos, currentChunk, neighbors);
+                                if (pooledChunk == null) {
+                                    continue;
+                                }
+                                int l4 = Math.max(1, pooledChunk.getBlockState(blockpos$pooledmutableblockpos).getLightOpacity());
+                                i3 = this.getLightForAsync(lightType, blockpos$pooledmutableblockpos, currentChunk, neighbors);
+                                // Sponge end
+
+                                if (i3 == l2 - l4 && j < this.lightUpdateBlockList.length) {
+                                    this.lightUpdateBlockList[j++] = i4 - i1 + 32 | j4 - j1 + 32 << 6 | k4 - k1 + 32 << 12 | l2 - l4 << 18;
+                                }
                             }
 
-                            if (this.getLightForAsync(lightType, blockpos1.east(), currentChunk, neighbors) < j6) {
-                                this.lightUpdateBlockList[j++] = j5 + 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
-                            }
-
-                            if (this.getLightForAsync(lightType, blockpos1.down(), currentChunk, neighbors) < j6) {
-                                this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
-                            }
-
-                            if (this.getLightForAsync(lightType, blockpos1.up(), currentChunk, neighbors) < j6) {
-                                this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 + 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
-                            }
-
-                            if (this.getLightForAsync(lightType, blockpos1.north(), currentChunk, neighbors) < j6) {
-                                this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - 1 - k1 + 32 << 12);
-                            }
-
-                            if (this.getLightForAsync(lightType, blockpos1.south(), currentChunk, neighbors) < j6) {
-                                this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 + 1 - k1 + 32 << 12);
-                            }
-                            // Sponge end
+                            blockpos$pooledmutableblockpos.release();
                         }
                     }
                 }
             }
 
-            // Sponge start - Asynchronous light updates
-            if (SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
-                spongeChunk.getPendingLightUpdates().decrementAndGet();
-                for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
-                    final IMixinChunk neighbor = (IMixinChunk) neighborChunk;
-                    neighbor.getPendingLightUpdates().decrementAndGet();
+            i = 0;
+        }
+
+        //this.profiler.endSection(); // Sponge - don't use profiler off of main thread
+        //this.profiler.startSection("checkedPosition < toCheckCount"); // Sponge - don't use profiler off of main thread
+
+        while (i < j) {
+            int i5 = this.lightUpdateBlockList[i++];
+            int j5 = (i5 & 63) - 32 + i1;
+            int k5 = (i5 >> 6 & 63) - 32 + j1;
+            int l5 = (i5 >> 12 & 63) - 32 + k1;
+            BlockPos blockpos1 = new BlockPos(j5, k5, l5);
+            int i6 = this.getLightForAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
+            int j6 = this.getRawBlockLightAsync(lightType, blockpos1, currentChunk, neighbors); // Sponge - use thread safe method
+
+            if (j6 != i6) {
+                this.setLightForAsync(lightType, blockpos1, j6, currentChunk, neighbors); // Sponge - use thread safe method
+
+                if (j6 > i6) {
+                    int k6 = Math.abs(j5 - i1);
+                    int l6 = Math.abs(k5 - j1);
+                    int i7 = Math.abs(l5 - k1);
+                    boolean flag = j < this.lightUpdateBlockList.length - 6;
+
+                    if (k6 + l6 + i7 < 17 && flag) {
+                        // Sponge start - use thread safe method getLightForAsync
+                        if (this.getLightForAsync(lightType, blockpos1.west(), currentChunk, neighbors) < j6) {
+                            this.lightUpdateBlockList[j++] = j5 - 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
+                        }
+
+                        if (this.getLightForAsync(lightType, blockpos1.east(), currentChunk, neighbors) < j6) {
+                            this.lightUpdateBlockList[j++] = j5 + 1 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
+                        }
+
+                        if (this.getLightForAsync(lightType, blockpos1.down(), currentChunk, neighbors) < j6) {
+                            this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
+                        }
+
+                        if (this.getLightForAsync(lightType, blockpos1.up(), currentChunk, neighbors) < j6) {
+                            this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 + 1 - j1 + 32 << 6) + (l5 - k1 + 32 << 12);
+                        }
+
+                        if (this.getLightForAsync(lightType, blockpos1.north(), currentChunk, neighbors) < j6) {
+                            this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 - 1 - k1 + 32 << 12);
+                        }
+
+                        if (this.getLightForAsync(lightType, blockpos1.south(), currentChunk, neighbors) < j6) {
+                            this.lightUpdateBlockList[j++] = j5 - i1 + 32 + (k5 - j1 + 32 << 6) + (l5 + 1 - k1 + 32 << 12);
+                        }
+                        // Sponge end
+                    }
                 }
             }
-            // Sponge end
-            //this.profiler.endSection(); // Sponge - don't use profiler off of main thread
-            return true;
         }
+
+        // Sponge start - Asynchronous light updates
+        if (SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+            spongeChunk.getPendingLightUpdates().decrementAndGet();
+            for (net.minecraft.world.chunk.Chunk neighborChunk : neighbors) {
+                final IMixinChunk neighbor = (IMixinChunk) neighborChunk;
+                neighbor.getPendingLightUpdates().decrementAndGet();
+            }
+        }
+        // Sponge end
+        //this.profiler.endSection(); // Sponge - don't use profiler off of main thread
+        return true;
+//        }
     }
 
     @Override

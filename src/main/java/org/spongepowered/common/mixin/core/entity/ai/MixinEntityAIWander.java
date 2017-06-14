@@ -41,7 +41,7 @@ public abstract class MixinEntityAIWander extends MixinEntityAIBase implements W
 
     @Override
     public double getSpeed() {
-        return speed;
+        return this.speed;
     }
 
     @Override
@@ -52,7 +52,7 @@ public abstract class MixinEntityAIWander extends MixinEntityAIBase implements W
 
     @Override
     public int getExecutionChance() {
-        return executionChance;
+        return this.executionChance;
     }
 
     @Override

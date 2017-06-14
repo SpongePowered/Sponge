@@ -35,15 +35,13 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.lang.reflect.Constructor;
-
 public class ReflectionTest {
 
     @Test
     public void testFindConstructor() {
-        final Dummy idiot = new Dummy("derp");
-        final Constructor<Dummy> ctor = findConstructor(Dummy.class, "break");
-        final Dummy dummy = createInstance(Dummy.class, "dance");
+        new Dummy("derp");
+        findConstructor(Dummy.class, "break");
+        createInstance(Dummy.class, "dance");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -114,7 +112,6 @@ public class ReflectionTest {
                 return "test";
             }
 
-            @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
             public TypeToken<Value<Double>> getValueToken() {
                 return this.token;

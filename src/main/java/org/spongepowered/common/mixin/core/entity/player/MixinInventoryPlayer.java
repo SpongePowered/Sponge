@@ -89,7 +89,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         if (playerIn instanceof EntityPlayerMP) {
             // We only care about Server inventories
             this.inventory = new DefaultInventoryFabric((IInventory) this);
-            this.slots = new SlotCollection.Builder().add(mainInventory.size()).add(offHandInventory.size()).add(armorInventory.size(),
+            this.slots = new SlotCollection.Builder().add(this.mainInventory.size()).add(this.offHandInventory.size()).add(this.armorInventory.size(),
                     EquipmentSlotAdapter.class).build();
             this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);

@@ -198,7 +198,6 @@ import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorObjectRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
-import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
@@ -334,7 +333,7 @@ public final class CommonModuleRegistry {
         ;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())

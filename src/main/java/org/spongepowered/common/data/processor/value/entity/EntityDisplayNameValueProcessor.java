@@ -78,9 +78,8 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
                 SpongeImpl.getLogger().error("There was an issue resetting the display name on an entity!", e);
                 return builder.result(DataTransactionResult.Type.ERROR).build();
             }
-        } else {
-            return builder.result(DataTransactionResult.Type.SUCCESS).build();
         }
+        return builder.result(DataTransactionResult.Type.SUCCESS).build();
     }
 
 }

@@ -53,7 +53,6 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         this.reset();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected Optional<ParticleEffect> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(DataQueries.PARTICLE_TYPE, DataQueries.PARTICLE_OPTIONS)) {
@@ -95,6 +94,7 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <V> ParticleEffect.Builder option(ParticleOption<V> option, V value) throws IllegalArgumentException {
         checkNotNull(option, "option");

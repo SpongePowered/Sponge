@@ -57,20 +57,20 @@ public class SpongeDamageModifierType implements DamageModifierType {
             return false;
         }
         SpongeDamageModifierType that = (SpongeDamageModifierType) o;
-        return Objects.equal(id, that.id) &&
-               Objects.equal(name, that.name);
+        return Objects.equal(this.id, that.id) &&
+               Objects.equal(this.name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, name);
+        return Objects.hashCode(this.id, this.name);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("id", id)
-            .add("name", name)
+            .add("id", this.id)
+            .add("name", this.name)
             .toString();
     }
 

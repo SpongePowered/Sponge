@@ -39,7 +39,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.HashMap;
 import java.util.Map;

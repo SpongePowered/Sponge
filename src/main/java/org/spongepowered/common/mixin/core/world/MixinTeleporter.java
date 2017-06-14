@@ -47,7 +47,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -142,9 +141,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         if (!foundTeleporter.isPresent()) {
             if (this.createPortal(targetLocation).isPresent()) {
                 return this.findPortal(targetLocation);
-            } else {
-                return Optional.empty();
             }
+            return Optional.empty();
         }
 
         return foundTeleporter;
@@ -226,9 +224,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             }
 
             return Optional.of(new Location<World>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     private void handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
@@ -240,19 +237,19 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
         double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
                 : (double) blockpattern$patternhelper.getFrontTopLeft().getX();
-        yTarget = (double) (blockpattern$patternhelper.getFrontTopLeft().getY() + 1)
-                - entityIn.getLastPortalVec().y * (double) blockpattern$patternhelper.getHeight();
+        yTarget = blockpattern$patternhelper.getFrontTopLeft().getY() + 1
+                - entityIn.getLastPortalVec().y * blockpattern$patternhelper.getHeight();
 
         if (flag1) {
             ++d2;
         }
 
         if (blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X) {
-            zTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * (double) blockpattern$patternhelper.getWidth()
-                    * (double) blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
+            zTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * blockpattern$patternhelper.getWidth()
+                    * blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
         } else {
-            xTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * (double) blockpattern$patternhelper.getWidth()
-                    * (double) blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
+            xTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * blockpattern$patternhelper.getWidth()
+                    * blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
         }
 
         float f = 0.0F;
@@ -276,10 +273,10 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
         double d3 = entityIn.motionX;
         double d4 = entityIn.motionZ;
-        entityIn.motionX = d3 * (double) f + d4 * (double) f3;
-        entityIn.motionZ = d3 * (double) f2 + d4 * (double) f1;
-        entityIn.rotationYaw = rotationYaw - (float) (entityIn.getTeleportDirection().getOpposite().getHorizontalIndex() * 90)
-                + (float) (blockpattern$patternhelper.getForwards().getHorizontalIndex() * 90);
+        entityIn.motionX = d3 * f + d4 * f3;
+        entityIn.motionZ = d3 * f2 + d4 * f1;
+        entityIn.rotationYaw = rotationYaw - entityIn.getTeleportDirection().getOpposite().getHorizontalIndex() * 90
+                + blockpattern$patternhelper.getForwards().getHorizontalIndex() * 90;
         entityIn.setLocationAndAngles(xTarget, yTarget, zTarget, entityIn.rotationYaw, entityIn.rotationPitch);
     }
 
@@ -306,8 +303,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     // Adds boolean to turn on special tracking if called from API
     public Optional<Location<World>> createTeleporter(Location<World> nearLocation, boolean plugin) {
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+//        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
+//        final CauseTracker causeTracker = CauseTracker.getInstance();
 //        if (plugin) {
 //            Cause teleportCause = Cause.of(NamedCause.source(this));
 //            if (causeTracker.getCurrentCause() != null) {
@@ -328,10 +325,10 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (int j2 = xNearTarget - this.creationRadius; j2 <= xNearTarget + this.creationRadius; ++j2) {
-            double d1 = (double) j2 + 0.5D - nearLocation.getBlockX();
+            double d1 = j2 + 0.5D - nearLocation.getBlockX();
 
             for (int l2 = zNearTarget - this.creationRadius; l2 <= zNearTarget + this.creationRadius; ++l2) {
-                double d2 = (double) l2 + 0.5D - nearLocation.getBlockZ();
+                double d2 = l2 + 0.5D - nearLocation.getBlockZ();
                 label142:
 
                 for (int j3 = this.world.getActualHeight() - 1; j3 >= 0; --j3) {
@@ -365,7 +362,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                                 }
                             }
 
-                            double d5 = (double) j3 + 0.5D - nearLocation.getBlockY();
+                            double d5 = j3 + 0.5D - nearLocation.getBlockY();
                             double distance = d1 * d1 + d5 * d5 + d2 * d2;
 
                             if (closest < 0.0D || distance < closest) {
@@ -383,10 +380,10 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
         if (closest < 0.0D) {
             for (int l5 = xNearTarget - this.creationRadius; l5 <= xNearTarget + this.creationRadius; ++l5) {
-                double d3 = (double) l5 + 0.5D - nearLocation.getBlockX();
+                double d3 = l5 + 0.5D - nearLocation.getBlockX();
 
                 for (int j6 = zNearTarget - this.creationRadius; j6 <= zNearTarget + this.creationRadius; ++j6) {
-                    double d4 = (double) j6 + 0.5D - nearLocation.getBlockZ();
+                    double d4 = j6 + 0.5D - nearLocation.getBlockZ();
                     label562:
 
                     for (int i7 = this.world.getActualHeight() - 1; i7 >= 0; --i7) {
@@ -413,7 +410,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                                     }
                                 }
 
-                                double d6 = (double) i7 + 0.5D - nearLocation.getBlockY();
+                                double d6 = i7 + 0.5D - nearLocation.getBlockY();
                                 double distance = d3 * d3 + d6 * d6 + d4 * d4;
 
                                 if (closest < 0.0D || distance < closest) {

@@ -104,14 +104,13 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public <E> Optional<E> get(int x, int y, int z, Key<? extends BaseValue<E>> key) {
-        final Optional<E> optional = getBlock(x, y, z).withExtendedProperties(new Location<>((World) this, x, y, z)).get(key);
+        final Optional<E> optional = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z)).get(key);
         if (optional.isPresent()) {
             return optional;
-        } else {
-            final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
-            if (tileEntityOptional.isPresent()) {
-                return tileEntityOptional.get().get(key);
-            }
+        }
+        final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
+        if (tileEntityOptional.isPresent()) {
+            return tileEntityOptional.get().get(key);
         }
         return Optional.empty();
     }
@@ -133,25 +132,23 @@ public abstract class MixinWorld_Data implements World {
         final Optional<T> optional = get(x, y, z, manipulatorClass);
         if (optional.isPresent()) {
             return optional;
-        } else {
-            final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
-            if (tileEntity.isPresent()) {
-                return tileEntity.get().getOrCreate(manipulatorClass);
-            }
+        }
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        if (tileEntity.isPresent()) {
+            return tileEntity.get().getOrCreate(manipulatorClass);
         }
         return Optional.empty();
     }
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>((World) this, x, y, z));
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         if (blockState.supports(key)) {
             return blockState.getValue(key);
-        } else {
-            final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
-            if (tileEntity.isPresent() && tileEntity.get().supports(key)) {
-                return tileEntity.get().getValue(key);
-            }
+        }
+        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
+        if (tileEntity.isPresent() && tileEntity.get().supports(key)) {
+            return tileEntity.get().getValue(key);
         }
         return Optional.empty();
     }
@@ -209,7 +206,6 @@ public abstract class MixinWorld_Data implements World {
         return builder.build();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
         return getTileEntity(x, y, z)
@@ -232,7 +228,6 @@ public abstract class MixinWorld_Data implements World {
                 .orElseGet(DataTransactionResult::failNoData);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
         return getTileEntity(x, y, z)
@@ -304,7 +299,7 @@ public abstract class MixinWorld_Data implements World {
     public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
         final List<DataManipulator<?, ?>> list = new ArrayList<>();
         final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z).withExtendedProperties(
-                new Location<>((World) this, x, y, z)).getManipulators();
+                new Location<>(this, x, y, z)).getManipulators();
         for (ImmutableDataManipulator<?, ?> immutableDataManipulator : manipulators) {
             list.add(immutableDataManipulator.asMutable());
         }

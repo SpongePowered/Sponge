@@ -48,12 +48,12 @@ public final class TextSerializerRegistryModule implements AlternateCatalogRegis
 
     @Override
     public Optional<TextSerializer> getById(String id) {
-        return Optional.ofNullable(textSerializerMappings.get(id));
+        return Optional.ofNullable(this.textSerializerMappings.get(id));
     }
 
     @Override
     public Collection<TextSerializer> getAll() {
-        return ImmutableList.copyOf(textSerializerMappings.values());
+        return ImmutableList.copyOf(this.textSerializerMappings.values());
     }
 
     @Override
@@ -65,12 +65,12 @@ public final class TextSerializerRegistryModule implements AlternateCatalogRegis
     }
 
     private void registerSerializer(TextSerializer serializer) {
-        textSerializerMappings.put(serializer.getId(), serializer);
+        this.textSerializerMappings.put(serializer.getId(), serializer);
     }
 
     @Override
     public void registerAdditionalCatalog(TextSerializer serializer) {
-        textSerializerMappings.put(serializer.getId(), serializer);
+        this.textSerializerMappings.put(serializer.getId(), serializer);
     }
 
     @Override

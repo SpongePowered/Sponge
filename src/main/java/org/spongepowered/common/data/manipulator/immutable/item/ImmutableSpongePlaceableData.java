@@ -56,7 +56,6 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
                 .collect(Collectors.toList()));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ImmutableSetValue<BlockType> placeable() {
         return getValueGetter();

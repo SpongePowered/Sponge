@@ -234,7 +234,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
         registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
         registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maxNearby);
         registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> spawnRange);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> this.spawnRange);
         registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextToSpawn);
         registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entitiesToSpawn);
 

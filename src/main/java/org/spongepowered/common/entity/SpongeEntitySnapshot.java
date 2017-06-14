@@ -271,7 +271,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return Optional.empty();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> Optional<EntitySnapshot> with(Key<? extends BaseValue<E>> key, E value) {
         return transform(key, input -> value);
@@ -283,7 +282,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
         return Optional.of(createBuilder().add(valueContainer).build());

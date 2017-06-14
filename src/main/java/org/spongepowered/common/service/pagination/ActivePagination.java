@@ -26,21 +26,20 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import org.spongepowered.api.network.Message;
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.command.CommandException;
 
-import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 /**
  * Holds logic for an active pagination that is occurring.

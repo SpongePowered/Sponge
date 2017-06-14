@@ -133,7 +133,6 @@ public class SpongeManipulatorRegistry {
     private SpongeManipulatorRegistry() {
     }
 
-    @SuppressWarnings("unused")
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> getRegistrationFor(
         Class<? extends M> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator.getClass());
@@ -159,7 +158,6 @@ public class SpongeManipulatorRegistry {
         return dataRegistration;
     }
 
-    @SuppressWarnings("unused")
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> getRegistrationForImmutable(
         Class<? extends I> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.immutableRegistrationMap.get(manipulator);
@@ -290,7 +288,6 @@ public class SpongeManipulatorRegistry {
         return this.nbtValueTable.column(nbtDataType).values();
     }
 
-    @SuppressWarnings("unchecked")
     void bake() {
         checkState(this.tempRegistry != null);
         // ValueProcessors

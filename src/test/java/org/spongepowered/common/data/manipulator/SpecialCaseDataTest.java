@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 public class SpecialCaseDataTest {
 
     //@RunWith(Parameterized.class)

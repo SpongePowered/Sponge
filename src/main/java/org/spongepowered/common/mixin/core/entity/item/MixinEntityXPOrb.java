@@ -32,8 +32,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;

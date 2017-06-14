@@ -96,9 +96,8 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         Subject subj = internalSubject();
         if (subj == null) {
             throw new IllegalStateException("No subject present for user " + this);
-        } else {
-            return subj.getContainingCollection();
         }
+        return subj.getContainingCollection();
     }
 
     @Override
@@ -106,9 +105,8 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         Subject subj = internalSubject();
         if (subj == null) {
             throw new IllegalStateException("No subject present for user " + this);
-        } else {
-            return subj.getSubjectData();
         }
+        return subj.getSubjectData();
     }
 
     @Override
@@ -116,9 +114,8 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         Subject subj = internalSubject();
         if (subj == null) {
             throw new IllegalStateException("No subject present for user " + this);
-        } else {
-            return subj.getTransientSubjectData();
         }
+        return subj.getTransientSubjectData();
     }
 
     @Override
@@ -126,14 +123,13 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         Subject subj = internalSubject();
         if (subj == null) {
             return this.permDefault(permission).asBoolean();
-        } else {
-            Tristate ret = getPermissionValue(contexts, permission);
-            switch (ret) {
-                case UNDEFINED:
-                    return this.permDefault(permission).asBoolean();
-                default:
-                    return ret.asBoolean();
-            }
+        }
+        Tristate ret = getPermissionValue(contexts, permission);
+        switch (ret) {
+            case UNDEFINED:
+                return this.permDefault(permission).asBoolean();
+            default:
+                return ret.asBoolean();
         }
     }
 

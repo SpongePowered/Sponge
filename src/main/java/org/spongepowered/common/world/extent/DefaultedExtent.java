@@ -52,7 +52,6 @@ import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;
 

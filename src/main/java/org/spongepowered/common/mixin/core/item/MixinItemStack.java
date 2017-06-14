@@ -417,9 +417,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             this.manipulators.remove(manipulator);
             resyncCustomToTag();
             return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
-        } else {
-            return DataTransactionResult.failNoData();
         }
+        return DataTransactionResult.failNoData();
     }
 
     @Override

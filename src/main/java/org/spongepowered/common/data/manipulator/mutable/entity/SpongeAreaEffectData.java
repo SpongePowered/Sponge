@@ -263,7 +263,6 @@ public class SpongeAreaEffectData extends AbstractData<AreaEffectCloudData, Immu
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ListValue<PotionEffect> effects() {
         return new SpongeListValue<>(Keys.POTION_EFFECTS, this.potionEffects);

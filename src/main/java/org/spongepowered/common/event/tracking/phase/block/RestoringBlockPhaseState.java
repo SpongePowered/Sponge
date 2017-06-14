@@ -31,7 +31,6 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     RestoringBlockPhaseState() {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     void unwind(PhaseContext phaseContext) {
 

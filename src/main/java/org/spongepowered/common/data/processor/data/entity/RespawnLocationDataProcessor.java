@@ -57,9 +57,8 @@ public class RespawnLocationDataProcessor extends
             ImmutableMap<UUID, RespawnLocation> removed = ((ISpongeUser) container).removeAllBeds();
             if (!removed.isEmpty()) {
                 return DataTransactionResult.successRemove(constructImmutableValue(removed));
-            } else {
-                return DataTransactionResult.successNoData();
             }
+            return DataTransactionResult.successNoData();
         }
         return DataTransactionResult.failNoData();
     }

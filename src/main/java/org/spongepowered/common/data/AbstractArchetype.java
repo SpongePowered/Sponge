@@ -27,7 +27,6 @@ package org.spongepowered.common.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.inject.Inject;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.Archetype;
@@ -49,7 +48,6 @@ import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Collection;
@@ -119,14 +117,14 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
+    public <R> DataTransactionResult offer(Key<? extends BaseValue<R>> key, R value) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.offer(this.data, value))
                 .orElseGet(DataTransactionResult::failNoData);
     }
 
     @Override
-    public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value, Cause cause) {
+    public <R> DataTransactionResult offer(Key<? extends BaseValue<R>> key, R value, Cause cause) {
         return offer(key, value);
     }
 
@@ -156,7 +154,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         return offer(valueContainer, function);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
         return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
@@ -200,15 +197,14 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+    public <R> Optional<R> get(Key<? extends BaseValue<R>> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readValue(this.data));
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+    public <R, V extends BaseValue<R>> Optional<V> getValue(Key<V> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
@@ -220,7 +216,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .orElse(true); // we want to say we automatically support custom data
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Set<Key<?>> getKeys() {
         return DataUtil.getNbtValueProcessors(this.getDataType()).stream()

@@ -30,7 +30,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -44,7 +43,6 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -127,7 +125,7 @@ final class CustomExplosionState extends PluginPhaseState {
 
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext context) {
         if (snapshots.isEmpty()) {
             return;
@@ -138,7 +136,6 @@ final class CustomExplosionState extends PluginPhaseState {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
-        final WorldServer minecraftWorld = (WorldServer) ((net.minecraft.world.Explosion) explosion).world;
 
         for (BlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
@@ -163,7 +160,6 @@ final class CustomExplosionState extends PluginPhaseState {
             // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
             // try catch to avoid bombing on performing block changes.
         }
-        final World world = ((World) minecraftWorld);
         // Creates the block events accordingly to the transaction arrays
         iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder); // Needs to throw events
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not

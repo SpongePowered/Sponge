@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -36,7 +35,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
@@ -53,14 +51,12 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
 import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
 import org.spongepowered.common.data.util.ComparatorUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 
 import java.util.ArrayList;
@@ -216,7 +212,6 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable((B) this.immutableDataBuilderMap.get(checkNotNull(holderClass)));
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public static void finalizeRegistration() {
         allowRegistrations = false;
         SpongeManipulatorRegistry.getInstance().bake();
@@ -237,6 +232,7 @@ public final class SpongeDataManager implements DataManager {
         final PluginContainer pluginContainer = registration.getPluginContainer();
         final String pluginId = pluginContainer.getId().toLowerCase();
 
+        // TODO ???
     }
 
     @SuppressWarnings("unchecked")

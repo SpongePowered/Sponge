@@ -41,7 +41,6 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
         super(CommandBlock.class, 1);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Optional<CommandBlock> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).flatMap(commandBlock -> {

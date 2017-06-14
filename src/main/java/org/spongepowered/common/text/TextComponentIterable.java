@@ -43,9 +43,8 @@ public class TextComponentIterable implements Iterable<ITextComponent> {
     public Iterator<ITextComponent> iterator() {
         if (this.includeSelf) {
             return new TextComponentIterator(this.component);
-        } else {
-            return new TextComponentIterator(this.component.childrenIterator());
         }
+        return new TextComponentIterator(this.component.childrenIterator());
     }
 
 }

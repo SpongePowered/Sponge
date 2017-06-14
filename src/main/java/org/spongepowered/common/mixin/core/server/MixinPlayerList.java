@@ -545,7 +545,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 toTransform, (Player) playerIn, (Player) newPlayer, EntityUtil.tempIsBedSpawn, !conqueredEnd);
         EntityUtil.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
-        ((IMixinEntity) (Object) player).setLocationAndAngles(event.getToTransform());
+        ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
         toTransform = event.getToTransform();
         location = toTransform.getLocation();
 
@@ -696,16 +696,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 blockpos = toWorldIn.getSpawnCoordinate();
             }
 
-            x = (double)blockpos.getX();
-            y = (double)blockpos.getY();
-            z = (double)blockpos.getZ();
+            x = blockpos.getX();
+            y = blockpos.getY();
+            z = blockpos.getZ();
             entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
             oldWorldIn.profiler.startSection("placing");
-            x = (double)MathHelper.clamp((int)x, -29999872, 29999872);
-            z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
+            x = MathHelper.clamp((int)x, -29999872, 29999872);
+            z = MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entityIn.isEntityAlive()) {
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);

@@ -56,8 +56,8 @@ public class FurnaceInventoryLens extends OrderedInventoryLensImpl {
         this.fuel = new FuelSlotLensImpl(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
         this.output = new OutputSlotLensImpl(2, (i) -> false, (i) -> false); // SlotFurnaceOutput
 
-        this.addChild(input, new SlotIndex(0));
-        this.addChild(fuel, new SlotIndex(1));
-        this.addChild(output, new SlotIndex(2));
+        this.addChild(this.input, new SlotIndex(0));
+        this.addChild(this.fuel, new SlotIndex(1));
+        this.addChild(this.output, new SlotIndex(2));
     }
 }

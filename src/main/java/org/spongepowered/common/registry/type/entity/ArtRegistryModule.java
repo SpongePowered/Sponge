@@ -76,7 +76,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     @AdditionalRegistration
     public void registerAdditionals() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            if (!this.artMappings.containsValue((Art) (Object) art)) {
+            if (!this.artMappings.containsValue(art)) {
                 this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
             }
         }

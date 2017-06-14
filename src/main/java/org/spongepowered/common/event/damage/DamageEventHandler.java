@@ -47,8 +47,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
@@ -58,7 +58,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -76,7 +75,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -90,7 +88,7 @@ public class DamageEventHandler {
     public static DoubleUnaryOperator createResistanceFunction(int resistanceAmplifier) {
         final int base = (resistanceAmplifier + 1) * 5;
         final int modifier = 25 - base;
-        return damage -> -(damage - ((damage * (float) modifier) / 25.0F));
+        return damage -> -(damage - ((damage * modifier) / 25.0F));
     }
 
     public static Optional<DamageFunction> createHardHatModifier(EntityLivingBase entityLivingBase,
@@ -109,7 +107,7 @@ public class DamageEventHandler {
     private static double damageToHandle;
 
     public static Optional<List<DamageFunction>> createArmorModifiers(EntityLivingBase entityLivingBase,
-                                                                                                               DamageSource damageSource, double damage) {
+            DamageSource damageSource, double damage) {
         if (!damageSource.isDamageAbsolute()) {
             damage *= 25;
             net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.getArmorInventoryList(), net.minecraft.item.ItemStack.class);
@@ -170,9 +168,7 @@ public class DamageEventHandler {
                 modifiers.add(new DamageFunction(modifier, function));
                 first = false;
             }
-            if (modifiers.isEmpty()) {
-                return Optional.empty();
-            } else {
+            if (!modifiers.isEmpty()) {
                 return Optional.of(modifiers);
             }
         }
@@ -285,7 +281,7 @@ public class DamageEventHandler {
                             double magicModifier;
                             if (modifier > 0 && modifier <= 20) {
                                 int j = 25 - modifier;
-                                magicModifier = modifierDamage * (float) j;
+                                magicModifier = modifierDamage * j;
                                 modifierDamage = magicModifier / 25.0F;
                             }
                             return - Math.max(actualDamage - modifierDamage, 0.0D);
@@ -307,10 +303,8 @@ public class DamageEventHandler {
         }
         if (!modifiers.isEmpty()) {
             return Optional.of(modifiers);
-        } else {
-            return Optional.empty();
         }
-
+        return Optional.empty();
     }
 
     public static Optional<DamageFunction> createAbsorptionModifier(EntityLivingBase entityLivingBase,

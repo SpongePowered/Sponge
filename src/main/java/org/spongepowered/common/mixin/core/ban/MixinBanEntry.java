@@ -44,7 +44,6 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
-@SuppressWarnings("rawtypes")
 @Mixin(UserListEntryBan.class)
 public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
 
@@ -62,7 +61,6 @@ public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
 
     private Optional<CommandSource> commandSource = Optional.empty();
 
-    @SuppressWarnings("deprecation")
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onInitMixinBanEntry(CallbackInfo ci) { // Prevent this from being overriden in MixinIPBanEntry
         this.spongeReason = this.reason == null ? Optional.empty() : Optional.of(SpongeTexts.fromLegacy(this.reason));

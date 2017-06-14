@@ -53,7 +53,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
 
     @Override
     public boolean matches(Binding<?> binding) {
-        return binding instanceof ProviderInstanceBinding && ((ProviderInstanceBinding) binding).getUserSuppliedProvider() == this;
+        return binding instanceof ProviderInstanceBinding && ((ProviderInstanceBinding<?>) binding).getUserSuppliedProvider() == this;
     }
 
     @Override

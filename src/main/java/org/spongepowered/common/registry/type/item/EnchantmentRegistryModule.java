@@ -87,7 +87,7 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
             if (enchantment == null) {
                 continue;
             }
-            if (!this.enchantmentMappings.containsValue((Enchantment) enchantment)) {
+            if (!this.enchantmentMappings.containsValue(enchantment)) {
                 final String name = enchantment.getName().replace("enchantment.", "");
                 this.enchantmentMappings.put(name.toLowerCase(Locale.ENGLISH), (Enchantment) enchantment);
             }

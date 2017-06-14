@@ -55,10 +55,9 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public BlockState.Builder add(DataManipulator<?, ?> manipulator) {
-        return add((ImmutableDataManipulator) manipulator.asImmutable());
+        return add(manipulator.asImmutable());
     }
 
     @Override

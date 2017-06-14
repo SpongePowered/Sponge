@@ -41,7 +41,6 @@ import org.spongepowered.api.util.Tristate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 /**
  * Basic implementation of {@link PermissionDescription}. Can only be used in
@@ -117,7 +116,6 @@ class SpongePermissionDescription implements PermissionDescription {
         private final PluginContainer owner;
         private String id;
         private Text description;
-        private Optional<String> suggestedRank = Optional.empty();
         private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {

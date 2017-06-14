@@ -107,9 +107,9 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory.Builder forCarrier(Class<? extends Carrier> carrier) {
-        if (true) throw new UnsupportedOperationException();
-        this.archetype = null; // TODO get Archetype for Carrier
-        return null;
+        throw new UnsupportedOperationException();
+//        this.archetype = null; // TODO get Archetype for Carrier
+//        return null;
     }
 
     @Override

@@ -130,13 +130,12 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         DataTransactionResult result = validateData(this.type, itemData);
         if (result.getType() != DataTransactionResult.Type.SUCCESS) {
             throw new IllegalArgumentException("The item data is not compatible with the current item type!");
-        } else {
-            if (this.itemDataSet == null) {
-                this.itemDataSet = new HashSet<>();
-            }
-            this.itemDataSet.add(itemData);
-            return this;
         }
+        if (this.itemDataSet == null) {
+            this.itemDataSet = new HashSet<>();
+        }
+        this.itemDataSet.add(itemData);
+        return this;
     }
 
     @Override

@@ -244,9 +244,8 @@ public final class EntityUtil {
         if (entity instanceof EntityLivingBase) {
             EntityLivingBase base = (EntityLivingBase) entity;
             return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
-        } else {
-            return entity.isDead;
         }
+        return entity.isDead;
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
@@ -296,7 +295,6 @@ public final class EntityUtil {
         if (!sameDimension && fromWorld == toWorld) {
             return null;
         }
-        final IMixinWorldServer toMixinWorld = (IMixinWorldServer) toWorld;
         if (teleporter == null) {
             teleporter = toWorld.getDefaultTeleporter();
         }
@@ -545,7 +543,7 @@ public final class EntityUtil {
         double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
         return new Vec3d(interpX, interpY, interpZ);
     }
-    @SuppressWarnings("unchecked")
+
     public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
         EntityPainting.EnumArt oldArt = painting.art;
         painting.art = art;
@@ -732,12 +730,6 @@ public final class EntityUtil {
         return (IMixinEntity) entity;
     }
 
-    public static org.spongepowered.api.entity.Entity fromMixin(IMixinEntity mixinEntity) {
-        if (!(mixinEntity instanceof org.spongepowered.api.entity.Entity)) {
-            throw new IllegalArgumentException("Not a native SpongeAPI entity!");
-        }
-        return (org.spongepowered.api.entity.Entity) mixinEntity;
-    }
     public static EntitySnapshot createSnapshot(Entity entity) {
         return fromNative(entity).createSnapshot();
     }
@@ -834,16 +826,16 @@ public final class EntityUtil {
                 blockpos = toWorld.getSpawnCoordinate();
             }
 
-            x = (double)blockpos.getX();
-            y = (double)blockpos.getY();
-            z = (double)blockpos.getZ();
+            x = blockpos.getX();
+            y = blockpos.getY();
+            z = blockpos.getZ();
             entity.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
             fromWorld.profiler.startSection("placing");
-            x = (double) MathHelper.clamp((int)x, -29999872, 29999872);
-            z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
+            x = MathHelper.clamp((int)x, -29999872, 29999872);
+            z = MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entity.isEntityAlive()) {
                 entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
@@ -889,7 +881,7 @@ public final class EntityUtil {
         }
 
         // SECOND throw the ConstructEntityEvent
-        Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + (double) offsetY, posZ));
+        Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + offsetY, posZ));
         SpawnCause cause = EntitySpawnCause.builder().entity(mixinEntity).type(SpawnTypes.DROPPED_ITEM).build();
         ConstructEntityEvent.Pre event = SpongeEventFactory
                 .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
@@ -911,13 +903,12 @@ public final class EntityUtil {
                             .position(new Vector3d(posX, posY, posZ))
                             .build());
                     return null;
-                } else {
-                    final List<ItemDropData> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
-                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(item)
-                            .position(new Vector3d(posX, posY, posZ))
-                            .build());
-                    return null;
                 }
+                final List<ItemDropData> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
+                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(item)
+                        .position(new Vector3d(posX, posY, posZ))
+                        .build());
+                return null;
             }
             EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
             entityitem.setDefaultPickupDelay();
@@ -946,7 +937,7 @@ public final class EntityUtil {
         final EntityPlayer player = EntityUtil.toNative(mixinPlayer);
 
         final double posX = player.posX;
-        final double adjustedPosY = player.posY - 0.30000001192092896D + (double) player.getEyeHeight();
+        final double adjustedPosY = player.posY - 0.3 + player.getEyeHeight();
         final double posZ = player.posZ;
         // Now the real fun begins.
         final ItemStack item;
@@ -976,28 +967,21 @@ public final class EntityUtil {
         final PhaseContext phaseContext = peek.context;
 
         if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            final Collection<ItemDropData> itemStacks;
             if (currentState.tracksEntitySpecificDrops()) {
                 final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
-                final Collection<ItemDropData> itemStacks = multimap.get(player.getUniqueID());
-                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.Player.player(player)
-                        .stack(item)
-                        .trace(traceItem)
-                        .motion(createDropMotion(dropAround, player, mixinPlayer.getRandom()))
-                        .dropAround(dropAround)
-                        .position(new Vector3d(posX, adjustedPosY, posZ))
-                        .build());
-                return null;
+                itemStacks = multimap.get(player.getUniqueID());
             } else {
-                final List<ItemDropData> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
-                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.Player.player(player)
-                        .stack(item)
-                        .trace(traceItem)
-                        .motion(createDropMotion(dropAround, player, mixinPlayer.getRandom()))
-                        .dropAround(dropAround)
-                        .position(new Vector3d(posX, adjustedPosY, posZ))
-                        .build());
-                return null;
+                itemStacks = phaseContext.getCapturedItemStackSupplier().get();
             }
+            SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.Player.player(player)
+                    .stack(item)
+                    .trace(traceItem)
+                    .motion(createDropMotion(dropAround, player, mixinPlayer.getRandom()))
+                    .dropAround(dropAround)
+                    .position(new Vector3d(posX, adjustedPosY, posZ))
+                    .build());
+            return null;
         }
 
         EntityItem entityitem = new EntityItem(player.world, posX, adjustedPosY, posZ, droppedItem);
@@ -1011,19 +995,19 @@ public final class EntityUtil {
         if (dropAround) {
             float f = random.nextFloat() * 0.5F;
             float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-            entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
-            entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
+            entityitem.motionX = -MathHelper.sin(f1) * f;
+            entityitem.motionZ = MathHelper.cos(f1) * f;
             entityitem.motionY = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            entityitem.motionX = (double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
-            entityitem.motionZ = (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
-            entityitem.motionY = (double) ( - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            entityitem.motionY = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
             float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
-            entityitem.motionX += Math.cos((double) f3) * (double) f2;
-            entityitem.motionY += (double) ((random.nextFloat() - random.nextFloat()) * 0.1F);
-            entityitem.motionZ += Math.sin((double) f3) * (double) f2;
+            entityitem.motionX += Math.cos(f3) * f2;
+            entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
+            entityitem.motionZ += Math.sin(f3) * f2;
         }
         // FIFTH - Capture the entity maybe?
         if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
@@ -1057,19 +1041,19 @@ public final class EntityUtil {
         if (dropAround) {
             float f = random.nextFloat() * 0.5F;
             float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-            x = (double) (-MathHelper.sin(f1) * f);
-            z = (double) (MathHelper.cos(f1) * f);
+            x = -MathHelper.sin(f1) * f;
+            z = MathHelper.cos(f1) * f;
             y = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            x = (double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
-            z = (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
-            y = (double) ( - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            x = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            z = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            y = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
             float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
-            x += Math.cos((double) f3) * (double) f2;
-            y += (double) ((random.nextFloat() - random.nextFloat()) * 0.1F);
-            z += Math.sin((double) f3) * (double) f2;
+            x += Math.cos(f3) * f2;
+            y += (random.nextFloat() - random.nextFloat()) * 0.1F;
+            z += Math.sin(f3) * f2;
         }
         return new Vector3d(x, y, z);
     }

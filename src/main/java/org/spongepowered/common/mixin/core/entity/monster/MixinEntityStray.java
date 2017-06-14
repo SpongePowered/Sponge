@@ -28,7 +28,6 @@ import net.minecraft.entity.monster.EntityStray;
 import org.spongepowered.api.entity.living.monster.Stray;
 import org.spongepowered.asm.mixin.Mixin;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityStray.class)
 public abstract class MixinEntityStray extends MixinAbstractSkeleton implements Stray {
 

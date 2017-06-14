@@ -114,18 +114,16 @@ public class ScheduledTask implements Task {
     public long getDelay() {
         if (this.delayIsTicks) {
             return this.offset;
-        } else {
-            return TimeUnit.NANOSECONDS.toMillis(this.offset);
         }
+        return TimeUnit.NANOSECONDS.toMillis(this.offset);
     }
 
     @Override
     public long getInterval() {
         if (this.intervalIsTicks) {
             return this.period;
-        } else {
-            return TimeUnit.NANOSECONDS.toMillis(this.period);
         }
+        return TimeUnit.NANOSECONDS.toMillis(this.period);
     }
 
     @Override
@@ -172,9 +170,8 @@ public class ScheduledTask implements Task {
     long nextExecutionTimestamp() {
         if (this.state.isActive) {
             return this.timestamp + this.period;
-        } else {
-            return this.timestamp + this.offset;
         }
+        return this.timestamp + this.offset;
     }
 
     void setTimestamp(long timestamp) {

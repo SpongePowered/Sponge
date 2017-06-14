@@ -103,14 +103,12 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayerMP;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
@@ -319,7 +317,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
         if (this.player.interactionManager.isCreative()) {
-            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.player.getServerWorld();
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final PhaseContext context = peek.context;
             final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();

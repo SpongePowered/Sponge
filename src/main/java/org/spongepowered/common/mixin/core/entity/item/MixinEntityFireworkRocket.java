@@ -67,9 +67,8 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     private Cause getDetonationCause() {
         if (this.detonationCause != null) {
             return this.detonationCause;
-        } else {
-            return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
         }
+        return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
     }
 
     @Override

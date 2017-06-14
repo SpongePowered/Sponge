@@ -101,17 +101,17 @@ public abstract class MixinDataHolder implements DataHolder {
                 SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
                 return custom;
-            } else { // Try to construct it from the DataManipulatorBuilder
-                Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(containerClass);
-                checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
-                        + containerClass.getName());
-                T manipulator = (T) builder.get().create();
-                // Basically at this point, it's up to plugins to validate whether it's supported
-                Optional<T> other = manipulator.fill(this).map(customManipulator -> (T) customManipulator);
-                SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
-                TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
-                return other;
             }
+            // Try to construct it from the DataManipulatorBuilder
+            Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(containerClass);
+            checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
+                    + containerClass.getName());
+            T manipulator = (T) builder.get().create();
+            // Basically at this point, it's up to plugins to validate whether it's supported
+            Optional<T> other = manipulator.fill(this).map(customManipulator -> (T) customManipulator);
+            SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
+            TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+            return other;
         }
         SpongeTimings.dataGetOrCreateManipulator.stopTimingIfSync();
         TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -136,17 +136,17 @@ public abstract class MixinDataHolder implements DataHolder {
                 SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
                 TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
                 return true;
-            } else { // Try to construct it from the DataManipulatorBuilder
-                Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(holderClass);
-                checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
-                        + holderClass.getName());
-                DataManipulator<?, ?> manipulator = builder.get().create();
-                // Basically at this point, it's up to plugins to validate whether it's supported
-                boolean present = manipulator.fill(this).isPresent();
-                SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
-                TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
-                return present;
             }
+            // Try to construct it from the DataManipulatorBuilder
+            Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(holderClass);
+            checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
+                    + holderClass.getName());
+            DataManipulator<?, ?> manipulator = builder.get().create();
+            // Basically at this point, it's up to plugins to validate whether it's supported
+            boolean present = manipulator.fill(this).isPresent();
+            SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
+            TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+            return present;
         }
         SpongeTimings.dataSupportsManipulator.stopTimingIfSync();
         TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();

@@ -116,7 +116,6 @@ import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
-@SuppressWarnings("deprecation")
 public class DataRegistrar {
 
     @SuppressWarnings("unchecked")

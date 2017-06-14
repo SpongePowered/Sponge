@@ -34,7 +34,6 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.loader.HeaderMode;
-import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.common.interfaces.text.IMixinTextComponent;
@@ -219,7 +218,7 @@ class PaginationCalculator {
         if (inputLength >= LINE_WIDTH) {
             return text;
         }
-        final Text textWithSpaces = addSpaces(LiteralText.of(" "), text);
+        final Text textWithSpaces = addSpaces(Text.of(" "), text);
 
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
         boolean addSpaces = getWidth(textWithSpaces) <= LINE_WIDTH;

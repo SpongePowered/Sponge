@@ -28,7 +28,6 @@ import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketCloseWindow;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -41,8 +40,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.service.permission.SpongePermissionService;
-
-import javax.annotation.Nullable;
 
 @Mixin(BlockCommandBlock.class)
 public abstract class MixinBlockCommandBlock {

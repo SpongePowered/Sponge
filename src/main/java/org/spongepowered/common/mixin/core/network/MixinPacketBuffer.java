@@ -77,11 +77,13 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.writerIndex() - this.readerIndex();
     }
 
+    @SuppressWarnings("deprecation")
     public ChannelBuf cbuf$order(ByteOrder order) {
         this.order(order);
         return (ChannelBuf) this;
     }
 
+    @SuppressWarnings("deprecation")
     public ByteOrder cbuf$getByteOrder() {
         return this.order();
     }

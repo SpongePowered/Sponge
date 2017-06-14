@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.common.SpongeImpl;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -100,7 +99,6 @@ public class SpongePaginationList implements PaginationList {
         return this.linesPerPage;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void sendTo(final MessageReceiver receiver) {
         checkNotNull(this.contents, "contents");
@@ -111,7 +109,6 @@ public class SpongePaginationList implements PaginationList {
         while (realSource instanceof ProxySource) {
             realSource = ((ProxySource)realSource).getOriginalSource();
         }
-        @SuppressWarnings("unchecked")
         PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
         Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
             int lines = calculator.getLines(input);

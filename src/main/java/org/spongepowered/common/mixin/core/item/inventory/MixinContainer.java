@@ -55,7 +55,6 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
-import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +76,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow protected List<IContainerListener> listeners;
     private boolean spectatorChest;
 
-    @SuppressWarnings("rawtypes")
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
 
@@ -125,7 +123,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
      * need to update the client with changes if listener already
      * exists.
      */
-    @SuppressWarnings("unchecked")
     @Overwrite
     public void addListener(IContainerListener listener) {
         Container container = (Container) (Object) this;

@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -67,7 +66,6 @@ public final class BlockPhase extends TrackingPhase {
         return ((BlockPhaseState) currentState).allowsSpawns();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void unwind(IPhaseState state, PhaseContext phaseContext) {
         ((BlockPhaseState) state).unwind(phaseContext);

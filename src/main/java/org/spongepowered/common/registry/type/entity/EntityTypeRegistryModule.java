@@ -61,7 +61,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-@SuppressWarnings("deprecation")
 public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
     @RegisterCatalog(EntityTypes.class)
@@ -210,7 +209,6 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 
-    @SuppressWarnings("deprecation")
     @CustomCatalogRegistration
     public void registerCatalogs() {
         registerDefaults();

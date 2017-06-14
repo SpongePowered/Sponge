@@ -70,15 +70,14 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
     public Optional<T> from(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
             return Optional.empty();
-        } else {
-            if (doesDataExist((Holder) dataHolder)) {
-                final T manipulator = createManipulator();
-                final Map<Key<?>, ?> keyValues = getValues((Holder) dataHolder);
-                for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
-                    manipulator.set((Key) entry.getKey(), entry.getValue());
-                }
-                return Optional.of(manipulator);
+        }
+        if (doesDataExist((Holder) dataHolder)) {
+            final T manipulator = createManipulator();
+            final Map<Key<?>, ?> keyValues = getValues((Holder) dataHolder);
+            for (Map.Entry<Key<?>, ?> entry : keyValues.entrySet()) {
+                manipulator.set((Key) entry.getKey(), entry.getValue());
             }
+            return Optional.of(manipulator);
         }
         return Optional.empty();
     }
@@ -102,9 +101,8 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
                     }
 
                     return builder.result(DataTransactionResult.Type.SUCCESS).success(newValues).build();
-                } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).reject(newValues).build();
                 }
+                return builder.result(DataTransactionResult.Type.FAILURE).reject(newValues).build();
             } catch (Exception e) {
                 SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject(newValues).build();

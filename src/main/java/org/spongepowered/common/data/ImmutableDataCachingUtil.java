@@ -103,9 +103,8 @@ public final class ImmutableDataCachingUtil {
                     try {
                         if (extraArgs == null || extraArgs.length == 0) {
                             return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
-                        } else {
-                            return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
                         }
+                        return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                         SpongeImpl.getLogger().error("Could not construct an ImmutableValue: " + valueClass.getCanonicalName(), e);
                     }

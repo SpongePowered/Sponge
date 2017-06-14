@@ -69,6 +69,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Shadow public abstract void checkForAdjacentChests();
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,
@@ -106,9 +107,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         this.checkForAdjacentChests();
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
             this.lidAngle = 0.7F;
-            double posX = (double)this.pos.getX() + 0.5D;
-            double posY = (double)this.pos.getY() + 0.5D;
-            double posZ = (double)this.pos.getZ() + 0.5D;
+            double posX = this.pos.getX() + 0.5D;
+            double posY = this.pos.getY() + 0.5D;
+            double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;
@@ -142,9 +143,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
                 this.lidAngle = 0.0f;
             }
 
-            double posX = (double)this.pos.getX() + 0.5D;
-            double posY = (double)this.pos.getY() + 0.5D;
-            double posZ = (double)this.pos.getZ() + 0.5D;
+            double posX = this.pos.getX() + 0.5D;
+            double posY = this.pos.getY() + 0.5D;
+            double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;

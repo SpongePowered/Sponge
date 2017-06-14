@@ -61,7 +61,6 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
     // (i.e its 'hasNext()' method returns true) when this method returns. If this condition can no longer be met,
     // we're done iterating.
     @Override
-    @SuppressWarnings("unchecked")
     public ITextComponent next() {
         if (!hasNext()) {
             throw new NoSuchElementException();

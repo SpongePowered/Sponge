@@ -37,7 +37,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableStructureData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntityStructure;

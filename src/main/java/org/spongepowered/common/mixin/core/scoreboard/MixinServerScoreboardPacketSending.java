@@ -45,7 +45,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -103,14 +102,12 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.removeObjectives(player);
     }
 
-    @SuppressWarnings("unchecked")
     void removeTeams(EntityPlayerMP player) {
         for (ScorePlayerTeam team: this.getTeams()) {
             player.connection.sendPacket(new SPacketTeams(team, 1));
         }
     }
 
-    @SuppressWarnings("unchecked")
     void removeObjectives(EntityPlayerMP player) {
         for (ScoreObjective objective: this.getScoreObjectives()) {
             player.connection.sendPacket(new SPacketScoreboardObjective(objective, 1));

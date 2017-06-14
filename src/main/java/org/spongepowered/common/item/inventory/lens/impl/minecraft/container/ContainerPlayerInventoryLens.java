@@ -33,7 +33,6 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventory
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Arrays;
 

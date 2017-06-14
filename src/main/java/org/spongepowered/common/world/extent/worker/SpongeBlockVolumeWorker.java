@@ -30,7 +30,6 @@ import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
@@ -39,11 +38,9 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMapper;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMerger;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeReducer;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.function.BiFunction;
 

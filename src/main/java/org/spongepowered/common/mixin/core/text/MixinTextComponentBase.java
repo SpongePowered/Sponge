@@ -62,7 +62,6 @@ public abstract class MixinTextComponentBase implements IMixinTextComponent {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Iterator<ITextComponent> childrenIterator() {
         return getSiblings().iterator();
@@ -166,16 +165,15 @@ public abstract class MixinTextComponentBase implements IMixinTextComponent {
                     firstNonNull(style.strikethrough, current.strikethrough),
                     firstNonNull(style.obfuscated, current.obfuscated)
             );
-        } else {
-            return new ResolvedChatStyle(
-                    style.getColor(),
-                    style.getBold(),
-                    style.getItalic(),
-                    style.getUnderlined(),
-                    style.getStrikethrough(),
-                    style.getObfuscated()
-            );
         }
+        return new ResolvedChatStyle(
+                style.getColor(),
+                style.getBold(),
+                style.getItalic(),
+                style.getUnderlined(),
+                style.getStrikethrough(),
+                style.getObfuscated()
+        );
     }
 
     private static boolean firstNonNull(Boolean b1, boolean b2) {

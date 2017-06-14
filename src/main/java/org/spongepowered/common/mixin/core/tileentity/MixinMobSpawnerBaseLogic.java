@@ -46,9 +46,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -59,7 +57,6 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 @Mixin(MobSpawnerBaseLogic.class)
 public abstract class MixinMobSpawnerBaseLogic {
 
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
     private static final String
             ANVIL_CHUNK_LOADER_READ_ENTITY =
             "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
@@ -68,11 +65,6 @@ public abstract class MixinMobSpawnerBaseLogic {
 
     @Shadow public abstract BlockPos getSpawnerPosition();
     @Shadow public abstract World getSpawnerWorld();
-
-
-    private double posX;
-    private double posY;
-    private double posZ;
 
     /**
      * @author gabizou - January 30th, 2016
@@ -159,13 +151,6 @@ public abstract class MixinMobSpawnerBaseLogic {
             }
         }
         return entity;
-    }
-
-    @Inject(method = "updateSpawner", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;resetTimer()V"))
-    private void onReset(CallbackInfo callbackInfo) {
-        this.posX = 0;
-        this.posY = 0;
-        this.posZ = 0;
     }
 
 }

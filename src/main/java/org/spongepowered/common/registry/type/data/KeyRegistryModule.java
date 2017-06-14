@@ -53,7 +53,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-@SuppressWarnings({"rawTypes", "deprecation"})
 public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>> {
 
     public static KeyRegistryModule getInstance() {

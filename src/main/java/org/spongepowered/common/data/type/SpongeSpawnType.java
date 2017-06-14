@@ -28,8 +28,6 @@ import com.google.common.base.CaseFormat;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Locale;
-
 public class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
 
     private final String name;

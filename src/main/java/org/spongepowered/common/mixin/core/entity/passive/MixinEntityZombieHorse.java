@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityZombieHorse.class)
 @Implements(@Interface(iface = ZombieHorse.class, prefix = "zombie$", unique = true))
 public abstract class MixinEntityZombieHorse extends MixinAbstractHorse implements ZombieHorse {

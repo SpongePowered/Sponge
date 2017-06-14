@@ -81,9 +81,8 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         checkArgument(propertyClass != null, "The property class can not be null!");
         if (!this.delegateMap.containsKey(propertyClass)) {
             return Optional.empty();
-        } else {
-            return Optional.of((PropertyStore<T>) this.delegateMap.get(propertyClass));
         }
+        return Optional.of((PropertyStore<T>) this.delegateMap.get(propertyClass));
     }
 
     public Collection<Property<?, ?>> getPropertiesFor(PropertyHolder holder) {

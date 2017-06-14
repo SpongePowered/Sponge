@@ -39,7 +39,7 @@ public class MixinBossInfoColor implements BossBarColor {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
-        this.name = ((Enum) (Object) this).name();
+        this.name = ((Enum<?>) (Object) this).name();
         this.id = "minecraft:" + this.name.toLowerCase();
     }
 

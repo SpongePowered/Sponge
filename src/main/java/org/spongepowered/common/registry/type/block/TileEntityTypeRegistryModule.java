@@ -38,7 +38,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Locale;
 import java.util.Map;
@@ -89,7 +88,7 @@ public final class TileEntityTypeRegistryModule
         try {
             // We just need to class load TileEntity so that it registers,
             // otherwise this is delayed until either pre-init or loading.
-            Class<?> clazz = Class.forName("net.minecraft.tileentity.TileEntity");
+            Class.forName("net.minecraft.tileentity.TileEntity");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

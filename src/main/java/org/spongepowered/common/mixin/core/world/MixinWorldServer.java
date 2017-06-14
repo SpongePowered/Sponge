@@ -2162,9 +2162,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (weather.equals(Weathers.CLEAR)) {
             if (this.worldInfo.getCleanWeatherTime() > 0) {
                 return this.worldInfo.getCleanWeatherTime();
-            } else {
-                return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
             }
+            return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
         } else if (weather.equals(Weathers.THUNDER_STORM)) {
             return this.worldInfo.getThunderTime();
         } else if (weather.equals(Weathers.RAIN)) {

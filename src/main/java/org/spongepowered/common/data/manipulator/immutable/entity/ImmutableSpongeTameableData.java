@@ -87,16 +87,14 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     public static ImmutableTameableData create(@Nullable UUID owner) {
         if (owner == null) {
             return EMPTY_DATA;
-        } else {
-            return new ImmutableSpongeTameableData(owner);
         }
+        return new ImmutableSpongeTameableData(owner);
     }
 
     public static ImmutableSpongeOptionalValue<UUID> createValue(Optional<UUID> owner) {
         if (!owner.isPresent()) {
             return EMPTY_VALUE;
-        } else {
-            return new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, owner);
         }
+        return new ImmutableSpongeOptionalValue<>(Keys.TAMED_OWNER, owner);
     }
 }

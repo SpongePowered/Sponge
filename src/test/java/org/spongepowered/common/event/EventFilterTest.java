@@ -80,7 +80,7 @@ public class EventFilterTest {
     @Test
     public void testDoubleListener() throws Exception {
         DoubleListener listener = new DoubleListener();
-        AnnotatedEventListener annotatedEventListener = this.getListener(listener, "onEvent", ChangeBlockEvent.Break.class, Player.class, ItemStack.class);
+        this.getListener(listener, "onEvent", ChangeBlockEvent.Break.class, Player.class, ItemStack.class);
     }
 
     @Test

@@ -46,7 +46,6 @@ public abstract class MixinUserBanEntry extends UserListEntryBan<com.mojang.auth
         return BanTypes.PROFILE;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public GameProfile getProfile() {
         return (GameProfile) this.getValue();

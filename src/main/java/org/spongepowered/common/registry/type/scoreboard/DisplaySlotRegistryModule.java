@@ -31,7 +31,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;

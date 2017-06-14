@@ -26,7 +26,6 @@ package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.api.data.DataHolder;

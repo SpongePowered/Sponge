@@ -40,25 +40,25 @@ public final class SpongeGoalType implements GoalType {
 
     @Override
     public Class<? extends Goal<?>> getGoalClass() {
-        return goalClass;
+        return this.goalClass;
     }
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .addValue(id)
-                .addValue(name)
-                .add("goalClass", goalClass)
+                .addValue(this.id)
+                .addValue(this.name)
+                .add("goalClass", this.goalClass)
                 .toString();
     }
 }

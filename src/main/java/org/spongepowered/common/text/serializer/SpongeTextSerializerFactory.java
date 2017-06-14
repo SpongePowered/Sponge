@@ -27,7 +27,6 @@ package org.spongepowered.common.text.serializer;
 import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
 import org.spongepowered.api.text.serializer.TextSerializerFactory;
 
-@SuppressWarnings("deprecation")
 public final class SpongeTextSerializerFactory implements TextSerializerFactory {
 
     public static final TextSerializerFactory INSTANCE = new SpongeTextSerializerFactory();

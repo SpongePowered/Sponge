@@ -130,7 +130,7 @@ public final class GeneralPhase extends TrackingPhase {
      * @param unwindingState
      * @param unwinding
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess,
         IPhaseState unwindingState, PhaseContext unwinding) {
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();

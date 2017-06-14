@@ -58,7 +58,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @NonnullByDefault
-@SuppressWarnings("deprecation")
 public class SpongeSelectorFactory implements SelectorFactory {
 
     public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
@@ -80,8 +79,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <K, V> Function<K, V> methodAsFunction(final Method m,
-                                                         boolean isStatic) {
+    public static <K, V> Function<K, V> methodAsFunction(final Method m, boolean isStatic) {
         if (isStatic) {
             return input -> {
                 try {
@@ -97,22 +95,21 @@ public class SpongeSelectorFactory implements SelectorFactory {
                     throw new RuntimeException(e.getCause());
                 }
             };
-        } else {
-            return input -> {
-                try {
-                    return (V) m.invoke(input);
-                } catch (IllegalAccessException e) {
-                    SpongeImpl.getLogger().debug(m + " wasn't public", e);
-                    return null;
-                } catch (IllegalArgumentException e) {
-                    SpongeImpl.getLogger()
-                            .debug(m + " failed with paramter " + input, e);
-                    return null;
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException(e.getCause());
-                }
-            };
         }
+        return input -> {
+            try {
+                return (V) m.invoke(input);
+            } catch (IllegalAccessException e) {
+                SpongeImpl.getLogger().debug(m + " wasn't public", e);
+                return null;
+            } catch (IllegalArgumentException e) {
+                SpongeImpl.getLogger()
+                        .debug(m + " failed with paramter " + input, e);
+                return null;
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            }
+        };
     }
 
     private final Map<String, ArgumentHolder.Limit<ArgumentType<Integer>>> scoreToTypeMap =
@@ -125,7 +122,6 @@ public class SpongeSelectorFactory implements SelectorFactory {
         return new SpongeSelectorBuilder();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Selector parseRawSelector(String selector) {
         checkArgument(selector.startsWith("@"), "Invalid selector %s",

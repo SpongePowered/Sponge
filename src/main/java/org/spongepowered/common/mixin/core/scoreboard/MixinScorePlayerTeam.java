@@ -222,9 +222,8 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
                 return true;
             }
             return false;
-        } else {
-            return this.membershipSet.remove(legacyName);
         }
+        return this.membershipSet.remove(legacyName);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -304,7 +303,6 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         this.doTeamUpdate();
     }
 
-    @SuppressWarnings("rawtypes")
     public MessageChannel getChannel() {
         return MessageChannel.fixed(this.getMembershipCollection().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
@@ -313,7 +311,6 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
                 .collect(Collectors.toSet()));
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public MessageChannel getTeamChannel(EntityPlayerMP player) {
         return MessageChannel.fixed(this.getMembershipCollection().stream()

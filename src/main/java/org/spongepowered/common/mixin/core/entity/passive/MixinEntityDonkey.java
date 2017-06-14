@@ -28,7 +28,6 @@ import net.minecraft.entity.passive.EntityDonkey;
 import org.spongepowered.api.entity.living.animal.Donkey;
 import org.spongepowered.asm.mixin.Mixin;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityDonkey.class)
 public abstract class MixinEntityDonkey extends MixinAbstractHorse implements Donkey {
 

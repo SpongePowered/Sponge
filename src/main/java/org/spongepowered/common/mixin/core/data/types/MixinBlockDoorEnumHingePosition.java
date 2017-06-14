@@ -52,8 +52,7 @@ public abstract class MixinBlockDoorEnumHingePosition implements Hinge {
     public Hinge cycleNext() {
         if (this.equals(Hinges.LEFT)) {
             return Hinges.RIGHT;
-        } else {
-            return Hinges.LEFT;
         }
+        return Hinges.LEFT;
     }
 }

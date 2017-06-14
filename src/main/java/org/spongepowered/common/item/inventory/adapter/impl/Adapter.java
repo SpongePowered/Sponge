@@ -412,7 +412,7 @@ public class Adapter implements MinecraftInventoryAdapter {
 //        return parentLens.getAdapter(this.inventory);
 //    }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected Lens<IInventory, net.minecraft.item.ItemStack> initRootLens() {
         if (this instanceof LensProvider) {
             return ((LensProvider) this).getRootLens(this.inventory, this);

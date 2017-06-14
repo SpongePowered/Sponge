@@ -45,16 +45,16 @@ public final class SpongeResourcePackFactory implements ResourcePackFactory {
         checkNotNull(uri, "uri");
         try {
             Hasher hasher = Hashing.sha1().newHasher();
-            InputStream in = openStream(uri);
-            byte[] buf = new byte[256];
-            while (true) {
-                int read = in.read(buf);
-                if (read <= 0) {
-                    break;
+            try (InputStream in = openStream(uri)) {
+                byte[] buf = new byte[256];
+                while (true) {
+                    int read = in.read(buf);
+                    if (read <= 0) {
+                        break;
+                    }
+                    hasher.putBytes(buf, 0, read);
                 }
-                hasher.putBytes(buf, 0, read);
             }
-            in.close();
             return SpongeResourcePack.create(uri, hasher.hash().toString());
         } catch (IOException e) {
             FileNotFoundException ex = new FileNotFoundException(e.toString());

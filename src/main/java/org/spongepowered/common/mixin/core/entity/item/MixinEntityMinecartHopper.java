@@ -61,7 +61,7 @@ public abstract class MixinEntityMinecartHopper extends MixinEntityMinecartConta
 
     @SuppressWarnings("unchecked")
     public CarriedInventory<HopperMinecart> minecart$getInventory() {
-        return (CarriedInventory<HopperMinecart>) (Object) this;
+        return (CarriedInventory<HopperMinecart>) this;
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {

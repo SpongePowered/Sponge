@@ -304,10 +304,9 @@ public class SpongeCommand {
 
                             return Text.builder().append(Text.of(TextColors.GOLD, key), Text.of(" set to "),
                                     title(value.get())).build();
-                        } else {
-                            return Text.builder().append(Text.of(TextColors.GOLD, key), Text.of(" is "),
-                                    title(String.valueOf(config.getSetting(key.get()).getValue()))).build();
                         }
+                        return Text.builder().append(Text.of(TextColors.GOLD, key), Text.of(" is "),
+                                title(String.valueOf(config.getSetting(key.get()).getValue()))).build();
                     }
                 })
                 .build();

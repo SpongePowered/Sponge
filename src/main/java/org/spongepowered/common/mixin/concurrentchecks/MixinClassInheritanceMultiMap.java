@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.concurrentchecks;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import org.spongepowered.api.Platform;
 import org.spongepowered.asm.mixin.Mixin;

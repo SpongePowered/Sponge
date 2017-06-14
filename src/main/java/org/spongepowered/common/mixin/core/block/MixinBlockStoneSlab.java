@@ -109,7 +109,7 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
             }
             return Optional.empty();
         } else if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) (Object) value));
+            return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) value));
         }
         if (key.equals(Keys.SEAMLESS)) {
             final boolean seamless = (Boolean) value;

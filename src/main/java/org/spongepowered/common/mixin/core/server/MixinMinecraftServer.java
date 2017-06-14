@@ -33,8 +33,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;

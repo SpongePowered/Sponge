@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.BlockBanner;
 import net.minecraft.block.BlockBanner.BlockBannerHanging;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -46,7 +47,7 @@ import java.util.Optional;
 public abstract class MixinBlockBannerHanging extends MixinBlockBanner {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final EnumFacing facing = blockState.getValue(BlockBannerHanging.FACING);
+        final EnumFacing facing = blockState.getValue(BlockBanner.FACING);
         final Direction direction = DirectionResolver.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }
@@ -61,7 +62,7 @@ public abstract class MixinBlockBannerHanging extends MixinBlockBanner {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockBannerHanging.FACING, facing));
+            return Optional.of((BlockState) blockState.withProperty(BlockBanner.FACING, facing));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -71,7 +72,7 @@ public abstract class MixinBlockBannerHanging extends MixinBlockBanner {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final EnumFacing facing = DirectionResolver.getFor(direction);
-            return Optional.of((BlockState) blockState.withProperty(BlockBannerHanging.FACING, facing));
+            return Optional.of((BlockState) blockState.withProperty(BlockBanner.FACING, facing));
         }
         return super.getStateWithValue(blockState, key, value);
     }

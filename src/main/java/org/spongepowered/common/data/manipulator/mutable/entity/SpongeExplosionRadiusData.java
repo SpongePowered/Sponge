@@ -73,9 +73,8 @@ public class SpongeExplosionRadiusData extends AbstractSingleData<Optional<Integ
         if (value.isPresent()) {
             if (other.isPresent()) {
                 return value.get() - other.get();
-            } else {
-                return 1;
             }
+            return 1;
         } else if (other.isPresent()) {
             return -1;
         }

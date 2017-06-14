@@ -30,27 +30,24 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.util.StartsWithPredicate;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -62,7 +59,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -213,9 +209,8 @@ public class SpongePaginationService implements PaginationService {
                 if (paginations.getLastUuid() != null) {
                     args.setState(state);
                     return paginations.get(paginations.getLastUuid());
-                } else {
-                    throw args.createError(t("Input was not a valid UUID!"));
                 }
+                throw args.createError(t("Input was not a valid UUID!"));
             }
             ActivePagination pagination = paginations.get(id);
             if (pagination == null) {
@@ -237,9 +232,8 @@ public class SpongePaginationService implements PaginationService {
                     .map(Object::toString)
                     .filter(new StartsWithPredicate(optNext.get()))
                     .collect(ImmutableList.toImmutableList());
-            } else {
-                return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
             }
+            return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
         }
 
         @Override

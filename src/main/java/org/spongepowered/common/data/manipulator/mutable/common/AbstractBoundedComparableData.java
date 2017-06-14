@@ -84,9 +84,8 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
     public I asImmutable() {
         if (this.comparator.compare(this.upperBound, this.lowerBound) > ImmutableDataCachingUtil.CACHE_LIMIT_FOR_INDIVIDUAL_TYPE) {
             return ReflectionUtil.createInstance(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound, this.defaultValue);
-        } else {
-            return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound, this.defaultValue);
         }
+        return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound, this.defaultValue);
     }
 
     @Override

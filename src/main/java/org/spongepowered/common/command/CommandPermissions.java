@@ -58,9 +58,8 @@ public final class CommandPermissions {
             CommandCallable callable = mapping.get().getCallable();
             if (callable instanceof MinecraftCommandWrapper) {
                 return source.hasPermission(((MinecraftCommandWrapper) callable).getCommandPermission());
-            } else {
-                return callable.testPermission(source);
             }
+            return callable.testPermission(source);
         }
         return source.hasPermission(commandName);
     }

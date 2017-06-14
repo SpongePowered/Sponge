@@ -25,8 +25,6 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
@@ -64,9 +62,8 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     protected Optional<TreeType> getVal(ItemStack stack) {
         if (stack.getItem() == ItemTypes.LEAVES2 || stack.getItem() == ItemTypes.LOG2) {
             return Optional.of(getFromMeta(stack.getItemDamage() + 4));
-        } else {
-            return Optional.of(getFromMeta(stack.getItemDamage()));
         }
+        return Optional.of(getFromMeta(stack.getItemDamage()));
     }
 
     @Override
@@ -74,7 +71,6 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
         return new SpongeTreeData();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, TreeType value) {
         // TODO - the API needs to be changed, as its no longer possible to change an ItemStack's type

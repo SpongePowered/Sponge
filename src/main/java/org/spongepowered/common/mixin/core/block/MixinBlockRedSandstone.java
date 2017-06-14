@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockRedSandstone;
-import net.minecraft.block.BlockRedSandstone.EnumType;
 import net.minecraft.block.BlockSandStone;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;

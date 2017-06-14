@@ -92,9 +92,8 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
             } else if (dataHolder instanceof ItemStack) {
                 if(((ItemStack) dataHolder).getItem().equals(Items.DYE)) {
                     return Optional.of(new SpongeDyeableData((DyeColor) (Object) EnumDyeColor.byDyeDamage(((ItemStack) dataHolder).getItemDamage())));
-                } else {
-                    return Optional.of(new SpongeDyeableData((DyeColor) (Object) EnumDyeColor.byMetadata(((ItemStack) dataHolder).getItemDamage())));
                 }
+                return Optional.of(new SpongeDyeableData((DyeColor) (Object) EnumDyeColor.byMetadata(((ItemStack) dataHolder).getItemDamage())));
             }
         }
         return Optional.empty();

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.common;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
-import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -37,7 +36,6 @@ import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
 
-@SuppressWarnings("deprecation")
 public class HorseUtils {
 
     public static int getInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {

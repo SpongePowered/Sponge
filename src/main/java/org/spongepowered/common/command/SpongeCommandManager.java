@@ -58,11 +58,9 @@ import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -124,7 +122,6 @@ public class SpongeCommandManager implements CommandManager {
         return register(plugin, callable, aliases, Function.identity());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Optional<CommandMapping> register(Object plugin, CommandCallable callable, List<String> aliases,
             Function<List<String>, List<String>> callback) {
@@ -359,9 +356,8 @@ public class SpongeCommandManager implements CommandManager {
             Sponge.getGame().getEventManager().post(event);
             if (event.isCancelled()) {
                 return ImmutableList.of();
-            } else {
-                return ImmutableList.copyOf(event.getTabCompletions());
             }
+            return ImmutableList.copyOf(event.getTabCompletions());
         } catch (Exception e) {
             if (e instanceof CommandException) {
                 src.sendMessage(error(t("Error getting suggestions: %s", ((CommandException) e).getText())));

@@ -1077,7 +1077,7 @@ public final class WorldManager {
             ((IMixinWorldInfo) info).setUniqueId(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), this.newName, true, SpongeImpl.getDataFixer())
                     .saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }
@@ -1093,7 +1093,7 @@ public final class WorldManager {
 
         @Override
         public Boolean call() throws Exception {
-            final Path worldFolder = getCurrentSavesDirectory().get().resolve(props.getWorldName());
+            final Path worldFolder = getCurrentSavesDirectory().get().resolve(this.props.getWorldName());
             if (!Files.exists(worldFolder)) {
                 unregisterWorldProperties(this.props, true);
                 return true;

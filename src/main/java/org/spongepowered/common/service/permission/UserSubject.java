@@ -103,9 +103,8 @@ public class UserSubject extends SpongeSubject {
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
             return SpongeImpl.getServer().getPlayerList().canSendCommands(this.player) ? SpongeImpl.getServer().getOpPermissionLevel() : 0;
-        } else {
-            return entry.getPermissionLevel();
         }
+        return entry.getPermissionLevel();
     }
 
     @Override

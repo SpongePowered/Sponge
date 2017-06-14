@@ -34,7 +34,6 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.attributes.BaseAttribute;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -933,7 +932,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.worldBorder = border;
             if (this.worldBorder != null) {
                 ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(this.borderListener);
-                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) (Object) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
+                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
             }

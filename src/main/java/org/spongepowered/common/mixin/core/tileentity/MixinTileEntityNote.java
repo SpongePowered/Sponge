@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.tileentity.TileEntityNote;
 import org.spongepowered.api.block.tileentity.Note;
 import org.spongepowered.api.data.DataContainer;

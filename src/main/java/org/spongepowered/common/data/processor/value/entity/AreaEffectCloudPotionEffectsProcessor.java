@@ -25,21 +25,14 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.EntityAreaEffectCloud;
-import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.mixin.core.entity.IMixinAreaEffectCloud;
 
 import java.util.ArrayList;

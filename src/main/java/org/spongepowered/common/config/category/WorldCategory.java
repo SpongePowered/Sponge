@@ -178,7 +178,7 @@ public class WorldCategory extends ConfigCategory {
     }
 
     public int getMobSpawnRange() {
-        return mobSpawnRange;
+        return this.mobSpawnRange;
     }
 
     public void setMobSpawnRange(int range) {

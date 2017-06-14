@@ -28,7 +28,6 @@ import net.minecraft.entity.monster.EntityHusk;
 import org.spongepowered.api.entity.living.monster.Husk;
 import org.spongepowered.asm.mixin.Mixin;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityHusk.class)
 public abstract class MixinEntityHusk extends MixinEntityZombie implements Husk {
 

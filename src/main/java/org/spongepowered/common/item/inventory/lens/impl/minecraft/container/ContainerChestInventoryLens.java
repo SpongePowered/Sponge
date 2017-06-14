@@ -58,7 +58,7 @@ public class ContainerChestInventoryLens extends ContainerLens {
         // (9 * numRows) slots after the chest slots
         this.playerInventory = new GridInventoryLensImpl(9 * this.numRows, 9, 3, 9, slots);
         // Add an additional 27 slots, for the player inventory
-        this.hotbarInventory = new HotbarLensImpl((9 * numRows) + 27, 9, slots);
+        this.hotbarInventory = new HotbarLensImpl((9 * this.numRows) + 27, 9, slots);
         this.viewedInventories = Arrays.asList(this.chestInventory, this.playerInventory, this.hotbarInventory);
 
         // Add child inventories and basic slots with SlotIndex

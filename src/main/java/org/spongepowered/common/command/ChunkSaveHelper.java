@@ -56,85 +56,85 @@ public class ChunkSaveHelper {
                 file.getParentFile().mkdirs();
             }
 
-            FileWriter fileWriter = new FileWriter(file);
-            JsonWriter writer = new JsonWriter(fileWriter);
-            writer.setIndent("  ");
-            writer.beginArray();
+            try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
+                writer.setIndent("  ");
+                writer.beginArray();
 
-            for (World spongeWorld : SpongeImpl.getGame().getServer().getWorlds()) {
-                WorldServer world = (WorldServer) spongeWorld;
-                writer.beginObject();
-                writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
-                writer.name("dimensionId").value(((IMixinWorldServer) spongeWorld).getDimensionId());
-                writer.name("players").value(world.playerEntities.size());
-                writer.name("loadedChunks").value(world.getChunkProvider().getLoadedChunks().size());
-                writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
-                writer.name("entities").value(world.loadedEntityList.size());
-                writer.name("tiles").value(world.loadedTileEntityList.size());
+                for (World spongeWorld : SpongeImpl.getGame().getServer().getWorlds()) {
+                    WorldServer world = (WorldServer) spongeWorld;
+                    writer.beginObject();
+                    writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
+                    writer.name("dimensionId").value(((IMixinWorldServer) spongeWorld).getDimensionId());
+                    writer.name("players").value(world.playerEntities.size());
+                    writer.name("loadedChunks").value(world.getChunkProvider().getLoadedChunks().size());
+                    writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
+                    writer.name("entities").value(world.loadedEntityList.size());
+                    writer.name("tiles").value(world.loadedTileEntityList.size());
 
-                Object2IntMap<ChunkPos> chunkEntityCounts = new Object2IntOpenHashMap<>();
-                chunkEntityCounts.defaultReturnValue(0);
-                Object2IntMap<Class> classEntityCounts = new Object2IntOpenHashMap<>();
-                classEntityCounts.defaultReturnValue(0);
-                Object2IntMap<Entity> entityCollisionCounts = new Object2IntOpenHashMap<>();
-                Set<BlockPos> collidingCoords = new HashSet<>();
-                for (int i = 0; i < world.loadedEntityList.size(); i++) {
-                    Entity entity = world.loadedEntityList.get(i);
-                    ChunkPos chunkCoords = new ChunkPos((int) entity.posX >> 4, (int) entity.posZ >> 4);
-                    chunkEntityCounts.put(chunkCoords, chunkEntityCounts.getInt(chunkCoords) + 1);
-                    classEntityCounts.put(entity.getClass(), classEntityCounts.getInt(entity.getClass()) + 1);
-                    if ((entity.getCollisionBoundingBox() != null) && logAll) {
-                        BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
-                        if (!collidingCoords.contains(coords)) {
-                            collidingCoords.add(coords);
-                            int size = entity.world.getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().grow(1, 1, 1)).size();
-                            if (size < 5) {
-                                continue;
+                    Object2IntMap<ChunkPos> chunkEntityCounts = new Object2IntOpenHashMap<>();
+                    chunkEntityCounts.defaultReturnValue(0);
+                    Object2IntMap<Class> classEntityCounts = new Object2IntOpenHashMap<>();
+                    classEntityCounts.defaultReturnValue(0);
+                    Object2IntMap<Entity> entityCollisionCounts = new Object2IntOpenHashMap<>();
+                    Set<BlockPos> collidingCoords = new HashSet<>();
+                    for (int i = 0; i < world.loadedEntityList.size(); i++) {
+                        Entity entity = world.loadedEntityList.get(i);
+                        ChunkPos chunkCoords = new ChunkPos((int) entity.posX >> 4, (int) entity.posZ >> 4);
+                        chunkEntityCounts.put(chunkCoords, chunkEntityCounts.getInt(chunkCoords) + 1);
+                        classEntityCounts.put(entity.getClass(), classEntityCounts.getInt(entity.getClass()) + 1);
+                        if ((entity.getCollisionBoundingBox() != null) && logAll) {
+                            BlockPos coords =
+                                    new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
+                            if (!collidingCoords.contains(coords)) {
+                                collidingCoords.add(coords);
+                                int size = entity.world.getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().grow(1, 1, 1))
+                                        .size();
+                                if (size < 5) {
+                                    continue;
+                                }
+                                entityCollisionCounts.put(entity, size);
                             }
-                            entityCollisionCounts.put(entity, size);
                         }
                     }
-                }
 
-                Object2IntMap<ChunkPos> chunkTileCounts = new Object2IntOpenHashMap<>();
-                chunkTileCounts.defaultReturnValue(0);
-                Object2IntMap<Class> classTileCounts = new Object2IntOpenHashMap<>();
-                classTileCounts.defaultReturnValue(0);
-                writer.name("tiles").beginArray();
-                for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
-                    TileEntity tile = world.loadedTileEntityList.get(i);
-                    if (logAll) {
-                        writer.beginObject();
-                        writer.name("type").value(tile.getClass().toString());
-                        writer.name("x").value(tile.getPos().getX());
-                        writer.name("y").value(tile.getPos().getY());
-                        writer.name("z").value(tile.getPos().getZ());
-                        writer.name("isInvalid").value(tile.isInvalid());
-                        // writer.name("canUpdate").value(tile.canUpdate());
-                        writer.name("block").value("" + tile.getBlockType());
-                        writer.endObject();
+                    Object2IntMap<ChunkPos> chunkTileCounts = new Object2IntOpenHashMap<>();
+                    chunkTileCounts.defaultReturnValue(0);
+                    Object2IntMap<Class> classTileCounts = new Object2IntOpenHashMap<>();
+                    classTileCounts.defaultReturnValue(0);
+                    writer.name("tiles").beginArray();
+                    for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
+                        TileEntity tile = world.loadedTileEntityList.get(i);
+                        if (logAll) {
+                            writer.beginObject();
+                            writer.name("type").value(tile.getClass().toString());
+                            writer.name("x").value(tile.getPos().getX());
+                            writer.name("y").value(tile.getPos().getY());
+                            writer.name("z").value(tile.getPos().getZ());
+                            writer.name("isInvalid").value(tile.isInvalid());
+                            // writer.name("canUpdate").value(tile.canUpdate());
+                            writer.name("block").value("" + tile.getBlockType());
+                            writer.endObject();
+                        }
+                        ChunkPos chunkCoords = new ChunkPos(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);
+                        chunkTileCounts.put(chunkCoords, chunkTileCounts.getInt(chunkCoords) + 1);
+                        classTileCounts.put(tile.getClass(), classTileCounts.getInt(tile.getClass()) + 1);
                     }
-                    ChunkPos chunkCoords = new ChunkPos(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);
-                    chunkTileCounts.put(chunkCoords, chunkTileCounts.getInt(chunkCoords) + 1);
-                    classTileCounts.put(tile.getClass(), classTileCounts.getInt(tile.getClass()) + 1);
+                    writer.endArray();
+
+                    if (logAll) {
+                        writeChunkCounts(writer, "topEntityColliders", entityCollisionCounts, 20);
+                    }
+
+                    writeChunkCounts(writer, "entitiesByClass", classEntityCounts);
+                    writeChunkCounts(writer, "entitiesByChunk", chunkEntityCounts);
+
+                    writeChunkCounts(writer, "tilesByClass", classTileCounts);
+                    writeChunkCounts(writer, "tilesByChunk", chunkTileCounts);
+
+                    writer.endObject(); // Dimension
                 }
-                writer.endArray();
-
-                if (logAll) {
-                    writeChunkCounts(writer, "topEntityColliders", entityCollisionCounts, 20);
-                }
-
-                writeChunkCounts(writer, "entitiesByClass", classEntityCounts);
-                writeChunkCounts(writer, "entitiesByChunk", chunkEntityCounts);
-
-                writeChunkCounts(writer, "tilesByClass", classTileCounts);
-                writeChunkCounts(writer, "tilesByChunk", chunkTileCounts);
-
-                writer.endObject(); // Dimension
+                writer.endArray(); // Dimensions
             }
-            writer.endArray(); // Dimensions
-            writer.close();
-            fileWriter.close();
         } catch (Throwable throwable) {
             SpongeImpl.getLogger().error("Could not save chunk info report to " + file);
         }

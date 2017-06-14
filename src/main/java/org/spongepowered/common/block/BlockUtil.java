@@ -72,21 +72,19 @@ public final class BlockUtil {
     public static IBlockState toNative(BlockState state) {
         if (state instanceof IBlockState) {
             return (IBlockState) state;
-        } else {
-            // TODO: Need to figure out what is sensible for other BlockState
-            // implementing classes.
-            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
+        // TODO: Need to figure out what is sensible for other BlockState
+        // implementing classes.
+        throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
     }
 
     public static BlockState fromNative(IBlockState blockState) {
         if (blockState instanceof BlockState) {
             return (BlockState) blockState;
-        } else {
-            // TODO: Need to figure out what is sensible for other BlockState
-            // implementing classes.
-            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
+        // TODO: Need to figure out what is sensible for other BlockState
+        // implementing classes.
+        throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
     }
 
     public static BlockType toBlock(IBlockState state) {

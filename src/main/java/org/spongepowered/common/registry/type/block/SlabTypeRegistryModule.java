@@ -53,7 +53,6 @@ public final class SlabTypeRegistryModule extends MinecraftEnumBasedAlternateCat
     protected void generateInitialMap() {
         super.generateInitialMap();
         final SlabType redSandstone = (SlabType) (Object) BlockStoneSlabNew.EnumType.RED_SANDSTONE;
-        final String derp = "derp";
 
         this.catalogTypeMap.put(redSandstone.getId(), redSandstone);
     }

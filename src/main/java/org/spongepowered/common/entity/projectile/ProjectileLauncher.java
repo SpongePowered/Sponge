@@ -113,16 +113,16 @@ public class ProjectileLauncher {
 
     // From EntityThrowable constructor
     private static void configureThrowable(EntityThrowable entity) {
-        entity.posX -= (double) (MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F);
+        entity.posX -= MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
         entity.posY -= 0.1D;
-        entity.posZ -= (double) (MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F);
+        entity.posZ -= MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI) * 0.16F;
         entity.setPosition(entity.posX, entity.posY, entity.posZ);
         float f = 0.4F;
-        entity.motionX = (double) (-MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI)
-                * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
-        entity.motionZ = (double) (MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI)
-                * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f);
-        entity.motionY = (double) (-MathHelper.sin((entity.rotationPitch) / 180.0F * (float) Math.PI) * f);
+        entity.motionX = -MathHelper.sin(entity.rotationYaw / 180.0F * (float) Math.PI)
+                * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f;
+        entity.motionZ = MathHelper.cos(entity.rotationYaw / 180.0F * (float) Math.PI)
+                * MathHelper.cos(entity.rotationPitch / 180.0F * (float) Math.PI) * f;
+        entity.motionY = -MathHelper.sin((entity.rotationPitch) / 180.0F * (float) Math.PI) * f;
     }
 
     public static <T extends Projectile> void registerProjectileLogic(Class<T> projectileClass, ProjectileLogic<T> logic) {
@@ -166,12 +166,12 @@ public class ProjectileLauncher {
     }
 
     // Internal
-    private static Cause createCause(Object source) {
+    static Cause createCause(Object source) {
         return Cause.source(SpawnCause.builder().type(InternalSpawnTypes.PROJECTILE).build())
                 .named("ProjectileSource", source).build();
     }
 
-    private static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {
+    static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {
         SpongeCommonEventFactory.checkSpawnEvent(projectile, cause);
         LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(cause, projectile);
         SpongeImpl.getGame().getEventManager().post(event);

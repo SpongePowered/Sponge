@@ -244,7 +244,7 @@ public final class PacketPhase extends TrackingPhase {
         return packetState.isPacketIgnored(packetIn, packetPlayer);
     }
 
-    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
+    @SuppressWarnings({"SuspiciousMethodCalls"})
     public IPacketState getStateForPacket(Packet<?> packet) {
         final Function<Packet<?>, IPacketState> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
         if (packetStateFunction != null) {
@@ -461,9 +461,8 @@ public final class PacketPhase extends TrackingPhase {
             final MinecraftServer server = SpongeImpl.getServer();
             if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
                 return General.PLACE_BLOCK;
-            } else {
-                return General.INVALID;
             }
+            return General.INVALID;
         });
         this.packetTranslationMap.put(CPacketPlayerTryUseItem.class, packet -> General.USE_ITEM);
         this.packetTranslationMap.put(CPacketHeldItemChange.class, packet -> Inventory.SWITCH_HOTBAR_SCROLL);
@@ -485,11 +484,10 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketClientStatus.class, packet -> {
             final CPacketClientStatus clientStatus = (CPacketClientStatus) packet;
             final CPacketClientStatus.State status = clientStatus.getStatus();
-            if ( status == CPacketClientStatus.State.PERFORM_RESPAWN) {
+            if (status == CPacketClientStatus.State.PERFORM_RESPAWN) {
                 return General.REQUEST_RESPAWN;
-            } else {
-                return General.IGNORED;
             }
+            return General.IGNORED;
         });
         this.packetTranslationMap.put(CPacketCustomPayload.class, packet -> General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketSpectate.class, packet -> General.IGNORED);

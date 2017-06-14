@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.tileentityactivation;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;

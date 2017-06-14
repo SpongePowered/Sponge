@@ -29,7 +29,6 @@ import static org.spongepowered.common.data.util.DataUtil.getData;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;

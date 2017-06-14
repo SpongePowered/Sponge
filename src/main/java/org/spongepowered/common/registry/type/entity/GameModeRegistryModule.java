@@ -30,9 +30,6 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RegisterCatalog(GameModes.class)
 public final class GameModeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<GameType, GameMode> {
 
@@ -41,6 +38,7 @@ public final class GameModeRegistryModule extends MinecraftEnumBasedCatalogTypeM
         return GameType.values();
     }
 
+    @Override
     protected void generateInitialMap() {
         for (GameType enumType: getValues()) {
             this.catalogTypeMap.put(enumAs(enumType).getId(), enumAs(enumType));

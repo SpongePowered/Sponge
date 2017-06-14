@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.entityactivation;
 
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;

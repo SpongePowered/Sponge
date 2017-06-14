@@ -32,7 +32,6 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +42,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityHorse.class)
 @Implements(@Interface(iface = RideableHorse.class, prefix = "rideableHorse$", unique = true))
 public abstract class MixinEntityHorse extends MixinAbstractHorse implements RideableHorse {

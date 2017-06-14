@@ -90,7 +90,7 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerCareerForProfession(Career career) {
         SpongeProfession profession = (SpongeProfession) checkNotNull(career).getProfession();
-        List<SpongeCareer> careers = (List<SpongeCareer>) (List) profession.getUnderlyingCareers();
+        List<SpongeCareer> careers = (List) profession.getUnderlyingCareers();
         boolean isRegistered = false;
         final SpongeCareer spongeCareer = (SpongeCareer) career;
         for (SpongeCareer professionCareer : careers) {

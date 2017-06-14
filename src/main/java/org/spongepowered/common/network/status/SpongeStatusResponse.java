@@ -95,9 +95,8 @@ public final class SpongeStatusResponse {
                     original.getOnlinePlayerCount());
             clone.setPlayers(original.getPlayers());
             return clone;
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Nullable

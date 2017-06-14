@@ -160,9 +160,8 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         if (event.isCancelled()) {
             ((IMixinEntityAIBase) base).setGoal(null);
             return false;
-        } else {
-            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
         }
+        return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
     }
 
     @Override
@@ -195,7 +194,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      *
      * @param aiBase
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Overwrite
     public void removeTask(EntityAIBase aiBase) {
         final Iterator iterator = this.taskEntries.iterator();

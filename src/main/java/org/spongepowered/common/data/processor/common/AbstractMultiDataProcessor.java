@@ -41,25 +41,22 @@ public abstract class AbstractMultiDataProcessor<T extends DataManipulator<T, I>
     public Optional<T> createFrom(DataHolder dataHolder) {
         if (!supports(dataHolder)) {
             return Optional.empty();
-        } else {
-            Optional<T> optional = from(dataHolder);
-            if (!optional.isPresent()) {
-                return Optional.of(createManipulator());
-            } else {
-                return optional;
-            }
         }
+        Optional<T> optional = from(dataHolder);
+        if (!optional.isPresent()) {
+            return Optional.of(createManipulator());
+        }
+        return optional;
     }
 
     @Override
     public Optional<T> fill(DataHolder dataHolder, T manipulator, MergeFunction overlap) {
         if (!supports(dataHolder)) {
             return Optional.empty();
-        } else {
-            final T merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
-            merged.getValues().forEach(manipulator::set);
-            return Optional.of(manipulator);
         }
+        final T merged = checkNotNull(overlap).merge(manipulator.copy(), from(dataHolder).orElse(null));
+        merged.getValues().forEach(manipulator::set);
+        return Optional.of(manipulator);
     }
 
 }

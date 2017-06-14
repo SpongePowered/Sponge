@@ -100,7 +100,6 @@ class GeneralGenerationPhaseState implements IPhaseState {
             .build();
     }
 
-    @SuppressWarnings("unchecked")
     public final void unwind(PhaseContext context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
@@ -108,9 +107,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
         }
         final Cause cause = provideSpawnCause(context);
 
-        final SpawnEntityEvent.Spawner
-                event =
-                SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities);
+        final SpawnEntityEvent.Spawner event = SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {
