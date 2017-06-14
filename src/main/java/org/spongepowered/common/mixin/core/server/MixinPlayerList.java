@@ -518,7 +518,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
         newPlayer.connection = playerIn.connection;
-        newPlayer.func_193104_a(playerIn, conqueredEnd);
+        newPlayer.copyFrom(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
         newPlayer.setEntityId(playerIn.getEntityId());

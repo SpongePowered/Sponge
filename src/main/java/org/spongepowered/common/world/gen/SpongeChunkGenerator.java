@@ -464,7 +464,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public boolean func_193414_a(World worldIn, String structureName, BlockPos position) {
+    public boolean isInsideStructure(World worldIn, String structureName, BlockPos position) {
         Class<? extends MapGenStructure> target = null;
         if ("Stronghold".equals(structureName)) {
             target = MapGenStronghold.class;
@@ -488,7 +488,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
         }
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).func_193414_a(worldIn, structureName, position);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).isInsideStructure(worldIn, structureName, position);
         }
         return false;
 }

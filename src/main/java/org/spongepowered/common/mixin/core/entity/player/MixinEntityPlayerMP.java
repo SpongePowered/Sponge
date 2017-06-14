@@ -329,7 +329,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Sponge end
     }
 
-    @Inject(method = "func_193104_a", at = @At("HEAD"))
+    @Inject(method = "copyFrom", at = @At("HEAD"))
     public void onClonePlayer(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.

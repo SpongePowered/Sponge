@@ -43,6 +43,8 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     @Shadow public abstract String shadow$getUnlocalizedName();
     @Shadow public abstract String shadow$getName();
 
+    @Shadow public abstract float[] getColorComponentValues();
+
     private Translation translation;
 
     @Intrinsic
@@ -55,7 +57,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     }
 
     public Color dye$getColor() {
-        float[] color = ((EnumDyeColor) (Object) this).func_193349_f();
+        float[] color = getColorComponentValues();
         int r = GenericMath.floor(color[0] * 255);
         int g = GenericMath.floor(color[1] * 255);
         int b = GenericMath.floor(color[2] * 255);
