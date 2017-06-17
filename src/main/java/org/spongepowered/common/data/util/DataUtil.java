@@ -36,11 +36,11 @@ import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -71,7 +71,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public final class DataUtil {
@@ -121,26 +124,21 @@ public final class DataUtil {
     }
 
     public static List<DataView> getSerializedManipulatorList(Iterable<DataManipulator<?, ?>> manipulators) {
-        checkNotNull(manipulators);
-        final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-        for (DataManipulator<?, ?> manipulator : manipulators) {
-            final DataContainer container = DataContainer.createNew();
-            container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
-            container.set(DataQueries.DATA_ID, getRegistrationFor(manipulator).getId())
-                .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
-            builder.add(container);
-        }
-        return builder.build();
+        return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
     }
 
     public static List<DataView> getSerializedImmutableManipulatorList(Iterable<ImmutableDataManipulator<?, ?>> manipulators) {
+        return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
+    }
+
+    private static <T extends DataSerializable> List<DataView> getSerializedManipulatorList(Iterable<T> manipulators, Function<T, DataRegistration> func) {
         checkNotNull(manipulators);
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-        for (ImmutableDataManipulator<?, ?> manipulator : manipulators) {
+        for (T manipulator : manipulators) {
             final DataContainer container = DataContainer.createNew();
             container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
-            container.set(DataQueries.DATA_ID, getRegistrationFor(manipulator).getId())
-                .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
+            container.set(DataQueries.DATA_ID, func.apply(manipulator).getId())
+                     .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }
         return builder.build();
@@ -150,43 +148,50 @@ public final class DataUtil {
         checkNotNull(containers);
         final SerializedDataTransaction.Builder builder = SerializedDataTransaction.builder();
         for (DataView view : containers) {
-            view = updateDataViewForDataManipulator(view);
-            final String dataId = view.getString(DataQueries.DATA_ID).get();
-            final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
-            try {
-                final Optional<DataRegistration<?, ?>> registration = getRegistrationFor(dataId);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = registration.map(DataRegistration::getDataManipulatorBuilder);
-                if (optional.isPresent()) {
-                    final DataManipulatorBuilder<?, ?> dataManipulatorBuilder = optional.get();
-                    final Optional<DataManipulator<?, ?>> build = (Optional<DataManipulator<?, ?>>) dataManipulatorBuilder.build(manipulatorView);
-                    if (build.isPresent()) {
-                        builder.successfulData(build.get());
-                    } else {
-                        if (!FAILED_DESERIALIZATION.contains(dataId)) {
-                            new InvalidDataException("Could not deserialize " + dataId
-                                                     + "! Don't worry though, we'll mute future attempts until next restart.").printStackTrace();
-                            FAILED_DESERIALIZATION.add(dataId);
-                        }
-                        builder.failedData(view);
-                    }
-                } else {
-                    if (!FAILED_DESERIALIZATION.contains(dataId)) {
-                        new InvalidDataException("Could not deserialize " + dataId
-                                                 + "! Don't worry though, we'll mute future attempts until next restart.").printStackTrace();
-                        FAILED_DESERIALIZATION.add(dataId);
-                    }
-                    builder.failedData(view);
-                }
-            } catch (Exception e) {
-                if (!FAILED_DESERIALIZATION.contains(dataId)) {
-                    new InvalidDataException("Could not translate " + dataId
-                                             + "! Don't worry though, we'll mute future attempts until next restart.").printStackTrace();
-                    FAILED_DESERIALIZATION.add(dataId);
-                }
-                builder.failedData(view);
-            }
+            final DataView updated = updateDataViewForDataManipulator(view);
+            findDataId(builder, updated).ifPresent(dataId -> tryDeserializeManipulator(builder, updated, dataId));
         }
         return builder.build();
+    }
+
+    private static Optional<String> findDataId(SerializedDataTransaction.Builder builder, DataView view) {
+        final Optional<String> dataId = view.getString(DataQueries.DATA_ID);
+        if (!dataId.isPresent()) {
+            // Show failed deserialization when this is v1 data
+            @SuppressWarnings("deprecation")
+            String dataClass = view.getString(DataQueries.DATA_CLASS).orElseThrow(DataUtil.dataNotFound());
+            addFailedDeserialization(builder, view, dataClass, null);
+        }
+        return dataId;
+    }
+
+    private static void tryDeserializeManipulator(SerializedDataTransaction.Builder builder, DataView view, String dataId) {
+        final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
+        try {
+            Optional<DataManipulator<?, ?>> build = deserializeManipulator(dataId, manipulatorView);
+            if (build.isPresent()) {
+                builder.successfulData(build.get());
+            } else {
+                addFailedDeserialization(builder, view, dataId, null);
+            }
+        } catch (Exception e) {
+            addFailedDeserialization(builder, view, dataId, e);
+        }
+    }
+
+    private static <T extends DataManipulator<?, ?>> Optional<T> deserializeManipulator(String dataId, DataView data) {
+        return getRegistrationFor(dataId) // Get Registration
+                .map(DataRegistration::getDataManipulatorBuilder) // Find Builder
+                .flatMap(b -> (Optional<T>) b.build(data)); // Build CustomData
+    }
+
+    private static void addFailedDeserialization(SerializedDataTransaction.Builder builder, DataView view, String dataId, @Nullable Throwable cause) {
+        if (!FAILED_DESERIALIZATION.contains(dataId)) {
+            new InvalidDataException("Could not deserialize " + dataId
+                    + "! Don't worry though, we'll mute future attempts until next restart.", cause).printStackTrace();
+            FAILED_DESERIALIZATION.add(dataId);
+        }
+        builder.failedData(view);
     }
 
     private static DataView updateDataViewForDataManipulator(DataView dataView) {
@@ -194,7 +199,7 @@ public final class DataUtil {
         if (version != DataVersions.Data.CURRENT_CUSTOM_DATA) {
             final DataContentUpdater contentUpdater = SpongeDataManager.getInstance()
                 .getWrappedContentUpdater(DataManipulator.class, version, DataVersions.Data.CURRENT_CUSTOM_DATA)
-                .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " +version));
+                .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " + version));
             return contentUpdater.update(dataView);
         }
         return dataView;
@@ -205,16 +210,10 @@ public final class DataUtil {
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (DataView view : containers) {
             view = updateDataViewForDataManipulator(view);
-            final String dataId = view.getString(DataQueries.DATA_ID).get();
-            final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
+            final String dataId = view.getString(DataQueries.DATA_ID).orElseThrow(DataUtil.dataNotFound());
+            final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
             try {
-                final Optional<DataRegistration<?, ?>> registration = getRegistrationFor(dataId);
-                final Optional<DataManipulatorBuilder<?, ?>> optional = registration.map(DataRegistration::getDataManipulatorBuilder);
-                optional.ifPresent(dataManipulatorBuilder ->
-                    dataManipulatorBuilder.build(manipulatorView)
-                        .map(DataManipulator::asImmutable)
-                        .ifPresent(builder::add)
-                );
+                deserializeManipulator(dataId, manipulatorView).map(DataManipulator::asImmutable).ifPresent(builder::add);
             } catch (Exception e) {
                 new InvalidDataException("Could not translate " + dataId + "!", e).printStackTrace();
             }
