@@ -58,7 +58,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.common.world.SpongeTeleportHelper;
+import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 

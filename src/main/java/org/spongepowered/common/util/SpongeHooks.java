@@ -62,6 +62,7 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModDat
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -518,6 +519,7 @@ public class SpongeHooks {
                 ((IModData_BlockCapturing) blockType).requiresBlockCapturingRefresh(true);
             }
         }
+        ConfigTeleportHelperFilter.invalidateCache();
     }
 
 
