@@ -26,9 +26,8 @@ package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -36,8 +35,6 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 @Plugin(id = "change_block_test", name = "ChangeBlock Listener Test", description = "Run /changeblocktest to break the block beneath you, should print out something.")
 public class ChangeBlockTest {
@@ -55,16 +52,13 @@ public class ChangeBlockTest {
 
     @Listener
     public void onPreInit(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-            .executor(((src, args) -> {
-                if (!(src instanceof Player)) {
-                    throw new CommandException(Text.of(TextColors.RED, "Must be a player to use this command!"));
-                }
+        Sponge.getCommandManager().register(this, Command.builder()
+            .targetedExecutor((src, player, args) -> {
                 this.enabled = true;
-                ((Player) src).getLocation().sub(0, 1,0 ).setBlock(BlockTypes.AIR.getDefaultState());
+                player.getLocation().sub(0, 1,0 ).setBlock(BlockTypes.AIR.getDefaultState());
                 this.enabled = false;
                 return CommandResult.success();
-            })).build(), "changeblocktest");
+            }, Player.class).build(), "changeblocktest");
     }
 
 }

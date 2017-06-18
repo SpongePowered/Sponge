@@ -25,9 +25,9 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -45,9 +45,9 @@ public class DamageableDataTest {
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.onlyOne(GenericArguments.entityOrSource(Text.of("target"))))
-                        .executor((src, args) -> {
+                Command.builder()
+                        .parameter(Parameter.entityOrSource().onlyOne().setKey("target").build())
+                        .setExecutor((cause, src, args) -> {
                             final Entity entity = args.<Entity>getOne("target").get();
 
                             final Optional<EntitySnapshot> optionalAttacker = entity.get(Keys.LAST_ATTACKER).get();

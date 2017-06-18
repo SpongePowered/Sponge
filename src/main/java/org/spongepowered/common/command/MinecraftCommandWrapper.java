@@ -33,13 +33,15 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
@@ -65,7 +67,7 @@ import javax.annotation.Nullable;
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
  */
-public class MinecraftCommandWrapper implements CommandCallable {
+public class MinecraftCommandWrapper implements Command {
 
     private static final String TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
@@ -96,17 +98,17 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     @Override
-    public CommandResult process(CommandSource source, String arguments) throws CommandException {
+    public CommandResult process(Cause cause, String arguments) throws CommandException {
 
-        if (!testPermission(source)) {
+        if (!testPermission(cause)) {
             throw new CommandPermissionException(Text.of(SpongeImpl.getGame().getRegistry()
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
         CommandHandler handler = (CommandHandler) SpongeImpl.getServer().getCommandManager();
-        final ICommandSender mcSender = WrapperICommandSender.of(source);
+        final ICommandSender mcSender = WrapperICommandSender.of(cause);
         final String[] splitArgs = splitArgs(arguments);
-        int usernameIndex = 0;
+        int usernameIndex;
         try {
             usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
         } catch (net.minecraft.command.CommandException e) {
@@ -120,7 +122,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         // Below this is copied from CommandHandler.execute. This might need to be updated between versions.
         int affectedEntities = 1;
         if (usernameIndex > -1) {
-            List<Entity> list = null;
+            List<Entity> list;
             try {
                 list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
             } catch (net.minecraft.command.CommandException e) {
@@ -183,27 +185,28 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     @Override
-    public boolean testPermission(CommandSource source) {
-        ICommandSender sender = WrapperICommandSender.of(source);
+    public boolean testPermission(Cause cause) {
+        ICommandSender sender = WrapperICommandSender.of(cause);
         return this.command.checkPermission(sender.getServer(), sender);
     }
 
     @Override
-    public Optional<Text> getShortDescription(CommandSource source) {
-        return getHelp(source);
+    public Optional<Text> getShortDescription(Cause cause) {
+        return getHelp(cause);
     }
 
     @Override
-    public Optional<Text> getHelp(CommandSource source) {
-        String translation = this.command.getUsage(WrapperICommandSender.of(source));
+    public Optional<Text> getHelp(Cause cause) {
+        String translation = this.command.getUsage(WrapperICommandSender.of(cause));
         if (translation == null) {
             return Optional.empty();
         }
-        return Optional.of((Text) Text.of(new SpongeTranslation(translation)));
+        return Optional.of(Text.of(new SpongeTranslation(translation)));
     }
 
     @Override
-    public Text getUsage(CommandSource source) {
+    public Text getUsage(Cause cause) {
+        CommandSource source = Command.getCommandSourceFromCause(cause).orElseGet(() -> Sponge.getServer().getConsole());
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         String usage = this.command.getUsage(mcSender);
         if (usage == null) { // Silly modders
@@ -228,12 +231,12 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource source, String arguments, @Nullable Location<World> targetPosition) throws CommandException {
-        if (!testPermission(source)) {
+    public List<String> getSuggestions(Cause cause, String arguments, @Nullable Location<World> targetPosition) throws CommandException {
+        if (!testPermission(cause)) {
             return ImmutableList.of();
         }
         List<String> suggestions = this.command.getTabCompletions(SpongeImpl.getServer(),
-                WrapperICommandSender.of(source), arguments.split(" ", -1), targetPosition == null ? null : VecHelper.toBlockPos(targetPosition));
+                WrapperICommandSender.of(cause), arguments.split(" ", -1), targetPosition == null ? null : VecHelper.toBlockPos(targetPosition));
         if (suggestions == null) {
             return ImmutableList.of();
         }

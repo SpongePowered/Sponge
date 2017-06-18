@@ -25,10 +25,8 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColors;
@@ -50,70 +48,70 @@ public class InventoryQueryTest {
 
     @Listener
     public void onInitialization(GameInitializationEvent e) {
-        CommandSpec inventoryType = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command inventoryType = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     Inventory hotbar = inventory.query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class));
-                    src.sendMessage(Text.of("You have ", hotbar.totalItems(), " items in your hotbar."));
+                    player.sendMessage(Text.of("You have ", hotbar.totalItems(), " items in your hotbar."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        CommandSpec itemType = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command itemType = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     Inventory sticks = inventory.query(QueryOperationTypes.ITEM_TYPE.of(ItemTypes.STICK));
-                    src.sendMessage(Text.of("You have ", sticks.totalItems(), " sticks in your inventory."));
+                    player.sendMessage(Text.of("You have ", sticks.totalItems(), " sticks in your inventory."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        CommandSpec itemStackGeneral = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command itemStackGeneral = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     ItemStack lapis = ItemStack.of(ItemTypes.DYE, 4);
                     lapis.offer(Keys.DYE_COLOR, DyeColors.BLUE);
                     Inventory lapisItems = inventory.query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(lapis));
-                    src.sendMessage(Text.of("You have ", lapisItems.totalItems(), " lapis lazuli in your inventory."));
+                    player.sendMessage(Text.of("You have ", lapisItems.totalItems(), " lapis lazuli in your inventory."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        CommandSpec itemStackSpecific = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command itemStackSpecific = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     ItemStack lapis = ItemStack.of(ItemTypes.DYE, 4);
                     lapis.offer(Keys.DYE_COLOR, DyeColors.BLUE);
                     Inventory lapisItems = inventory.query(QueryOperationTypes.ITEM_STACK_EXACT.of(lapis));
-                    src.sendMessage(Text.of("You have ", lapisItems.size(), " stacks of 4 lapis lazuli in your inventory."));
+                    player.sendMessage(Text.of("You have ", lapisItems.size(), " stacks of 4 lapis lazuli in your inventory."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        CommandSpec itemStackCustom = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command itemStackCustom = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     Inventory evenCountStacks = inventory.query(QueryOperationTypes.ITEM_STACK_CUSTOM.of(
                             x -> x.getQuantity() > 0 && x.getQuantity() % 2 == 0));
-                    src.sendMessage(Text.of("You have ", evenCountStacks.size(), " stacks with an even number of items in your inventory."));
+                    player.sendMessage(Text.of("You have ", evenCountStacks.size(), " stacks with an even number of items in your inventory."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        CommandSpec inventoryProperty = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command inventoryProperty = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     Inventory slots = ((PlayerInventory) inventory).getHotbar()
                             .query(QueryOperationTypes.INVENTORY_PROPERTY.of(new SlotIndex(3, Property.Operator.LESS)));
-                    src.sendMessage(Text.of("You have ", slots.totalItems(), " items in the first 3 slots of your hotbar."));
+                    player.sendMessage(Text.of("You have ", slots.totalItems(), " items in the first 3 slots of your hotbar."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        CommandSpec inventoryTranslation = CommandSpec.builder()
-                .executor((src, args) -> {
-                    Inventory inventory = getPlayerInventory(src);
+        Command inventoryTranslation = Command.builder()
+                .targetedExecutor((cause, player, args) -> {
+                    Inventory inventory = player.getInventory();
                     Inventory slots = ((PlayerInventory) inventory).getHotbar()
                             .query(QueryOperationTypes.INVENTORY_TRANSLATION.of(Sponge.getRegistry().getTranslationById("slot.name").get()));
-                    src.sendMessage(Text.of("You have ", slots.totalItems(), " items in your hotbar."));
+                    player.sendMessage(Text.of("You have ", slots.totalItems(), " items in your hotbar."));
                     return CommandResult.success();
-                }).build();
+                }, Player.class).build();
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        Sponge.getCommandManager().register(this, Command.builder()
                 .child(inventoryType, "inventorytype")
                 .child(itemType, "itemtype")
                 .child(itemStackGeneral, "itemstackgeneral")
@@ -122,13 +120,6 @@ public class InventoryQueryTest {
                 .child(inventoryProperty, "inventoryproperty")
                 .child(inventoryTranslation, "inventorytranslation")
                 .build(), "invquery");
-    }
-
-    private Inventory getPlayerInventory(CommandSource source) throws CommandException {
-        if (source instanceof Player) {
-            return ((Player) source).getInventory();
-        }
-        throw new CommandException(Text.of("You must run this command as a player!"));
     }
 
 }

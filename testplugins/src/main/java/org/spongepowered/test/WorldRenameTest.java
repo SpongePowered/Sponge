@@ -25,17 +25,18 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.ArgumentParseException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.api.command.parameter.token.CommandArgs;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
@@ -46,11 +47,10 @@ import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 // Allows for testing the rename of a world.
 // Includes commands to load, unload, rename and create worlds.
@@ -63,30 +63,31 @@ public class WorldRenameTest {
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                    .arguments(GenericArguments.world(worldKey))
-                    .executor((source, context) -> {
+                Command.builder()
+                    .parameter(Parameter.worldProperties().setKey(worldKey).build())
+                    .setExecutor((source, context) -> {
                         Sponge.getServer().unloadWorld(Sponge.getServer().getWorld(context.<WorldProperties>getOne(worldKey).get().getUniqueId())
                                 .orElseThrow(() -> new CommandException(Text.of(TextColors.RED, "That world doesn't seem to be loaded."))));
                         return CommandResult.success();
                     }).build(), "unloadworld");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(new WorldParameter())
-                        .executor((source, context) -> {
+                Command.builder()
+                        .parameter(Parameter.builder().setKey(worldKey).setParser(new WorldParameter()).build())
+                        .setExecutor((source, context) -> {
                             Sponge.getServer().unloadWorld(Sponge.getServer().getWorld(context.<WorldProperties>getOne(worldKey).get().getUniqueId())
                                     .orElseThrow(() -> new CommandException(Text.of(TextColors.RED, "That world doesn't seem to be loaded."))));
                             return CommandResult.success();
                         }).build(), "loadworld");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(new WorldParameter(), GenericArguments.string(newNameKey))
-                        .executor((source, context) -> {
+                Command.builder()
+                        .parameter(Parameter.builder().setKey(worldKey).setParser(new WorldParameter()).build())
+                        .parameter(Parameter.string().setKey(newNameKey).build())
+                        .setExecutor((cause, source, context) -> {
                             // Name clashes should be handled by the impl.
                             WorldProperties newProperties = Sponge.getServer()
-                                    .renameWorld(context.<WorldProperties>getOne(worldKey).get(), context.<String>getOne(newNameKey).get())
+                                    .renameWorld(context.getOneUnchecked(worldKey), context.getOneUnchecked(newNameKey))
                                     .orElseThrow(() -> new CommandException(Text.of(TextColors.RED, "The world was not renamed.")));
 
                             source.sendMessage(Text.of("The world was renamed to " + newProperties.getWorldName()));
@@ -94,11 +95,11 @@ public class WorldRenameTest {
                         }).build(), "renameworld");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.string(newNameKey))
-                        .executor((source, context) -> {
+                Command.builder()
+                        .parameter(Parameter.string().setKey(newNameKey).build())
+                        .setExecutor((cause, source, context) -> {
                             try {
-                                Sponge.getServer().createWorldProperties(context.<String>getOne(newNameKey).get(), WorldArchetypes.OVERWORLD);
+                                Sponge.getServer().createWorldProperties(context.getOneUnchecked(newNameKey), WorldArchetypes.OVERWORLD);
                             } catch (IOException e) {
                                 throw new CommandException(Text.of(TextColors.RED, "Could not create the world."), e);
                             }
@@ -108,10 +109,10 @@ public class WorldRenameTest {
                         }).build(), "createworld");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(new WorldParameter(x -> true))
-                        .executor((source, context) -> {
-                            WorldProperties wp = context.<WorldProperties>getOne(worldKey).get();
+                Command.builder()
+                        .parameter(Parameter.builder().setKey(worldKey).setParser(new WorldParameter(x -> true)).build())
+                        .setExecutor((cause, source, context) -> {
+                            WorldProperties wp = context.getOneUnchecked(worldKey);
                             source.sendMessage(Text.of("World: ", wp.getWorldName(), " - UUID: ", wp.getUniqueId(), " - Dim ID:",
                                     wp.getAdditionalProperties().getInt(DataQuery.of("SpongeData", "dimensionId")).map(Object::toString)
                                             .orElse("unknown")));
@@ -121,7 +122,7 @@ public class WorldRenameTest {
     }
 
     @NonnullByDefault
-    static class WorldParameter extends CommandElement {
+    static class WorldParameter implements ValueParameter {
 
         private final Predicate<WorldProperties> worldPropertiesPredicate;
 
@@ -130,24 +131,11 @@ public class WorldRenameTest {
         }
 
         WorldParameter(Predicate<WorldProperties> worldPropertiesPredicate) {
-            super(WorldRenameTest.worldKey);
             this.worldPropertiesPredicate = worldPropertiesPredicate;
         }
 
-        @Nullable
         @Override
-        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
-            WorldProperties worldProperties = Sponge.getServer().getWorldProperties(args.next())
-                    .orElseThrow(() -> args.createError(Text.of("Cannot find the world")));
-            if (this.worldPropertiesPredicate.test(worldProperties)) {
-                throw args.createError(Text.of("The world is currently loaded."));
-            }
-
-            return worldProperties;
-        }
-
-        @Override
-        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+        public List<String> complete(Cause cause, CommandArgs args, CommandContext context) throws ArgumentParseException {
             Stream<String> tabComplete = Sponge.getServer().getAllWorldProperties().stream()
                     .filter(this.worldPropertiesPredicate)
                     .map(x -> x.getWorldName().toLowerCase());
@@ -158,6 +146,20 @@ public class WorldRenameTest {
             } catch (ArgumentParseException ignored) {
                 return tabComplete.collect(Collectors.toList());
             }
+        }
+
+        @Override
+        public Optional<?> getValue(Cause cause, CommandArgs args, CommandContext context) throws ArgumentParseException {
+            Optional<WorldProperties> worldProperties = Sponge.getServer().getWorldProperties(args.next());
+            if (worldProperties.isPresent()) {
+                if (this.worldPropertiesPredicate.test(worldProperties.get())) {
+                    throw args.createError(Text.of("The world is currently loaded."));
+                }
+
+                return worldProperties;
+            }
+
+            throw args.createError(Text.of("Cannot find the world"));
         }
     }
 }

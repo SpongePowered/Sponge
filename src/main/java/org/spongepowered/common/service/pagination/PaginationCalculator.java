@@ -48,7 +48,7 @@ import java.util.PrimitiveIterator;
  * Pagination calculator for players. Handles calculation of text widths,
  * centering text, adding padding, adding spacing, and more.
  */
-class PaginationCalculator {
+public class PaginationCalculator {
 
     private static final String NON_UNICODE_CHARS;
     private static final int[] NON_UNICODE_CHAR_WIDTHS;
@@ -104,7 +104,7 @@ class PaginationCalculator {
      */
     int getLines(Text text) {
         //TODO: this needs fixing as well.
-        return (int) Math.ceil((double) this.getWidth(text) / LINE_WIDTH);
+        return (int) Math.ceil((double) getWidth(text) / LINE_WIDTH);
     }
 
     /**
@@ -115,8 +115,7 @@ class PaginationCalculator {
      * @param isBold Whether or not the character is bold or not
      * @return The width of the character at the code point
      */
-    @VisibleForTesting
-    int getWidth(int codePoint, boolean isBold) {
+    public static int getWidth(int codePoint, boolean isBold) {
         int nonUnicodeIdx = NON_UNICODE_CHARS.indexOf(codePoint);
         int width;
         if (codePoint == 32) {
@@ -159,8 +158,7 @@ class PaginationCalculator {
      * @param text The text to get the width of
      * @return The amount of character pixels/columns the text takes up
      */
-    @VisibleForTesting
-    int getWidth(Text text) {
+    public static int getWidth(Text text) {
         ITextComponent component = SpongeTexts.toComponent(text);
         Iterable<ITextComponent> children = ((IMixinTextComponent) component).withChildren();
         int total = 0;

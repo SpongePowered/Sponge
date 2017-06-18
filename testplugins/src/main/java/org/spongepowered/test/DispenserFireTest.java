@@ -26,8 +26,8 @@ package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
@@ -45,7 +45,7 @@ public class DispenserFireTest {
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
+                Command.builder().setExecutor((source, context) -> {
                     if (this.registered) {
                         this.registered = false;
                         Sponge.getEventManager().unregisterListeners(this.listener);

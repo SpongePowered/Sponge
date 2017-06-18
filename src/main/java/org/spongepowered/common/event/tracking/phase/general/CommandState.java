@@ -109,8 +109,10 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                 list.clear();
             }
         }
-        final CommandSource sender = phaseContext.getSource(CommandSource.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
+        // TODO: back to CommandSender?
+        final Object sender = phaseContext.getSource(Object.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing something, but nothing found!", phaseContext));
+
         phaseContext.getCapturedBlockSupplier()
                 .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

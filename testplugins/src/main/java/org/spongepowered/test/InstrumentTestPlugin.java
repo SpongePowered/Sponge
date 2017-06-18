@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.property.block.InstrumentProperty;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -52,9 +52,8 @@ public class InstrumentTestPlugin {
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments()
-                        .executor((src, args) -> {
+                Command.builder()
+                        .setExecutor((cause, src, args) -> {
                             enabled = !enabled;
 
                             if (enabled) {
@@ -69,8 +68,8 @@ public class InstrumentTestPlugin {
                         .build(),
                 "instrumenttest");
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
+                Command.builder()
+                        .setExecutor((cause, src, args) -> {
                             PaginationList.builder()
                                     .title(Text.of(TextColors.GREEN, "Instrument Types"))
                                     .padding(Text.of(TextColors.DARK_GREEN, "="))

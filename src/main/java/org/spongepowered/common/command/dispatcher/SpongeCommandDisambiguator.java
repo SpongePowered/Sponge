@@ -22,21 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command;
+package org.spongepowered.common.command.dispatcher;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.command.CommandMapping;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
-import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.command.dispatcher.SpongeDispatcher;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,32 +45,23 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 public class SpongeCommandDisambiguator implements Disambiguator {
-    private final Game game;
 
-    /**
-     * Disambiguator that takes preferences from the global configuration, falling back to {@link SimpleDispatcher#FIRST_DISAMBIGUATOR}.
-     *
-     * @param game The game instance to be used
-     */
-    public SpongeCommandDisambiguator(Game game) {
-        this.game = game;
-    }
 
     @Override
     @NonnullByDefault
-    public Optional<CommandMapping> disambiguate(@Nullable CommandSource source, String aliasUsed, List<CommandMapping> availableOptions) {
+    public Optional<CommandMapping> disambiguate(@Nullable Cause cause, String aliasUsed, List<CommandMapping> availableOptions) {
         if (availableOptions.size() > 1) {
             final String chosenPlugin = SpongeImpl.getGlobalConfig().getConfig().getCommands().getAliases().get(aliasUsed.toLowerCase());
             if (chosenPlugin != null) {
-                Optional<PluginContainer> container = this.game.getPluginManager().getPlugin(chosenPlugin);
+                Optional<PluginContainer> container = Sponge.getPluginManager().getPlugin(chosenPlugin);
                 if (!container.isPresent()) {
                     SpongeImpl
                         .getGame().getServer().getConsole().sendMessage(t("Unable to find plugin '" + chosenPlugin + "' for command '" + aliasUsed
                                                                           + "', falling back to default"));
                 } else {
-                    final Set<CommandMapping> ownedCommands = this.game.getCommandManager().getOwnedBy(container.get());
-                    final List<CommandMapping> ownedMatchingCommands = ImmutableList.copyOf(Iterables.filter(availableOptions,
-                            Predicates.in(ownedCommands)));
+                    final Set<CommandMapping> ownedCommands = Sponge.getCommandManager().getOwnedBy(container.get());
+                    final List<CommandMapping> ownedMatchingCommands =
+                            ImmutableList.copyOf(Iterables.filter(availableOptions, Predicates.in(ownedCommands)));
                     if (ownedMatchingCommands.isEmpty()) {
                         SpongeImpl.getGame().getServer().getConsole().sendMessage(t("Plugin " + container.get().getName() + " was specified as the "
                                                                                     + "preferred owner for " + aliasUsed + ", but does not have any such command!"));
@@ -84,6 +75,6 @@ public class SpongeCommandDisambiguator implements Disambiguator {
                 }
             }
         }
-        return SimpleDispatcher.FIRST_DISAMBIGUATOR.disambiguate(source, aliasUsed, availableOptions);
+        return SpongeDispatcher.FIRST_DISAMBIGUATOR.disambiguate(cause, aliasUsed, availableOptions);
     }
 }

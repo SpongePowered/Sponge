@@ -26,8 +26,8 @@ package org.spongepowered.test;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
@@ -53,15 +53,15 @@ public class OfflineLocationTest {
 
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .description(Text.of("Teleport while offline"))
-                .executor((src, args) -> {
+        Sponge.getCommandManager().register(this, Command.builder()
+                .setShortDescription(Text.of("Teleport while offline"))
+                .setExecutor((cause, src, args) -> {
                     if (!(src instanceof Player)) {
                         src.sendMessage(Text.of(TextColors.RED, "Player only."));
                         return CommandResult.success();
                     }
                     Player player = (Player) src;
-                    set.add(player.getUniqueId());
+                    this.set.add(player.getUniqueId());
                     player.kick(Text.of("You got moved"));
                     return CommandResult.success();
                 })
@@ -71,7 +71,7 @@ public class OfflineLocationTest {
     @Listener
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
         UUID uuid = player.getUniqueId();
-        if (set.remove(uuid)) {
+        if (this.set.remove(uuid)) {
             Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
         }
     }

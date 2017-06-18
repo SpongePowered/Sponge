@@ -25,10 +25,10 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
@@ -49,13 +49,9 @@ public final class EntitySpawnTest {
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.allOf(GenericArguments.catalogedElement(Text.of("type"), EntityType.class)))
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
-                                throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                            }
-
+                Command.builder()
+                        .parameter(Parameter.catalogedElement(EntityType.class).setKey("type").allOf().build())
+                        .targetedExecutor((cause, player, args) -> {
                             final List<EntityType> types = new ArrayList<>(args.getAll("type"));
 
                             final int size = types.size();
@@ -64,7 +60,7 @@ public final class EntitySpawnTest {
                                 throw new CommandException(Text.of(TextColors.RED, "You must specify at least one entity type to spawn any."));
                             }
 
-                            final Location location = ((Player) src).getLocation();
+                            final Location location = player.getLocation();
 
                             if (size == 1) {
                                 boolean failed = false;
@@ -72,7 +68,7 @@ public final class EntitySpawnTest {
                                 final Entity entity = location.createEntity(type);
                                 try {
                                     if (location.getExtent().spawnEntity(entity)) {
-                                        src.sendMessage(Text.of(TextColors.GOLD, "You have successfully spawned a ",
+                                        player.sendMessage(Text.of(TextColors.GOLD, "You have successfully spawned a ",
                                                 TextColors.DARK_GREEN, entity.getTranslation()));
                                     } else {
                                         failed = true;
@@ -84,14 +80,14 @@ public final class EntitySpawnTest {
                                     throw new CommandException(Text.of(TextColors.RED, "You have failed to spawn a " + type.getId()));
                                 }
                             } else {
-                                src.sendMessage(Text.of(TextColors.GOLD, "You have spawned the following entities:"));
+                                player.sendMessage(Text.of(TextColors.GOLD, "You have spawned the following entities:"));
                                 location.getExtent()
                                         .spawnEntities(types.stream().map(location::createEntity).collect(Collectors.toList()))
-                                        .forEach(e -> src.sendMessage(Text.of(TextColors.DARK_GREEN, e.getTranslation())));
+                                        .forEach(e -> player.sendMessage(Text.of(TextColors.DARK_GREEN, e.getTranslation())));
                             }
 
                             return CommandResult.success();
-                        })
+                        }, Player.class)
                         .build(),
                 "spawnspongeentity");
     }

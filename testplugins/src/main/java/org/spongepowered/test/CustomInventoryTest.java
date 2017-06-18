@@ -26,8 +26,8 @@ package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.entity.living.animal.Llama;
@@ -41,7 +41,6 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -194,7 +193,7 @@ public class CustomInventoryTest {
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
+                Command.builder().setExecutor((cause, source, context) -> {
                     if (this.registered) {
                         this.registered = false;
                         Sponge.getEventManager().unregisterListeners(this.listener);

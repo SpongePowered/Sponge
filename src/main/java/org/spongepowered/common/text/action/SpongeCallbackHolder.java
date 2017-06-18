@@ -33,14 +33,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.command.parameter.ArgumentParseException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.api.command.parameter.token.CommandArgs;
+import org.spongepowered.api.event.cause.Cause;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,10 +51,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
-
 public class SpongeCallbackHolder {
     public static final String CALLBACK_COMMAND = "callback";
+    public static final CallbackValueParameter CALLBACK_VALUE_PARAMETER = new CallbackValueParameter();
     public static final String CALLBACK_COMMAND_QUALIFIED = "/sponge:" + CALLBACK_COMMAND;
     private static final SpongeCallbackHolder INSTANCE = new SpongeCallbackHolder();
 
@@ -88,25 +88,20 @@ public class SpongeCallbackHolder {
         return Optional.of(reverseMap.get(id));
     }
 
-    public CommandSpec createCommand() {
-        return CommandSpec.builder()
-                .description(t("Execute a callback registered as part of a Text object. Primarily for internal use"))
-                .arguments(new CallbackCommandElement(t("callback")))
-                .executor((src, args) -> {
-                    args.<Consumer<CommandSource>>getOne("callback").get().accept(src);
+    public Command createCommand() {
+        return Command.builder()
+                .setShortDescription(t("Execute a callback registered as part of a Text object. Primarily for internal use"))
+                .parameters(Parameter.builder().setKey(t("callback")).setParser(CALLBACK_VALUE_PARAMETER).build())
+                .setExecutor((cause, src, args) -> {
+                    args.<Consumer<CommandSource>>getOneUnchecked("callback").accept(src);
                     return CommandResult.success();
                 }).build();
     }
 
-    private class CallbackCommandElement extends CommandElement {
+    private static class CallbackValueParameter implements ValueParameter {
 
-        protected CallbackCommandElement(@Nullable Text key) {
-            super(key);
-        }
-
-        @Nullable
         @Override
-        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+        public Optional<Object> getValue(Cause cause, CommandArgs args, CommandContext context) throws ArgumentParseException {
             final String next = args.next();
             try {
                 UUID id = UUID.fromString(next);
@@ -115,15 +110,16 @@ public class SpongeCallbackHolder {
                     throw args.createError(t("The callback you provided was not valid. Keep in mind that callbacks will expire after 10 minutes, so"
                             + " you might want to consider clicking faster next time!"));
                 }
-                return ret;
+                return Optional.of(ret);
             } catch (IllegalArgumentException ex) {
                 throw args.createError(t("Input %s was not a valid UUID", next));
             }
         }
 
         @Override
-        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+        public List<String> complete(Cause cause, CommandArgs args, CommandContext context) throws ArgumentParseException {
             return ImmutableList.of();
         }
+
     }
 }

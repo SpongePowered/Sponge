@@ -52,7 +52,7 @@ import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.asset.SpongeAssetManager;
-import org.spongepowered.common.command.SpongeCommandDisambiguator;
+import org.spongepowered.common.command.dispatcher.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -104,8 +104,8 @@ public class SpongeImplementationModule extends PrivateModule {
 
     @Provides
     @Singleton
-    SpongeCommandManager commandManager(final Logger logger, final Game game) {
-        return new SpongeCommandManager(logger, new SpongeCommandDisambiguator(game));
+    SpongeCommandManager commandManager(final Logger logger) {
+        return new SpongeCommandManager(logger, new SpongeCommandDisambiguator());
     }
 
 }

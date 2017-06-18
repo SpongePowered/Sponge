@@ -71,7 +71,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public Optional<CommandSource> getCommandSource() {
-        return Optional.of((CommandSource) this);
+        return Optional.of(this);
     }
 
     @Override

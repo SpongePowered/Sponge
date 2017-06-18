@@ -24,15 +24,14 @@
  */
 package org.spongepowered.test;
 
-import static org.spongepowered.api.command.args.GenericArguments.playerOrSource;
-import static org.spongepowered.api.command.args.GenericArguments.catalogedElement;
-
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.managed.CommandExecutor;
+import org.spongepowered.api.command.managed.TargetedCommandExecutor;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.entity.living.player.Player;
@@ -50,42 +49,43 @@ import java.util.function.BiFunction;
 @Plugin(id = "skulltest", name = "Skull Test", description = "A plugin to test Skulls")
 public class SkullTest {
 
-    final static Text SKULL = Text.of("skulltype");
+    private final static Text SKULL = Text.of("skulltype");
     private static final Text PLAYER = Text.of("player");
 
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you your player mobHead"))
-                        .arguments(playerOrSource(PLAYER))
-                        .executor(giveSkull(SkullTest::playerHead))
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you your player mobHead"))
+                        .parameter(Parameter.playerOrSource().setKey(PLAYER).build())
+                        .setTargetedExecutorErrorMessage(Text.of("This command can only be executed by players"))
+                        .targetedExecutor(giveSkull(SkullTest::playerHead), Player.class)
                         .build(),
                 "skullme");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you a Marcs Head Format Blaze"))
-                        .arguments(playerOrSource(PLAYER))
-                        .executor(giveSkull(SkullTest::blazeHead))
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you a Marcs Head Format Blaze"))
+                        .parameter(Parameter.playerOrSource().setKey(PLAYER).build())
+                        .setTargetedExecutorErrorMessage(Text.of("This command can only be executed by players"))
+                        .targetedExecutor(giveSkull(SkullTest::blazeHead), Player.class)
                         .build(),
                 "skullblaze");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you a monster head"))
-                        .arguments(
-                                playerOrSource(PLAYER),
-                                catalogedElement(SKULL, SkullType.class)
-                        )
-                        .executor(giveSkull(SkullTest::mobHead))
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you a monster head"))
+                        .parameter(Parameter.playerOrSource().setKey(PLAYER).build())
+                        .parameter(Parameter.catalogedElement(SkullType.class).setKey(SKULL).build())
+                        .setTargetedExecutorErrorMessage(Text.of("This command can only be executed by players"))
+                        .targetedExecutor(giveSkull(SkullTest::mobHead), Player.class)
                         .build(),
                 "skullmob");
     }
 
     private static ItemStack.Builder playerHead(CommandContext commandContext, ItemStack.Builder builder) {
         return builder.add(
-                Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PLAYER).get().getProfile()
+                Keys.REPRESENTED_PLAYER, commandContext.<Player>getOneUnchecked(PLAYER).getProfile()
         );
     }
 
@@ -96,17 +96,14 @@ public class SkullTest {
     }
 
     private static ItemStack.Builder mobHead(CommandContext ctx, ItemStack.Builder builder) {
-        return builder.add(Keys.SKULL_TYPE, ctx.<SkullType>getOne(SKULL).get());
+        return builder.add(Keys.SKULL_TYPE, ctx.getOneUnchecked(SKULL));
     }
 
-    private static CommandExecutor giveSkull(final BiFunction<CommandContext, ItemStack.Builder, ItemStack.Builder> profile) {
-        return (commandSource, commandContext) -> {
-            if (!(commandSource instanceof Player)) {
-                throw new CommandException(Text.of("CommandSource must be a player"));
-            }
+    private static TargetedCommandExecutor<Player> giveSkull(final BiFunction<CommandContext, ItemStack.Builder, ItemStack.Builder> profile) {
+        return (cause, player, commandContext) -> {
             ItemStack.Builder builder = ItemStack.builder().itemType(ItemTypes.SKULL);
             profile.apply(commandContext, builder);
-            ((Player) commandSource).getInventory().offer(builder.build());
+            player.getInventory().offer(builder.build());
             return CommandResult.success();
         };
     }

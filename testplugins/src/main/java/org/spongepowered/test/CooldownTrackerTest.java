@@ -25,10 +25,9 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
@@ -54,69 +53,36 @@ public final class CooldownTrackerTest {
 
     @Listener
     public void onInit(GameInitializationEvent event) {
-
-        final CommandSpec test = CommandSpec.builder()
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                    }
-                    final Player player = (Player) src;
-                    final CooldownTracker cooldownTracker = player.getCooldownTracker();
-                    final ItemType itemType = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty()).getType();
-                    if (!cooldownTracker.hasCooldown(itemType)) {
-                        player.sendMessage(Text.of(TextColors.GRAY, "The item type in your hand is not on cooldown!"));
-                    } else {
-                        player.sendMessage(Text.of(TextColors.GRAY, "The cooldown remaining for the item type in your hand is ",
-                                TextColors.GOLD, cooldownTracker.getCooldown(itemType).orElse(0), TextColors.GRAY, " tick(s)."));
-                        player.sendMessage(Text.of(TextColors.GRAY, "This item type has ", TextColors.GOLD, new DecimalFormat("#.00")
-                                        .format(cooldownTracker.getFractionRemaining(itemType).orElse(0.0) * 100) + "%",
-                                TextColors.GRAY, " of its cooldown remaining."));
-                    }
-                    return CommandResult.success();
-                })
-                .build();
-
-        final CommandSpec set = CommandSpec.builder()
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                    }
-                    final Player player = (Player) src;
-                    final int cooldown = args.<Integer>getOne("cooldown").orElse(10);
-                    player.getCooldownTracker().setCooldown(player.getItemInHand(HandTypes.MAIN_HAND)
-                            .orElse(ItemStack.empty()).getType(), cooldown);
-                    player.sendMessage(Text.of(TextColors.GRAY, "You have given the item type in your hand a cooldown of ",
-                            TextColors.GOLD, cooldown, TextColors.GRAY, " tick(s)."));
-                    return CommandResult.success();
-                })
-                .arguments(GenericArguments.integer(Text.of("cooldown")))
-                .build();
-
-        final CommandSpec enable = CommandSpec.builder()
-                .executor(((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                    }
-                    final Player player = (Player) src;
-                    if (!this.enabled.remove(player.getUniqueId())) {
-                        this.enabled.add(player.getUniqueId());
-                        src.sendMessage(Text.of(TextColors.GOLD, "You have enabled the cooldown listeners!"));
-                    } else {
-                        src.sendMessage(Text.of(TextColors.GOLD, "You have disabled the cooldown listeners!"));
-                    }
-                    return CommandResult.success();
-                }))
-                .build();
+        Sponge.getCommandManager().register(this,
+                Command.builder()
+                        .targetedExecutor((cause, player, args) -> {
+                            final CooldownTracker cooldownTracker = player.getCooldownTracker();
+                            final ItemType itemType = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty()).getType();
+                            if (!cooldownTracker.hasCooldown(itemType)) {
+                                player.sendMessage(Text.of(TextColors.GRAY, "The item type in your hand is not on cooldown!"));
+                            } else {
+                                player.sendMessage(Text.of(TextColors.GRAY, "The cooldown remaining for the item type in your hand is ",
+                                        TextColors.GOLD, cooldownTracker.getCooldown(itemType).orElse(0), TextColors.GRAY, " tick(s)."));
+                                player.sendMessage(Text.of(TextColors.GRAY, "This item type has ", TextColors.GOLD, new DecimalFormat("#.00")
+                                                .format(cooldownTracker.getFractionRemaining(itemType).orElse(0.0) * 100) + "%",
+                                        TextColors.GRAY, " of its cooldown remaining."));
+                            }
+                            return CommandResult.success();
+                        }, Player.class)
+                        .build(),
+                "cooldowntest");
 
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor(((src, args) -> {
-                            src.sendMessage(Text.of(TextColors.GOLD, "Use cooldown set|test|enable"));
+                Command.builder()
+                        .parameter(Parameter.integerNumber().setKey("cooldown").onlyOne().optional().build())
+                        .targetedExecutor((cause, player, args) -> {
+                            final int cooldown = args.<Integer>getOne("cooldown").orElse(10);
+                            player.getCooldownTracker().setCooldown(player.getItemInHand(HandTypes.MAIN_HAND)
+                                    .orElse(ItemStack.empty()).getType(), cooldown);
+                            player.sendMessage(Text.of(TextColors.GRAY, "You have given the item type in your hand a cooldown of ",
+                                    TextColors.GOLD, cooldown, TextColors.GRAY, " tick(s)."));
                             return CommandResult.success();
-                        }))
-                        .child(test, "test")
-                        .child(set, "set")
-                        .child(enable, "enable", "disable")
+                        }, Player.class)
                         .build(),
                 "cooldowns");
     }

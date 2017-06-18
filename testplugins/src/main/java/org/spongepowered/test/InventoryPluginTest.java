@@ -25,11 +25,10 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
@@ -45,7 +44,7 @@ public class InventoryPluginTest {
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
+                Command.builder().setExecutor((cause, source, context) -> {
                     if (this.registered) {
                         this.registered = false;
                         Sponge.getEventManager().unregisterListeners(this.listener);

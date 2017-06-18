@@ -25,7 +25,6 @@
 package org.spongepowered.common.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.command.CommandMessageFormatting.error;
 import static org.spongepowered.api.util.SpongeApiTranslationHelper.t;
 
 import com.google.common.collect.HashMultimap;
@@ -36,7 +35,7 @@ import com.google.inject.Singleton;
 import net.minecraft.entity.player.EntityPlayer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandMapping;
@@ -44,20 +43,26 @@ import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
-import org.spongepowered.api.command.args.ArgumentParseException;
+import org.spongepowered.api.command.dispatcher.CommandNode;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
-import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.command.format.CommandMessageFormats;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.command.CommandExecutionEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.command.dispatcher.SpongeDispatcher;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -75,7 +80,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -90,7 +94,7 @@ public class SpongeCommandManager implements CommandManager {
 
     private static final Pattern SPACE_PATTERN = Pattern.compile(" ", Pattern.LITERAL);
     private final Logger logger;
-    private final SimpleDispatcher dispatcher;
+    private final SpongeDispatcher dispatcher;
     private final Multimap<PluginContainer, CommandMapping> owners = HashMultimap.create();
     private final Map<CommandMapping, PluginContainer> reverseOwners = new ConcurrentHashMap<>();
     private final Object lock = new Object();
@@ -102,7 +106,7 @@ public class SpongeCommandManager implements CommandManager {
      */
     @Inject
     public SpongeCommandManager(Logger logger) {
-        this(logger, SimpleDispatcher.FIRST_DISAMBIGUATOR);
+        this(logger, SpongeDispatcher.FIRST_DISAMBIGUATOR);
     }
 
     /**
@@ -113,22 +117,16 @@ public class SpongeCommandManager implements CommandManager {
      */
     public SpongeCommandManager(Logger logger, Disambiguator disambiguator) {
         this.logger = logger;
-        this.dispatcher = new SimpleDispatcher(disambiguator);
+        this.dispatcher = new SpongeDispatcher(disambiguator);
     }
 
     @Override
-    public Optional<CommandMapping> register(Object plugin, CommandCallable callable, String... alias) {
-        return register(plugin, callable, Arrays.asList(alias));
+    public Optional<CommandMapping> register(Object plugin, Command command, String... alias) {
+        return register(plugin, command, Arrays.asList(alias));
     }
 
     @Override
-    public Optional<CommandMapping> register(Object plugin, CommandCallable callable, List<String> aliases) {
-        return register(plugin, callable, aliases, Function.identity());
-    }
-
-    @Override
-    public Optional<CommandMapping> register(Object plugin, CommandCallable callable, List<String> aliases,
-            Function<List<String>, List<String>> callback) {
+    public Optional<CommandMapping> register(Object plugin, Command command, List<String> aliases) {
         checkNotNull(plugin, "plugin");
 
         Optional<PluginContainer> containerOptional = Sponge.getGame().getPluginManager().fromInstance(plugin);
@@ -138,36 +136,45 @@ public class SpongeCommandManager implements CommandManager {
                             + "(in other words, is 'plugin' actually your plugin object?");
         }
 
-        PluginContainer container = containerOptional.get();
+        return register(containerOptional.get(), command, aliases);
+    }
 
+    @Override
+    public Optional<CommandMapping> register(PluginContainer pluginContainer, Command command, String... alias) {
+        return register(pluginContainer, command, Arrays.asList(alias));
+    }
+
+    @Override
+    public Optional<CommandMapping> register(PluginContainer pluginContainer, Command command, List<String> aliases) {
+        checkNotNull(pluginContainer, "pluginContainer");
         synchronized (this.lock) {
             // <namespace>:<alias> for all commands
             List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
             for (final String originalAlias : aliases) {
-                final String alias = this.fixAlias(container, originalAlias);
+                final String alias = this.fixAlias(pluginContainer, originalAlias);
                 if (aliasesWithPrefix.contains(alias)) {
-                    this.logger.debug("Plugin '{}' is attempting to register duplicate alias '{}'", container.getId(), alias);
+                    this.logger.debug("Plugin '{}' is attempting to register duplicate alias '{}'", pluginContainer.getId(), alias);
                     continue;
                 }
-                final Collection<CommandMapping> ownedCommands = this.owners.get(container);
+                final Collection<CommandMapping> ownedCommands = this.owners.get(pluginContainer);
                 for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
                     if (ownedCommands.contains(mapping)) {
-                        boolean isWrapper = callable instanceof MinecraftCommandWrapper;
-                        if (!(isWrapper && ((MinecraftCommandWrapper) callable).suppressDuplicateAlias(alias))) {
+                        boolean isWrapper = command instanceof MinecraftCommandWrapper;
+                        if (!(isWrapper && ((MinecraftCommandWrapper) command).suppressDuplicateAlias(alias))) {
                             throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
                         }
                     }
                 }
 
                 aliasesWithPrefix.add(alias);
-                aliasesWithPrefix.add(container.getId() + ':' + alias);
+                aliasesWithPrefix.add(pluginContainer.getId() + ':' + alias);
             }
 
-            Optional<CommandMapping> mapping = this.dispatcher.register(callable, aliasesWithPrefix, callback);
+            Optional<CommandMapping> mapping = this.dispatcher.register(command, aliasesWithPrefix);
 
             if (mapping.isPresent()) {
-                this.owners.put(container, mapping.get());
-                this.reverseOwners.put(mapping.get(), container);
+                this.owners.put(pluginContainer, mapping.get());
+                this.reverseOwners.put(mapping.get(), pluginContainer);
             }
 
             return mapping;
@@ -203,11 +210,7 @@ public class SpongeCommandManager implements CommandManager {
     public Optional<CommandMapping> removeMapping(CommandMapping mapping) {
         synchronized (this.lock) {
             Optional<CommandMapping> removed = this.dispatcher.removeMapping(mapping);
-
-            if (removed.isPresent()) {
-                forgetMapping(removed.get());
-            }
-
+            removed.ifPresent(this::forgetMapping);
             return removed;
         }
     }
@@ -268,8 +271,8 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public Optional<? extends CommandMapping> get(String alias, @Nullable CommandSource source) {
-        return this.dispatcher.get(alias, source);
+    public Optional<? extends CommandMapping> get(String alias, @Nullable Cause cause) {
+        return this.dispatcher.get(alias, cause);
     }
 
     @Override
@@ -293,14 +296,38 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public CommandResult process(CommandSource source, String commandLine) {
-        final String[] argSplit = commandLine.split(" ", 2);
-        Sponge.getCauseStackManager().pushCause(source);
-        final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Sponge.getCauseStackManager().getCurrentCause(),
-            argSplit.length > 1 ? argSplit[1] : "", argSplit[0], CommandResult.empty());
+    public Optional<? extends CommandNode> getCommandNode(String alias) {
+        return this.dispatcher.getCommandNode(alias);
+    }
+
+    @Override
+    public Map<String, ? extends CommandNode> getCommandNodes() {
+        return this.dispatcher.getCommandNodes();
+    }
+
+    @Override
+    public Optional<String> getPrimaryAlias(Command command) {
+        return this.reverseOwners.keySet().stream().filter(x -> x.getCommand() == command).findFirst().map(CommandMapping::getPrimaryAlias);
+    }
+
+    @Override
+    public CommandResult process(Cause cause, String commandLine) {
+        String[] argSplit = commandLine.split(" ", 2);
+        if (argSplit.length == 1) {
+            argSplit = new String[] { argSplit[0], "" };
+        }
+
+        // Note, change this once SendCommandEvent is removed
+        final CommandExecutionEvent.Pre event = SpongeEventFactory.createSendCommandEvent(
+                cause,
+                argSplit[1],
+                argSplit[0],
+                CommandResult.empty()
+        );
         Sponge.getGame().getEventManager().post(event);
-        Sponge.getCauseStackManager().popCause();
+
         if (event.isCancelled()) {
+            sendMessageToSourceIfPresent(cause, event.getResult());
             return event.getResult();
         }
 
@@ -312,21 +339,41 @@ public class SpongeCommandManager implements CommandManager {
             commandLine = commandLine + ' ' + event.getArguments();
         }
 
+        CommandResult result = CommandResult.empty();
+        Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0]);
+
+        final CommandExecutionEvent.Selected selectedEvent = SpongeEventFactory.createCommandExecutionEventSelected(
+                cause,
+                argSplit[1],
+                argSplit[0],
+                mapping,
+                CommandResult.empty()
+        );
+        Sponge.getGame().getEventManager().post(selectedEvent);
+
+        if (selectedEvent.isCancelled()) {
+            sendMessageToSourceIfPresent(cause, selectedEvent.getResult());
+            return event.getResult();
+        }
+
+        Throwable throwable = null;
         try {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                  // Since we know we are in the main thread, this is safe to do without a thread check
                  CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
-                         .source(source)
+                         .source(cause.root())
                          .addCaptures()
                          .addEntityDropCaptures()
                          .buildAndSwitch()) {
+
+                // TODO: Remove in the fullness of time
+                CommandSource source = Command.getCommandSourceFromCause(cause).orElseGet(() -> Sponge.getServer().getConsole());
                 if (source instanceof EntityPlayer) {
                     // Enable player inventory capture
                     ((IMixinInventoryPlayer) ((EntityPlayer) source).inventory).setCapture(true);
                 }
                 Sponge.getCauseStackManager().pushCause(source);
-                final CommandResult result = this.dispatcher.process(source, commandLine);
-                return result;
+                result = this.dispatcher.process(cause, commandLine);
             } catch (InvocationCommandException ex) {
                 if (ex.getCause() != null) {
                     throw ex.getCause();
@@ -334,29 +381,22 @@ public class SpongeCommandManager implements CommandManager {
             } catch (CommandPermissionException ex) {
                 Text text = ex.getText();
                 if (text != null) {
-                    source.sendMessage(error(text));
+                    getSource(cause).sendMessage(CommandMessageFormats.ERROR.applyFormat(text));
                 }
             } catch (CommandException ex) {
                 Text text = ex.getText();
+                CommandSource source = getSource(cause);
                 if (text != null) {
-                    source.sendMessage(error(text));
+                    source.sendMessage(CommandMessageFormats.ERROR.applyFormat(text));
                 }
 
-                if (ex.shouldIncludeUsage()) {
-                    final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
-                    if (mapping.isPresent()) {
-                        Text usage;
-                        if (ex instanceof ArgumentParseException.WithUsage) {
-                            usage = ((ArgumentParseException.WithUsage) ex).getUsage();
-                        } else {
-                            usage = mapping.get().getCallable().getUsage(source);
-                        }
-
-                        source.sendMessage(error(t("Usage: /%s %s", argSplit[0], usage)));
-                    }
+                if (ex.shouldIncludeUsage() && mapping.isPresent()) {
+                    source.sendMessage(CommandMessageFormats.ERROR.applyFormat(
+                                    t("Usage: /%s %s", argSplit[0], mapping.get().getCommand().getUsage(cause))));
                 }
             }
         } catch (Throwable thr) {
+            throwable = thr;
             Text.Builder excBuilder;
             if (thr instanceof TextMessageException) {
                 Text text = ((TextMessageException) thr).getText();
@@ -364,7 +404,9 @@ public class SpongeCommandManager implements CommandManager {
             } else {
                 excBuilder = Text.builder(String.valueOf(thr.getMessage()));
             }
-            if (source.hasPermission("sponge.debug.hover-stacktrace")) {
+            Subject subject = Command.getSubjectFromCause(cause).orElseGet(() -> Sponge.getServer().getConsole());
+            CommandSource source = getSource(cause);
+            if (subject.hasPermission("sponge.debug.hover-stacktrace")) {
                 final StringWriter writer = new StringWriter();
                 thr.printStackTrace(new PrintWriter(writer));
                 excBuilder.onHover(TextActions.showText(Text.of(writer.toString()
@@ -372,57 +414,83 @@ public class SpongeCommandManager implements CommandManager {
                         .replace("\r\n", "\n")
                         .replace("\r", "\n")))); // I mean I guess somebody could be running this on like OS 9?
             }
-            source.sendMessage(error(t("Error occurred while executing command: %s", excBuilder.build())));
+            result = CommandResult.builder().error(t("Error occurred while executing command: %s", excBuilder.build())).build();
             this.logger.error(TextSerializers.PLAIN.serialize(t("Error occurred while executing command '%s' for source %s: %s", commandLine, source.toString(), String
                     .valueOf(thr.getMessage()))), thr);
         }
-        return CommandResult.empty();
+
+        CommandExecutionEvent.Post postEvent = SpongeEventFactory.createCommandExecutionEventPost(
+                cause,
+                result,
+                result,
+                argSplit[1],
+                argSplit[0],
+                mapping,
+                Optional.ofNullable(throwable)
+        );
+        Sponge.getGame().getEventManager().post(postEvent);
+        sendMessageToSourceIfPresent(cause, postEvent.getResult());
+        return postEvent.getResult();
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition) {
-        return this.getSuggestions(src, arguments, targetPosition, false);
+    public List<String> getSuggestions(String arguments, @Nullable Location<World> targetPosition) {
+        return getSuggestions(Sponge.getCauseStackManager().getCurrentCause(), arguments, targetPosition);
     }
 
-    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition, boolean usingBlock) {
+    @Override
+    public List<String> getSuggestions(CommandSource commandSource, String arguments, @Nullable Location<World> targetPosition) {
+        try (SpongeCauseStackManager.StackFrame frame = SpongeImpl.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.COMMAND_SOURCE, commandSource);
+            frame.addContext(EventContextKeys.COMMAND_PERMISSION_SUBJECT, commandSource);
+            return getSuggestions(frame.getCurrentCause(), arguments, targetPosition);
+        }
+    }
+
+    @Override
+    public List<String> getSuggestions(Cause cause, String arguments, @Nullable Location<World> targetPosition) {
+        return this.getSuggestions(cause, arguments, targetPosition, false);
+    }
+
+    public List<String> getSuggestions(Cause cause, String arguments, @Nullable Location<World> targetPosition, boolean usingBlock) {
         try {
             final String[] argSplit = arguments.split(" ", 2);
-            List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments, targetPosition));
-            Sponge.getCauseStackManager().pushCause(src);
+            List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(cause, arguments, targetPosition));
             final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Sponge.getCauseStackManager().getCurrentCause(),
-                    ImmutableList.copyOf(suggestions), suggestions, argSplit.length > 1 ? argSplit[1] : "", argSplit[0], arguments, Optional.ofNullable(targetPosition), usingBlock); // TODO zml: Should this be exposed in the API?
+                    ImmutableList.copyOf(suggestions), suggestions, argSplit.length > 1 ? argSplit[1] : "",
+                        argSplit[0], arguments, Optional.ofNullable(targetPosition), usingBlock);
             Sponge.getGame().getEventManager().post(event);
-            Sponge.getCauseStackManager().popCause();
             if (event.isCancelled()) {
                 return ImmutableList.of();
             }
             return ImmutableList.copyOf(event.getTabCompletions());
         } catch (CommandException e) {
-            src.sendMessage(error(t("Error getting suggestions: %s", e.getText())));
+            getSource(cause).sendMessage(
+                    CommandMessageFormats.ERROR.applyFormat(t("Error getting suggestions: %s", e.getText())));
             return Collections.emptyList();
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Error occured while tab completing '%s'", arguments), e);
+            throw new RuntimeException(String.format("Error occurred while tab completing '%s'", arguments), e);
         }
     }
 
     @Override
-    public boolean testPermission(CommandSource source) {
-        return this.dispatcher.testPermission(source);
+    public boolean testPermission(Cause cause) {
+        return this.dispatcher.testPermission(cause);
     }
 
     @Override
-    public Optional<Text> getShortDescription(CommandSource source) {
-        return this.dispatcher.getShortDescription(source);
+    public Optional<Text> getShortDescription(Cause cause) {
+        return this.dispatcher.getShortDescription(cause);
     }
 
     @Override
-    public Optional<Text> getHelp(CommandSource source) {
-        return this.dispatcher.getHelp(source);
+    public Optional<Text> getHelp(Cause cause) {
+        return this.dispatcher.getHelp(cause);
     }
 
     @Override
-    public Text getUsage(CommandSource source) {
-        return this.dispatcher.getUsage(source);
+    public Text getUsage(Cause cause) {
+        return this.dispatcher.getUsage(cause);
     }
 
     @Override
@@ -430,4 +498,27 @@ public class SpongeCommandManager implements CommandManager {
         return this.dispatcher.size();
     }
 
+    @Override
+    public CommandResult process(String arguments) {
+        return process(Sponge.getCauseStackManager().getCurrentCause(), arguments);
+    }
+
+    @Override
+    public CommandResult process(CommandSource commandSource, String arguments) {
+        try (SpongeCauseStackManager.StackFrame frame = SpongeImpl.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.COMMAND_SOURCE, commandSource);
+            frame.addContext(EventContextKeys.COMMAND_PERMISSION_SUBJECT, commandSource);
+            return process(frame.getCurrentCause(), arguments);
+        }
+    }
+
+    private static CommandSource getSource(Cause cause) {
+        return Command.getCommandSourceFromCause(cause).orElseGet(() -> Sponge.getServer().getConsole());
+    }
+
+    private static void sendMessageToSourceIfPresent(Cause cause, CommandResult result) {
+        result.getErrorMessage()
+                .ifPresent(message -> getSource(cause)
+                        .sendMessage(CommandMessageFormats.ERROR.applyFormat(message)));
+    }
 }

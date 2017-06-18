@@ -33,7 +33,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -117,6 +120,10 @@ public class WrapperICommandSender implements ICommandSender {
     @Override
     public MinecraftServer getServer() {
         return getEntityWorld().getMinecraftServer();
+    }
+
+    public static ICommandSender of(Cause cause) {
+        return of(Command.getCommandSourceFromCause(cause).orElse(Sponge.getServer().getConsole()));
     }
 
     public static ICommandSender of(CommandSource source) {

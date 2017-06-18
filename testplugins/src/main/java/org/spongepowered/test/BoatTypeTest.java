@@ -25,9 +25,9 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
@@ -48,20 +48,16 @@ public class BoatTypeTest {
     @Listener
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .description(Text.of("Gives you a boat of a specific TreeType"))
-                        .arguments(GenericArguments.catalogedElement(Text.of("tree"), TreeType.class))
-                        .executor((src, args) -> {
-                            if (!(src instanceof Player)) {
-                                src.sendMessage(Text.of("Only players can run this command"));
-                                return CommandResult.empty();
-                            }
-                            Player player = (Player) src;
+                Command.builder()
+                        .setShortDescription(Text.of("Gives you a boat of a specific TreeType"))
+                        .parameter(Parameter.catalogedElement(TreeType.class).setKey("tree").build())
+                        .setTargetedExecutorErrorMessage(Text.of("Only players can run this command"))
+                        .targetedExecutor((cause, player, args) -> {
                             Boat boat = (Boat) player.getLocation().getExtent().createEntity(EntityTypes.BOAT, player.getLocation().getPosition());
                             boat.offer(Keys.TREE_TYPE, args.<TreeType>getOne("tree").orElse(TreeTypes.OAK));
                             player.getWorld().spawnEntity(boat);
                             return CommandResult.success();
-                        })
+                        }, Player.class)
                         .build(),
                 "makeboat");
     }

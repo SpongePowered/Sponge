@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
-import static org.spongepowered.api.command.args.GenericArguments.integer;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -33,22 +31,25 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.ChildCommandElementExecutor;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.ArgumentParseException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.api.command.parameter.token.CommandArgs;
+import org.spongepowered.api.command.managed.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.command.parameter.SpongeDispatcherParameter;
 
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
 public class SpongePaginationService implements PaginationService {
+
+    private final static Text COMMAND_KEY = Text.of("command");
+    private final ValueParameter activePaginationValueParameter = new ActivePaginationValueParameter();
 
     static class SourcePaginations {
         private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<>();
@@ -87,7 +91,9 @@ public class SpongePaginationService implements PaginationService {
         public UUID getLastUuid() {
             return this.lastUuid;
         }
+
     }
+
     private final ConcurrentMap<MessageReceiver, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
 
     // We have a second active pagination system because of the way Players are handled by the server.
@@ -142,73 +148,69 @@ public class SpongePaginationService implements PaginationService {
         return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
     }
 
-    private CommandSpec buildPaginationCommand() {
+    private Command buildPaginationCommand() {
 
-        final ActivePaginationCommandElement paginationElement = new ActivePaginationCommandElement(t("pagination-id"));
-
-        CommandSpec next = CommandSpec.builder()
-                .description(t("Go to the next page"))
-                .executor((src, args) -> {
-                    args.<ActivePagination>getOne("pagination-id").get().nextPage();
+        Command next = Command.builder()
+                .setShortDescription(t("Go to the next page"))
+                .setExecutor((src, args) -> {
+                    args.<ActivePagination>getOneUnchecked("pagination-id").nextPage();
                     return CommandResult.success();
                 }).build();
 
-        CommandSpec prev = CommandSpec.builder()
-                .description(t("Go to the previous page"))
-                .executor((src, args) -> {
-                    args.<ActivePagination>getOne("pagination-id").get().previousPage();
+        Command prev = Command.builder()
+                .setShortDescription(t("Go to the previous page"))
+                .setExecutor((src, args) -> {
+                    args.<ActivePagination>getOneUnchecked("pagination-id").previousPage();
                     return CommandResult.success();
                 }).build();
 
-        CommandElement pageArgs = integer(t("page"));
+        Parameter pageArgs = Parameter.integerNumber().setKey(t("page")).build();
 
         CommandExecutor pageExecutor = (src, args) -> {
-            args.<ActivePagination>getOne("pagination-id").get().specificPage(args.<Integer>getOne("page").get());
+            args.<ActivePagination>getOneUnchecked("pagination-id").specificPage(args.<Integer>getOneUnchecked("page"));
             return CommandResult.success();
         };
 
-        CommandSpec page = CommandSpec.builder()
-                        .description(t("Go to a specific page"))
-                        .arguments(pageArgs)
-                        .executor(pageExecutor).build();
+        Command page = Command.builder()
+                        .setShortDescription(t("Go to a specific page"))
+                        .parameters(pageArgs)
+                        .setExecutor(pageExecutor).build();
 
         //Fallback to page arguments
-        ChildCommandElementExecutor childDispatcher = new ChildCommandElementExecutor(pageExecutor);
+        SpongeDispatcherParameter childDispatcher = new SpongeDispatcherParameter(COMMAND_KEY);
         childDispatcher.register(next, "next", "n");
         childDispatcher.register(prev, "prev", "p", "previous");
         childDispatcher.register(page, "page");
 
         //We create the child manually in order to force that paginationElement is required for all children + fallback
         //https://github.com/SpongePowered/SpongeAPI/issues/1272
-        return CommandSpec.builder().arguments(paginationElement, firstParsing(childDispatcher, pageArgs))
-                .executor(childDispatcher)
-                .description(t("Helper command for paginations occurring"))
+        return Command.builder()
+                .parameters(Parameter.builder().setKey("pagination-id").setParser(this.activePaginationValueParameter).build(),
+                        Parameter.firstOf(childDispatcher, pageArgs))
+                .setExecutor(childDispatcher)
+                .setShortDescription(t("Helper command for paginations occurring"))
                 .build();
     }
 
-    private class ActivePaginationCommandElement extends CommandElement {
+    private class ActivePaginationValueParameter implements ValueParameter {
 
-        protected ActivePaginationCommandElement(@Nullable Text key) {
-            super(key);
-        }
-
-        @Nullable
         @Override
-        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+        public Optional<Object> getValue(Cause cause, CommandArgs args, CommandContext context) throws ArgumentParseException {
             UUID id;
 
+            CommandSource source = context.getCommandSource().orElseGet(() -> Sponge.getServer().getConsole());
             SourcePaginations paginations = getPaginationState(source, false);
             if (paginations == null) {
                 throw args.createError(t("Source %s has no paginations!", source.getName()));
             }
 
-            Object state = args.getState();
+            CommandArgs.State state = args.getState();
             try {
                 id = UUID.fromString(args.next());
             } catch (IllegalArgumentException ex) {
                 if (paginations.getLastUuid() != null) {
                     args.setState(state);
-                    return paginations.get(paginations.getLastUuid());
+                    return Optional.ofNullable(paginations.get(paginations.getLastUuid()));
                 }
                 throw args.createError(t("Input was not a valid UUID!"));
             }
@@ -216,11 +218,12 @@ public class SpongePaginationService implements PaginationService {
             if (pagination == null) {
                 throw args.createError(t("No pagination registered for id %s", id.toString()));
             }
-            return paginations.get(id);
+            return Optional.of(pagination);
         }
 
         @Override
-        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+        public List<String> complete(Cause cause, CommandArgs args, CommandContext context) throws ArgumentParseException {
+            CommandSource src = context.getCommandSource().orElseGet(() -> Sponge.getServer().getConsole());
             SourcePaginations paginations = getPaginationState(src, false);
             if (paginations == null) {
                 return ImmutableList.of();
@@ -237,8 +240,10 @@ public class SpongePaginationService implements PaginationService {
         }
 
         @Override
-        public Text getUsage(CommandSource src) {
-            return getKey() == null ? Text.of() : Text.of("[", getKey(), "]");
+        public Text getUsage(Text key, Cause cause) {
+            return Text.of("[", key, "]");
         }
+
     }
+
 }

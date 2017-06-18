@@ -24,11 +24,9 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -39,6 +37,7 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -46,31 +45,29 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 @Plugin(id = "damagesourcetest", name = "Damage Source Test", description = "A plugin to test damage sources")
 public final class DamageSourceTest {
 
+    @Inject private PluginContainer pluginContainer;
     private final Set<UUID> activated = new HashSet<>();
 
     @Listener
     public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (src instanceof Player) {
-                                final UUID uuid = ((Player) src).getUniqueId();
-                                if (this.activated.contains(uuid)) {
-                                    this.activated.remove(uuid);
-                                    src.sendMessage(Text.of("You have deactivated damage source analysis."));
-                                } else {
-                                    this.activated.add(uuid);
-                                    src.sendMessage(Text.of("You have activated damage source analysis."));
-                                }
-                                return CommandResult.success();
+                Command.builder()
+                        .targetedExecutor((cause, player, args) -> {
+                            final UUID uuid = player.getUniqueId();
+                            if (this.activated.contains(uuid)) {
+                                this.activated.remove(uuid);
+                                player.sendMessage(Text.of("You have deactivated damage source analysis."));
+                            } else {
+                                this.activated.add(uuid);
+                                player.sendMessage(Text.of("You have activated damage source analysis."));
                             }
-                            throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                        })
-                        .build(),
-                "dstest");
+                            return CommandResult.success();
+                        }, Player.class)
+                        .buildAndRegister(pluginContainer, "dstest");
 
         final DamageSource damageSource = DamageSource.builder()
                 .type(DamageTypes.CUSTOM)
@@ -78,20 +75,14 @@ public final class DamageSourceTest {
                 .scalesWithDifficulty()
                 .build();
 
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .executor((src, args) -> {
-                            if (src instanceof Player) {
-                                final Player player = (Player) src;
-                                player.damage(args.<Double>getOne("damage").orElse(2.0), damageSource);
-                                player.sendMessage(Text.of("You have damaged yourself with the custom damage source."));
-                                return CommandResult.success();
-                            }
-                            throw new CommandException(Text.of(TextColors.RED, "You must be a player to execute this command!"));
-                        })
-                        .arguments(GenericArguments.doubleNum(Text.of("damage")))
-                        .build(),
-                "dsdamage");
+                Command.builder()
+                        .targetedExecutor((cause, player, args) -> {
+                            player.damage(args.<Double>getOne("damage").orElse(2.0), damageSource);
+                            player.sendMessage(Text.of("You have damaged yourself with the custom damage source."));
+                            return CommandResult.success();
+                        }, Player.class)
+                        .parameter(Parameter.doubleNumber().setKey("damage").optional().build())
+                        .buildAndRegister(this.pluginContainer, "dsdamage");
     }
 
     @Listener(order = Order.POST)

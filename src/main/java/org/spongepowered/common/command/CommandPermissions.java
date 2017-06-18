@@ -25,9 +25,12 @@
 package org.spongepowered.common.command;
 
 import net.minecraft.command.ICommandSender;
-import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
@@ -61,11 +64,15 @@ public final class CommandPermissions {
         }
         Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(commandName);
         if (mapping.isPresent()) {
-            CommandCallable callable = mapping.get().getCallable();
+            Command callable = mapping.get().getCommand();
             if (callable instanceof MinecraftCommandWrapper) {
                 return source.hasPermission(((MinecraftCommandWrapper) callable).getCommandPermission());
             }
-            return callable.testPermission(source);
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.COMMAND_SOURCE, source);
+                frame.addContext(EventContextKeys.COMMAND_PERMISSION_SUBJECT, source);
+                return callable.testPermission(frame.getCurrentCause());
+            }
         }
         return source.hasPermission(commandName);
     }
@@ -90,8 +97,8 @@ public final class CommandPermissions {
         // get what we can.
         populateNonCommandPermissions(data, sender::canUseCommand);
         for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
-            if (command.getCallable() instanceof MinecraftCommandWrapper) {
-                MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
+            if (command.getCommand() instanceof MinecraftCommandWrapper) {
+                MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCommand();
                 data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
                         Tristate.fromBoolean(wrapper.command.checkPermission(sender.getServer(), sender)));
             }

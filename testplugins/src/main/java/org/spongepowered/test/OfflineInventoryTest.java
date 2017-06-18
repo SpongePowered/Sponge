@@ -26,8 +26,8 @@ package org.spongepowered.test;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
@@ -43,8 +43,6 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -64,18 +62,14 @@ public class OfflineInventoryTest {
 
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-                .description(Text.of("Fills your hotbar with diamonds when you are offline"))
-                .executor((src, args) -> {
-                    if (!(src instanceof Player)) {
-                        src.sendMessage(Text.of(TextColors.RED, "Player only."));
-                        return CommandResult.success();
-                    }
-                    Player player = (Player) src;
+        Sponge.getCommandManager().register(this, Command.builder()
+                .setShortDescription(Text.of("Fills your hotbar with diamonds when you are offline"))
+                .setTargetedExecutorErrorMessage(Text.of("This command can only be executed by players"))
+                .targetedExecutor((cause, player, args) -> {
                     receiveDiamonds.add(player.getUniqueId());
-                    src.sendMessage(Text.of(TextColors.GREEN, "You will receive diamonds."));
+                    player.sendMessage(Text.of(TextColors.GREEN, "You will receive diamonds."));
                     return CommandResult.success();
-                })
+                }, Player.class)
                 .build(), "getmesomediamonds");
     }
 

@@ -25,9 +25,9 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.entity.Entity;
@@ -49,9 +49,9 @@ public class ParrotDataTest {
     @Listener
     public void onGamePreInitialization(GamePreInitializationEvent event) {
         Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments(GenericArguments.onlyOne(GenericArguments.catalogedElement(Text.of("parrot variant"), ParrotVariant.class)))
-                        .executor((src, args) -> {
+                Command.builder()
+                        .parameter(Parameter.catalogedElement(ParrotVariant.class).setKey("parrot variant").onlyOne().build())
+                        .setExecutor((cause, src, args) -> {
                             this.parrotVariant = args.<ParrotVariant>getOne("parrot variant").get();
 
                             src.sendMessage(Text.of(TextColors.DARK_GREEN, "Click a parrot to change their variant to: ",

@@ -25,12 +25,12 @@
 package org.spongepowered.common.service.pagination;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.command.CommandMessageFormatting.error;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.format.CommandMessageFormats;
 import org.spongepowered.api.command.source.ProxySource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
@@ -144,7 +144,7 @@ public class SpongePaginationList implements PaginationList {
         try {
             pagination.specificPage(page);
         } catch (CommandException e) {
-            receiver.sendMessage(error(e.getText()));
+            receiver.sendMessage(CommandMessageFormats.ERROR.applyFormat(e.getText()));
         }
     }
 }
