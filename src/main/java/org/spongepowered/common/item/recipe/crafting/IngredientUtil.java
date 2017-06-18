@@ -22,19 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.item.recipe.crafting;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import net.minecraft.item.crafting.Ingredient;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+public class IngredientUtil {
 
-    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
+    public static org.spongepowered.api.item.recipe.crafting.Ingredient fromNative(Ingredient ingredient) {
+        return ((org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) ingredient);
+    }
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
-
-    TStack getOutputStack(Fabric<TInventory> inv);
-
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
-
+    public static Ingredient toNative(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
+        return DelegateIngredient.of(ingredient);
+    }
 }

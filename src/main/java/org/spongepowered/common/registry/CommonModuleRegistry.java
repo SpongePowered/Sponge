@@ -86,6 +86,11 @@ import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
+import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
+import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -158,6 +163,11 @@ import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetyp
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
+import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
+import org.spongepowered.common.item.recipe.crafting.SpongeIngredientBuilder;
+import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeBuilder;
+import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
+import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
@@ -330,6 +340,10 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
             .registerBuilderSupplier(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
             .registerBuilderSupplier(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
+            .registerBuilderSupplier(Ingredient.Builder.class, SpongeIngredientBuilder::new)
+            .registerBuilderSupplier(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
+            .registerBuilderSupplier(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
+            .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
         ;
     }
 
@@ -441,6 +455,7 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
+            .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())
