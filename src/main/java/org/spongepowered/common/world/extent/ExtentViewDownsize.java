@@ -611,9 +611,9 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public int getPrecipitationLevel(int x, int z) {
+    public int getPrecipitationLevelAt(int x, int z) {
         checkBlockRange(x, 0, z);
-        return this.extent.getPrecipitationLevel(x, z);
+        return this.extent.getPrecipitationLevelAt(x, z);
     }
 
 }

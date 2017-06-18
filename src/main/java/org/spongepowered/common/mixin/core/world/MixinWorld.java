@@ -374,7 +374,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public int getPrecipitationLevel(int x, int z) {
+    public int getPrecipitationLevelAt(int x, int z) {
         return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
     }
 
