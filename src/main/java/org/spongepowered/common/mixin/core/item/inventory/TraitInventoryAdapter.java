@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -66,7 +67,8 @@ import java.util.Optional;
         InventoryLargeChest.class,
         TileEntityLockable.class,
         CustomInventory.class,
-        InventoryBasic.class
+        InventoryBasic.class,
+        SpongeUserInventory.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {

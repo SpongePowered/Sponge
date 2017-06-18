@@ -167,6 +167,7 @@ public class SlotAdapter extends Adapter implements Slot {
         if (old.isEmpty() && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             remaining -= push;
         } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+            this.inventory.markDirty();
             push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
             old.setCount(old.getCount() + push);
             remaining -= push;
