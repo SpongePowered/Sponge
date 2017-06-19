@@ -28,11 +28,14 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
 public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens<IInventory, ItemStack> {
 
@@ -41,6 +44,21 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
     public EquipmentInventoryLensImpl(ArmorEquipable carrier, int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots) {
         super(base, size, stride, EquipmentInventoryAdapter.class, slots);
         this.carrier = carrier;
+    }
+
+    @Override
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        super.init(slots);
+        // TODO predicates for ItemStack/ItemType?
+        int index = base;
+        // BOOTS
+        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS), EquipmentSlotType.of(EquipmentTypes.BOOTS));
+        index++;       // LEGGINGS
+        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
+        index++;       // CHEST
+        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
+        index ++;       // HEAD
+        this.addChild(new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
     }
 
     @Override
