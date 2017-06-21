@@ -35,6 +35,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ContainerPlayerInventoryLens extends ContainerLens {
@@ -67,7 +68,7 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
         final OrderedInventoryLensImpl offHand = new OrderedInventoryLensImpl(base, OFFHAND, 1, slots);
         base += OFFHAND;
 
-        this.viewedInventories = Arrays.asList(hotbar, main, armor, crafting, offHand);
+        this.viewedInventories = new ArrayList<>(Arrays.asList(hotbar, main, armor, crafting, offHand));
 
         int additionalSlots = this.size - base;
         if (additionalSlots > 0) {
