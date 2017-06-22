@@ -62,7 +62,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+    public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
         final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
                 .entity(EntityUtil.fromNative(playerMP))
