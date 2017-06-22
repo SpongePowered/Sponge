@@ -51,6 +51,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerList;
@@ -69,6 +71,7 @@ import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -304,6 +307,26 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         // if we are loading overworld, create a new mapstorage
         return new MapStorage(saveHandler);
+    }
+
+    // The following two redirects work around the fact that 'onCreateMapStorage' causes all worlds to share a single MapStorage.
+    // Worlds other than the Overworld have scoreboard created, but they are never used. Therefore, we need to ensure that these unused scoreboards
+    // are not saved into the global MapStorage when non-Overworld worlds are initialized.
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapStorage;setData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
+    public void onMapStorageSetData(MapStorage storage, String name, WorldSavedData data) {
+        if (name.equals("scoreboard") && this.dimensionId != 0) {
+            return;
+        }
+        storage.setData(name, data);
+    }
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V"))
+    public void onSetSaveDataScoreboard(ScoreboardSaveData scoreboardSaveData, Scoreboard scoreboard) {
+        if (this.dimensionId != 0) {
+            return;
+        }
+        scoreboardSaveData.setScoreboard(scoreboard);
     }
 
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
