@@ -37,6 +37,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUseEntity;
@@ -370,15 +371,27 @@ public interface PacketFunction {
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
                         }
-                        final DropItemEvent.Dispense
-                                dropItemEvent =
-                                SpongeEventFactory.createDropItemEventDispense(cause, entities);
+
+                        final CPacketPlayerDigging packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketPlayerDigging.class)
+                                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing the packet used, but no packet was captured!", context));
+
+                        CPacketPlayerDigging.Action action = packetIn.getAction();
+
+                        final int usedButton = action == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+
+                        Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                        Container openContainer = player.openContainer;
+                        List<SlotTransaction> slotTrans = ((IMixinContainer) openContainer).getCapturedTransactions();
+                        ClickInventoryEvent.Drop dropItemEvent = ((DropItemWithHotkeyState) state)
+                                .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities, cause, usedButton);
+
                         SpongeImpl.postEvent(dropItemEvent);
                         if (!dropItemEvent.isCancelled()) {
                             processSpawnedEntities(player, dropItemEvent);
                         } else {
                             ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
                         }
+                        slotTrans.clear();
                     });
             context.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(itemMapping -> {

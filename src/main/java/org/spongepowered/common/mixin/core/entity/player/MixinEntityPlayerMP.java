@@ -102,6 +102,9 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -518,7 +521,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void restorePacketItem(EnumHand hand) {
-        if (this.packetItem == null) {
+        if (this.packetItem.isEmpty()) {
             return;
         }
 
@@ -813,14 +816,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Nullable
     public EntityItem dropItem(boolean dropAll) {
         final ItemStack currentItem = this.inventory.getCurrentItem();
-        if (currentItem == null) {
+        if (currentItem.isEmpty()) {
             return null;
         }
-        //final int amount = dropAll ? currentItem.stackSize : 1;
-        //final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
-        // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.getCount() : 1), false, true);
+        // Add SlotTransaction to PlayerContainer
+        org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer).query(Hotbar.class).query(SlotIndex.of(this.inventory.currentItem));
+        ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
+        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(currentItem), ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
+
+        return this.dropItem(itemToDrop, false, true);
     }
 
     @Override

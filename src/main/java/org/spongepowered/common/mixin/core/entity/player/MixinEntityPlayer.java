@@ -322,7 +322,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     @Nullable
-    public EntityItem dropItem(@Nullable ItemStack itemStackIn, boolean unused) {
+    public EntityItem dropItem(ItemStack itemStackIn, boolean unused) {
         return this.dropItem(itemStackIn, false, false);
     }
 
@@ -338,8 +338,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Nullable
     @Overwrite
-    public EntityItem dropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem == null || droppedItem.getCount() == 0 || droppedItem.getItem() == null) {
+    public EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        if (droppedItem.isEmpty()) {
             return null;
         } else if (this.world.isRemote) {
             double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();

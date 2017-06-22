@@ -177,7 +177,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         {
             for (int i = 0; i < aitemstack.size(); ++i)
             {
-                if (aitemstack.get(i) != null)
+                if (!aitemstack.get(i).isEmpty())
                 {
                     this.player.dropItem(aitemstack.get(i), true, false);
                     //aitemstack[i] = null; // Sponge - we handle this after calling the death event
