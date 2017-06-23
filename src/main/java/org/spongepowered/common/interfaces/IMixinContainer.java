@@ -34,9 +34,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-public interface IMixinContainer {
-
-    List<SlotTransaction> getCapturedTransactions();
+public interface IMixinContainer extends IMixinInventory {
 
     boolean capturingInventory();
 

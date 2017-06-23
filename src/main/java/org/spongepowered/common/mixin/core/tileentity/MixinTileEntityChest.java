@@ -27,13 +27,9 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -52,6 +48,7 @@ import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -170,27 +167,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Override
     public Optional<Inventory> getDoubleChestInventory() {
-        // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
-        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            BlockPos blockpos = this.pos.offset(enumfacing);
-
-            TileEntity tileentity1 = this.world.getTileEntity(blockpos);
-
-            if (tileentity1 instanceof TileEntityChest && tileentity1.getBlockType() == this.getBlockType()) {
-
-                InventoryLargeChest inventory;
-
-                if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH)
-                {
-                    inventory = new InventoryLargeChest("container.chestDouble", this, (TileEntityChest)tileentity1);
-                } else {
-                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest)tileentity1, this);
-                }
-
-                return Optional.of((Inventory) inventory);
-            }
-        }
-        return Optional.empty();
+        return InventoryUtil.getDoubleChestInventory(((TileEntityChest)(Object) this));
     }
+
 }
 

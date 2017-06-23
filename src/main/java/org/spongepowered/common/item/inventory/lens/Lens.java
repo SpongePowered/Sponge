@@ -71,7 +71,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     /**
      * Returns the display name of this lens 
      */
-    public abstract Translation getName(Fabric<TInventory> inv);
+    Translation getName(Fabric<TInventory> inv);
     
     /**
      * Get the number of slots referenced by this lens

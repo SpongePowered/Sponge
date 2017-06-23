@@ -172,7 +172,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
             final ItemStack itemstack = slot.getStack();
-            ItemStack itemstack1 = this.inventoryItemStacks .get(i);
+            ItemStack itemstack1 = this.inventoryItemStacks.get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
 

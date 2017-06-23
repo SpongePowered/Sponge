@@ -39,6 +39,7 @@
         "block.MixinBlockDoublePlant",
         "block.MixinBlockDoubleStoneSlab",
         "block.MixinBlockDoubleWoodSlab",
+        "block.MixinBlockDropper",
         "block.MixinBlockDynamicLiquid",
         "block.MixinBlockLiquid",
         "block.MixinBlockEnderChest",

@@ -52,7 +52,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -89,8 +88,10 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
@@ -110,6 +111,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -133,6 +135,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -950,4 +954,74 @@ public class SpongeCommonEventFactory {
         return true;
     }
 
+    public static ChangeInventoryEvent.Transfer.Pre callTransferPre(Inventory source, Inventory destination) {
+        Sponge.getCauseStackManager().pushCause(source);
+        ChangeInventoryEvent.Transfer.Pre event = SpongeEventFactory.createChangeInventoryEventTransferPre(
+                Sponge.getCauseStackManager().getCurrentCause(), source, destination);
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        return event;
+    }
+
+    public static boolean callTransferPost(IMixinInventory captureSource, Inventory source, Inventory destination) {
+        Sponge.getCauseStackManager().pushCause(source);
+        ChangeInventoryEvent.Transfer.Post event =
+                SpongeEventFactory.createChangeInventoryEventTransferPost(Sponge.getCauseStackManager().getCurrentCause(),
+                        source, destination, captureSource.getCapturedTransactions());
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            // restore inventories
+            setSlots(event.getTransactions(), SlotTransaction::getOriginal);
+        } else {
+            // handle custom inventory transaction result
+            setSlots(event.getTransactions(), SlotTransaction::getFinal);
+        }
+
+        captureSource.getCapturedTransactions().clear();
+        Sponge.getCauseStackManager().popCause();
+
+        return event.isCancelled();
+    }
+
+    private static void setSlots(List<SlotTransaction> transactions, Function<SlotTransaction, ItemStackSnapshot> func) {
+        transactions.forEach(t -> t.getSlot().set(func.apply(t).createStack()));
+    }
+
+    /**
+     * Captures a transaction
+     *
+     * @param captureIn the {@link IMixinInventory} to capture the transaction in
+     * @param inv the Inventory
+     * @param index the affected SlotIndex
+     * @param originalStack the original Stack
+     */
+    public static void captureTransaction(IMixinInventory captureIn, Inventory inv, int index, ItemStack originalStack) {
+        org.spongepowered.api.item.inventory.Slot slot = ((OrderedInventory) inv.query(OrderedInventory.class)).getSlot(SlotIndex.of(index)).get();
+        SlotTransaction trans = new SlotTransaction(slot,
+                ItemStackUtil.snapshotOf(originalStack),
+                ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
+        captureIn.getCapturedTransactions().add(trans);
+    }
+
+    /**
+     * Captures a transaction
+     *
+     * @param captureIn the {@link IMixinInventory} to capture the transaction in
+     * @param inv the Inventory
+     * @param index the affected SlotIndex
+     * @param transaction the transaction to execute
+     * @return the result if the transaction
+     */
+    public static ItemStack captureTransaction(IMixinInventory captureIn, Inventory inv, int index, Supplier<ItemStack> transaction) {
+        Inventory slot = inv.query(OrderedInventory.class).query(SlotIndex.of(index));
+        if (slot instanceof org.spongepowered.api.item.inventory.Slot) {
+            ItemStackSnapshot original = slot.peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
+            ItemStack remaining = transaction.get();
+            ItemStackSnapshot replacement = slot.peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
+            captureIn.getCapturedTransactions().add(new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), original, replacement));
+            return remaining;
+        }
+        // else inventory was missing the slot for some reason
+        return transaction.get();
+    }
 }
