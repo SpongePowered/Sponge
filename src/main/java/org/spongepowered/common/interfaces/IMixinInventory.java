@@ -22,17 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.slots;
+package org.spongepowered.common.interfaces;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
-public interface SlotLens<TInventory, TStack> extends Lens<TInventory, TStack> {
+import java.util.List;
 
-    TStack getStack(Fabric<TInventory> inv);
+public interface IMixinInventory {
 
-    boolean setStack(Fabric<TInventory> inv, TStack stack);
+    List<SlotTransaction> getCapturedTransactions();
 
-    int getOrdinal(Fabric<TInventory> inv);
-    
 }

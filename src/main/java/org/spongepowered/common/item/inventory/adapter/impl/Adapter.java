@@ -78,9 +78,6 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static Optional<ItemStack> pollSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens) {
-            if (lens == null) {
-                return Optional.empty();
-            }
             return Logic.findStack(inv, lens, true);
         }
 
@@ -89,9 +86,6 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static Optional<ItemStack> pollSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit) {
-            if (lens == null) {
-                return Optional.empty();
-            }
             return Logic.findStacks(inv, lens, limit, true);
         }
 
@@ -100,9 +94,6 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static Optional<ItemStack> peekSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens) {
-            if (lens == null) {
-                return Optional.empty();
-            }
             return Logic.findStack(inv, lens, false);
         }
 
@@ -111,13 +102,13 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static Optional<ItemStack> peekSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit) {
-            if (lens == null) {
-                return Optional.empty();
-            }
             return Logic.findStacks(inv, lens, limit, false);
         }
 
         private static Optional<ItemStack> findStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, boolean remove) {
+            if (lens == null) {
+                return Optional.empty();
+            }
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
                 if (stack.isEmpty() || (remove && !lens.setStack(inv, ord, net.minecraft.item.ItemStack.EMPTY))) {
@@ -130,6 +121,11 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         private static Optional<ItemStack> findStacks(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit, boolean remove) {
+
+            if (lens == null) {
+                return Optional.empty();
+            }
+
             ItemStack result = null;
 
             for (int ord = 0; ord < lens.slotCount(); ord++) {

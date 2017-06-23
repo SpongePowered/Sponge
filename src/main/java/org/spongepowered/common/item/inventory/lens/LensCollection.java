@@ -37,7 +37,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @param index
      * @return
      */
-    public abstract Lens<TInventory, TStack> getLens(int index);
+    Lens<TInventory, TStack> getLens(int index);
     
     /**
      * Get all the properties for the specified target slot.
@@ -46,7 +46,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    public abstract Collection<InventoryProperty<?, ?>> getProperties(int index);
+    Collection<InventoryProperty<?, ?>> getProperties(int index);
     
     /**
      * Get all the properties for the specified lens (if contained in this
@@ -56,7 +56,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    public abstract Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> lens);
+    Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> lens);
 
     /**
      * A strongly-typed {@link java.util.Collection#contains}.
@@ -64,7 +64,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @param lens
      * @return
      */
-    public abstract boolean has(Lens<TInventory, TStack> lens);
+    boolean has(Lens<TInventory, TStack> lens);
 
     /**
      * Somewhat the inverse of {@link java.util.Collection#containsAll} in
@@ -75,6 +75,6 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @param c Collection to inspect
      * @return
      */
-    public abstract boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c);
+    boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c);
     
 }
