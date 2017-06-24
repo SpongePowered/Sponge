@@ -401,7 +401,7 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(GlowingData.class, SpongeGlowingData.class, ImmutableGlowingData.class, ImmutableSpongeGlowingData.class,
                 new GlowingDataProcessor());
-        
+
         dataManager.registerDualProcessor(GravityData.class, SpongeGravityData.class, ImmutableGravityData.class, ImmutableSpongeGravityData.class,
                 new GravityDataProcessor());
 
@@ -665,6 +665,9 @@ public class DataRegistrar {
 
         dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class,
                 ImmutableBeaconData.class, ImmutableSpongeBeaconData.class, new BeaconDataProcessor());
+
+        dataManager.registerDualProcessor(HealthScalingData.class, SpongeHealthScaleData.class, ImmutableHealthScalingData.class, ImmutableSpongeHealthScalingData.class,
+                new HealthScalingProcessor());
 
         // Values
 

@@ -1004,6 +1004,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("area_effect_cloud_particle_type", makeSingleKey(PARTICLE_TYPE_TOKEN, PARTICLE_TYPE_VALUE_TOKEN, of("CloudParticleType"), "sponge:area_effect_cloud_particle_type", "AreaEffectCloud ParticleType"));
 
 
+        this.fieldMap.put("health_scale", makeSingleKey(DOUBLE_TOKEN, BOUNDED_DOUBLE_VALUE_TOKEN, of("HealthScale"), "sponge:health_scale", "Health Scale"));
+
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
         }

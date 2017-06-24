@@ -25,22 +25,31 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketEntityMetadata;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.mixin.core.network.datasync.IMixinEntityDataManager;
+import org.spongepowered.common.network.SpoofedEntityDataManager;
 
+import java.util.Collection;
 import java.util.Set;
 
 @Mixin(EntityTrackerEntry.class)
@@ -121,6 +130,31 @@ public abstract class MixinEntityTrackerEntry {
         if (((IMixinEntity) this.trackedEntity).isVanished()) {
             callBackInfo.cancel();
         }
+    }
+
+    @ModifyArg(method = "sendMetadataToAllAssociatedPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
+    private Collection<IAttributeInstance> spongeInjectHealth(Collection<IAttributeInstance> set) {
+        if (this.trackedEntity instanceof EntityPlayerMP) {
+            ((IMixinEntityPlayerMP) this.trackedEntity).injectScaledHealth(set, false);
+        }
+        return set;
+    }
+
+    @ModifyArg(method = "sendMetadataToAllAssociatedPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityMetadata;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
+    private EntityDataManager spongeRelocateDataManager(EntityDataManager manager) {
+        final Entity player = ((IMixinEntityDataManager) manager).getEntity();
+        if (((IMixinEntityPlayerMP) player).isHealthScaled()) {
+            return new SpoofedEntityDataManager(manager, player);
+        }
+        return manager;
+    }
+
+    @ModifyArg(method = "updatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityProperties;<init>(ILjava/util/Collection;)V"))
+    private Collection<IAttributeInstance> spongeInjectHealthForUpdate(Collection<IAttributeInstance> set) {
+        if (this.trackedEntity instanceof EntityPlayerMP) {
+            ((IMixinEntityPlayerMP) this.trackedEntity).injectScaledHealth(set, false);
+        }
+        return set;
     }
 
 }
