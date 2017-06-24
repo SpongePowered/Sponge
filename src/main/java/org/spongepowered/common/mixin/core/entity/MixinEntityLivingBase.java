@@ -93,6 +93,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
@@ -181,6 +183,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow private boolean checkTotemDeathProtection(DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
+    @Shadow public abstract AbstractAttributeMap getAttributeMap();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -850,6 +853,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 //            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
         }
     }
+
+    @Inject(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;resetActiveHand()V"))
+    private void updateHealthForUseFinish(CallbackInfo ci) {
+        if (this instanceof IMixinEntityPlayerMP) {
+            ((IMixinEntityPlayerMP) this).refreshScaledHealth();
+        }
+    }
+
     // Data delegated methods
 
     @Override

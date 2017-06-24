@@ -607,6 +607,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         for (PotionEffect potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
+        ((IMixinEntityPlayerMP) newPlayer).refreshScaledHealth();
 
         return newPlayer;
     }

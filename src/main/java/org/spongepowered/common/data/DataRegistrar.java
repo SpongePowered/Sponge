@@ -692,6 +692,8 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(MobSpawnerData.class, SpongeMobSpawnerData.class, ImmutableMobSpawnerData.class,
                 ImmutableSpongeMobSpawnerData.class, new MobSpawnerDataProcessor());
 
+        DataUtil.registerDualProcessor(HealthScalingData.class, SpongeHealthScaleData.class, ImmutableHealthScalingData.class, ImmutableSpongeHealthScalingData.class,
+                new HealthScalingProcessor());
 
         // Values
 
