@@ -34,6 +34,10 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.attributes.AttributeMap;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -43,6 +47,7 @@ import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClientSettings;
@@ -50,10 +55,12 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.network.play.server.SPacketEntityProperties;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
+import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -127,11 +134,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -169,6 +178,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -227,6 +238,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Nullable private Vector3d velocityOverride = null;
+    private boolean healthScaling = false;
+    private double healthScale = 20;
+
+    @Override
+    public void writeToNbt(NBTTagCompound compound) {
+        super.writeToNbt(compound);
+        if (this.healthScaling) {
+            compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
+        }
+    }
+
+    @Override
+    public void readFromNbt(NBTTagCompound compound) {
+        super.readFromNbt(compound);
+        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
+            this.healthScaling = true;
+            this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
+        }
+    }
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -507,6 +537,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.lastExperience = -1;
         this.lastHealth = -1.0F;
         this.lastFoodLevel = -1;
+        refreshScaledHealth();
     }
 
     @Override
@@ -902,4 +933,132 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return event;
     }
 
+    /**
+     * @author Faithcaio - 31. 12. 2016
+     * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
+     */
+    @Overwrite
+    public void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack) {
+        if (!this.isChangingQuantityOnly) {
+            this.connection.sendPacket(new SPacketSetSlot(containerToSend.windowId, slotInd, stack));
+        }
+    }
+
+    @Redirect(method = "onUpdateEntity",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/player/EntityPlayerMP;getHealth()F"
+            ),
+            slice =  @Slice(
+                    from = @At(
+                            value = "FIELD",
+                            target = "Lnet/minecraft/entity/player/EntityPlayerMP;lastHealth:F"
+                    ),
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/network/play/server/SPacketUpdateHealth;<init>(FIF)V"
+                    )
+            )
+    )
+    private float spongeGetScaledHealthForPacket(EntityPlayerMP entityPlayerMP) {
+        return getInternalScaledHealth();
+    }
+
+    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
+    private void updateHealthPriorToArmor(CallbackInfo ci) {
+        refreshScaledHealth();
+    }
+
+    @Override
+    public void setHealthScale(double scale) {
+        checkArgument(scale > 0, "Health scale must be greater than 0!");
+        checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
+        this.healthScale = scale;
+        this.healthScaling = true;
+        refreshScaledHealth();
+    }
+
+    @Override
+    public void refreshScaledHealth() {
+        // We need to use the dirty instances to signify that the player needs to ahve it updated, instead
+        // of modifying the attribute instances themselves, we bypass other potentially detrimental logi
+        // that would otherwise break the actual health scaling.
+        final Set<IAttributeInstance> dirtyInstances = ((AttributeMap) this.getAttributeMap()).getDirtyInstances();
+        injectScaledHealth(dirtyInstances, true);
+
+        // Send the new information to the client.
+        sendHealthUpdate();
+        this.connection.sendPacket(new SPacketEntityProperties(this.getEntityId(), dirtyInstances));
+        // Reset the dirty instances since they've now been manually updated on the client.
+        dirtyInstances.clear();
+
+    }
+
+    public void sendHealthUpdate() {
+        this.connection.sendPacket(new SPacketUpdateHealth(getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
+    }
+
+    @Override
+    public void injectScaledHealth(Collection<IAttributeInstance> set, boolean force) {
+        if (!this.healthScaling && !force) {
+            return;
+        }
+        // We need to remove the existing attribute instance for max health, since it's not always going to be the
+        // same as SharedMonsterAttributes.MAX_HEALTH
+        for (final Iterator<IAttributeInstance> iter = set.iterator(); iter.hasNext(); ) {
+            final IAttributeInstance dirtyInstance = iter.next();
+            if (dirtyInstance.getAttribute().getName().equals("generic.maxHealth")) {
+                iter.remove();
+                break;
+            }
+        }
+
+        // We now re-create a new ranged attribute for our desired health
+        final RangedAttribute maxHealth =
+            new RangedAttribute(null, "generic.maxHealth", this.healthScaling ? this.healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE);
+        maxHealth.setDescription("Max Health");
+        maxHealth.setShouldWatch(true); // needs to be watched
+
+        set.add(new ModifiableAttributeInstance(this.getAttributeMap(), maxHealth));
+
+    }
+
+    @Override
+    public double getHealthScale() {
+        return this.healthScale;
+    }
+
+    float cachedHealth = -1;
+    float cachedScaledHealth = -1;
+
+    @Override
+    public float getInternalScaledHealth() {
+        if (this.healthScaling) {
+            // Micro-optimization so we don't have to recalculate it all the time
+            if (this.cachedHealth != -1 && this.getHealth() == this.cachedHealth) {
+                if (this.cachedScaledHealth != -1) {
+                    return this.cachedScaledHealth;
+                }
+            }
+            this.cachedHealth = this.getHealth();
+            this.cachedScaledHealth = (float) ((this.cachedHealth / getMaxHealth()) * this.healthScale);
+            return this.cachedScaledHealth;
+        }
+        return getHealth();
+    }
+
+    @Override
+    public boolean isHealthScaled() {
+        return this.healthScaling;
+    }
+
+    @Override
+    public void setHealthScaled(boolean scaled) {
+        this.healthScaling = scaled;
+    }
+
+    @Override
+    public void updateDataManagerForScaledHealth() {
+        this.dataManager.set(EntityLivingBase.HEALTH, getInternalScaledHealth());
+    }
 }
