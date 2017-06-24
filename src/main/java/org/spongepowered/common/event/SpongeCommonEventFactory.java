@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;
@@ -94,8 +95,10 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -120,6 +123,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -288,6 +292,73 @@ public class SpongeCommonEventFactory {
         SpongeImpl.postEvent(event);
         return event;
     }
+
+    public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, @Nullable Object source) {
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseData data = causeTracker.getCurrentPhaseData();
+
+        BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
+        BlockState toState = BlockUtil.fromNative(state);
+        User owner = data.context.getOwner().orElse(null);
+        User notifier = data.context.getNotifier().orElse(null);
+
+        if (source == null) {
+            // If source is null the source is the block itself
+            source = LocatableBlock.builder().state(fromState).world(((World) worldIn)).position(pos.getX(), pos.getY(), pos.getZ()).build();
+        }
+
+        Cause.Builder builder = Cause.source(source);
+        builder.named(NamedCause.of(NamedCause.LIQUID_MIX, worldIn));
+        if (owner != null) {
+            builder.owner(owner);
+        }
+        if (notifier != null) {
+            builder.notifier(notifier);
+        }
+
+        WorldProperties world = ((World) worldIn).getProperties();
+        Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
+
+        Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
+                                                                   BlockSnapshot.builder().blockState(toState).world(world).position(position).build());
+        ChangeBlockEvent.Modify event = SpongeEventFactory.createChangeBlockEventModify(builder.build(), Collections.singletonList(transaction));
+
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseData data = causeTracker.getCurrentPhaseData();
+
+        BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
+        BlockState toState = BlockUtil.fromNative(state);
+        User owner = data.context.getOwner().orElse(null);
+        User notifier = data.context.getNotifier().orElse(null);
+        Object source = data.context.getSource(LocatableBlock.class).orElse(null);
+        if (source == null) {
+            source = worldIn; // Fallback
+        }
+        Cause.Builder builder = Cause.source(source);
+        builder.named(NamedCause.of(NamedCause.LIQUID_FLOW, worldIn));
+        if (owner != null) {
+            builder.owner(owner);
+        }
+        if (notifier != null) {
+            builder.notifier(notifier);
+        }
+
+        WorldProperties world = ((World) worldIn).getProperties();
+        Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
+
+        Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
+                BlockSnapshot.builder().blockState(toState).world(world).position(position).build());
+        ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(builder.build(), Collections.singletonList(transaction));
+
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
 
     /**
      * This simulates the blocks a piston moves and calls the event for saner debugging.
@@ -802,4 +873,5 @@ public class SpongeCommonEventFactory {
         // else any other Archetype we cannot be sure which size is correct
         return true;
     }
+
 }
