@@ -26,6 +26,8 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
@@ -58,11 +60,13 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -312,5 +316,22 @@ public final class SpongeImplHooks {
     public static void onCraftingRecipeRegister(CraftingRecipe recipe) {
         // Overridden in SF
         CraftingManager.register(recipe.getId(), ((IRecipe) recipe));
+    }
+
+    public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {
+        IRecipe recipe = CraftingManager.findMatchingRecipe(InventoryUtil.toNativeInventory(inventory), ((net.minecraft.world.World) world));
+        return Optional.ofNullable(((CraftingRecipe) recipe));
+    }
+
+    public static Collection<CraftingRecipe> getCraftingRecipes() {
+        return Streams.stream(CraftingManager.REGISTRY.iterator()).map(CraftingRecipe.class::cast).collect(ImmutableList.toImmutableList());
+    }
+
+    public static Optional<CraftingRecipe> getRecipeById(String id) {
+        IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
+        if (recipe == null) {
+            return Optional.empty();
+        }
+        return Optional.of(((CraftingRecipe) recipe));
     }
 }

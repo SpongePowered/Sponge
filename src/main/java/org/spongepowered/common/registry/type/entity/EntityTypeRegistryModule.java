@@ -205,7 +205,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, String oldName, int entityId, Translation translation) {
-        EntityList.register(entityId, SpongeImpl.ECOSYSTEM_ID + ':' + entityName, entityClass, oldName);
+        // SpongeENtityType cannot be registered with EntityList.
+//        EntityList.register(entityId, SpongeImpl.ECOSYSTEM_ID + ':' + entityName, entityClass, oldName);
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 
