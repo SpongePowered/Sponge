@@ -52,13 +52,11 @@ public class MixinBlockLiquid {
         Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             cir.setReturnValue(false);
-            cir.cancel();
             return;
         }
         boolean success = worldIn.setBlockState(pos, BlockUtil.toNative(transaction.getFinal().getState()));
-        cir.setReturnValue(success);
         if (!success) {
-            cir.cancel();
+            cir.setReturnValue(false);
         }
     }
 
