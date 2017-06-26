@@ -142,9 +142,11 @@ public abstract class MixinEntityTrackerEntry {
 
     @ModifyArg(method = "sendMetadataToAllAssociatedPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SPacketEntityMetadata;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
     private EntityDataManager spongeRelocateDataManager(EntityDataManager manager) {
-        final Entity player = ((IMixinEntityDataManager) manager).getEntity();
-        if (((IMixinEntityPlayerMP) player).isHealthScaled()) {
-            return new SpoofedEntityDataManager(manager, player);
+        if (((IMixinEntityDataManager) manager).getEntity() instanceof EntityPlayerMP) {
+            final Entity player = ((IMixinEntityDataManager) manager).getEntity();
+            if (((IMixinEntityPlayerMP) player).isHealthScaled()) {
+                return new SpoofedEntityDataManager(manager, player);
+            }
         }
         return manager;
     }
