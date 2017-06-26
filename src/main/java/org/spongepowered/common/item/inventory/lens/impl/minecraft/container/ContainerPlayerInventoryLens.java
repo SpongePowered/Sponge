@@ -35,6 +35,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ContainerPlayerInventoryLens extends ContainerLens {
@@ -65,11 +66,18 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
         final HotbarLensImpl hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
         base += HOTBAR * INVENTORY_WIDTH; // 9
         final OrderedInventoryLensImpl offHand = new OrderedInventoryLensImpl(base, OFFHAND, 1, slots);
+        base += OFFHAND;
+
+        this.viewedInventories = new ArrayList<>(Arrays.asList(hotbar, main, armor, crafting, offHand));
+
+        int additionalSlots = this.size - base;
+        if (additionalSlots > 0) {
+            viewedInventories.add(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
+        }
 
         // TODO actual Container order is:
         // CraftingOutput (1) -> Crafting (4) -> ArmorSlots (4) -> MainInventory (27) -> Hotbar (9) -> Offhand (1)
         // how to handle issues like in #939? ; e.g. Inventory#offer using a different insertion order
-        this.viewedInventories = Arrays.asList(hotbar, main, armor, crafting, offHand);
         super.init(slots);
     }
 }

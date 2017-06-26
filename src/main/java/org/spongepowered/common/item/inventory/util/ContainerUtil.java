@@ -345,7 +345,14 @@ public final class ContainerUtil {
      */
     public static SlotCollection countSlots(net.minecraft.inventory.Container container) {
         if (container instanceof ContainerPlayer) {
-            return new SlotCollection.Builder().add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false)).add(4).add(4, EquipmentSlotAdapter.class).add(36).add(1).build();
+            SlotCollection.Builder builder = new SlotCollection.Builder()
+                    .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
+                    .add(4)
+                    .add(4, EquipmentSlotAdapter.class)
+                    .add(36)
+                    .add(1);
+            builder.add(container.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
+            return builder.build();
         }
         return new SlotCollection.Builder().add(((MinecraftInventoryAdapter) container).getInventory().getSize()).build();
     }
