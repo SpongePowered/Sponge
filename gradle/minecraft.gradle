@@ -1,6 +1,7 @@
 // Shared Gradle configuration for the Sponge ForgeGradle projects
 
 ext.api = common.project('SpongeAPI')
+ext.testPlugins = common.project('testplugins')
 
 // Finish configuring SpongeAPI first
 evaluationDependsOn api.path
