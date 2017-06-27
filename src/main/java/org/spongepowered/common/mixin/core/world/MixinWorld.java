@@ -1311,7 +1311,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @return True if the block position is valid
      */
     @Overwrite
-    protected boolean isValid(BlockPos pos) { // isValid
+    public boolean isValid(BlockPos pos) { // isValid
         return ((IMixinBlockPos) pos).isValidPosition();
     }
 
