@@ -31,15 +31,8 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
 
-@Plugin(
-    id = "testplugin",
-    name = "TestPlugin",
-    version = "0.0.1-SNAPSHOT",
-    url = "https://spongepowered.org/",
-    authors = "SpongePowered",
-    description = "A Test plugin suite"
-)
-public class TestPlugin {
+@Plugin(id = "scaledhealthtest", name = "ScaledHealthTest", description = "A plugin to test scaled health")
+public class ScaledHealthTest {
 
     @Listener
     public void onPlayerJoin(ClientConnectionEvent.Join event, @Getter("getTargetEntity") Player player) {
