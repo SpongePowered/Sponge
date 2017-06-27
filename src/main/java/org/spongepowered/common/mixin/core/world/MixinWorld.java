@@ -1165,7 +1165,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @return The raw light
      */
     @Overwrite
-    private int getRawLight(BlockPos pos, EnumSkyBlock lightType) {
+    public int getRawLight(BlockPos pos, EnumSkyBlock lightType) {
         if (lightType == EnumSkyBlock.SKY && this.canSeeSky(pos)) {
             return 15;
         } else {
