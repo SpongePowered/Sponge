@@ -13,12 +13,10 @@ ext.apiSuffix = (api.version - '-SNAPSHOT') + '-BETA'
 dependencies {
     compile common
     compile common.sourceSets.java6.output
-//    compile testPlugins
 }
 
 sourceSets {
     java6.compileClasspath += main.compileClasspath + main.output
-//    testPlugins.compileClasspath += api.compileClasspath + api.output
 }
 
 // Include only asm-debug-all in the workspace
