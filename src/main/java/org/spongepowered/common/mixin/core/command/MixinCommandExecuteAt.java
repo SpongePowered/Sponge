@@ -22,15 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.command;
 
-import org.spongepowered.api.command.CommandSource;
+import net.minecraft.command.CommandExecuteAt;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-public interface IMixinCommandSender {
+@Mixin(CommandExecuteAt.class)
+public abstract class MixinCommandExecuteAt {
 
-    String COMMAND_BLOCK_SENDER = "net/minecraft/tileentity/TileEntityCommandBlock$1";
-    String COMMAND_MINECART_SENDER = "net.minecraft.entity.item.EntityMinecartCommandBlock$1";
-    String SIGN_CLICK_SENDER = "net/minecraft/tileentity/TileEntitySign$1";
-
-    CommandSource asCommandSource();
+    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
+    private GameRules onGetGameRules(WorldServer originalWorld, MinecraftServer server, ICommandSender sender, String[] args) {
+        return sender.getEntityWorld().getGameRules();
+    }
 }

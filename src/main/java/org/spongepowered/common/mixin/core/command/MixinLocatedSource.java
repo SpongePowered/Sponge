@@ -38,8 +38,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.util.VecHelper;
 
-@Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}/*,
-        targets = {IMixinCommandSender.SIGN_CLICK_SENDER, IMixinCommandSender.EXECUTE_COMMAND_SENDER}*/)
+@Mixin({EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class})
 public abstract class MixinLocatedSource implements Locatable, IMixinCommandSource {
 
     @Override
