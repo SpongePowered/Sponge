@@ -70,7 +70,7 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
         addTextColor(TextFormatting.DARK_GRAY, Color.ofRgb(0x555555));
         addTextColor(TextFormatting.BLUE, Color.ofRgb(0x5555FF));
         addTextColor(TextFormatting.GREEN, Color.ofRgb(0x55FF55));
-        addTextColor(TextFormatting.AQUA, Color.ofRgb(0x00FFFF));
+        addTextColor(TextFormatting.AQUA, Color.ofRgb(0x55FFFF));
         addTextColor(TextFormatting.RED, Color.ofRgb(0xFF5555));
         addTextColor(TextFormatting.LIGHT_PURPLE, Color.ofRgb(0xFF55FF));
         addTextColor(TextFormatting.YELLOW, Color.ofRgb(0xFFFF55));
