@@ -35,7 +35,8 @@
  * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinSignCommandSender}
  * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandExecuteAtSender}
+ * and /function
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSenderWrapper}
  * </dl>
  *
  * In addition, {@link org.spongepowered.common.mixin.core.command.MixinBlockCommandBlockSender} and

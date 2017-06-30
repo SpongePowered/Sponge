@@ -32,9 +32,8 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
 
-@Mixin(value = {EntityPlayer.class, CommandBlockBaseLogic.class}, targets = IMixinCommandSender.EXECUTE_COMMAND_SENDER)
+@Mixin({EntityPlayer.class, CommandBlockBaseLogic.class})
 public abstract class MixinCommandSendCommandFeedback implements ICommandSender {
 
     @Redirect(method = "sendCommandFeedback()Z", at = @At(value = "INVOKE",

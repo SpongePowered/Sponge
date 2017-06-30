@@ -28,16 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.math.Vec3d;
-import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -57,17 +54,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     private WrapperCommandSource(ICommandSender sender) {
         this.sender = sender;
         this.data = new MemorySubjectData(SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get());
-
-        // ICommandSenders have a *very* basic understanding of permissions, so
-        // get what we can.
-        CommandPermissions.populateNonCommandPermissions(this.data, this.sender::canUseCommand);
-        for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
-            if (command.getCallable() instanceof MinecraftCommandWrapper) {
-                MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
-                this.data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
-                        Tristate.fromBoolean(wrapper.command.checkPermission(sender.getServer(), sender)));
-            }
-        }
+        CommandPermissions.populateMinecraftPermissions(sender, data);
     }
 
     @Override

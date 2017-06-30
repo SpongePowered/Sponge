@@ -22,15 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.command;
 
-import org.spongepowered.api.command.CommandSource;
+import net.minecraft.command.FunctionObject;
+import net.minecraft.command.ICommand;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-public interface IMixinCommandSender {
+import java.util.Map;
 
-    String COMMAND_BLOCK_SENDER = "net/minecraft/tileentity/TileEntityCommandBlock$1";
-    String COMMAND_MINECART_SENDER = "net.minecraft.entity.item.EntityMinecartCommandBlock$1";
-    String SIGN_CLICK_SENDER = "net/minecraft/tileentity/TileEntitySign$1";
+@Mixin(FunctionObject.class)
+public abstract class MixinFunctionObject {
 
-    CommandSource asCommandSource();
+    @Redirect(method = "create", at = @At(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z", remap = false))
+    private static boolean doesCommandExist(Map<String, ICommand> unused, Object name) {
+        return Sponge.getCommandManager().containsAlias((String) name);
+    }
 }
