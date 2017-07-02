@@ -56,7 +56,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     @Shadow public abstract int getMaxEnchantability(int level);
     @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
     @Shadow public abstract String shadow$getName();
-    @Shadow public abstract boolean shadow$isTreasureEnchantment();
+    @Shadow public abstract boolean isTreasureEnchantment();
 
     private String id = "";
 
@@ -122,9 +122,9 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
         return new SpongeTranslation(shadow$getName());
     }
 
-    @Intrinsic
-    public boolean enchantment$isTreasure() {
-        return shadow$isTreasureEnchantment();
+    @Override
+    public boolean isTreasure() {
+        return isTreasureEnchantment();
     }
 
     @Override
