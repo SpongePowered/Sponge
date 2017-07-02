@@ -1,6 +1,7 @@
 // Shared Gradle configuration for the Sponge implementation projects
 
 ext.common = project(':SpongeCommon')
+
 // Finish configuring SpongeCommon first
 evaluationDependsOn common.path
 
@@ -95,6 +96,9 @@ shadowJar ext.shadowConfiguration = {
         // SpongeAPI and event generation
         include project(api.path)
         include dependency('org.spongepowered:event-gen-core')
+
+        // We need to exclude the test plugins
+        exclude project(testPlugins.path)
 
         include dependency('org.spongepowered:plugin-meta')
 
