@@ -51,8 +51,11 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+<<<<<<< HEAD
+=======
+import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
+>>>>>>> f83cb09... Add better fake world detection. Lazily evaluated, method can be used on any World object now.
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
