@@ -45,4 +45,6 @@ public interface IMixinWorld {
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
     int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType);
+
+    boolean isFake();
 }
