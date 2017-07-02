@@ -509,4 +509,7 @@
     "injectors": {
         "defaultRequire": 1
     }
+    "overwrites": {
+        "conformVisibility": true
+    }
 }
