@@ -53,6 +53,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -92,7 +93,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
     private double getSearchRadius(double originalRadius) {
-        if (this.world.isRemote) {
+        if (this.world.isRemote || ((IMixinWorld) this.world).isFake()) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
