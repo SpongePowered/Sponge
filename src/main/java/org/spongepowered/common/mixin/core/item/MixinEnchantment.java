@@ -123,7 +123,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     }
 
     @Intrinsic
-    public boolean enchantment$isTreasureEnchantment() {
+    public boolean enchantment$isTreasure() {
         return shadow$isTreasureEnchantment();
     }
 
