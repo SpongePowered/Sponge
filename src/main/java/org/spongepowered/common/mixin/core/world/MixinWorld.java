@@ -135,6 +135,7 @@ import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -178,6 +179,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     @Nullable private Context worldContext;
     protected boolean processingExplosion = false;
+    protected boolean isDefinitelyFake = false;
+    protected boolean hasChecked = false;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -1046,6 +1049,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean isFake() {
+        if (this.hasChecked) {
+            return this.isDefinitelyFake;
+        }
+        this.isDefinitelyFake = this.isRemote || this.worldInfo == null || !(this instanceof IMixinWorldServer);
+        this.hasChecked = true;
+        return this.isDefinitelyFake;
     }
 
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
