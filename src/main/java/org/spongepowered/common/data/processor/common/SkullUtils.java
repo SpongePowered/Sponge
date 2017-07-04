@@ -57,9 +57,12 @@ public class SkullUtils {
     }
 
     public static SkullType getSkullType(int skullType) {
-        return SpongeImpl.getRegistry().getAllOf(SkullType.class).stream()
-                .filter(type -> type instanceof SpongeSkullType && ((SpongeSkullType) type).getByteId() == skullType)
-                .findAny().orElse(DEFAULT_TYPE);
+        for(SkullType type : SpongeImpl.getRegistry().getAllOf(SkullType.class)){
+            if((type instanceof SpongeSkullType) && (((SpongeSkullType) type).getByteId() == skullType)) {
+                return type;
+            }
+        }
+        return DEFAULT_TYPE;
     }
 
     public static boolean isValidItemStack(Object container) {
