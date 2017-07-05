@@ -29,13 +29,22 @@ import static org.spongepowered.api.item.ItemTypes.BEDROCK;
 import static org.spongepowered.api.item.ItemTypes.STONE;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+
+import java.util.Collections;
+
+import javax.inject.Inject;
 
 /**
  * Adds BedRock. Literally.
@@ -43,18 +52,23 @@ import org.spongepowered.api.plugin.Plugin;
 @Plugin(id = "recipetest", name = "Recipe Test", description = "A plugin to test recipes")
 public class RecipeTest {
 
+    @Inject private PluginContainer plugin;
     @Listener
-    public void onInit(GameInitializationEvent event) {
+    public void onInit(GamePreInitializationEvent event) {
         Ingredient s = Ingredient.of(STONE);
         Ingredient b = Ingredient.of(BED);
+        ItemStack item = ItemStack.of(BEDROCK, 1);
+        DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(new ItemEnchantment(Enchantments.UNBREAKING, 1)));
+        if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
+            plugin.getLogger().error("Could not build recipe output!");
+        }
         ShapedCraftingRecipe recipe = CraftingRecipe.shapedBuilder().rows()
                 .row(s, s, s)
                 .row(s, b, s)
                 .row(s, s, s)
-                .result(ItemStack.of(BEDROCK, 1))
-                .build("bedrock", this);
+                .result(item)
+                .build("bedrock", plugin);
         Sponge.getRegistry().getCraftingRecipeRegistry().register(recipe);
-
     }
 
 }
