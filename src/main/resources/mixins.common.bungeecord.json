@@ -1,5 +1,5 @@
 {
-    "minVersion": "0.5.7",
+    "minVersion": "0.6.15",
     "package": "org.spongepowered.common.mixin.bungee",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.BungeeCordPlugin",

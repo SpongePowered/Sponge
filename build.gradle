@@ -50,7 +50,7 @@ ext.apiVersion = version
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.6.13-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.6.15-SNAPSHOT') {
         exclude module: 'launchwrapper'
     }
 
