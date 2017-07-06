@@ -158,9 +158,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.targetedLocation = VecHelper.toVector3d(worldIn.getSpawnPoint());
     }
 
-    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onGetDisplayName(CallbackInfoReturnable<ITextComponent> ci, TextComponentString component) {
-        ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
+    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
+    public void onGetDisplayName(CallbackInfoReturnable<ITextComponent> ci) {
+        ci.setReturnValue(LegacyTexts.parseComponent((TextComponentString) ci.getReturnValue(), SpongeTexts.COLOR_CHAR));
     }
 
     // utility method for getting the total experience at an arbitrary level

@@ -1,6 +1,6 @@
 {
     "required": false,
-    "minVersion": "0.6.8",
+    "minVersion": "0.6.15",
     "package": "org.spongepowered.common.mixin.core",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.CorePlugin",
