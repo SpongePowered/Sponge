@@ -303,15 +303,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "getCollisionBoxes", at = @At("HEAD"), cancellable = true)
-    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
-            CallbackInfoReturnable<List> cir) {
+    @Inject(method = "getCollisionBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)
+    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis, CallbackInfoReturnable<List<AxisAlignedBB>> cir) {
         if (this.isRemote || entity == null) {
             return;
         }
         if (entity.world != null && !entity.world.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
-            cir.setReturnValue(new ArrayList());
+            cir.setReturnValue(new ArrayList<>());
         }
     }
 

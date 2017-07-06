@@ -140,7 +140,7 @@ class EntityTickPhaseState extends TickPhaseState {
                                         .build()
                         );
                         if (tickingEntity instanceof EntityAnimal) {
-                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).func_191993_do();
+                            final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                             if (playerInLove != null) {
                                 builder.named(NamedCause.of("Player", playerInLove));
                             }
@@ -444,7 +444,7 @@ class EntityTickPhaseState extends TickPhaseState {
                             .build()
             );
             if (tickingEntity instanceof EntityAnimal) {
-                final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).func_191993_do();
+                final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                 if (playerInLove != null) {
                     builder.named(NamedCause.of("Player", playerInLove));
                 }

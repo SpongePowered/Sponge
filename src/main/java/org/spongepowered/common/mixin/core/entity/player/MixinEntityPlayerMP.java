@@ -344,7 +344,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.func_191956_a((EntityPlayerMP) (Object) this, this.scoreValue, cause);
+            entitylivingbase.awardKillScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
         }
 
         this.addStat(StatList.DEATHS);

@@ -162,7 +162,7 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
         ingredientsMap.putIfAbsent(" ", net.minecraft.item.crafting.Ingredient.EMPTY);
 
         // Throws JsonException when pattern is not complete or defines unused Ingredients
-        NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.func_192402_a(keys, ingredientsMap, width, height);
+        NonNullList<net.minecraft.item.crafting.Ingredient> ingredients = ShapedRecipes.deserializeIngredients(keys, ingredientsMap, width, height);
 
         return ((ShapedCraftingRecipe) new SpongeShapedRecipe(id, this.groupName, width, height, ingredients, ItemStackUtil.toNative(this.result)));
     }

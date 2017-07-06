@@ -600,7 +600,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                                     .item(heldSnapshot)
                                                     .type(DamageModifierTypes.SWEAPING)
                                                     .build(),
-                                            (incoming) -> EnchantmentHelper.func_191527_a((EntityPlayer) (Object) this) * attackDamage);
+                                            (incoming) -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
                                     final List<DamageFunction> sweapingFunctions = new ArrayList<>();
                                     sweapingFunctions.add(sweapingFunction);
                                     AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(sweapingCause,
