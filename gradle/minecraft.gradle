@@ -28,7 +28,7 @@ minecraft {
 // Mixins
 sourceSets {
     main {
-        refMap = "mixins.${implementation.toLowerCase()}.refmap.json"
+        ext.refMap = "mixins.${implementation.toLowerCase()}.refmap.json"
     }
 }
 
