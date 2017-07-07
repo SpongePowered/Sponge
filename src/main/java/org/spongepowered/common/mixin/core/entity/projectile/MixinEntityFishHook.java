@@ -71,7 +71,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Shadow protected abstract void bringInHookedEntity();
 
     @Shadow private int ticksCatchable;
-    @Shadow private int field_191518_aw;
+    @Shadow private int luck;
     @Shadow private boolean inGround;
 
     @Shadow public abstract void setDead();
@@ -135,7 +135,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             if (this.ticksCatchable > 0) {
                 // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
-                lootcontext$builder.withLuck((float) this.field_191518_aw + this.angler.getLuck());
+                lootcontext$builder.withLuck((float) this.luck + this.angler.getLuck());
                 transactions = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
                         .generateLootForPools(this.rand, lootcontext$builder.build())
                         .stream()
