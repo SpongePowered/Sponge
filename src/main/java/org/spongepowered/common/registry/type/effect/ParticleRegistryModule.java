@@ -137,7 +137,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("lava", EnumParticleTypes.LAVA, false);
         this.addParticleType("magic_critical_hit", EnumParticleTypes.CRIT_MAGIC, true);
         this.addEffectType("mobspawner_flames", null, ImmutableMap.of());
-        this.addParticleType("mob_spell", EnumParticleTypes.END_ROD, false, ImmutableMap.of(
+        this.addParticleType("mob_spell", EnumParticleTypes.SPELL_MOB, false, ImmutableMap.of(
                 ParticleOptions.COLOR, Color.BLACK));
         this.addParticleType("note", EnumParticleTypes.NOTE, false, ImmutableMap.of(
                 ParticleOptions.NOTE, NotePitches.F_SHARP0));
