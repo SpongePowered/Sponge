@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,6 +35,7 @@ import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
+import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
 
@@ -57,7 +57,12 @@ public class SkullUtils {
     }
 
     public static SkullType getSkullType(int skullType) {
-        return Iterables.get(SpongeImpl.getRegistry().getAllOf(SkullType.class), skullType);
+        for(SkullType type : SpongeImpl.getRegistry().getAllOf(SkullType.class)){
+            if((type instanceof SpongeSkullType) && (((SpongeSkullType) type).getByteId() == skullType)) {
+                return type;
+            }
+        }
+        return DEFAULT_TYPE;
     }
 
     public static boolean isValidItemStack(Object container) {
