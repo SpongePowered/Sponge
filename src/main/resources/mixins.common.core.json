@@ -53,6 +53,7 @@
         "block.MixinBlockFurnace",
         "block.MixinBlockGrass",
         "block.MixinBlockHay",
+        "block.MixinBlockHorizontal",
         "block.MixinBlockHopper",
         "block.MixinBlockHugeMushroom",
         "block.MixinBlockLadder",
