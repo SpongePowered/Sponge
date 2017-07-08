@@ -25,62 +25,56 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockCocoa;
+import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
+import org.spongepowered.common.data.util.DirectionResolver;
 
+import java.util.List;
 import java.util.Optional;
 
-@Mixin(BlockCocoa.class)
-public abstract class MixinBlockCocoa extends MixinBlockHorizontal {
-
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
-                .addAll(super.getManipulators(blockState))
-                .add(getGrowthData(blockState))
-                .build();
-    }
+@Mixin(BlockHorizontal.class)
+public abstract class MixinBlockHorizontal extends MixinBlock {
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return super.supports(immutable) ||  ImmutableGrowthData.class.isAssignableFrom(immutable);
+        return super.supports(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableGrowthData) {
-            int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            if (growth > 2) {
-                growth = 2;
-            }
-            return Optional.of((BlockState) blockState.withProperty(BlockCocoa.AGE, growth));
+        if (manipulator instanceof ImmutableDirectionalData) {
+            final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
+            final EnumFacing facing = DirectionResolver.getFor(direction);
+            return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        if (key.equals(Keys.GROWTH_STAGE)) {
-            int growth = (Integer) value;
-            if (growth > 2) {
-                growth = 2;
-            }
-            return Optional.of((BlockState) blockState.withProperty(BlockCocoa.AGE, growth));
+        if (key.equals(Keys.DIRECTION)) {
+            final Direction direction = (Direction) value;
+            final EnumFacing facing = DirectionResolver.getFor(direction);
+            return Optional.of((BlockState) blockState.withProperty(BlockHorizontal.FACING, facing));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCocoa.AGE), 0, 2);
+    @Override
+    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .addAll(super.getManipulators(blockState))
+                .add(new ImmutableSpongeDirectionalData(DirectionResolver.getFor(blockState.getValue(BlockHorizontal.FACING))))
+                .build();
     }
-
 }
