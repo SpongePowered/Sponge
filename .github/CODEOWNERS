@@ -7,6 +7,8 @@ src/main/java/org/spongepowered/common/data/** @gabizou
 src/main/java/org/spongepowered/common/effect/** @gabizou
 src/main/java/org/spongepowered/common/event/** @gabizou
 src/main/java/org/spongepowered/common/inject/** @kashike
+src/main/java/org/spongepowered/common/item/inventory/** @Faithcaio
+src/main/java/org/spongepowered/common/item/recipe/** @Faithcaio
 src/main/java/org/spongepowered/common/profile/** @kashike
 
 src/main/java/org/spongepowered/common/mixin/api/data/** @gabizou
@@ -18,8 +20,11 @@ src/main/java/org/sgponepowered/common/mixin/core/data/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/entity/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/entity/ai/** @Zidane
 src/main/java/org/spongepowered/common/mixin/core/event/cause/entity/damage/** @gabizou
+src/main/java/org/spongepowered/common/mixin/core/inventory/** @Faithcaio
 src/main/java/org/spongepowered/common/mixin/core/item/data/** @gabizou
+src/main/java/org/spongepowered/common/mixin/core/item/inventory/** @Faithcaio
 src/main/java/org/spongepowered/common/mixin/core/item/merchant/** @gabizou
+src/main/java/org/spongepowered/common/mixin/core/item/recipe/** @Faithcaio
 src/main/java/org/spongepowered/common/mixin/core/nbt/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/potion/** @gabizou
 src/main/java/org/spongepowered/common/mixin/core/text/** @kashike @minecrell
