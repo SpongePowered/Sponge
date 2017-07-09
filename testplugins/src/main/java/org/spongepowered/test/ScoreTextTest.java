@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -38,9 +39,16 @@ import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.selector.Selector;
+
+import javax.inject.Inject;
 
 @Plugin(id = "scoretexttest", name = "ScoreText test", description = "A plugin to test projectiles")
 public class ScoreTextTest {
+
+    @Inject
+    private Logger logger;
 
     @Listener
     public void onGameStartingServer(GameStartingServerEvent event) {
@@ -48,14 +56,14 @@ public class ScoreTextTest {
         Sponge.getCommandManager().register(
                 this,
                 CommandSpec.builder()
-                        .executor(ScoreTextTest::showTest)
+                        .executor(this::showTest)
                         .description(Text.of("Creates a dummy objective 'test', adds 1 to it, then shows you the ScoreText"))
                         .build(),
                 "scoretext"
         );
     }
 
-    private static CommandResult showTest(CommandSource src, CommandContext ctx) throws CommandException {
+    private CommandResult showTest(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
             throw new CommandException(Text.of("Must be ran by player"));
         }
@@ -66,7 +74,25 @@ public class ScoreTextTest {
         final Scoreboard sb = Sponge.getServer().getServerScoreboard().get();
         final Objective test = sb.getObjective("test").get();
         final Score score = test.getScore(player.getTeamRepresentation()).get();
-        src.sendMessage(Text.of(score));
+
+        src.sendMessage(Text.of(TextColors.GREEN, Text.of("1.")));
+        //This should work, Score should remember the player and objective.
+        try {
+            src.sendMessage(Text.of(TextColors.GREEN, Text.of(score)));
+        } catch (RuntimeException e){
+            src.sendMessage(Text.of(TextColors.RED, Text.of((e.getMessage() == null) ? "null" : e.getMessage())));
+            this.logger.error("1. Error: ", e);
+        }
+
+        src.sendMessage(Text.of(TextColors.GREEN, Text.of("2.")));
+        //This should not work, it's an API design error to not include an objective
+        try {
+            src.sendMessage(Text.of(TextColors.RED, Text.of(Selector.parse("@p"))));
+        } catch (RuntimeException e){
+            src.sendMessage(Text.of(TextColors.RED, Text.of(e.getMessage())));
+            this.logger.error("2. Error: ", e);
+        }
+
         return CommandResult.success();
     }
 }
