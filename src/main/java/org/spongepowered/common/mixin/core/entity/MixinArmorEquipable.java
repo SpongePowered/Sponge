@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.monster.AbstractSkeleton;
 import net.minecraft.entity.monster.EntityGiantZombie;
-import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -47,7 +47,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 // All implementors of ArmorEquipable
-@Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, EntitySkeleton.class, EntityZombie.class, EntityHuman.class})
+@Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, AbstractSkeleton.class, EntityZombie.class, EntityHuman.class})
 @Implements(@Interface(iface = ArmorEquipable.class, prefix = "equipable$"))
 public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 
