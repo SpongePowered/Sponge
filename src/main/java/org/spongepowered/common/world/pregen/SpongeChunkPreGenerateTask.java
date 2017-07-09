@@ -143,7 +143,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         this.spongeTask = this.scheduler
                 .createTaskBuilder()
-                .intervalTicks(preferredTickInterval)
+                .intervalTicks(tickInterval)
                 .execute(this)
                 .submit(plugin);
 
