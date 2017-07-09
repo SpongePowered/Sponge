@@ -47,27 +47,34 @@ import java.util.stream.Stream;
 @Plugin(id = "projectiletest", name = "Projectile Test", description = "A plugin to test projectiles")
 public class ProjectileTest {
 
-    private static Text ENABLE = Text.of("enable");
-    private static Text unknown = Text.of("Unknown");
+    private static final Text ENABLE = Text.of("enable");
+    private static final Text UNKNOWN = Text.of("Unknown");
 
-    private boolean logging = false;
+    private boolean disableLogging = true;
 
-    @Listener public void onGameStartingServer(GameStartingServerEvent event) {
+    private static <T> Stream<T> streamOpt(Optional<T> opt) {
+        return opt.map(Stream::of).orElse(Stream.empty());
+    }
+
+    @Listener
+    public void onGameStartingServer(GameStartingServerEvent event) {
         Sponge.getCommandManager().register(
                 this,
                 CommandSpec.builder()
                         .arguments(GenericArguments.bool(ENABLE))
                         .description(Text.of("Enable logging of projectiles"))
                         .executor((src, args) -> {
-                            this.logging = args.<Boolean>getOne(ENABLE).get();
+                            this.disableLogging = !args.<Boolean>getOne(ENABLE).get();
                             return CommandResult.success();
                         })
-                        .build()
-                , "logProjectiles");
+                        .build(),
+                "logProjectiles"
+        );
     }
 
-    @Listener public void onUseItemStack(UseItemStackEvent event) {
-        if (!logging) {
+    @Listener
+    public void onUseItemStack(UseItemStackEvent event) {
+        if (this.disableLogging) {
             return;
         }
         this.title("UseItemStack");
@@ -75,18 +82,19 @@ public class ProjectileTest {
         this.broadcast("Stack", event.getItemStackInUse());
     }
 
-    @Listener public void onLaunchProjectile(LaunchProjectileEvent event) {
-        if (!logging) {
+    @Listener
+    public void onLaunchProjectile(LaunchProjectileEvent event) {
+        if (this.disableLogging) {
             return;
         }
-        title("LaunchProjectile");
-        broadcast("     Cause", event.getCause());
-        broadcast("Projectile", event.getTargetEntity());
+        this.title("LaunchProjectile");
+        this.broadcast("     Cause", event.getCause());
+        this.broadcast("Projectile", event.getTargetEntity());
     }
 
     @Listener
     public void onEntityCreate(ConstructEntityEvent.Post event) {
-        if (!logging) {
+        if (this.disableLogging) {
             return;
         }
         if (!(event.getTargetEntity() instanceof Projectile)) {
@@ -99,11 +107,11 @@ public class ProjectileTest {
                         .flatMap(ProjectileTest::streamOpt)
                         .findFirst()
                         .<Text>map(Text::of)
-                        .orElse(unknown)
-        ).orElse(unknown);
-        title("ConstructEntity");
-        broadcast("Shooter", Text.of(proj.getShooter()));
-        broadcast("Creator", creatorText);
+                        .orElse(UNKNOWN)
+        ).orElse(UNKNOWN);
+        this.title("ConstructEntity");
+        this.broadcast("Shooter", Text.of(proj.getShooter()));
+        this.broadcast("Creator", creatorText);
     }
 
     private void title(String title) {
@@ -116,9 +124,5 @@ public class ProjectileTest {
         Sponge.getServer().getBroadcastChannel().send(
                 Text.of(TextColors.GOLD, label + ": ", TextColors.AQUA, logged)
         );
-    }
-
-    private static <T> Stream<T> streamOpt(Optional<T> opt) {
-        return opt.map(Stream::of).orElse(Stream.empty());
     }
 }
