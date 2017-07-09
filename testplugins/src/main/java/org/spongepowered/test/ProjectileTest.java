@@ -50,11 +50,8 @@ public class ProjectileTest {
     private static final Text ENABLE = Text.of("enable");
     private static final Text UNKNOWN = Text.of("Unknown");
 
-    private boolean disableLogging = true;
-
-    private static <T> Stream<T> streamOpt(Optional<T> opt) {
-        return opt.map(Stream::of).orElse(Stream.empty());
-    }
+    private boolean enabled = false;
+    private final ProjectileTest.ProjListener listener = new ProjectileTest.ProjListener();
 
     @Listener
     public void onGameStartingServer(GameStartingServerEvent event) {
@@ -64,7 +61,12 @@ public class ProjectileTest {
                         .arguments(GenericArguments.bool(ENABLE))
                         .description(Text.of("Enable logging of projectiles"))
                         .executor((src, args) -> {
-                            this.disableLogging = !args.<Boolean>getOne(ENABLE).get();
+                            final boolean enable = !args.<Boolean>getOne(ENABLE).get();
+                            if (enable && !this.enabled) {
+                                this.enable();
+                            } else if (!enable && this.enabled) {
+                                this.disable();
+                            }
                             return CommandResult.success();
                         })
                         .build(),
@@ -72,57 +74,68 @@ public class ProjectileTest {
         );
     }
 
-    @Listener
-    public void onUseItemStack(UseItemStackEvent event) {
-        if (this.disableLogging) {
-            return;
-        }
-        this.title("UseItemStack");
-        this.broadcast("Cause", event.getCause());
-        this.broadcast("Stack", event.getItemStackInUse());
+    private void disable() {
+        Sponge.getEventManager().unregisterListeners(this.listener);
     }
 
-    @Listener
-    public void onLaunchProjectile(LaunchProjectileEvent event) {
-        if (this.disableLogging) {
-            return;
-        }
-        this.title("LaunchProjectile");
-        this.broadcast("     Cause", event.getCause());
-        this.broadcast("Projectile", event.getTargetEntity());
+    private void enable() {
+        Sponge.getEventManager().registerListeners(this, this.listener);
+        this.enabled = true;
     }
 
-    @Listener
-    public void onEntityCreate(ConstructEntityEvent.Post event) {
-        if (this.disableLogging) {
-            return;
-        }
-        if (!(event.getTargetEntity() instanceof Projectile)) {
-            return;
-        }
-        Projectile proj = (Projectile) event.getTargetEntity();
-        Text creatorText = proj.getCreator().map(creatorUUID ->
-                Sponge.getServer().getWorlds().stream()
-                        .map(w -> w.getEntity(creatorUUID))
-                        .flatMap(ProjectileTest::streamOpt)
-                        .findFirst()
-                        .<Text>map(Text::of)
-                        .orElse(UNKNOWN)
-        ).orElse(UNKNOWN);
-        this.title("ConstructEntity");
-        this.broadcast("Shooter", Text.of(proj.getShooter()));
-        this.broadcast("Creator", creatorText);
-    }
 
-    private void title(String title) {
-        Sponge.getServer().getBroadcastChannel().send(
-                Text.of(TextColors.RED, title)
-        );
-    }
+    public class ProjListener {
 
-    private void broadcast(String label, Object logged) {
-        Sponge.getServer().getBroadcastChannel().send(
-                Text.of(TextColors.GOLD, label + ": ", TextColors.AQUA, logged)
-        );
+        @Listener
+        public void onUseItemStack(UseItemStackEvent event) {
+            this.title("UseItemStack");
+            this.broadcast("Cause", event.getCause());
+            this.broadcast("Stack", event.getItemStackInUse());
+        }
+
+        @Listener
+        public void onLaunchProjectile(LaunchProjectileEvent event) {
+            this.title("LaunchProjectile");
+            this.broadcast("     Cause", event.getCause());
+            this.broadcast("Projectile", event.getTargetEntity());
+        }
+
+        @Listener
+        public void onEntityCreate(ConstructEntityEvent.Post event) {
+            if (!(event.getTargetEntity() instanceof Projectile)) {
+                return;
+            }
+            Projectile proj = (Projectile) event.getTargetEntity();
+            Text creatorText = proj.getCreator().map(creatorUUID ->
+                    Sponge.getServer().getWorlds().stream()
+                            .map(w -> w.getEntity(creatorUUID))
+                            .flatMap(this::streamOpt)
+                            .findFirst()
+                            .<Text>map(Text::of)
+                            .orElse(UNKNOWN)
+            ).orElse(UNKNOWN);
+            this.title("ConstructEntity");
+            this.broadcast("Shooter", Text.of(proj.getShooter()));
+            this.broadcast("Creator", creatorText);
+        }
+
+        private void title(String title) {
+            Sponge.getServer().getBroadcastChannel().send(
+                    Text.of(TextColors.RED, title)
+            );
+        }
+
+        private void broadcast(String label, Object logged) {
+            Sponge.getServer().getBroadcastChannel().send(
+                    Text.of(TextColors.GOLD, label + ": ", TextColors.AQUA, logged)
+            );
+        }
+
+        /**
+         * allow flat mapping over optionals, to single stream, or empty.
+         */
+        private <T> Stream<T> streamOpt(Optional<T> opt) {
+            return opt.map(Stream::of).orElse(Stream.empty());
+        }
     }
 }
