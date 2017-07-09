@@ -391,8 +391,8 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
                         logger.info("Generated {} chunks in {}, {}% complete", post.getChunksGeneratedThisStep(),
                             DurationFormatUtils.formatDuration(post.getTimeTakenForStep().toMillis(), TIME_FORMAT, false),
                             GenericMath.floor(
-                                (post.getChunkPreGenerate().getTotalGeneratedChunks() + post.getChunkPreGenerate().getTotalSkippedChunks())
-                                    / post.getChunkPreGenerate().getTargetTotalChunks() * 100)
+                                100 * (post.getChunkPreGenerate().getTotalGeneratedChunks() + post.getChunkPreGenerate().getTotalSkippedChunks())
+                                    / post.getChunkPreGenerate().getTargetTotalChunks())
                         );
                     } else if (event instanceof ChunkPreGenerationEvent.Complete) {
                         logger.info("Done! Generated a total of {} chunks in {}", event.getChunkPreGenerate().getTargetTotalChunks(),
