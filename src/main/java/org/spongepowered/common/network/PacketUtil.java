@@ -233,7 +233,13 @@ public class PacketUtil {
 
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
             SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(playerMP)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
-            return isCancelled;
+            if (isCancelled) {
+                // Multiple slots may have been changed on the client. Right
+                // clicking armor is one example - the client changes it
+                // without the server telling it to.
+                playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory());
+                return true;
+            }
         } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
             lastTryBlockPacketTimeStamp = System.currentTimeMillis();
@@ -247,6 +253,7 @@ public class PacketUtil {
                 BlockPos pos = packet.getPos();
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos));
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos.offset(packet.getDirection())));
+                playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory()); // See above
                 return true;
             }
         }
