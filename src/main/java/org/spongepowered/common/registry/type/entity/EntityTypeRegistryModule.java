@@ -27,9 +27,9 @@ package org.spongepowered.common.registry.type.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
@@ -57,9 +57,11 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
@@ -67,6 +69,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
 
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
+    private final Set<FutureRegistration> customEntities = new HashSet<>();
 
     public static EntityTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -205,8 +208,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, String oldName, int entityId, Translation translation) {
-        // SpongeENtityType cannot be registered with EntityList.
-//        EntityList.register(entityId, SpongeImpl.ECOSYSTEM_ID + ':' + entityName, entityClass, oldName);
+        this.customEntities.add(new FutureRegistration(entityId, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, entityName), entityClass, oldName));
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 
@@ -276,6 +278,25 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             }
         }
         return Optional.empty();
+    }
+
+    public Set<FutureRegistration> getCustomEntities() {
+        return ImmutableSet.copyOf(this.customEntities);
+    }
+
+    public static final class FutureRegistration {
+
+        public final int id;
+        public final ResourceLocation name;
+        public final Class<? extends Entity> type;
+        public final String oldName;
+
+        FutureRegistration(int id, ResourceLocation name, Class<? extends Entity> type, String oldName) {
+            this.id = id;
+            this.name = name;
+            this.type = type;
+            this.oldName = oldName;
+        }
     }
 
 }
