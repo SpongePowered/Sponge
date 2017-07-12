@@ -25,35 +25,52 @@
 package org.spongepowered.common.item.inventory.query.strategy;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.text.translation.Translation;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.Query;
 import org.spongepowered.common.item.inventory.query.QueryStrategy;
 
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Set;
 
-public class NameStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Translation> {
-    
-    private Set<Translation> names;
+public final class CompoundStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Object> {
+
+    private Set<QueryStrategy<TInventory, TStack, ?>> strategies = new HashSet<>();
 
     @Override
-    public QueryStrategy<TInventory, TStack, Translation> with(ImmutableSet<Translation> args) {
-        this.names = ImmutableSet.<Translation>copyOf(args);
+    public QueryStrategy<TInventory, TStack, Object> with(ImmutableSet<Object> objects) {
+        Multimap<Query.Type, Object> args = Multimaps.newMultimap(new EnumMap<>(Query.Type.class), HashSet::new);
+        for (Object arg : objects) {
+            args.put(Query.getType(arg), arg);
+        }
+        args.asMap().forEach(this::addStrategy);
+        if (this.strategies.size() == 1) {
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            QueryStrategy<TInventory, TStack, Object> value = (QueryStrategy) this.strategies.iterator().next();
+            return value;
+        }
         return this;
     }
-    
+
+    private <E> void addStrategy(Query.Type type, Collection<E> args) {
+        QueryStrategy<TInventory, TStack, E> strategy = Query.getStrategy(type);
+        this.strategies.add(strategy.with(ImmutableSet.copyOf(args)));
+    }
+
     @Override
     public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.names.isEmpty()) {
+        if (this.strategies.isEmpty()) {
             return true;
         }
-        for (Translation candidate : this.names) {
-            if (candidate.toString().equals(lens.getName(inventory).toString())) {
+        for (QueryStrategy<TInventory, TStack, ?> subStrategy : this.strategies) {
+            if (subStrategy.matches(lens, parent, inventory)) {
                 return true;
             }
         }
-        
         return false;
     }
-
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.query.strategy.expression;
 
+import com.google.common.collect.ImmutableSet;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.query.QueryStrategy;
@@ -33,7 +34,7 @@ public class ExpressionStrategy<TInventory, TStack> extends QueryStrategy<TInven
 //    private Evaluator evaluator;
 
     @Override
-    public QueryStrategy<TInventory, TStack, Class<?>> with(Class<?>[] args) {
+    public QueryStrategy<TInventory, TStack, Class<?>> with(ImmutableSet<Class<?>> args) {
 //        this.evaluator = Parser.parse(args);
         return this;
     }
