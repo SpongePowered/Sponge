@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
+import com.google.common.collect.ImmutableSet;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 
 public abstract class QueryStrategy<TInventory, TStack, TArgs> {
 
-    public abstract QueryStrategy<TInventory, TStack, TArgs> with(TArgs[] args);
+    public abstract QueryStrategy<TInventory, TStack, TArgs> with(ImmutableSet<TArgs> args);
 
     public abstract boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory);
 }

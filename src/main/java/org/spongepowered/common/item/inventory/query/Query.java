@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.query;
 
 import static com.google.common.base.Preconditions.*;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -43,6 +44,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLens
 import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
 import org.spongepowered.common.item.inventory.query.result.QueryResult;
 import org.spongepowered.common.item.inventory.query.strategy.ClassStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.CompoundStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ExactItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.GenericStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemStackStrategy;
@@ -66,7 +68,8 @@ public class Query<TInventory, TStack> {
         PROPERTIES("property", PropertyStrategy.class),
         NAME("name", NameStrategy.class),
         EXPRESSION("expr", ExpressionStrategy.class),
-        GENERIC("args", GenericStrategy.class);
+        GENERIC("args", GenericStrategy.class),
+        COMPOUND("compound", CompoundStrategy.class);
 
         private final String key;
 
@@ -112,7 +115,9 @@ public class Query<TInventory, TStack> {
 
     private final QueryStrategy<TInventory, TStack, ?> strategy;
 
-    protected Query(InventoryAdapter<TInventory, TStack> adapter, QueryStrategy<TInventory, TStack, ?> strategy) {
+    private Query(InventoryAdapter<TInventory, TStack> adapter, Type type, Object...args) {
+        QueryStrategy<TInventory, TStack, Object> strategy = Query.<TInventory, TStack, Object>getStrategy(type)
+                .with(ImmutableSet.copyOf(args));
         this.adapter = adapter;
         this.inventory = adapter.getInventory();
         this.lens = adapter.getRootLens();
@@ -208,43 +213,35 @@ public class Query<TInventory, TStack> {
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Class<?>... types) {
-        QueryStrategy<TInventory, TStack, Class<?>> strategy = Query.<TInventory, TStack, Class<?>>getStrategy(Type.CLASS).with(types);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.CLASS, types);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, ItemType... types) {
-        QueryStrategy<TInventory, TStack, ItemType> strategy = Query.<TInventory, TStack, ItemType>getStrategy(Type.TYPE).with(types);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.TYPE, types);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, ItemStack... types) {
-        QueryStrategy<TInventory, TStack, ItemStack> strategy = Query.<TInventory, TStack, ItemStack>getStrategy(Type.STACK).with(types);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.STACK, types);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compileExact(InventoryAdapter<TInventory, TStack>  adapter, ItemStack... types) {
-        QueryStrategy<TInventory, TStack, ItemStack> strategy = Query.<TInventory, TStack, ItemStack>getStrategy(Type.EXACT_STACK).with(types);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.EXACT_STACK, types);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, InventoryProperty<?, ?>... props) {
-        QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> strategy = Query.<TInventory, TStack, InventoryProperty<?, ?>>getStrategy(Type.PROPERTIES).with(props);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.PROPERTIES, props);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Translation... names) {
-        QueryStrategy<TInventory, TStack, Translation> strategy = Query.<TInventory, TStack, Translation>getStrategy(Type.NAME).with(names);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.NAME, names);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, String... expression) {
-        QueryStrategy<TInventory, TStack, String> strategy = Query.<TInventory, TStack, String>getStrategy(Type.EXPRESSION).with(expression);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.EXPRESSION, expression);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
-        QueryStrategy<TInventory, TStack, Object> strategy = Query.<TInventory, TStack, Object>getStrategy(Type.GENERIC).with(args);
-        return new Query<TInventory, TStack>(adapter, strategy);
+        return new Query<>(adapter, Type.COMPOUND, args);
     }
 
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(Type type) {
@@ -273,6 +270,28 @@ public class Query<TInventory, TStack> {
 
     public static void setDefaultResultProvider(ResultAdapterProvider<?, ?> defaultResultProvider) {
         Query.defaultResultProvider = defaultResultProvider;
+    }
+
+    public static Query.Type getType(Object argument) {
+        if (argument instanceof Class) {
+            return Type.CLASS;
+        }
+        if (argument instanceof ItemType) {
+            return Type.TYPE;
+        }
+        if (argument instanceof ItemStack) {
+            return Type.STACK; // TODO EXACT_STACK?
+        }
+        if (argument instanceof InventoryProperty) {
+            return Type.PROPERTIES;
+        }
+        if (argument instanceof Translation) {
+            return Type.NAME;
+        }
+        if (argument instanceof String) {
+            return Type.EXPRESSION;
+        }
+        return Type.GENERIC;
     }
 
     private static void registerDefaultStrategies() {
