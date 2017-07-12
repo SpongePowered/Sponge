@@ -38,8 +38,8 @@ public class ExactItemStackStrategy<TInventory> extends QueryStrategy<TInventory
     private Set<ItemStack> stacks;
 
     @Override
-    public QueryStrategy<TInventory, ItemStack, ItemStack> with(ItemStack[] types) {
-        this.stacks = ImmutableSet.<ItemStack>copyOf(types);
+    public QueryStrategy<TInventory, ItemStack, ItemStack> with(ImmutableSet<ItemStack> types) {
+        this.stacks = types;
         return this;
     }
     

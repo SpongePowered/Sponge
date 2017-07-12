@@ -39,7 +39,7 @@ public class PropertyStrategy<TInventory, TStack> extends QueryStrategy<TInvento
     private Set<InventoryProperty<?, ?>> properties;
 
     @Override
-    public QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> with(InventoryProperty<?, ?>[] args) {
+    public QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> with(ImmutableSet<InventoryProperty<?, ?>> args) {
         this.properties = ImmutableSet.<InventoryProperty<?, ?>>copyOf(args);
         return this;
     }

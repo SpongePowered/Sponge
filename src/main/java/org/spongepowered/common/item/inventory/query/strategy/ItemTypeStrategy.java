@@ -39,8 +39,8 @@ public class ItemTypeStrategy<TInventory> extends QueryStrategy<TInventory, Item
     private Set<ItemType> types;
 
     @Override
-    public QueryStrategy<TInventory, ItemStack, ItemType> with(ItemType[] types) {
-        this.types = ImmutableSet.<ItemType>copyOf(types);
+    public QueryStrategy<TInventory, ItemStack, ItemType> with(ImmutableSet<ItemType> types) {
+        this.types = types;
         return this;
     }
     
