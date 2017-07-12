@@ -175,11 +175,13 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         return getMaxStackSize();
     }
 
-    public boolean dataholder$validateRawData(DataView container) {
+    @Override
+    public boolean validateRawData(DataView container) {
         return false;
     }
 
-    public void dataholder$setRawData(DataView container) throws InvalidDataException {
+    @Override
+    public void setRawData(DataView container) throws InvalidDataException {
 
     }
     
