@@ -39,6 +39,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
@@ -88,7 +89,7 @@ import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemstack$"))
-public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
+public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMixinCustomDataHolder {
 
     private List<DataView> failedData = new ArrayList<>();
 
@@ -154,43 +155,40 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            state.getPhase().capturePlayerUsingStackToBreakBlock(this, (EntityPlayerMP) playerIn, state, peek.context, causeTracker);
+            state.getPhase().capturePlayerUsingStackToBreakBlock((ItemStack)this, (EntityPlayerMP) playerIn, state, peek.context, causeTracker);
         }
     }
 
-    @Override
-    public ItemType getItem() {
+    public ItemType itemstack$getItem() {
         return (ItemType) shadow$getItem();
     }
 
-    @Override
-    public int getQuantity() {
+    public int itemstack$getQuantity() {
         return this.getCount();
     }
 
-    @Override
-    public void setQuantity(int quantity) throws IllegalArgumentException {
+    public void itemstack$setQuantity(int quantity) throws IllegalArgumentException {
         this.setCount(quantity);
     }
 
-    @Override
-    public int getMaxStackQuantity() {
+    public int itemstack$getMaxStackQuantity() {
         return getMaxStackSize();
     }
 
-    @Override
-    public boolean validateRawData(DataView container) {
+    public boolean dataholder$validateRawData(DataView container) {
         return false;
     }
 
-    @Override
-    public void setRawData(DataView container) throws InvalidDataException {
-
+    public void dataholder$setRawData(DataView container) throws InvalidDataException {
 
     }
-
+    
     @Override
-    public ItemStack copy() {
+    public DataHolder copy() {
+        return this.itemstack$copy();
+    }
+
+    public ItemStack itemstack$copy() {
         return (ItemStack) shadow$copy();
     }
 
@@ -203,8 +201,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ITEM_TYPE, this.getItem().getId())
-                .set(DataQueries.ITEM_COUNT, this.getQuantity())
+                .set(DataQueries.ITEM_TYPE, this.itemstack$getItem().getId())
+                .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity())
                 .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = getTagCompound().copy();
@@ -228,18 +226,15 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         return container;
     }
 
-    @Override
-    public Translation getTranslation() {
+    public Translation itemstack$getTranslation() {
         return new SpongeTranslation(shadow$getItem().getUnlocalizedName((net.minecraft.item.ItemStack) (Object) this) + ".name");
     }
 
-    @Override
-    public ItemStackSnapshot createSnapshot() {
-        return new SpongeItemStackSnapshot(this);
+    public ItemStackSnapshot itemstack$createSnapshot() {
+        return new SpongeItemStackSnapshot((ItemStack)this);
     }
 
-    @Override
-    public boolean equalTo(ItemStack that) {
+    public boolean itemstack$equalTo(ItemStack that) {
         return net.minecraft.item.ItemStack.areItemStacksEqual(
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) that

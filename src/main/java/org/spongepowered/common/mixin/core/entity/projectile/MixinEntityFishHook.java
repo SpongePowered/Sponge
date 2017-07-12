@@ -74,8 +74,6 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Shadow private int luck;
     @Shadow private boolean inGround;
 
-    @Shadow public abstract void setDead();
-
     @Nullable
     private ProjectileSource projectileSource;
 

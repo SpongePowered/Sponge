@@ -59,6 +59,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
@@ -970,9 +971,9 @@ public abstract class MixinEntity implements IMixinEntity {
         }
         return list;
     }
-
+    
     @Override
-    public Entity copy() {
+    public DataHolder copy() {
         if ((Object) this instanceof Player) {
             throw new IllegalArgumentException("Cannot copy player entities!");
         }
