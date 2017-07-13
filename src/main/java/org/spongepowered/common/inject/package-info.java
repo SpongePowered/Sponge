@@ -22,29 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.provider;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.asset.AssetId;
-import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.api.inject.InjectionPoint;
-import org.spongepowered.api.plugin.PluginContainer;
-
-import java.util.NoSuchElementException;
-
-public class PluginAssetProvider implements Provider<Asset> {
-
-    @Inject private PluginContainer container;
-    @Inject private AssetManager assetManager;
-    @Inject private InjectionPoint point;
-
-    @Override
-    public Asset get() {
-        String name = this.point.getAnnotation(AssetId.class).value();
-        return this.assetManager.getAsset(this.container, name)
-                .orElseThrow(() -> new NoSuchElementException("Cannot find asset " + name));
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.inject;

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inject;
 
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Module;
@@ -31,10 +32,15 @@ import com.google.inject.Provider;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
-import com.google.inject.spi.InjectionPoint;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
+import org.spongepowered.api.inject.InjectionPoint;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -46,6 +52,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
 
     @Nullable private InjectionPoint injectionPoint;
 
+    @Nullable
     @Override
     public InjectionPoint get() {
         return this.injectionPoint;
@@ -66,6 +73,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
         }
     }
 
+    @Nullable
     private static InjectionPoint findInjectionPoint(List<DependencyAndSource> dependencyChain) {
         if (dependencyChain.size() < 3) {
             throw new AssertionError("Provider is not included in the dependency chain");
@@ -73,13 +81,27 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
 
         // @Inject InjectionPoint is the last, so we can skip it
         for (int i = dependencyChain.size() - 2; i >= 0; i--) {
-            Dependency<?> dependency = dependencyChain.get(i).getDependency();
+            final Dependency<?> dependency = dependencyChain.get(i).getDependency();
             if (dependency == null) {
                 return null;
             }
-
-            InjectionPoint injectionPoint = dependency.getInjectionPoint();
-            if (injectionPoint != null) {
+            final com.google.inject.spi.InjectionPoint spiInjectionPoint = dependency.getInjectionPoint();
+            if (spiInjectionPoint != null) {
+                final TypeToken<?> source = TypeToken.of(spiInjectionPoint.getDeclaringType().getType());
+                final Member member = spiInjectionPoint.getMember();
+                final InjectionPoint injectionPoint;
+                if (member instanceof Field) {
+                    final Field field = (Field) member;
+                    injectionPoint = new SpongeInjectionPoint(source, TypeToken.of(field.getGenericType()), field.getAnnotations());
+                } else if (member instanceof Executable) {
+                    final Executable executable = (Executable) member;
+                    final Annotation[][] parameterAnnotations = executable.getParameterAnnotations();
+                    final Type[] parameterTypes = executable.getGenericParameterTypes();
+                    final int index = dependency.getParameterIndex();
+                    injectionPoint = new SpongeInjectionPoint(source, TypeToken.of(parameterTypes[index]), parameterAnnotations[index]);
+                } else {
+                    throw new IllegalStateException("Unsupported Member type: " + member.getClass().getName());
+                }
                 return injectionPoint;
             }
         }
