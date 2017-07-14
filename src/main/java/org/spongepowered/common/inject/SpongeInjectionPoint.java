@@ -75,7 +75,7 @@ final class SpongeInjectionPoint implements InjectionPoint {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper("InjectionPoint")
+        return MoreObjects.toStringHelper(this)
                 .add("source", this.source)
                 .add("type", this.type)
                 .add("annotations", Arrays.toString(this.annotations))
