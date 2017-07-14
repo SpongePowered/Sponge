@@ -22,30 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.effect.record;
-
-import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.api.effect.sound.record.RecordType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.text.translation.SpongeTranslation;
-
-public class SpongeRecordType extends SpongeCatalogType.Translatable implements RecordType {
-
-    private final int internalId;
-    private final SoundType soundType;
-
-    public SpongeRecordType(String id, String translation, int internalId, SoundType soundType) {
-        super(id, new SpongeTranslation(translation));
-        this.internalId = internalId;
-        this.soundType = soundType;
-    }
-
-    public int getInternalId() {
-        return this.internalId;
-    }
-
-    @Override
-    public SoundType getSound() {
-        return this.soundType;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.effect.record;
