@@ -2172,20 +2172,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void playRecord(Vector3i position, RecordType recordType) {
-        playRecord0(checkNotNull(recordType, "recordType"), position);
+        playRecord0(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
     public void stopRecord(Vector3i position) {
-        playRecord0(null, position);
+        playRecord0(position, null);
     }
 
-    private void playRecord0(@Nullable RecordType recordType, Vector3i position) {
-        checkNotNull(position, "position");
-        final PlayerList playerList = this.mcServer.getPlayerList();
-        final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        playerList.sendPacketToAllPlayersInDimension(new SPacketEffect(
-                1010, pos, recordType == null ? 0 : ((SpongeRecordType) recordType).getInternalId(), false), getDimensionId());
+    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
+        this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(
+                SpongeRecordType.createPacket(position, recordType), getDimensionId());
     }
 
     @Override

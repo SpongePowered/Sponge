@@ -24,12 +24,25 @@
  */
 package org.spongepowered.common.effect.record;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 public class SpongeRecordType extends SpongeCatalogType.Translatable implements RecordType {
+
+    /**
+     * This is the effect ID that is used by the Effect packet to play a record effect.
+     * http://wiki.vg/Protocol#Effect
+     */
+    private static final int EFFECT_ID = 1010;
 
     private final int internalId;
     private final SoundType soundType;
@@ -47,5 +60,12 @@ public class SpongeRecordType extends SpongeCatalogType.Translatable implements 
     @Override
     public SoundType getSound() {
         return this.soundType;
+    }
+
+    public static SPacketEffect createPacket(Vector3i position, @Nullable RecordType recordType) {
+        checkNotNull(position, "position");
+        final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
+        return new SPacketEffect(EFFECT_ID, pos, recordType == null ? 0 :
+                ((SpongeRecordType) recordType).getInternalId(), false);
     }
 }

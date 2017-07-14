@@ -56,7 +56,6 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
-import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketEntityProperties;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
@@ -70,8 +69,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.server.management.PlayerList;
-
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -694,19 +691,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void playRecord(Vector3i position, RecordType recordType) {
-        playRecord0(checkNotNull(recordType, "recordType"), position);
+        playRecord0(position, checkNotNull(recordType, "recordType"));
     }
 
     @Override
     public void stopRecord(Vector3i position) {
-        playRecord0(null, position);
+        playRecord0(position, null);
     }
 
-    private void playRecord0(@Nullable RecordType recordType, Vector3i position) {
-        checkNotNull(position, "position");
-        final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
-        this.connection.sendPacket(new SPacketEffect(1010, pos,
-                recordType == null ? 0 : ((SpongeRecordType) recordType).getInternalId(), false));
+    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
+        this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
     }
 
     @Override
