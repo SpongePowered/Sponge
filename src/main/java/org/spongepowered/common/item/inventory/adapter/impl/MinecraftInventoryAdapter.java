@@ -211,12 +211,6 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     @SuppressWarnings("unchecked")
     @Override
     default <T extends Inventory> T query(Object... args) {
-        return (T) Query.compileExact(this, args).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T queryAny(Object... args) {
         return (T) Query.compile(this, args).execute();
     }
 
