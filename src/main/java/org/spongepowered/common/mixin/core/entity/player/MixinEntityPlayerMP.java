@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -55,6 +56,7 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketEntityProperties;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
@@ -68,6 +70,8 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.server.management.PlayerList;
+
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -93,6 +97,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -145,6 +150,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
@@ -684,6 +690,23 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         this.connection.sendPacket(new SPacketSoundEffect(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
                 position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
+    }
+
+    @Override
+    public void playRecord(Vector3i position, RecordType recordType) {
+        playRecord0(checkNotNull(recordType, "recordType"), position);
+    }
+
+    @Override
+    public void stopRecord(Vector3i position) {
+        playRecord0(null, position);
+    }
+
+    private void playRecord0(@Nullable RecordType recordType, Vector3i position) {
+        checkNotNull(position, "position");
+        final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
+        this.connection.sendPacket(new SPacketEffect(1010, pos,
+                recordType == null ? 0 : ((SpongeRecordType) recordType).getInternalId(), false));
     }
 
     @Override

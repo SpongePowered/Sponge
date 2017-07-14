@@ -48,6 +48,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
@@ -94,6 +95,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -151,6 +153,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -2167,6 +2170,23 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @Override
+    public void playRecord(Vector3i position, RecordType recordType) {
+        playRecord0(checkNotNull(recordType, "recordType"), position);
+    }
+
+    @Override
+    public void stopRecord(Vector3i position) {
+        playRecord0(null, position);
+    }
+
+    private void playRecord0(@Nullable RecordType recordType, Vector3i position) {
+        checkNotNull(position, "position");
+        final PlayerList playerList = this.mcServer.getPlayerList();
+        final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
+        playerList.sendPacketToAllPlayersInDimension(new SPacketEffect(
+                1010, pos, recordType == null ? 0 : ((SpongeRecordType) recordType).getInternalId(), false), getDimensionId());
+    }
 
     @Override
     public Weather getWeather() {
