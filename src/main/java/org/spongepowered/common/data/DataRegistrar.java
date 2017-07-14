@@ -841,6 +841,7 @@ public class DataRegistrar {
         propertyRegistry.register(UnbreakableProperty.class, new UnbreakablePropertyStore());
         propertyRegistry.register(SurrogateBlockProperty.class, new SurrogateBlockPropertyStore());
         propertyRegistry.register(FullBlockSelectionBoxProperty.class, new FullBlockSelectionBoxPropertyStore());
+        propertyRegistry.register(InstrumentProperty.class, new InstrumentPropertyStore());
 
         // Items
         propertyRegistry.register(ApplicableEffectProperty.class, new ApplicableEffectPropertyStore());
