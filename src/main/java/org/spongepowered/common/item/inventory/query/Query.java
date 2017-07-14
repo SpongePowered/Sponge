@@ -69,8 +69,7 @@ public class Query<TInventory, TStack> {
         NAME("name", NameStrategy.class),
         EXPRESSION("expr", ExpressionStrategy.class),
         GENERIC("args", GenericStrategy.class),
-        COMPOUND("compound", CompoundStrategy.class),
-        COMPOUND_EXACT("compound_exact", ExactCompoundStrategy.class);
+        COMPOUND("compound", CompoundStrategy.class);
 
         private final String key;
 
@@ -245,10 +244,6 @@ public class Query<TInventory, TStack> {
         return new Query<>(adapter, Type.COMPOUND, args);
     }
 
-    public static <TInventory, TStack> Query<TInventory, TStack> compileExact(InventoryAdapter<TInventory, TStack>  adapter, Object... args) {
-        return new Query<>(adapter, Type.EXACT_STACK, args);
-    }
-
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(Type type) {
         return Query.getStrategy(type.getKey());
     }
@@ -277,7 +272,7 @@ public class Query<TInventory, TStack> {
         Query.defaultResultProvider = defaultResultProvider;
     }
 
-    public static Query.Type getType(Object argument, boolean exact) {
+    public static Query.Type getType(Object argument) {
         if (argument instanceof Class) {
             return Type.CLASS;
         }
@@ -285,7 +280,7 @@ public class Query<TInventory, TStack> {
             return Type.TYPE;
         }
         if (argument instanceof ItemStack) {
-            return exact ? Type.EXACT_STACK : Type.STACK;
+            return Type.STACK; // TODO EXACT_STACK?
         }
         if (argument instanceof InventoryProperty) {
             return Type.PROPERTIES;

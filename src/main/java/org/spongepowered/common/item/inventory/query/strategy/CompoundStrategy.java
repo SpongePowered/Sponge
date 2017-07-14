@@ -37,25 +37,15 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CompoundStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Object> {
+public final class CompoundStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Object> {
 
     private Set<QueryStrategy<TInventory, TStack, ?>> strategies = new HashSet<>();
-    private boolean exact;
-
-    @SuppressWarnings("unused") // called from Query via reflection
-    public CompoundStrategy() {
-        this(false);
-    }
-
-    protected CompoundStrategy(boolean exact) {
-        this.exact = exact;
-    }
 
     @Override
     public QueryStrategy<TInventory, TStack, Object> with(ImmutableSet<Object> objects) {
         Multimap<Query.Type, Object> args = Multimaps.newMultimap(new EnumMap<>(Query.Type.class), HashSet::new);
         for (Object arg : objects) {
-            args.put(Query.getType(arg, this.exact), arg);
+            args.put(Query.getType(arg), arg);
         }
         args.asMap().forEach(this::addStrategy);
         if (this.strategies.size() == 1) {
