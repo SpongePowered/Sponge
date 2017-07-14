@@ -846,6 +846,7 @@ public class DataRegistrar {
         propertyRegistry.register(ToolTypeProperty.class, new ToolTypePropertyStore());
         propertyRegistry.register(ArmorTypeProperty.class, new ArmorTypePropertyStore());
         propertyRegistry.register(SmeltableProperty.class, new SmeltablePropertyStore());
+        propertyRegistry.register(RecordProperty.class, new RecordPropertyStore());
 
         // Entities
         propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());
