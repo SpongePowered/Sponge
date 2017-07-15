@@ -68,7 +68,7 @@ import javax.annotation.Nullable;
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     private final ItemType itemType;
-    private final int count;
+    private final int quantity;
     private final int damageValue;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
@@ -79,8 +79,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
-        this.itemType = itemStack.getItem();
-        this.count = itemStack.getQuantity();
+        this.itemType = itemStack.getType();
+        this.quantity = itemStack.getQuantity();
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
@@ -111,15 +111,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     public SpongeItemStackSnapshot(ItemType itemType,
-                                   int count,
+                                   int quantity,
                                    int damageValue,
                                    ImmutableList<ImmutableDataManipulator<?, ?>> manipulators,
                                    @Nullable NBTTagCompound compound) {
         this.itemType = checkNotNull(itemType);
-        this.count = count;
+        this.quantity = quantity;
         this.manipulators = checkNotNull(manipulators);
         this.damageValue = damageValue;
-        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.count, this.damageValue);
+        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity, this.damageValue);
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
@@ -138,8 +138,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public int getCount() {
-        return this.count;
+    public int getQuantity() {
+        return this.quantity;
     }
 
     @Override
@@ -171,7 +171,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.ITEM_TYPE, this.itemType.getId())
-            .set(DataQueries.ITEM_COUNT, this.count)
+            .set(DataQueries.ITEM_COUNT, this.quantity)
             .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
@@ -326,7 +326,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("itemType", this.itemType)
-                .add("count", this.count)
+                .add("quantity", this.quantity)
                 .toString();
     }
 
@@ -375,7 +375,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             return false;
         }
         SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
-        return this.count == that.count &&
+        return this.quantity == that.quantity &&
                this.damageValue == that.damageValue &&
                Objects.equal(this.itemType, that.itemType) &&
                Objects.equal(this.compound, that.compound) &&
@@ -384,6 +384,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.itemType, this.count, this.damageValue, this.compound, this.creatorUniqueId);
+        return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
     }
 }

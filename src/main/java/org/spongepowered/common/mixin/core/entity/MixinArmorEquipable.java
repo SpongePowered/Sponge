@@ -57,7 +57,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
     }
 
     public void equipable$setHelmet(ItemStack helmet) {
-        if (helmet == null || helmet.getItem() == ItemTypes.NONE) {
+        if (helmet == null || helmet.getType() == ItemTypes.NONE) {
             this.setItemStackToSlot(EntityEquipmentSlot.HEAD, net.minecraft.item.ItemStack.EMPTY);
         } else {
             this.setItemStackToSlot(EntityEquipmentSlot.HEAD, (net.minecraft.item.ItemStack) helmet.copy());
@@ -70,7 +70,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
     }
 
     public void equipable$setChestplate(ItemStack chestplate) {
-        if (chestplate == null || chestplate.getItem() == ItemTypes.NONE) {
+        if (chestplate == null || chestplate.getType() == ItemTypes.NONE) {
             this.setItemStackToSlot(EntityEquipmentSlot.CHEST, net.minecraft.item.ItemStack.EMPTY);
         } else {
             this.setItemStackToSlot(EntityEquipmentSlot.CHEST, (net.minecraft.item.ItemStack) chestplate.copy());
@@ -83,7 +83,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
     }
 
     public void equipable$setLeggings(ItemStack leggings) {
-        if (leggings == null || leggings.getItem() == ItemTypes.NONE) {
+        if (leggings == null || leggings.getType() == ItemTypes.NONE) {
             this.setItemStackToSlot(EntityEquipmentSlot.LEGS, net.minecraft.item.ItemStack.EMPTY);
         } else {
             this.setItemStackToSlot(EntityEquipmentSlot.LEGS, ((net.minecraft.item.ItemStack) leggings.copy()));
@@ -96,7 +96,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
     }
 
     public void equipable$setBoots(ItemStack boots) {
-        if (boots == null || boots.getItem() == ItemTypes.NONE) {
+        if (boots == null || boots.getType() == ItemTypes.NONE) {
             this.setItemStackToSlot(EntityEquipmentSlot.FEET, net.minecraft.item.ItemStack.EMPTY);
         } else {
             this.setItemStackToSlot(EntityEquipmentSlot.FEET, ((net.minecraft.item.ItemStack) boots.copy()));
@@ -111,7 +111,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 
     public void equipable$setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
         checkNotNull(handType, "HandType cannot be null!");
-        if (itemInHand == null || itemInHand.getItem() == ItemTypes.NONE) {
+        if (itemInHand == null || itemInHand.getType() == ItemTypes.NONE) {
             this.setHeldItem((EnumHand) (Object) handType, net.minecraft.item.ItemStack.EMPTY);
         } else {
             this.setHeldItem((EnumHand) (Object) handType, ((net.minecraft.item.ItemStack) itemInHand.copy()));
