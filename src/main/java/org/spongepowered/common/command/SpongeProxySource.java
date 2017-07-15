@@ -33,6 +33,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
@@ -109,8 +110,18 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
+    public SubjectReference asSubjectReference() {
+        return this.subjectDelegate.asSubjectReference();
+    }
+
+    @Override
     public SubjectCollection getContainingCollection() {
         return this.subjectDelegate.getContainingCollection();
+    }
+
+    @Override
+    public boolean isSubjectDataPersisted() {
+        return this.subjectDelegate.isSubjectDataPersisted();
     }
 
     @Override
@@ -139,22 +150,22 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public boolean isChildOf(Subject parent) {
+    public boolean isChildOf(SubjectReference parent) {
         return this.subjectDelegate.isChildOf(parent);
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, Subject parent) {
+    public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
         return this.subjectDelegate.isChildOf(contexts, parent);
     }
 
     @Override
-    public List<Subject> getParents() {
+    public List<SubjectReference> getParents() {
         return this.subjectDelegate.getParents();
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
+    public List<SubjectReference> getParents(Set<Context> contexts) {
         return this.subjectDelegate.getParents(contexts);
     }
 

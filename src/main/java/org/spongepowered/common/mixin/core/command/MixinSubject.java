@@ -34,6 +34,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,11 +49,11 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
@@ -66,7 +67,7 @@ import javax.annotation.Nullable;
 public abstract class MixinSubject implements Subject, IMixinCommandSource, IMixinSubject {
 
     @Nullable
-    private WeakReference<Subject> thisSubject;
+    private SubjectReference thisSubject;
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     public void subjectConstructor(CallbackInfo ci) {
@@ -76,58 +77,107 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     }
 
     @Override
-    public void setSubject(Subject subj) {
-        this.thisSubject = new WeakReference<>(subj);
+    public void setSubject(SubjectReference subj) {
+        this.thisSubject = subj;
+    }
+
+    @Override
+    public CompletableFuture<Subject> loadInternalSubject() {
+        return asSubjectReference().resolve();
     }
 
     @Nullable
-    private Subject internalSubject() {
-        if (this.thisSubject == null || this.thisSubject.get() == null) {
+    private Subject resolveNullable() {
+        if (this.thisSubject == null) {
             Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
             if (serv.isPresent()) {
                 new SubjectSettingCallback(this).test(serv.get());
             }
         }
-        return this.thisSubject.get();
+
+        return this.thisSubject == null ? null : this.thisSubject.resolve().join();
+    }
+
+    private Subject resolve() {
+        Subject ret = resolveNullable();
+        if (ret == null) {
+            throw new IllegalStateException("No subject reference present for user " + this);
+        }
+        return ret;
+    }
+
+    @Override
+    public SubjectReference asSubjectReference() {
+        if (this.thisSubject == null) {
+            Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
+            if (serv.isPresent()) {
+                new SubjectSettingCallback(this).test(serv.get());
+            }
+        }
+
+        if (this.thisSubject == null) {
+            throw new IllegalStateException("No subject reference present for user " + this);
+        }
+
+        return this.thisSubject;
+    }
+
+    @Override
+    public boolean isSubjectDataPersisted() {
+        Subject subj = resolveNullable();
+        return subj != null && subj.isSubjectDataPersisted();
+    }
+
+    @Override
+    public Set<Context> getActiveContexts() {
+        Subject subj = resolveNullable();
+        return subj == null ? Collections.emptySet() : subj.getActiveContexts();
+    }
+
+    @Override
+    public Optional<String> getFriendlyIdentifier() {
+        Subject subj = resolveNullable();
+        return subj == null ? Optional.empty() : subj.getFriendlyIdentifier();
     }
 
     @Override
     public SubjectCollection getContainingCollection() {
-        Subject subj = internalSubject();
-        if (subj == null) {
-            throw new IllegalStateException("No subject present for user " + this);
-        }
-        return subj.getContainingCollection();
+        return resolve().getContainingCollection();
     }
 
     @Override
     public SubjectData getSubjectData() {
-        Subject subj = internalSubject();
-        if (subj == null) {
-            throw new IllegalStateException("No subject present for user " + this);
-        }
-        return subj.getSubjectData();
+        return resolve().getSubjectData();
     }
 
     @Override
     public SubjectData getTransientSubjectData() {
-        Subject subj = internalSubject();
+        return resolve().getTransientSubjectData();
+    }
+
+    @Override
+    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
+        Subject subj = resolveNullable();
         if (subj == null) {
-            throw new IllegalStateException("No subject present for user " + this);
+            return permDefault(permission);
+        } else {
+            return subj.getPermissionValue(contexts, permission);
         }
-        return subj.getTransientSubjectData();
     }
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        Subject subj = internalSubject();
+        Subject subj = resolveNullable();
         if (subj == null) {
-            return this.permDefault(permission).asBoolean();
+            return permDefault(permission).asBoolean();
         }
+
+        // these calls are not directly forwarded to the subject, so we can
+        // apply permission defaults.
         Tristate ret = getPermissionValue(contexts, permission);
         switch (ret) {
             case UNDEFINED:
-                return this.permDefault(permission).asBoolean();
+                return permDefault(permission).asBoolean();
             default:
                 return ret.asBoolean();
         }
@@ -135,48 +185,38 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
 
     @Override
     public boolean hasPermission(String permission) {
+        // forwarded to the implementation in this class, and not the default
+        // in the Subject interface so permission defaults can be applied
         return hasPermission(getActiveContexts(), permission);
     }
 
     @Override
-    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        Subject subj = internalSubject();
-        return subj == null ? this.permDefault(permission) : subj.getPermissionValue(contexts, permission);
+    public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
+        return resolve().isChildOf(contexts, parent);
     }
 
     @Override
-    public boolean isChildOf(Subject parent) {
-        Subject subj = internalSubject();
-        return subj != null && subj.isChildOf(parent);
+    public boolean isChildOf(SubjectReference parent) {
+        return resolve().isChildOf(parent);
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, Subject parent) {
-        Subject subj = internalSubject();
-        return subj != null && subj.isChildOf(contexts, parent);
+    public List<SubjectReference> getParents(Set<Context> contexts) {
+        return resolve().getParents(contexts);
     }
 
     @Override
-    public List<Subject> getParents() {
-        Subject subj = internalSubject();
-        return subj == null ? Collections.<Subject>emptyList() : subj.getParents();
-    }
-
-    @Override
-    public List<Subject> getParents(Set<Context> contexts) {
-        Subject subj = internalSubject();
-        return subj == null ? Collections.<Subject>emptyList() : subj.getParents(contexts);
-    }
-
-    @Override
-    public Set<Context> getActiveContexts() {
-        Subject subj = internalSubject();
-        return subj == null ? Collections.<Context>emptySet() : subj.getActiveContexts();
+    public List<SubjectReference> getParents() {
+        return resolve().getParents();
     }
 
     @Override
     public Optional<String> getOption(Set<Context> contexts, String key) {
-        Subject subj = internalSubject();
-        return subj == null ? Optional.empty() : subj.getOption(contexts, key);
+        return resolve().getOption(contexts, key);
+    }
+
+    @Override
+    public Optional<String> getOption(String key) {
+        return resolve().getOption(key);
     }
 }

@@ -22,24 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.service.permission;
 
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.service.permission.base.SpongeSubject;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Interface going with IMixinSubject-shared mixins (what am I even saying?).
- */
-public interface IMixinSubject {
+import javax.annotation.Nullable;
 
-    void setSubject(SubjectReference subj);
+public class SpongeSubjectReference implements SubjectReference {
+    private final SpongePermissionService service;
+    private final String collectionId;
+    private final String subjectId;
 
-    CompletableFuture<Subject> loadInternalSubject();
+    @Nullable
+    private SpongeSubject cache = null;
 
-    String getSubjectCollectionIdentifier();
+    public SpongeSubjectReference(SpongePermissionService service, String collectionId, String subjectId) {
+        this.service = service;
+        this.collectionId = collectionId;
+        this.subjectId = subjectId;
+    }
 
-    Tristate permDefault(String permission);
+    @Override
+    public String getCollectionIdentifier() {
+        return collectionId;
+    }
+
+    @Override
+    public String getSubjectIdentifier() {
+        return subjectId;
+    }
+
+    @Override
+    public synchronized CompletableFuture<Subject> resolve() {
+        // lazily load
+        if (cache == null) {
+            cache = service.get(collectionId).get(subjectId);
+        }
+
+        return CompletableFuture.completedFuture(cache);
+    }
+
 }

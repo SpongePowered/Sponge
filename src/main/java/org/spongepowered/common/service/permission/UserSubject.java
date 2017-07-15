@@ -28,12 +28,13 @@ import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
-import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SingleParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
@@ -53,19 +54,19 @@ public class UserSubject extends SpongeSubject {
         this.player = player;
         this.data = new SingleParentMemorySubjectData(users.getService()) {
             @Override
-            public Subject getParent() {
+            public SubjectReference getParent() {
                 int opLevel = getOpLevel();
-                return opLevel == 0 ? null : users.getService().getGroupForOpLevel(opLevel);
+                return opLevel == 0 ? null : users.getService().getGroupForOpLevel(opLevel).asSubjectReference();
             }
 
             @Override
-            public boolean setParent(Subject parent) {
+            public void setParent(SubjectReference parent) {
                 int opLevel;
                 if (parent == null) {
                     opLevel = 0;
                 } else {
-                    if (!(parent instanceof OpLevelCollection.OpLevelSubject)) {
-                        return false;
+                    if (!(parent.resolve().join() instanceof OpLevelCollection.OpLevelSubject)) {
+                        return;
                     }
                     opLevel = ((OpLevelCollection.OpLevelSubject) parent).getOpLevel();
                 }
@@ -75,7 +76,6 @@ public class UserSubject extends SpongeSubject {
                 } else {
                     SpongePermissionService.getOps().removeEntry(player);
                 }
-                return true;
             }
         };
         this.collection = users;
@@ -87,10 +87,14 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
+    public Optional<String> getFriendlyIdentifier() {
+        return Optional.of(player.getName());
+    }
+
+    @Override
     public Optional<CommandSource> getCommandSource() {
         if (Sponge.isServerAvailable()) {
-            return Optional
-                    .ofNullable((CommandSource) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.player.getId()));
+            return Optional.ofNullable((CommandSource) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.player.getId()));
         }
         return Optional.empty();
     }
@@ -103,8 +107,9 @@ public class UserSubject extends SpongeSubject {
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
             return SpongeImpl.getServer().getPlayerList().canSendCommands(this.player) ? SpongeImpl.getServer().getOpPermissionLevel() : 0;
+        } else {
+            return entry.getPermissionLevel();
         }
-        return entry.getPermissionLevel();
     }
 
     @Override
@@ -115,6 +120,11 @@ public class UserSubject extends SpongeSubject {
     @Override
     public MemorySubjectData getSubjectData() {
         return this.data;
+    }
+
+    @Override
+    public PermissionService getService() {
+        return collection.getService();
     }
 
     @Override
