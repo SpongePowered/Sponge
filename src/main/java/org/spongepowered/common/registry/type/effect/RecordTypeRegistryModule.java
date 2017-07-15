@@ -34,6 +34,7 @@ import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.effect.sound.record.RecordTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 
 import java.util.Collection;
@@ -42,6 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@RegistrationDependency(SoundRegistryModule.class)
 public final class RecordTypeRegistryModule implements CatalogRegistryModule<RecordType> {
 
     public static RecordTypeRegistryModule getInstance() {
