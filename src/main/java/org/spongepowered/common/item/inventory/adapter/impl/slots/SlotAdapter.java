@@ -188,7 +188,7 @@ public class SlotAdapter extends Adapter implements Slot {
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
-        if (stack.getItem() == ItemTypes.NONE) {
+        if (stack.getType() == ItemTypes.NONE) {
             clear(); // NONE item will clear the slot
             return result.replace(ItemStackUtil.fromNative(old)).build();
         }

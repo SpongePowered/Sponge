@@ -56,7 +56,7 @@ public class ItemTypeStrategy<TInventory> extends QueryStrategy<TInventory, Item
                 return false;
             }
             for (ItemType type : this.types) {
-                if (stack.getItem().equals(type)) {
+                if (stack.getType().equals(type)) {
                     return true;
                 }
             }

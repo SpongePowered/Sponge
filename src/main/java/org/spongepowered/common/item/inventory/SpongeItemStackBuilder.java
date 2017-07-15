@@ -143,7 +143,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         checkNotNull(itemStack, "Item stack cannot be null");
         this.itemDataSet = new HashSet<>();
         // Assumes the item stack's values don't need to be validated
-        this.type = itemStack.getItem();
+        this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
             final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
@@ -196,8 +196,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     public ItemStack.Builder fromSnapshot(ItemStackSnapshot snapshot) {
         checkNotNull(snapshot, "The snapshot was null!");
         itemType(snapshot.getType());
-        quantity(snapshot.getCount());
-        quantity(snapshot.getCount());
+        quantity(snapshot.getQuantity());
         for (ImmutableDataManipulator<?, ?> manipulator : snapshot.getContainers()) {
             itemData(manipulator);
         }

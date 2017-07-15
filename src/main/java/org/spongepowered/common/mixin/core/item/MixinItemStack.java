@@ -159,12 +159,12 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         }
     }
 
-    public ItemType itemstack$getItem() {
-        return (ItemType) shadow$getItem();
-    }
-
     public int itemstack$getQuantity() {
         return this.getCount();
+    }
+
+    public ItemType itemstack$getType() {
+        return (ItemType) shadow$getItem();
     }
 
     public void itemstack$setQuantity(int quantity) throws IllegalArgumentException {
@@ -203,7 +203,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ITEM_TYPE, this.itemstack$getItem().getId())
+                .set(DataQueries.ITEM_TYPE, this.itemstack$getType().getId())
                 .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity())
                 .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.

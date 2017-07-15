@@ -126,7 +126,7 @@ public class Adapter implements MinecraftInventoryAdapter {
 
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-                if (stack.isEmpty() || stack.getCount() < 1 || (result != null && !result.getItem().equals(stack.getItem()))) {
+                if (stack.isEmpty() || stack.getCount() < 1 || (result != null && !result.getType().equals(stack.getItem()))) {
                     continue;
                 }
 

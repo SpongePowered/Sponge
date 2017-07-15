@@ -54,6 +54,7 @@ import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -158,7 +159,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     }
 
     @Override
-    public boolean add(GameProfile profile, boolean overwrite, @Nullable Date expiry) {
+    public boolean add(GameProfile profile, boolean overwrite, @Nullable Instant expiry) {
         checkNotNull(profile, "profile");
 
         // Don't attempt to overwrite entries if we aren't requested to do so
@@ -166,7 +167,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
             return false;
         }
 
-        this.addEntry((com.mojang.authlib.GameProfile) profile, expiry);
+        this.addEntry((com.mojang.authlib.GameProfile) profile, expiry == null ? null : new Date(expiry.toEpochMilli()));
 
         return true;
     }
