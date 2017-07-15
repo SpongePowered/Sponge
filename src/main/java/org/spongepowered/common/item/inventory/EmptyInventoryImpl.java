@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -188,50 +189,8 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Inventory> T query(Class<?>... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(ItemType... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(ItemStack... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T queryAny(ItemStack... types) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(Translation... names) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(String... names) {
-        return (T)this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T query(Object... args) {
-        return (T)this;
+    public <T extends Inventory> T query(QueryOperation<?>... operations) {
+        return (T) this;
     }
 
     @Override

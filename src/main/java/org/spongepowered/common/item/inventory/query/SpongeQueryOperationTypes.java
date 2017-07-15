@@ -22,27 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy.expression;
+package org.spongepowered.common.item.inventory.query;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
+import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
 
-public class ExpressionStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Class<?>> {
-    
-//    private Evaluator evaluator;
+public final class SpongeQueryOperationTypes {
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Class<?>> with(ImmutableSet<Class<?>> args) {
-//        this.evaluator = Parser.parse(args);
-        return this;
-    }
-    
-    @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        return false;
-//        return this.evaluator.matches(lens, inventory);
-    }
+    public static final QueryOperationType<Lens<?, ?>> LENS = new SpongeQueryOperationType<>("lens", LensQueryOperation::new);
+
+    public static final QueryOperationType<ImmutableSet<Inventory>> SLOT_LENS = new SpongeQueryOperationType<>("slot_lens",
+            SlotLensQueryOperation::new);
 
 }

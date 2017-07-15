@@ -22,38 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query;
 
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Set;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class ClassStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Class<?>> {
-    
-    private Set<Class<?>> classes;
+import java.util.function.Function;
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Class<?>> with(ImmutableSet<Class<?>> args) {
-        this.classes = args;
-        return this;
+public final class SpongeQueryOperationType<T> extends SpongeCatalogType implements QueryOperationType<T> {
+
+    private final Function<T, SpongeQueryOperation<T>> newInstance;
+
+    public SpongeQueryOperationType(String id, Function<T, SpongeQueryOperation<T>> newInstance) {
+        super(id);
+        this.newInstance = newInstance;
     }
-    
+
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.classes.isEmpty()) {
-            return true;
-        }
-        for (Class<?> candidate : this.classes) {
-            // Check for null first because there are inventories without lens (e.g. InventoryCrafting in EntitySheep)
-            if (candidate != null && candidate.isAssignableFrom(lens.getAdapterType())) {
-                return true;
-            }
-        }
-        
-        return false;
+    public QueryOperation<T> of(T arg) {
+        checkNotNull(arg);
+        return this.newInstance.apply(arg);
     }
 
 }

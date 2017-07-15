@@ -22,15 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
 
-public abstract class QueryStrategy<TInventory, TStack, TArgs> {
+public final class LensQueryOperation extends SpongeQueryOperation<Lens<?, ?>> {
 
-    public abstract QueryStrategy<TInventory, TStack, TArgs> with(ImmutableSet<TArgs> args);
+    private final Lens<?, ?> lens;
 
-    public abstract boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory);
+    public LensQueryOperation(Lens<?, ?> lens) {
+        super(SpongeQueryOperationTypes.LENS);
+        this.lens = lens;
+    }
+
+    @Override
+    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+        return this.lens.equals(lens);
+    }
+
 }

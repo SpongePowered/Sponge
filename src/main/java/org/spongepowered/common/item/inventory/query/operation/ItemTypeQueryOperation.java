@@ -22,47 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 
-import java.util.Set;
+public final class ItemTypeQueryOperation extends ItemStackQueryOperation<ItemType> {
 
-public class ItemTypeStrategy<TInventory> extends QueryStrategy<TInventory, ItemStack, ItemType> {
-    
-    private Set<ItemType> types;
-
-    @Override
-    public QueryStrategy<TInventory, ItemStack, ItemType> with(ImmutableSet<ItemType> types) {
-        this.types = types;
-        return this;
+    public ItemTypeQueryOperation(ItemType type) {
+        super(QueryOperationTypes.ITEM_TYPE, type);
     }
-    
+
     @Override
-    public boolean matches(Lens<TInventory, ItemStack> lens, Lens<TInventory, ItemStack> parent, Fabric<TInventory> inventory) {
-        if (this.types.isEmpty()) {
-            return true;
-        }
-        
-        if (lens instanceof SlotLens) {
-            ItemStack stack = ((SlotLens<TInventory, ItemStack>)lens).getStack(inventory);
-            if (stack == null) {
-                return false;
-            }
-            for (ItemType type : this.types) {
-                if (stack.getType().equals(type)) {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
+    protected boolean matches(ItemStack itemStack, ItemType arg) {
+        return itemStack.getType().equals(arg);
     }
 
 }

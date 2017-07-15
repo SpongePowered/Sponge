@@ -24,12 +24,25 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-public class InvalidQueryStrategyException extends RuntimeException {
+import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
 
-    private static final long serialVersionUID = 1L;
+public abstract class SpongeQueryOperation<T> implements QueryOperation<T> {
 
-    public InvalidQueryStrategyException(String format, Object... args) {
-        super(String.format(format, args));
+    protected final QueryOperationType<T> type;
+
+    protected SpongeQueryOperation(QueryOperationType<T> type) {
+        this.type = type;
     }
-    
+
+    @Override
+    public final QueryOperationType<T> getType() {
+        return this.type;
+    }
+
+    public abstract <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent,
+            Fabric<TInventory> inventory);
+
 }

@@ -22,28 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 
-public class LensStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Lens<TInventory, TStack>> {
+import java.util.function.Predicate;
 
-    private Lens<TInventory, TStack> lens;
+public final class ItemStackCustomOperation extends ItemStackQueryOperation<Predicate<ItemStack>> {
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Lens<TInventory, TStack>> with(ImmutableSet<Lens<TInventory, TStack>> lens) {
-        if (lens.size() != 1) {
-            throw new IllegalArgumentException("Can only match a single lens");
-        }
-        this.lens = lens.iterator().next();
-        return this;
+    public ItemStackCustomOperation(Predicate<ItemStack> predicate) {
+        super(QueryOperationTypes.ITEM_STACK_CUSTOM, predicate);
     }
 
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        return this.lens.equals(lens);
+    protected boolean matches(ItemStack itemStack, Predicate<ItemStack> arg) {
+        return arg.test(itemStack);
     }
+
 }

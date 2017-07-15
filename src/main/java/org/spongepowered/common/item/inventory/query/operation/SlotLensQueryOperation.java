@@ -22,52 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperationTypes;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
-import java.util.Set;
+public final class SlotLensQueryOperation extends SpongeQueryOperation<ImmutableSet<Inventory>> {
 
-public class PropertyStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> {
-    
-    private Set<InventoryProperty<?, ?>> properties;
+    private final ImmutableSet<Inventory> inventories;
 
-    @Override
-    public QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> with(ImmutableSet<InventoryProperty<?, ?>> args) {
-        this.properties = ImmutableSet.<InventoryProperty<?, ?>>copyOf(args);
-        return this;
+    public SlotLensQueryOperation(ImmutableSet<Inventory> inventories) {
+        super(SpongeQueryOperationTypes.SLOT_LENS);
+        this.inventories = inventories;
     }
-    
-    @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.properties.isEmpty()) {
-            return true;
-        }
-        
-        if (parent == null) {
-            return false;
-        }
-        
-        try {
-            Collection<InventoryProperty<?, ?>> lensProperties = parent.getProperties(lens);
 
-            for (InventoryProperty<?, ?> lensProperty : lensProperties) {
-                for (InventoryProperty<?, ?> property : this.properties) {
-                    if (property.matches(lensProperty)) {
-                        return true;
-                    }
+    @Override
+    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+        for (Inventory inv : this.inventories) {
+            for (Inventory slot : inv.slots()) {
+                if (((SlotAdapter) slot).getRootLens().equals(lens)) {
+                    return true;
                 }
             }
-        } catch (NoSuchElementException ex) {
-            return false;
         }
-        
         return false;
     }
 

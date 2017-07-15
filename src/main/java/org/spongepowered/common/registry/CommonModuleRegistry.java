@@ -85,6 +85,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -409,6 +410,7 @@ public final class CommonModuleRegistry {
             .registerModule(PrismarineType.class, new PrismarineRegistryModule())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
             .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
+            .registerModule(QueryOperationType.class, new QueryOperationRegistryModule())
             .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
             .registerModule(Rotation.class, RotationRegistryModule.getInstance())

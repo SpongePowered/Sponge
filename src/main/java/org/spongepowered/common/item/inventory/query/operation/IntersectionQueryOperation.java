@@ -22,34 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+/**
+ * Created by jbyoshi on 8/16/17.
+ */
+public class IntersectionQueryOperation {
 
-public class UnionStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Inventory> {
-
-    private ImmutableSet<Inventory> inventories;
-
-    @Override
-    public QueryStrategy<TInventory, TStack, Inventory> with(ImmutableSet<Inventory> inventories) {
-        this.inventories = inventories;
-        return this;
-    }
-
-    @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        for (Inventory inv : this.inventories) {
-            for (Inventory slot : inv.slots()) {
-                if (((SlotAdapter) slot).getRootLens().equals(lens)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }
