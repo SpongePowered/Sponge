@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -93,6 +94,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -145,6 +147,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
@@ -684,6 +687,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         this.connection.sendPacket(new SPacketSoundEffect(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
                 position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
+    }
+
+    @Override
+    public void playRecord(Vector3i position, RecordType recordType) {
+        playRecord0(position, checkNotNull(recordType, "recordType"));
+    }
+
+    @Override
+    public void stopRecord(Vector3i position) {
+        playRecord0(position, null);
+    }
+
+    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
+        this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
     }
 
     @Override
