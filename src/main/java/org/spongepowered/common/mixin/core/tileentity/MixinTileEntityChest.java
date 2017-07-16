@@ -176,7 +176,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
             TileEntity tileentity1 = this.world.getTileEntity(blockpos);
 
-            if (tileentity1 instanceof TileEntityChest) {
+            if (tileentity1 instanceof TileEntityChest && tileentity1.getBlockType() == this.getBlockType()) {
+
                 InventoryLargeChest inventory;
 
                 if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH)
