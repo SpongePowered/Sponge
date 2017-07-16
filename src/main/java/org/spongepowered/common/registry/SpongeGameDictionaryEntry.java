@@ -52,7 +52,7 @@ public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
 
         @Override
         public boolean matches(org.spongepowered.api.item.inventory.ItemStack stack) {
-            return this.getType().equals(stack.getItem()) && this.damage == ((ItemStack) stack).getItemDamage();
+            return this.getType().equals(stack.getType()) && this.damage == ((ItemStack) stack).getItemDamage();
         }
 
         @Override

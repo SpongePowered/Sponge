@@ -54,7 +54,7 @@ public class BrewingStandInventoryLens extends OrderedInventoryLensImpl {
 
         this.potions = new OrderedInventoryLensImpl(0, 3, 1, OutputSlot.class, slots);
         this.ingredient = new InputSlotLensImpl(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
-        this.fuel = new FuelSlotLensImpl(4, (i) -> BLAZE_POWDER.equals(i.getItem()), BLAZE_POWDER::equals);
+        this.fuel = new FuelSlotLensImpl(4, (i) -> BLAZE_POWDER.equals(i.getType()), BLAZE_POWDER::equals);
 
         this.addSpanningChild(this.potions);
         this.addSpanningChild(this.ingredient);

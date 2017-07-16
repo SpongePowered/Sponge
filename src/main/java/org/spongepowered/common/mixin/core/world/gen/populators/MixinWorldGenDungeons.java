@@ -82,7 +82,7 @@ public abstract class MixinWorldGenDungeons extends WorldGenerator implements Du
 //            VariableAmount quantity =
 //                    VariableAmount.baseWithRandomAddition(item.theMinimumChanceToGenerateItem, item.theMaximumChanceToGenerateItem
 //                            - item.theMinimumChanceToGenerateItem + 1);
-//            this.items.add(new WeightedItem(stack.getItem(), quantity, item.itemWeight, stack.getContainers()));
+//            this.items.add(new WeightedItem(stack.getType(), quantity, item.itemWeight, stack.getContainers()));
 //        }
 //        this.items.add(new WeightedEnchantmentBook(VariableAmount.fixed(1), 1));
     }
