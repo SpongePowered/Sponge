@@ -483,7 +483,7 @@ public class Adapter implements MinecraftInventoryAdapter {
 
     @Override
     public void clear() {
-        this.inventory.clear();
+        this.slots().forEach(Inventory::clear);
     }
 
     public static Optional<Slot> forSlot(Fabric<IInventory> inv, SlotLens<IInventory, net.minecraft.item.ItemStack> slotLens, Inventory parent) {
