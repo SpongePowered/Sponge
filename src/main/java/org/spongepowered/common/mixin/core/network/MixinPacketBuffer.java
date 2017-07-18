@@ -427,7 +427,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return value;
     }
 
-    @Deprecated
     public ChannelBuf cbuf$writeUTF(String data) {
         byte[] bytes = data.getBytes(Charsets.UTF_8);
         if (bytes.length > MixinPacketBuffer.MAX_STRING_LENGTH_BYTES) {
@@ -439,7 +438,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Deprecated
     public ChannelBuf cbuf$setUTF(int index, String data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
@@ -449,7 +447,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Deprecated
     public String cbuf$readUTF() {
         final short length = this.readShort();
         final byte[] bytes = new byte[length];
@@ -457,7 +454,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return new String(bytes, Charsets.UTF_8);
     }
 
-    @Deprecated
     public String cbuf$getUTF(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
