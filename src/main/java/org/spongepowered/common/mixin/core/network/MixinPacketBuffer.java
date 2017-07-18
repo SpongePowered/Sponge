@@ -60,6 +60,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     @Shadow public abstract PacketBuffer writeVarInt(int input);
     @Shadow public abstract PacketBuffer writeString(String string);
     @Shadow public abstract PacketBuffer writeCompoundTag(@Nullable NBTTagCompound nbt);
+    @Shadow public abstract PacketBuffer writeUniqueId(UUID uniqueId);
     
     // mojang methods, non-fluent
     @Shadow public abstract byte[] readByteArray();
@@ -144,6 +145,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
 
     public ChannelBuf cbuf$slice(int index, int length) {
         return SpongeNetworkManager.toChannelBuf(this.slice(index, length));
+    }
+
+    @Intrinsic
+    public boolean cbuf$hasArray() {
+        return this.hasArray();
     }
 
     @Intrinsic
@@ -242,7 +248,9 @@ public abstract class MixinPacketBuffer extends ByteBuf {
 
     @Intrinsic
     public byte[] cbuf$readBytes(int length) {
-        return this.readBytes(length).array();
+        final byte[] bytes = new byte[length];
+        this.readBytes(bytes);
+        return bytes;
     }
 
     public byte[] cbuf$readBytes(int index, int length) {
@@ -419,6 +427,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return value;
     }
 
+    @Deprecated
     public ChannelBuf cbuf$writeUTF(String data) {
         byte[] bytes = data.getBytes(Charsets.UTF_8);
         if (bytes.length > MixinPacketBuffer.MAX_STRING_LENGTH_BYTES) {
@@ -430,6 +439,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Deprecated
     public ChannelBuf cbuf$setUTF(int index, String data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
@@ -439,30 +449,36 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Deprecated
     public String cbuf$readUTF() {
         final short length = this.readShort();
-        return new String(this.readBytes(length).array(), Charsets.UTF_8);
+        final byte[] bytes = new byte[length];
+        this.readBytes(bytes);
+        return new String(bytes, Charsets.UTF_8);
     }
 
+    @Deprecated
     public String cbuf$getUTF(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
         final short length = this.readShort();
-        final String data = new String(this.readBytes(length).array(), Charsets.UTF_8);
+        final byte[] bytes = new byte[length];
+        this.readBytes(bytes);
+        final String data = new String(bytes, Charsets.UTF_8);
         this.readerIndex(oldIndex);
         return data;
     }
 
     public ChannelBuf cbuf$writeUniqueId(UUID data) {
         checkNotNull(data, "data");
-        return this.cbuf$writeLong(data.getMostSignificantBits()).writeLong(data.getLeastSignificantBits());
+        return (ChannelBuf) this.writeUniqueId(data); // fluent in target
     }
 
     public ChannelBuf cbuf$setUniqueId(int index, UUID data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
-        this.writeLong(data.getMostSignificantBits()).writeLong(data.getLeastSignificantBits());
+        this.writeUniqueId(data);
         this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
