@@ -73,6 +73,8 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Shadow public abstract int getInventoryStackLimit();
 
+    @Shadow public abstract int getSizeInventory();
+
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
     protected PlayerInventoryLens lens;
@@ -88,8 +90,13 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         if (playerIn instanceof EntityPlayerMP) {
             // We only care about Server inventories
             this.inventory = new DefaultInventoryFabric((IInventory) this);
-            this.slots = new SlotCollection.Builder().add(this.mainInventory.length).add(this.offHandInventory.length).add(this.armorInventory.length,
-                    EquipmentSlotAdapter.class).build();
+            this.slots = new SlotCollection.Builder()
+                    .add(this.mainInventory.length)
+                    .add(this.offHandInventory.length)
+                    .add(this.armorInventory.length, EquipmentSlotAdapter.class)
+                    // for mods providing bigger inventories
+                    .add(this.getSizeInventory() - this.mainInventory.length - this.offHandInventory.length - this.armorInventory.length)
+                    .build();
             this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);
         }
