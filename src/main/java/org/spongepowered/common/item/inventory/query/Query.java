@@ -42,6 +42,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensSetImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
 import org.spongepowered.common.item.inventory.query.result.QueryResult;
 import org.spongepowered.common.item.inventory.query.strategy.ClassStrategy;
@@ -183,7 +184,7 @@ public class Query<TInventory, TStack> {
     }
 
     private MutableLensSet<TInventory, TStack> reduce(Lens<TInventory, TStack> lens, MutableLensSet<TInventory, TStack> matches) {
-        if (lens.getSlots().equals(this.getSlots(matches))) {
+        if (lens.getSlots().equals(this.getSlots(matches)) && this.allLensesAreSlots(matches)) {
             matches.clear();
             matches.add(lens);
             return matches;
@@ -200,14 +201,14 @@ public class Query<TInventory, TStack> {
         return matches;
     }
 
-//    private boolean allLensesAreSlots(MutableLensSetImpl<TInventory, TStack> lenses) {
-//        for (Lens<TInventory, TStack> lens : lenses) {
-//            if (!(lens instanceof SlotLens)) {
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
+    private boolean allLensesAreSlots(MutableLensSet<TInventory, TStack> lenses) {
+        for (Lens<TInventory, TStack> lens : lenses) {
+            if (!(lens instanceof SlotLens)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     private IntSet getSlots(Collection<Lens<TInventory, TStack>> lenses) {
         IntSet slots = new IntOpenHashSet();

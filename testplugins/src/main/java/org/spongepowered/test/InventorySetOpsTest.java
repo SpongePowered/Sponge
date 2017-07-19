@@ -61,11 +61,11 @@ public class InventorySetOpsTest {
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
         Inventory firstSlots = chest.query(SlotIndex.of(0));
-        //Inventory firstRow = chest.query(InventoryRow.class).first(); // TODO is the query supposed to return the entire grid?
-        //Inventory firstCol = chest.query(InventoryColumn.class).first();
+        Inventory firstRow = chest.query(InventoryRow.class).first(); // TODO is the query supposed to return the entire grid?
+        Inventory firstCol = chest.query(InventoryColumn.class).first();
         GridInventory grid = chest.query(GridInventory.class);
-        InventoryColumn firstCol = grid.getColumn(0).get();
-        InventoryRow firstRow = grid.getRow(0).get();
+        //InventoryColumn firstCol = grid.getColumn(0).get();
+        //InventoryRow firstRow = grid.getRow(0).get();
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
         Preconditions.checkArgument(intersection.capacity() == 1, "This should be the first slot only!");
         logger.info("Intersect works!");
