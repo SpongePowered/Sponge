@@ -24,14 +24,19 @@
  */
 package org.spongepowered.test;
 
+import com.google.common.base.Preconditions;
+import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.api.plugin.Plugin;
+
+import javax.inject.Inject;
 
 /**
  * Tests intersect union and containsInventory
@@ -39,6 +44,7 @@ import org.spongepowered.api.plugin.Plugin;
 @Plugin(id = "inventorysetoperationstest", name = "Inventory Set Operations Test", description = "A plugin to test inventory set operations")
 public class InventorySetOpsTest {
 
+    @Inject private Logger logger;
 
     @Listener
     public void onStart(GameStartedServerEvent event) {
@@ -49,18 +55,20 @@ public class InventorySetOpsTest {
     @Listener
     public void onCmd(SendCommandEvent event)
     {
-        testIntersect();
+        testIntersect(); // TODO remove me once this is all working
     }
 
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
         Inventory firstSlots = chest.query(SlotIndex.of(0));
-        Inventory firstRow = chest.query(InventoryRow.class).first(); // TODO is the query supposed to return the entire grid?
-        Inventory firstCol = chest.query(InventoryColumn.class).first();
+        //Inventory firstRow = chest.query(InventoryRow.class).first(); // TODO is the query supposed to return the entire grid?
+        //Inventory firstCol = chest.query(InventoryColumn.class).first();
+        GridInventory grid = chest.query(GridInventory.class);
+        InventoryColumn firstCol = grid.getColumn(0).get();
+        InventoryRow firstRow = grid.getRow(0).get();
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
-        if (intersection.capacity() != 1) {
-            throw new IllegalStateException("This should be the first slot only!");
-        }
+        Preconditions.checkArgument(intersection.capacity() == 1, "This should be the first slot only!");
+        logger.info("Intersect works!");
     }
 
 
