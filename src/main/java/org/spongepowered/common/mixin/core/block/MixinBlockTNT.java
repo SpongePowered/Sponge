@@ -34,6 +34,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -85,11 +86,11 @@ public abstract class MixinBlockTNT extends MixinBlock {
     @Redirect(method = "onBlockDestroyedByExplosion", at = @At(value = "INVOKE", target = TARGET_PRIME))
     public boolean onPrimePostExplosion(World world, Entity tnt) {
         // Called when prime triggered by explosion
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
-        boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        return result;
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
+            boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
+            return result;
+        }
     }
 
     @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = TARGET_REMOVE))

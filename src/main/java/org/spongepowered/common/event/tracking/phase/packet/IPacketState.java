@@ -30,6 +30,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -77,19 +78,19 @@ public interface IPacketState extends IPhaseState {
                 phaseContext.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player packet, but didn't get anything",
                                 phaseContext));
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-        Sponge.getCauseStackManager().pushCause(player);
-        final SpawnEntityEvent event =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            Sponge.getCauseStackManager().pushCause(player);
+            final SpawnEntityEvent event =
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                }
             }
         }
-        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 
     default boolean shouldCaptureEntity() {
@@ -115,21 +116,21 @@ public interface IPacketState extends IPhaseState {
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().pushCause(player);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, player);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, player);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        if (!event.isCancelled()) {
-            for (Entity newEntity : event.getEntities()) {
-                EntityUtil.toMixin(newEntity).setCreator(player.getUniqueId());
-                ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(newEntity);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, player);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity newEntity : event.getEntities()) {
+                    EntityUtil.toMixin(newEntity).setCreator(player.getUniqueId());
+                    ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(newEntity);
+                }
+    
+                return true;
             }
-
-            return true;
         }
         return false;
     }

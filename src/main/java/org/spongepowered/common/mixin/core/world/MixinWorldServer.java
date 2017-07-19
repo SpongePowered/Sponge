@@ -76,11 +76,11 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
@@ -103,6 +103,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -172,7 +173,6 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
@@ -614,43 +614,43 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     if (this.rand.nextDouble() < difficultyinstance.getAdditionalDifficulty() * 0.05D)
                     {
                         // Sponge Start - Throw construction events
-                        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-                        Sponge.getCauseStackManager().pushCause(this.getWeather());
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                        ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
-                        SpongeImpl.postEvent(constructEntityEvent);
-                        if (!constructEntityEvent.isCancelled()) {
-                            // Sponge End
-                            EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
-                            entityhorse.setTrap(true);
-                            entityhorse.setGrowingAge(0);
-                            entityhorse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
-                            this.spawnEntity(entityhorse);
-                            // Sponge Start - Throw a construct event for the lightning
+                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            Sponge.getCauseStackManager().pushCause(this.getWeather());
+                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                            ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
+                            SpongeImpl.postEvent(constructEntityEvent);
+                            if (!constructEntityEvent.isCancelled()) {
+                                // Sponge End
+                                EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
+                                entityhorse.setTrap(true);
+                                entityhorse.setGrowingAge(0);
+                                entityhorse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                                this.spawnEntity(entityhorse);
+                                // Sponge Start - Throw a construct event for the lightning
+                            }
+    
+                            ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING, transform);
+                            SpongeImpl.postEvent(lightning);
+                            if (!lightning.isCancelled()) {
+                                // Sponge End
+                                this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
+                            } // Sponge - Brackets.
                         }
-
-                        ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING, transform);
-                        SpongeImpl.postEvent(lightning);
-                        if (!lightning.isCancelled()) {
-                            // Sponge End
-                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
-                        } // Sponge - Brackets.
-                        Sponge.getCauseStackManager().popCauseFrame(frame);
                     }
                     else
                     {
                         // Sponge start - Throw construction event for lightningbolts
-                        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-                        Sponge.getCauseStackManager().pushCause(this.getWeather());
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                                EntityTypes.LIGHTNING, transform);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            // Sponge End
-                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
-                        } // Sponge - Brackets.
-                        Sponge.getCauseStackManager().popCauseFrame(frame);
+                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            Sponge.getCauseStackManager().pushCause(this.getWeather());
+                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                                    EntityTypes.LIGHTNING, transform);
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                // Sponge End
+                                this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
+                            } // Sponge - Brackets.
+                        }
                     }
                 }
                 // Sponge Start - Cause tracker unwind
@@ -1156,26 +1156,26 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 entityList.add((Entity) entity);
             }
         }
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
-        Sponge.getCauseStackManager().pushCause(this);
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));
-        SpongeImpl.postEvent(chunkLoad);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
-            for (Entity successful : chunkLoad.getEntities()) {
-                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                this.onEntityAdded((net.minecraft.entity.Entity) successful);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            Sponge.getCauseStackManager().pushCause(this);
+            SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));
+            SpongeImpl.postEvent(chunkLoad);
+            if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
+                for (Entity successful : chunkLoad.getEntities()) {
+                    this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                    this.onEntityAdded((net.minecraft.entity.Entity) successful);
+                }
             }
-        }
-        // Remove entities from chunk/world that were filtered in event
-        // This prevents invisible entities from loading into the world and blocking the position.
-        for (Entity entity : entityList) {
-            if (!chunkLoad.getEntities().contains(entity)) {
-                ((net.minecraft.world.World) (Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
+            // Remove entities from chunk/world that were filtered in event
+            // This prevents invisible entities from loading into the world and blocking the position.
+            for (Entity entity : entityList) {
+                if (!chunkLoad.getEntities().contains(entity)) {
+                    ((net.minecraft.world.World) (Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
+                }
             }
+            callbackInfo.cancel();
         }
-        callbackInfo.cancel();
     }
 
     @Override

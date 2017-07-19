@@ -60,8 +60,8 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
@@ -93,7 +93,6 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
@@ -257,74 +256,73 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
         // Double check that the CauseTracker is already capturing the Death phase
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        if (!this.world.isRemote) {
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
-            final IPhaseState state = peek.state;
-            this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
-            if (this.tracksEntityDeaths) {
-                Sponge.getCauseStackManager().pushCause(this);
-                final PhaseContext context = PhaseContext.start()
-                        .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
-                        .source(this);
-                this.getNotifierUser().ifPresent(context::notifier);
-                this.getCreatorUser().ifPresent(context::owner);
-                causeTracker.switchToPhase(EntityPhase.State.DEATH, context
-                        .addCaptures()
-                        .addEntityDropCaptures()
-                        .complete());
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (!this.world.isRemote) {
+                final PhaseData peek = causeTracker.getCurrentPhaseData();
+                final IPhaseState state = peek.state;
+                this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+                if (this.tracksEntityDeaths) {
+                    Sponge.getCauseStackManager().pushCause(this);
+                    final PhaseContext context = PhaseContext.start()
+                            .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
+                            .source(this);
+                    this.getNotifierUser().ifPresent(context::notifier);
+                    this.getCreatorUser().ifPresent(context::owner);
+                    causeTracker.switchToPhase(EntityPhase.State.DEATH, context
+                            .addCaptures()
+                            .addEntityDropCaptures()
+                            .complete());
+                }
+            } else {
+                this.tracksEntityDeaths = false;
             }
-        } else {
-            this.tracksEntityDeaths = false;
-        }
-        // Sponge End
-        if (this.dead) {
-            // Sponge Start - ensure that we finish the tracker if necessary
-            if (this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+            // Sponge End
+            if (this.dead) {
+                // Sponge Start - ensure that we finish the tracker if necessary
+                if (this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+                    causeTracker.completePhase(EntityPhase.State.DEATH);
+                }
+                // Sponge End
+                return;
+            }
+    
+            Entity entity = cause.getTrueSource();
+            EntityLivingBase entitylivingbase = this.getAttackingEntity();
+    
+            if (this.scoreValue >= 0 && entitylivingbase != null) {
+                entitylivingbase.awardKillScore((EntityLivingBase) (Object) this, this.scoreValue, cause);
+            }
+    
+            if (entity != null) {
+                entity.onKillEntity((EntityLivingBase) (Object) this);
+            }
+    
+            this.dead = true;
+            this.getCombatTracker().reset();
+    
+            if (!this.world.isRemote) {
+                int i = 0;
+    
+                if (entity instanceof EntityPlayer) {
+                    i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+                }
+    
+                if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
+                    boolean flag = this.recentlyHit > 0;
+                    this.dropLoot(flag, i, cause);
+                }
+    
+            }
+    
+            // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
+            if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
+                this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
+            }
+            if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+                this.tracksEntityDeaths = false;
                 causeTracker.completePhase(EntityPhase.State.DEATH);
             }
-            Sponge.getCauseStackManager().popCauseFrame(frame);
-            // Sponge End
-            return;
         }
-
-        Entity entity = cause.getTrueSource();
-        EntityLivingBase entitylivingbase = this.getAttackingEntity();
-
-        if (this.scoreValue >= 0 && entitylivingbase != null) {
-            entitylivingbase.awardKillScore((EntityLivingBase) (Object) this, this.scoreValue, cause);
-        }
-
-        if (entity != null) {
-            entity.onKillEntity((EntityLivingBase) (Object) this);
-        }
-
-        this.dead = true;
-        this.getCombatTracker().reset();
-
-        if (!this.world.isRemote) {
-            int i = 0;
-
-            if (entity instanceof EntityPlayer) {
-                i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
-            }
-
-            if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
-                boolean flag = this.recentlyHit > 0;
-                this.dropLoot(flag, i, cause);
-            }
-
-        }
-
-        // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
-        if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
-            this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
-        }
-        if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
-            this.tracksEntityDeaths = false;
-            causeTracker.completePhase(EntityPhase.State.DEATH);
-        }
-        Sponge.getCauseStackManager().popCauseFrame(frame);
         // Sponge End
     }
 
@@ -510,24 +508,24 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                         // Sponge Start - notify the cause tracker
                         final CauseTracker causeTracker = CauseTracker.getInstance();
-                        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-                        final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
-                        if (enterDeathPhase) {
-                            Sponge.getCauseStackManager().pushCause(this);
-                            final PhaseContext context = PhaseContext.start().source(this);
-                            this.getCreatorUser().ifPresent(context::owner);
-                            this.getNotifierUser().ifPresent(context::notifier);
-                            causeTracker.switchToPhase(EntityPhase.State.DEATH, context
-                                    .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, source)
-                                    .addCaptures()
-                                    .addEntityDropCaptures()
-                                    .complete());
+                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
+                            if (enterDeathPhase) {
+                                Sponge.getCauseStackManager().pushCause(this);
+                                final PhaseContext context = PhaseContext.start().source(this);
+                                this.getCreatorUser().ifPresent(context::owner);
+                                this.getNotifierUser().ifPresent(context::notifier);
+                                causeTracker.switchToPhase(EntityPhase.State.DEATH, context
+                                        .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, source)
+                                        .addCaptures()
+                                        .addEntityDropCaptures()
+                                        .complete());
+                            }
+                            this.onDeath(source);
+                            if (enterDeathPhase) {
+                                causeTracker.completePhase(EntityPhase.State.DEATH);
+                            }
                         }
-                        this.onDeath(source);
-                        if (enterDeathPhase) {
-                            causeTracker.completePhase(EntityPhase.State.DEATH);
-                        }
-                        Sponge.getCauseStackManager().popCauseFrame(frame);
                     }
                     // Sponge End
                 } else if (flag1) {
@@ -606,67 +604,67 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (absorptionFunction.isPresent()) {
                 originalFunctions.add(absorptionFunction.get());
             }
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-            DamageEventHandler.generateCauseFor(damageSource);
-
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
-            if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
-                Sponge.getEventManager().post(event);
-            }
-            Sponge.getCauseStackManager().popCauseFrame(frame);
-            if (event.isCancelled()) {
-                return false;
-            }
-
-            damage = (float) event.getFinalDamage();
-
-            // Helmet
-            final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
-            if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
-                mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
-            }
-
-            // Shield
-            if (shieldFunction.isPresent()) {
-                this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
-                if (!damageSource.isProjectile()) {
-                    Entity entity = damageSource.getImmediateSource();
-
-                    if (entity instanceof EntityLivingBase) {
-                        this.blockUsingShield((EntityLivingBase) entity);
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                DamageEventHandler.generateCauseFor(damageSource);
+    
+                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
+                if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
+                    Sponge.getEventManager().post(event);
+                }
+                if (event.isCancelled()) {
+                    return false;
+                }
+    
+                damage = (float) event.getFinalDamage();
+    
+                // Helmet
+                final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
+                if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
+                    mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
+                }
+    
+                // Shield
+                if (shieldFunction.isPresent()) {
+                    this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
+                    if (!damageSource.isProjectile()) {
+                        Entity entity = damageSource.getImmediateSource();
+    
+                        if (entity instanceof EntityLivingBase) {
+                            this.blockUsingShield((EntityLivingBase) entity);
+                        }
                     }
                 }
-            }
-
-            // Armor
-            if (!damageSource.isUnblockable()) {
-                for (DamageFunction modifier : event.getModifiers()) {
-                    applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
+    
+                // Armor
+                if (!damageSource.isUnblockable()) {
+                    for (DamageFunction modifier : event.getModifiers()) {
+                        applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
+                    }
                 }
-            }
-
-            double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
-            if (absorptionFunction.isPresent()) {
-                absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
-            }
-
-            this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
-            if (damage != 0.0F) {
-                if (human) {
-                    ((EntityPlayer) (Object) this).addExhaustion(damageSource.getHungerDamage());
+    
+                double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
+                if (absorptionFunction.isPresent()) {
+                    absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
                 }
-                float f2 = this.getHealth();
-
-                this.setHealth(f2 - damage);
-                this.getCombatTracker().trackDamage(damageSource, f2, damage);
-
-                if (human) {
-                    return true;
+    
+                this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
+                if (damage != 0.0F) {
+                    if (human) {
+                        ((EntityPlayer) (Object) this).addExhaustion(damageSource.getHungerDamage());
+                    }
+                    float f2 = this.getHealth();
+    
+                    this.setHealth(f2 - damage);
+                    this.getCombatTracker().trackDamage(damageSource, f2, damage);
+    
+                    if (human) {
+                        return true;
+                    }
+    
+                    this.setAbsorptionAmount(this.getAbsorptionAmount() - damage);
                 }
-
-                this.setAbsorptionAmount(this.getAbsorptionAmount() - damage);
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -836,16 +834,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-            Sponge.getCauseStackManager().pushCause(entityLivingBase);
-            causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
-                    .addCaptures()
-                    .addEntityDropCaptures()
-                    .source(entityLivingBase)
-                    .complete());
-            ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
-            causeTracker.completePhase(EntityPhase.State.DEATH_UPDATE);
-            Sponge.getCauseStackManager().popCauseFrame(frame);
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(entityLivingBase);
+                causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
+                        .addCaptures()
+                        .addEntityDropCaptures()
+                        .source(entityLivingBase)
+                        .complete());
+                ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
+                causeTracker.completePhase(EntityPhase.State.DEATH_UPDATE);
+            }
         } else {
             ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
         }

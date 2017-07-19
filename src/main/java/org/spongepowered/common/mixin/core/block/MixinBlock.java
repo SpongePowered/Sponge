@@ -58,6 +58,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.item.ItemType;
@@ -257,15 +258,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().pushCause(worldIn.getBlockState(pos));
-        final ConstructEntityEvent.Pre
-                eventPre =
-                SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, position);
-        SpongeImpl.postEvent(eventPre);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        if (eventPre.isCancelled()) {
-            callbackInfo.cancel();
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(worldIn.getBlockState(pos));
+            final ConstructEntityEvent.Pre
+                    eventPre =
+                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, position);
+            SpongeImpl.postEvent(eventPre);
+            if (eventPre.isCancelled()) {
+                callbackInfo.cancel();
+            }
         }
     }
 

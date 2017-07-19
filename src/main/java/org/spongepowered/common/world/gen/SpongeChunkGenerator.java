@@ -45,8 +45,8 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenEndCity;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
@@ -58,6 +58,7 @@ import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
@@ -343,36 +344,36 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
                 continue;
             }
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-            Timing timing = null;
-            if (Timings.isTimingsEnabled()) {
-                timing = this.populatorTimings.get(populator.getType().getId());
-                if (timing == null) {
-                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
-                                                                                                      // this.chunkGeneratorTiming);
-                    this.populatorTimings.put(populator.getType().getId(), timing);
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Timing timing = null;
+                if (Timings.isTimingsEnabled()) {
+                    timing = this.populatorTimings.get(populator.getType().getId());
+                    if (timing == null) {
+                        timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
+                                                                                                          // this.chunkGeneratorTiming);
+                        this.populatorTimings.put(populator.getType().getId(), timing);
+                    }
+                    timing.startTimingIfSync();
                 }
-                timing.startTimingIfSync();
+                if (CauseTracker.ENABLED) {
+                    causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                            .addExtra(InternalNamedCauses.WorldGeneration.WORLD, world)
+                            .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type)
+                            .addEntityCaptures()
+                            .complete());
+                }
+                if (populator instanceof IFlaggedPopulator) {
+                    ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
+                } else {
+                    populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
+                }
+                if (Timings.isTimingsEnabled()) {
+                    timing.stopTimingIfSync();
+                }
+                if (CauseTracker.ENABLED) {
+                    causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
+                }
             }
-            if (CauseTracker.ENABLED) {
-                causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                        .addExtra(InternalNamedCauses.WorldGeneration.WORLD, world)
-                        .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type)
-                        .addEntityCaptures()
-                        .complete());
-            }
-            if (populator instanceof IFlaggedPopulator) {
-                ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
-            } else {
-                populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
-            }
-            if (Timings.isTimingsEnabled()) {
-                timing.stopTimingIfSync();
-            }
-            if (CauseTracker.ENABLED) {
-                causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
-            }
-            Sponge.getCauseStackManager().popCauseFrame(frame);
         }
 
         // If we wrapped a custom chunk provider then we should call its
@@ -404,20 +405,20 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-                    final CauseTracker causeTracker = CauseTracker.getInstance();
-                    if (CauseTracker.ENABLED) {
-                        causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                                .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
-                                .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType())
-                                .addEntityCaptures()
-                                .complete());
+                    try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        final CauseTracker causeTracker = CauseTracker.getInstance();
+                        if (CauseTracker.ENABLED) {
+                            causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
+                                    .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType())
+                                    .addEntityCaptures()
+                                    .complete());
+                        }
+                        flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
+                        if (CauseTracker.ENABLED) {
+                            causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
+                        }
                     }
-                    flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
-                    if (CauseTracker.ENABLED) {
-                        causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
-                    }
-                    Sponge.getCauseStackManager().popCauseFrame(frame);
                 }
             }
         }

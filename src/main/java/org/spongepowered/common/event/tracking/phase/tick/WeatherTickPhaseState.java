@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -44,37 +45,38 @@ class WeatherTickPhaseState extends TickPhaseState {
 
     @Override
     public void processPostTick(PhaseContext phaseContext) {
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-        phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-            final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-            SpongeImpl.postEvent(spawnEntityEvent);
-            for (Entity entity : spawnEntityEvent.getEntities()) {
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-            }
-        });
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
-        });
-        Sponge.getCauseStackManager().popCauseFrame(frame);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+                final SpawnEntityEvent spawnEntityEvent =
+                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                SpongeImpl.postEvent(spawnEntityEvent);
+                for (Entity entity : spawnEntityEvent.getEntities()) {
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                }
+            });
+            phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
+                TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
+            });
+        }
     }
 
     @Override
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-        capturedEntities.add(entity);
-        final SpawnEntityEvent spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
-        SpongeImpl.postEvent(spawnEntityEvent);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        if (!spawnEntityEvent.isCancelled()) {
-            for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+            capturedEntities.add(entity);
+            final SpawnEntityEvent spawnEntityEvent =
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+            SpongeImpl.postEvent(spawnEntityEvent);
+            Sponge.getCauseStackManager().popCauseFrame(frame);
+            if (!spawnEntityEvent.isCancelled()) {
+                for (Entity anEntity : spawnEntityEvent.getEntities()) {
+                    EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }

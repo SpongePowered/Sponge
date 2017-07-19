@@ -29,6 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -71,80 +72,82 @@ final class CommandState extends GeneralState {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().pushCause(sender);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
-        phaseContext.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    // TODO the entity spawn causes are not likely valid, need to investigate further.
-                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        final boolean isPlayer = sender instanceof Player;
-                        final Player player = isPlayer ? (Player) sender : null;
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (isPlayer) {
-                                EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                            }
-                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                        }
-                    }
-                });
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().pushCause(sender);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-        phaseContext.getCapturedEntityDropSupplier()
-                .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
-                    for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
-                        final UUID key = entry.getKey();
-                        @Nullable net.minecraft.entity.Entity foundEntity = null;
-                        for (WorldServer worldServer : WorldManager.getWorlds()) {
-                            final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
-                            if (entityFromUuid != null) {
-                                foundEntity = entityFromUuid;
-                                break;
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(sender);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            phaseContext.getCapturedEntitySupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        // TODO the entity spawn causes are not likely valid,
+                        // need to investigate further.
+                        final SpawnEntityEvent spawnEntityEvent =
+                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeImpl.postEvent(spawnEntityEvent);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            final boolean isPlayer = sender instanceof Player;
+                            final Player player = isPlayer ? (Player) sender : null;
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                if (isPlayer) {
+                                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                                }
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
-                        final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
-                        if (!affectedEntity.isPresent()) {
-                            continue;
-                        }
-                        final Collection<ItemDropData> itemStacks = entry.getValue();
-                        if (itemStacks.isEmpty()) {
-                            return;
-                        }
-                        final List<ItemDropData> items = new ArrayList<>();
-                        items.addAll(itemStacks);
-                        itemStacks.clear();
-
-                        final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
-                        if (!items.isEmpty()) {
-                            final List<Entity> itemEntities = items.stream()
-                                    .map(data -> data.create(minecraftWorld))
-                                    .map(EntityUtil::fromNative)
-                                    .collect(Collectors.toList());
-                            Sponge.getCauseStackManager().pushCause(affectedEntity.get());
-                            final DropItemEvent.Destruct
-                                    destruct =
-                                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
-                            SpongeImpl.postEvent(destruct);
-                            Sponge.getCauseStackManager().popCause();
-                            if (!destruct.isCancelled()) {
-                                final boolean isPlayer = sender instanceof Player;
-                                final Player player = isPlayer ? (Player) sender : null;
-                                for (Entity entity : destruct.getEntities()) {
-                                    if (isPlayer) {
-                                        EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                                    }
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                    });
+        }
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(sender);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            phaseContext.getCapturedEntityDropSupplier()
+                    .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
+                            final UUID key = entry.getKey();
+                            @Nullable
+                            net.minecraft.entity.Entity foundEntity = null;
+                            for (WorldServer worldServer : WorldManager.getWorlds()) {
+                                final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
+                                if (entityFromUuid != null) {
+                                    foundEntity = entityFromUuid;
+                                    break;
                                 }
                             }
+                            final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
+                            if (!affectedEntity.isPresent()) {
+                                continue;
+                            }
+                            final Collection<ItemDropData> itemStacks = entry.getValue();
+                            if (itemStacks.isEmpty()) {
+                                return;
+                            }
+                            final List<ItemDropData> items = new ArrayList<>();
+                            items.addAll(itemStacks);
+                            itemStacks.clear();
 
+                            final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
+                            if (!items.isEmpty()) {
+                                final List<Entity> itemEntities = items.stream()
+                                        .map(data -> data.create(minecraftWorld))
+                                        .map(EntityUtil::fromNative)
+                                        .collect(Collectors.toList());
+                                Sponge.getCauseStackManager().pushCause(affectedEntity.get());
+                                final DropItemEvent.Destruct destruct =
+                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                                SpongeImpl.postEvent(destruct);
+                                Sponge.getCauseStackManager().popCause();
+                                if (!destruct.isCancelled()) {
+                                    final boolean isPlayer = sender instanceof Player;
+                                    final Player player = isPlayer ? (Player) sender : null;
+                                    for (Entity entity : destruct.getEntities()) {
+                                        if (isPlayer) {
+                                            EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                                        }
+                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                                    }
+                                }
+
+                            }
                         }
-                    }
-                });
-        Sponge.getCauseStackManager().popCauseFrame(frame);
+                    });
+        }
     }
 
     @Override

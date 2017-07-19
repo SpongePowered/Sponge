@@ -47,6 +47,7 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.Location;
@@ -426,22 +427,21 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return entity;
             }
         }
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
-        Entity newEntity = world.get().createEntity(getType(), this.position);
-        if (newEntity != null) {
-            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
-            if (this.compound != null) {
-                nmsEntity.readFromNBT(this.compound);
-            }
-
-            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
-            if (spawnResult) {
-                Sponge.getCauseStackManager().popCauseFrame(frame);
-                return Optional.of((Entity) nmsEntity);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
+            Entity newEntity = world.get().createEntity(getType(), this.position);
+            if (newEntity != null) {
+                net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
+                if (this.compound != null) {
+                    nmsEntity.readFromNBT(this.compound);
+                }
+    
+                boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
+                if (spawnResult) {
+                    return Optional.of((Entity) nmsEntity);
+                }
             }
         }
-        Sponge.getCauseStackManager().popCauseFrame(frame);
         return Optional.empty();
     }
 

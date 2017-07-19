@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -41,18 +40,13 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.service.ServiceManager;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("rawtypes")
@@ -85,6 +79,7 @@ public final class EventContextKeysModule
         this.catalogTypeMap.put("sponge:dismount_type", new SpongeEventContextKey<>("sponge:dismount_type", "Dimension Type", DismountType.class));
         this.catalogTypeMap.put("sponge:igniter", new SpongeEventContextKey<>("sponge:igniter", "Igniter", User.class));
         this.catalogTypeMap.put("sponge:last_damage_source", new SpongeEventContextKey<>("sponge:last_damage_source", "Last Damage Source", DamageSource.class));
+        this.catalogTypeMap.put("sponge:liquid_mix", new SpongeEventContextKey<>("sponge:liquid_mix", "Liquid Mix", World.class));
         this.catalogTypeMap.put("sponge:notifier", new SpongeEventContextKey<>("sponge:notifier", "Notifier", User.class));
         this.catalogTypeMap.put("sponge:owner", new SpongeEventContextKey<>("sponge:owner", "Owner", User.class));
         this.catalogTypeMap.put("sponge:player", new SpongeEventContextKey<>("sponge:player", "Player", Player.class));

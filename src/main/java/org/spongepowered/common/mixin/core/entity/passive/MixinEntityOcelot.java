@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,7 +50,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingDat
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.event.SpongeCauseStackManager.CauseStackFrame;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
@@ -67,7 +67,7 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
-            try (CauseStackFrame frame = (CauseStackFrame) Sponge.getCauseStackManager().createCauseFrame()) {
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(player);
                 if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this))) {
                     stack.setCount(stack.getCount() - 1);

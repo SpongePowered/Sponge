@@ -24,11 +24,11 @@
  */
 package org.spongepowered.test;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
@@ -65,7 +65,9 @@ public class CustomInventoryTest {
                                 .withCarrier(myCarrier)
                                 .build(this);
                         myCarrier.init(custom);
-                        player.openInventory(custom, Cause.source(player).build());
+                        Sponge.getCauseStackManager().pushCause(player);
+                        player.openInventory(custom);
+                        Sponge.getCauseStackManager().popCause();
                         event.setCancelled(true);
                     }
                 })
@@ -73,7 +75,7 @@ public class CustomInventoryTest {
     }
 
     @Listener
-    public void onInventoryClick(ClickInventoryEvent event, @Root Player player, @Getter("getTargetInventory") CarriedInventory container) {
+    public void onInventoryClick(ClickInventoryEvent event, @Root Player player, @Getter("getTargetInventory") CarriedInventory<Carrier> container) {
         Optional<Carrier> carrier = container.getCarrier();
         if (carrier.isPresent() && carrier.get() instanceof BasicCarrier) {
             for (SlotTransaction trans : event.getTransactions()) {
@@ -89,7 +91,7 @@ public class CustomInventoryTest {
 
         @Override
         public CarriedInventory<? extends Carrier> getInventory() {
-            return ((CarriedInventory) this.inventory);
+            return ((CarriedInventory<?>) this.inventory);
         }
 
         public void init(Inventory inventory) {

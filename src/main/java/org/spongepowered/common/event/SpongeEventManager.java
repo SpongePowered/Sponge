@@ -38,16 +38,15 @@ import com.google.common.reflect.TypeToken;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
@@ -360,8 +359,7 @@ public class SpongeEventManager implements EventManager {
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             Sponge.getCauseStackManager().pushCause(handler.getPlugin());
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-            try {
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 handler.getTimingsHandler().startTimingIfSync();
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
@@ -372,7 +370,6 @@ public class SpongeEventManager implements EventManager {
             } finally {
                 handler.getTimingsHandler().stopTimingIfSync();
             }
-            Sponge.getCauseStackManager().popCauseFrame(frame);
             Sponge.getCauseStackManager().popCause();
         }
         if (event instanceof AbstractEvent) {

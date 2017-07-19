@@ -33,6 +33,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
@@ -56,15 +57,15 @@ public class MixinBlockFalling {
                 EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
                 Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
                 BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
-                Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-                Sponge.getCauseStackManager().pushCause(snapshot);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.FALLING_BLOCK);
-                Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
-                ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                        fallingBlock, worldTransform);
-                SpongeImpl.postEvent(event);
-                Sponge.getCauseStackManager().popCauseFrame(frame);
-                return !event.isCancelled();
+                try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    Sponge.getCauseStackManager().pushCause(snapshot);
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.FALLING_BLOCK);
+                    Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
+                    ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                            fallingBlock, worldTransform);
+                    SpongeImpl.postEvent(event);
+                    return !event.isCancelled();
+                }
             }
         }
         return false;

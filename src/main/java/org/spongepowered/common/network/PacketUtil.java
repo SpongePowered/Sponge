@@ -47,6 +47,7 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -168,14 +169,14 @@ public class PacketUtil {
             SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
             SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(playerMP);
             HandType handType = packet.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-            Sponge.getCauseStackManager().pushCause(playerMP);
-            AnimateHandEvent event = SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) playerMP);
-            if (SpongeImpl.postEvent(event)) {
-                Sponge.getCauseStackManager().popCauseFrame(frame);
-                return true;
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(playerMP);
+                AnimateHandEvent event =
+                        SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) playerMP);
+                if (SpongeImpl.postEvent(event)) {
+                    return true;
+                }
             }
-            Sponge.getCauseStackManager().popCauseFrame(frame);
             return false;
         } else if (packetIn instanceof CPacketPlayerDigging) {
             SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
@@ -235,16 +236,16 @@ public class PacketUtil {
             }
 
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-            Sponge.getCauseStackManager().pushCause(playerMP);
-            SpongeCommonEventFactory.callInteractBlockEventSecondary(Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
-            Sponge.getCauseStackManager().popCauseFrame(frame);
-            if (isCancelled) {
-                // Multiple slots may have been changed on the client. Right
-                // clicking armor is one example - the client changes it
-                // without the server telling it to.
-                playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory());
-                return true;
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(playerMP);
+                SpongeCommonEventFactory.callInteractBlockEventSecondary(Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
+                if (isCancelled) {
+                    // Multiple slots may have been changed on the client. Right
+                    // clicking armor is one example - the client changes it
+                    // without the server telling it to.
+                    playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory());
+                    return true;
+                }
             }
         } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;

@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -43,11 +41,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +74,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        try {
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
@@ -110,7 +104,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Exception occured while processing tile entity %s at %s", tickingTile, tickingTile.getLocation()), e);
         }
-        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 
     @Override
@@ -132,18 +125,39 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
         // Separate experience from other entities
         if (entity instanceof EntityXPOrb) {
-            Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                context.addNotifierAndOwnerToCauseStack();
+                final ArrayList<Entity> exp = new ArrayList<>();
+                exp.add(entity);
+                final SpawnEntityEvent event =
+                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), exp);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    for (Entity anEntity : event.getEntities()) {
+                        if (entityCreator != null) {
+                            EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
+                        }
+                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        final List<Entity> nonExpEntities = new ArrayList<>(1);
+        nonExpEntities.add(entity);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
             context.addNotifierAndOwnerToCauseStack();
-            final ArrayList<Entity> exp = new ArrayList<>();
-            exp.add(entity);
-            final SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), exp);
-            SpongeImpl.postEvent(event);
-            Sponge.getCauseStackManager().popCauseFrame(frame);
-            if (!event.isCancelled()) {
-                for (Entity anEntity : event.getEntities()) {
+            final SpawnEntityEvent
+                    spawnEntityEvent =
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
+            SpongeImpl.postEvent(spawnEntityEvent);
+            if (!spawnEntityEvent.isCancelled()) {
+                for (Entity anEntity : spawnEntityEvent.getEntities()) {
                     if (entityCreator != null) {
                         EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
                     }
@@ -151,27 +165,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                 }
                 return true;
             }
-            return false;
-        }
-        final List<Entity> nonExpEntities = new ArrayList<>(1);
-        nonExpEntities.add(entity);
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
-        context.addNotifierAndOwnerToCauseStack();
-        final SpawnEntityEvent
-                spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
-        SpongeImpl.postEvent(spawnEntityEvent);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        if (!spawnEntityEvent.isCancelled()) {
-            for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                if (entityCreator != null) {
-                    EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                }
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-            }
-            return true;
         }
         return false;
     }

@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -112,15 +113,15 @@ public abstract class MixinMobSpawnerBaseLogic {
         if (type == null) {
             return null;
         }
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>(
-                ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCauseFrame(frame);
-        if (event.isCancelled()) {
-            return null;
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
+            Transform<org.spongepowered.api.world.World> transform = new Transform<>(
+                    ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return null;
+            }
         }
         Entity entity;
         try {

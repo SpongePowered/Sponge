@@ -50,7 +50,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     public static final boolean DEBUG_CAUSE_FRAMES = Boolean.valueOf(System.getProperty("sponge.debugcauseframes", "false"));
 
     private final Deque<Object> cause = Queues.newArrayDeque();
-    private final Deque<CauseStackFrame> frames = Queues.newArrayDeque();
+    private final Deque<CauseStackFrameImpl> frames = Queues.newArrayDeque();
     private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
 
     private int min_depth = 0;
@@ -127,7 +127,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     @Override
     public CauseStackFrame pushCauseFrame() {
         enforceMainThread();
-        CauseStackFrame frame = new CauseStackFrame(this.min_depth);
+        CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth);
         this.frames.push(frame);
         this.min_depth = this.cause.size();
         if (DEBUG_CAUSE_FRAMES) {
@@ -140,10 +140,10 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public void popCauseFrame(Object oldFrame) {
+    public void popCauseFrame(CauseStackFrame oldFrame) {
         enforceMainThread();
         checkNotNull(oldFrame, "oldFrame");
-        CauseStackFrame frame = this.frames.peek();
+        CauseStackFrameImpl frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occured and we do our best to correct
@@ -154,7 +154,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
             // to simply throw an error.
             int offset = -1;
             int i = 0;
-            for (CauseStackFrame f : this.frames) {
+            for (CauseStackFrameImpl f : this.frames) {
                 if (f == oldFrame) {
                     offset = i;
                     break;
@@ -173,7 +173,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 SpongeImpl.getLogger().warn("Frames being popped are:");
             }
             while (offset >= 0) {
-                CauseStackFrame f = this.frames.peek();
+                CauseStackFrameImpl f = this.frames.peek();
                 if (DEBUG_CAUSE_FRAMES && offset > 0) {
                     SpongeImpl.getLogger().warn("Stack frame in position " + offset + ":");
                     f.stack_debug.printStackTrace();
@@ -210,12 +210,6 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public AutoCloseable createCauseFrame() {
-        enforceMainThread();
-        return pushCauseFrame();
-    }
-
-    @Override
     public <T> CauseStackManager addContext(EventContextKey<T> key, T value) {
         enforceMainThread();
         checkNotNull(key, "key");
@@ -223,7 +217,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
         this.cached_ctx = null;
         Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
-            CauseStackFrame frame = this.frames.peek();
+            CauseStackFrameImpl frame = this.frames.peek();
             if (existing == null) {
                 frame.markNew(key);
             } else if (!frame.isNew(key) && !frame.isStored(key)) {
@@ -249,7 +243,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
         this.cached_ctx = null;
         Object existing = this.ctx.remove(key);
         if (existing != null && !this.frames.isEmpty()) {
-            CauseStackFrame frame = this.frames.peek();
+            CauseStackFrameImpl frame = this.frames.peek();
             if (!frame.isNew(key)) {
                 frame.store(key, existing);
             }
@@ -258,7 +252,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     // TODO could pool these for more fasts
-    public static class CauseStackFrame implements AutoCloseable {
+    public static class CauseStackFrameImpl implements CauseStackFrame {
 
         // lazy loaded
         private Map<EventContextKey<?>, Object> stored_ctx_values;
@@ -267,7 +261,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
         public Exception stack_debug = null;
 
-        public CauseStackFrame(int old_depth) {
+        public CauseStackFrameImpl(int old_depth) {
             this.old_min_depth = old_depth;
         }
 

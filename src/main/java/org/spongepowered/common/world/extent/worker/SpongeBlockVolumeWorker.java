@@ -29,8 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
@@ -140,24 +139,24 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = this.volume.getBlockMax().getX();
         final int yMax = this.volume.getBlockMax().getY();
         final int zMax = this.volume.getBlockMax().getZ();
-        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                .source(this)
-                .addCaptures()
-                .complete());
-        }
-        for (int z = zMin; z <= zMax; z++) {
-            for (int y = yMin; y <= yMax; y++) {
-                for (int x = xMin; x <= xMax; x++) {
-                    visitor.visit(this.volume, x, y, z);
+        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (CauseTracker.ENABLED) {
+                CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                        .source(this)
+                        .addCaptures()
+                        .complete());
+            }
+            for (int z = zMin; z <= zMax; z++) {
+                for (int y = yMin; y <= yMax; y++) {
+                    for (int x = xMin; x <= xMax; x++) {
+                        visitor.visit(this.volume, x, y, z);
+                    }
                 }
             }
+            if (CauseTracker.ENABLED) {
+                CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
+            }
         }
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
-        }
-        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 
     @Override

@@ -45,6 +45,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;
@@ -280,8 +281,7 @@ public class SpongeCommandManager implements CommandManager {
         }
 
         try {
-            try {
-                Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(source);
                 if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                     CauseTracker.getInstance().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
@@ -294,7 +294,6 @@ public class SpongeCommandManager implements CommandManager {
                 }
                 final CommandResult result = this.dispatcher.process(source, commandLine);
                 this.completeCommandPhase();
-                Sponge.getCauseStackManager().popCauseFrame(frame);
                 return result;
             } catch (InvocationCommandException ex) {
                 this.completeCommandPhase();
