@@ -215,6 +215,21 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     }
 
     @Override
+    default Inventory intersect(Inventory inventory) {
+        return Query.intersect(this, inventory).execute();
+    }
+
+    @Override
+    default Inventory union(Inventory inventory) {
+        return Query.union(this, inventory).execute();
+    }
+
+    @Override
+    default boolean containsInventory(Inventory inventory) {
+        return false; // TODO
+    }
+
+    @Override
     default InventoryArchetype getArchetype() {
         return InventoryArchetypes.UNKNOWN;
     }

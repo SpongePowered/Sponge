@@ -37,6 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
@@ -47,10 +48,12 @@ import org.spongepowered.common.item.inventory.query.strategy.ClassStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.CompoundStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ExactItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.GenericStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.IntersectStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemTypeStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.NameStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.PropertyStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.UnionStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.expression.ExpressionStrategy;
 
 import java.lang.reflect.Constructor;
@@ -69,7 +72,9 @@ public class Query<TInventory, TStack> {
         NAME("name", NameStrategy.class),
         EXPRESSION("expr", ExpressionStrategy.class),
         GENERIC("args", GenericStrategy.class),
-        COMPOUND("compound", CompoundStrategy.class);
+        COMPOUND("compound", CompoundStrategy.class),
+        INTERSECT("intersect", IntersectStrategy.class),
+        UNION("union", UnionStrategy.class);
 
         private final String key;
 
@@ -243,6 +248,15 @@ public class Query<TInventory, TStack> {
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
         return new Query<>(adapter, Type.COMPOUND, args);
     }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> intersect(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
+        return new Query<>(adapter, Type.INTERSECT, args);
+    }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
+        return new Query<>(adapter, Type.UNION, args);
+    }
+
 
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(Type type) {
         return Query.getStrategy(type.getKey());
