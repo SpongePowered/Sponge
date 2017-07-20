@@ -22,38 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
+package org.spongepowered.common.item.inventory.lens.impl;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 
 import java.util.List;
-import java.util.Set;
 
-public class ContainerLens extends MinecraftLens {
+/**
+ * A compound-lens composed of multiple lenses.
+ * Only contains slot-lenses.
+ */
+public class CompoundLens extends MinecraftLens {
 
-    // The viewed inventories
-    protected List<Lens<IInventory, ItemStack>> viewedInventories;
+    protected List<Lens<IInventory, ItemStack>> inventories;
 
-    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots,
+    public CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots,
             List<Lens<IInventory, ItemStack>> lenses) {
-        this(adapter, slots);
-        this.viewedInventories = lenses;
+        super(0, size, adapterType, slots);
+        this.inventories = lenses;
         this.init(slots);
-    }
-
-    /**
-     * Do not forget to call init when using this constructor!
-     */
-    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
     }
 
     @Override
@@ -61,12 +53,9 @@ public class ContainerLens extends MinecraftLens {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
-        }
-
-        // Adding spanning children
-        for (Lens<IInventory, ItemStack> lens : this.viewedInventories) {
-            this.addSpanningChild(lens);
+            if (!this.children.contains(slots.getSlot(slot))) {
+                this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));
+            }
         }
     }
 

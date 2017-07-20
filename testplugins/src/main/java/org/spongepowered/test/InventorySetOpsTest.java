@@ -49,26 +49,41 @@ public class InventorySetOpsTest {
     @Listener
     public void onStart(GameStartedServerEvent event) {
         testIntersect();
+        testUnion();
 
     }
 
     @Listener
-    public void onCmd(SendCommandEvent event)
-    {
+    public void onCmd(SendCommandEvent event) {
         testIntersect(); // TODO remove me once this is all working
+        testUnion(); // TODO remove me once this is all working
     }
 
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
         Inventory firstSlots = chest.query(SlotIndex.of(0));
-        Inventory firstRow = chest.query(InventoryRow.class).first(); // TODO is the query supposed to return the entire grid?
+        Inventory firstRow = chest.query(InventoryRow.class).first();
         Inventory firstCol = chest.query(InventoryColumn.class).first();
-        GridInventory grid = chest.query(GridInventory.class);
-        //InventoryColumn firstCol = grid.getColumn(0).get();
-        //InventoryRow firstRow = grid.getRow(0).get();
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
         Preconditions.checkArgument(intersection.capacity() == 1, "This should be the first slot only!");
         logger.info("Intersect works!");
+    }
+
+    private void testUnion() {
+
+        Inventory chest = Inventory.builder().build(this);
+        Inventory firstSlots = chest.query(SlotIndex.of(0));
+        Inventory firstRow = chest.query(InventoryRow.class).first();
+        GridInventory grid = chest.query(GridInventory.class);
+        InventoryColumn firstCol = grid.getColumn(0).get();
+        InventoryColumn secondCol = grid.getColumn(1).get();
+        Inventory union = firstSlots.union(firstCol).union(firstRow);
+        Inventory union2 = firstCol.union(firstRow);
+        Inventory union3 = firstCol.union(secondCol);
+        Preconditions.checkArgument(union.capacity() == 11, "This should include all eleven slot of the first row and column!");
+        Preconditions.checkArgument(union2.capacity() == 11, "This should include all eleven slot of the first row and column!");
+        Preconditions.checkArgument(union3.capacity() == 6, "This should include all six slot of the first 2 columns!");
+        logger.info("Union works!");
     }
 
 

@@ -22,36 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.lens;
 
-import com.google.common.collect.ImmutableSet;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
 
-public class UnionStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Inventory> {
+import java.util.ArrayList;
+import java.util.List;
 
-    private ImmutableSet<Inventory> inventories;
+public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider<TInventory, TStack>  {
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Inventory> with(ImmutableSet<Inventory> inventories) {
-        this.inventories = inventories;
+    private List<SlotLens<TInventory, TStack>> slotList = new ArrayList<>();
+
+    public CompoundSlotProvider add(InventoryAdapter<TInventory, TStack> adapter) {
+        for (Inventory slot : adapter.slots()) {
+            SlotLens slotLens = ((SlotLens<IInventory, ItemStack>) ((SlotAdapter) slot).getRootLens());
+            if (!slotList.contains(slotLens)) {
+                slotList.add(slotLens);
+            }
+        }
         return this;
     }
 
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        for (Inventory inv : this.inventories) {
-            for (Inventory slot : inv.slots()) {
-                if (((SlotAdapter) slot).getRootLens().equals(lens)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public SlotLens<TInventory, TStack> getSlot(int index) {
+        return this.slotList.get(index);
+    }
+
+    public int size() {
+        return this.slotList.size();
     }
 }
