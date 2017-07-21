@@ -809,7 +809,6 @@ public final class TrackingUtil {
             final User entityCreator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
             final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemDrops);
             SpongeImpl.postEvent(destruct);
-            Sponge.getCauseStackManager().popCauseFrame(frame);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
                     if (entityCreator != null) {

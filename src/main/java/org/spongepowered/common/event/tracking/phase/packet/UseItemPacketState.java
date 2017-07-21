@@ -38,6 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -70,7 +71,7 @@ class UseItemPacketState extends BasicPacketState {
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         PhaseContext context) {
-        Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
+        Player player = context.getRequiredExtra(InternalNamedCauses.Packet.PACKET_PLAYER, Player.class);
         BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation().get()).getBlockPos();
         IMixinChunk spongeChunk = (IMixinChunk) EntityUtil.getMinecraftWorld(player).getChunkFromBlockCoords(pos);
         if (blockChange == BlockChange.PLACE) {

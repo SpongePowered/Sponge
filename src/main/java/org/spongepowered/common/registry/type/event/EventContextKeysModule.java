@@ -74,22 +74,31 @@ public final class EventContextKeysModule
 
     @Override
     public void registerDefaults() {
-        this.catalogTypeMap.put("sponge:creator", new SpongeEventContextKey<>("sponge:creator", "Creator", UUID.class));
-        this.catalogTypeMap.put("sponge:damage_type", new SpongeEventContextKey<>("sponge:damage_type", "Damage Type", DamageType.class));
-        this.catalogTypeMap.put("sponge:dismount_type", new SpongeEventContextKey<>("sponge:dismount_type", "Dimension Type", DismountType.class));
-        this.catalogTypeMap.put("sponge:igniter", new SpongeEventContextKey<>("sponge:igniter", "Igniter", User.class));
-        this.catalogTypeMap.put("sponge:last_damage_source", new SpongeEventContextKey<>("sponge:last_damage_source", "Last Damage Source", DamageSource.class));
-        this.catalogTypeMap.put("sponge:liquid_mix", new SpongeEventContextKey<>("sponge:liquid_mix", "Liquid Mix", World.class));
-        this.catalogTypeMap.put("sponge:notifier", new SpongeEventContextKey<>("sponge:notifier", "Notifier", User.class));
-        this.catalogTypeMap.put("sponge:owner", new SpongeEventContextKey<>("sponge:owner", "Owner", User.class));
-        this.catalogTypeMap.put("sponge:player", new SpongeEventContextKey<>("sponge:player", "Player", Player.class));
-        this.catalogTypeMap.put("sponge:player_simulated", new SpongeEventContextKey<>("sponge:player_simulated", "Game Profile", GameProfile.class));
-        this.catalogTypeMap.put("sponge:projectile_source", new SpongeEventContextKey<>("sponge:projectile_source", "Projectile Source", ProjectileSource.class));
-        this.catalogTypeMap.put("sponge:service_manager", new SpongeEventContextKey<>("sponge:service_manager", "Service Manager", ServiceManager.class));
-        this.catalogTypeMap.put("sponge:spawn_type", new SpongeEventContextKey<>("sponge:spawn_type", "Spawn Type", SpawnType.class));
-        this.catalogTypeMap.put("sponge:teleport_type", new SpongeEventContextKey<>("sponge:teleport_type", "Teleport Type", TeleportType.class));
-        this.catalogTypeMap.put("sponge:thrower", new SpongeEventContextKey<>("sponge:thrower", "Thrower", User.class));
-        this.catalogTypeMap.put("sponge:weapon", new SpongeEventContextKey<>("sponge:weapon", "Weapon", ItemStackSnapshot.class));
+        createKey("sponge:creator", "Creator", UUID.class);
+        createKey("sponge:damage_type", "Damage Type", DamageType.class);
+        createKey("sponge:dismount_type", "Dimension Type", DismountType.class);
+        createKey("sponge:igniter", "Igniter", User.class);
+        createKey("sponge:last_damage_source", "Last Damage Source", DamageSource.class);
+        createKey("sponge:liquid_mix", "Liquid Mix", World.class);
+        createKey("sponge:notifier", "Notifier", User.class);
+        createKey("sponge:owner", "Owner", User.class);
+        createKey("sponge:player", "Player", Player.class);
+        createKey("sponge:player_simulated", "Game Profile", GameProfile.class);
+        createKey("sponge:projectile_source", "Projectile Source", ProjectileSource.class);
+        createKey("sponge:service_manager", "Service Manager", ServiceManager.class);
+        createKey("sponge:spawn_type", "Spawn Type", SpawnType.class);
+        createKey("sponge:teleport_type", "Teleport Type", TeleportType.class);
+        createKey("sponge:thrower", "Thrower", User.class);
+        createKey("sponge:weapon", "Weapon", ItemStackSnapshot.class);
+        createKey("sponge:fake_player", "Fake Player", Player.class);
+        createKey("sponge:player_break", "Player Break", World.class);
+        createKey("sponge:player_place", "Player Place", World.class);
+        createKey("sponge:fire_spread", "Fire Spread", World.class);
+        createKey("sponge:leaves_decay", "Leaves Decay", World.class);
+    }
+
+    private void createKey(String id, String name, Class<?> usedClass) {
+        this.catalogTypeMap.put(id, new SpongeEventContextKey<>(id, name, usedClass));
     }
 
     private EventContextKeysModule() {

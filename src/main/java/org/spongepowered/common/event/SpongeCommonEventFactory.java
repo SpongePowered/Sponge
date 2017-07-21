@@ -73,6 +73,8 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -601,22 +603,28 @@ public class SpongeCommonEventFactory {
 
         originalMessage = SpongeTexts.toText(entity.getCombatTracker().getDeathMessage());
         formatter.getBody().add(new MessageEvent.DefaultBodyApplier(originalMessage));
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(source);
-            if (sourceCreator.isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, sourceCreator.get());
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        // Try-with-resources will not produce an NPE when trying to autoclose the frame if it is null. Client sided
+        // checks need to be made here since entities can die on the client world.
+        try (final CauseStackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
+            if (isMainThread) {
+                Sponge.getCauseStackManager().pushCause(source);
+                if (sourceCreator.isPresent()) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, sourceCreator.get());
+                }
             }
-    
-            DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(Sponge.getCauseStackManager().getCurrentCause(),
-                    originalChannel, Optional.of(channel), formatter,
-                    (Living) entity, messageCancelled);
+
+            final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
+            DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
+                originalChannel, Optional.of(channel), formatter,
+                (Living) entity, messageCancelled);
             SpongeImpl.postEvent(event);
             Text message = event.getMessage();
             if (!event.isMessageCancelled() && !message.isEmpty()) {
                 event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
             }
+            return true;
         }
-        return true;
     }
 
     public static boolean handleCollideBlockEvent(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity, Direction direction) {

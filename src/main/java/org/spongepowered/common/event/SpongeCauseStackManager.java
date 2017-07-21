@@ -30,11 +30,13 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Deque;
@@ -61,7 +63,8 @@ public class SpongeCauseStackManager implements CauseStackManager {
     private SpongeCauseStackManager() { }
 
     private void enforceMainThread() {
-        if (!Sponge.getServer().isMainThread()) {
+        // On clients, this may not be available immediately, we can't bomb out that early.
+        if (Sponge.isServerAvailable() && !Sponge.getServer().isMainThread()) {
             throw new IllegalStateException("CauseStackManager called from off main thread!");
         }
     }
@@ -161,26 +164,32 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 }
                 i++;
             }
-            if (offset == -1) {
-                throw new IllegalStateException("Cause stack frame corruption! Attempted to pop a frame which was not on the frame stack.");
-            }
-            SpongeImpl.getLogger().warn("Cause stack frame corruption! Found " + (offset + 1) + " frames left on the stack. Clearing them all.");
+            final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
+                .add("Found %n frames left on the stack. Clearing them all.", offset + 1);
             if (!DEBUG_CAUSE_FRAMES) {
+                printer.add()
+                    .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
                 SpongeImpl.getLogger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
             } else {
-                SpongeImpl.getLogger().warn("Attempted to pop frame:");
-                frame.stack_debug.printStackTrace();
-                SpongeImpl.getLogger().warn("Frames being popped are:");
+                printer.add()
+                    .add("Attempting to pop frame:")
+                    .add(frame.stack_debug)
+                    .add()
+                    .add("Frames being popped are:")
+                    .add(((CauseStackFrameImpl) oldFrame).stack_debug);
             }
+
             while (offset >= 0) {
                 CauseStackFrameImpl f = this.frames.peek();
                 if (DEBUG_CAUSE_FRAMES && offset > 0) {
-                    SpongeImpl.getLogger().warn("Stack frame in position " + offset + ":");
-                    f.stack_debug.printStackTrace();
+                    printer.add("   Stack frame in position %n:", offset);
+                    printer.add(f.stack_debug);
                 }
                 popCauseFrame(f);
                 offset--;
             }
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+
             return;
         }
         this.frames.pop();

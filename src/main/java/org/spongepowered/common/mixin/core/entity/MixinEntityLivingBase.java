@@ -256,22 +256,24 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
         // Double check that the CauseTracker is already capturing the Death phase
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        try (final CauseStackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
             if (!this.world.isRemote) {
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 final IPhaseState state = peek.state;
-                this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+                this.tracksEntityDeaths =
+                    CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
                 if (this.tracksEntityDeaths) {
                     Sponge.getCauseStackManager().pushCause(this);
                     final PhaseContext context = PhaseContext.start()
-                            .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
-                            .source(this);
+                        .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
+                        .source(this);
                     this.getNotifierUser().ifPresent(context::notifier);
                     this.getCreatorUser().ifPresent(context::owner);
                     causeTracker.switchToPhase(EntityPhase.State.DEATH, context
-                            .addCaptures()
-                            .addEntityDropCaptures()
-                            .complete());
+                        .addCaptures()
+                        .addEntityDropCaptures()
+                        .complete());
                 }
             } else {
                 this.tracksEntityDeaths = false;
@@ -285,35 +287,35 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 // Sponge End
                 return;
             }
-    
+
             Entity entity = cause.getTrueSource();
             EntityLivingBase entitylivingbase = this.getAttackingEntity();
-    
+
             if (this.scoreValue >= 0 && entitylivingbase != null) {
                 entitylivingbase.awardKillScore((EntityLivingBase) (Object) this, this.scoreValue, cause);
             }
-    
+
             if (entity != null) {
                 entity.onKillEntity((EntityLivingBase) (Object) this);
             }
-    
+
             this.dead = true;
             this.getCombatTracker().reset();
-    
+
             if (!this.world.isRemote) {
                 int i = 0;
-    
+
                 if (entity instanceof EntityPlayer) {
                     i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
                 }
-    
+
                 if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
                     boolean flag = this.recentlyHit > 0;
                     this.dropLoot(flag, i, cause);
                 }
-    
+
             }
-    
+
             // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
             if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
                 this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
@@ -322,7 +324,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 this.tracksEntityDeaths = false;
                 causeTracker.completePhase(EntityPhase.State.DEATH);
             }
+
         }
+
         // Sponge End
     }
 
