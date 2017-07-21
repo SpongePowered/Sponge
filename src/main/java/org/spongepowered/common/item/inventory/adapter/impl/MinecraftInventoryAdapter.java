@@ -226,7 +226,8 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
 
     @Override
     default boolean containsInventory(Inventory inventory) {
-        return false; // TODO
+        Inventory result = Query.compile(this, ((InventoryAdapter) inventory).getRootLens()).execute();
+        return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
     }
 
     @Override

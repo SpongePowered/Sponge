@@ -38,7 +38,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -56,16 +55,14 @@ import org.spongepowered.common.item.inventory.query.strategy.GenericStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.IntersectStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemTypeStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.LensStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.NameStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.PropertyStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.UnionStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.expression.ExpressionStrategy;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public class Query<TInventory, TStack> {
@@ -82,7 +79,8 @@ public class Query<TInventory, TStack> {
         GENERIC("args", GenericStrategy.class),
         COMPOUND("compound", CompoundStrategy.class),
         INTERSECT("intersect", IntersectStrategy.class),
-        UNION("union", UnionStrategy.class);
+        UNION("union", UnionStrategy.class),
+        LENS("lens", LensStrategy.class);
 
         private final String key;
 
@@ -255,6 +253,10 @@ public class Query<TInventory, TStack> {
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
         return new Query<>(adapter, Type.COMPOUND, args);
+    }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Lens<TInventory, TStack>... args) {
+        return new Query<>(adapter, Type.LENS, args);
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> intersect(InventoryAdapter<TInventory, TStack> adapter, Object... args) {

@@ -30,11 +30,15 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.command.SendCommandEvent;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
@@ -77,6 +81,18 @@ public class InventorySetOpsTest {
                     inventory.set(ItemStack.of(ItemTypes.APPLE, i++));
                 }
                 player.openInventory(chest, Cause.source(this).build());
+            }
+        }
+    }
+
+    @Listener
+    public void onMidas(ChangeInventoryEvent.Held event, @Root Player player)
+    {
+        Inventory hotbar = event.getTargetInventory().query(Hotbar.class);
+        for (SlotTransaction transaction : event.getTransactions()) {
+            if (hotbar.containsInventory(transaction.getSlot())) {
+                transaction.setCustom(ItemStack.of(ItemTypes.GOLD_NUGGET, transaction.getOriginal().getCount()));
+                System.out.println("You got midas hands!");
             }
         }
     }

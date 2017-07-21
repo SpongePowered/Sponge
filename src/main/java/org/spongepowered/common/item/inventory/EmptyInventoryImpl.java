@@ -236,7 +236,7 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
 
     @Override
     public boolean containsInventory(Inventory inventory) {
-        return false; // TODO empty inventory return true?
+        return this == inventory;
     }
 
     @Override
