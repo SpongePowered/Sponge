@@ -28,7 +28,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
@@ -37,7 +36,7 @@ import java.util.List;
 
 public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider<TInventory, TStack>  {
 
-    private List<SlotLens<TInventory, TStack>> slotList = new ArrayList<>();
+    private final List<SlotLens<TInventory, TStack>> slotList = new ArrayList<>();
 
     public CompoundSlotProvider add(InventoryAdapter<TInventory, TStack> adapter) {
         for (Inventory slot : adapter.slots()) {

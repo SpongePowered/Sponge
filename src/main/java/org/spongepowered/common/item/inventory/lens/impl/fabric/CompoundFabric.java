@@ -40,12 +40,12 @@ import java.util.Set;
 public class CompoundFabric extends MinecraftFabric {
 
     private Translation displayName;
-    private final List<MinecraftFabric> all = new ArrayList<>();
+    private final List<MinecraftFabric> all;
 
-    public CompoundFabric(List<MinecraftFabric> list) {
+    private CompoundFabric(List<MinecraftFabric> list) {
         Preconditions.checkArgument(!list.isEmpty());
         this.displayName = list.get(0).getDisplayName();
-        this.all.addAll(list);
+        this.all = new ArrayList<>(list);
     }
 
     @Override
@@ -126,6 +126,24 @@ public class CompoundFabric extends MinecraftFabric {
     @Override
     public void markDirty() {
         this.all.forEach(Fabric::markDirty);
+    }
+
+    public static CompoundFabric.Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private final List<Fabric> fabrics = new ArrayList<>();
+
+        public Builder add(Fabric fabric) {
+            this.fabrics.add(fabric);
+            return this;
+        }
+
+        public CompoundFabric build() {
+            return new CompoundFabric(((List) this.fabrics));
+        }
     }
 
 }

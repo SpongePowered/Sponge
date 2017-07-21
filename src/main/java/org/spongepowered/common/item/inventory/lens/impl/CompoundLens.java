@@ -28,9 +28,12 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
+import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,9 +42,9 @@ import java.util.List;
  */
 public class CompoundLens extends MinecraftLens {
 
-    protected List<Lens<IInventory, ItemStack>> inventories;
+    protected final List<Lens<IInventory, ItemStack>> inventories;
 
-    public CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots,
+    private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots,
             List<Lens<IInventory, ItemStack>> lenses) {
         super(0, size, adapterType, slots);
         this.inventories = lenses;
@@ -62,5 +65,24 @@ public class CompoundLens extends MinecraftLens {
     @Override
     protected boolean isDelayedInit() {
         return true;
+    }
+
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private final List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
+
+        public Builder add(Lens lens) {
+            this.lenses.add(lens);
+            return this;
+        }
+
+        public CompoundLens build(CompoundSlotProvider provider) {
+            return new CompoundLens(provider.size(), Adapter.class, provider, this.lenses);
+        }
     }
 }

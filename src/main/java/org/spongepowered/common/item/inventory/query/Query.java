@@ -262,20 +262,17 @@ public class Query<TInventory, TStack> {
     }
 
     public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
-        List<Fabric<TInventory>> fabricList = new ArrayList<>();
-        List<Lens<TInventory, TStack>> lensList = new ArrayList<>();
-        fabricList.add(adapter.getInventory());
-        lensList.add(adapter.getRootLens());
-        CompoundSlotProvider provider = new CompoundSlotProvider<>();
-        provider.add(adapter);
+        CompoundFabric.Builder fabricBuilder = CompoundFabric.builder().add(adapter.getInventory());
+        CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.getRootLens());
+        fabricBuilder.add(adapter.getInventory());
+        CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
         for (Object inv : args) {
-            fabricList.add(((InventoryAdapter) inv).getInventory());
-            lensList.add(((InventoryAdapter) inv).getRootLens());
+            fabricBuilder.add(((InventoryAdapter) inv).getInventory());
+            lensBuilder.add(((InventoryAdapter) inv).getRootLens());
             provider.add(((InventoryAdapter) inv));
         }
-
-        CompoundLens lens = new CompoundLens(provider.size(), Adapter.class, provider, ((List) lensList));
-        CompoundFabric fabric = new CompoundFabric(((List) fabricList)); // TODO offsets are probably all wrong
+        CompoundLens lens = lensBuilder.build(provider);
+        CompoundFabric fabric = fabricBuilder.build();
         InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, null);
 
         return new Query(compoundAdapter, Type.UNION, compoundAdapter);

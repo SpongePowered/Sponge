@@ -26,10 +26,14 @@ package org.spongepowered.test;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
@@ -57,6 +61,24 @@ public class InventorySetOpsTest {
     public void onCmd(SendCommandEvent event) {
         testIntersect(); // TODO remove me once this is all working
         testUnion(); // TODO remove me once this is all working
+
+        if (event.getCause().root() instanceof Player) {
+            Player player = (Player) event.getCause().root();
+
+            {
+                Inventory chest = Inventory.builder().build(this);
+                GridInventory grid = chest.query(GridInventory.class);
+                InventoryColumn firstCol = grid.getColumn(0).get();
+                InventoryColumn secondCol = grid.getColumn(1).get();
+                InventoryRow row2 = grid.getRow(1).get();
+                Inventory result = firstCol.union(secondCol).union(row2);
+                int i = 1;
+                for (Inventory inventory : result.slots()) {
+                    inventory.set(ItemStack.of(ItemTypes.APPLE, i++));
+                }
+                player.openInventory(chest, Cause.source(this).build());
+            }
+        }
     }
 
     private void testIntersect() {
@@ -67,6 +89,7 @@ public class InventorySetOpsTest {
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
         Preconditions.checkArgument(intersection.capacity() == 1, "This should be the first slot only!");
         logger.info("Intersect works!");
+
     }
 
     private void testUnion() {
