@@ -435,6 +435,10 @@ public final class EntityUtil {
         return (World) player.world;
     }
 
+    public static Player toPlayer(EntityPlayer player) {
+        return (Player) player;
+    }
+
 
     static final class EntityTrace {
 

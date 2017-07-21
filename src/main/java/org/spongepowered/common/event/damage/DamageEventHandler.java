@@ -364,15 +364,15 @@ public class DamageEventHandler {
             if (!(source instanceof EntityPlayer) && source != null) {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
                 // TODO only have a UUID, want a user
-                //mixinEntity.getNotifier().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
-                mixinEntity.getCreator().ifPresent(creator -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, creator));
+                mixinEntity.getNotifierUser().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
+                mixinEntity.getCreatorUser().ifPresent(creator -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, creator));
             }
         } else if (damageSource instanceof BlockDamageSource) {
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
             final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunkFromBlockCoords(blockPos);
             mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
-            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, owner.getUniqueId()));
+            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, owner));
         }
         Sponge.getCauseStackManager().pushCause(damageSource);
     }

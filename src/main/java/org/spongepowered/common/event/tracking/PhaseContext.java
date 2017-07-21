@@ -41,6 +41,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -80,6 +81,7 @@ public class PhaseContext {
     protected boolean processImmediately;
 
     private Object source;
+    private PluginContainer activeContainer;
 
     public static PhaseContext start() {
         return new PhaseContext();
@@ -216,6 +218,14 @@ public class PhaseContext {
         this.entityItemDropsSupplier = entityItemDropsSupplier;
         EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
         this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
+        return this;
+    }
+
+    // TODO to be moved to listener based phase contexts when gabizou gets to restructuring PhaseContexts...
+    public PhaseContext player() {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(this.capturePlayer == null, "Already capturing a player object!");
+        this.capturePlayer = new CapturePlayer();
         return this;
     }
 
@@ -398,6 +408,15 @@ public class PhaseContext {
         return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("isCompleted", this.isCompleted)
                 .toString();
+    }
+
+    public PhaseContext activeContainer(PluginContainer plugin) {
+        this.activeContainer = plugin;
+        return this;
+    }
+
+    public PluginContainer getActiveContainer() {
+        return this.activeContainer;
     }
 
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {
