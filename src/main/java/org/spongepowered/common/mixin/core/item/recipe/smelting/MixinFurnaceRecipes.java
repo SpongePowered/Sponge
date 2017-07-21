@@ -78,6 +78,8 @@ public abstract class MixinFurnaceRecipes implements SmeltingRecipeRegistry {
             ItemStack nativeResult = ItemStackUtil.fromSnapshotToNative(result.get().getResult());
 
             cir.setReturnValue(nativeResult);
+        } else if (this.nativeIngredientToCustomRecipe.containsKey(stack)) {
+            cir.setReturnValue(ItemStack.EMPTY);
         }
     }
 
