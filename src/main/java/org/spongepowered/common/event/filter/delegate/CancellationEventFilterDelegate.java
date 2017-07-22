@@ -51,11 +51,11 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
 
     @Override
     public int write(String name, ClassWriter cw, MethodVisitor mv, Method method, int locals) {
-        if (!Cancellable.class.isAssignableFrom(method.getParameters()[0].getType())) {
-            throw new IllegalStateException("Attempted to filter a non-cancellable event type by its cancellation status");
-        }
         if (this.state == Tristate.UNDEFINED) {
             return locals;
+        }
+        if (!Cancellable.class.isAssignableFrom(method.getParameters()[0].getType())) {
+            throw new IllegalStateException("Attempted to filter a non-cancellable event type by its cancellation status");
         }
         mv.visitVarInsn(ALOAD, 1);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(Cancellable.class));
