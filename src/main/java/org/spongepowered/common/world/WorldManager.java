@@ -413,7 +413,10 @@ public final class WorldManager {
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
         if (dimensionId != null) {
             ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
-        } else if (((IMixinWorldInfo) worldInfo).getDimensionId() == null || ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE) {
+        } else if (((IMixinWorldInfo) worldInfo).getDimensionId() == null
+                || ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE
+                || getWorldByDimensionId(((IMixinWorldInfo) worldInfo).getDimensionId()).isPresent()) {
+            // DimensionID is null or 0 or the dimensionID is already assinged to a loaded world
             ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
         }
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
