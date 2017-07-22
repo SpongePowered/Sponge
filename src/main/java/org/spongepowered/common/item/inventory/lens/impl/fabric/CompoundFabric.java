@@ -24,88 +24,64 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.fabric;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class CompoundFabric extends MinecraftFabric {
 
+    private final MinecraftFabric fabric1;
+    private final MinecraftFabric fabric2;
     private Translation displayName;
-    private final List<MinecraftFabric> all;
 
-    private CompoundFabric(List<MinecraftFabric> list) {
-        Preconditions.checkArgument(!list.isEmpty());
-        this.displayName = list.get(0).getDisplayName();
-        this.all = new ArrayList<>(list);
+    public CompoundFabric(MinecraftFabric fabric1, MinecraftFabric fabric2) {
+        this.fabric1 = fabric1;
+        this.fabric2 = fabric2;
+        this.displayName = fabric1.getDisplayName();
     }
 
     @Override
     public Collection<IInventory> allInventories() {
         Set<IInventory> inv = new HashSet<>();
-        for (MinecraftFabric fabric : this.all) {
-            inv.addAll(fabric.allInventories());
-        }
+        inv.addAll(fabric1.allInventories());
+        inv.addAll(fabric2.allInventories());
         return inv;
     }
 
     @Override
     public IInventory get(int index) {
-        int offset = 0;
-        for (MinecraftFabric fabric : this.all) {
-            if (index < offset + fabric.getSize()) {
-                return fabric.get(index - offset);
-            } else {
-                offset += fabric.getSize();
-            }
-        }
 
-        return null; // TODO?
+        if (index < this.fabric1.getSize()) {
+            return fabric1.get(index);
+        }
+        return fabric2.get(index - fabric1.getSize());
     }
 
     @Override
     public ItemStack getStack(int index) {
-        int offset = 0;
-        for (MinecraftFabric fabric : this.all) {
-            if (index < offset + fabric.getSize()) {
-                return fabric.getStack(index - offset);
-            } else {
-                offset += fabric.getSize();
-            }
+        if (index < this.fabric1.getSize()) {
+            return fabric1.getStack(index);
         }
-
-        return null;
+        return fabric2.getStack(index - fabric1.getSize());
     }
 
     @Override
     public void setStack(int index, ItemStack stack) {
-
-        int offset = 0;
-        for (MinecraftFabric fabric : this.all) {
-            if (index < offset + fabric.getSize()) {
-                fabric.setStack(index - offset, stack);
-                return;
-            } else {
-                offset += fabric.getSize();
-            }
+        if (index < this.fabric1.getSize()) {
+            fabric1.setStack(index, stack);
+        } else {
+            fabric2.setStack(index - fabric1.getSize(), stack);
         }
     }
 
     @Override
     public int getMaxStackSize() {
-        int max = 0;
-        for (Fabric inv : this.all) {
-            max = Math.max(max, inv.getMaxStackSize());
-        }
-        return max;
+        return Math.max(this.fabric1.getMaxStackSize(), this.fabric2.getMaxStackSize());
     }
 
     @Override
@@ -115,35 +91,19 @@ public class CompoundFabric extends MinecraftFabric {
 
     @Override
     public int getSize() {
-        return this.all.stream().mapToInt(Fabric::getSize).sum();
+        return this.fabric1.getSize() + this.fabric2.getSize();
     }
 
     @Override
     public void clear() {
-        this.all.forEach(Fabric::clear);
+        this.fabric1.clear();
+        this.fabric2.clear();
     }
 
     @Override
     public void markDirty() {
-        this.all.forEach(Fabric::markDirty);
-    }
-
-    public static CompoundFabric.Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private final List<Fabric> fabrics = new ArrayList<>();
-
-        public Builder add(Fabric fabric) {
-            this.fabrics.add(fabric);
-            return this;
-        }
-
-        public CompoundFabric build() {
-            return new CompoundFabric(((List) this.fabrics));
-        }
+        this.fabric1.markDirty();
+        this.fabric2.markDirty();
     }
 
 }

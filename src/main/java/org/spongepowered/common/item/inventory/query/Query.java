@@ -43,6 +43,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensSetImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
@@ -263,18 +264,15 @@ public class Query<TInventory, TStack> {
         return new Query<>(adapter, Type.INTERSECT, args);
     }
 
-    public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
-        CompoundFabric.Builder fabricBuilder = CompoundFabric.builder().add(adapter.getInventory());
+    public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Inventory args) {
         CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.getRootLens());
-        fabricBuilder.add(adapter.getInventory());
+        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) adapter.getInventory(), (MinecraftFabric) ((InventoryAdapter) args).getInventory());
         CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
         for (Object inv : args) {
-            fabricBuilder.add(((InventoryAdapter) inv).getInventory());
             lensBuilder.add(((InventoryAdapter) inv).getRootLens());
             provider.add(((InventoryAdapter) inv));
         }
         CompoundLens lens = lensBuilder.build(provider);
-        CompoundFabric fabric = fabricBuilder.build();
         InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, null);
 
         return new Query(compoundAdapter, Type.UNION, compoundAdapter);
