@@ -28,8 +28,6 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -47,7 +45,7 @@ import org.spongepowered.api.plugin.Plugin;
 import javax.inject.Inject;
 
 /**
- * Tests intersect union and containsInventory
+ * Tests intersect union on and containsInventory
  */
 @Plugin(id = "inventorysetoperationstest", name = "Inventory Set Operations Test", description = "A plugin to test inventory set operations")
 public class InventorySetOpsTest {
@@ -58,41 +56,21 @@ public class InventorySetOpsTest {
     public void onStart(GameStartedServerEvent event) {
         testIntersect();
         testUnion();
-
     }
 
     @Listener
-    public void onCmd(SendCommandEvent event) {
-        testIntersect(); // TODO remove me once this is all working
-        testUnion(); // TODO remove me once this is all working
-
-        if (event.getCause().root() instanceof Player) {
-            Player player = (Player) event.getCause().root();
-
-            {
-                Inventory chest = Inventory.builder().build(this);
-                GridInventory grid = chest.query(GridInventory.class);
-                InventoryColumn firstCol = grid.getColumn(0).get();
-                InventoryColumn secondCol = grid.getColumn(1).get();
-                InventoryRow row2 = grid.getRow(1).get();
-                Inventory result = firstCol.union(secondCol).union(row2);
-                int i = 1;
-                for (Inventory inventory : result.slots()) {
-                    inventory.set(ItemStack.of(ItemTypes.APPLE, i++));
-                }
-                player.openInventory(chest, Cause.source(this).build());
-            }
-        }
-    }
-
-    @Listener
-    public void onMidas(ChangeInventoryEvent.Held event, @Root Player player)
-    {
+    public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
+        // Checks if Slots are contained in the hotbar then may transform iron to gold
         Inventory hotbar = event.getTargetInventory().query(Hotbar.class);
+        boolean nugget = false;
         for (SlotTransaction transaction : event.getTransactions()) {
             if (hotbar.containsInventory(transaction.getSlot())) {
-                transaction.setCustom(ItemStack.of(ItemTypes.GOLD_NUGGET, transaction.getOriginal().getCount()));
-                System.out.println("You got midas hands!");
+                if (ItemTypes.GOLD_NUGGET.equals(transaction.getOriginal().getType())) {
+                    nugget = true;
+                }
+                if (nugget && ItemTypes.IRON_INGOT.equals(transaction.getOriginal().getType())) {
+                    transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT, transaction.getOriginal().getCount()));
+                }
             }
         }
     }
@@ -103,9 +81,7 @@ public class InventorySetOpsTest {
         Inventory firstRow = chest.query(InventoryRow.class).first();
         Inventory firstCol = chest.query(InventoryColumn.class).first();
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
-        Preconditions.checkArgument(intersection.capacity() == 1, "This should be the first slot only!");
-        logger.info("Intersect works!");
-
+        Preconditions.checkState(intersection.capacity() == 1, "This should be the first slot only!");
     }
 
     private void testUnion() {
@@ -119,11 +95,9 @@ public class InventorySetOpsTest {
         Inventory union = firstSlots.union(firstCol).union(firstRow);
         Inventory union2 = firstCol.union(firstRow);
         Inventory union3 = firstCol.union(secondCol);
-        Preconditions.checkArgument(union.capacity() == 11, "This should include all eleven slot of the first row and column!");
-        Preconditions.checkArgument(union2.capacity() == 11, "This should include all eleven slot of the first row and column!");
-        Preconditions.checkArgument(union3.capacity() == 6, "This should include all six slot of the first 2 columns!");
-        logger.info("Union works!");
+        Preconditions.checkState(union.capacity() == 11, "This should include all eleven slot of the first row and column!");
+        Preconditions.checkState(union2.capacity() == 11, "This should include all eleven slot of the first row and column!");
+        Preconditions.checkState(union3.capacity() == 6, "This should include all six slot of the first 2 columns!");
     }
-
 
 }
