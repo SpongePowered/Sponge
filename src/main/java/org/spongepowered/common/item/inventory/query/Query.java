@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -37,20 +38,28 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
+import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensSetImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
 import org.spongepowered.common.item.inventory.query.result.QueryResult;
 import org.spongepowered.common.item.inventory.query.strategy.ClassStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.CompoundStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ExactItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.GenericStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.IntersectStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemTypeStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.LensStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.NameStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.PropertyStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.UnionStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.expression.ExpressionStrategy;
 
 import java.lang.reflect.Constructor;
@@ -69,7 +78,10 @@ public class Query<TInventory, TStack> {
         NAME("name", NameStrategy.class),
         EXPRESSION("expr", ExpressionStrategy.class),
         GENERIC("args", GenericStrategy.class),
-        COMPOUND("compound", CompoundStrategy.class);
+        COMPOUND("compound", CompoundStrategy.class),
+        INTERSECT("intersect", IntersectStrategy.class),
+        UNION("union", UnionStrategy.class),
+        LENS("lens", LensStrategy.class);
 
         private final String key;
 
@@ -134,7 +146,7 @@ public class Query<TInventory, TStack> {
             return this.lens.getAdapter(this.inventory, null);
         }
 
-        return this.toResult(resultProvider, this.depthFirstSearch(this.lens));
+        return this.toResult(resultProvider, this.reduce(this.lens, this.depthFirstSearch(this.lens)));
     }
 
     @SuppressWarnings("unchecked")
@@ -174,11 +186,11 @@ public class Query<TInventory, TStack> {
             return matches;
         }
 
-        return this.reduce(lens, matches);
+        return matches;
     }
 
     private MutableLensSet<TInventory, TStack> reduce(Lens<TInventory, TStack> lens, MutableLensSet<TInventory, TStack> matches) {
-        if (lens.getSlots().equals(this.getSlots(matches))) {
+        if (lens.getSlots().equals(this.getSlots(matches)) && this.allLensesAreSlots(matches)) {
             matches.clear();
             matches.add(lens);
             return matches;
@@ -195,14 +207,14 @@ public class Query<TInventory, TStack> {
         return matches;
     }
 
-//    private boolean allLensesAreSlots(MutableLensSetImpl<TInventory, TStack> lenses) {
-//        for (Lens<TInventory, TStack> lens : lenses) {
-//            if (!(lens instanceof SlotLens)) {
-//                return false;
-//            }
-//        }
-//        return true;
-//    }
+    private boolean allLensesAreSlots(MutableLensSet<TInventory, TStack> lenses) {
+        for (Lens<TInventory, TStack> lens : lenses) {
+            if (!(lens instanceof SlotLens)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     private IntSet getSlots(Collection<Lens<TInventory, TStack>> lenses) {
         IntSet slots = new IntOpenHashSet();
@@ -242,6 +254,28 @@ public class Query<TInventory, TStack> {
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
         return new Query<>(adapter, Type.COMPOUND, args);
+    }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Lens<TInventory, TStack>... args) {
+        return new Query<>(adapter, Type.LENS, args);
+    }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> intersect(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
+        return new Query<>(adapter, Type.INTERSECT, args);
+    }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Inventory args) {
+        CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.getRootLens());
+        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) adapter.getInventory(), (MinecraftFabric) ((InventoryAdapter) args).getInventory());
+        CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
+        for (Object inv : args) {
+            lensBuilder.add(((InventoryAdapter) inv).getRootLens());
+            provider.add(((InventoryAdapter) inv));
+        }
+        CompoundLens lens = lensBuilder.build(provider);
+        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, null);
+
+        return new Query(compoundAdapter, Type.UNION, compoundAdapter);
     }
 
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(Type type) {

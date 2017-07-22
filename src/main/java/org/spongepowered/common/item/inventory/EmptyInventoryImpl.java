@@ -225,6 +225,21 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     }
 
     @Override
+    public Inventory intersect(Inventory inventory) {
+        return this; // Shortcut
+    }
+
+    @Override
+    public Inventory union(Inventory inventory) {
+        return inventory; // Shortcut
+    }
+
+    @Override
+    public boolean containsInventory(Inventory inventory) {
+        return this == inventory;
+    }
+
+    @Override
     public Iterator<Inventory> iterator() {
         return new EmptyIterator();
     }
