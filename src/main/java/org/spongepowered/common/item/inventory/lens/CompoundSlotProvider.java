@@ -41,8 +41,8 @@ public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider<TI
     public CompoundSlotProvider add(InventoryAdapter<TInventory, TStack> adapter) {
         for (Inventory slot : adapter.slots()) {
             SlotLens slotLens = ((SlotLens<IInventory, ItemStack>) ((SlotAdapter) slot).getRootLens());
-            if (!slotList.contains(slotLens)) {
-                slotList.add(slotLens);
+            if (!this.slotList.contains(slotLens)) {
+                this.slotList.add(slotLens);
             }
         }
         return this;
