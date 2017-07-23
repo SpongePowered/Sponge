@@ -40,6 +40,7 @@ import org.spongepowered.common.config.category.GlobalWorldCategory;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.MovementChecksCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
+import org.spongepowered.common.config.category.PermissionCategory;
 import org.spongepowered.common.config.category.SqlCategory;
 import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
@@ -59,6 +60,9 @@ public class GlobalConfig extends GeneralConfigBase {
 
     @Setting
     private CommandsCategory commands = new CommandsCategory();
+
+    @Setting
+    private PermissionCategory permission = new PermissionCategory();
 
     @Setting(value = "modules")
     private ModuleCategory mixins = new ModuleCategory();
@@ -114,6 +118,10 @@ public class GlobalConfig extends GeneralConfigBase {
 
     public CommandsCategory getCommands() {
         return this.commands;
+    }
+
+    public PermissionCategory getPermission() {
+        return this.permission;
     }
 
     public ModuleCategory getModules() {
