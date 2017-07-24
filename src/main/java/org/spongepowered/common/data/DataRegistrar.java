@@ -54,6 +54,7 @@ import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.BookViewDataBuilder;
@@ -64,6 +65,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.data.builder.authlib.SpongeGameProfileBuilder;
 import org.spongepowered.common.data.builder.block.state.SpongeBlockStateMetaContentUpdater;
 import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
@@ -175,6 +177,8 @@ public class DataRegistrar {
 
         dataManager.registerBuilder((Class<Location<World>>) (Class<?>) Location.class, new LocationBuilder());
         dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
+
+        dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
