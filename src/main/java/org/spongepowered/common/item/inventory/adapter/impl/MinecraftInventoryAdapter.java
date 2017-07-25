@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.InventoryIterator;
@@ -159,6 +160,18 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
             return Optional.empty(); // TODO top level inventory properties
         }
         return this.parent().getProperty(this, property, key);
+    }
+
+    @Override
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property) {
+        Object key = AbstractInventoryProperty.getDefaultKey(property);
+        return this.getProperty(child, property, key);
+    }
+
+    @Override
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property) {
+        Object key = AbstractInventoryProperty.getDefaultKey(property);
+        return this.getProperty(property, key);
     }
 
     @Override

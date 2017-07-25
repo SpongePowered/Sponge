@@ -176,6 +176,16 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
         return Optional.<T>empty();
     }
 
+    @Override
+    public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property) {
+        return Optional.empty();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T query(Class<?>... types) {
