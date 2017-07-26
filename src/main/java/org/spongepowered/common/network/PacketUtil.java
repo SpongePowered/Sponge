@@ -152,7 +152,7 @@ public class PacketUtil {
                     // update the reference of player
                     packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 }
-                ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(null);
+                ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(ItemStack.EMPTY);
             }
         } else { // client
             packetIn.processPacket(netHandler);
