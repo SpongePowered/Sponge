@@ -163,13 +163,13 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property) {
+    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Inventory child, Class<T> property) {
         Object key = AbstractInventoryProperty.getDefaultKey(property);
         return this.getProperty(child, property, key);
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property) {
+    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Class<T> property) {
         Object key = AbstractInventoryProperty.getDefaultKey(property);
         return this.getProperty(property, key);
     }
