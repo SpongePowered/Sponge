@@ -349,7 +349,7 @@ public class SpongeCommand {
                 .permission("sponge.command.heap")
                 .executor((src, args) -> {
                     File file = new File(new File(new File("."), "dumps"),
-                            "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.bin");
+                            "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
                     src.sendMessage(Text.of("Writing JVM heap data to: ", file));
                     SpongeHooks.dumpHeap(file, true);
                     src.sendMessage(Text.of("Heap dump complete"));
