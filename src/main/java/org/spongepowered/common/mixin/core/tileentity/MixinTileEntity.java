@@ -302,4 +302,9 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public boolean hasSetOwner() {
         return this.hasSetOwner;
     }
+
+    @Override
+    public TileEntity copy() {
+        return this;
+    }
 }

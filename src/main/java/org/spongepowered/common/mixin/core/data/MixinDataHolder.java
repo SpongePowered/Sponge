@@ -413,9 +413,4 @@ public abstract class MixinDataHolder implements DataHolder {
         return Collections.emptyList();
     }
 
-    @Override
-    public DataHolder copy() {
-        return this;
-    }
-
 }
