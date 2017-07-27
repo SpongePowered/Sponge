@@ -260,6 +260,14 @@ public class SpongeManipulatorRegistry {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Nullable
     public DataProcessor<?, ?> getDelegate(Class<?> mClass) {
+        if (this.tempRegistry != null) {
+            // During soft registrations
+            if (DataManipulator.class.isAssignableFrom(mClass)) {
+                return new DataProcessorDelegate(ImmutableList.copyOf(this.tempRegistry.processorMap.get(mClass)));
+            } else {
+                return new DataProcessorDelegate(ImmutableList.copyOf(this.tempRegistry.immutableProcessorMap.get(mClass)));
+            }
+        }
         return DataManipulator.class.isAssignableFrom(mClass)
                ? this.dataProcessorDelegates.get(mClass)
                : this.immutableDataProcessorDelegates.get(mClass);
@@ -267,6 +275,10 @@ public class SpongeManipulatorRegistry {
 
     @Nullable
     public ValueProcessor<?, ?> getDelegate(Key<?> key) {
+        if (this.tempRegistry != null) {
+            // During soft registrations
+            return new ValueProcessorDelegate(key, ImmutableList.copyOf(this.tempRegistry.valueProcessorMap.get(key)));
+        }
         return this.valueDelegates.get(key);
     }
 
