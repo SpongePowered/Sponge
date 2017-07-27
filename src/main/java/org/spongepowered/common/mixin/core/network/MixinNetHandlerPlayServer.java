@@ -715,7 +715,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                      * if (this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove.stack, itemstack))
                      * {
                      */
-                    final ItemStack toItemStack = this.player.openContainer.getSlot(cpacketrecipeplacement$itemmove.destSlot).getStack();
+                    final ItemStack toItemStack = this.player.inventory.getStackInSlot(cpacketrecipeplacement$itemmove.destSlot);
 
                     if (this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove.stack, itemstack) && (toItemStack.isEmpty() ||
                             this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove.stack, toItemStack)))
