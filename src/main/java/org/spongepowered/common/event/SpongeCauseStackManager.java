@@ -164,8 +164,14 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 }
                 i++;
             }
+            if (!DEBUG_CAUSE_FRAMES && offset == -1) {
+                // if we're not debugging the cause frames then throw an error
+                // immediately otherwise let the pretty printer output the frame
+                // that was erroneously popped.
+                throw new IllegalStateException("Cause Stack Frame Corruption! Attempted to pop a frame that was not on the stack.");
+            }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
-                .add("Found %n frames left on the stack. Clearing them all.", offset + 1);
+                .add("Found %d frames left on the stack. Clearing them all.", new Object[]{offset + 1});
             if (!DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
@@ -189,7 +195,11 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 offset--;
             }
             printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-
+            if (offset == -1) {
+                // Popping a frame that was not on the stack is not recoverable
+                // so we throw an exception.
+                throw new IllegalStateException("Cause Stack Frame Corruption! Attempted to pop a frame that was not on the stack.");
+            }
             return;
         }
         this.frames.pop();
