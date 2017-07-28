@@ -28,11 +28,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-public final class SpongeInjectionPoint {
+public final class SpongeInjectionPoint implements AnnotatedElement {
 
     private final TypeToken<?> source;
     private final TypeToken<?> type;
@@ -54,14 +55,17 @@ public final class SpongeInjectionPoint {
 
     @SuppressWarnings("unchecked")
     @Nullable
+    @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         return (A) Arrays.stream(this.annotations).filter(annotationClass::isInstance).findFirst().orElse(null);
     }
 
+    @Override
     public Annotation[] getAnnotations() {
         return Arrays.copyOf(this.annotations, this.annotations.length);
     }
 
+    @Override
     public Annotation[] getDeclaredAnnotations() {
         return Arrays.copyOf(this.annotations, this.annotations.length);
     }
