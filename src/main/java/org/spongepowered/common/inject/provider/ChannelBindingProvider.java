@@ -26,22 +26,20 @@ package org.spongepowered.common.inject.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.spi.InjectionPoint;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelId;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginContainer;
-
-import java.lang.reflect.AnnotatedElement;
+import org.spongepowered.common.inject.SpongeInjectionPoint;
 
 public abstract class ChannelBindingProvider<B extends ChannelBinding> implements Provider<B> {
 
     @Inject ChannelRegistrar registrar;
     @Inject PluginContainer container;
-    @Inject private Provider<InjectionPoint> point;
+    @Inject private Provider<SpongeInjectionPoint> point;
 
     final String getChannel() {
-        return ((AnnotatedElement) this.point.get().getMember()).getAnnotation(ChannelId.class).value();
+        return this.point.get().getAnnotation(ChannelId.class).value();
     }
 
     public static class Indexed extends ChannelBindingProvider<ChannelBinding.IndexedMessageChannel> {
