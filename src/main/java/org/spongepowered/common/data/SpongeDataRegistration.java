@@ -37,6 +37,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
     implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
 
+
     private final Class<M> manipulatorClass;
     private final Class<I> immutableClass;
     private final DataManipulatorBuilder<M, I> manipulatorBuilder;
