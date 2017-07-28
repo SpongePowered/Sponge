@@ -74,43 +74,25 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     @Override
     protected boolean set(ItemStack stack, TreeType value) {
         // TODO - the API needs to be changed, as its no longer possible to change an ItemStack's type
-        return false;
-        /*
-        if (stack.getType() == ItemTypes.LOG || stack.getType() == ItemTypes.LEAVES) {
-            if (value.equals(TreeTypes.OAK) || value.equals(TreeTypes.BIRCH) ||
-                    value.equals(TreeTypes.SPRUCE) || value.equals(TreeTypes.JUNGLE)) {
-                stack.setItemDamage(this.setToMeta(value));
-                return true;
-            } else {
-                // converting block so we can set new types to the log/leave
-                if (stack.getType() == ItemTypes.LOG) {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LOG2));
-                    stack.setItemDamage(this.setToMeta(value) - 4);
-                    return true;
-                } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LEAVES2));
-                    stack.setItemDamage(this.setToMeta(value) - 4);
-                    return true;
-                }
+
+        if (stack.getItem() == ItemTypes.LOG || stack.getItem() == ItemTypes.LEAVES) {
+            if (value == TreeTypes.ACACIA || value == TreeTypes.DARK_OAK) {
+                return false; // TODO
             }
-        } else if (stack.getType() == ItemTypes.LOG2 || stack.getType() == ItemTypes.LEAVES2) {
-            if (value.equals(TreeTypes.ACACIA) || value.equals(TreeTypes.DARK_OAK)) {
-                stack.setItemDamage(this.setToMeta(value) - 4);
-                return true;
-            } else {
-                // converting block so we can set old types to the log/leave
-                if (stack.getType() == ItemTypes.LOG2) {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LOG));
-                } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LEAVES));
-                }
-                stack.setItemDamage(this.setToMeta(value));
-                return true;
-            }
-        } else {
             stack.setItemDamage(this.setToMeta(value));
             return true;
-        }*/
+        }
+        else if (stack.getItem() == ItemTypes.LOG2) {
+            if (value == TreeTypes.OAK || value == TreeTypes.SPRUCE || value == TreeTypes.BIRCH || value == TreeTypes.JUNGLE) {
+                return false; // TODO
+            }
+            stack.setItemDamage(this.setToMeta(value) - 4);
+            return true;
+        }
+        else {
+            stack.setItemDamage(this.setToMeta(value));
+            return true;
+        }
     }
 
     @Override
