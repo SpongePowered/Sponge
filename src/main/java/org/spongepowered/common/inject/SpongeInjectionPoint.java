@@ -26,14 +26,13 @@ package org.spongepowered.common.inject;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.inject.InjectionPoint;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-final class SpongeInjectionPoint implements InjectionPoint {
+public final class SpongeInjectionPoint {
 
     private final TypeToken<?> source;
     private final TypeToken<?> type;
@@ -45,29 +44,24 @@ final class SpongeInjectionPoint implements InjectionPoint {
         this.type = type;
     }
 
-    @Override
     public TypeToken<?> getSource() {
         return this.source;
     }
 
-    @Override
     public TypeToken<?> getType() {
         return this.type;
     }
 
     @SuppressWarnings("unchecked")
     @Nullable
-    @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         return (A) Arrays.stream(this.annotations).filter(annotationClass::isInstance).findFirst().orElse(null);
     }
 
-    @Override
     public Annotation[] getAnnotations() {
         return Arrays.copyOf(this.annotations, this.annotations.length);
     }
 
-    @Override
     public Annotation[] getDeclaredAnnotations() {
         return Arrays.copyOf(this.annotations, this.annotations.length);
     }

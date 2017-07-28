@@ -34,7 +34,6 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
-import org.spongepowered.api.inject.InjectionPoint;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
@@ -46,15 +45,15 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /**
- * Allows injecting the {@link InjectionPoint} in {@link Provider}s.
+ * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.
  */
-public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> implements Module, ProvisionListener, Provider<InjectionPoint> {
+public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> implements Module, ProvisionListener, Provider<SpongeInjectionPoint> {
 
-    @Nullable private InjectionPoint injectionPoint;
+    @Nullable private SpongeInjectionPoint injectionPoint;
 
     @Nullable
     @Override
-    public InjectionPoint get() {
+    public SpongeInjectionPoint get() {
         return this.injectionPoint;
     }
 
@@ -74,7 +73,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
     }
 
     @Nullable
-    private static InjectionPoint findInjectionPoint(List<DependencyAndSource> dependencyChain) {
+    private static SpongeInjectionPoint findInjectionPoint(List<DependencyAndSource> dependencyChain) {
         if (dependencyChain.size() < 3) {
             throw new AssertionError("Provider is not included in the dependency chain");
         }
@@ -89,7 +88,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
             if (spiInjectionPoint != null) {
                 final TypeToken<?> source = TypeToken.of(spiInjectionPoint.getDeclaringType().getType());
                 final Member member = spiInjectionPoint.getMember();
-                final InjectionPoint injectionPoint;
+                final SpongeInjectionPoint injectionPoint;
                 if (member instanceof Field) {
                     final Field field = (Field) member;
                     injectionPoint = new SpongeInjectionPoint(source, TypeToken.of(field.getGenericType()), field.getAnnotations());
@@ -111,7 +110,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(InjectionPoint.class).toProvider(this);
+        binder.bind(SpongeInjectionPoint.class).toProvider(this);
         binder.bindListener(this, this);
     }
 
