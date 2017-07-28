@@ -88,20 +88,18 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
             if (spiInjectionPoint != null) {
                 final TypeToken<?> source = TypeToken.of(spiInjectionPoint.getDeclaringType().getType());
                 final Member member = spiInjectionPoint.getMember();
-                final SpongeInjectionPoint injectionPoint;
                 if (member instanceof Field) {
                     final Field field = (Field) member;
-                    injectionPoint = new SpongeInjectionPoint(source, TypeToken.of(field.getGenericType()), field.getAnnotations());
+                    return new SpongeInjectionPoint(source, TypeToken.of(field.getGenericType()), field.getAnnotations());
                 } else if (member instanceof Executable) {
                     final Executable executable = (Executable) member;
                     final Annotation[][] parameterAnnotations = executable.getParameterAnnotations();
                     final Type[] parameterTypes = executable.getGenericParameterTypes();
                     final int index = dependency.getParameterIndex();
-                    injectionPoint = new SpongeInjectionPoint(source, TypeToken.of(parameterTypes[index]), parameterAnnotations[index]);
+                    return new SpongeInjectionPoint(source, TypeToken.of(parameterTypes[index]), parameterAnnotations[index]);
                 } else {
                     throw new IllegalStateException("Unsupported Member type: " + member.getClass().getName());
                 }
-                return injectionPoint;
             }
         }
 
