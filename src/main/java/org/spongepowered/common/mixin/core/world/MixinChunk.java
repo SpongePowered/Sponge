@@ -936,7 +936,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
-    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
+    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V", ordinal = 1))
     private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (CauseTracker.ENABLED && !this.worldObj.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
