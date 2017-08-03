@@ -131,7 +131,7 @@ public class EntityActivationRange {
      * @return boolean If it should always tick.
      */
     public static boolean initializeEntityActivationState(Entity entity) {
-        if (entity.worldObj.isRemote) {
+        if (entity.worldObj.isRemote || !(entity.worldObj instanceof IMixinWorldServer)) {
             return true;
         }
 
