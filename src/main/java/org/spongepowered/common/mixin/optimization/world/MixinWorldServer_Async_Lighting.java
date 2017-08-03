@@ -193,7 +193,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
 
     @Override
     public boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos) {
-        if (this.getMinecraftServer().isServerStopped()) {
+        if (this.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
             return false;
         }
 
