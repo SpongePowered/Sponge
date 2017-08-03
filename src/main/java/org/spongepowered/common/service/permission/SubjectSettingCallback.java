@@ -28,9 +28,10 @@ import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.mixin.core.command.MixinSubject;
+import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
 import java.lang.ref.WeakReference;
 import java.util.function.Predicate;
@@ -53,22 +54,37 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
     public boolean test(@Nullable PermissionService input) {
         IMixinSubject ref = this.ref.get();
         if (ref == null) {
+            // returning false from this predicate means this setting callback will be removed
+            // as a listener, and will not be tested again.
             return false;
         }
+
+        // if PS has just been unregistered, ignore the change.
         if (input == null) {
             return true;
         }
-        SubjectCollection userSubjects = input.getSubjects(ref.getSubjectCollectionIdentifier());
-        if (userSubjects != null) {
-            Subject subject;
-            if (ref instanceof User && userSubjects instanceof UserCollection) {
+
+        SubjectReference subject;
+
+        // check if we're using the native Sponge impl
+        // we can skip some unnecessary instance creation this way.
+        if (input instanceof SpongePermissionService) {
+            SpongePermissionService serv = (SpongePermissionService) input;
+            SpongeSubjectCollection collection = serv.get(ref.getSubjectCollectionIdentifier());
+
+            if (ref instanceof User && collection instanceof UserCollection) {
                 // GameProfile is already resolved, use it directly
-                subject = ((UserCollection) userSubjects).get((GameProfile) ((User) ref).getProfile());
+                subject = ((UserCollection) collection).get((GameProfile) ((User) ref).getProfile()).asSubjectReference();
             } else {
-                subject = userSubjects.get(((Subject) ref).getIdentifier());
+                subject = collection.get(((Subject) ref).getIdentifier()).asSubjectReference();
             }
-            ref.setSubject(subject);
+        } else {
+            // build a new subject reference using the permission service
+            // this doesn't actually load the subject, so it will be lazily init'd when needed.
+            subject = input.newSubjectReference(ref.getSubjectCollectionIdentifier(), ((Subject) ref).getIdentifier());
         }
+
+        ref.setSubject(subject);
         return true;
     }
 

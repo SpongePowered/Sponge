@@ -28,44 +28,45 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Implementation that forces a single parent to always be part of the parents.
  */
 public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
-    private final Subject forcedParent;
+    private final SubjectReference forcedParent;
 
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      *
      * @param service The service to request subjects from
      */
-    public FixedParentMemorySubjectData(PermissionService service, Subject parent) {
+    public FixedParentMemorySubjectData(PermissionService service, SubjectReference parent) {
         super(service);
         this.forcedParent = parent;
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
-        return ImmutableList.<Subject>builder().add(this.forcedParent).addAll(super.getParents(contexts)).build();
+    public List<SubjectReference> getParents(Set<Context> contexts) {
+        return ImmutableList.<SubjectReference>builder().add(this.forcedParent).addAll(super.getParents(contexts)).build();
     }
 
     @Override
-    public boolean addParent(Set<Context> contexts, Subject parent) {
-        if (Objects.equal(this.forcedParent, parent) && GLOBAL_CONTEXT.equals(contexts)) {
-            return true;
+    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
+        if (Objects.equal(this.forcedParent, parent) && contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(true);
         }
         return super.addParent(contexts, parent);
     }
 
     @Override
-    public boolean removeParent(Set<Context> contexts, Subject parent) {
+    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
         if (Objects.equal(this.forcedParent, parent)) {
-            return false;
+            return CompletableFuture.completedFuture(false);
         }
         return super.removeParent(contexts, parent);
     }

@@ -28,19 +28,20 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class GlobalMemorySubjectData extends MemorySubjectData {
 
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      *
-     * @param service The service to request subjects from
+     * @param service The service to request subject references from
      */
     public GlobalMemorySubjectData(PermissionService service) {
         super(service);
@@ -48,46 +49,46 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
 
 
     @Override
-    public Map<Set<Context>, List<Subject>> getAllParents() {
+    public Map<Set<Context>, List<SubjectReference>> getAllParents() {
         return ImmutableMap.of(GLOBAL_CONTEXT, getParents(GLOBAL_CONTEXT));
     }
 
     @Override
-    public boolean setPermission(Set<Context> contexts, String permission, Tristate value) {
-        if (!GLOBAL_CONTEXT.equals(contexts)) {
-            return false;
+    public CompletableFuture<Boolean> setPermission(Set<Context> contexts, String permission, Tristate value) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
         }
         return super.setPermission(contexts, permission, value);
     }
 
     @Override
-    public boolean clearPermissions(Set<Context> contexts) {
-        if (!GLOBAL_CONTEXT.equals(contexts)) {
-            return false;
+    public CompletableFuture<Boolean> clearPermissions(Set<Context> contexts) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
         }
         return super.clearPermissions(contexts);
     }
 
     @Override
-    public boolean addParent(Set<Context> contexts, Subject parent) {
-        if (!GLOBAL_CONTEXT.equals(contexts)) {
-            return false;
+    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
         }
         return super.addParent(contexts, parent);
     }
 
     @Override
-    public boolean removeParent(Set<Context> contexts, Subject parent) {
-        if (!GLOBAL_CONTEXT.equals(contexts)) {
-            return false;
+    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
         }
         return super.removeParent(contexts, parent);
     }
 
     @Override
-    public boolean clearParents(Set<Context> contexts) {
-        if (!GLOBAL_CONTEXT.equals(contexts)) {
-            return false;
+    public CompletableFuture<Boolean> clearParents(Set<Context> contexts) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
         }
         return super.clearParents(contexts);
     }

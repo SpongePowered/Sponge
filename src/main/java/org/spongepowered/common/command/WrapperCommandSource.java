@@ -49,12 +49,19 @@ import java.util.Optional;
 public class WrapperCommandSource extends SpongeSubject implements CommandSource {
 
     final ICommandSender sender;
+    private final PermissionService service;
     private final MemorySubjectData data;
 
     private WrapperCommandSource(ICommandSender sender) {
         this.sender = sender;
-        this.data = new MemorySubjectData(SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get());
+        this.service = SpongeImpl.getGame().getServiceManager().provideUnchecked(PermissionService.class);
+        this.data = new MemorySubjectData(this.service);
         CommandPermissions.populateMinecraftPermissions(sender, data);
+    }
+
+    @Override
+    public PermissionService getService() {
+        return this.service;
     }
 
     @Override
@@ -70,7 +77,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     @Override
     public SubjectCollection getContainingCollection() {
         SpongePermissionService permission = (SpongePermissionService) SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get();
-        return permission.getSubjects(PermissionService.SUBJECTS_SYSTEM);
+        return permission.get(PermissionService.SUBJECTS_SYSTEM);
     }
 
     @Override

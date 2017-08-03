@@ -26,8 +26,10 @@ package org.spongepowered.common.service.permission.base;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
@@ -36,8 +38,20 @@ import java.util.Set;
 
 public abstract class SpongeBaseSubject implements Subject {
 
+    public abstract PermissionService getService();
+
     @Override
     public abstract MemorySubjectData getTransientSubjectData();
+
+    @Override
+    public boolean isSubjectDataPersisted() {
+        return false;
+    }
+
+    @Override
+    public SubjectReference asSubjectReference() {
+        return getService().newSubjectReference(getContainingCollection().getIdentifier(), getIdentifier());
+    }
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
@@ -53,39 +67,39 @@ public abstract class SpongeBaseSubject implements Subject {
         Tristate res = subject.getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
         if (res == Tristate.UNDEFINED) {
-            for (Subject parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
-                Tristate tempRes = parent.getPermissionValue(SubjectData.GLOBAL_CONTEXT, permission);
-                if (tempRes != Tristate.UNDEFINED) {
-                    res = tempRes;
-                    break;
+            for (SubjectReference parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
+                res = parent.resolve().join().getPermissionValue(SubjectData.GLOBAL_CONTEXT, permission);
+                if (res != Tristate.UNDEFINED) {
+                    return res;
                 }
             }
         }
+
         return res;
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, Subject parent) {
-        return getTransientSubjectData().getParents(contexts).contains(parent);
+    public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
+        return getSubjectData().getParents(contexts).contains(parent);
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
-        return getTransientSubjectData().getParents(contexts);
+    public List<SubjectReference> getParents(Set<Context> contexts) {
+        return getSubjectData().getParents(contexts);
     }
 
     protected Optional<String> getDataOptionValue(MemorySubjectData subject, String option) {
         Optional<String> res = Optional.ofNullable(subject.getOptions(SubjectData.GLOBAL_CONTEXT).get(option));
 
         if (!res.isPresent()) {
-            for (Subject parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
-                Optional<String> tempRes = parent.getOption(SubjectData.GLOBAL_CONTEXT, option);
-                if (tempRes.isPresent()) {
-                    res = tempRes;
-                    break;
+            for (SubjectReference parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
+                res = parent.resolve().join().getOption(SubjectData.GLOBAL_CONTEXT, option);
+                if (res.isPresent()) {
+                    return res;
                 }
             }
         }
+
         return res;
     }
 
