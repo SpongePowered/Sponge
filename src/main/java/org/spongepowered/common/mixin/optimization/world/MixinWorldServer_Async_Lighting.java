@@ -193,6 +193,10 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
 
     @Override
     public boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos) {
+        if (this.getMinecraftServer().isServerStopped()) {
+            return false;
+        }
+
         final net.minecraft.world.chunk.Chunk chunk =
                 ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         IMixinChunk spongeChunk = (IMixinChunk) chunk;
