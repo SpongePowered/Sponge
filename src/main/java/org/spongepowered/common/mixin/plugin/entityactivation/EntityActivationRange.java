@@ -64,6 +64,7 @@ import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -131,7 +132,7 @@ public class EntityActivationRange {
      * @return boolean If it should always tick.
      */
     public static boolean initializeEntityActivationState(Entity entity) {
-        if (entity.world.isRemote || !(entity.world instanceof IMixinWorldServer)) {
+        if (((IMixinWorld) entity.world).isFake()) {
             return true;
         }
 
