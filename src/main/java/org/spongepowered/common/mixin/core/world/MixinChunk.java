@@ -87,6 +87,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
@@ -936,7 +937,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
-    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
+    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"),
+        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
+    )
     private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (CauseTracker.ENABLED && !this.worldObj.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
