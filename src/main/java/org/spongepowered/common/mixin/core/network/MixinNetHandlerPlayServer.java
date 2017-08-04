@@ -614,9 +614,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         // All packets received by server are handled first on the Netty Thread
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
-                // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the
-                // INTERACT_AT packet contains the same data but also includes a hitVec.
+                // This packet is only sent by client when CPacketUseEntity.Action.INTERACT_AT is
+                // not successful. We can safely ignore this packet as we handle the INTERACT logic
+                // when INTERACT_AT does not return a successful result.
                 return;
             } else { // queue packet for main thread
                 PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
@@ -637,9 +637,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
 
             if (this.player.getDistanceSqToEntity(entity) < d0) {
-                // Since we ignore any packet that has hitVec set to null, we can safely ignore this check
-                // if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT) {
-                //    this.player.interactWith(entity);
+                // The client will only send this packet if INTERACT_AT is not successful.
+                // We can safely ignore this as we handle interactOn below during INTERACT_AT.
+                // if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
+                //    this.player.interactOn(entity);
                 // } else
                 EnumHand hand = packetIn.getHand();
                 ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
@@ -652,7 +653,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         return;
                     }
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, entity, packetIn.getHand(), interactionPoint).isCancelled()) {
-                        // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
+                        // If INTERACT_AT is not successful, run the INTERACT logic
                         if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
                             this.player.interactOn(entity, hand);
                         }
