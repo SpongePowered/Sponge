@@ -44,12 +44,10 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.client.CPacketRecipePlacement;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
-import net.minecraft.network.play.server.SPacketConfirmTransaction;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -153,8 +151,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow private void captureCurrentPosition() {}
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
-
-    @Shadow protected abstract boolean checkIfMoveItemMatch(ItemStack p_193074_1_, ItemStack p_193074_2_);
 
     private boolean justTeleported = false;
     @Nullable private Location<World> lastMoveLocation = null;
@@ -684,106 +680,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     this.player.attackTargetEntityWithCurrentItem(entity);
                 }
             }
-        }
-    }
-
-    /**
-     * @author Zidane - July 26th, 2017
-     * @reason Vanilla mc server does not check the stack being fed into the output slot to ensure it is of the same type.
-     *         It blindly increments the item by one as it assumes it is the result of the recipe. A hacked client can send
-     *         a different stack to that slot and therefore duplicate the item. This overwrite addresses this (see tags).
-     * @param p_191985_1_
-     */
-    @Overwrite
-    public void handleRecipePlacement(CPacketRecipePlacement p_191985_1_)
-    {
-        PacketThreadUtil.checkThreadAndEnqueue(p_191985_1_, (INetHandlerPlayServer) this, this.player.getServerWorld());
-        this.player.markPlayerActive();
-
-        if (this.player.openContainer.windowId == p_191985_1_.getContainerId() && this.player.openContainer.getCanCraft(this.player))
-        {
-            this.player.connection.sendPacket(new SPacketConfirmTransaction(p_191985_1_.getContainerId(), p_191985_1_.getUid(), true));
-
-            if (!p_191985_1_.getMoveItemsFromGrid().isEmpty())
-            {
-                for (CPacketRecipePlacement.ItemMove cpacketrecipeplacement$itemmove : p_191985_1_.getMoveItemsFromGrid())
-                {
-                    ItemStack itemstack = this.player.openContainer.getSlot(cpacketrecipeplacement$itemmove.srcSlot).getStack();
-
-                    /*
-                     * Sponge Start - Lookup the dest slot stack and make sure it is the same stack we're operating on for the auto-recipe
-                     *
-                     * if (this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove.stack, itemstack))
-                     * {
-                     */
-                    final ItemStack toItemStack = this.player.inventory.getStackInSlot(cpacketrecipeplacement$itemmove.destSlot);
-
-                    if (this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove.stack, itemstack) && (toItemStack.isEmpty() ||
-                            this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove.stack, toItemStack)))
-                    {
-                        // Sponge End
-                        int i = cpacketrecipeplacement$itemmove.stack.getCount();
-
-                        if (cpacketrecipeplacement$itemmove.destSlot == -1)
-                        {
-                            this.player.dropItem(cpacketrecipeplacement$itemmove.stack, true);
-                        }
-                        else
-                        {
-                            ItemStack itemstack1 = this.player.inventory.getStackInSlot(cpacketrecipeplacement$itemmove.destSlot);
-
-                            if (itemstack1.isEmpty())
-                            {
-                                this.player.inventory.setInventorySlotContents(cpacketrecipeplacement$itemmove.destSlot, cpacketrecipeplacement$itemmove.stack);
-                            }
-                            else
-                            {
-                                itemstack1.grow(i);
-                            }
-                        }
-
-                        if (itemstack.getCount() == i)
-                        {
-                            this.player.openContainer.putStackInSlot(cpacketrecipeplacement$itemmove.srcSlot, ItemStack.EMPTY);
-                        }
-                        else
-                        {
-                            itemstack.shrink(i);
-                        }
-                    } else {
-                        // Sponge Start - If checks fail, resend container
-                        this.player.openContainer.detectAndSendChanges();
-                        return;
-                        // Sponge End
-                    }
-                }
-            }
-
-            if (!p_191985_1_.getMoveItemsToGrid().isEmpty())
-            {
-                for (CPacketRecipePlacement.ItemMove cpacketrecipeplacement$itemmove1 : p_191985_1_.getMoveItemsToGrid())
-                {
-                    ItemStack itemstack2 = this.player.inventory.getStackInSlot(cpacketrecipeplacement$itemmove1.destSlot);
-
-                    if (this.checkIfMoveItemMatch(cpacketrecipeplacement$itemmove1.stack, itemstack2))
-                    {
-                        int j = cpacketrecipeplacement$itemmove1.stack.getCount();
-
-                        if (itemstack2.getCount() == j)
-                        {
-                            this.player.inventory.removeStackFromSlot(cpacketrecipeplacement$itemmove1.destSlot);
-                        }
-                        else
-                        {
-                            itemstack2.shrink(j);
-                        }
-
-                        this.player.openContainer.addItem(cpacketrecipeplacement$itemmove1.srcSlot, cpacketrecipeplacement$itemmove1.stack);
-                    }
-                }
-            }
-
-            this.player.openContainer.detectAndSendChanges();
         }
     }
 
