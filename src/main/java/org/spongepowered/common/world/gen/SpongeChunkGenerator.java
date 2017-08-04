@@ -48,7 +48,9 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.structure.MapGenEndCity;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
+import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -447,6 +449,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             target = MapGenMineshaft.class;
         } else if("Temple".equals(structureName)) {
             target = MapGenScatteredFeature.class;
+        } else if ("Fortress".equals(structureName)) {
+            target = MapGenNetherBridge.class;
+        } else if ("EndCity".equals(structureName)) {
+            target = MapGenEndCity.class;
         }
         if (target == null) {
             return null;
@@ -478,6 +484,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             target = MapGenMineshaft.class;
         } else if ("Temple".equals(structureName)) {
             target = MapGenScatteredFeature.class;
+        } else if ("Fortress".equals(structureName)) {
+            target = MapGenNetherBridge.class;
+        } else if ("EndCity".equals(structureName)) {
+            target = MapGenEndCity.class;
         }
         if (target == null) {
             return false;
