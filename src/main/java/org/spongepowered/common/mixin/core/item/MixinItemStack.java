@@ -183,7 +183,6 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Override
     public void setRawData(DataView container) throws InvalidDataException {
 
-
     }
     
     @Override
