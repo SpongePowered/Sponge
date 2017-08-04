@@ -31,13 +31,17 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
+import java.util.Collection;
 import java.util.List;
 
 public final class PacketPhaseUtil {
@@ -117,5 +121,17 @@ public final class PacketPhaseUtil {
         }
 
         return true;
+    }
+
+    public static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
+        List<Entity> entities = event.getEntities();
+        processEntities(player, entities);
+    }
+
+    public static void processEntities(EntityPlayerMP player, Collection<Entity> entities) {
+        for (Entity entity : entities) {
+            entity.setCreator(player.getUniqueID());
+            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+        }
     }
 }

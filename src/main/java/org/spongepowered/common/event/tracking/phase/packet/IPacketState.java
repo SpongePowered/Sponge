@@ -47,7 +47,7 @@ import java.util.ArrayList;
 
 public interface IPacketState extends IPhaseState {
 
-    boolean matches(int packetState);
+    void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context);
 
     default void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
 

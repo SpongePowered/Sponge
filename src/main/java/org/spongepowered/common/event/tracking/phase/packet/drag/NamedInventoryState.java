@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
-import org.spongepowered.common.event.tracking.phase.packet.BasicInventoryPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.InventoryClickPacketState;
 
-public abstract class NamedInventoryState extends BasicInventoryPacketState {
+public abstract class NamedInventoryState extends InventoryClickPacketState {
 
     private final String name;
 

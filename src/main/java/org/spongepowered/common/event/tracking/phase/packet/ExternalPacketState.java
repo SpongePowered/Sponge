@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketUseEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -36,16 +35,12 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.Collection;
@@ -54,9 +49,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
-final class InteractAtEntityPacketState extends BasicPacketState {
+final class ExternalPacketState extends BasicPacketState {
 
     @Override
     public boolean ignoresItemPreMerges() {
@@ -64,48 +57,18 @@ final class InteractAtEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
-        // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
-        return entity == null;
+    public boolean tracksBlockSpecificDrops() {
+        return true;
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
-        if (stack != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
-        }
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
-        if (entity != null) {
-            // unused, to be removed and re-located when phase context is cleaned up
-            //context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-            //context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
-        }
-        context.addEntityDropCaptures()
-                .addEntityCaptures()
-                .addBlockCaptures();
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean tracksEntitySpecificDrops() {
         return true;
     }
 
     @Override
     public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
-        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
-        if (entity == null) {
-            // Something happened?
-            return;
-        }
-        //final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
-        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
-
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
         context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
             final Cause cause = Cause.source(EntitySpawnCause.builder()
                     .entity((Player) player)
@@ -116,6 +79,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 PacketPhaseUtil.processSpawnedEntities(player, event);
+
             }
         });
         context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
@@ -129,6 +93,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 PacketPhaseUtil.processSpawnedEntities(player, event);
+
             }
         });
         context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
@@ -153,7 +118,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     final Cause cause = Cause.source(
                             EntitySpawnCause.builder()
                                     .entity(affectedEntity)
-                                    .type(InternalSpawnTypes.PLACEMENT)
+                                    .type(InternalSpawnTypes.CUSTOM)
                                     .build()
                     ).named(NamedCause.notifier(player))
                             .build();
@@ -166,6 +131,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             PacketPhaseUtil.processSpawnedEntities(player, event);
+
                         }
                     }
                 }
@@ -177,8 +143,8 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final Cause cause = Cause.source(
                     EntitySpawnCause.builder()
-                            .entity((Entity) entity)
-                            .type(InternalSpawnTypes.PLACEMENT)
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.CUSTOM)
                             .build()
             ).named(NamedCause.notifier(player))
                     .build();
@@ -191,13 +157,16 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     PacketPhaseUtil.processSpawnedEntities(player, event);
+
                 }
             }
 
         });
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(snapshots ->
-                        TrackingUtil.processBlockCaptures(snapshots, this, context)
-                );
     }
+
+    @Override
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+        context.addBlockCaptures().addEntityCaptures().addEntityDropCaptures();
+    }
+
 }

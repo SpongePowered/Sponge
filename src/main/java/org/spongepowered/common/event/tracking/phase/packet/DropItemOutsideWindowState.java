@@ -42,7 +42,7 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 
-final class DropItemOutsideWindowState extends BasicInventoryPacketState {
+final class DropItemOutsideWindowState extends InventoryClickPacketState {
 
     DropItemOutsideWindowState() {
         super(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_OUTSIDE_WINDOW);

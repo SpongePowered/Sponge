@@ -24,19 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-final class NoCaptureUseItemPacketState extends UseItemPacketState {
+final class ActionPacketState extends BasicPacketState {
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
-        BlockPos pos) {
-        return false;
-    }
-
-    @Override
-    public boolean doBlockCapturing() {
-        return false;
+    public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
     }
 }

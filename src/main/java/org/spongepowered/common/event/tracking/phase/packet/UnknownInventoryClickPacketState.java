@@ -25,17 +25,33 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
-final class ChatPacketState extends BasicPacketState {
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+final class UnknownInventoryClickPacketState extends InventoryClickPacketState {
+
+    UnknownInventoryClickPacketState() {
+        super(0, PacketPhase.MASK_NONE);
+    }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-//        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
-        // unused, to be removed and re-located when phase context is cleaned up
-//        if (chatMessage.getMessage().contains("kill")) {
-//            context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
-//        }
+    public boolean matches(int packetState) {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+        return null;
     }
 }

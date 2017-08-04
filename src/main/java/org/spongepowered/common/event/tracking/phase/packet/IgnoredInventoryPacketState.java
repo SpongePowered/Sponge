@@ -28,14 +28,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-final class UpdateSignState extends BasicPacketState {
+final class IgnoredInventoryPacketState extends BasicInventoryPacketState {
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        context
-                .addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
-
+    public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
     }
 }

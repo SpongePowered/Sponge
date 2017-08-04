@@ -36,7 +36,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
 import java.util.List;
 
-final class SecondaryInventoryShiftClickState extends BasicInventoryPacketState {
+final class SecondaryInventoryShiftClickState extends InventoryClickPacketState {
 
     SecondaryInventoryShiftClickState() {
         super(PacketPhase.MODE_SHIFT_CLICK | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_NORMAL);

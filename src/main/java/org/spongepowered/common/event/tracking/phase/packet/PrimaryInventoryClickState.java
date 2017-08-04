@@ -36,7 +36,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
 import java.util.List;
 
-final class PrimaryInventoryClickState extends BasicInventoryPacketState {
+final class PrimaryInventoryClickState extends InventoryClickPacketState {
 
     public PrimaryInventoryClickState() {
         super(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.CLICK_INSIDE_WINDOW);

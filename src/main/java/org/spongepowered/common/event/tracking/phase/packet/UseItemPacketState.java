@@ -32,15 +32,24 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
@@ -50,6 +59,30 @@ class UseItemPacketState extends BasicPacketState {
     @Override
     public boolean isInteraction() {
         return true;
+    }
+
+    @Override
+    public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
+        final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+        context.getCapturedEntitySupplier()
+                .ifPresentAndNotEmpty(entities -> {
+                    final Cause cause = Cause.source(EntitySpawnCause.builder()
+                            .entity(EntityUtil.fromNative(player))
+                            .type(itemStack.getType() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT)
+                            .build())
+                            .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
+                            .build();
+                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
+                    SpongeImpl.postEvent(spawnEntityEvent);
+                    if (!spawnEntityEvent.isCancelled()) {
+                        PacketPhaseUtil.processSpawnedEntities(player, spawnEntityEvent);
+                    }
+                });
+        context.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(
+                        originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, this, context));
+
     }
 
     @Override
