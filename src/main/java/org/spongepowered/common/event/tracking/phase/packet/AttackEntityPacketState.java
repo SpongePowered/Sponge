@@ -146,7 +146,7 @@ final class AttackEntityPacketState extends BasicPacketState {
                             SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities);
                     SpongeImpl.postEvent(destruct);
                     if (!destruct.isCancelled()) {
-                        PacketPhaseUtil.processSpawnedEntities(player, destruct);
+                        TrackingUtil.processSpawnedEntities(player, destruct);
                     }
                 }
             }
@@ -171,7 +171,7 @@ final class AttackEntityPacketState extends BasicPacketState {
                         SpongeEventFactory.createDropItemEventDestruct(cause, items);
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
-                    PacketPhaseUtil.processSpawnedEntities(player, destruct);
+                    TrackingUtil.processSpawnedEntities(player, destruct);
                 }
             }
         });

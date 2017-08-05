@@ -113,7 +113,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
@@ -580,7 +580,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
                 // cancelling item usage (e.g. eating food) that occurs while targeting a block
                 if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) || SpongeCommonEventFactory.interactBlockEventCancelled) {
-                    PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+                    TrackingUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
                 }
             }
         }

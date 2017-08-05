@@ -140,7 +140,7 @@ final class InteractEntityPacketState extends BasicPacketState {
             SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, items);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
-                PacketPhaseUtil.processSpawnedEntities(player, event);
+                TrackingUtil.processSpawnedEntities(player, event);
 
             }
         });

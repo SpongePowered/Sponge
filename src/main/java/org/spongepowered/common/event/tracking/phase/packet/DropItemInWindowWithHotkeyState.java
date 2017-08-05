@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
@@ -33,38 +32,23 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
 
-final class DropItemInWindowWithHotkeyState extends InventoryClickPacketState {
+final class DropItemInWindowWithHotkeyState extends DropItemWindowState {
 
     DropItemInWindowWithHotkeyState() {
         super(PacketPhase.MODE_DROP | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_ANYWHERE);
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
-        return true;
-    }
-
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        super.populateContext(playerMP, packet, context);
-        // unused, to be removed and re-located when phase context is cleaned up
-        //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
-    }
-
-    @Override
     public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+        if (capturedEntities.isEmpty()) {
+            return null;
+        }
         return DropItemInGameWithHotkeyState.createDropItemEvent(playerMP, openContainer, transaction, slotTransactions, capturedEntities, cause,
                 usedButton);
-    }
-
-    @Override
-    public boolean ignoresItemPreMerges() {
-        return true;
     }
 
 }

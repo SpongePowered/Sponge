@@ -76,7 +76,7 @@ class UseItemPacketState extends BasicPacketState {
                     final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
                     SpongeImpl.postEvent(spawnEntityEvent);
                     if (!spawnEntityEvent.isCancelled()) {
-                        PacketPhaseUtil.processSpawnedEntities(player, spawnEntityEvent);
+                        TrackingUtil.processSpawnedEntities(player, spawnEntityEvent);
                     }
                 });
         context.getCapturedBlockSupplier()

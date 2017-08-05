@@ -25,46 +25,54 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
 
-final class DropItemOutsideWindowState extends DropItemWindowState {
+abstract class DropItemWindowState extends InventoryClickPacketState {
 
-    DropItemOutsideWindowState() {
-        super(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_OUTSIDE_WINDOW);
+    DropItemWindowState(int stateId) {
+        super(stateId);
     }
 
     @Override
-    public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-        if (capturedEntities.isEmpty()) {
-            return null;
-        }
+    public boolean doesCaptureEntityDrops() {
+        return true;
+    }
 
-        final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
-                .entity(EntityUtil.fromNative(playerMP))
-                .type(InternalSpawnTypes.DROPPED_ITEM)
-                .build())
-                .named(NamedCause.of("Container", openContainer))
-                .build();
+    @Override
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+        super.populateContext(playerMP, packet, context);
+        // unused, to be removed and re-located when phase context is cleaned up
+        //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+    }
 
-        for (Entity currentEntity : capturedEntities) {
-            currentEntity.setCreator(playerMP.getUniqueID());
-        }
-        return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
-               ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(spawnCause, transaction, capturedEntities, openContainer, slotTransactions)
-               : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(spawnCause, transaction, capturedEntities, openContainer, slotTransactions);
+    @Override
+    public abstract ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer,
+            Transaction<ItemStackSnapshot> transaction, List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause,
+            int usedButton);
+
+    @Override
+    protected SpawnEntityEvent fireSpawnEntityEvent(ClickInventoryEvent inventoryEvent, Cause cause, List<Entity> entities) {
+        return (ClickInventoryEvent.Drop) inventoryEvent;
+    }
+
+    @Override
+    protected void onCancelled(ClickInventoryEvent event) {
+        ((ClickInventoryEvent.Drop) event).getEntities().clear();
+    }
+
+    @Override
+    public boolean ignoresItemPreMerges() {
+        return true;
     }
 }

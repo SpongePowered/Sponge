@@ -78,7 +78,7 @@ final class ExternalPacketState extends BasicPacketState {
             SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
-                PacketPhaseUtil.processSpawnedEntities(player, event);
+                TrackingUtil.processSpawnedEntities(player, event);
 
             }
         });
@@ -92,7 +92,7 @@ final class ExternalPacketState extends BasicPacketState {
             SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, items);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
-                PacketPhaseUtil.processSpawnedEntities(player, event);
+                TrackingUtil.processSpawnedEntities(player, event);
 
             }
         });
@@ -130,7 +130,7 @@ final class ExternalPacketState extends BasicPacketState {
                         DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            PacketPhaseUtil.processSpawnedEntities(player, event);
+                            TrackingUtil.processSpawnedEntities(player, event);
 
                         }
                     }
@@ -156,7 +156,7 @@ final class ExternalPacketState extends BasicPacketState {
                 DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
-                    PacketPhaseUtil.processSpawnedEntities(player, event);
+                    TrackingUtil.processSpawnedEntities(player, event);
 
                 }
             }

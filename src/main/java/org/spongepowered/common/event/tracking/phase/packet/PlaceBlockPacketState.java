@@ -80,7 +80,6 @@ class PlaceBlockPacketState extends BasicPacketState {
     public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
 
-        // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
@@ -95,7 +94,7 @@ class PlaceBlockPacketState extends BasicPacketState {
                     final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
                     SpongeImpl.postEvent(spawnEntityEvent);
                     if (!spawnEntityEvent.isCancelled()) {
-                        PacketPhaseUtil.processSpawnedEntities(player, spawnEntityEvent);
+                        TrackingUtil.processSpawnedEntities(player, spawnEntityEvent);
 
                     }
                 });
@@ -106,7 +105,7 @@ class PlaceBlockPacketState extends BasicPacketState {
                                     context);
                             if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                                 EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                                TrackingUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
                             }
                         });
         context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {

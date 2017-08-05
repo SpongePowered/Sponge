@@ -107,7 +107,7 @@ final class InteractionPacketState extends BasicPacketState {
                                     SpongeEventFactory.createDropItemEventDestruct(cause, items);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
-                                PacketPhaseUtil.processSpawnedEntities(player, event);
+                                TrackingUtil.processSpawnedEntities(player, event);
                             }
                         }
                     }
@@ -118,7 +118,7 @@ final class InteractionPacketState extends BasicPacketState {
                         final BlockPos blockPos = VecHelper.toBlockPos(position);
                         final Collection<EntityItem> entityItems = map.get(blockPos);
                         if (!entityItems.isEmpty()) {
-                            PacketPhaseUtil.processEntities(player, (Collection<Entity>) (Collection<?>) entityItems);
+                            TrackingUtil.processEntities(player, (Collection<Entity>) (Collection<?>) entityItems);
                         }
                     }
                 }
@@ -145,7 +145,7 @@ final class InteractionPacketState extends BasicPacketState {
                             SpongeEventFactory.createDropItemEventDispense(cause, entities);
                     SpongeImpl.postEvent(dispense);
                     if (!dispense.isCancelled()) {
-                        PacketPhaseUtil.processSpawnedEntities(player, dispense);
+                        TrackingUtil.processSpawnedEntities(player, dispense);
                     }
                 });
         context.getCapturedEntityDropSupplier()
@@ -180,8 +180,8 @@ final class InteractionPacketState extends BasicPacketState {
                     normalPlacement.add(entity);
                 }
             }
-            if (!projectiles.isEmpty()) {
-                if (ShouldFire.SPAWN_ENTITY_EVENT) {
+            if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                if (!projectiles.isEmpty()) {
                     final Cause cause = Cause.source(
                             EntitySpawnCause.builder()
                                     .entity(spongePlayer)
@@ -192,14 +192,10 @@ final class InteractionPacketState extends BasicPacketState {
                             .build();
                     final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, projectiles);
                     if (!SpongeImpl.postEvent(event)) {
-                        PacketPhaseUtil.processSpawnedEntities(player, event);
+                        TrackingUtil.processSpawnedEntities(player, event);
                     }
-                } else {
-                    PacketPhaseUtil.processEntities(player, projectiles);
                 }
-            }
-            if (!spawnEggs.isEmpty()) {
-                if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                if (!spawnEggs.isEmpty()) {
                     final Cause cause = Cause.source(
                             EntitySpawnCause.builder()
                                     .entity(spongePlayer)
@@ -210,12 +206,27 @@ final class InteractionPacketState extends BasicPacketState {
                             .build();
                     final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, spawnEggs);
                     if (!SpongeImpl.postEvent(event)) {
-                        PacketPhaseUtil.processSpawnedEntities(player, event);
+                        TrackingUtil.processSpawnedEntities(player, event);
                     }
-                } else {
-                    PacketPhaseUtil.processEntities(player, spawnEggs);
                 }
+                if (!normalPlacement.isEmpty()) {
+                    final Cause cause = Cause.source(
+                            EntitySpawnCause.builder()
+                                    .entity(spongePlayer)
+                                    .type(InternalSpawnTypes.PLACEMENT)
+                                    .build())
+                            .build();
+                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, normalPlacement);
+                    if (!SpongeImpl.postEvent(event)) {
+                        TrackingUtil.processSpawnedEntities(player, event);
+                    }
+                }
+            } else {
+                TrackingUtil.processEntities(player, projectiles);
+                TrackingUtil.processEntities(player, spawnEggs);
+                TrackingUtil.processEntities(player, normalPlacement);
             }
+
             if (!items.isEmpty()) {
                 if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
                     final Cause cause = Cause.source(
@@ -227,26 +238,10 @@ final class InteractionPacketState extends BasicPacketState {
                             .build();
                     final DropItemEvent.Dispense dispense = SpongeEventFactory.createDropItemEventDispense(cause, items);
                     if (!SpongeImpl.postEvent(dispense)) {
-                        PacketPhaseUtil.processSpawnedEntities(player, dispense);
+                        TrackingUtil.processSpawnedEntities(player, dispense);
                     }
                 } else {
-                    PacketPhaseUtil.processEntities(player, items);
-                }
-            }
-            if (!normalPlacement.isEmpty()) {
-                if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                    final Cause cause = Cause.source(
-                            EntitySpawnCause.builder()
-                                    .entity(spongePlayer)
-                                    .type(InternalSpawnTypes.PLACEMENT)
-                                    .build())
-                            .build();
-                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, normalPlacement);
-                    if (!SpongeImpl.postEvent(event)) {
-                        PacketPhaseUtil.processSpawnedEntities(player, event);
-                    }
-                } else {
-                    PacketPhaseUtil.processEntities(player, normalPlacement);
+                    TrackingUtil.processEntities(player, items);
                 }
             }
         });

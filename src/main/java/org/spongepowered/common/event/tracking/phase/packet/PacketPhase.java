@@ -314,7 +314,7 @@ public final class PacketPhase extends TrackingPhase {
                 return inventory;
             }
         }
-        SpongeImpl.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
+        SpongeImpl.getLogger().warn("Unable to find InventoryPacketState handler for click window packet: {}", windowPacket);
         return Inventory.UNKNOWN_CLICK;
     }
 

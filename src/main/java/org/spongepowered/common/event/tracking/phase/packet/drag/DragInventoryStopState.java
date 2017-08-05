@@ -32,4 +32,8 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
         super(name, PacketPhase.MODE_DRAG | buttonId | PacketPhase.DRAG_STATUS_STOPPED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG);
     }
 
+    @Override
+    protected boolean shouldValidateTransactions() {
+        return false;
+    }
 }

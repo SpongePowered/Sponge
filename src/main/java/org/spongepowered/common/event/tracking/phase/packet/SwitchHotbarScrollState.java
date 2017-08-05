@@ -82,10 +82,10 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
                 .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
         net.minecraft.inventory.Container openContainer = player.openContainer;
         SpongeImpl.postEvent(changeInventoryEventHeld);
-        if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(changeInventoryEventHeld.getTransactions())) {
+        if (changeInventoryEventHeld.isCancelled() || TrackingUtil.allTransactionsInvalid(changeInventoryEventHeld.getTransactions())) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false);
+            TrackingUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }

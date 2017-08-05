@@ -34,7 +34,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -126,38 +125,29 @@ public abstract class InventoryClickPacketState extends BasicInventoryPacketStat
 
 
         if (inventoryEvent != null) {
-            // Don't fire inventory drop events when there are no entities
-            if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
-                slotTransactions.clear();
-                mixinContainer.setCaptureInventory(false);
-                return;
-            }
-
             // The client sends several packets all at once for drag events - we only care about the last one.
             // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
-            if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
-                PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
+            if (shouldValidateTransactions()) {
+                TrackingUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
             }
 
             SpongeImpl.postEvent(inventoryEvent);
-            if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
-                if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
-                    capturedItems.clear();
-                }
+            if (inventoryEvent.isCancelled() || TrackingUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
+                onCancelled(inventoryEvent);
 
                 // Restore cursor
-                PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                TrackingUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
 
                 // Restore target slots
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
+                TrackingUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
             } else {
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
+                TrackingUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
 
                 // Handle cursor
                 if (!inventoryEvent.getCursorTransaction().isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                    TrackingUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
                 } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
+                    TrackingUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                 } else if (inventoryEvent instanceof ClickInventoryEvent.Drag) {
                     int increment;
 
@@ -166,7 +156,7 @@ public abstract class InventoryClickPacketState extends BasicInventoryPacketStat
 
                     final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
                     cursor.setQuantity(cursor.getQuantity() + increment);
-                    PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
+                    TrackingUtil.handleCustomCursor(player, cursor.createSnapshot());
                 } else if (inventoryEvent instanceof ClickInventoryEvent.Double && !(inventoryEvent instanceof ClickInventoryEvent.Shift)) {
                     int decrement;
 
@@ -175,21 +165,36 @@ public abstract class InventoryClickPacketState extends BasicInventoryPacketStat
 
                     final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
                     cursor.setQuantity(cursor.getQuantity() - decrement);
-                    PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
+                    TrackingUtil.handleCustomCursor(player, cursor.createSnapshot());
                 }
-                if (inventoryEvent instanceof SpawnEntityEvent) {
-                    PacketPhaseUtil.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                } else if (!context.getCapturedEntitySupplier().isEmpty()) {
-                    SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, context.getCapturedEntities());
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        PacketPhaseUtil.processSpawnedEntities(player, spawnEntityEvent);
-                    }
+                SpawnEntityEvent spawnEntityEvent = fireSpawnEntityEvent(inventoryEvent, cause, context.getCapturedEntities());
+                if (spawnEntityEvent != null) {
+                    TrackingUtil.processSpawnedEntities(player, spawnEntityEvent);
                 }
             }
         }
         slotTransactions.clear();
         mixinContainer.setCaptureInventory(false);
+    }
+
+    protected boolean shouldValidateTransactions() {
+        return true;
+    }
+
+    @Nullable
+    protected SpawnEntityEvent fireSpawnEntityEvent(ClickInventoryEvent inventoryEvent, Cause cause, List<Entity> entities) {
+        if (entities.isEmpty()) {
+            return null;
+        }
+        SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
+        SpongeImpl.postEvent(spawnEntityEvent);
+        if (spawnEntityEvent.isCancelled()) {
+            return null;
+        }
+        return spawnEntityEvent;
+    }
+
+    protected void onCancelled(ClickInventoryEvent event) {
     }
 
     public boolean matches(int packetState) {

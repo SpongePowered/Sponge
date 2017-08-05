@@ -115,7 +115,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
             SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
-                PacketPhaseUtil.processSpawnedEntities(player, event);
+                TrackingUtil.processSpawnedEntities(player, event);
             }
         });
         context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
@@ -128,7 +128,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
             SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, items);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
-                PacketPhaseUtil.processSpawnedEntities(player, event);
+                TrackingUtil.processSpawnedEntities(player, event);
             }
         });
         context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
@@ -165,7 +165,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                         DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            PacketPhaseUtil.processSpawnedEntities(player, event);
+                            TrackingUtil.processSpawnedEntities(player, event);
                         }
                     }
                 }
@@ -190,7 +190,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                 DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
-                    PacketPhaseUtil.processSpawnedEntities(player, event);
+                    TrackingUtil.processSpawnedEntities(player, event);
                 }
             }
 

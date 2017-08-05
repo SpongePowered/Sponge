@@ -37,6 +37,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ final class CreativeInventoryPacketState extends BasicPacketState {
                             SpongeEventFactory.createDropItemEventDispense(cause, entities);
                     SpongeImpl.postEvent(dispense);
                     if (!dispense.isCancelled()) {
-                        PacketPhaseUtil.processSpawnedEntities(player, dispense);
+                        TrackingUtil.processSpawnedEntities(player, dispense);
                     }
                 });
         final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
