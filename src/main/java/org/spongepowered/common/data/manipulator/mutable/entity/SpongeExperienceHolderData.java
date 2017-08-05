@@ -136,14 +136,16 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     public void setTotalExp(int totalExp) {
         this.totalExp = totalExp;
         int level = 0;
-        for (int i = totalExp; i > 0; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
-            level ++;
-            if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
-                this.expSinceLevel = i;
-                this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
+        while (true) {
+            int expToNextLevel = ExperienceHolderUtils.getExpBetweenLevels(level);
+            if (totalExp < expToNextLevel) {
+                this.expSinceLevel = totalExp;
+                this.expBetweenLevels = expToNextLevel;
                 this.level = level;
                 break;
             }
+            totalExp -= expToNextLevel;
+            level++;
         }
     }
 
