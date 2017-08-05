@@ -590,13 +590,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return NetworkUtil.getHostString(this.connection.netManager.getRemoteAddress());
     }
 
-    // this needs to be overridden from EntityPlayer so we can force a resend of the experience level
-    @Override
-    public void setLevel(int level) {
-        super.experienceLevel = level;
-        this.lastExperience = -1;
-    }
-
     @Override
     public String getSubjectCollectionIdentifier() {
         return ((IMixinSubject) this.user).getSubjectCollectionIdentifier();

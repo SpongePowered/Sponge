@@ -53,4 +53,8 @@ public interface IMixinEntityPlayer extends IMixinEntity {
     void shouldRestoreInventory(boolean flag);
 
     boolean shouldRestoreInventory();
+
+    int getExperienceSinceLevel();
+
+    void setExperienceSinceLevel(int experience);
 }
