@@ -37,7 +37,9 @@ final class PostState extends GeneralState {
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
-        return state.getPhase() == TrackingPhases.GENERATION || state == BlockPhase.State.RESTORING_BLOCKS;
+        return state.getPhase() == TrackingPhases.GENERATION
+                || state.getPhase() == TrackingPhases.PLUGIN
+                || state == BlockPhase.State.RESTORING_BLOCKS;
     }
 
     @Override
