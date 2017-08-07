@@ -380,10 +380,10 @@ public interface PacketFunction {
                         final int usedButton = action == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
 
                         Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-                        Container openContainer = player.openContainer;
-                        List<SlotTransaction> slotTrans = ((IMixinContainer) openContainer).getCapturedTransactions();
+                        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+                        List<SlotTransaction> slotTrans = mixinContainer.getCapturedTransactions();
                         ClickInventoryEvent.Drop dropItemEvent = ((DropItemWithHotkeyState) state)
-                                .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities, cause, usedButton);
+                                .createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities, cause, usedButton);
 
                         SpongeImpl.postEvent(dropItemEvent);
                         if (!dropItemEvent.isCancelled()) {
@@ -392,6 +392,7 @@ public interface PacketFunction {
                             ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
                         }
                         slotTrans.clear();
+                        mixinContainer.setCaptureInventory(false);
                     });
             context.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(itemMapping -> {
