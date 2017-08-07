@@ -25,7 +25,6 @@
 package org.spongepowered.common.map;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapShade;
@@ -82,7 +81,7 @@ public class SpongeMapColor implements MapColor {
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer container = new MemoryDataContainer();
+        final DataContainer container = DataContainer.createNew();
         container.set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(DataQueries.MAP_BASE_COLOR, this.baseColor)
                 .set(DataQueries.MAP_SHADE, this.shade.getId());

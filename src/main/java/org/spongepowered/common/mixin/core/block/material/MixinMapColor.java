@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.block.material;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapShade;
@@ -84,7 +82,7 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer container = new MemoryDataContainer();
+        final DataContainer container = DataContainer.createNew();
         container.set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.MAP_COLOR_INDEX, this.colorIndex);
         return container;
@@ -121,8 +119,8 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
         return toStringHelper().toString();
     }
 
-    protected Objects.ToStringHelper toStringHelper() {
-        return Objects.toStringHelper(this)
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return MoreObjects.toStringHelper(this)
                 .add("id", getId())
                 .add("name", getName())
                 .add("colorValue", this.colorValue)

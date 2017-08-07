@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.storage;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
@@ -36,6 +36,7 @@ import org.spongepowered.api.map.MapViewStorage;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.map.SpongeMapScale;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
@@ -81,7 +82,7 @@ public abstract class MixinMapStorage implements MapViewStorage {
         // XXX: This isn't quite the best way, but afaik it's the only way to do this
         // due to no common index of maps
         // TODO: Evaluate effectiveness of creating an index file for map data
-        return SpongeScheduler.getInstance().submitAsyncTask(() -> {
+        return SpongeImpl.getScheduler().submitAsyncTask(() -> {
             File mapDataDir = new File(saveHandler.getWorldDirectory(), "data");
             String[] filenameListing = mapDataDir.list((dir, name) -> name.startsWith("map_") && name.endsWith(".dat"));
             for (int i = 0; i < filenameListing.length; i++) {

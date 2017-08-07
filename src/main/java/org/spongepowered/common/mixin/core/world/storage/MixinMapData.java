@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.storage;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.map.MapView;
 import org.spongepowered.api.map.color.MapColor;

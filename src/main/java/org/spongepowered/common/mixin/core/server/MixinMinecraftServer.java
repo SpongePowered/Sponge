@@ -751,7 +751,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public MapViewStorage getMapViewStorage() {
-        return (MapViewStorage) this.worldServers[0].getMapStorage();
+        return (MapViewStorage) this.worlds[0].getMapStorage();
     }
     
     /**
