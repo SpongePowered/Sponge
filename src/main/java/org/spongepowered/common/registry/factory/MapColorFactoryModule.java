@@ -53,7 +53,7 @@ public class MapColorFactoryModule implements FactoryRegistry<MapColorFactory, M
 
             @Override
             public MapColor of(Color color, Function<Color, MapColor> matcher) {
-                return new SpongeMapColor(MapColors.Base.AIR, MapShades.BASE);
+                return new SpongeMapColor(MapColors.AIR, MapShades.BASE);
             }
         };
     }
