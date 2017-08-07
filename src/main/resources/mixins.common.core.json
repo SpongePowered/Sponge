@@ -528,8 +528,8 @@
         "world.gen.structure.MixinMapGenVillage",
         "world.storage.MixinSaveHandler",
         "world.storage.MixinThreadedFileIOBase",
-        "world.storage.MixinWorldInfo"
-        "world.storage.MixinMapStorage"
+        "world.storage.MixinWorldInfo",
+        "world.storage.MixinMapStorage",
         "world.storage.MixinMapData"
     ],
     "server": [

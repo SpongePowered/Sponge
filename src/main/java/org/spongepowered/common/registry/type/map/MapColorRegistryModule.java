@@ -43,7 +43,7 @@ public final class MapColorRegistryModule implements CatalogRegistryModule<org.s
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(value = MapColors.class, ignoredFields = "factory")
+    @RegisterCatalog(value = MapColors.Base.class)
     private final Map<String, org.spongepowered.api.map.color.MapColor.Base> mapColorMappings = new HashMap<>();
 
     @Override

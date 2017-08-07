@@ -170,6 +170,7 @@ import org.spongepowered.common.item.recipe.crafting.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
+import org.spongepowered.common.registry.factory.MapColorFactoryModule;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
@@ -243,6 +244,7 @@ public final class CommonModuleRegistry {
 
     private void registerFactories() {
         final List<FactoryRegistry<?, ?>> factoryRegistries = new ArrayList<>();
+        factoryRegistries.add(new MapColorFactoryModule());
         factoryRegistries.add(new ResourcePackFactoryModule());
         factoryRegistries.add(new TimingsFactoryModule());
 
