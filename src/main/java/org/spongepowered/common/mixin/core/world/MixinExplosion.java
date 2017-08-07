@@ -105,7 +105,9 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             double originZ, float radius, boolean isFlaming, boolean isSmoking,
             CallbackInfo ci) {
         this.origin = new Vector3d(this.x, this.y, this.z);
-        this.shouldBreakBlocks = true; // by default, all explosions do this can be changed by the explosion builder
+        // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
+        // Sponge-created explosions will explicitly set 'shouldBreakBlocks' to its proper value
+        this.shouldBreakBlocks = this.damagesTerrain;
         this.shouldDamageEntities = true;
     }
 
@@ -347,7 +349,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             }
         }
 
-        if (this.damagesTerrain) {
+        if (this.shouldBreakBlocks) { // Sponge - use 'shouldBreakBlocks' instead of 'damagesTerrain'
             for (BlockPos blockpos : this.affectedBlockPositions) {
                 IBlockState iblockstate = this.world.getBlockState(blockpos);
                 Block block = iblockstate.getBlock();
