@@ -85,7 +85,9 @@ public class RegistryHelper {
 
     public static boolean setFactory(Class<?> apiClass, Object factory) {
         try {
-            apiClass.getDeclaredField("factory").set(null, factory);
+            Field field = apiClass.getDeclaredField("factory");
+            field.setAccessible(true);
+            field.set(null, factory);
             return true;
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while setting factory on {}", apiClass, e);

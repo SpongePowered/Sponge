@@ -58,7 +58,7 @@ class RegistryTestUtil {
             if (catalogedBy != null) {
                 for (Class<?> containerClass : catalogedBy.value()) {
                     for (Field field : containerClass.getFields()) {
-                        if (Modifier.isStatic(field.getModifiers())) {
+                        if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
                             objects.add(new Object[] {field.getName(), entry.getKey(), containerClass, entry.getValue(), field});
                         }
                     }
