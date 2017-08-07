@@ -54,7 +54,9 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
@@ -78,7 +80,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
-    protected PlayerInventoryLens lens;
+    protected MinecraftLens lens;
 
     private Player carrier;
     private HotbarAdapter hotbar;
@@ -88,10 +90,16 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
-        if (playerIn instanceof EntityPlayerMP) {
-            // We only care about Server inventories
-            this.inventory = new DefaultInventoryFabric((IInventory) this);
 
+        // Set Carrier if we got a real Player
+        if (playerIn instanceof EntityPlayerMP) {
+            this.carrier = (Player) playerIn;
+        }
+
+        this.inventory = new DefaultInventoryFabric((IInventory) this);
+        Class clazz = this.getClass();
+        if (clazz == InventoryPlayer.class) { // Build Player Lens
+            // We only care about Server inventories
             this.slots = new SlotCollection.Builder()
                     .add(this.mainInventory.size())
                     .add(this.offHandInventory.size())
@@ -99,8 +107,10 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
                     // for mods providing bigger inventories
                     .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
                     .build();
-            this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);
+        } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
+            this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
+            this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
         }
     }
 
@@ -126,16 +136,16 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Override
     public Hotbar getHotbar() {
-        if (this.hotbar == null) {
-            this.hotbar = (HotbarAdapter) this.lens.getHotbarLens().getAdapter(this.inventory, this);
+        if (this.hotbar == null && this.lens instanceof PlayerInventoryLens) {
+            this.hotbar = (HotbarAdapter) ((PlayerInventoryLens) this.lens).getHotbarLens().getAdapter(this.inventory, this);
         }
         return this.hotbar;
     }
 
     @Override
     public GridInventory getMain() {
-        if (this.main == null) {
-            this.main = (GridInventoryAdapter) this.lens.getMainLens().getAdapter(this.inventory, this);
+        if (this.main == null && this.lens instanceof PlayerInventoryLens) {
+            this.main = (GridInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
         }
         return this.main;
     }
@@ -143,15 +153,15 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public EquipmentInventory getEquipment() {
         if (this.equipment == null) {
-            this.equipment = (EquipmentInventoryAdapter) this.lens.getEquipmentLens().getAdapter(this.inventory, this);
+            this.equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.lens).getEquipmentLens().getAdapter(this.inventory, this);
         }
         return this.equipment;
     }
 
     @Override
     public Slot getOffhand() {
-        if (this.offhand == null) {
-            this.offhand = (SlotAdapter) this.lens.getOffhandLens().getAdapter(this.inventory, this);
+        if (this.offhand == null && this.lens instanceof PlayerInventoryLens) {
+            this.offhand = (SlotAdapter) ((PlayerInventoryLens) this.lens).getOffhandLens().getAdapter(this.inventory, this);
         }
         return this.offhand;
     }
