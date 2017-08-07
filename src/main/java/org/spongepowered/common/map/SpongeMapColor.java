@@ -31,8 +31,6 @@ import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.DataQueries;
 
-import javax.annotation.Nonnull;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class SpongeMapColor implements MapColor {
@@ -88,7 +86,6 @@ public class SpongeMapColor implements MapColor {
         return container;
     }
 
-    @Nonnull
     public static final Color shadeColor(int color, MapShade shade) {
         Color spongeColor = Color.ofRgb(color);
         int mulFactor = shade.getMultiplication();

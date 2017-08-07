@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.map.SpongeMapScale;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.io.File;
 import java.util.Arrays;
@@ -94,13 +93,8 @@ public abstract class MixinMapStorage implements MapViewStorage {
 
     @Override
     public ImmutableCollection<MapView> getLoadedMaps() {
-        ImmutableList.Builder<MapView> builder = ImmutableList.builder();
-        loadedDataList.forEach(entry -> {
-            if (entry instanceof MapView) {
-                builder.add((MapView) entry);
-            }
-        });
-        return builder.build();
+        return loadedDataList.stream().filter(MapView.class::isInstance)
+                .map(MapView.class::cast).collect(ImmutableList.toImmutableList());
     }
 
     @Override

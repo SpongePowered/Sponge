@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.block.material.MapColor;
 import org.spongepowered.api.map.color.MapColors;
 import org.spongepowered.api.map.color.MapShades;
@@ -35,7 +34,11 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 public final class MapColorRegistryModule implements CatalogRegistryModule<org.spongepowered.api.map.color.MapColor.Base> {
 
