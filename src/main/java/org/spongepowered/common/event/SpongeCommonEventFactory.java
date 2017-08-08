@@ -682,14 +682,17 @@ public class SpongeCommonEventFactory {
 
     public static ClickInventoryEvent.Creative callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
         Cause cause = Cause.of(NamedCause.owner(player));
-        // Creative doesn't inform server of cursor status
+        // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
+        // Due to this, we can only send the original item that was clicked in slot
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
             && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null) {
+                ItemStackSnapshot clickedItem = slot.getStack() == null ? ItemStackSnapshot.NONE
+                        : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
                 SlotTransaction slotTransaction =
-                        new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                        new SlotTransaction(new SlotAdapter(slot), clickedItem, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
