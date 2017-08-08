@@ -509,7 +509,7 @@ public class DataRegistrar {
                 new HideDataProcessor());
 
         DataUtil.registerDualProcessor(MapItemData.class, SpongeMapItemData.class, ImmutableMapItemData.class,
-                ImmutableSpongeMapItemData.class, new MapItemDataProcessor());
+                ImmutableSpongeMapItemData.class, new ItemMapDataProcessor());
 
         // Block Processors
 

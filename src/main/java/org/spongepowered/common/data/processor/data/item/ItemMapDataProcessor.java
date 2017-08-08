@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT)
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.init.Items;
@@ -40,9 +39,9 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class MapItemDataProcessor extends AbstractSingleDataSingleTargetProcessor<ItemStack, String, Value<String>, MapItemData, ImmutableMapItemData> {
+public class ItemMapDataProcessor extends AbstractSingleDataSingleTargetProcessor<ItemStack, String, Value<String>, MapItemData, ImmutableMapItemData> {
 
-    public MapItemDataProcessor() {
+    public ItemMapDataProcessor() {
         super(Keys.ATTACHED_MAP, ItemStack.class);
     }
 

@@ -1,5 +1,5 @@
 /*
- * The MIT License (MIT)
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -22,7 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package org.spongepowered.common.data.manipulator.mutable.item;
 
 import org.spongepowered.api.data.DataContainer;

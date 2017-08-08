@@ -22,27 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.factory;
+package org.spongepowered.common.map;
 
-import org.spongepowered.api.map.color.MapColors;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.util.MapColorFactory;
-import org.spongepowered.api.registry.FactoryRegistry;
-import org.spongepowered.common.map.SpongeMapColorFactory;
 
-public class MapColorFactoryModule implements FactoryRegistry<MapColorFactory, MapColors> {
+import java.util.Collection;
+import java.util.stream.Collectors;
 
-    @Override
-    public Class<MapColors> getFactoryOwner() {
-        return MapColors.class;
-    }
+public class SpongeMapColorFactory implements MapColorFactory {
+    private ImmutableCollection<MapColor> mapColors;
 
     @Override
-    public MapColorFactory provideFactory() {
-        return Holder.INSTANCE;
-    }
+    public Collection<MapColor> getAll() {
+        if (mapColors != null) {
+            return mapColors;
+        }
 
-    private static final class Holder {
-        static final SpongeMapColorFactory INSTANCE = new SpongeMapColorFactory();
+        ImmutableList.Builder<MapColor> allColors = ImmutableList.builder();
+        Collection<MapColor.Base> baseColors = Sponge.getRegistry().getAllOf(MapColor.Base.class);
+        Sponge.getRegistry().getAllOf(MapShade.class).forEach(shade ->
+                allColors.addAll(
+                        baseColors.stream().map(base -> base.shade(shade)).collect(Collectors.toList())
+                )
+        );
+        mapColors = allColors.build();
+        return mapColors;
     }
 
 }

@@ -34,6 +34,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.map.SpongeMapColor;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -52,6 +53,12 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
 
     public MixinMapData(String name) {
         super(name);
+    }
+
+    private void dataFlush() {
+        markDirty();
+        updateMapData(0, 0);
+        updateMapData(127, 127);
     }
 
     @Override
@@ -79,7 +86,7 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
         // int and byte are the only types observed as of yet.
         DataBuffer buffer = image.getData().getDataBuffer();
         System.out.println(buffer.getClass().getTypeName());
-        System.out.println(image.getType());
+        System.out.println(image.getType());/*
         if (buffer instanceof DataBufferByte) {
             // TODO: Finish this implementation
             DataBufferByte byteBuffer = (DataBufferByte) buffer;
@@ -109,7 +116,21 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
 
         } else {
             // TODO: Figure out how to throw an "alert sponge" exception
+            image.
+        }*/
+        int[] pixels = image.getRGB(0, 0, Math.min(128, image.getWidth()), Math.min(128, image.getHeight()), null, 0, image.getWidth());
+        for (int i = 0; i < Math.min(128, image.getHeight()); i++) {
+            for (int j = 0; j < Math.min(128, image.getWidth()); j++) {
+                int argb = pixels[(i*image.getWidth())+j];
+                int alpha = (argb >> 24) & 0xFF;
+                if (alpha > 127) {
+                    colors[(i*128)+j] = (byte)((net.minecraft.block.material.MapColor) MapColors.of(Color.ofRgb(argb))).colorIndex;
+                } else {
+                    //colors[(i*128)+j] = (byte) (net.minecraft.block.material.MapColor.AIR.colorIndex);
+                }
+            }
         }
+        dataFlush();
     }
 
     @Override

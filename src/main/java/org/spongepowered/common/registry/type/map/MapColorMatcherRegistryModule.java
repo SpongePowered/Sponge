@@ -22,27 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.factory;
+package org.spongepowered.common.registry.type.map;
 
-import org.spongepowered.api.map.color.MapColors;
-import org.spongepowered.api.map.util.MapColorFactory;
-import org.spongepowered.api.registry.FactoryRegistry;
-import org.spongepowered.common.map.SpongeMapColorFactory;
+import org.spongepowered.api.map.color.MapColorMatchers;
+import org.spongepowered.api.map.util.MapColorMatcher;
+import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 
-public class MapColorFactoryModule implements FactoryRegistry<MapColorFactory, MapColors> {
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-    @Override
-    public Class<MapColors> getFactoryOwner() {
-        return MapColors.class;
-    }
+public class MapColorMatcherRegistryModule implements CatalogRegistryModule<MapColorMatcher> {
 
-    @Override
-    public MapColorFactory provideFactory() {
+    public static MapColorMatcherRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    private static final class Holder {
-        static final SpongeMapColorFactory INSTANCE = new SpongeMapColorFactory();
+    @RegisterCatalog(MapColorMatchers.class)
+    private final Map<String, MapColorMatcher> mapColorMatchers = new HashMap<>();
+    @Override
+    public Optional<MapColorMatcher> getById(String id) {
+        return null;
     }
 
+    @Override
+    public Collection<MapColorMatcher> getAll() {
+        return null;
+    }
+
+    MapColorMatcherRegistryModule() { }
+
+    private static final class Holder {
+        static final MapColorMatcherRegistryModule INSTANCE = new MapColorMatcherRegistryModule();
+    }
 }
