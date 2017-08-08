@@ -94,23 +94,23 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         // Set Carrier if we got a real Player
         if (playerIn instanceof EntityPlayerMP) {
             this.carrier = (Player) playerIn;
-        }
 
-        this.inventory = new DefaultInventoryFabric((IInventory) this);
-        Class clazz = this.getClass();
-        if (clazz == InventoryPlayer.class) { // Build Player Lens
-            // We only care about Server inventories
-            this.slots = new SlotCollection.Builder()
-                    .add(this.mainInventory.size())
-                    .add(this.offHandInventory.size())
-                    .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
-                    // for mods providing bigger inventories
-                    .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
-                    .build();
-            this.lens = new PlayerInventoryLens(this, this.slots);
-        } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
-            this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-            this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+            this.inventory = new DefaultInventoryFabric((IInventory) this);
+            Class clazz = this.getClass();
+            if (clazz == InventoryPlayer.class) { // Build Player Lens
+                // We only care about Server inventories
+                this.slots = new SlotCollection.Builder()
+                        .add(this.mainInventory.size())
+                        .add(this.offHandInventory.size())
+                        .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
+                        // for mods providing bigger inventories
+                        .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
+                        .build();
+                this.lens = new PlayerInventoryLens(this, this.slots);
+            } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
+                this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
+                this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+            }
         }
     }
 
