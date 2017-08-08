@@ -164,7 +164,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                     SpongeCommonEventFactory.playerInteractItemChanged = true;
                 }
 
-                result = this.handleOpenEvent(lastOpenContainer, this.thisPlayerMP, result);
+                result = this.handleOpenEvent(lastOpenContainer, this.thisPlayerMP, currentSnapshot, result);
 
                 if (result != EnumActionResult.PASS) {
 
@@ -215,10 +215,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     }
 
     @Override
-    public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, EnumActionResult result) {
+    public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result) {
 
         if (lastOpenContainer != player.openContainer) {
-            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player)), player)) {
+            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player), NamedCause.hitTarget(blockSnapshot)), player)) {
                 result = EnumActionResult.FAIL;
                 SpongeCommonEventFactory.interactBlockEventCancelled = true;
             }

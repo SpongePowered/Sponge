@@ -391,7 +391,7 @@ public interface PacketFunction {
                                 .createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities, cause, usedButton);
 
                         SpongeImpl.postEvent(dropItemEvent);
-                        if (!dropItemEvent.isCancelled()) {
+                        if (!dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
                             processSpawnedEntities(player, dropItemEvent);
                         } else {
                             ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
@@ -695,7 +695,7 @@ public interface PacketFunction {
             }
 
             SpongeImpl.postEvent(inventoryEvent);
-            if (inventoryEvent.isCancelled()) {
+            if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
                 if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
                     capturedItems.clear();
                 }
@@ -708,8 +708,10 @@ public interface PacketFunction {
             } else {
                 PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
 
-                // Custom cursor
-                if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
+                // Handle cursor
+                if (!inventoryEvent.getCursorTransaction().isValid()) {
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                 }
                 if (inventoryEvent instanceof SpawnEntityEvent) {
@@ -888,7 +890,7 @@ public interface PacketFunction {
                 .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
         Container openContainer = player.openContainer;
         SpongeImpl.postEvent(changeInventoryEventHeld);
-        if (changeInventoryEventHeld.isCancelled()) {
+        if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(changeInventoryEventHeld.getTransactions())) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
             PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false);
@@ -986,7 +988,9 @@ public interface PacketFunction {
                 player.closeScreen();
             } else {
                 // Custom cursor
-                if (event.getCursorTransaction().getCustom().isPresent()) {
+                if (!event.getCursorTransaction().isValid()) {
+                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+                } else if (event.getCursorTransaction().getCustom().isPresent()) {
                     PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
                 }
             }

@@ -53,14 +53,6 @@ public final class PacketPhaseUtil {
             final int slotNumber = slot.slotNumber;
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
-
-            // TODO: fix below
-            /*if (originalStack == null) {
-                slot.clear();
-            } else {
-                slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
-            }*/
-
             final Slot nmsSlot = openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
@@ -110,5 +102,16 @@ public final class PacketPhaseUtil {
         player.openContainer.detectAndSendChanges();
         player.isChangingQuantityOnly = false;
         player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, itemStack));
+    }
+
+    // Check if all transactions are invalid
+    public static boolean allTransactionsInvalid(List<SlotTransaction> slotTransactions) {
+        for (SlotTransaction slotTransaction : slotTransactions) {
+            if (slotTransaction.isValid()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
