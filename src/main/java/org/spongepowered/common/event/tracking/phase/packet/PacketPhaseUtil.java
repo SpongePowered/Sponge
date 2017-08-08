@@ -31,8 +31,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -44,13 +42,7 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled, Event event) {
-        // We always need to force resync for shift click events, since a previous event cancellation could have caused a desync
-        // (if the event is from a shift double click)c
-        handleSlotRestore(player, openContainer, slotTransactions, eventCancelled, event instanceof ClickInventoryEvent.Shift);
-    }
-
-    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled, boolean forceResync) {
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
@@ -75,8 +67,9 @@ public final class PacketPhaseUtil {
             }
         }
         openContainer.detectAndSendChanges();
-        // we must validate the player still has the same container open after the event has been processed
-        if (forceResync && player.openContainer == openContainer) {
+        // If event is cancelled, always resync with player
+        // we must also validate the player still has the same container open after the event has been processed
+        if (eventCancelled && player.openContainer == openContainer) {
             player.sendContainerToPlayer(openContainer);
         }
     }
