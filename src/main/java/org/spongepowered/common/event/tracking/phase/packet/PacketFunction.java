@@ -627,24 +627,13 @@ public interface PacketFunction {
                         processSpawnedEntities(player, dispense);
                     }
                 });
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        mixinContainer.setCaptureInventory(false);
+        mixinContainer.getCapturedTransactions().clear();
     };
 
     PacketFunction INVENTORY = (packet, state, player, context) -> {
-        // The server will disable the player's crafting after receiving a client packet
-        // that did not pass validation (server click item != packet click item)
-        // The server then sends a SPacketConfirmTransaction and waits for a
-        // CPacketConfirmTransaction to re-enable crafting confirming that the client
-        // acknowledged the denied transaction.
-        // To detect when this happens, we turn off capturing so we can avoid firing
-        // invalid events.
-        // See MixinNetHandlerPlayServer processClickWindow redirect for rest of fix.
-        // --bloodmc
         final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
-        if (!mixinContainer.capturingInventory()) {
-            mixinContainer.getCapturedTransactions().clear();
-            return;
-        }
-
         final CPacketClickWindow packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing the packet used, but no packet was captured!", context));
         final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
@@ -695,9 +684,9 @@ public interface PacketFunction {
                 PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
 
                 // Restore target slots
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true, inventoryEvent);
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
             } else {
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false, inventoryEvent);
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
 
                 // Custom cursor
                 if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
@@ -829,7 +818,7 @@ public interface PacketFunction {
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
+            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }
