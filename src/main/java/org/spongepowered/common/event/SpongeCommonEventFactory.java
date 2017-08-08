@@ -716,10 +716,11 @@ public class SpongeCommonEventFactory {
             player.closeScreen();
             return false;
         }
-        // TODO - determine if/how we want to fire inventory events outside of click poaket handlers
-        //((IMixinContainer) player.openContainer).setCaptureInventory(true);
-        // Custom cursor
-        if (event.getCursorTransaction().getCustom().isPresent()) {
+
+        // Handle cursor
+        if (!event.getCursorTransaction().isValid()) {
+            handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+        } else if (event.getCursorTransaction().getCustom().isPresent()) {
             handleCustomCursor(player, event.getCursorTransaction().getFinal());
         }
         return true;
@@ -754,12 +755,18 @@ public class SpongeCommonEventFactory {
                     // in opening the wrong GUI window.
                 }
             }
+            // Handle cursor
+            if (!event.getCursorTransaction().isValid()) {
+                handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+            }
         } else {
             IMixinContainer mixinContainer = (IMixinContainer) player.openContainer;
             mixinContainer.getCapturedTransactions().clear();
             mixinContainer.setCaptureInventory(false);
-            // Custom cursor
-            if (event.getCursorTransaction().getCustom().isPresent()) {
+            // Handle cursor
+            if (!event.getCursorTransaction().isValid()) {
+                handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+            } else if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
             if (!clientSource) {

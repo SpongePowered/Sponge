@@ -27,9 +27,10 @@ package org.spongepowered.common.interfaces.server.management;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.util.EnumActionResult;
+import org.spongepowered.api.block.BlockSnapshot;
 
 public interface IMixinPlayerInteractionManager {
 
-    EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, EnumActionResult result);
+    EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result);
 
 }
