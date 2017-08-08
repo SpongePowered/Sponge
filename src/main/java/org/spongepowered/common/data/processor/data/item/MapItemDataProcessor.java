@@ -28,7 +28,6 @@ package org.spongepowered.common.data.processor.data.item;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableMapItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.MapItemData;
@@ -37,7 +36,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapItemData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
@@ -69,6 +67,14 @@ public class MapItemDataProcessor extends AbstractSingleDataSingleTargetProcesso
     @Override
     protected ImmutableValue<String> constructImmutableValue(String value) {
         return constructValue(value).asImmutable();
+    }
+
+    @Override
+    protected boolean supports(ItemStack holder) {
+        if (holder.getItem() == Items.FILLED_MAP) {
+            return true;
+        }
+        return false;
     }
 
     @Override
