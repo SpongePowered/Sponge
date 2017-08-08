@@ -24,16 +24,22 @@
  */
 package org.spongepowered.common.data.processor.value.block;
 
+import net.minecraft.tileentity.TileEntityChest;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
+
 public class ConnectedSouthValueProcessor extends
-        AbstractBlockOnlyValueProcessor<Boolean, Value<Boolean>> {
+        AbstractSpongeValueProcessor<TileEntityChest, Boolean, Value<Boolean>> {
 
     public ConnectedSouthValueProcessor() {
-        super(Keys.CONNECTED_SOUTH);
+        super(TileEntityChest.class, Keys.CONNECTED_SOUTH);
     }
 
     @Override
@@ -41,4 +47,24 @@ public class ConnectedSouthValueProcessor extends
         return new SpongeValue<>(Keys.CONNECTED_SOUTH, false, defaultValue);
     }
 
+    @Override
+    protected boolean set(TileEntityChest container, Boolean value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<Boolean> getVal(TileEntityChest container) {
+        container.checkForAdjacentChests();
+        return Optional.of(container.adjacentChestZPos != null);
+    }
+
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return constructValue(value).asImmutable();
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer container) {
+        return DataTransactionResult.failNoData();
+    }
 }
