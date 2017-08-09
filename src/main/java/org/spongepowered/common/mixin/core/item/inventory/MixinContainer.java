@@ -118,6 +118,28 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     /**
      * @author bloodmc
+     * @reason If listener already exists, avoid firing an exception
+     * and simply send the inventory changes to client.
+     */
+    @SuppressWarnings("unchecked")
+    @Overwrite
+    public void addListener(IContainerListener listener) {
+        Container container = (Container) (Object) this;
+        if (this.listeners.contains(listener)) {
+            // Sponge start
+            // throw new IllegalArgumentException("Listener already listening");
+            listener.updateCraftingInventory(container, this.getInventory());
+            container.detectAndSendChanges();
+            // Sponge end
+        } else {
+            this.listeners.add(listener);
+            listener.updateCraftingInventory(container, this.getInventory());
+            container.detectAndSendChanges();
+        }
+    }
+
+    /**
+     * @author bloodmc
      * @reason All player fabric changes that need to be synced to
      * client flow through this method. Overwrite is used as no mod
      * should be touching this method.
