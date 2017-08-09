@@ -102,41 +102,6 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
         checkNotNull(image, "image");
         checkArgument(x >= 0 && x < 128, "x >= 0 && x < 128");
         checkArgument(y >= 0 && y < 128, "y >= 0 && y < 128");
-        // int and byte are the only types observed as of yet.
-        DataBuffer buffer = image.getData().getDataBuffer();
-        System.out.println(buffer.getClass().getTypeName());
-        System.out.println(image.getType());/*
-        if (buffer instanceof DataBufferByte) {
-            // TODO: Finish this implementation
-            DataBufferByte byteBuffer = (DataBufferByte) buffer;
-            byte[] imageData = byteBuffer.getData();
-            // TODO: We will need to know what types people are using because
-            // there are way too many assume 3 byte BGR for now
-            for (int i = 0; i < Math.min(128-y, image.getHeight()); i++) {
-                for (int j = 0; j < Math.min(128-x, image.getHeight()); j++) {
-                    int baseIndex = (i*image.getHeight()) + j;
-                    byte blue = imageData[baseIndex];
-                    byte green = imageData[baseIndex+1];
-                    byte red = imageData[baseIndex+2];
-                    Color color = Color.ofRgb(red, green, blue);
-                    // Use the unweighted RGB model to convert
-                    // TODO: Is this the best default?
-                    MapColor converted = MapColors.of(color);
-                    // XXX: This is way broken, should actually expose the multiplied ID in the
-                    // SpongeMapColor
-                    colors[(i*128)+j] = (byte) ((net.minecraft.block.material.MapColor) converted).colorIndex;
-                }
-            }
-            markDirty();
-            updateMapData(0, 0);
-            updateMapData(127, 127);
-
-        } else if (buffer instanceof DataBufferInt) {
-
-        } else {
-            // TODO: Figure out how to throw an "alert sponge" exception
-            image.
-        }*/
         int width = Math.min(image.getWidth(), 128);
         int height = Math.min(image.getHeight(), 128);
 
