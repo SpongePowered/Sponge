@@ -68,6 +68,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -488,8 +491,16 @@ public final class WorldManager {
             }
         }
 
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.WORLD_UNLOAD, PhaseContext.start()
+                    .add(NamedCause.source(worldServer))
+                    .complete());
+        }
         if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
                 worldServer))) {
+            if (CauseTracker.ENABLED) {
+                CauseTracker.getInstance().completePhase(GeneralPhase.State.WORLD_UNLOAD);
+            }
             return false;
         }
 
@@ -516,6 +527,9 @@ public final class WorldManager {
             unregisterDimension(dimensionId);
         }
 
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().completePhase(GeneralPhase.State.WORLD_UNLOAD);
+        }
         return true;
     }
 
