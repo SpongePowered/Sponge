@@ -850,7 +850,7 @@ public final class EntityUtil {
             mcServer.getPlayerList().getPlayerList().add(entityPlayerMP);
             entityPlayerMP.interactionManager.setWorld(toWorld);
             entityPlayerMP.addSelfToInternalCraftingInventory();
-            entityPlayerMP.setHealth(entityPlayerMP.getHealth());
+            ((IMixinEntityPlayerMP) entityPlayerMP).refreshXpHealthAndFood();
             for (Object effect : entityPlayerMP.getActivePotionEffects()) {
                 entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), (PotionEffect) effect));
             }
