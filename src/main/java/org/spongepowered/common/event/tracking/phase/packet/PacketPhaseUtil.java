@@ -106,6 +106,10 @@ public final class PacketPhaseUtil {
 
     // Check if all transactions are invalid
     public static boolean allTransactionsInvalid(List<SlotTransaction> slotTransactions) {
+        if (slotTransactions.size() == 0) {
+            return false;
+        }
+
         for (SlotTransaction slotTransaction : slotTransactions) {
             if (slotTransaction.isValid()) {
                 return false;

@@ -680,6 +680,13 @@ public interface PacketFunction {
             inventoryEvent = null;
         }
 
+        // Some mods may override container detectAndSendChanges method and prevent captures
+        // If this happens and we captured no entities, avoid firing events
+        if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
+            mixinContainer.setCaptureInventory(false);
+            return;
+        }
+
         if (inventoryEvent != null) {
             // Don't fire inventory drop events when there are no entities
             if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
