@@ -22,13 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block.material;
 
-public interface IMixinMapColor {
+package org.spongepowered.common.map;
 
-    void setId(String id);
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.util.MapColorMatcher;
+import org.spongepowered.api.util.Color;
+import org.spongepowered.common.SpongeCatalogType;
 
-    byte getRawShaded();
+import java.util.function.Function;
 
-    byte getRawBase();
+public class SpongeMapColorMatcher extends SpongeCatalogType implements MapColorMatcher {
+
+    private final Function<Color, MapColor> matchingFunction;
+
+    public SpongeMapColorMatcher(String id, Function<Color, MapColor> matchingFunction) {
+        super(id);
+        this.matchingFunction = matchingFunction;
+    }
+
+    @Override
+    public MapColor apply(Color color) {
+        return this.matchingFunction.apply(color);
+    }
+
 }

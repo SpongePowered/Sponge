@@ -40,14 +40,17 @@ import org.spongepowered.api.event.map.InitializeMapEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapView;
+import org.spongepowered.api.map.color.MapColorMatchers;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.Color;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +67,7 @@ public class MapTest {
     public void onInit(GameInitializationEvent event) {
         Sponge.getCommandManager().register(this, saveMap(), "savemap");
         Sponge.getCommandManager().register(this, drawImage(), "drawimage");
+        Sponge.getCommandManager().register(this, tuneMatcher(), "tunematch");
     }
 
     @Listener
@@ -72,6 +76,45 @@ public class MapTest {
         event.setCancelled(true);
         event.getCause().first(Player.class).ifPresent(player -> player.setItemInHand(HandTypes.MAIN_HAND, null));
     }
+
+    private static CommandCallable tuneMatcher() {
+        final LiteralText url = Text.of("url");
+        return CommandSpec.builder()
+        .arguments(GenericArguments.onlyOne(GenericArguments.string(url)))
+        .description(Text.of(TextColors.DARK_AQUA, "Debug for testing map color matching"))
+        .executor((src, args) -> {
+            if (!(src instanceof Player)) {
+                return CommandResult.empty();
+            }
+            if (!(args.getOne(url).isPresent())) {
+                return CommandResult.empty();
+            }
+
+            try {
+                URL properURL = new URI((String) args.getOne(url).get()).toURL();
+                BufferedImage image = ImageIO.read(properURL);
+                BufferedImage matched = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+                int[] srcPixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+                int w = image.getWidth();
+                int h = image.getHeight();
+
+                for (int i = 0; i<h;i++) {
+                    for (int j = 0; j < w; j++) {
+                        int srcPix = srcPixels[i * w + j] & 0x00FFFFFF;
+                        int dstPix = MapColorMatchers.RGB_UNWEIGHTED.apply(Color.ofRgb(srcPix)).getColor().getRgb();
+                        srcPixels[i * w + j] = dstPix;
+                    }
+                }
+                matched.setRGB(0, 0, w, h, srcPixels, 0, w);
+                ImageIO.write(matched, "png", new File("matched.png"));
+                return CommandResult.success();
+            } catch (Exception e) {
+                return CommandResult.empty();
+            }
+        })
+        .build();
+    }
+
 
     private static CommandCallable drawImage() {
         final LiteralText url = Text.of("url");
@@ -105,7 +148,13 @@ public class MapTest {
                     try {
                         URL properURL = new URI((String) args.getOne(url).get()).toURL();
                         BufferedImage image = ImageIO.read(properURL);
-                        view.drawImage(0, 0, image);
+
+                        BufferedImage scaledImage = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+                        Graphics g = scaledImage.getGraphics();
+                        g.drawImage(image, 0, 0, 128, 128, null);
+                        g.dispose();
+
+                        view.drawImage(0, 0, scaledImage);
                         return CommandResult.success();
                     } catch (Exception e) {
                         return CommandResult.empty();
@@ -113,6 +162,7 @@ public class MapTest {
                 })
                 .build();
     }
+
     private static CommandCallable saveMap() {
         return CommandSpec.builder()
                 .description(Text.of(TextColors.DARK_AQUA, "Saves your map and returns a link"))

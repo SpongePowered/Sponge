@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -35,6 +34,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.map.SpongeMapShade;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +46,8 @@ public class MapShadeRegistryModule implements CatalogRegistryModule<MapShade> {
     }
 
     @RegisterCatalog(MapShades.class)
-    public static final Map<String, MapShade> mapShadeMappings = Maps.newHashMap();
+    private static final Map<String, MapShade> mapShadeMappings = new HashMap<>();
+    private static final MapShade[] indexMappings = new MapShade[4];
 
     @Override
     public void registerDefaults() {
@@ -57,7 +58,13 @@ public class MapShadeRegistryModule implements CatalogRegistryModule<MapShade> {
     }
 
     private void registerMapping(String id, int index, int mulFactor) {
-        mapShadeMappings.put(id, new SpongeMapShade(id, index, mulFactor));
+        SpongeMapShade shade =  new SpongeMapShade(id, index, mulFactor);
+        mapShadeMappings.put(id, shade);
+        indexMappings[index] = shade;
+    }
+
+    public MapShade fromIndex(int index) {
+        return indexMappings[index];
     }
 
     @Override

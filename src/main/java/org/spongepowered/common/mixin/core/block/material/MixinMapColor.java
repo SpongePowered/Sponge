@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 import org.spongepowered.common.map.SpongeMapColor;
+import org.spongepowered.common.map.SpongeMapShade;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +70,7 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
     public MapColor shade(MapShade newShading) {
         MapColor shaded = cachedShadings.get(newShading);
         if (shaded == null) {
-            shaded = new SpongeMapColor(this, newShading);
+            shaded = new SpongeMapColor((net.minecraft.block.material.MapColor) (Object) this, (SpongeMapShade) newShading);
             cachedShadings.put(newShading, shaded);
         }
         return shaded;
@@ -130,5 +131,15 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public byte getRawShaded() {
+        return (byte) (this.colorIndex * 4 + 2);
+    }
+
+    @Override
+    public byte getRawBase() {
+        return (byte) this.colorIndex;
     }
 }

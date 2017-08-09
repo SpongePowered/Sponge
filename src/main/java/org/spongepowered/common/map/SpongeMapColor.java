@@ -30,22 +30,26 @@ import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class SpongeMapColor implements MapColor {
+public class SpongeMapColor implements MapColor,IMixinMapColor {
+
+    private byte index;
 
     private final Base baseColor;
-    private final MapShade shade;
+    private final SpongeMapShade shade;
 
     private Color shadedColor = null;
 
-    public SpongeMapColor(Base baseColor, MapShade shade) {
+    public SpongeMapColor(net.minecraft.block.material.MapColor baseColor, SpongeMapShade shade) {
         checkNotNull(baseColor, "baseColor cannot be null");
         checkNotNull(shade, "shade cannot be null");
 
-        this.baseColor = baseColor;
+        this.baseColor = (Base)(baseColor);
         this.shade = shade;
+        this.index = (byte)((baseColor.colorIndex * 4) + shade.getRawIndex());
     }
 
     @Override
@@ -89,9 +93,24 @@ public class SpongeMapColor implements MapColor {
     public static final Color shadeColor(int color, MapShade shade) {
         Color spongeColor = Color.ofRgb(color);
         int mulFactor = shade.getMultiplication();
-        return spongeColor.withRed((spongeColor.getRed() * mulFactor) & 255)
-                .withGreen((spongeColor.getGreen() * mulFactor) & 255)
-                .withBlue((spongeColor.getBlue() * mulFactor) & 255);
+        return spongeColor.withRed((spongeColor.getRed() * mulFactor) / 255)
+                .withGreen((spongeColor.getGreen() * mulFactor) / 255)
+                .withBlue((spongeColor.getBlue() * mulFactor) / 255);
 
+    }
+
+    @Override
+    public void setId(String id) {
+        // noop to share interface
+    }
+
+    @Override
+    public byte getRawShaded() {
+        return this.index;
+    }
+
+    @Override
+    public byte getRawBase() {
+        return (byte) ((this.index - (this.index % 4)) / 4);
     }
 }

@@ -30,11 +30,16 @@ import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.map.MapView;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColors;
+import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 import org.spongepowered.common.map.SpongeMapColor;
+import org.spongepowered.common.map.SpongeMapShade;
+import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -67,12 +72,20 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
     }
 
     @Override
+    public MapColor getPixel(int x, int y) {
+        checkArgument(x >= 0 && x < 128, "x >= 0 && x < 128");
+        checkArgument(y >= 0 && y < 128, "y >= 0 && y < 128");
+        int pixel = colors[y*128 + x] & 0xFF;
+        return MapColorRegistryModule.fromIndex(pixel);
+    }
+
+    @Override
     public BufferedImage toImage() {
-        BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
         int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < 128; i++) {
             for (int j = 0; j < 128; j++) {
-                data[j + (i*128)] = 0; // TODO: Use getPixel when it's implemented to get color
+                data[j + (i*128)] =  getPixel(j, i).getColor().getRgb();
             }
         }
         return image;
@@ -80,6 +93,12 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
 
     @Override
     public void drawImage(int x, int y, BufferedImage image) {
+        // Using -1 makes even an alpha value of 0 trip the threshold
+        drawImage(x, y, -1, image);
+    }
+
+    @Override
+    public void drawImage(int x, int y, int threshold, BufferedImage image) {
         checkNotNull(image, "image");
         checkArgument(x >= 0 && x < 128, "x >= 0 && x < 128");
         checkArgument(y >= 0 && y < 128, "y >= 0 && y < 128");
@@ -118,15 +137,22 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
             // TODO: Figure out how to throw an "alert sponge" exception
             image.
         }*/
-        int[] pixels = image.getRGB(0, 0, Math.min(128, image.getWidth()), Math.min(128, image.getHeight()), null, 0, image.getWidth());
-        for (int i = 0; i < Math.min(128, image.getHeight()); i++) {
-            for (int j = 0; j < Math.min(128, image.getWidth()); j++) {
-                int argb = pixels[(i*image.getWidth())+j];
+        int width = Math.min(image.getWidth(), 128);
+        int height = Math.min(image.getHeight(), 128);
+
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, image.getWidth());
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int argb = pixels[i*width+j];
                 int alpha = (argb >> 24) & 0xFF;
-                if (alpha > 127) {
-                    colors[(i*128)+j] = (byte)((net.minecraft.block.material.MapColor) MapColors.of(Color.ofRgb(argb))).colorIndex;
-                } else {
-                    //colors[(i*128)+j] = (byte) (net.minecraft.block.material.MapColor.AIR.colorIndex);
+                if (alpha > threshold) {
+                    if (alpha > 0) {
+                        MapColor matched = MapColors.of(Color.ofRgb(argb));
+                        this.colors[i * 128 + j] = ((SpongeMapColor) matched).getRawShaded();
+                    } else {
+                        this.colors[i * 128 + j] = 0;
+                    }
                 }
             }
         }

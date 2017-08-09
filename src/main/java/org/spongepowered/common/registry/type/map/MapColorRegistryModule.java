@@ -34,6 +34,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
@@ -47,17 +48,20 @@ public final class MapColorRegistryModule implements CatalogRegistryModule<org.s
     }
 
     @RegisterCatalog(value = MapColors.class, ignoredFields = "factory")
-    private final Map<String, org.spongepowered.api.map.color.MapColor.Base> mapColorMappings = new HashMap<>();
+    private static final Map<String, org.spongepowered.api.map.color.MapColor.Base> mapColorMappings = new HashMap<>();
+    // This will need changes if more shade variations are ever added
+    private static final org.spongepowered.api.map.color.MapColor[] idToColorCache =
+            new org.spongepowered.api.map.color.MapColor[(MapColor.COLORS.length+1)*4];
 
     @Override
     public Optional<org.spongepowered.api.map.color.MapColor.Base> getById(String id) {
         checkNotNull(id, "id");
-        return Optional.ofNullable(this.mapColorMappings.get(id.toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(mapColorMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
     public Collection<org.spongepowered.api.map.color.MapColor.Base> getAll() {
-        return ImmutableList.copyOf(this.mapColorMappings.values());
+        return ImmutableList.copyOf(mapColorMappings.values());
     }
 
     // If we need more than these we will have to be tricky, theoretically maps
@@ -112,16 +116,20 @@ public final class MapColorRegistryModule implements CatalogRegistryModule<org.s
 
     // This makes life easier, we just extract the base color, the base implementation
     // handles the caching of sub-shaded instances and we don't have to hack things up
-    public static Optional<org.spongepowered.api.map.color.MapColor> fromId(int id) {
-        id = id & 255;
+    @Nullable
+    public static org.spongepowered.api.map.color.MapColor fromIndex(int id) {
+        if (idToColorCache[id] != null) {
+            return idToColorCache[id];
+        }
         int baseId = id / 4;
-        int shade = id & 3;
-        MapColor baseColor = MapColor.COLORS[baseId];
+        int shade = id % 4;
+        MapColor baseColor = Optional.ofNullable(MapColor.COLORS[baseId]).get();
         if (baseColor == null) {
-            return Optional.empty();
+            return MapColors.AIR.shade(MapShades.BASE);
         } else {
-            // TODO: Revisit and patch to call in registry module for shades
-            return Optional.of(((org.spongepowered.api.map.color.MapColor) baseColor).shade(MapShades.BASE));
+            idToColorCache[id] = ((org.spongepowered.api.map.color.MapColor) baseColor)
+                    .shade(MapShadeRegistryModule.getInstance().fromIndex(shade));
+            return idToColorCache[id];
         }
     }
 
