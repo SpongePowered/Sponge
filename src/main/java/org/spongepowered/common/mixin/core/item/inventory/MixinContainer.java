@@ -76,7 +76,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow protected List<IContainerListener> listeners;
     private boolean spectatorChest;
 
-    @SuppressWarnings("rawtypes")
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
 
@@ -116,6 +115,27 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             this.init();
         }
         return this.archetype;
+    }
+
+    /**
+     * @author bloodmc
+     * @reason If listener already exists, avoid firing an exception
+     * and simply send the inventory changes to client.
+     */
+    @Overwrite
+    public void addListener(IContainerListener listener) {
+        Container container = (Container) (Object) this;
+        if (this.listeners.contains(listener)) {
+            // Sponge start
+            // throw new IllegalArgumentException("Listener already listening");
+            listener.sendAllContents(container, this.getInventory());
+            container.detectAndSendChanges();
+            // Sponge end
+        } else {
+            this.listeners.add(listener);
+            listener.sendAllContents(container, this.getInventory());
+            container.detectAndSendChanges();
+        }
     }
 
     /**
