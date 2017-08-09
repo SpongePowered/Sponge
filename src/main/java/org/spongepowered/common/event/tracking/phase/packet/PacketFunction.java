@@ -664,6 +664,13 @@ public interface PacketFunction {
             inventoryEvent = null;
         }
 
+        // Some mods may override container detectAndSendChanges method and prevent captures
+        // If this happens and we captured no entities, avoid firing events
+        if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
+            mixinContainer.setCaptureInventory(false);
+            return;
+        }
+
         if (inventoryEvent != null) {
             // The client sends several packets all at once for drag events - we only care about the last one.
             // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
