@@ -70,6 +70,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public void registerDefaults() {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Attempting to register Keys illegally!");
 
+        this.fieldMap.put("attached_map", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("AttachedMap"), "sponge:attached_map", "AttachedMap"));
+
         this.fieldMap.put("axis", makeSingleKey(TypeTokens.AXIS_TOKEN, TypeTokens.AXIS_VALUE_TOKEN, of("Axis"), "sponge:axis", "Axis"));
 
         this.fieldMap.put("color", makeSingleKey(TypeTokens.COLOR_TOKEN, TypeTokens.COLOR_VALUE_TOKEN, of("Color"), "sponge:color", "Color"));

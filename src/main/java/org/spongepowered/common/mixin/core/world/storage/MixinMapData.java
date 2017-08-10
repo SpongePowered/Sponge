@@ -1,0 +1,131 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.mixin.core.world.storage;
+
+import com.flowpowered.math.vector.Vector2i;
+import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.world.storage.MapData;
+import org.spongepowered.api.map.MapView;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapColors;
+import org.spongepowered.api.map.color.MapShades;
+import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
+import org.spongepowered.common.map.SpongeMapColor;
+import org.spongepowered.common.map.SpongeMapShade;
+import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+@NonnullByDefault
+@Mixin(MapData.class)
+public abstract class MixinMapData extends WorldSavedData implements MapView {
+
+    @Shadow public byte[] colors;
+    @Shadow public abstract void updateMapData(int x, int y);
+
+    public MixinMapData(String name) {
+        super(name);
+    }
+
+    private void dataFlush() {
+        markDirty();
+        updateMapData(0, 0);
+        updateMapData(127, 127);
+    }
+
+    @Override
+    public Vector2i getSize() {
+        return Vector2i.from(128, 128);
+    }
+
+    @Override
+    public MapColor getPixel(int x, int y) {
+        checkArgument(x >= 0 && x < 128, "x >= 0 && x < 128");
+        checkArgument(y >= 0 && y < 128, "y >= 0 && y < 128");
+        int pixel = colors[y*128 + x] & 0xFF;
+        return MapColorRegistryModule.fromIndex(pixel);
+    }
+
+    @Override
+    public BufferedImage toImage() {
+        BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
+        int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        for (int i = 0; i < 128; i++) {
+            for (int j = 0; j < 128; j++) {
+                data[j + (i*128)] =  getPixel(j, i).getColor().getRgb();
+            }
+        }
+        return image;
+    }
+
+    @Override
+    public void drawImage(int x, int y, BufferedImage image) {
+        // Using -1 makes even an alpha value of 0 trip the threshold
+        drawImage(x, y, -1, image);
+    }
+
+    @Override
+    public void drawImage(int x, int y, int threshold, BufferedImage image) {
+        checkNotNull(image, "image");
+        checkArgument(x >= 0 && x < 128, "x >= 0 && x < 128");
+        checkArgument(y >= 0 && y < 128, "y >= 0 && y < 128");
+        int width = Math.min(image.getWidth(), 128);
+        int height = Math.min(image.getHeight(), 128);
+
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, image.getWidth());
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int argb = pixels[i*width+j];
+                int alpha = (argb >> 24) & 0xFF;
+                if (alpha > threshold) {
+                    if (alpha > 0) {
+                        MapColor matched = MapColors.of(Color.ofRgb(argb));
+                        this.colors[i * 128 + j] = ((SpongeMapColor) matched).getRawShaded();
+                    } else {
+                        this.colors[i * 128 + j] = 0;
+                    }
+                }
+            }
+        }
+        dataFlush();
+    }
+
+    @Override
+    public String getId() {
+        return mapName;
+    }
+}

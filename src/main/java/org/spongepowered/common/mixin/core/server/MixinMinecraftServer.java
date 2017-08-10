@@ -61,6 +61,8 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.TabCompleteEvent;
+import org.spongepowered.api.map.MapView;
+import org.spongepowered.api.map.MapViewStorage;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -747,6 +749,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.shadow$setPlayerIdleTimeout(timeout);
     }
 
+    @Override
+    public MapViewStorage getMapViewStorage() {
+        return (MapViewStorage) this.worlds[0].getMapStorage();
+    }
+    
     /**
      * @author Zidane - June 2nd
      * @reason Tells the server to use our WorldManager instead of the arrays, this will

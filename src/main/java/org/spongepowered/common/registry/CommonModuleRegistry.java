@@ -91,6 +91,9 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.map.util.MapColorMatcher;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -168,6 +171,7 @@ import org.spongepowered.common.item.recipe.crafting.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
+import org.spongepowered.common.registry.factory.MapColorFactoryModule;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
@@ -193,6 +197,9 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
+import org.spongepowered.common.registry.type.map.MapColorMatcherRegistryModule;
+import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CollisionRuleRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
@@ -239,6 +246,7 @@ public final class CommonModuleRegistry {
 
     private void registerFactories() {
         final List<FactoryRegistry<?, ?>> factoryRegistries = new ArrayList<>();
+        factoryRegistries.add(new MapColorFactoryModule());
         factoryRegistries.add(new ResourcePackFactoryModule());
         factoryRegistries.add(new TimingsFactoryModule());
 
@@ -397,6 +405,9 @@ public final class CommonModuleRegistry {
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
             .registerModule(new LocaleRegistryModule())
             .registerModule(LogAxis.class, new LogAxisRegistryModule())
+            .registerModule(MapColor.Base.class, MapColorRegistryModule.getInstance())
+            .registerModule(MapColorMatcher.class, MapColorMatcherRegistryModule.getInstance())
+            .registerModule(MapShade.class, MapShadeRegistryModule.getInstance())
             .registerModule(MushroomType.class, new MushroomTypeRegistryModule())
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
