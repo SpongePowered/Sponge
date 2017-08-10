@@ -83,8 +83,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                 while (true) {
                     if (blockClass == Object.class) {
                         final String propertyId = modId + ":" + originalClass + "_" + property.getName();
-                        LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(),
-                                propertyId);
+                        //LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(), propertyId);
                         instance.register(property, propertyId);
                         return propertyId;
                     }
