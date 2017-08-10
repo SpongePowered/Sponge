@@ -116,7 +116,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("Name", this.unlocalizedName == null ? this.getName() : this.unlocalizedName)
+                .add("Name", this.unlocalizedName)
                 .toString();
     }
 }
