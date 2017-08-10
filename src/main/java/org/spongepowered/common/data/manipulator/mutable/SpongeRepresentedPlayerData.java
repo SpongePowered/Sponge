@@ -61,7 +61,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
 
         @Override
         public DataContainer toContainer() {
-            return DataContainer.createNew();
+            return DataContainer.createNew().set(DataQueries.CONTENT_VERSION, this.getContentVersion());
         }
 
         @Override
