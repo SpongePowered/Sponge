@@ -80,12 +80,13 @@ class ListPagination extends ActivePagination {
 
     @Override
     protected Iterable<Text> getLines(int page) throws CommandException {
-        if (this.pages.size() == 0) {
+        final int size = this.pages.size();
+        if (size == 0) {
             return ImmutableList.of();
         } else if (page < 1) {
             throw new CommandException(t("Page %s does not exist!", page));
-        } else if (page > this.pages.size()) {
-            throw new CommandException(t("Page %s is too high", page));
+        } else if (page > size) {
+            throw new CommandException(t("Page %s is greater than the max of %s!", page, size));
         }
         return this.pages.get(page - 1);
     }

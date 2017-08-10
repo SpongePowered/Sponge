@@ -48,15 +48,16 @@ import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpongePaginationList implements PaginationList {
 
     private final SpongePaginationService service;
-    private Iterable<Text> contents;
-    private Optional<Text> title;
-    private Optional<Text> header;
-    private Optional<Text> footer;
-    private Text paginationSpacer;
-    private int linesPerPage;
+    private final Iterable<Text> contents;
+    private final Optional<Text> title;
+    private final Optional<Text> header;
+    private final Optional<Text> footer;
+    private final Text paginationSpacer;
+    private final int linesPerPage;
 
     public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, @Nullable Text title, @Nullable Text header,
             @Nullable Text footer, Text paginationSpacer, int linesPerPage) {
@@ -100,16 +101,15 @@ public class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public void sendTo(final MessageReceiver receiver) {
-        checkNotNull(this.contents, "contents");
-        checkNotNull(receiver, "source");
+    public void sendTo(final MessageReceiver receiver, int page) {
+        checkNotNull(receiver, "The message receiver cannot be null!");
         this.service.registerCommandOnce();
 
         MessageReceiver realSource = receiver;
         while (realSource instanceof ProxySource) {
             realSource = ((ProxySource)realSource).getOriginalSource();
         }
-        PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
+        final PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
         Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
             int lines = calculator.getLines(input);
             return Maps.immutableEntry(input, lines);
@@ -142,7 +142,7 @@ public class SpongePaginationList implements PaginationList {
 
         this.service.getPaginationState(receiver, true).put(pagination);
         try {
-            pagination.nextPage();
+            pagination.specificPage(page);
         } catch (CommandException e) {
             receiver.sendMessage(error(e.getText()));
         }
