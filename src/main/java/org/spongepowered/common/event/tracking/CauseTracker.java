@@ -557,10 +557,11 @@ public final class CauseTracker {
      * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
      * any phases and directly throws a spawn entity event.
      *
+     * @param world The world
      * @param entity The entity
      * @return True if the entity spawn was successful
      */
-    public boolean spawnEntity(Entity entity) {
+    public boolean spawnEntity(World world, Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
 
         // Sponge Start - handle construction phases
@@ -569,7 +570,7 @@ public final class CauseTracker {
         }
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
-        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
+        final WorldServer minecraftWorld = (WorldServer) world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) minecraftWorld;
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState phaseState = phaseData.state;
@@ -663,11 +664,12 @@ public final class CauseTracker {
      * The core implementation of {@link World#spawnEntity(Entity, Cause)} that
      * bypasses any sort of cause tracking and throws an event directly
      *
+     * @param world
      * @param entity
      * @param cause
      * @return
      */
-    public boolean spawnEntityWithCause(Entity entity, Cause cause) {
+    public boolean spawnEntityWithCause(World world, Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");
         checkNotNull(cause, "Cause cannot be null!");
 
@@ -677,8 +679,8 @@ public final class CauseTracker {
         }
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
-        final World spongeWorld = (World) minecraftEntity.worldObj;
-        final WorldServer worldServer = (WorldServer) minecraftEntity.worldObj;
+        final World spongeWorld = (World) world;
+        final WorldServer worldServer = (WorldServer) world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
         // Sponge End - continue with vanilla mechanics
 

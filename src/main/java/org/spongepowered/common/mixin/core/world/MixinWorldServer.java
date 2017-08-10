@@ -1275,7 +1275,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return canAddEntity(entity) && CauseTracker.getInstance().spawnEntity(EntityUtil.fromNative(entity));
+        return canAddEntity(entity) && CauseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
     }
 
 
@@ -1522,11 +1522,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .add(NamedCause.source(cause))
                 .addCaptures()
                 .complete());
-            causeTracker.spawnEntityWithCause(entity, cause);
+            causeTracker.spawnEntityWithCause(this, entity, cause);
             causeTracker.completePhase(PluginPhase.State.CUSTOM_SPAWN);
             return true;
         }
-        return causeTracker.spawnEntityWithCause(entity, cause);
+        return causeTracker.spawnEntityWithCause(this, entity, cause);
     }
 
     @Override
