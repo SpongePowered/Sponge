@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
 import java.util.Random;
@@ -53,6 +54,10 @@ public class MixinInventoryHelper {
     @Redirect(method = DROP_INVENTORY_ITEMS_BLOCK_POS, at = @At(value = "INVOKE", target = DROP_INVENTORY_ITEMS_X_Y_Z))
     private static void spongeDropInventoryItems(World world, double x, double y, double z, IInventory inventory) {
         if (world instanceof WorldServer) {
+            // Don't drop items if we are restoring blocks
+            if (SpongeImplHooks.isRestoringBlocks(world)) {
+                return;
+            }
             ContainerUtil.performBlockInventoryDrops((WorldServer) world, x, y, z, inventory);
         } else {
             for (int i = 0; i < inventory.getSizeInventory(); ++i) {
