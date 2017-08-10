@@ -25,16 +25,16 @@
 package org.spongepowered.common.service.pagination;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
 
 import javax.annotation.Nullable;
 
 public class SpongePaginationBuilder implements PaginationList.Builder {
+
     private final SpongePaginationService service;
     @Nullable
     private Iterable<Text> contents;
@@ -56,6 +56,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder contents(Iterable<Text> contents) {
+        checkNotNull(contents, "The contents cannot be null!");
         this.contents = contents;
         this.paginationList = null;
         return this;
@@ -63,13 +64,14 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder contents(Text... contents) {
+        checkNotNull(contents, "The contents cannot be null!");
         this.contents = ImmutableList.copyOf(contents);
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder title(Text title) {
+    public PaginationList.Builder title(@Nullable Text title) {
         this.title = title;
         this.paginationList = null;
         return this;
@@ -91,7 +93,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder padding(Text padding) {
-        checkNotNull(padding, "padding");
+        checkNotNull(padding, "The padding cannot be null!");
         this.paginationSpacer = padding;
         this.paginationList = null;
         return this;
@@ -105,22 +107,12 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList build() {
-        checkNotNull(this.contents, "contents");
+        checkState(this.contents != null, "The contents of the pagination list cannot be null!");
 
         if (this.paginationList == null) {
             this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer, this.linesPerPage);
         }
         return this.paginationList;
-    }
-
-    @Override
-    public void sendTo(MessageReceiver source) {
-        this.build().sendTo(source);
-    }
-
-    @Override
-    public void sendTo(MessageChannel channel) {
-        this.build().sendTo(channel);
     }
 
     @Override
