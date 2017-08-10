@@ -57,6 +57,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
 import java.util.Collection;
@@ -275,4 +276,11 @@ public final class SpongeImplHooks {
         block.onBlockDestroyedByExplosion(world, blockpos, explosion);
     }
 
+    public static boolean isRestoringBlocks(World world) {
+        if (CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+            return true;
+        }
+
+        return false;
+    }
 }
