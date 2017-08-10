@@ -232,4 +232,9 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     public CarriedInventory<? extends Carrier> getInventory() {
         return this;
     }
+
+    @Override
+    public Optional<Villager> getCarrier() {
+        return Optional.of(this);
+    }
 }
