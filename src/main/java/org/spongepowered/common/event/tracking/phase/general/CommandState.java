@@ -83,6 +83,7 @@ final class CommandState extends GeneralState {
                             SpawnCause.builder()
                                     .type(InternalSpawnTypes.PLACEMENT)
                                     .build())
+                            .named(NamedCause.of("CommandSource", sender))
                             .build();
                     final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
                     SpongeImpl.postEvent(spawnEntityEvent);
