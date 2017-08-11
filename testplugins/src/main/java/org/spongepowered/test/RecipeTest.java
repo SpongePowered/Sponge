@@ -53,21 +53,22 @@ import javax.inject.Inject;
 public class RecipeTest {
 
     @Inject private PluginContainer plugin;
+
     @Listener
     public void onInit(GamePreInitializationEvent event) {
-        Ingredient s = Ingredient.of(STONE);
-        Ingredient b = Ingredient.of(BED);
-        ItemStack item = ItemStack.of(BEDROCK, 1);
-        DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(new ItemEnchantment(Enchantments.UNBREAKING, 1)));
+        final Ingredient s = Ingredient.of(STONE);
+        final Ingredient b = Ingredient.of(BED);
+        final ItemStack item = ItemStack.of(BEDROCK, 1);
+        final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(new ItemEnchantment(Enchantments.UNBREAKING, 1)));
         if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
-            plugin.getLogger().error("Could not build recipe output!");
+            this.plugin.getLogger().error("Could not build recipe output!");
         }
-        ShapedCraftingRecipe recipe = CraftingRecipe.shapedBuilder().rows()
+        final ShapedCraftingRecipe recipe = CraftingRecipe.shapedBuilder().rows()
                 .row(s, s, s)
                 .row(s, b, s)
                 .row(s, s, s)
                 .result(item)
-                .build("bedrock", plugin);
+                .build("bedrock", this.plugin);
         Sponge.getRegistry().getCraftingRecipeRegistry().register(recipe);
     }
 

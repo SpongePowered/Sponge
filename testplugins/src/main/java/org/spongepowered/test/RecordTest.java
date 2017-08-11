@@ -41,17 +41,13 @@ import java.util.Optional;
 public class RecordTest {
 
     @Listener
-    public void onInit(GameInitializationEvent event) {
-    }
-
-    @Listener
     public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
         final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(null);
         if (itemStack != null) {
             final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
             if (optRecord.isPresent()) {
                 player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
-            } else if (itemStack.getItem() == ItemTypes.SPONGE) {
+            } else if (itemStack.getType() == ItemTypes.SPONGE) {
                 player.stopRecord(player.getLocation().getPosition().toInt());
             }
         }
