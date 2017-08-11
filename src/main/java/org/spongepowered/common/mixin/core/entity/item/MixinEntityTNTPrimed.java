@@ -28,10 +28,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
-import org.spongepowered.api.block.BlockState;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
@@ -49,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.Optional;
@@ -100,8 +102,8 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     private void defuse() {
         setDead();
         // Place a TNT block at the Entity's position
-        getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ,
-                BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlag.ALL, Cause.source(this).build());
+        ((IMixinWorldServer) this.world).setBlockState(new BlockPos(this.posX, this.posY, this.posZ),
+                (IBlockState) BLOCK_TYPE.getDefaultState(), BlockChangeFlag.ALL);
     }
 
     @Override
