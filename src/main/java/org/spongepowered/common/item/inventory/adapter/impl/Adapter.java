@@ -60,6 +60,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 public class Adapter implements MinecraftInventoryAdapter {
 
     public static abstract class Logic {
@@ -370,21 +372,20 @@ public class Adapter implements MinecraftInventoryAdapter {
     public Adapter(Fabric<IInventory> inventory, net.minecraft.inventory.Container container) {
         this.inventory = inventory;
         this.parent = this;
-        this.slots = this.initSlots(inventory, null, this);
+        this.slots = this.initSlots(inventory, this);
         this.lens = checkNotNull(this.initRootLens(), "root lens");
         this.rootContainer = (Container) container;
     }
 
-    public Adapter(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public Adapter(Fabric<IInventory> inventory, @Nullable Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
         this.inventory = inventory;
         this.parent = checkNotNull(parent, "parent");
-        checkNotNull(root, "root");
-        this.slots = this.initSlots(inventory, root, parent);
-        this.lens = checkNotNull(this.initRootLens(), "root lens");
+        this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
+        this.slots = this.initSlots(inventory, parent);
         this.rootContainer = null;
     }
 
-    protected SlotCollection initSlots(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    protected SlotCollection initSlots(Fabric<IInventory> inventory, @Nullable Inventory parent) {
         if (parent instanceof InventoryAdapter) {
             @SuppressWarnings("unchecked")
             SlotProvider<IInventory, net.minecraft.item.ItemStack> slotProvider = ((InventoryAdapter<IInventory, net.minecraft.item.ItemStack>)parent).getSlotProvider();

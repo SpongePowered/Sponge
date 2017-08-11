@@ -143,7 +143,7 @@ public class Query<TInventory, TStack> {
 
     public Inventory execute(ResultAdapterProvider<TInventory, TStack> resultProvider) {
         if (this.strategy.matches(this.lens, null, this.inventory)) {
-            return this.lens.getAdapter(this.inventory, null);
+            return this.lens.getAdapter(this.inventory, this.adapter);
         }
 
         return this.toResult(resultProvider, this.reduce(this.lens, this.depthFirstSearch(this.lens)));
@@ -273,7 +273,7 @@ public class Query<TInventory, TStack> {
             provider.add(((InventoryAdapter) inv));
         }
         CompoundLens lens = lensBuilder.build(provider);
-        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, null);
+        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, adapter);
 
         return new Query(compoundAdapter, Type.UNION, compoundAdapter);
     }
