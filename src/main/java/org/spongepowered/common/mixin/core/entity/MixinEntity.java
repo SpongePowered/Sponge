@@ -118,6 +118,9 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -457,8 +460,11 @@ public abstract class MixinEntity implements IMixinEntity {
             return false;
         }
 
+        CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
+
         MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
         if (event.isCancelled()) {
+            CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
             return false;
         }
         location = event.getToTransform().getLocation();
@@ -499,6 +505,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         chunkProviderServer.setForceChunkRequests(false);
+        CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
         return true;
     }
 
