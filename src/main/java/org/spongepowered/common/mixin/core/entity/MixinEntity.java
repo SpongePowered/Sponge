@@ -314,7 +314,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
             if (SpongeImpl.postEvent(SpongeEventFactory
                     .createRideEntityEventDismount(Cause
-                            .of(NamedCause.source(this), NamedCause.of("DismountType", type)),
+                                    .of(NamedCause.source(this), NamedCause.of("DismountType", type)),
                             type,
                             (Entity) this.getRidingEntity()))
                     ) {
@@ -334,7 +334,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public boolean removePassengers(DismountType type) {
         boolean dismount = false;
         for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
-            dismount = ((IMixinEntity)this.riddenByEntities.get(i)).dismountRidingEntity(type) || dismount;
+            dismount = ((IMixinEntity) this.riddenByEntities.get(i)).dismountRidingEntity(type) || dismount;
         }
         return dismount;
     }
@@ -354,13 +354,14 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC)) // setOnFireFromLava
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    // setOnFireFromLava
     public void preSetOnFire(CallbackInfo callbackInfo) {
         if (!this.world.isRemote) {
             this.originalLava = DamageSource.LAVA;
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.LAVA);
+                    block.getMaterial() == Material.LAVA);
             DamageSource.LAVA = new MinecraftBlockDamageSource("lava", location).setFireDamage();
         }
     }
@@ -385,7 +386,7 @@ public abstract class MixinEntity implements IMixinEntity {
             this.originalInFire = DamageSource.IN_FIRE;
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
+                    block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
             DamageSource.IN_FIRE = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
         }
     }
@@ -460,8 +461,11 @@ public abstract class MixinEntity implements IMixinEntity {
             return false;
         }
 
+        // TODO Add a 'Move' plugin phase or just keep it under Teleport?
         CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
 
+        // TODO These methods need a Cause (maybe wait till Cause PR)
+        // TODO Need to not fire Teleport in all cases (especially when movement is local)
         MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
         if (event.isCancelled()) {
             CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
@@ -471,43 +475,64 @@ public abstract class MixinEntity implements IMixinEntity {
         this.rotationPitch = (float) event.getToTransform().getPitch();
         this.rotationYaw = (float) event.getToTransform().getYaw();
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
+        final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
-        // detach passengers
+
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
-        net.minecraft.world.World nmsWorld = null;
+        boolean isTeleporting = true;
+
         if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-            nmsWorld = (net.minecraft.world.World) location.getExtent();
+            final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getExtent();
             if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
                 // Close open containers
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (net.minecraft.entity.Entity) (Object) this;
+                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
                 if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
                     entityPlayerMP.closeContainer();
                 }
             }
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
+            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
+                    ((IMixinWorldServer) nmsWorld).getDimensionId());
         } else {
+            double deltaSquared = location.getPosition().distanceSquared(this.getPosition());
+
+            if (deltaSquared <= 4) {
+                isTeleporting = false;
+            }
+
             if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
-                EntityPlayerMP thisPlayer = (EntityPlayerMP) thisEntity;
-                ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
-                thisPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
-                ((IMixinNetHandlerPlayServer) thisPlayer.connection).setLastMoveLocation(null); // Set last move to teleport target
+                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+
+                // No reason to attempt to load chunks unless we're teleporting
+                if (isTeleporting) {
+                    // Close open containers
+                    if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                        entityPlayerMP.closeContainer();
+                    }
+
+                    ((WorldServer) location.getExtent()).getChunkProvider()
+                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                }
+                entityPlayerMP.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
         }
 
-        // Re-attach passengers
-        for (net.minecraft.entity.Entity passenger : passengers) {
-            passenger.startRiding(thisEntity, true);
+        if (isTeleporting) {
+            // Re-attach passengers
+            for (net.minecraft.entity.Entity passenger : passengers) {
+                passenger.startRiding(thisEntity, true);
+            }
         }
 
         chunkProviderServer.setForceChunkRequests(false);
         CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
         return true;
     }
+
 
     // always use these methods internally when setting locations from a transform or location
     // to avoid firing a DisplaceEntityEvent.Teleport
