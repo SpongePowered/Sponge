@@ -37,6 +37,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -98,6 +99,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private InventoryArchetype archetype;
     protected Optional<Carrier> carrier = Optional.empty();
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
+    private PluginContainer plugin = SpongeImpl.getMinecraftPlugin();
 
     private void init() {
         this.initialized = true;
@@ -282,6 +284,22 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             return new SlotAdapter(mcSlot);
         }
         return adapter;
+    }
+
+    @Override
+    public PluginContainer getPlugin() {
+        if (this.carrier.isPresent()) {
+            CarriedInventory<? extends Carrier> inventory = this.carrier.get().getInventory();
+            if (!(inventory instanceof Container)) {
+                return inventory.getPlugin();
+            }
+        }
+        return this.plugin;
+    }
+
+    @Override
+    public void setPlugin(PluginContainer plugin) {
+        this.plugin = plugin;
     }
 }
 

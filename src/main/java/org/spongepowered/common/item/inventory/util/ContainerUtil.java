@@ -217,7 +217,7 @@ public final class ContainerUtil {
             if (container instanceof InventoryAdapter) {
                 adapter = ((InventoryAdapter) container);
             } else {
-                adapter = new Adapter(MinecraftFabric.of(container));
+                adapter = new Adapter(MinecraftFabric.of(container), container);
             }
             return ((LensProvider) container).getRootLens(fabric, adapter);
         }
@@ -263,7 +263,7 @@ public final class ContainerUtil {
             if (lens == null && subInventory instanceof LensProvider) // Check if sub-inventory is LensProvider
             {
                 Fabric<IInventory> keyFabric = MinecraftFabric.of(subInventory);
-                lens = ((LensProvider) subInventory).getRootLens(keyFabric, new Adapter(keyFabric));
+                lens = ((LensProvider) subInventory).getRootLens(keyFabric, new Adapter(keyFabric, container));
             }
             if (lens == null // Unknown Inventory or
                     || lens.slotCount() != slotCount) { // Inventory size <> Lens size

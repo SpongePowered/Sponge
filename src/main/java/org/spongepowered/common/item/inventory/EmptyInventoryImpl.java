@@ -286,7 +286,7 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
 
     @Override
     public PluginContainer getPlugin() {
-        return null; // TODO?
+        return this.parent.getPlugin();
     }
 
     @Override
