@@ -87,6 +87,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
+import org.spongepowered.api.util.blockray.BlockRay;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
@@ -495,9 +496,9 @@ public abstract class MixinEntity implements IMixinEntity {
             EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
                     ((IMixinWorldServer) nmsWorld).getDimensionId());
         } else {
-            double deltaSquared = location.getPosition().distanceSquared(this.getPosition());
+            double distance = location.getPosition().distance(this.getPosition());
 
-            if (deltaSquared <= 4) {
+            if (distance <= 4) {
                 isTeleporting = false;
             }
 
