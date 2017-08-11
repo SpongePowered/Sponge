@@ -830,9 +830,11 @@ public final class WorldManager {
         // Set the worlds on the Minecraft server
         reorderWorldsVanillaFirst();
 
+        ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(Sponge.getServer())),
                 (org.spongepowered.api.world.World) worldServer));
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
+        ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(false);
         return worldServer;
     }
 
