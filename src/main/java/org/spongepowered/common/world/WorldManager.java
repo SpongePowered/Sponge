@@ -78,6 +78,7 @@ import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
@@ -833,9 +834,11 @@ public final class WorldManager {
         // Set the worlds on the Minecraft server
         reorderWorldsVanillaFirst();
 
+        ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(Sponge.getServer())),
                 (org.spongepowered.api.world.World) worldServer));
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
+        ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(false);
         return worldServer;
     }
 

@@ -33,6 +33,7 @@ import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.interfaces.IMixinSaveHandler;
 
 import java.io.File;
 
@@ -58,6 +59,6 @@ public abstract class MixinAnvilSaveHandler extends SaveHandler {
         // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
         // for the world container with provider.getSaveFolder().
         // This allows users to remove our mod and maintain world compatibility.
-        return new AnvilChunkLoader(this.getWorldDirectory(), this.dataFixer);
+        return new AnvilChunkLoader(((IMixinSaveHandler) this).getSpongeWorldDirectory(), this.dataFixer);
     }
 }
