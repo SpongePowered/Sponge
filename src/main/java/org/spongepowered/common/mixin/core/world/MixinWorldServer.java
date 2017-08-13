@@ -103,7 +103,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -614,7 +615,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     if (this.rand.nextDouble() < difficultyinstance.getAdditionalDifficulty() * 0.05D)
                     {
                         // Sponge Start - Throw construction events
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             Sponge.getCauseStackManager().pushCause(this.getWeather());
                             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                             ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
@@ -640,7 +641,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     else
                     {
                         // Sponge start - Throw construction event for lightningbolts
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             Sponge.getCauseStackManager().pushCause(this.getWeather());
                             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
@@ -1156,7 +1157,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 entityList.add((Entity) entity);
             }
         }
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
             Sponge.getCauseStackManager().pushCause(this);
             SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));

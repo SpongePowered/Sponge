@@ -30,7 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -74,7 +74,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
@@ -125,7 +125,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
         // Separate experience from other entities
         if (entity instanceof EntityXPOrb) {
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
                 context.addNotifierAndOwnerToCauseStack();
@@ -148,7 +148,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         }
         final List<Entity> nonExpEntities = new ArrayList<>(1);
         nonExpEntities.add(entity);
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
             context.addNotifierAndOwnerToCauseStack();

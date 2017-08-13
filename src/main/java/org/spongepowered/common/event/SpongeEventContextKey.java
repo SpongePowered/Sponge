@@ -29,11 +29,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.event.cause.EventContextKey;
 
-public class SpongeEventContextKey<T> implements EventContextKey<T> {
+public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     private final String id;
     private final Class<T> allowed;
     private final String name;
+
+    SpongeEventContextKey(SpongeEventContextKeyBuilder<T> builder) {
+        this.id = builder.id;
+        this.allowed = builder.typeClass;
+        this.name = builder.name;
+    }
 
     public SpongeEventContextKey(String id, String name, Class<T> allowed) {
         this.id = checkNotNull(id, "Id");

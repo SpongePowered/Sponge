@@ -38,6 +38,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
@@ -173,7 +174,13 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fuse == this.fuseDuration - 1) {
-            postPrime();
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                if (this.detonator != null) {
+                    Sponge.getCauseStackManager().pushCause(this.detonator);
+                }
+                Sponge.getCauseStackManager().pushCause(this);
+                postPrime();
+            }
         }
     }
 

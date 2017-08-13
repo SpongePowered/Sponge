@@ -52,7 +52,8 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -156,7 +157,7 @@ public interface PacketFunction {
                     items.addAll(itemStacks);
 
                     if (!items.isEmpty()) {
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             final List<Entity> itemEntities = items.stream()
                                     .map(data -> data.create(((WorldServer) player.world)))
                                     .map(EntityUtil::fromNative)
@@ -176,7 +177,7 @@ public interface PacketFunction {
                 }
             });
             context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     Sponge.getCauseStackManager().pushCause(player);
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
                     for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
@@ -218,7 +219,7 @@ public interface PacketFunction {
                         }
                         printer.trace(System.err);
                     });
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(player);
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
                 context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
@@ -248,7 +249,7 @@ public interface PacketFunction {
                     });
 
         } else if (state == PacketPhase.General.INTERACT_AT_ENTITY) {
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(player);
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
                 context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
@@ -330,7 +331,7 @@ public interface PacketFunction {
         final ItemStack usedStack = context.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(spongePlayer);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             if (state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY) {
@@ -477,7 +478,7 @@ public interface PacketFunction {
                     }
                     if (!projectiles.isEmpty()) {
                         if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                            try (CauseStackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            try (CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
                                 Sponge.getCauseStackManager().pushCause(usedSnapshot);
                                 final SpawnEntityEvent event =
@@ -493,7 +494,7 @@ public interface PacketFunction {
                     }
                     if (!spawnEggs.isEmpty()) {
                         if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                            try (CauseStackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            try (StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
                                 Sponge.getCauseStackManager().pushCause(usedSnapshot);
                                 final SpawnEntityEvent event =
@@ -556,7 +557,7 @@ public interface PacketFunction {
                     if (items.isEmpty()) {
                         return;
                     }
-                    try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
                         Sponge.getCauseStackManager().pushCause(player);
                         final ArrayList<Entity> entities = new ArrayList<>();
@@ -607,7 +608,7 @@ public interface PacketFunction {
         for (EntityItem entityItem : context.getCapturedItems()) {
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(openContainer);
             final ClickInventoryEvent inventoryEvent;
@@ -681,7 +682,7 @@ public interface PacketFunction {
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
         final ItemStack itemStack = context.getRequiredExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(snapshot);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE,
@@ -716,7 +717,7 @@ public interface PacketFunction {
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
-                    try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().pushCause(player);
                         Sponge.getCauseStackManager().pushCause(snapshot);
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
@@ -746,7 +747,7 @@ public interface PacketFunction {
                     drops.stream().map(drop -> drop.create(player.getServerWorld())).map(EntityUtil::fromNative)
                             .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                     Sponge.getCauseStackManager().pushCause(player);
                     DropItemEvent.Custom event =
@@ -782,7 +783,7 @@ public interface PacketFunction {
                 new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, previousSlot + preHotbarSize), sourceSnapshot, sourceSnapshot);
         SlotTransaction targetTransaction =
                 new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, itemChange.getSlotId() + preHotbarSize), targetSnapshot, targetSnapshot);
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             ImmutableList<SlotTransaction> transactions =
                     new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
@@ -803,7 +804,7 @@ public interface PacketFunction {
         final Container container = context.getRequiredExtra(InternalNamedCauses.Packet.OPEN_CONTAINER, Container.class);
         ItemStackSnapshot lastCursor = context.getRequiredExtra(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
-        try (CauseStackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             InteractInventoryEvent.Close event =
                     SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
@@ -811,7 +812,7 @@ public interface PacketFunction {
                 return;
             }
         }
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);// Non-merged
                                                                                                         // items
@@ -865,7 +866,7 @@ public interface PacketFunction {
             final ItemStackSnapshot lastCursor = context.getRequiredExtra(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(player);
                 final InteractInventoryEvent.Open event =
                         SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
@@ -947,7 +948,7 @@ public interface PacketFunction {
     };
 
     PacketFunction UNKNOWN_PACKET = (packet, state, player, context) -> {
-        try (CauseStackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, context));
@@ -995,7 +996,7 @@ public interface PacketFunction {
                             .map(EntityUtil::fromNative)
                             .collect(Collectors.toList());
                     if (!entities.isEmpty()) {
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             Sponge.getCauseStackManager().pushCause(player);
                             Sponge.getCauseStackManager().pushCause(affectedEntity);
                             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
@@ -1019,7 +1020,7 @@ public interface PacketFunction {
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     Sponge.getCauseStackManager().pushCause(player);
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
                     DropItemEvent.Custom event =

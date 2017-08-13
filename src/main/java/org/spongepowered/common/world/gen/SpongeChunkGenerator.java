@@ -58,7 +58,7 @@ import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
@@ -344,7 +344,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
                 continue;
             }
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Timing timing = null;
                 if (Timings.isTimingsEnabled()) {
                     timing = this.populatorTimings.get(populator.getType().getId());
@@ -405,7 +405,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         final CauseTracker causeTracker = CauseTracker.getInstance();
                         if (CauseTracker.ENABLED) {
                             causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()

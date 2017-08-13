@@ -60,7 +60,8 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -257,7 +258,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // Double check that the CauseTracker is already capturing the Death phase
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        try (final CauseStackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
+        try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
             if (!this.world.isRemote) {
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 final IPhaseState state = peek.state;
@@ -512,7 +513,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                         // Sponge Start - notify the cause tracker
                         final CauseTracker causeTracker = CauseTracker.getInstance();
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
                             if (enterDeathPhase) {
                                 Sponge.getCauseStackManager().pushCause(this);
@@ -608,7 +609,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (absorptionFunction.isPresent()) {
                 originalFunctions.add(absorptionFunction.get());
             }
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 DamageEventHandler.generateCauseFor(damageSource);
     
                 DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
@@ -838,7 +839,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
-            try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(entityLivingBase);
                 causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
                         .addCaptures()

@@ -33,7 +33,9 @@ import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -59,7 +61,6 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
-    @Nullable private Cause detonationCause;
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
     private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
 
@@ -154,7 +155,8 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         // Fireworks don't typically explode like other explosives, but we'll
         // post an event regardless and if the radius is zero the explosion
         // won't be triggered (the default behavior).
-        Sponge.getCauseStackManager().pushCause(getShooter());
+        Sponge.getCauseStackManager().pushCause(this);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
         detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(getLocation())
@@ -166,7 +168,11 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fireworkAge == 1) {
-            postPrime();
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(this);
+                Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+                postPrime();
+            }
         }
     }
 }

@@ -44,7 +44,7 @@ import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -82,7 +82,7 @@ class EntityTickPhaseState extends TickPhaseState {
         final Optional<User> creator = phaseContext.getOwner();
         final Optional<User> notifier = phaseContext.getNotifier();
         final User entityCreator = notifier.orElseGet(() -> creator.orElse(null));
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(tickingEntity);
             phaseContext.addNotifierAndOwnerToCauseStack();
             phaseContext.getCapturedEntitySupplier()
@@ -344,7 +344,7 @@ class EntityTickPhaseState extends TickPhaseState {
         final Optional<User> creator = context.getOwner();
         final Optional<User> notifier = context.getNotifier();
         final User entityCreator = notifier.orElseGet(() -> creator.orElse(null));
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack();
             Sponge.getCauseStackManager().pushCause(tickingEntity);
             if (entity instanceof EntityXPOrb) {

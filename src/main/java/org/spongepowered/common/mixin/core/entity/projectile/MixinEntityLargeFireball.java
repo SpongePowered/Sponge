@@ -30,6 +30,8 @@ import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -81,16 +83,20 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
                                                       double x, double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
         boolean griefer = ((IMixinGriefer) this).canGrief();
-        Sponge.getCauseStackManager().pushCause(getShooter());
-        Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(this);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+            Sponge.getCauseStackManager().pushCause(getShooter());
+            Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(strength)
                 .canCauseFire(flaming && griefer)
                 .shouldPlaySmoke(smoking && griefer)
                 .shouldBreakBlocks(smoking && griefer));
-        Sponge.getCauseStackManager().popCause();
-        return ex.orElse(null);
+
+            return ex.orElse(null);
+        }
     }
 
 }

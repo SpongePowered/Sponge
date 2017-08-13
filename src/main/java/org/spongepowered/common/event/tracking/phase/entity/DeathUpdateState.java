@@ -28,7 +28,8 @@ import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -63,7 +64,7 @@ final class DeathUpdateState extends EntityPhaseState {
         context.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     final DamageSource damageSource = context.getRequiredExtra(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class);
-                    try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().pushCause(dyingEntity);
                         Sponge.getCauseStackManager().pushCause(damageSource);
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -87,7 +88,7 @@ final class DeathUpdateState extends EntityPhaseState {
                             .filter(entity -> entity instanceof ExperienceOrb)
                             .collect(Collectors.toList());
                     if (!experience.isEmpty()) {
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             Sponge.getCauseStackManager().pushCause(dyingEntity);
                             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                             final SpawnEntityEvent event =
@@ -105,7 +106,7 @@ final class DeathUpdateState extends EntityPhaseState {
                             .filter(entity -> !(entity instanceof ExperienceOrb))
                             .collect(Collectors.toList());
                     if (!other.isEmpty()) {
-                        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             Sponge.getCauseStackManager().pushCause(dyingEntity);
                             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
                             final SpawnEntityEvent event1 =

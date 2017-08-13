@@ -128,7 +128,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public CauseStackFrame pushCauseFrame() {
+    public StackFrame pushCauseFrame() {
         enforceMainThread();
         CauseStackFrameImpl frame = new CauseStackFrameImpl(this.min_depth);
         this.frames.push(frame);
@@ -143,7 +143,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public void popCauseFrame(CauseStackFrame oldFrame) {
+    public void popCauseFrame(StackFrame oldFrame) {
         enforceMainThread();
         checkNotNull(oldFrame, "oldFrame");
         CauseStackFrameImpl frame = this.frames.peek();
@@ -271,7 +271,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     // TODO could pool these for more fasts
-    public static class CauseStackFrameImpl implements CauseStackFrame {
+    public static class CauseStackFrameImpl implements StackFrame {
 
         // lazy loaded
         private Map<EventContextKey<?>, Object> stored_ctx_values;

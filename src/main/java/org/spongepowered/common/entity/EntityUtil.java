@@ -74,7 +74,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -326,7 +326,7 @@ public final class EntityUtil {
             // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).connection).setAllowClientLocationUpdate(false);
         }
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(teleporter);
             Sponge.getCauseStackManager().pushCause(mixinEntity);
             final PhaseContext context = PhaseContext.start();
@@ -871,7 +871,7 @@ public final class EntityUtil {
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(entity);
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                     ImmutableList.of(snapshot), original);
@@ -944,7 +944,7 @@ public final class EntityUtil {
         // Now the real fun begins.
         final ItemStack item;
 
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             // FIRST we want to throw the DropItemEvent.PRE
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);

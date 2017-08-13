@@ -34,7 +34,8 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -71,8 +72,12 @@ public abstract class MixinBlockTNT extends MixinBlock {
     public boolean onPrime(World world, Entity tnt) {
         IMixinEntityTNTPrimed mixin = (IMixinEntityTNTPrimed) tnt;
         mixin.setDetonator(this.igniter);
-        // TODO IGNITER flag
-        this.primeCancelled = !mixin.shouldPrime();
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (this.igniter != null) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.IGNITER, (Living) this.igniter);
+            } // TODO Maybe add the player or any active entity from the CauseTracker?
+            this.primeCancelled = !mixin.shouldPrime();
+        }
         return !this.primeCancelled && world.spawnEntity(tnt);
     }
 
@@ -86,7 +91,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
     @Redirect(method = "onBlockDestroyedByExplosion", at = @At(value = "INVOKE", target = TARGET_PRIME))
     public boolean onPrimePostExplosion(World world, Entity tnt) {
         // Called when prime triggered by explosion
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
             boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
             return result;

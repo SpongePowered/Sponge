@@ -30,7 +30,7 @@ import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.CauseStackManager.CauseStackFrame;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.StatusClient;
@@ -68,7 +68,7 @@ public final class SpongeStatusResponse {
 
     @Nullable
     private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
-        try (CauseStackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(client);
             if (!SpongeImpl.postEvent(SpongeEventFactory.createClientPingServerEvent(Sponge.getCauseStackManager().getCurrentCause(), client,
                     (ClientPingServerEvent.Response) response))) {
