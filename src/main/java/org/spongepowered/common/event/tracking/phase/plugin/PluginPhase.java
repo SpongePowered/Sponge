@@ -29,8 +29,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -106,11 +104,6 @@ public final class PluginPhase extends TrackingPhase {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);
         }
-    }
-
-    @Override
-    public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
-        return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.PLUGIN).build()));
     }
 
     @Override

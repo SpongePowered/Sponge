@@ -662,7 +662,7 @@ public interface PacketFunction {
                 // Handle cursor
                 if (!inventoryEvent.getCursorTransaction().isValid()) {
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                } elseif (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
+                } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                 }
                 if (inventoryEvent instanceof SpawnEntityEvent) {

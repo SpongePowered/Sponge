@@ -173,7 +173,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
-        if (this.fuse == this.fuseDuration - 1) {
+        if (this.fuse == this.fuseDuration - 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (this.detonator != null) {
                     Sponge.getCauseStackManager().pushCause(this.detonator);

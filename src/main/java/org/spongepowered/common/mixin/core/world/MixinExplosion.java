@@ -375,7 +375,18 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
                 if (iblockstate.getMaterial() != Material.AIR) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
+                        // Sponge Start - Track the block position being destroyed
+                        final CauseTracker causeTracker = CauseTracker.getInstance();
+                        final PhaseData peek = causeTracker.getCurrentPhaseData();
+                        // We need to capture this block position if necessary
+                        if (peek.state.requiresBlockPosTracking()) {
+                            peek.context.getCaptureBlockPos().setPos(blockpos);
+                        }
                         block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
+                        // And then un-set the captured block position
+                        if (peek.state.requiresBlockPosTracking()) {
+                            peek.context.getCaptureBlockPos().setPos(null);
+                        }
                     }
 
                     // Sponge Start - Track the block position being destroyed

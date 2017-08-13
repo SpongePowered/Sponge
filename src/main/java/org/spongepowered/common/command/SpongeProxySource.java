@@ -78,7 +78,7 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public Set<ServiceContext> getActiveContexts() {
+    public Set<Context> getActiveContexts() {
         return this.subjectDelegate.getActiveContexts();
     }
 

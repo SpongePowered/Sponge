@@ -490,7 +490,7 @@ public final class WorldManager {
 
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(GeneralPhase.State.WORLD_UNLOAD, PhaseContext.start()
-                    .add(NamedCause.source(worldServer))
+                    .source(worldServer)
                     .complete());
         }
         if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)

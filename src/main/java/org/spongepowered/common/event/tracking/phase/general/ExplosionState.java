@@ -51,6 +51,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -249,15 +250,30 @@ final class ExplosionState extends GeneralState {
 
     @Override
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        final BlockPos blockPos = context.getBlockPosition()
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a block position during an explosion!", context));
-        final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();
-        final Multimap<BlockPos, EntityItem> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
-        if (entity instanceof EntityItem) {
-            blockPosEntityItemMultimap.put(blockPos, (EntityItem) entity);
-        } else {
-            blockPosEntityMultimap.put(blockPos, (net.minecraft.entity.Entity) entity);
-        }
-        return true;
+        return context.getBlockPosition().map(blockPos -> {
+            // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
+            final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();
+            final Multimap<BlockPos, EntityItem> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
+            if (entity instanceof EntityItem) {
+                blockPosEntityItemMultimap.put(blockPos, (EntityItem) entity);
+            } else {
+                blockPosEntityMultimap.put(blockPos, (net.minecraft.entity.Entity) entity);
+            }
+            return true;
+        }).orElseGet(() -> {
+            final ArrayList<Entity> entities = new ArrayList<>(1);
+            entities.add(entity);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                entities);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled() && event.getEntities().size() > 0) {
+                for (Entity item: event.getEntities()) {
+                    ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+                }
+                return true;
+            }
+            return false;
+        });
+
     }
 }
