@@ -37,7 +37,7 @@ import org.spongepowered.api.plugin.Plugin;
 
 import java.util.Optional;
 
-@Plugin(id = "record_test", name = "Record Test", version = "Right click to start/stop a record at a position.")
+@Plugin(id = "record_test", name = "Record Test", description = "Right click to start/stop a record at a position.")
 public class RecordTest {
 
     @Listener

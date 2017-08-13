@@ -43,7 +43,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-@Plugin(id = "scaledhealthtest", name = "ScaledHealthTest", description = "A plugin to test scaled health")
+@Plugin(id = "scaledhealthtest", name = "Scaled Health Test", description = "A plugin to test scaled health")
 public class ScaledHealthTest {
 
     @Listener

@@ -39,6 +39,7 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
+import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -75,6 +76,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
@@ -106,12 +108,13 @@ import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeCommand {
-    static final String INDENT = "    ";
-    static final String LONG_INDENT = INDENT + INDENT;
+    public static final String INDENT = "    ";
+    public static final String LONG_INDENT = INDENT + INDENT;
+    public static final List<String> CONTAINER_LIST_STATICS = Lists.newArrayList("minecraft", "mcp", "spongeapi", "sponge");
 
+    protected static final Text SEPARATOR_TEXT = Text.of(", ");
     static final Text INDENT_TEXT = Text.of(INDENT);
     static final Text NEWLINE_TEXT = Text.NEW_LINE;
-    static final Text SEPARATOR_TEXT = Text.of(", ");
     static final Text LIST_ITEM_TEXT = Text.of(TextColors.GRAY, "- ");
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
@@ -137,6 +140,9 @@ public class SpongeCommand {
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
         flagChildren.register(getSaveCommand(), "save");
         flagChildren.register(getTpsCommand(), "tps");
+
+        SpongeImplHooks.registerAdditionalCommands(flagChildren, nonFlagChildren);
+
         return CommandSpec.builder()
                 .description(Text.of("General Sponge command"))
                 .extendedDescription(Text.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
@@ -149,7 +155,8 @@ public class SpongeCommand {
                         INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation\n",
                         INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins\n",
                         INDENT, title("which"), LONG_INDENT, "List plugins that own a specific command\n",
-                        INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds"))
+                        INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds\n",
+                        SpongeImplHooks.getAdditionalCommandDescriptions()))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
                         .valueFlag(world(Text.of("world")), "-world", "w")
@@ -458,10 +465,11 @@ public class SpongeCommand {
                 .build();
     }
 
-    static Text title(String title) {
+    public static Text title(String title) {
         return Text.of(TextColors.GREEN, title);
     }
-    static Text hl(String toHighlight) {
+
+    public static Text hl(String toHighlight) {
         return Text.of(TextColors.DARK_GREEN, toHighlight);
     }
 
@@ -476,62 +484,56 @@ public class SpongeCommand {
                         SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Cause.of(NamedCause.source(src))));
                         src.sendMessage(Text.of("Reload complete!"));
                     } else if (args.hasAny("plugin")) {
-                        for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
-                            Text.Builder builder = Text.builder().append(title(container.getName()));
-                            container.getVersion().ifPresent(version -> builder.append(Text.of((" v" + version))));
-
-                            appendPluginMeta(builder, "ID", container.getId());
-                            appendPluginMeta(builder, "Description", container.getDescription());
-                            appendPluginMeta(builder, "URL", container.getUrl().map(url -> {
-                                ClickAction.OpenUrl action = null;
-                                try {
-                                    // make the url clickable
-                                    action = TextActions.openUrl(new URL(url));
-                                } catch (MalformedURLException e) {
-                                    // or not
-                                }
-                                return Text.builder(url).onClick(action);
-                            }));
-                            if (!container.getAuthors().isEmpty()) {
-                                appendPluginMeta(builder, "Authors", String.join(", ", container.getAuthors()));
-                            }
-
-                            appendPluginMeta(builder, "Main class", container.getInstance().map(instance -> instance.getClass().getCanonicalName()));
-
-                            src.sendMessage(builder.build());
-                        }
+                        sendContainerMeta(src, args, "plugin");
                     } else {
-                        List<PluginContainer> plugins = new ArrayList<PluginContainer>(SpongeImpl.getGame().getPluginManager().getPlugins());
-                        plugins.sort(Comparator.comparing(PluginContainer::getName));
+                        final Collection<PluginContainer> containers = SpongeImpl.getGame().getPluginManager().getPlugins();
+                        final List<PluginContainer> sortedContainers = new ArrayList<>();
+
+                        // Add static listings first
+                        CONTAINER_LIST_STATICS.forEach(containerId -> containers.stream()
+                                .filter(container -> container.getId().equalsIgnoreCase(containerId))
+                                .findFirst()
+                                .ifPresent(sortedContainers::add));
+
+                        containers.stream()
+                                .filter(SpongeImplHooks.getPluginFilterPredicate())
+                                .sorted(Comparator.comparing(PluginContainer::getName))
+                                .forEachOrdered(sortedContainers::add);
+
                         if (src instanceof Player) {
-                            List<Text> pluginList = new ArrayList<Text>();
-                            PaginationList.Builder builder = PaginationList.builder();
-                            builder.title(Text.builder(String.format("Plugins: (%d)", plugins.size())).build()).padding(Text.of("-"));
-                            int counter = 1;
-                            for (PluginContainer next : plugins) {
+                            final List<Text> containerList = new ArrayList<>();
 
-                                Text.Builder pluginBuilder = Text.builder((counter++) + ". " + next.getName())
-                                        .color(TextColors.GREEN)
-                                        .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
+                            final PaginationList.Builder builder = PaginationList.builder();
+                            builder.title(Text.of(TextColors.YELLOW, "Plugins", TextColors.WHITE, " (", sortedContainers.size(), ")"))
+                                    .padding(Text.of(TextColors.DARK_GREEN, "="));
 
-                                next.getVersion()
-                                        .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
-                                pluginList.add(pluginBuilder.build());
+                            for (PluginContainer container : sortedContainers) {
+                                final Text.Builder containerBuilder = Text.builder()
+                                        .append(Text.of(TextColors.RESET, " - ", TextColors.GREEN, container.getName()))
+                                        .onClick(TextActions.runCommand("/sponge:sponge plugins " + container.getId()))
+                                        .onHover(TextActions.showText(Text.of(
+                                                TextColors.RESET,
+                                                "ID: ", container.getId(), Text.NEW_LINE,
+                                                "Version: ", container.getVersion().orElse("Unknown"))));
+
+                                containerList.add(containerBuilder.build());
                             }
-                            builder.contents(pluginList).sendTo(src);
+
+                            builder.contents(containerList).build().sendTo(src);
                         } else {
-                            Text.Builder builder = Text.builder(String.format("Plugins (%d): ", plugins.size()));
+                            final Text.Builder builder = Text.builder();
+                            builder.append(Text.of(TextColors.YELLOW, "Plugins", TextColors.WHITE, " (", sortedContainers.size(), "): "));
+
                             boolean first = true;
-                            for (PluginContainer next : plugins) {
+                            for (PluginContainer container : sortedContainers) {
                                 if (!first) {
                                     builder.append(SEPARATOR_TEXT);
                                 }
                                 first = false;
 
-                                Text.Builder pluginBuilder = Text.builder(next.getName())
-                                        .color(TextColors.GREEN);
-                                builder.append(pluginBuilder.build());
+                                builder.append(Text.of(TextColors.GREEN, container.getName()));
                             }
+
                             src.sendMessage(builder.build());
                         }
                     }
@@ -539,14 +541,41 @@ public class SpongeCommand {
                 }).build();
     }
 
-    private static void appendPluginMeta(Text.Builder builder, String key, Optional<?> value) {
+    public static void appendPluginMeta(Text.Builder builder, String key, Optional<?> value) {
         if (value.isPresent()) {
             appendPluginMeta(builder, key, value.get());
         }
     }
 
-    private static void appendPluginMeta(Text.Builder builder, String key, Object value) {
+    public static void appendPluginMeta(Text.Builder builder, String key, Object value) {
         builder.append(NEWLINE_TEXT, INDENT_TEXT, title(key + ": "), Text.of(value));
+    }
+
+    public static void sendContainerMeta(CommandSource src, CommandContext args, String argumentName) {
+        for (PluginContainer container : args.<PluginContainer>getAll(argumentName)) {
+            Text.Builder builder = Text.builder().append(title(container.getName()));
+            container.getVersion().ifPresent(version -> builder.append(Text.of((" v" + version))));
+
+            appendPluginMeta(builder, "ID", container.getId());
+            appendPluginMeta(builder, "Description", container.getDescription());
+            appendPluginMeta(builder, "URL", container.getUrl().map(url -> {
+                ClickAction.OpenUrl action = null;
+                try {
+                    // make the url clickable
+                    action = TextActions.openUrl(new URL(url));
+                } catch (MalformedURLException e) {
+                    // or not
+                }
+                return Text.builder(url).onClick(action);
+            }));
+            if (!container.getAuthors().isEmpty()) {
+                appendPluginMeta(builder, "Authors", String.join(", ", container.getAuthors()));
+            }
+
+            appendPluginMeta(builder, "Main class", container.getInstance().map(instance -> instance.getClass().getCanonicalName()));
+
+            src.sendMessage(builder.build());
+        }
     }
 
 

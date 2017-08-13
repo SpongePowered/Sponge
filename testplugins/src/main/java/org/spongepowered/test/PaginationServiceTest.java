@@ -41,7 +41,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Optional;
 
-@Plugin(id = "paginationtest", name = "PaginationTest", description = "A plugin to test the pagination service.")
+@Plugin(id = "paginationtest", name = "Pagination Test", description = "A plugin to test the pagination service.")
 public class PaginationServiceTest {
 
     @Inject

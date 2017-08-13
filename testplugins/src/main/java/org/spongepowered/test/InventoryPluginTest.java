@@ -31,7 +31,7 @@ import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "inventoryplugintest", description = "A plugin to test the owner of an inventory.")
+@Plugin(id = "inventoryplugintest", name = "Inventory Test", description = "A plugin to test the owner of an inventory.")
 public class InventoryPluginTest {
 
     @Listener
