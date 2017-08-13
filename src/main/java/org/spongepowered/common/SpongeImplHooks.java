@@ -260,4 +260,8 @@ public final class SpongeImplHooks {
 
         return false;
     }
+
+    public static void onTileEntityChunkUnload(net.minecraft.tileentity.TileEntity tileEntity) {
+        // forge only method
+    }
 }
