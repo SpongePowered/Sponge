@@ -866,6 +866,13 @@ public abstract class MixinEntity implements IMixinEntity {
         return entity != null && entity.addPassenger(this);
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<Entity> getNearbyEntities(double distance) {
+        return (Collection) this.world.getEntitiesWithinAABB(net.minecraft.entity.Entity.class,
+                new AxisAlignedBB(this.posX - distance, this.posY - distance, this.posZ - distance, this.posX + distance, this.posY + distance,
+                        this.posZ + distance), e1 -> e1.getDistanceSqToEntity((net.minecraft.entity.Entity) (Object) this) <= distance * distance);
+    }
 
     /**
      * @author blood - May 28th, 2016
