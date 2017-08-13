@@ -79,7 +79,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
@@ -185,7 +184,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         final WorldArchetype archetype = (WorldArchetype) (Object) settings;
         setDimensionType(archetype.getDimensionType());
 
-        boolean configNewlyCreated = createWorldConfig();
+        createWorldConfig();
         setEnabled(archetype.isEnabled());
         setLoadOnStartup(archetype.loadOnStartup());
         setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
@@ -200,10 +199,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         }
         setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
         setSerializationBehavior(archetype.getSerializationBehavior());
-        // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
-        if (configNewlyCreated && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
-            this.getOrCreateWorldConfig().getConfig().setConfigEnabled(true);
-        }
         this.getOrCreateWorldConfig().save();
     }
 
