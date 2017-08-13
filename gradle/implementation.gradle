@@ -151,6 +151,7 @@ shadowJar ext.shadowConfiguration = {
         include 'it/unimi/dsi/fastutil/bytes/ByteSet*'
         include 'it/unimi/dsi/fastutil/bytes/ByteStack*'
         include 'it/unimi/dsi/fastutil/ints/IntOpenHashSet*'
+        include 'it/unimi/dsi/fastutil/longs/LongOpenHashSet*'
         include 'it/unimi/dsi/fastutil/objects/AbstractObject2IntFunction*'
         include 'it/unimi/dsi/fastutil/objects/AbstractObject2IntMap*'
         include 'it/unimi/dsi/fastutil/objects/AbstractObject2LongFunction*'
