@@ -181,6 +181,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
+    private it.unimi.dsi.fastutil.longs.LongCollection tileEntitiesChunkToBeRemoved = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -1601,6 +1602,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
+        this.removeTileEntitiesForRemovedChunks(); 
         // this.profiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 
         if (!this.addedTileEntityList.isEmpty()) {
@@ -1627,6 +1629,41 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.endPendingTileEntities(); // Sponge
         // this.profiler.endSection(); // Sponge - Don't use the profiler
         // this.profiler.endSection(); // Sponge - Don't use the profiler
+    }
+
+    @Override
+    public void markTileEntitiesInChunkForRemoval(net.minecraft.world.chunk.Chunk chunk)
+    {
+        if (!chunk.getTileEntityMap().isEmpty())
+        {
+            long pos = net.minecraft.util.math.ChunkPos.asLong(chunk.x, chunk.z);
+            this.tileEntitiesChunkToBeRemoved.add(pos);
+        }
+    }
+
+    private void removeTileEntitiesForRemovedChunks()
+    {
+        if (!this.tileEntitiesChunkToBeRemoved.isEmpty())
+        {
+            java.util.function.Predicate<net.minecraft.tileentity.TileEntity> isInChunk = (tileEntity) ->
+            {
+                BlockPos tilePos = tileEntity.getPos();
+                long tileChunkPos = net.minecraft.util.math.ChunkPos.asLong(tilePos.getX() >> 4, tilePos.getZ() >> 4);
+                return this.tileEntitiesChunkToBeRemoved.contains(tileChunkPos);
+            };
+            java.util.function.Predicate<net.minecraft.tileentity.TileEntity> isInChunkDoUnload = (tileEntity) ->
+            {
+                boolean inChunk = isInChunk.test(tileEntity);
+                if (inChunk)
+                {
+                    SpongeImplHooks.onTileEntityChunkUnload(tileEntity);
+                }
+                return inChunk;
+            };
+            this.tickableTileEntities.removeIf(isInChunk);
+            this.loadedTileEntityList.removeIf(isInChunkDoUnload);
+            this.tileEntitiesChunkToBeRemoved.clear();
+        }
     }
 
     protected void entityActivationCheck() {
