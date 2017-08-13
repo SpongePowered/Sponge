@@ -65,6 +65,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -89,6 +90,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -101,6 +103,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -136,6 +139,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     private boolean isSpawning = false;
     private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long cacheKey;
+    private Cause chunkCause;
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
     private static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
@@ -188,6 +192,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     this.sponge_world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
         }
         this.cacheKey = ChunkPos.asLong(this.x, this.z);
+        this.chunkCause = Cause.source(this.world).build();
     }
 
     @Override
@@ -215,12 +220,24 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         this.isSpawning = spawning;
     }
 
-    @Inject(method = "onLoad()V", at = @At("RETURN"))
-    public void onLoadInject(CallbackInfo ci) {
-        if (!this.world.isRemote) {
-            SpongeHooks.logChunkLoad(this.world, this.chunkPos);
+    /**
+     * @author blood - August 13th, 2017
+     * @reason Due to many changes, overwrite makes this method easier
+     * to read and maintain.
+     *
+     */
+    @Overwrite
+    public void onChunkLoad()
+    {
+        this.loaded = true;
+        this.world.addTileEntities(this.tileEntities.values());
+    
+        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
+        {
+            this.world.loadEntities(classinheritancemultimap);
         }
 
+        // Sponge start
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.world.getChunkProvider();
@@ -233,12 +250,36 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk) (Object) this);
             }
         }
+
+        SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(this.chunkCause, (Chunk) this));
+        if (!this.world.isRemote) {
+            SpongeHooks.logChunkLoad(this.world, this.chunkPos);
+        }
+        // Sponge end
     }
 
-    @Inject(method = "onUnload()V", at = @At("RETURN"))
-    public void onUnloadInject(CallbackInfo ci) {
-        if (!this.world.isRemote) {
-            SpongeHooks.logChunkUnload(this.world, this.chunkPos);
+    /**
+     * @author blood - August 13th, 2017
+     * @reason Due to many changes, overwrite makes this method easier
+     * to read and maintain.
+     *
+     */
+    @Overwrite
+    public void onChunkUnload()
+    {
+        this.loaded = false;
+
+        // Sponge start
+        ((IMixinWorld) this.world).markTileEntitiesInChunkForRemoval((net.minecraft.world.chunk.Chunk)(Object) this);
+        if (false) // Forge: remove all TEs in a chunk at once instead of marking each one for removal
+        for (TileEntity tileentity : this.tileEntities.values())
+        {
+            this.world.markTileEntityForRemoval(tileentity);
+        }
+
+        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
+        {
+            this.world.unloadEntities(classinheritancemultimap);
         }
 
         for (Direction direction : CARDINAL_DIRECTIONS) {
@@ -253,6 +294,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, null);
             }
         }
+
+        SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(this.chunkCause, (Chunk) this));
+        if (!this.world.isRemote) {
+            SpongeHooks.logChunkUnload(this.world, this.chunkPos);
+        }
+        // Sponge end
     }
 
     @Override
