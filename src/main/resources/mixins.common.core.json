@@ -440,6 +440,7 @@
         "world.MixinBossInfo",
         "world.MixinBossInfoServer",
         "world.MixinChunk",
+        "world.MixinChunkCache",
         "world.MixinDimensionType",
         "world.MixinExplosion",
         "world.MixinGameRules",
