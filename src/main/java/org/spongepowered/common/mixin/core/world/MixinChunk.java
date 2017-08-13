@@ -227,7 +227,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
      *
      */
     @Overwrite
-    public void onChunkLoad()
+    public void onLoad()
     {
         this.loaded = true;
         this.world.addTileEntities(this.tileEntities.values());
@@ -265,7 +265,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
      *
      */
     @Overwrite
-    public void onChunkUnload()
+    public void onUnload()
     {
         this.loaded = false;
 
