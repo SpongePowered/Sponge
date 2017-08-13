@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.common.registry.type.event.EventContextKeysModule;
 
 public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
 
@@ -65,7 +66,9 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
         checkState(!this.id.isEmpty(), "ID cannot be empty!");
         checkState(this.name != null, "Name cannot be null for id: " + this.id);
         checkState(!this.name.isEmpty(), "Name cannot be empty for id: " + this.id);
-        return new SpongeEventContextKey<>(this);
+        final SpongeEventContextKey<T> key = new SpongeEventContextKey<>(this);
+        EventContextKeysModule.getInstance().registerAdditionalCatalog(key);
+        return key;
     }
 
     @Override

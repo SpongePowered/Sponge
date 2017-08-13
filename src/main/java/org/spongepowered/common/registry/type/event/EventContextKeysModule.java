@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -95,6 +96,10 @@ public final class EventContextKeysModule
         createKey("sponge:player_place", "Player Place", World.class);
         createKey("sponge:fire_spread", "Fire Spread", World.class);
         createKey("sponge:leaves_decay", "Leaves Decay", World.class);
+        createKey("sponge:piston_retract", "Piston Retract", World.class);
+        createKey("sponge:piston_extend", "Piston Extend", World.class);
+        createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
+        createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {
