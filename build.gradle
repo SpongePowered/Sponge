@@ -44,7 +44,7 @@ dependencies {
         exclude module: 'spongeapi'
     }
     compile 'org.ow2.asm:asm-debug-all:5.2'
-    compile('org.spongepowered:mixin:0.6.15-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.7-SNAPSHOT') {
         exclude module: 'launchwrapper'
     }
 

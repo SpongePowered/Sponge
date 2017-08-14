@@ -1,5 +1,5 @@
 {
-    "minVersion": "0.6.15",
+    "minVersion": "0.7",
     "package": "org.spongepowered.common.mixin.tileentityactivation",
     "plugin": "org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivationPlugin",
     "refmap": "mixins.common.refmap.json",
