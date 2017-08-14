@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,6 +44,7 @@ import javax.annotation.Nullable;
 public abstract class MixinItemArmorMaterial implements ArmorType {
 
     @Shadow @Final private String name;
+    @Shadow public abstract Item shadow$getRepairItem();
 
     // getName() end up replacing a method with the same signature in ArmorMaterial
     // at dev time. Since it's capitalized, the client becomes unable to retrieve
@@ -71,17 +72,7 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
     @Override
     public Optional<ItemType> getRepairItemType() {
         if (this.repairItemType == null) {
-            if ("diamond".equals(this.name)) {
-                this.repairItemType = Optional.of(ItemTypes.DIAMOND);
-            } else if ("gold".equals(this.name)) {
-                this.repairItemType = Optional.of(ItemTypes.GOLD_INGOT);
-            } else if ("leather".equals(this.name)) {
-                this.repairItemType = Optional.of(ItemTypes.LEATHER);
-            } else if ("iron".equals(this.name)) {
-                this.repairItemType = Optional.of(ItemTypes.IRON_INGOT);
-            } else {
-                this.repairItemType = Optional.empty();
-            }
+            this.repairItemType = Optional.ofNullable((ItemType) shadow$getRepairItem());
         }
         return this.repairItemType;
     }
