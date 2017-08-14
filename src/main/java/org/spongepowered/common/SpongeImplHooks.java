@@ -27,6 +27,7 @@ package org.spongepowered.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -59,11 +60,19 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
+import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.common.command.SpongeCommand;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -72,10 +81,14 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.FutureTask;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -345,5 +358,17 @@ public final class SpongeImplHooks {
             return Optional.empty();
         }
         return Optional.of(((CraftingRecipe) recipe));
+    }
+
+    public static Text getAdditionalCommandDescriptions() {
+        return Text.EMPTY;
+    }
+
+    public static void registerAdditionalCommands(ChildCommandElementExecutor flagChildren, ChildCommandElementExecutor nonFlagChildren) {
+        // Overwritten in SpongeForge
+    }
+
+    public static Predicate<? super PluginContainer> getPluginFilterPredicate() {
+        return plugin -> !SpongeCommand.CONTAINER_LIST_STATICS.contains(plugin.getId());
     }
 }
