@@ -48,8 +48,12 @@ import javax.inject.Inject;
 
 /**
  * Adds BedRock. Literally.
+ *
+ * TODO There is a Forge client bug with recipes where a Forge client cannot connect to a Sponge-based server that only
+ *      adds a new recipe via a plugin (or any server where you simply add a new recipe). In the interest of not breaking testing altogether,
+ *      disabling this plugin for now.
  */
-@Plugin(id = "recipetest", name = "Recipe Test", description = "A plugin to test recipes")
+//@Plugin(id = "recipetest", name = "Recipe Test", description = "A plugin to test recipes")
 public class RecipeTest {
 
     @Inject private PluginContainer plugin;
