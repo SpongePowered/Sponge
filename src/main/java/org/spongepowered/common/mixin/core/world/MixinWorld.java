@@ -1605,7 +1605,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.stopTileEntityRemovelInWhile(); // Sponge
         }
 
-        this.processingLoadedTiles = false;
         this.startPendingTileEntityTimings(); // Sponge
 
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
@@ -1621,6 +1620,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.removeTileEntitiesForRemovedChunks(); 
+        this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
         // this.theProfiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 
         if (!this.addedTileEntityList.isEmpty()) {
