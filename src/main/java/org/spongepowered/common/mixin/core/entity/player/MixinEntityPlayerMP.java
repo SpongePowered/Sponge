@@ -770,7 +770,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                     SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
                             (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
             SpongeImpl.postEvent(event);
-            Sponge.getCauseStackManager().popCauseFrame(frame);
             if (event.isCancelled()) {
                 ci.cancel();
             }

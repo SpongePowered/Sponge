@@ -147,7 +147,6 @@ final class CustomExplosionState extends PluginPhaseState {
     
             final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, transactions);
             if (postEvent == null) { // Means that we have had no actual block changes apparently?
-                Sponge.getCauseStackManager().popCauseFrame(frame);
                 return;
             }
             SpongeImpl.postEvent(postEvent);

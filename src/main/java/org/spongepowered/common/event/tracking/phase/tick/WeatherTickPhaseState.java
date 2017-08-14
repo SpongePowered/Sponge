@@ -70,7 +70,6 @@ class WeatherTickPhaseState extends TickPhaseState {
             final SpawnEntityEvent spawnEntityEvent =
                     SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
             SpongeImpl.postEvent(spawnEntityEvent);
-            Sponge.getCauseStackManager().popCauseFrame(frame);
             if (!spawnEntityEvent.isCancelled()) {
                 for (Entity anEntity : spawnEntityEvent.getEntities()) {
                     EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
