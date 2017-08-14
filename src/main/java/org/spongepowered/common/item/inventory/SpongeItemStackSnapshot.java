@@ -46,6 +46,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
@@ -145,6 +146,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public boolean isEmpty() {
         return this.privateStack.isEmpty();
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return this.privateStack.getTranslation();
     }
 
     @Override
@@ -386,4 +392,5 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public int hashCode() {
         return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
     }
+
 }
