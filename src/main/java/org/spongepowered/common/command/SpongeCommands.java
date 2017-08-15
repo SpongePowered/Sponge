@@ -111,7 +111,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 
 @NonnullByDefault
-public class SpongeCommand {
+public class SpongeCommands {
     public static final String INDENT = "    ";
     public static final String LONG_INDENT = INDENT + INDENT;
     public static final List<String> CONTAINER_LIST_STATICS = Lists.newArrayList("minecraft", "mcp", "spongeapi", "sponge");
@@ -128,22 +128,22 @@ public class SpongeCommand {
      *
      * @return The newly created command
      */
-    public static CommandSpec getCommand() {
+    public static CommandSpec createSpongeCommand() {
         final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
         final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren);
-        nonFlagChildren.register(getVersionCommand(), "version");
-        nonFlagChildren.register(getBlockInfoCommand(), "blockInfo");
-        nonFlagChildren.register(getEntityInfoCommand(), "entityInfo");
-        nonFlagChildren.register(getAuditCommand(), "audit");
-        nonFlagChildren.register(getHeapCommand(), "heap");
-        nonFlagChildren.register(getPluginsCommand(), "plugins");
-        nonFlagChildren.register(getTimingsCommand(), "timings");
-        nonFlagChildren.register(getWhichCommand(), "which");
-        flagChildren.register(getChunksCommand(), "chunks");
-        flagChildren.register(getConfigCommand(), "config");
-        flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
-        flagChildren.register(getSaveCommand(), "save");
-        flagChildren.register(getTpsCommand(), "tps");
+        nonFlagChildren.register(createSpongeVersionCommand(), "version");
+        nonFlagChildren.register(createSpongeBlockInfoCommand(), "blockInfo");
+        nonFlagChildren.register(createSpongeEntityInfoCommand(), "entityInfo");
+        nonFlagChildren.register(createSpongeAuditCommand(), "audit");
+        nonFlagChildren.register(createSpongeHeapCommand(), "heap");
+        nonFlagChildren.register(createSpongePluginsCommand(), "plugins");
+        nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
+        nonFlagChildren.register(createSpongeWhichCommand(), "which");
+        flagChildren.register(createSpongeChunksCommand(), "chunks");
+        flagChildren.register(createSpongeConfigCommand(), "config");
+        flagChildren.register(createSpongeReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
+        flagChildren.register(createSpongeSaveCommand(), "save");
+        flagChildren.register(createSpongeTpsCommand(), "tps");
 
         SpongeImplHooks.registerAdditionalCommands(flagChildren, nonFlagChildren);
 
@@ -232,7 +232,7 @@ public class SpongeCommand {
 
     // Flag children
 
-    private static CommandSpec getChunksCommand() {
+    private static CommandSpec createSpongeChunksCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Print chunk information, optionally dump"))
                 .arguments(optional(seq(literal(Text.of("dump"), "dump"), optional(literal(Text.of("dump-all"), "all")))))
@@ -299,7 +299,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getConfigCommand() {
+    private static CommandSpec createSpongeConfigCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Inspect the Sponge config"))
                 .arguments(seq(string(Text.of("key")), optional(string(Text.of("value")))))
@@ -327,7 +327,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getReloadCommand() {
+    private static CommandSpec createSpongeReloadCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Reload the Sponge game"))
                 .permission("sponge.command.reload")
@@ -342,7 +342,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getSaveCommand() {
+    private static CommandSpec createSpongeSaveCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Save the configuration"))
                 .permission("sponge.command.save")
@@ -358,7 +358,7 @@ public class SpongeCommand {
 
     // Non-flag children
 
-    private static CommandSpec getHeapCommand() {
+    private static CommandSpec createSpongeHeapCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Generate a dump of the Sponge heap"))
                 .permission("sponge.command.heap")
@@ -377,7 +377,7 @@ public class SpongeCommand {
     private static final Text IMPLEMENTATION_NAME = Text.of(TextColors.YELLOW, TextStyles.BOLD,
             Sponge.getPlatform().getContainer(IMPLEMENTATION).getName());
 
-    private static CommandSpec getVersionCommand() {
+    private static CommandSpec createSpongeVersionCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Display Sponge's current version"))
                 .permission("sponge.command.version")
@@ -395,7 +395,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getBlockInfoCommand() {
+    private static CommandSpec createSpongeBlockInfoCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Display the tracked information of the Block you are looking at."))
                 .permission("sponge.command.blockinfo")
@@ -424,7 +424,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getEntityInfoCommand() {
+    private static CommandSpec createSpongeEntityInfoCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Display the tracked information of the Entity you are looking at."))
                 .permission("sponge.command.entityinfo")
@@ -458,7 +458,7 @@ public class SpongeCommand {
     }
 
 
-    private static CommandSpec getAuditCommand() {
+    private static CommandSpec createSpongeAuditCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Audit Mixin classes for implementation"))
                 .permission("sponge.command.audit")
@@ -477,7 +477,7 @@ public class SpongeCommand {
         return Text.of(TextColors.DARK_GREEN, toHighlight);
     }
 
-    private static CommandSpec getPluginsCommand() {
+    private static CommandSpec createSpongePluginsCommand() {
         return CommandSpec.builder()
                 .description(Text.of("List currently installed plugins"))
                 .permission("sponge.command.plugins")
@@ -583,7 +583,7 @@ public class SpongeCommand {
     }
 
 
-    private static CommandCallable getTimingsCommand() {
+    private static CommandCallable createSpongeTimingsCommand() {
         return CommandSpec.builder()
                 .permission("sponge.command.timings")
                 .description(Text.of("Manages Sponge Timings data to see performance of the server."))
@@ -657,7 +657,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getWhichCommand() {
+    private static CommandSpec createSpongeWhichCommand() {
         return CommandSpec.builder()
                 .permission("sponge.command.which")
                 .description(Text.of("List plugins that own a specific command"))
@@ -685,7 +685,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static CommandSpec getTpsCommand() {
+    private static CommandSpec createSpongeTpsCommand() {
         return CommandSpec.builder()
                 .permission("sponge.command.tps")
                 .description(Text.of("Provides TPS (ticks per second) data for loaded worlds."))
@@ -738,7 +738,7 @@ public class SpongeCommand {
     }
 
     // Not registered under the 'sponge' alias but kept here for consistency
-    public static CommandSpec getHelpCommand() {
+    public static CommandSpec createHelpCommand() {
         return CommandSpec
             .builder()
             .permission("sponge.command.help")
