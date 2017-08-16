@@ -32,13 +32,13 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanD
 
 public class SpongeSleepingData extends AbstractBooleanData<SleepingData, ImmutableSleepingData> implements SleepingData {
 
-	public SpongeSleepingData(boolean value) {
+    public SpongeSleepingData(boolean value) {
         super(SleepingData.class, value, Keys.IS_SLEEPING, ImmutableSleepingData.class, false);
     }
 
-	public SpongeSleepingData() {
-		this(false);
-	}
+    public SpongeSleepingData() {
+        this(false);
+    }
 
     @Override
     public Value<Boolean> sleeping() {

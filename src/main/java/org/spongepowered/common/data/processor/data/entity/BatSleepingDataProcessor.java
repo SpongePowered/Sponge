@@ -53,27 +53,27 @@ public class BatSleepingDataProcessor extends AbstractEntitySingleDataProcessor<
 
     @Override
     public SleepingData createManipulator() {
-		return new SpongeSleepingData();
+        return new SpongeSleepingData();
     }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		return DataTransactionResult.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 
-	@Override
-	public Optional<Boolean> getVal(EntityBat dataHolder) {
-		return Optional.of(dataHolder.getIsBatHanging());
-	}
+    @Override
+    public Optional<Boolean> getVal(EntityBat dataHolder) {
+        return Optional.of(dataHolder.getIsBatHanging());
+    }
 
-	@Override
-	public ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-		return ImmutableSpongeValue.cachedOf(Keys.IS_SLEEPING, false, value);
-	}
+    @Override
+    public ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SLEEPING, false, value);
+    }
 
-	@Override
-	public Value<Boolean> constructValue(Boolean actualValue) {
-		return new SpongeValue<>(this.key, false, actualValue);
-	}
+    @Override
+    public Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, false, actualValue);
+    }
 
 }

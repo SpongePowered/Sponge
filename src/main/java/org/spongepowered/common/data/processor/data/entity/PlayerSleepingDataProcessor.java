@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSleepingData;
@@ -43,38 +42,38 @@ import java.util.Optional;
 public class PlayerSleepingDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Boolean, Value<Boolean>, SleepingData, ImmutableSleepingData> {
 
     public PlayerSleepingDataProcessor() {
-		super(EntityPlayerMP.class, Keys.IS_SLEEPING);
-	}
+        super(EntityPlayerMP.class, Keys.IS_SLEEPING);
+    }
 
     @Override
     public boolean set(EntityPlayerMP dataHolder, Boolean value) {
-    	dataHolder.sleeping = value;
-		return true;
+        dataHolder.sleeping = value;
+        return true;
     }
 
     @Override
     public SleepingData createManipulator() {
-		return new SpongeSleepingData();
+        return new SpongeSleepingData();
     }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		return DataTransactionResult.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 
-	@Override
-	public Optional<Boolean> getVal(EntityPlayerMP dataHolder) {
-		return Optional.of(dataHolder.isPlayerSleeping());
-	}
+    @Override
+    public Optional<Boolean> getVal(EntityPlayerMP dataHolder) {
+        return Optional.of(dataHolder.isPlayerSleeping());
+    }
 
-	@Override
-	public ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-		return ImmutableSpongeValue.cachedOf(Keys.IS_SLEEPING, false, value);
-	}
+    @Override
+    public ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_SLEEPING, false, value);
+    }
 
-	@Override
-	public Value<Boolean> constructValue(Boolean actualValue) {
-		return new SpongeValue<>(this.key, false, actualValue);
-	}
+    @Override
+    public Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, false, actualValue);
+    }
 
 }

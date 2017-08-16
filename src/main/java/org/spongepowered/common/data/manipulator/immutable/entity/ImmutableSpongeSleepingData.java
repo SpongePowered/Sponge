@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 
 public class ImmutableSpongeSleepingData extends AbstractImmutableBooleanData<ImmutableSleepingData, SleepingData> implements ImmutableSleepingData {
-	public ImmutableSpongeSleepingData(boolean value) {
+    public ImmutableSpongeSleepingData(boolean value) {
         super(ImmutableSleepingData.class, value, Keys.IS_SLEEPING, SleepingData.class, false);
     }
 
