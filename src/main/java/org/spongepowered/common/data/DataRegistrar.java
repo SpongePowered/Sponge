@@ -660,6 +660,12 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, new MoistureDataProcessor());
 
+        DataUtil.registerDualProcessor(SleepingData.class, SpongeSleepingData.class, ImmutableSleepingData.class, ImmutableSpongeSleepingData.class, 
+                new PlayerSleepingDataProcessor());
+
+        DataUtil.registerDualProcessor(SleepingData.class, SpongeSleepingData.class, ImmutableSleepingData.class, ImmutableSpongeSleepingData.class, 
+                new BatSleepingDataProcessor());
+
         // TileEntity Processors
 
         DataUtil.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
