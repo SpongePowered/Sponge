@@ -535,7 +535,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     @Overwrite
-    protected void updateBlocks() {
+    public void updateBlocks() {
         this.playerCheckLight();
 
         if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD)
