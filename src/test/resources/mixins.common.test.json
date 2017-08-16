@@ -1,5 +1,6 @@
 {
     "required": true,
+    "minVersion": "0.7",
     "package": "org.spongepowered.common.launch.mixin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
