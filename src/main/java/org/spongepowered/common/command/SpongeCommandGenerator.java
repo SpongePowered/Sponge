@@ -204,102 +204,6 @@ public class SpongeCommandGenerator {
                 .build();
     }
 
-    /**
-     * Creates a new instance of the Sponge help command.
-     * @return The newly created command
-     */
-    public static CommandSpec createHelpCommand() {
-        return CommandSpec
-            .builder()
-            .permission("sponge.command.help")
-            .arguments(
-                optional(
-                    firstParsing(
-                        GenericArguments.integer(PAGE_KEY),
-                        COMMAND_ARGUMENT,
-                        string(NOT_FOUND)
-                    )
-                )
-            )
-            .description(Text.of("View a list of all commands."))
-            .extendedDescription(
-                Text.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
-                         + " a command to insert it into your chat bar."))
-            .executor((src, args) -> {
-
-                if(args.getOne(NOT_FOUND).isPresent()){
-                    throw new CommandException(Text.of("No such command: ", args.getOne(NOT_FOUND).get()));
-                }
-
-                Optional<CommandMapping> command = args.getOne(COMMAND_KEY);
-                Optional<Integer> page = args.getOne(PAGE_KEY);
-
-                if (command.isPresent()) {
-                    CommandCallable callable = command.get().getCallable();
-                    Optional<? extends Text> desc = callable.getHelp(src);
-                    if (desc.isPresent()) {
-                        src.sendMessage(desc.get());
-                    } else {
-                        src.sendMessage(Text.of("Usage: /", command.get(), callable.getUsage(src)));
-                    }
-                    return CommandResult.success();
-                }
-
-                Translation helpTip = Sponge.getRegistry().getTranslationById("commands.help.footer").get();
-                PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-                builder.title(Text.builder("Showing Help (/page <page>):").color(TextColors.DARK_GREEN).build());
-
-                ImmutableList<Text> contents = ImmutableList.<Text>builder()
-                        .add(Text.of(helpTip))
-                        .addAll(Collections2.transform(commands(src), input -> createDescription(src, input))).build();
-                builder.contents(contents);
-                builder.build().sendTo(src, page.orElse(1));
-                return CommandResult.success();
-            }).build();
-    }
-
-    /**
-     * get a collection of primary aliases of commands that the source has access to.
-     * @param src the command source to permission check.
-     * @return a collection of primary aliases.
-     */
-    private static Collection<String> commandsStr(CommandSource src) {
-        return commands(src).stream().map(CommandMapping::getPrimaryAlias).collect(Collectors.toList());
-    }
-
-    /**
-     *
-     * @param src the CommandSource to test permissions against.
-     * @return a set of commandMapping, sorted by primary alias
-     */
-    private static TreeSet<CommandMapping> commands(CommandSource src) {
-        TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
-        commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
-                .testPermission(src)));
-        return commands;
-    }
-
-    /**
-     * Creates a short description for display on the help index.
-     * @param source the source the description will be shown to for translation purposes.
-     * @param mapping the command mapping to generate a description from
-     * @return a Text representing the command mapping, formatted for display on the help index.
-     */
-    private static Text createDescription(CommandSource source, CommandMapping mapping) {
-        @SuppressWarnings("unchecked")
-        final Optional<Text> description = mapping.getCallable().getShortDescription(source);
-        Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
-        text.color(TextColors.GREEN);
-        //End with a space, so tab completion works immediately.
-        text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
-        Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
-        if (longDescription.isPresent()) {
-            text.onHover(TextActions.showText(longDescription.get()));
-        }
-        return Text.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
-    }
-
-
     // TODO: Have some sort of separator between outputs for each world/dimension/global/whatever (that are exactly one line?)
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
         private boolean requireWorldLoaded;
@@ -586,7 +490,6 @@ public class SpongeCommandGenerator {
                 .build();
     }
 
-
     private static CommandSpec createSpongeAuditCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Audit Mixin classes for implementation"))
@@ -865,5 +768,100 @@ public class SpongeCommandGenerator {
         }
 
         return mean;
+    }
+
+    /**
+     * Creates a new instance of the Sponge help command.
+     * @return The newly created command
+     */
+    public static CommandSpec createHelpCommand() {
+        return CommandSpec
+                .builder()
+                .permission("sponge.command.help")
+                .arguments(
+                        optional(
+                                firstParsing(
+                                        GenericArguments.integer(PAGE_KEY),
+                                        COMMAND_ARGUMENT,
+                                        string(NOT_FOUND)
+                                )
+                        )
+                )
+                .description(Text.of("View a list of all commands."))
+                .extendedDescription(
+                        Text.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
+                                + " a command to insert it into your chat bar."))
+                .executor((src, args) -> {
+
+                    if(args.getOne(NOT_FOUND).isPresent()){
+                        throw new CommandException(Text.of("No such command: ", args.getOne(NOT_FOUND).get()));
+                    }
+
+                    Optional<CommandMapping> command = args.getOne(COMMAND_KEY);
+                    Optional<Integer> page = args.getOne(PAGE_KEY);
+
+                    if (command.isPresent()) {
+                        CommandCallable callable = command.get().getCallable();
+                        Optional<? extends Text> desc = callable.getHelp(src);
+                        if (desc.isPresent()) {
+                            src.sendMessage(desc.get());
+                        } else {
+                            src.sendMessage(Text.of("Usage: /", command.get(), callable.getUsage(src)));
+                        }
+                        return CommandResult.success();
+                    }
+
+                    Translation helpTip = Sponge.getRegistry().getTranslationById("commands.help.footer").get();
+                    PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
+                    builder.title(Text.builder("Showing Help (/page <page>):").color(TextColors.DARK_GREEN).build());
+
+                    ImmutableList<Text> contents = ImmutableList.<Text>builder()
+                            .add(Text.of(helpTip))
+                            .addAll(Collections2.transform(commands(src), input -> createDescription(src, input))).build();
+                    builder.contents(contents);
+                    builder.build().sendTo(src, page.orElse(1));
+                    return CommandResult.success();
+                }).build();
+    }
+
+    /**
+     * get a collection of primary aliases of commands that the source has access to.
+     * @param src the command source to permission check.
+     * @return a collection of primary aliases.
+     */
+    private static Collection<String> commandsStr(CommandSource src) {
+        return commands(src).stream().map(CommandMapping::getPrimaryAlias).collect(Collectors.toList());
+    }
+
+    /**
+     *
+     * @param src the CommandSource to test permissions against.
+     * @return a set of commandMapping, sorted by primary alias
+     */
+    private static TreeSet<CommandMapping> commands(CommandSource src) {
+        TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
+        commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
+                .testPermission(src)));
+        return commands;
+    }
+
+    /**
+     * Creates a short description for display on the help index.
+     * @param source the source the description will be shown to for translation purposes.
+     * @param mapping the command mapping to generate a description from
+     * @return a Text representing the command mapping, formatted for display on the help index.
+     */
+    private static Text createDescription(CommandSource source, CommandMapping mapping) {
+        @SuppressWarnings("unchecked")
+        final Optional<Text> description = mapping.getCallable().getShortDescription(source);
+        Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
+        text.color(TextColors.GREEN);
+        //End with a space, so tab completion works immediately.
+        text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
+        Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
+        if (longDescription.isPresent()) {
+            text.onHover(TextActions.showText(longDescription.get()));
+        }
+        return Text.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
     }
 }
