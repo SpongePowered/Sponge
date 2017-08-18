@@ -38,14 +38,19 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.selector.Selector;
 
 import javax.inject.Inject;
 
-@Plugin(id = "scoretexttest", name = "ScoreText test", description = "A plugin to test projectiles")
-public class ScoreTextTest {
+@Plugin(id = "selectortexttest", name = "Selector Text test", description = "A plugin to test selector texts")
+public class SelectorTextTest {
+
+    private static final LiteralText ERROR_PLAYER = Text.of("Must be ran by player");
+    private static final Text ONE = Text.of(TextColors.GREEN, Text.of("1."));
+    private static final Text TWO = Text.of(TextColors.GREEN, Text.of("2."));
 
     @Inject
     private Logger logger;
@@ -65,7 +70,7 @@ public class ScoreTextTest {
 
     private CommandResult showTest(CommandSource src, CommandContext ctx) throws CommandException {
         if (!(src instanceof Player)) {
-            throw new CommandException(Text.of("Must be ran by player"));
+            throw new CommandException(ERROR_PLAYER);
         }
         final Player player = (Player) src;
         Sponge.getCommandManager().process(src, "scoreboard objectives add test dummy test");
@@ -75,7 +80,7 @@ public class ScoreTextTest {
         final Objective test = sb.getObjective("test").get();
         final Score score = test.getScore(player.getTeamRepresentation()).get();
 
-        src.sendMessage(Text.of(TextColors.GREEN, Text.of("1.")));
+        src.sendMessage(ONE);
         //This should work, Score should remember the player and objective.
         try {
             src.sendMessage(Text.of(TextColors.GREEN, Text.of(score)));
@@ -84,10 +89,10 @@ public class ScoreTextTest {
             this.logger.error("1. Error: ", e);
         }
 
-        src.sendMessage(Text.of(TextColors.GREEN, Text.of("2.")));
-        //This should not work, it's an API design error to not include an objective
+        src.sendMessage(TWO);
+        //This should pass, it should display the name of the player to the player.
         try {
-            src.sendMessage(Text.of(TextColors.RED, Text.of(Selector.parse("@p"))));
+            src.sendMessage(Text.of(TextColors.GREEN, Text.of(Selector.parse("@p"))));
         } catch (RuntimeException e){
             src.sendMessage(Text.of(TextColors.RED, Text.of(e.getMessage())));
             this.logger.error("2. Error: ", e);
