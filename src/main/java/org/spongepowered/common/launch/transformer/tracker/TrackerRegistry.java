@@ -148,12 +148,12 @@ public final class TrackerRegistry {
             // Store the method
             final String id = entry.name + ';' + oldDesc;
             final MethodEntry methodEntry = methodLists.computeIfAbsent(id, id1 -> new MethodEntry(
-                    entry.desc, Type.getArgumentTypes(entry.desc), Type.getReturnType(entry.desc)));
+                    Type.getArgumentTypes(oldDesc), Type.getReturnType(oldDesc)));
             if (methodEntry.entries.containsKey(trackedType)) {
                 throw new IllegalArgumentException("Attempted to track a method twice, at " +
                         entry.name + ':' + entry.desc + " located in " + trackerClass);
             }
-            methodEntry.entries.put(trackedType, trackerType);
+            methodEntry.entries.put(trackedType, new MethodEntry.TargetTracker(trackerType, entry.desc));
         }
     }
 
