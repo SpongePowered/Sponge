@@ -120,7 +120,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-public class SpongeCommands {
+public class SpongeCommandGenerator {
     public static final String INDENT = "    ";
     public static final String LONG_INDENT = INDENT + INDENT;
     public static final List<String> CONTAINER_LIST_STATICS = Lists.newArrayList("minecraft", "mcp", "spongeapi", "sponge");
