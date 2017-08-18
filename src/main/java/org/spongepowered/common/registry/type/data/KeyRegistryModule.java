@@ -378,6 +378,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("rabbit_type", makeSingleKey(TypeTokens.RABBIT_TOKEN, TypeTokens.RABBIT_VALUE_TOKEN, of("RabbitType"), "sponge:rabbit_type", "Rabbit Type"));
 
+        this.fieldMap.put("parrot_variant", makeSingleKey(TypeTokens.PARROT_VARIANT_TOKEN, TypeTokens.PARROT_VARIANT_VALUE_TOKEN, of("ParrotVariant"), "sponge:parrot_variant", "Parrot Variant"));
+
         this.fieldMap.put("lock_token", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("Lock"), "sponge:lock", "Lock"));
 
         this.fieldMap.put("banner_base_color", makeSingleKey(TypeTokens.DYE_COLOR_TOKEN, TypeTokens.DYE_COLOR_VALUE_TOKEN, of("BannerBaseColor"), "sponge:banner_base_color", "Banner Base Color"));

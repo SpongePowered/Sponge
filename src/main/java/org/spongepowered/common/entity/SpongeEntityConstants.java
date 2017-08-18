@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.ParrotVariant;
 import org.spongepowered.api.data.type.RabbitType;
 
 import java.util.Map;
@@ -42,6 +43,8 @@ public class SpongeEntityConstants {
     public static final Map<Integer, HorseColor> HORSE_COLOR_IDMAP = Maps.newHashMap();
     public static final Map<String, HorseStyle> HORSE_STYLES = Maps.newHashMap();
     public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
+    public static final Map<String, ParrotVariant> PARROT_VARIANTS = Maps.newHashMap();
+    public static final Map<Integer, ParrotVariant> PARROT_VARIANT_IDMAP = Maps.newHashMap();
 
     // ocelot types
     public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");
@@ -74,6 +77,12 @@ public class SpongeEntityConstants {
     public static final SpongeHorseStyle WHITE_DOTS = new SpongeHorseStyle(3, "WHITE_DOTS");
     public static final SpongeHorseStyle BLACK_DOTS = new SpongeHorseStyle(4, "BLACK_DOTS");
 
+    // parrot variants
+    public static final SpongeParrotVariant RED_PARROT = new SpongeParrotVariant(0, "RED");
+    public static final SpongeParrotVariant BLUE_PARROT = new SpongeParrotVariant(1, "BLUE");
+    public static final SpongeParrotVariant GREEN_PARROT = new SpongeParrotVariant(2, "GREEN");
+    public static final SpongeParrotVariant CYAN_PARROT = new SpongeParrotVariant(3, "CYAN");
+    public static final SpongeParrotVariant GRAY_PARROT = new SpongeParrotVariant(4, "GRAY");
 
     static {
         OCELOT_TYPES.put("wild_ocelot", WILD_OCELOT);
@@ -130,5 +139,16 @@ public class SpongeEntityConstants {
         HORSE_STYLE_IDMAP.put(3, WHITE_DOTS);
         HORSE_STYLE_IDMAP.put(4, BLACK_DOTS);
 
+        PARROT_VARIANTS.put("red", RED_PARROT);
+        PARROT_VARIANTS.put("blue", BLUE_PARROT);
+        PARROT_VARIANTS.put("green", GREEN_PARROT);
+        PARROT_VARIANTS.put("cyan", CYAN_PARROT);
+        PARROT_VARIANTS.put("gray", GRAY_PARROT);
+
+        PARROT_VARIANT_IDMAP.put(0, RED_PARROT);
+        PARROT_VARIANT_IDMAP.put(1, BLUE_PARROT);
+        PARROT_VARIANT_IDMAP.put(2, GREEN_PARROT);
+        PARROT_VARIANT_IDMAP.put(3, CYAN_PARROT);
+        PARROT_VARIANT_IDMAP.put(4, GRAY_PARROT);
     }
 }
