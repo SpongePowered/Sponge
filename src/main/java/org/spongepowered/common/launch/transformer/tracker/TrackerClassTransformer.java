@@ -91,8 +91,9 @@ public class TrackerClassTransformer implements IClassTransformer {
             for (TrackerMethodEntry e : this.addedMethods.values()) {
                 final MethodVisitor m = super.visitMethod(ACC_PRIVATE | ACC_STATIC, e.nName, e.nDesc, null, null);
                 m.visitCode();
-                final Set<Map.Entry<TrackedType, String>> set = e.entry.entries.entrySet();
-                for (Map.Entry<TrackedType, String> entry1 : set) {
+                final Set<Map.Entry<TrackedType, MethodEntry.TargetTracker>> set = e.entry.entries.entrySet();
+                for (Map.Entry<TrackedType, MethodEntry.TargetTracker> entry1 : set) {
+                    final MethodEntry.TargetTracker target = entry1.getValue();
                     final String targetName = entry1.getKey().name;
                     // Do instance check
                     m.visitVarInsn(ALOAD, 0);
@@ -103,22 +104,22 @@ public class TrackerClassTransformer implements IClassTransformer {
                     m.visitVarInsn(ALOAD, 0);
                     // Cast the target object
                     m.visitTypeInsn(CHECKCAST, targetName);
-                    for (int i = 1; i < e.entry.paramTypes.length; i++) {
-                        m.visitVarInsn(e.entry.paramTypes[i].getOpcode(ILOAD), i);
+                    for (int i = 0; i < e.entry.paramTypes.length; i++) {
+                        m.visitVarInsn(e.entry.paramTypes[i].getOpcode(ILOAD), i + 1);
                     }
-                    m.visitMethodInsn(INVOKESTATIC, entry1.getValue(), e.oName, e.entry.desc, false);
+                    m.visitMethodInsn(INVOKESTATIC, target.type, e.oName, target.desc, false);
                     m.visitInsn(e.entry.returnType.getOpcode(IRETURN));
                     m.visitLabel(ifLabel);
                     m.visitFrame(F_SAME, 0, null, 0, null);
                 }
                 // None of the instance checks succeeded, call the original method
                 m.visitVarInsn(ALOAD, 0);
-                for (int i = 1; i < e.entry.paramTypes.length; i++) {
-                    m.visitVarInsn(e.entry.paramTypes[i].getOpcode(ILOAD), i);
+                for (int i = 0; i < e.entry.paramTypes.length; i++) {
+                    m.visitVarInsn(e.entry.paramTypes[i].getOpcode(ILOAD), i + 1);
                 }
                 m.visitMethodInsn(e.oOpcode, e.oOwner, e.oName, e.oDesc, e.oItf);
                 m.visitInsn(e.entry.returnType.getOpcode(IRETURN));
-                final int locals = e.entry.paramTypes.length;
+                final int locals = e.entry.paramTypes.length + 1;
                 m.visitMaxs(locals, locals);
                 m.visitEnd();
             }
@@ -158,9 +159,10 @@ public class TrackerClassTransformer implements IClassTransformer {
                 return;
             }
             // First, try to directly redirect the method
-            for (Map.Entry<TrackedType, String> entry1 : entry.entries.entrySet()) {
+            for (Map.Entry<TrackedType, MethodEntry.TargetTracker> entry1 : entry.entries.entrySet()) {
                 if (entry1.getKey().knownSubtypes.contains(owner)) {
-                    super.visitMethodInsn(INVOKESTATIC, entry1.getValue(), name, entry.desc, false);
+                    final MethodEntry.TargetTracker target = entry1.getValue();
+                    super.visitMethodInsn(INVOKESTATIC, target.type, name, target.desc, false);
                     return;
                 }
             }
