@@ -39,8 +39,6 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -65,7 +63,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
@@ -105,7 +102,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.function.Function;
 
 @NonnullByDefault
@@ -735,56 +731,5 @@ public class SpongeCommands {
         }
 
         return mean;
-    }
-
-    // Not registered under the 'sponge' alias but kept here for consistency
-    public static CommandSpec createHelpCommand() {
-        return CommandSpec
-            .builder()
-            .permission("sponge.command.help")
-            .arguments(optional(string(Text.of("command"))))
-            .description(Text.of("View a list of all commands."))
-            .extendedDescription(
-                    Text.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
-                            + " a command to insert it into your chat bar."))
-            .executor((src, args) -> {
-                Optional<String> command = args.getOne("command");
-                if (command.isPresent()) {
-                    Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(command.get(), src);
-                    if (mapping.isPresent()) {
-                        CommandCallable callable = mapping.get().getCallable();
-                        Optional<? extends Text> desc = callable.getHelp(src);
-                        if (desc.isPresent()) {
-                            src.sendMessage(desc.get());
-                        } else {
-                            src.sendMessage(Text.of("Usage: /", command.get(), callable.getUsage(src)));
-                        }
-                        return CommandResult.success();
-                    }
-                    throw new CommandException(Text.of("No such command: ", command.get()));
-                }
-
-                PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-                builder.title(Text.of(TextColors.DARK_GREEN, "Available commands:"));
-                builder.padding(Text.of(TextColors.DARK_GREEN, "="));
-
-                TreeSet<CommandMapping> commands = new TreeSet<>(Comparator.comparing(CommandMapping::getPrimaryAlias));
-                commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
-                        .testPermission(src)));
-                builder.contents(ImmutableList.copyOf(Collections2.transform(commands, input -> getDescription(src, input))));
-                builder.sendTo(src);
-                return CommandResult.success();
-            }).build();
-    }
-
-    private static Text getDescription(CommandSource source, CommandMapping mapping) {
-        final Optional<Text> description = mapping.getCallable().getShortDescription(source);
-        Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
-        text.color(TextColors.GREEN);
-        text.style(TextStyles.UNDERLINE);
-        // End with a space, so tab completion works immediately.
-        text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
-        mapping.getCallable().getHelp(source).ifPresent(text1 -> text.onHover(TextActions.showText(text1)));
-        return Text.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
     }
 }
