@@ -38,6 +38,10 @@ public class MixinChunkCache {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getChunkFromChunkCoords(II)Lnet/minecraft/world/chunk/Chunk;"))
     private Chunk onConstruct(World worldIn, int chunkX, int chunkZ) {
+        if (worldIn.isRemote) {
+            return worldIn.getChunkFromChunkCoords(chunkX, chunkZ);
+        }
+
         final net.minecraft.world.chunk.Chunk chunk =
                 ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
         IMixinChunk spongeChunk = (IMixinChunk) chunk;
