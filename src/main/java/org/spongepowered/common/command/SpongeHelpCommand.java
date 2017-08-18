@@ -68,7 +68,7 @@ public class SpongeHelpCommand {
     private static final Text COMMAND_KEY = Text.of("command");
     private static final Text NOT_FOUND = Text.of("notFound");
 
-    private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY){
+    private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
 
         @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             String input = args.next();
