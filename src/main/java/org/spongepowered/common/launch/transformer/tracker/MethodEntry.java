@@ -31,14 +31,23 @@ import java.util.Map;
 
 final class MethodEntry {
 
-    final String desc;
     final Type[] paramTypes;
     final Type returnType;
-    final Map<TrackedType, String> entries = new HashMap<>();
+    final Map<TrackedType, TargetTracker> entries = new HashMap<>();
 
-    MethodEntry(String desc, Type[] paramTypes, Type returnType) {
+    MethodEntry(Type[] paramTypes, Type returnType) {
         this.paramTypes = paramTypes;
         this.returnType = returnType;
-        this.desc = desc;
+    }
+
+    static final class TargetTracker {
+
+        final String type;
+        final String desc;
+
+        TargetTracker(String type, String desc) {
+            this.type = type;
+            this.desc = desc;
+        }
     }
 }
