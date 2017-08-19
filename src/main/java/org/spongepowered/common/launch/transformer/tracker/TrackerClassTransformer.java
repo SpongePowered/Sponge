@@ -114,6 +114,7 @@ public class TrackerClassTransformer implements IClassTransformer {
                 }
                 // None of the instance checks succeeded, call the original method
                 m.visitVarInsn(ALOAD, 0);
+                m.visitTypeInsn(CHECKCAST, e.oOwner);
                 for (int i = 0; i < e.entry.paramTypes.length; i++) {
                     m.visitVarInsn(e.entry.paramTypes[i].getOpcode(ILOAD), i + 1);
                 }
@@ -174,7 +175,7 @@ public class TrackerClassTransformer implements IClassTransformer {
             }
             final String methodName = "redirect" + simpleOwner + '$' + name;
             final String methodId = methodName + ';' + desc;
-            final String methodDesc = "(L" + owner + ';' + desc.substring(1);
+            final String methodDesc = "(Ljava/lang/Object;" + desc.substring(1);
             if (!this.classVisitor.addedMethods.containsKey(methodId)) {
                 final TrackerMethodEntry methodEntry = new TrackerMethodEntry();
                 methodEntry.entry = entry;
