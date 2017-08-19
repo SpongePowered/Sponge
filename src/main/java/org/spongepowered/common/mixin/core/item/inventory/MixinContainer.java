@@ -292,43 +292,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     @Override
-    public PluginContainer getPlugin() {
-        if (this.plugin == null) {
-            Object base = this;
-            PluginContainer container;
-
-            final Optional<?> carrier = ((CarriedInventory<?>) base).getCarrier();
-            if (carrier.isPresent()) {
-                base = carrier.get();
-            }
-
-            if (base instanceof TileEntity) {
-                final String id = ((TileEntity) base).getBlock().getType().getId();
-                final String pluginId = id.substring(0, id.indexOf(":"));
-                container = Sponge.getPluginManager().getPlugin(pluginId)
-                        .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
-            } else if (base instanceof Entity) {
-                final String id = ((Entity) base).getType().getId();
-                final String pluginId = id.substring(0, id.indexOf(":"));
-                container = Sponge.getPluginManager().getPlugin(pluginId)
-                        .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + this.getClass().getName() +
-                                ")"));
-            } else if (base instanceof SpongeUser) {
-                container = SpongeImpl.getMinecraftPlugin();
-            } else {
-                container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(this.getClass())).orElseGet(() -> {
-                    SpongeImpl.getLogger().warn("Unknown plugin for " + this);
-                    return SpongeImpl.getMinecraftPlugin();
-                });
-            }
-
-            this.plugin = container;
-        }
-
-        return this.plugin;
-    }
-
-    @Override
     public void setPlugin(PluginContainer plugin) {
         this.plugin = plugin;
     }
