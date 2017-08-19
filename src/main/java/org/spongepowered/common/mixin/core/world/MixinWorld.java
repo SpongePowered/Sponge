@@ -131,6 +131,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
@@ -1689,6 +1690,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (inChunk)
                 {
                     SpongeImplHooks.onTileEntityChunkUnload(tileEntity);
+                    ((IMixinTileEntity) tileEntity).setActiveChunk(null);
                 }
                 return inChunk;
             };

@@ -46,12 +46,11 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -67,7 +66,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
 import java.util.HashMap;
@@ -234,19 +232,9 @@ public class EntityActivationRange {
             ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
-            int i = MathHelper.floor_double(maxBB.minX / 16.0D);
-            int j = MathHelper.floor_double(maxBB.maxX / 16.0D);
-            int k = MathHelper.floor_double(maxBB.minZ / 16.0D);
-            int l = MathHelper.floor_double(maxBB.maxZ / 16.0D);
-
-            for (int i1 = i; i1 <= j; ++i1) {
-                for (int j1 = k; j1 <= l; ++j1) {
-                    WorldServer worldserver = (WorldServer) world;
-                    Chunk chunk = ((IMixinChunkProviderServer) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
-                    if (chunk != null) {
-                        activateChunkEntities(player, chunk);
-                    }
-                }
+            final Chunk chunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) player).getActiveChunk();
+            if (chunk != null) {
+                activateChunkEntities(player, chunk);
             }
         }
     }
@@ -392,8 +380,14 @@ public class EntityActivationRange {
         if (entity.worldObj.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
-        // If in forced chunk, always activate
-        if (((IMixinEntity) entity).isInForcedChunk()) {
+        final IMixinChunk activeChunk = ((IMixinEntity) entity).getActiveChunk();
+        if (activeChunk == null) {
+            // Should never happen but just in case for mods, always tick
+            return true;
+        }
+
+        // If in forced chunk or is player
+        if (activeChunk.isPersistedChunk() || (!SpongeImplHooks.isFakePlayer(entity) && entity instanceof EntityPlayerMP)) {
             return true;
         }
 
@@ -416,11 +410,7 @@ public class EntityActivationRange {
             isActive = false;
         }
 
-        // Make sure not on edge of unloaded chunk
-        int x = MathHelper.floor_double(entity.posX);
-        int z = MathHelper.floor_double(entity.posZ);
-        IMixinChunk spongeChunk = isActive ? (IMixinChunk)((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
-        if (isActive && (spongeChunk == null || !spongeChunk.areNeighborsLoaded())) {
+        if (isActive && !activeChunk.areNeighborsLoaded()) {
             isActive = false;
         }
 

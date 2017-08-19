@@ -118,6 +118,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -130,6 +131,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -157,7 +159,7 @@ public abstract class MixinEntity implements IMixinEntity {
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
-    private boolean inForcedChunk = false;
+    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
     private float origHeight;
@@ -1251,12 +1253,13 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public boolean isInForcedChunk() {
-        return this.inForcedChunk;
+    @Nullable
+    public IMixinChunk getActiveChunk() {
+        return this.activeChunk.get();
     }
 
     @Override
-    public void setIsInForcedChunk(boolean flag) {
-        this.inForcedChunk = flag;
+    public void setActiveChunk(@Nullable IMixinChunk chunk) {
+        this.activeChunk = new WeakReference<IMixinChunk>(chunk);
     }
 }

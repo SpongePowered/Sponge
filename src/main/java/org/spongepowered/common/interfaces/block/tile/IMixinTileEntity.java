@@ -33,7 +33,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+
+import javax.annotation.Nullable;
 
 public interface IMixinTileEntity {
 
@@ -103,7 +106,7 @@ public interface IMixinTileEntity {
 
     boolean hasSetOwner();
 
-    boolean isInForcedChunk();
+    @Nullable IMixinChunk getActiveChunk();
 
-    void setIsInForcedChunk(boolean flag);
+    void setActiveChunk(IMixinChunk chunk);
 }
