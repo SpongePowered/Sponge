@@ -43,7 +43,7 @@ public class BlockCapturingModCategory extends ConfigCategory {
 
     public BlockCapturingModCategory(String modId) {
         if (modId.equals("extrautils2")) {
-            this.blockMap.put("RedstoneClock", true);
+            this.blockMap.put("redstoneclock", true);
         }
     }
 
