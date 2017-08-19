@@ -34,10 +34,9 @@ import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
-import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -49,6 +48,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -84,7 +84,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     private Player carrier;
     private HotbarAdapter hotbar;
-    private GridInventoryAdapter main;
+    private MainPlayerInventoryAdapter main;
     private EquipmentInventoryAdapter equipment;
     private SlotAdapter offhand;
 
@@ -135,17 +135,9 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     }
 
     @Override
-    public Hotbar getHotbar() {
-        if (this.hotbar == null && this.lens instanceof PlayerInventoryLens) {
-            this.hotbar = (HotbarAdapter) ((PlayerInventoryLens) this.lens).getHotbarLens().getAdapter(this.inventory, this);
-        }
-        return this.hotbar;
-    }
-
-    @Override
-    public GridInventory getMain() {
+    public MainPlayerInventory getMain() {
         if (this.main == null && this.lens instanceof PlayerInventoryLens) {
-            this.main = (GridInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
+            this.main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
         }
         return this.main;
     }

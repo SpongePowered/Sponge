@@ -71,6 +71,9 @@ public final class NbtDataUtil {
 
         public static final String IS_FLYING = "flying";
 
+        public static final String INVENTORY = "Inventory";
+
+        public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
     }
 
     // These are the various tag compound id's for getting to various places

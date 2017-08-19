@@ -35,86 +35,75 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.entity.Equipable;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-// All implementors of ArmorEquipable
+// All living implementors of ArmorEquipable
 @Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, AbstractSkeleton.class, EntityZombie.class, EntityHuman.class})
 @Implements(@Interface(iface = ArmorEquipable.class, prefix = "equipable$"))
-public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
+public abstract class MixinArmorEquipable extends MixinEntityLivingBase implements Equipable {
 
-    public Optional<ItemStack> equipable$getHelmet() {
-        @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
-        return Optional.ofNullable(itemStack.isEmpty() ? null : (ItemStack) itemStack.copy());
+    @Override
+    public boolean canEquip(EquipmentType type) {
+        return true;
     }
 
-    public void equipable$setHelmet(ItemStack helmet) {
-        if (helmet == null || helmet.getType() == ItemTypes.NONE) {
-            this.setItemStackToSlot(EntityEquipmentSlot.HEAD, net.minecraft.item.ItemStack.EMPTY);
-        } else {
-            this.setItemStackToSlot(EntityEquipmentSlot.HEAD, (net.minecraft.item.ItemStack) helmet.copy());
+    @Override
+    public boolean canEquip(EquipmentType type, @Nullable ItemStack equipment) {
+        return true;
+    }
+
+    @Override
+    public Optional<ItemStack> getEquipped(EquipmentType type) {
+        if (type instanceof SpongeEquipmentType) {
+            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            if (slots.length != 1) {
+                throw new IllegalArgumentException("Only EquipmentTypes for a single Slot are possible");
+            }
+            net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
+            if (!nmsItem.isEmpty()) {
+                return Optional.of(ItemStackUtil.fromNative(nmsItem));
+            }
         }
+        return Optional.empty();
     }
 
-    public Optional<ItemStack> equipable$getChestplate() {
-        @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
-    }
-
-    public void equipable$setChestplate(ItemStack chestplate) {
-        if (chestplate == null || chestplate.getType() == ItemTypes.NONE) {
-            this.setItemStackToSlot(EntityEquipmentSlot.CHEST, net.minecraft.item.ItemStack.EMPTY);
-        } else {
-            this.setItemStackToSlot(EntityEquipmentSlot.CHEST, (net.minecraft.item.ItemStack) chestplate.copy());
+    @Override
+    public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
+        if (type instanceof SpongeEquipmentType) {
+            EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
+            if (slots.length == 0) {
+                slots = EntityEquipmentSlot.values();
+            }
+            for (EntityEquipmentSlot slot : slots) {
+                // TODO check if canEquip
+                this.setItemStackToSlot(slot, ItemStackUtil.toNative(equipment));
+                return true;
+            }
         }
-    }
-
-    public Optional<ItemStack> equipable$getLeggings() {
-        @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.LEGS);
-        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
-    }
-
-    public void equipable$setLeggings(ItemStack leggings) {
-        if (leggings == null || leggings.getType() == ItemTypes.NONE) {
-            this.setItemStackToSlot(EntityEquipmentSlot.LEGS, net.minecraft.item.ItemStack.EMPTY);
-        } else {
-            this.setItemStackToSlot(EntityEquipmentSlot.LEGS, ((net.minecraft.item.ItemStack) leggings.copy()));
-        }
-    }
-
-    public Optional<ItemStack> equipable$getBoots() {
-        @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.FEET);
-        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
-    }
-
-    public void equipable$setBoots(ItemStack boots) {
-        if (boots == null || boots.getType() == ItemTypes.NONE) {
-            this.setItemStackToSlot(EntityEquipmentSlot.FEET, net.minecraft.item.ItemStack.EMPTY);
-        } else {
-            this.setItemStackToSlot(EntityEquipmentSlot.FEET, ((net.minecraft.item.ItemStack) boots.copy()));
-        }
+        return false;
     }
 
     public Optional<ItemStack> equipable$getItemInHand(HandType handType) {
         checkNotNull(handType, "HandType cannot be null!");
-        @Nullable final net.minecraft.item.ItemStack itemStack = this.getHeldItem((EnumHand) (Object) handType);
-        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
+        final net.minecraft.item.ItemStack nmsItem = this.getHeldItem((EnumHand) (Object) handType);
+        return Optional.ofNullable(nmsItem.isEmpty() ? null : ((ItemStack) nmsItem.copy()));
     }
 
     public void equipable$setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
         checkNotNull(handType, "HandType cannot be null!");
-        if (itemInHand == null || itemInHand.getType() == ItemTypes.NONE) {
-            this.setHeldItem((EnumHand) (Object) handType, net.minecraft.item.ItemStack.EMPTY);
-        } else {
-            this.setHeldItem((EnumHand) (Object) handType, ((net.minecraft.item.ItemStack) itemInHand.copy()));
-        }
+        this.setHeldItem((EnumHand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
     }
 }

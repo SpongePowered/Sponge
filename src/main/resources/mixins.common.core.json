@@ -306,6 +306,7 @@
         "entity.player.MixinEntityPlayerMP",
         "entity.player.MixinInventoryPlayer",
         "entity.player.MixinSpongeUser",
+        "entity.player.MixinSpongeUserInventory",
         "entity.projectile.MixinEntityArrow",
         "entity.projectile.MixinEntityTippedArrow",
         "entity.projectile.MixinEntitySpectralArrow",

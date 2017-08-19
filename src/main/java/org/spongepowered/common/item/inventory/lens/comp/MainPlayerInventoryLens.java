@@ -22,16 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.item.inventory.lens.comp;
 
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypeWorn;
+public interface MainPlayerInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
 
-public class SpongeEquipmentTypeWorn extends SpongeEquipmentType implements EquipmentTypeWorn {
+    HotbarLens<TInventory, TStack> getHotbar();
 
-    private final int slot;
-
-    public SpongeEquipmentTypeWorn(String id, int slot) {
-        super(id);
-        this.slot = slot;
-    }
+    GridInventoryLens<TInventory, TStack> getGrid();
 }
