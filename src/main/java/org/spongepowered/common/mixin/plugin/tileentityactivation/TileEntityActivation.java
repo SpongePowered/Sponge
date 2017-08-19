@@ -42,9 +42,8 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -176,7 +175,7 @@ public class TileEntityActivation {
         final World world = tileEntity.getWorld();
         long currentTick = SpongeImpl.getServer().getTickCounter();
         IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
-        boolean isActive = spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();
+        boolean isActive = ((IMixinTileEntity) tileEntity).isInForcedChunk() || spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();
 
         // Should this entity tick?
         if (!isActive) {
@@ -184,18 +183,6 @@ public class TileEntityActivation {
                 // Has not come across a player
                 return false;
             }
-        }
-
-        // Make sure not on edge of unloaded chunk
-        int x = tileEntity.getPos().getX();
-        int z = tileEntity.getPos().getZ();
-        IMixinChunk spongeChunk = (IMixinChunk)((IMixinChunkProviderServer) world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
-        if (isActive && (spongeChunk == null || (!spongeChunk.isPersistedChunk() && !spongeChunk.areNeighborsLoaded()))) {
-            isActive = false;
-        }
-
-        if (!isActive && spongeChunk != null && spongeChunk.isPersistedChunk()) {
-            isActive = true;
         }
 
         // check tick rate

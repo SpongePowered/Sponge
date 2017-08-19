@@ -160,6 +160,7 @@ public abstract class MixinEntity implements IMixinEntity {
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
+    private boolean inForcedChunk = false;
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
     private float origHeight;
@@ -1315,5 +1316,15 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public Value<Boolean> gravity() {
         return this.getValue(Keys.HAS_GRAVITY).get();
+    }
+
+    @Override
+    public boolean isInForcedChunk() {
+        return this.inForcedChunk;
+    }
+
+    @Override
+    public void setIsInForcedChunk(boolean flag) {
+        this.inForcedChunk = flag;
     }
 }
