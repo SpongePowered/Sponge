@@ -16,7 +16,6 @@
         "text.MixinTextScore",
         "text.MixinTextSelector",
         "text.MixinTextTranslatable",
-        "text.title.MixinTitle",
         "world.MixinLocation"
     ],
     "injectors": {
