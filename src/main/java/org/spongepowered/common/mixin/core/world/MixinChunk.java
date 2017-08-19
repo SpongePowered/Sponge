@@ -102,6 +102,8 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -208,6 +210,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public void setPersistedChunk(boolean flag) {
         this.persistedChunk = flag;
+        // update persisted status for entities and TE's
+        for (TileEntity tileEntity : this.chunkTileEntityMap.values()) {
+            ((IMixinTileEntity) tileEntity).setIsInForcedChunk(flag);
+        }
+        for (ClassInheritanceMultiMap<Entity> entityList : this.entityLists) {
+            for (Entity entity : entityList) {
+                ((IMixinEntity) entity).setIsInForcedChunk(flag);
+            }
+        }
     }
 
     @Override
@@ -218,6 +229,20 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public void setIsSpawning(boolean spawning) {
         this.isSpawning = spawning;
+    }
+
+    @Inject(method = "addEntity", at = @At("RETURN"))
+    private void onChunkAddEntity(Entity entityIn, CallbackInfo ci) {
+        if (!entityIn.isDead && this.persistedChunk) {
+            ((IMixinEntity) entityIn).setIsInForcedChunk(true);
+        }
+    }
+
+    @Inject(method = "addTileEntity", at = @At("RETURN"))
+    private void onChunkAddTileEntity(TileEntity tileEntityIn, CallbackInfo ci) {
+        if (this.persistedChunk) {
+            ((IMixinTileEntity) tileEntityIn).setIsInForcedChunk(true);
+        }
     }
 
     /**
