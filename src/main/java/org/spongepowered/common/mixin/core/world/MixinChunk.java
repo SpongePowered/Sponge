@@ -203,6 +203,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public boolean isChunkLoaded() {
+        return this.loaded;
+    }
+
+    @Override
     public boolean isPersistedChunk() {
         return this.persistedChunk;
     }
@@ -211,12 +216,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public void setPersistedChunk(boolean flag) {
         this.persistedChunk = flag;
         // update persisted status for entities and TE's
-        for (TileEntity tileEntity : this.chunkTileEntityMap.values()) {
-            ((IMixinTileEntity) tileEntity).setIsInForcedChunk(flag);
+        for (TileEntity tileEntity : this.tileEntities.values()) {
+            ((IMixinTileEntity) tileEntity).setActiveChunk(this);
         }
         for (ClassInheritanceMultiMap<Entity> entityList : this.entityLists) {
             for (Entity entity : entityList) {
-                ((IMixinEntity) entity).setIsInForcedChunk(flag);
+                ((IMixinEntity) entity).setActiveChunk(this);
             }
         }
     }
@@ -233,16 +238,25 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Inject(method = "addEntity", at = @At("RETURN"))
     private void onChunkAddEntity(Entity entityIn, CallbackInfo ci) {
-        if (!entityIn.isDead && this.persistedChunk) {
-            ((IMixinEntity) entityIn).setIsInForcedChunk(true);
+        if (!entityIn.isDead) {
+            ((IMixinEntity) entityIn).setActiveChunk(this);
         }
     }
 
-    @Inject(method = "addTileEntity", at = @At("RETURN"))
-    private void onChunkAddTileEntity(TileEntity tileEntityIn, CallbackInfo ci) {
-        if (this.persistedChunk) {
-            ((IMixinTileEntity) tileEntityIn).setIsInForcedChunk(true);
-        }
+    @Inject(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
+    private void onChunkAddTileEntity(BlockPos pos, TileEntity tileEntityIn, CallbackInfo ci) {
+        ((IMixinTileEntity) tileEntityIn).setActiveChunk(this);
+    }
+
+    @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
+    private void onChunkRemoveEntityAtIndex(Entity entityIn, int index, CallbackInfo ci) {
+        ((IMixinEntity) entityIn).setActiveChunk(null);
+    }
+
+    @Redirect(method = "removeTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;invalidate()V"))
+    private void onChunkRemoveTileEntity(TileEntity tileEntityIn) {
+        ((IMixinTileEntity) tileEntityIn).setActiveChunk(null);
+        tileEntityIn.invalidate();
     }
 
     /**

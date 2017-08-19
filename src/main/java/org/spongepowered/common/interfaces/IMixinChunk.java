@@ -106,4 +106,6 @@ public interface IMixinChunk {
     void setLightUpdateTime(long time);
 
     List<net.minecraft.world.chunk.Chunk> getNeighbors();
+
+    boolean isChunkLoaded();
 }
