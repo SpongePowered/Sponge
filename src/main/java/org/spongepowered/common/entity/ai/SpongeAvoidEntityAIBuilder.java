@@ -70,7 +70,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
 
     @Override
     public AvoidEntityAITask.Builder from(AvoidEntityAITask value) {
-        return targetSelector(value.getTargetSelector())
+        return this.targetSelector(value.getTargetSelector())
             .searchDistance(value.getSearchDistance())
             .closeRangeSpeed(value.getCloseRangeSpeed())
             .farRangeSpeed(value.getFarRangeSpeed());
@@ -89,7 +89,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     public AvoidEntityAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidEntityAITask) new EntityAIAvoidEntity<>((EntityCreature) owner, net.minecraft.entity.EntityCreature.class,
+        return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, Entity.class,
                 Functional.java8ToGuava((Predicate) this.targetSelector),
                 this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
     }
