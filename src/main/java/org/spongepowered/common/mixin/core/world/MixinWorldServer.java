@@ -331,7 +331,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         scoreboardSaveData.setScoreboard(scoreboard);
     }
 
-    @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
+    @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
@@ -343,7 +343,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
 
-    @Inject(method = "createBonusChest", at = @At(value = "RETURN"))
+    @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
