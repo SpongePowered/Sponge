@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.google.common.base.Objects;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -99,5 +100,10 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
                 .add("isOnline", this.isOnline())
                 .add("profile", this.getProfile())
                 .toString();
+    }
+
+    @Override
+    public DataHolder copy() {
+        return this;
     }
 }
