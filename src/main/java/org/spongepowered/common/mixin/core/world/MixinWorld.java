@@ -1624,14 +1624,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        if (CauseTracker.ENABLED) {
+        if (!this.isRemote && CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(GeneralPhase.State.TILE_ENTITY_UNLOAD, PhaseContext.start()
                     .add(this.worldNamedCause)
                     .complete());
         }
         this.startPendingTileEntityTimings(); // Sponge
-        this.removeTileEntitiesForRemovedChunks(); 
-        if (CauseTracker.ENABLED) {
+        this.removeTileEntitiesForRemovedChunks();
+        if (!this.isRemote && CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GeneralPhase.State.TILE_ENTITY_UNLOAD);
         }
         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
