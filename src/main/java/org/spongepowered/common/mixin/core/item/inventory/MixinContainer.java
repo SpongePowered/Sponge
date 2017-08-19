@@ -32,6 +32,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -48,6 +51,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -68,7 +73,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-@Mixin(Container.class)
+@Mixin(value = Container.class, priority = 998)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer, CarriedInventory<Carrier> {
 
@@ -99,7 +104,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private InventoryArchetype archetype;
     protected Optional<Carrier> carrier = Optional.empty();
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
-    private PluginContainer plugin = SpongeImpl.getMinecraftPlugin();
+    @Nullable private PluginContainer plugin = null;
 
     private void init() {
         this.initialized = true;
@@ -288,12 +293,38 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public PluginContainer getPlugin() {
-        if (this.carrier.isPresent()) {
-            CarriedInventory<? extends Carrier> inventory = this.carrier.get().getInventory();
-            if (!(inventory instanceof Container)) {
-                return inventory.getPlugin();
+        if (this.plugin == null) {
+            Object base = this;
+            PluginContainer container;
+
+            final Optional<?> carrier = ((CarriedInventory<?>) base).getCarrier();
+            if (carrier.isPresent()) {
+                base = carrier.get();
             }
+
+            if (base instanceof TileEntity) {
+                final String id = ((TileEntity) base).getBlock().getType().getId();
+                final String pluginId = id.substring(0, id.indexOf(":"));
+                container = Sponge.getPluginManager().getPlugin(pluginId)
+                        .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
+            } else if (base instanceof Entity) {
+                final String id = ((Entity) base).getType().getId();
+                final String pluginId = id.substring(0, id.indexOf(":"));
+                container = Sponge.getPluginManager().getPlugin(pluginId)
+                        .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + this.getClass().getName() +
+                                ")"));
+            } else if (base instanceof SpongeUser) {
+                container = SpongeImpl.getMinecraftPlugin();
+            } else {
+                container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(this.getClass())).orElseGet(() -> {
+                    SpongeImpl.getLogger().warn("Unknown plugin for " + this);
+                    return SpongeImpl.getMinecraftPlugin();
+                });
+            }
+
+            this.plugin = container;
         }
+
         return this.plugin;
     }
 
@@ -302,4 +333,3 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.plugin = plugin;
     }
 }
-

@@ -343,6 +343,7 @@
         "item.inventory.MixinContainerPlayer",
         "item.inventory.MixinContainerCanInteract",
         "item.inventory.MixinContainerCrafting",
+        "item.inventory.MixinCustomContainer",
         "item.inventory.MixinSlot",
         "item.inventory.MixinSlotCrafting",
         "item.inventory.TraitInventoryAdapter",

@@ -46,8 +46,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.custom.CustomContainer;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
@@ -135,35 +137,5 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     @Intrinsic
     public void inventory$clear() {
         this.getInventory().clear();
-    }
-
-    @Override
-    public PluginContainer getPlugin() {
-        Object base = this;
-        if (this instanceof CarriedInventory) {
-            Optional<?> carrier = ((CarriedInventory<?>) this).getCarrier();
-            if (carrier.isPresent()) {
-                base = carrier.get();
-            }
-        }
-        if (base instanceof TileEntity) {
-            String id = ((TileEntity) base).getBlock().getType().getId();
-            String pluginId = id.substring(0, id.indexOf(":"));
-            return Sponge.getPluginManager().getPlugin(pluginId)
-                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
-        }
-        if (base instanceof Entity) {
-            String id = ((Entity) base).getType().getId();
-            String pluginId = id.substring(0, id.indexOf(":"));
-            return Sponge.getPluginManager().getPlugin(pluginId)
-                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + getClass().getName() + ")"));
-        }
-        if (base instanceof SpongeUser) {
-            return SpongeImpl.getMinecraftPlugin();
-        }
-        return Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(this.getClass())).orElseGet(() -> {
-            SpongeImpl.getLogger().warn("Unknown plugin for " + this);
-            return SpongeImpl.getMinecraftPlugin();
-        });
     }
 }

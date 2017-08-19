@@ -780,13 +780,12 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static Container displayContainer(Cause cause, EntityPlayerMP player, Inventory inventory) {
         net.minecraft.inventory.Container previousContainer = player.openContainer;
-        net.minecraft.inventory.Container container = null;
+        net.minecraft.inventory.Container container;
 
         if (inventory instanceof CustomInventory) {
             if (!checkValidVanillaCustomInventory(((CustomInventory) inventory))) {
                 return null; // Invalid size for vanilla inventory ; This is to prevent crashing the client with invalid data
             }
-            // else continue as normal
         }
 
         if (inventory instanceof IInteractionObject) {
@@ -794,36 +793,32 @@ public class SpongeCommonEventFactory {
 
             switch (guiId) {
                 case "EntityHorse":
-                    // If Carrier is Horse open Inventory
                     if (inventory instanceof CarriedInventory) {
                         if (((CarriedInventory<?>) inventory).getCarrier().isPresent()
                                 && ((CarriedInventory<?>) inventory).getCarrier().get() instanceof EntityHorse) {
                             player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory<?>) inventory).getCarrier().get()), (IInventory) inventory);
-                            container = player.openContainer;
                         }
                     }
                     break;
                 case "minecraft:chest":
                     player.displayGUIChest((IInventory) inventory);
-                    container = player.openContainer;
                     break;
                 case "minecraft:crafting_table":
                 case "minecraft:anvil":
                 case "minecraft:enchanting_table":
                     player.displayGui((IInteractionObject) inventory);
-                    container = player.openContainer;
                     break;
                 default:
                     player.displayGUIChest((IInventory) inventory);
-                    container = player.openContainer;
                     break;
             }
         } else if (inventory instanceof IInventory) {
             player.displayGUIChest(((IInventory) inventory));
-            container = player.openContainer;
         } else {
             return null;
         }
+
+        container = player.openContainer;
 
         if (previousContainer == container) {
             return null;
@@ -832,6 +827,7 @@ public class SpongeCommonEventFactory {
         if (!callInteractInventoryOpenEvent(cause, player)) {
             return null;
         }
+
         if (container instanceof IMixinContainer) {
             // This overwrites the normal container behaviour and allows viewing inventories that are more than 8 blocks away
             // This currently actually only works for the Containers mixed into by MixinContainerCanInteract ; but throws no errors for other containers
