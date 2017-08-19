@@ -162,7 +162,7 @@ public class EntityActivationRange {
         SpongeEntityType spongeType = (SpongeEntityType) type;
 
         byte activationType = spongeEntity.getActivationType();
-        EntityActivationModCategory entityMod = config.getModList().get(spongeType.getModId());
+        EntityActivationModCategory entityMod = config.getModList().get(spongeType.getModId().toLowerCase());
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
             // use default activation range
@@ -177,7 +177,7 @@ public class EntityActivationRange {
         }
 
         Integer defaultModActivationRange = entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType));
-        Integer entityActivationRange = entityMod.getEntityList().get(type.getName());
+        Integer entityActivationRange = entityMod.getEntityList().get(type.getName().toLowerCase());
         if (defaultModActivationRange != null && entityActivationRange == null) {
             spongeEntity.setActivationRange(defaultModActivationRange);
             if (defaultModActivationRange <= 0) {
@@ -438,11 +438,12 @@ public class EntityActivationRange {
         String entityType = "misc";
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);
         boolean requiresSave = false;
+        final String entityModId = type.getModId().toLowerCase();
         EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
-        EntityActivationModCategory entityMod = activationCategory.getModList().get(type.getModId());
+        EntityActivationModCategory entityMod = activationCategory.getModList().get(entityModId);
         if (entityMod == null) {
             entityMod = new EntityActivationModCategory();
-            activationCategory.getModList().put(type.getModId(), entityMod);
+            activationCategory.getModList().put(entityModId, entityMod);
             requiresSave = true;
         }
 
@@ -460,9 +461,10 @@ public class EntityActivationRange {
             }
 
             // check for entity overrides
-            Integer entityActivationRange = entityMod.getEntityList().get(type.getName());
+            final String entityId = type.getName().toLowerCase();
+            Integer entityActivationRange = entityMod.getEntityList().get(entityId);
             if (entityActivationRange == null) {
-                entityMod.getEntityList().put(type.getName(), entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType)));
+                entityMod.getEntityList().put(entityId, entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType)));
                 requiresSave = true;
             } else if (entityActivationRange != null) {
                 // check max ranges

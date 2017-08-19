@@ -71,7 +71,7 @@ public class TileEntityActivation {
         if (spongeType == null || spongeType.getModId() == null) {
             return true;
         }
-        TileEntityActivationModCategory tileEntityMod = config.getModList().get(spongeType.getModId());
+        TileEntityActivationModCategory tileEntityMod = config.getModList().get(spongeType.getModId().toLowerCase());
         int defaultActivationRange = config.getDefaultBlockRange();
         if (tileEntityMod == null) {
             // use default activation range
@@ -86,7 +86,7 @@ public class TileEntityActivation {
         }
 
         Integer defaultModActivationRange = tileEntityMod.getDefaultBlockRange();
-        Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(type.getName());
+        Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(type.getName().toLowerCase());
         if (defaultModActivationRange != null && tileEntityActivationRange == null) {
             spongeEntity.setActivationRange(defaultModActivationRange);
             if (defaultModActivationRange <= 0) {
@@ -216,25 +216,27 @@ public class TileEntityActivation {
         }
 
         boolean requiresSave = false;
+        final String tileModId = type.getModId().toLowerCase();
         TileEntityActivationCategory activationCategory = config.getConfig().getTileEntityActivationRange();
-        TileEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(type.getModId());
+        TileEntityActivationModCategory tileEntityMod = activationCategory.getModList().get(tileModId);
         int defaultRange = activationCategory.getDefaultBlockRange();
         int defaultTickRate = activationCategory.getDefaultTickRate();
         if (tileEntityMod == null) {
-            tileEntityMod = new TileEntityActivationModCategory(type.getModId());
-            activationCategory.getModList().put(type.getModId(), tileEntityMod);
+            tileEntityMod = new TileEntityActivationModCategory(tileModId);
+            activationCategory.getModList().put(tileModId, tileEntityMod);
             requiresSave = true;
         }
 
         if (tileEntityMod != null) {
             // check for tileentity range overrides
-            Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(type.getName());
+            final String tileId = type.getName().toLowerCase();
+            Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(tileId);
             Integer modDefaultRange = tileEntityMod.getDefaultBlockRange();
             if (modDefaultRange == null) {
                 modDefaultRange = defaultRange;
             }
             if (tileEntityActivationRange == null) {
-                tileEntityMod.getTileEntityRangeList().put(type.getName(), modDefaultRange);
+                tileEntityMod.getTileEntityRangeList().put(tileId, modDefaultRange);
                 requiresSave = true;
             }
 
@@ -243,9 +245,9 @@ public class TileEntityActivation {
             if (modDefaultTickRate == null) {
                 modDefaultTickRate = defaultTickRate;
             }
-            Integer tileEntityActivationTickRate = tileEntityMod.getTileEntityTickRateList().get(type.getName());
+            Integer tileEntityActivationTickRate = tileEntityMod.getTileEntityTickRateList().get(tileId);
             if (tileEntityActivationTickRate == null) {
-                tileEntityMod.getTileEntityTickRateList().put(type.getName(), modDefaultTickRate);
+                tileEntityMod.getTileEntityTickRateList().put(tileId, modDefaultTickRate);
                 requiresSave = true;
             }
         }

@@ -56,8 +56,8 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
         BlockCapturingModCategory modCapturing = blockCapturing.getModMappings().get(modId);
         if (modCapturing == null && blockCapturing.autoPopulateData()) {
             modCapturing = new BlockCapturingModCategory();
-            blockCapturing.getModMappings().put(modId, modCapturing);
-            modCapturing.getBlockMap().put(name, false);
+            blockCapturing.getModMappings().put(modId.toLowerCase(), modCapturing);
+            modCapturing.getBlockMap().put(name.toLowerCase(), false);
             if (blockCapturing.autoPopulateData()) {
                 activeConfig.save();
             }
@@ -68,7 +68,7 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
                 return;
             }
 
-            Boolean processImmediately = modCapturing.getBlockMap().get(name);
+            Boolean processImmediately = modCapturing.getBlockMap().get(name.toLowerCase());
             if (processImmediately != null) {
                 this.processTickChangesImmediately = processImmediately;
             }
