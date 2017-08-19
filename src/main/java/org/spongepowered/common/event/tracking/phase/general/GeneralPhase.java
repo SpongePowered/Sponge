@@ -73,6 +73,7 @@ public final class GeneralPhase extends TrackingPhase {
         public static final IPhaseState COMPLETE = new CompletePhase();
         public static final IPhaseState MARKER_CROSS_WORLD = new MarkerCrossWorld();
         public static final IPhaseState GAME_STATE_EVENTS = new GameStateEventState();
+        public static final IPhaseState TILE_ENTITY_UNLOAD = new TileEntityUnloadState();
         public static final IPhaseState WORLD_UNLOAD = new WorldUnload();
 
         private State() { }
