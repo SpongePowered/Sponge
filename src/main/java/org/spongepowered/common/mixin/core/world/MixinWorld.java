@@ -91,6 +91,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -126,6 +127,9 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -179,6 +183,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
+    private NamedCause worldNamedCause;
     private it.unimi.dsi.fastutil.longs.LongCollection tileEntitiesChunkToBeRemoved = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
     // @formatter:off
@@ -299,6 +304,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds use separate save handlers.
         this.worldInfo = info;
+        this.worldNamedCause = NamedCause.source(this);
     }
 
     @SuppressWarnings("rawtypes")
@@ -1605,9 +1611,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.stopTileEntityRemovelInWhile(); // Sponge
         }
 
-        this.startPendingTileEntityTimings(); // Sponge
-
-        if (!this.tileEntitiesToBeRemoved.isEmpty()) {
+        // This is handled below in removeTileEntitiesForRemovedChunks
+        if (false && !this.tileEntitiesToBeRemoved.isEmpty()) {
             // Sponge start - use forge hook
             for (Object tile : this.tileEntitiesToBeRemoved) {
                SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
@@ -1619,7 +1624,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.TILE_ENTITY_UNLOAD, PhaseContext.start()
+                    .add(this.worldNamedCause)
+                    .complete());
+        }
+        this.startPendingTileEntityTimings(); // Sponge
         this.removeTileEntitiesForRemovedChunks(); 
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().completePhase(GeneralPhase.State.TILE_ENTITY_UNLOAD);
+        }
         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
         // this.theProfiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 

@@ -344,6 +344,7 @@
         "network.play.server.MixinSPacketPlayerListItem",
         "network.play.server.MixinSPacketWorldBorder",
         "network.datasync.IMixinEntityDataManager",
+        "network.datasync.MixinEntityDataManager",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "profiler.MixinProfiler",
