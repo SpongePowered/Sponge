@@ -354,11 +354,8 @@
         "network.packet.MixinSPacketResourcePackSend",
         "network.play.server.MixinSPacketPlayerListItem",
         "network.play.server.MixinSPacketWorldBorder",
-<<<<<<< HEAD
-=======
         "network.datasync.IMixinEntityDataManager",
         "network.datasync.MixinEntityDataManager",
->>>>>>> d3fd356... Add TileEntityUnloadState. Fixes SpongePowered/SpongeForge#1470
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "profiler.MixinProfiler",
