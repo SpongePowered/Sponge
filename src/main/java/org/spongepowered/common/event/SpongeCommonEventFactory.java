@@ -36,7 +36,7 @@ import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -795,8 +795,8 @@ public class SpongeCommonEventFactory {
                 case "EntityHorse":
                     if (inventory instanceof CarriedInventory) {
                         if (((CarriedInventory<?>) inventory).getCarrier().isPresent()
-                                && ((CarriedInventory<?>) inventory).getCarrier().get() instanceof EntityHorse) {
-                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory<?>) inventory).getCarrier().get()), (IInventory) inventory);
+                                && ((CarriedInventory<?>) inventory).getCarrier().get() instanceof AbstractHorse) {
+                            player.openGuiHorseInventory(((AbstractHorse) ((CarriedInventory<?>) inventory).getCarrier().get()), (IInventory) inventory);
                         }
                     }
                     break;

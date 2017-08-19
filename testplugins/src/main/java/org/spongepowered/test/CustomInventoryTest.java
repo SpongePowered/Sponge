@@ -24,22 +24,38 @@
  */
 package org.spongepowered.test;
 
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.entity.living.animal.Horse;
+import org.spongepowered.api.entity.living.animal.Llama;
+import org.spongepowered.api.entity.living.animal.Mule;
+import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.property.GuiIdProperty;
+import org.spongepowered.api.item.inventory.property.GuiIds;
+import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextAction;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
@@ -52,24 +68,108 @@ import java.util.Optional;
 public class CustomInventoryTest {
 
     @Listener
-    public void onPlayerInteract(InteractBlockEvent.Primary event, @Root Player player) {
+    public void onPunchBlock(InteractBlockEvent.Primary event, @Root Player player) {
         if (!player.get(Keys.IS_SNEAKING).orElse(false)) {
             return;
         }
-        event.getTargetBlock().getLocation().ifPresent(l ->
-                l.getTileEntity().ifPresent(te -> {
-                    if (te instanceof Carrier) {
-                        BasicCarrier myCarrier = new BasicCarrier();
-                        Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
-                                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName())))
-                                .withCarrier(myCarrier)
-                                .build(this);
-                        myCarrier.init(custom);
-                        player.openInventory(custom, Cause.source(player).build());
-                        event.setCancelled(true);
-                    }
-                })
+        event.getTargetBlock().getLocation().ifPresent(loc -> {
+                    interactCarrier(event, player, loc);
+                    interactOtherBlock(event, player, loc);
+                }
         );
+    }
+
+    @Listener
+    public void onPunchEntity(InteractEntityEvent.Primary event, @Root Player player) {
+        if (!player.get(Keys.IS_SNEAKING).orElse(false)) {
+            return;
+        }
+        if (event.getTargetEntity() instanceof Mule) {
+            Inventory.Builder builder;
+            if (((Mule) event.getTargetEntity()).getInventory().capacity() <= 2) {
+                builder = Inventory.builder().of(InventoryArchetypes.HORSE);
+            } else {
+                builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
+            }
+            Inventory inventory =  builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Mule")))
+                    .withCarrier(((Horse) event.getTargetEntity()))
+                    .build(this);
+            int i = 1;
+            for (Inventory slot : inventory.slots()) {
+                slot.set(ItemStack.of(ItemTypes.APPLE, i++));
+            }
+            player.openInventory(inventory, Cause.source(player).build());
+            event.setCancelled(true);
+        } else if (event.getTargetEntity() instanceof Llama) {
+            Inventory.Builder builder;
+            if (((Llama) event.getTargetEntity()).getInventory().capacity() <= 2) {
+                builder = Inventory.builder().of(InventoryArchetypes.HORSE);
+            } else {
+                builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
+            }
+            Inventory inventory =  builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Llama")))
+                    .withCarrier(((Horse) event.getTargetEntity()))
+                    .build(this);
+            int i = 1;
+            for (Inventory slot : inventory.slots()) {
+                slot.set(ItemStack.of(ItemTypes.APPLE, i++));
+            }
+            player.openInventory(inventory, Cause.source(player).build());
+            event.setCancelled(true);
+        } else if (event.getTargetEntity() instanceof Horse) {
+            Inventory inventory = Inventory.builder().of(InventoryArchetypes.HORSE)
+                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Horse")))
+                    .withCarrier(((Horse) event.getTargetEntity()))
+                    .build(this);
+            int i = 1;
+            for (Inventory slot : inventory.slots()) {
+                slot.set(ItemStack.of(ItemTypes.APPLE, i++));
+            }
+            player.openInventory(inventory, Cause.source(player).build());
+            event.setCancelled(true);
+        }
+        if (event.getTargetEntity() instanceof Slime) {
+            Inventory inventory = Inventory.builder().of(InventoryArchetypes.MENU_GRID)
+                    .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(1, 9))
+                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Slime Content")))
+                    .property("guiidproperty", new GuiIdProperty(GuiIds.DISPENSER))
+                    .build(this);
+            ItemStack flard = ItemStack.of(ItemTypes.SLIME, 1);
+            flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
+            for (Inventory slot : inventory.slots()) {
+                slot.set(flard);
+            }
+            player.openInventory(inventory, Cause.source(player).build());
+        }
+    }
+
+    private void interactOtherBlock(InteractBlockEvent.Primary event, Player player, Location<World> loc) {
+        if (loc.getBlockType() == BlockTypes.CRAFTING_TABLE) {
+            Inventory inventory = Inventory.builder().of(InventoryArchetypes.WORKBENCH)
+                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Workbench")))
+                    .build(this);
+            for (Inventory slot : inventory.slots()) {
+                slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
+            }
+            player.openInventory(inventory, Cause.source(player).build());
+            event.setCancelled(true);
+        }
+    }
+
+    private void interactCarrier(InteractBlockEvent.Primary event, Player player, Location<World> loc) {
+        loc.getTileEntity().ifPresent(te -> {
+            if (te instanceof Carrier) {
+                BasicCarrier myCarrier = new BasicCarrier();
+                Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
+                        .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory()
+                                .getName())))
+                        .withCarrier(myCarrier)
+                        .build(this);
+                myCarrier.init(custom);
+                player.openInventory(custom, Cause.source(player).build());
+                event.setCancelled(true);
+            }
+        });
     }
 
     @Listener

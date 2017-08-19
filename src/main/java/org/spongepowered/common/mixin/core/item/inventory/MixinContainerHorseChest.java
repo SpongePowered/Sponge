@@ -22,19 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.archetype;
+package org.spongepowered.common.mixin.core.item.inventory;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import net.minecraft.inventory.ContainerHorseChest;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.Optional;
 
-/**
- * Base Archetype
- */
-public class SlotArchetype extends CompositeInventoryArchetype {
+@Mixin(ContainerHorseChest.class)
+public abstract class MixinContainerHorseChest implements CarriedInventory, IMixinCarriedInventory {
 
-    public SlotArchetype(Map<String, InventoryProperty<String, ?>> properties) {
-        super("minecraft:slot", "Slot", Collections.emptyList(), properties, null);
+    private Carrier carrier;
+
+    @Override
+    public Optional<Carrier> getCarrier() {
+        return Optional.ofNullable(this.carrier);
+    }
+
+    @Override
+    public void setCarrier(Carrier carrier) {
+        this.carrier = carrier;
     }
 }

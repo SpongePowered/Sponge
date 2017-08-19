@@ -26,6 +26,9 @@ package org.spongepowered.common.item.inventory.archetype;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 
@@ -33,18 +36,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class CompositeInventoryArchetype implements InventoryArchetype {
 
     private final String id;
     private final String name;
     private final List<InventoryArchetype> types;
     private final Map<String, InventoryProperty<String, ?>> properties;
+    @Nullable private ContainerProvider containerProvider;
 
-    public CompositeInventoryArchetype(String id, String name, List<InventoryArchetype> types, Map<String, InventoryProperty<String, ?>> properties) {
+    public CompositeInventoryArchetype(String id, String name, List<InventoryArchetype> types, Map<String, InventoryProperty<String, ?>> properties, @Nullable ContainerProvider containerProvider) {
         this.id = id;
         this.name = name;
         this.types = ImmutableList.copyOf(types);
         this.properties = ImmutableMap.copyOf(properties);
+        this.containerProvider = containerProvider;
     }
 
     @Override
@@ -85,4 +92,16 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
     public Map<String, InventoryProperty<String, ?>> getProperties() {
         return this.properties;
     }
+
+    @Nullable public ContainerProvider getContainerProvider() {
+        return this.containerProvider;
+    }
+
+    /**
+     * Provides a {@link Container} for a {@link EntityPlayer} viewing an {@link IInventory}
+     */
+    public interface ContainerProvider {
+        Container provide(IInventory viewed, EntityPlayer viewing);
+    }
+
 }

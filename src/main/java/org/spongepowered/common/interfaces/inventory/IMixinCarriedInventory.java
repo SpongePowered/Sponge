@@ -22,19 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.archetype;
+package org.spongepowered.common.interfaces.inventory;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.Carrier;
 
-import java.util.Collections;
-import java.util.Map;
+public interface IMixinCarriedInventory {
 
-/**
- * Base Archetype
- */
-public class SlotArchetype extends CompositeInventoryArchetype {
-
-    public SlotArchetype(Map<String, InventoryProperty<String, ?>> properties) {
-        super("minecraft:slot", "Slot", Collections.emptyList(), properties, null);
-    }
+    void setCarrier(Carrier carrier);
 }
