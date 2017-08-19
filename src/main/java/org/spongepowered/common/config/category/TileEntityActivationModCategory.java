@@ -48,7 +48,7 @@ public class TileEntityActivationModCategory extends ConfigCategory {
     }
 
     public TileEntityActivationModCategory(String modId) {
-        if (modId.equalsIgnoreCase("ComputerCraft")) {
+        if (modId.equalsIgnoreCase("computercraft")) {
             this.tileEntityRangeList.put("advanced_modem", 0);
             this.tileEntityRangeList.put("ccprinter", 0);
             this.tileEntityRangeList.put("diskdrive", 0);

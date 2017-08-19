@@ -102,4 +102,8 @@ public interface IMixinTileEntity {
     User getSpongeOwner();
 
     boolean hasSetOwner();
+
+    boolean isInForcedChunk();
+
+    void setIsInForcedChunk(boolean flag);
 }

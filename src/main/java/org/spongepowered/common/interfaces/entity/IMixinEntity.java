@@ -139,4 +139,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     default void onJoinWorld() {
 
     }
+
+    boolean isInForcedChunk();
+
+    void setIsInForcedChunk(boolean flag);
 }

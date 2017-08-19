@@ -64,6 +64,7 @@ import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -391,6 +392,10 @@ public class EntityActivationRange {
         if (entity.worldObj.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
+        // If in forced chunk, always activate
+        if (((IMixinEntity) entity).isInForcedChunk()) {
+            return true;
+        }
 
         long currentTick = SpongeImpl.getServer().getTickCounter();
         IModData_Activation spongeEntity = (IModData_Activation) entity;
@@ -417,10 +422,6 @@ public class EntityActivationRange {
         IMixinChunk spongeChunk = isActive ? (IMixinChunk)((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
         if (isActive && (spongeChunk == null || !spongeChunk.areNeighborsLoaded())) {
             isActive = false;
-        }
-
-        if (!isActive && spongeChunk != null && spongeChunk.isPersistedChunk()) {
-            isActive = true;
         }
 
         return isActive;

@@ -82,6 +82,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     // caches owner to avoid constant lookups in chunk
     private User spongeOwner;
     private boolean hasSetOwner = false;
+    private boolean inForcedChunk = false;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -301,5 +302,15 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public boolean hasSetOwner() {
         return this.hasSetOwner;
+    }
+
+    @Override
+    public boolean isInForcedChunk() {
+        return this.inForcedChunk;
+    }
+
+    @Override
+    public void setIsInForcedChunk(boolean flag) {
+        this.inForcedChunk = flag;
     }
 }
