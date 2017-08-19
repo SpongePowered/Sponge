@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.server.MinecraftServer;
@@ -35,7 +36,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -62,5 +66,10 @@ public abstract class MixinServerWorldEventHandler implements IMixinServerWorldE
             float volume, float pitch) {
         this.mcServer.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
                 ((IMixinWorldServer) this.world).getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
+    }
+
+    @Inject(method = "onEntityRemoved", at = @At("RETURN"))
+    public void onSpongeEntityRemoved(Entity entityIn, CallbackInfo ci) {
+        ((IMixinEntity) entityIn).setActiveChunk(null);
     }
 }

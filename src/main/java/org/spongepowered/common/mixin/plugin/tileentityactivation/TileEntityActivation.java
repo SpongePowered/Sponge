@@ -42,6 +42,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -173,9 +174,15 @@ public class TileEntityActivation {
         }
 
         final World world = tileEntity.getWorld();
+        final IMixinChunk activeChunk = ((IMixinTileEntity) tileEntity).getActiveChunk();
+        if (activeChunk == null) {
+            // Should never happen but just in case for mods, always tick
+            return true;
+        }
+
         long currentTick = SpongeImpl.getServer().getTickCounter();
         IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
-        boolean isActive = ((IMixinTileEntity) tileEntity).isInForcedChunk() || spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();
+        boolean isActive = activeChunk.isPersistedChunk() || spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();
 
         // Should this entity tick?
         if (!isActive) {
