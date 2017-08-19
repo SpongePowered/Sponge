@@ -700,6 +700,24 @@ public interface PacketFunction {
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
                 } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
+                } else if (inventoryEvent instanceof ClickInventoryEvent.Drag) {
+                    int increment;
+
+                    increment = slotTransactions.stream().filter((t) -> !t.isValid()).collect(Collectors.summingInt((t) -> t.getFinal()
+                            .getQuantity()));
+
+                    final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
+                    cursor.setQuantity(cursor.getQuantity() + increment);
+                    PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
+                } else if (inventoryEvent instanceof ClickInventoryEvent.Double && !(inventoryEvent instanceof ClickInventoryEvent.Shift)) {
+                    int decrement;
+
+                    decrement = slotTransactions.stream().filter((t) -> !t.isValid()).collect(Collectors.summingInt((t) -> t.getOriginal()
+                            .getQuantity()));
+
+                    final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
+                    cursor.setQuantity(cursor.getQuantity() - decrement);
+                    PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
                 }
                 if (inventoryEvent instanceof SpawnEntityEvent) {
                     processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
