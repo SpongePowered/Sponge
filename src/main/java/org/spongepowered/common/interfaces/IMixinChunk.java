@@ -108,4 +108,6 @@ public interface IMixinChunk {
     List<net.minecraft.world.chunk.Chunk> getNeighbors();
 
     boolean isChunkLoaded();
+
+    boolean isQueuedForUnload();
 }

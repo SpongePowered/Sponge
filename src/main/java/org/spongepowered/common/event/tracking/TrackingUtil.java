@@ -134,7 +134,7 @@ public final class TrackingUtil {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
         final IMixinChunk chunk = ((IMixinEntity) entityIn).getActiveChunk();
-        if (chunk == null || (!chunk.isChunkLoaded() && !chunk.isPersistedChunk())) {
+        if (chunk == null || (chunk.isQueuedForUnload() && !chunk.isPersistedChunk())) {
             // Don't tick entities in chunks queued for unload
             return;
         }
@@ -167,7 +167,7 @@ public final class TrackingUtil {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
         final IMixinChunk chunk = ((IMixinEntity) entity).getActiveChunk();
-        if (chunk == null || (!chunk.isChunkLoaded() && !chunk.isPersistedChunk())) {
+        if (chunk == null || (chunk.isQueuedForUnload() && !chunk.isPersistedChunk())) {
             // Don't tick entity in chunks queued for unload
             return;
         }
@@ -195,7 +195,7 @@ public final class TrackingUtil {
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final BlockPos pos = tileEntity.getPos();
         final IMixinChunk chunk = ((IMixinTileEntity) tile).getActiveChunk();
-        if (chunk == null || (!chunk.isChunkLoaded() && !chunk.isPersistedChunk())) {
+        if (chunk == null || (chunk.isQueuedForUnload() && !chunk.isPersistedChunk())) {
             // Don't tick TE's in chunks queued for unload
             return;
         }

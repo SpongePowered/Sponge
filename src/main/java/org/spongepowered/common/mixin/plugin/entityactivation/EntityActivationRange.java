@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.plugin.entityactivation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -50,7 +51,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -66,9 +69,9 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class EntityActivationRange {
@@ -88,16 +91,7 @@ public class EntityActivationRange {
     static AxisAlignedBB aquaticBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     static AxisAlignedBB ambientBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     static AxisAlignedBB tileEntityBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
-    @SuppressWarnings("serial") static Map<Byte, Integer> maxActivationRanges = new HashMap<Byte, Integer>() {
-
-        {
-            put((byte) 1, 32);
-            put((byte) 2, 32);
-            put((byte) 3, 32);
-            put((byte) 4, 32);
-            put((byte) 5, 16);
-        }
-    };
+    static Map<Byte, Integer> maxActivationRanges = Maps.newHashMap();
 
     /**
      * Initializes an entities type on construction to specify what group this
@@ -158,9 +152,13 @@ public class EntityActivationRange {
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
             return false;
         }
-        SpongeEntityType spongeType = (SpongeEntityType) type;
+        final SpongeEntityType spongeType = (SpongeEntityType) type;
+        final byte activationType = spongeEntity.getActivationType();
+        if (!spongeType.isActivationRangeInitialized()) {
+            addEntityToConfig(entity.world, spongeType, activationType);
+            spongeType.setActivationRangeInitialized(true);
+        }
 
-        byte activationType = spongeEntity.getActivationType();
         EntityActivationModCategory entityMod = config.getModList().get(spongeType.getModId().toLowerCase());
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
@@ -219,6 +217,10 @@ public class EntityActivationRange {
      * @param world The world to perform activation checks in
      */
     public static void activateEntities(World world) {
+        if (((IMixinWorld) world).isFake()) {
+            return;
+        }
+
         for (EntityPlayer player : world.playerEntities) {
 
             int maxRange = 0;
@@ -232,9 +234,19 @@ public class EntityActivationRange {
             ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
-            final Chunk chunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) player).getActiveChunk();
-            if (chunk != null) {
-                activateChunkEntities(player, chunk);
+            int i = MathHelper.floor(maxBB.minX / 16.0D);
+            int j = MathHelper.floor(maxBB.maxX / 16.0D);
+            int k = MathHelper.floor(maxBB.minZ / 16.0D);
+            int l = MathHelper.floor(maxBB.maxZ / 16.0D);
+
+            for (int i1 = i; i1 <= j; ++i1) {
+                for (int j1 = k; j1 <= l; ++j1) {
+                    WorldServer worldserver = (WorldServer) world;
+                    Chunk chunk = ((IMixinChunkProviderServer) worldserver.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i1, j1);
+                    if (chunk != null) {
+                        activateChunkEntities(player, chunk);
+                    }
+                }
             }
         }
     }
@@ -416,50 +428,57 @@ public class EntityActivationRange {
         checkNotNull(type, "type");
 
         SpongeConfig<?> config = ((IMixinWorldServer) world).getActiveConfig();
-        if (config == null || type == null || !config.getConfig().getEntityActivationRange().autoPopulateData()) {
+        if (config == null || type == null) {
             return;
         }
 
+        final boolean autoPopulate = config.getConfig().getEntityActivationRange().autoPopulateData();
+        boolean requiresSave = false;
         String entityType = "misc";
         entityType = EntityActivationRange.activationTypeMappings.get(activationType);
-        boolean requiresSave = false;
         final String entityModId = type.getModId().toLowerCase();
+        final String entityId = type.getName().toLowerCase();
         EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
         EntityActivationModCategory entityMod = activationCategory.getModList().get(entityModId);
-        if (entityMod == null) {
+        Integer defaultActivationRange = activationCategory.getDefaultRanges().get(entityType);
+        if (defaultActivationRange == null) {
+            defaultActivationRange = 32;
+        }
+        Integer activationRange = activationCategory.getDefaultRanges().get(entityType);
+
+        if (autoPopulate && entityMod == null) {
             entityMod = new EntityActivationModCategory();
             activationCategory.getModList().put(entityModId, entityMod);
             requiresSave = true;
         }
-
         if (entityMod != null) {
-            // check for activation type overrides
-            Integer modActivationRange = entityMod.getDefaultRanges().get(entityType);
-            if (modActivationRange == null) {
-                entityMod.getDefaultRanges().put(entityType, activationType == 5 ? 16 : 32);
+            final Integer modActivationRange = entityMod.getDefaultRanges().get(entityType);
+            if (autoPopulate && modActivationRange == null) {
+                entityMod.getDefaultRanges().put(entityType, defaultActivationRange);
                 requiresSave = true;
-            } else if (modActivationRange != null) {
-                // check max ranges
-                if (modActivationRange > maxActivationRanges.get(activationType)) {
-                    maxActivationRanges.put(activationType, modActivationRange);
-                }
+            } else if (modActivationRange != null && modActivationRange > activationRange) {
+                activationRange = modActivationRange;
             }
 
-            // check for entity overrides
-            final String entityId = type.getName().toLowerCase();
-            Integer entityActivationRange = entityMod.getEntityList().get(entityId);
-            if (entityActivationRange == null) {
-                entityMod.getEntityList().put(entityId, entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType)));
+            final Integer entityActivationRange = entityMod.getEntityList().get(entityId);
+            if (autoPopulate && entityActivationRange == null) {
+                entityMod.getEntityList().put(entityId, entityMod.getDefaultRanges().get(entityType));
                 requiresSave = true;
-            } else if (entityActivationRange != null) {
-                // check max ranges
-                if (entityActivationRange > maxActivationRanges.get(activationType)) {
-                    maxActivationRanges.put(activationType, entityActivationRange);
-                }
+            }
+            if (entityActivationRange != null && entityActivationRange > activationRange) {
+                activationRange = entityActivationRange;
             }
         }
 
-        if (requiresSave) {
+        // check max ranges
+        Integer maxRange = maxActivationRanges.get(activationType);
+        if (maxRange == null) {
+            maxActivationRanges.put(activationType, activationRange);
+        } else if (activationRange > maxRange) {
+            maxActivationRanges.put(activationType, activationRange);
+        }
+
+        if (autoPopulate && requiresSave) {
             config.save();
         }
     }
