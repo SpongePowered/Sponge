@@ -38,6 +38,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
+import org.spongepowered.common.interfaces.IMixinTileEntityBeacon;
 
 import java.util.Map;
 import java.util.Optional;
@@ -58,10 +59,9 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
     protected boolean set(TileEntityBeacon dataHolder, Map<Key<?>, Object> keyValues) {
         Potion primary = ((Optional<Potion>) keyValues.get(Keys.BEACON_PRIMARY_EFFECT)).orElse(null);
         Potion secondary = ((Optional<Potion>) keyValues.get(Keys.BEACON_SECONDARY_EFFECT)).orElse(null);
-        final int primaryId = primary == null ? 0 : Potion.getIdFromPotion(primary);
-        dataHolder.setField(1, primaryId);
-        final int secondaryId = secondary == null ? 0 : Potion.getIdFromPotion(secondary);
-        dataHolder.setField(2, secondaryId);
+
+        ((IMixinTileEntityBeacon) dataHolder).forceSetPrimaryEffect(primary);
+        ((IMixinTileEntityBeacon) dataHolder).forceSetSecondaryEffect(secondary);
 
         dataHolder.markDirty();
         return true;

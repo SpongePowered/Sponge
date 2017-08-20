@@ -40,7 +40,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinTileEntityBeacon;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
@@ -50,7 +52,7 @@ import java.util.List;
 
 @NonnullByDefault
 @Mixin(TileEntityBeacon.class)
-public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon, IMixinCustomNameable {
+public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon, IMixinCustomNameable, IMixinTileEntityBeacon {
 
     @Shadow private Potion primaryEffect;
     @Shadow private Potion secondaryEffect;
@@ -74,16 +76,17 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
         return this.levels < 0 ? 0 : this.levels;
     }
 
-    /**
-     * @author gabizou - March 4th, 2016
-     *
-     * @reason Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
-     * prevented any non-vanilla beacon defined potions from being applied
-     * to a beacon. This method is used for both setfield and when reading from nbt.
-     */
-    @Overwrite
-    private static Potion isBeaconEffect(int p_184279_0_) {
-        return Potion.getPotionById(p_184279_0_);
+    // We want to preserve the normal behavior of isBeaconEffect, except when reading saved effects from NBT
+    // and when setting from a Sponge DataProcessor. This ensures that vanilla in-game interactions with the beacon
+    // work as normal, while still allowing plugins to set a custom potion through the API
+    @Redirect(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 0))
+    private Potion onFirstIsBeaconEffect(int id) {
+        return Potion.getPotionById(id);
+    }
+
+    @Redirect(method = "readFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityBeacon;isBeaconEffect(I)Lnet/minecraft/potion/Potion;", ordinal = 1))
+    private Potion oSecondIsBeaconEffect(int id) {
+        return Potion.getPotionById(id);
     }
 
 
@@ -110,5 +113,15 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     @Override
     public void setCustomDisplayName(String customName) {
         ((TileEntityBeacon) (Object) this).setName(customName);
+    }
+
+    @Override
+    public void forceSetPrimaryEffect(Potion potion) {
+        this.primaryEffect = potion;
+    }
+
+    @Override
+    public void forceSetSecondaryEffect(Potion potion) {
+        this.secondaryEffect = potion;
     }
 }
