@@ -387,10 +387,10 @@ public class DamageEventHandler {
         }
     }
 
-    public static List<DamageFunction> createAttackEnchamntmentFunction(
-            @Nullable net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute, float attackStrength) {
+    public static List<DamageFunction> createAttackEnchantmentFunction(
+            net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute, float attackStrength) {
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
-        if (heldItem != null) {
+        if (!heldItem.isEmpty()) {
             Supplier<ItemStackSnapshot> supplier = new Supplier<ItemStackSnapshot>() {
                 private ItemStackSnapshot snapshot;
                 @Override
@@ -403,24 +403,22 @@ public class DamageEventHandler {
             };
             NBTTagList nbttaglist = heldItem.getEnchantmentTagList();
 
-            if (nbttaglist != null) {
-                for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                    int j = nbttaglist.getCompoundTagAt(i).getShort("id");
-                    int enchantmentLevel = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+                int j = nbttaglist.getCompoundTagAt(i).getShort("id");
+                int enchantmentLevel = nbttaglist.getCompoundTagAt(i).getShort("lvl");
 
-                    final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
-                    if (enchantment != null) {
-                        final DamageModifier enchantmentModifier = DamageModifier.builder()
-                                .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
-                                .cause(Cause.builder()
-                                        .named("Weapon", supplier.get())
-                                        .named("Enchantment", enchantment)
-                                        .build())
-                                .build();
-                        DoubleUnaryOperator enchantmentFunction = (damage) ->
-                                (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute) * attackStrength;
-                        damageModifierFunctions.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
-                    }
+                final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
+                if (enchantment != null) {
+                    final DamageModifier enchantmentModifier = DamageModifier.builder()
+                            .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
+                            .cause(Cause.builder()
+                                    .named("Weapon", supplier.get())
+                                    .named("Enchantment", enchantment)
+                                    .build())
+                            .build();
+                    DoubleUnaryOperator enchantmentFunction = (damage) ->
+                            (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute) * attackStrength;
+                    damageModifierFunctions.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
                 }
             }
         }
