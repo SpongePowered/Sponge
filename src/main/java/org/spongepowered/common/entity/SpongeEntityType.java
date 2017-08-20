@@ -71,6 +71,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public final Class<? extends Entity> entityClass;
     private EnumCreatureType creatureType;
     private final Translation translation;
+    private boolean activationRangeInitialized = false;
     // currently not used
     public int trackingRange;
     public int updateFrequency;
@@ -116,6 +117,14 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
 
     public void setEnumCreatureType(EnumCreatureType type) {
         this.creatureType = type;
+    }
+
+    public boolean isActivationRangeInitialized() {
+        return this.activationRangeInitialized;
+    }
+
+    public void setActivationRangeInitialized(boolean flag) {
+        this.activationRangeInitialized = flag;
     }
 
     @SuppressWarnings("unchecked")

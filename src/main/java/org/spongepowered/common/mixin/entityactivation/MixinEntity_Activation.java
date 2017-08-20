@@ -26,15 +26,12 @@ package org.spongepowered.common.mixin.entityactivation;
 
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
@@ -60,9 +57,6 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     public void onEntityActivationConstruction(World world, CallbackInfo ci) {
         if (world != null && !((IMixinWorld) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
             this.defaultActivationState = EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
-            if (!this.defaultActivationState && this.getType() != EntityTypes.UNKNOWN) {
-                EntityActivationRange.addEntityToConfig(world, (SpongeEntityType) this.getType(), this.activationType);
-            }
         } else {
             this.defaultActivationState = false;
         }
