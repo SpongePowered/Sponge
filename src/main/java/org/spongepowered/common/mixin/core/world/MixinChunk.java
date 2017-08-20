@@ -209,6 +209,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public boolean isQueuedForUnload() {
+        return this.unloadQueued;
+    }
+
+    @Override
     public boolean isPersistedChunk() {
         return this.persistedChunk;
     }
