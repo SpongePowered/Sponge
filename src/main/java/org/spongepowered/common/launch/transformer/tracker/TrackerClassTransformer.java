@@ -155,7 +155,7 @@ public class TrackerClassTransformer implements IClassTransformer {
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             MethodEntry entry;
             if ((opcode != INVOKEVIRTUAL && opcode != INVOKEINTERFACE) ||
-                    (entry = TrackerRegistry.methodLists.get(name + ';' + desc)) == null) {
+                    (entry = TrackerRegistry.methodLists.get(owner + ';' + name + ';' + desc)) == null) {
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
                 return;
             }

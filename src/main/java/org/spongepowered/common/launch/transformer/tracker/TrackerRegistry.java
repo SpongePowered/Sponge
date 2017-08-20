@@ -145,8 +145,11 @@ public final class TrackerRegistry {
             final TrackedType trackedType = trackedTypes.computeIfAbsent(targetType, TrackedType::new);
             // Extract the method desc we need to target/replace
             final String oldDesc = '(' + entry.desc.substring(end + 1);
+
             // Store the method
-            final String id = entry.name + ';' + oldDesc;
+            final String id = targetType + ';' + entry.name + ';' + oldDesc;
+
+
             final MethodEntry methodEntry = methodLists.computeIfAbsent(id, id1 -> new MethodEntry(
                     Type.getArgumentTypes(oldDesc), Type.getReturnType(oldDesc)));
             if (methodEntry.entries.containsKey(trackedType)) {
