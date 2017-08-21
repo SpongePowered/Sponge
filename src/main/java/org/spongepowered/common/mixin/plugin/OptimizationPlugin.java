@@ -95,6 +95,10 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::useCacheTameableOwners)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_TileEntity_Unload",
+                    OptimizationCategory::useTileEntityUnload)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_TileEntity_Unload",
+                    OptimizationCategory::useTileEntityUnload)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Async_Lighting",

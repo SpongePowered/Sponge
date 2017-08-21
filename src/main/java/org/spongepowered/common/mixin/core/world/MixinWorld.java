@@ -131,7 +131,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
@@ -185,7 +184,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
     private NamedCause worldNamedCause;
-    private it.unimi.dsi.fastutil.longs.LongCollection tileEntitiesChunkToBeRemoved = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -1620,8 +1618,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.stopTileEntityRemovelInWhile(); // Sponge
         }
 
-        // This is handled below in removeTileEntitiesForRemovedChunks
-        if (false && !this.tileEntitiesToBeRemoved.isEmpty()) {
+        this.processingLoadedTiles = false;
+        this.startPendingTileEntityTimings(); // Sponge
+        if (!this.isRemote && CauseTracker.ENABLED) {
+            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.TILE_ENTITY_UNLOAD, PhaseContext.start()
+                    .add(this.worldNamedCause)
+                    .complete());
+        }
+
+        if (!this.tileEntitiesToBeRemoved.isEmpty()) {
             // Sponge start - use forge hook
             for (Object tile : this.tileEntitiesToBeRemoved) {
                SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
@@ -1634,16 +1639,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         if (!this.isRemote && CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.TILE_ENTITY_UNLOAD, PhaseContext.start()
-                    .add(this.worldNamedCause)
-                    .complete());
-        }
-        this.startPendingTileEntityTimings(); // Sponge
-        this.removeTileEntitiesForRemovedChunks();
-        if (!this.isRemote && CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GeneralPhase.State.TILE_ENTITY_UNLOAD);
         }
-        this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
         // this.theProfiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 
         if (!this.addedTileEntityList.isEmpty()) {
@@ -1671,43 +1668,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // this.theProfiler.endSection(); // Sponge - Don't use the profiler
         // this.theProfiler.endSection(); // Sponge - Don't use the profiler
     }
-
-    @Override
-    public void markTileEntitiesInChunkForRemoval(net.minecraft.world.chunk.Chunk chunk)
-    {
-        if (!chunk.getTileEntityMap().isEmpty())
-        {
-            long pos = net.minecraft.util.math.ChunkPos.chunkXZ2Int(chunk.xPosition, chunk.zPosition);
-            this.tileEntitiesChunkToBeRemoved.add(pos);
-        }
-    }
-
-    private void removeTileEntitiesForRemovedChunks()
-    {
-        if (!this.tileEntitiesChunkToBeRemoved.isEmpty())
-        {
-            java.util.function.Predicate<net.minecraft.tileentity.TileEntity> isInChunk = (tileEntity) ->
-            {
-                BlockPos tilePos = tileEntity.getPos();
-                long tileChunkPos = net.minecraft.util.math.ChunkPos.chunkXZ2Int(tilePos.getX() >> 4, tilePos.getZ() >> 4);
-                return this.tileEntitiesChunkToBeRemoved.contains(tileChunkPos);
-            };
-            java.util.function.Predicate<net.minecraft.tileentity.TileEntity> isInChunkDoUnload = (tileEntity) ->
-            {
-                boolean inChunk = isInChunk.test(tileEntity);
-                if (inChunk)
-                {
-                    SpongeImplHooks.onTileEntityChunkUnload(tileEntity);
-                    ((IMixinTileEntity) tileEntity).setActiveChunk(null);
-                }
-                return inChunk;
-            };
-            this.tickableTileEntities.removeIf(isInChunk);
-            this.loadedTileEntityList.removeIf(isInChunkDoUnload);
-            this.tileEntitiesChunkToBeRemoved.clear();
-        }
-    }
-
 
     /**
      * Overridden in {@link MixinWorldServer_TileEntityActivation}

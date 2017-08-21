@@ -105,7 +105,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -265,24 +264,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         tileEntityIn.invalidate();
     }
 
-    /**
-     * @author blood - August 13th, 2017
-     * @reason Due to many changes, overwrite makes this method easier
-     * to read and maintain.
-     *
-     */
-    @Overwrite
-    public void onChunkLoad()
-    {
-        this.isChunkLoaded = true;
-        this.worldObj.addTileEntities(this.chunkTileEntityMap.values());
-
-        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
-        {
-            this.worldObj.loadEntities(com.google.common.collect.ImmutableList.copyOf(classinheritancemultimap));
+    @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
+    public void onLoadInject(CallbackInfo ci) {
+        if (!this.worldObj.isRemote) {
+            SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
         }
 
-        // Sponge start
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
@@ -292,39 +279,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 int neighborIndex = directionToIndex(direction);
                 int oppositeNeighborIndex = directionToIndex(direction.getOpposite());
                 this.setNeighborChunk(neighborIndex, neighbor);
-                ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk)(Object) this);
+                ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk) (Object) this);
             }
         }
-
         SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(this.chunkCause, (Chunk) this));
-        if (!this.worldObj.isRemote) {
-            SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
-        }
-        // Sponge end
     }
 
-    /**
-     * @author blood - August 13th, 2017
-     * @reason Due to many changes, overwrite makes this method easier
-     * to read and maintain.
-     *
-     */
-    @Overwrite
-    public void onChunkUnload()
-    {
-        this.isChunkLoaded = false;
-
-        // Sponge start
-        ((IMixinWorld) this.world).markTileEntitiesInChunkForRemoval((net.minecraft.world.chunk.Chunk)(Object) this);
-        if (false) // Forge: remove all TEs in a chunk at once instead of marking each one for removal
-        for (TileEntity tileentity : this.chunkTileEntityMap.values())
-        {
-            this.worldObj.markTileEntityForRemoval(tileentity);
-        }
-
-        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
-        {
-            this.worldObj.unloadEntities(classinheritancemultimap);
+    @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
+    public void onUnloadInject(CallbackInfo ci) {
+        if (!this.worldObj.isRemote) {
+            SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
         }
 
         for (Direction direction : CARDINAL_DIRECTIONS) {
@@ -339,12 +303,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, null);
             }
         }
-
         SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(this.chunkCause, (Chunk) this));
-        if (!this.worldObj.isRemote) {
-            SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
-        }
-        // Sponge end
     }
 
     @Override
