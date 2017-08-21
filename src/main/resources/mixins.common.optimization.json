@@ -10,6 +10,8 @@
         "MixinWorldServer_Explosion",
         "entity.MixinEntityTameable_Cached_Owner",
         "world.MixinChunk_Async_Lighting",
+        "world.MixinChunk_TileEntity_Unload",
+        "world.MixinWorld_TileEntity_Unload",
         "world.MixinWorldServer_Async_Lighting",
         "world.gen.MixinChunkProviderServer_Async_Lighting",
         "world.gen.structure.MixinMapGenStructure_Structure_Saving"
