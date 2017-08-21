@@ -59,6 +59,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.slot.InputSlot;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -408,7 +409,7 @@ public final class ContainerUtil {
                 return ((Carrier) ((InventoryLargeChest) inventory).lowerChest);
                 // TODO: Decide what the carrier should be (wrapper of 2 Block-based carriers including info which block is the upper inventory)
             } else {
-                return inventory instanceof Carrier ? ((Carrier) inventory) : null;
+                return carrierOrNull(inventory);
             }
         } else if (container instanceof ContainerHopper) {
             return carrierOrNull(((ContainerHopper) container).hopperInventory);
@@ -456,6 +457,10 @@ public final class ContainerUtil {
     private static Carrier carrierOrNull(IInventory inventory) {
         if (inventory instanceof Carrier) {
             return (Carrier) inventory;
+        }
+        if (inventory instanceof CarriedInventory) {
+            Optional<Carrier> carrier = ((CarriedInventory) inventory).getCarrier();
+            return carrier.orElse(null);
         }
         return null;
     }
