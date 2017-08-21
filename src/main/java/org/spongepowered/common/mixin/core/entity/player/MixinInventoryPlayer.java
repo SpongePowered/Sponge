@@ -30,6 +30,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -88,8 +89,17 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     private EquipmentInventoryAdapter equipment;
     private SlotAdapter offhand;
 
+    private int offhandIndex;
+
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
+        // Find offhand slot
+        for (NonNullList<ItemStack> inventory : this.allInventories) {
+            if (inventory == this.offHandInventory) {
+                break;
+            }
+            this.offhandIndex += inventory.size();
+        }
 
         // Set Carrier if we got a real Player
         if (playerIn instanceof EntityPlayerMP) {
@@ -111,6 +121,18 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
                 this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
                 this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
             }
+        }
+    }
+
+    @Override
+    public int getHeldItemIndex(EnumHand hand) {
+        switch (hand) {
+            case MAIN_HAND:
+                return this.currentItem;
+            case OFF_HAND:
+                return this.offhandIndex;
+            default:
+                throw new AssertionError(hand);
         }
     }
 

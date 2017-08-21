@@ -457,7 +457,8 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand hand, Vec3d hitVec) {
+    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, net.minecraft.entity.Entity entity,
+            EnumHand hand, @Nullable Vec3d hitVec) {
         InteractEntityEvent.Primary event;
         Optional<Vector3d> hitVector = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
         if (hand == EnumHand.MAIN_HAND) {

@@ -25,9 +25,12 @@
 package org.spongepowered.common.interfaces.entity.player;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 
 public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
+
+    int getHeldItemIndex(EnumHand hand);
     
     /**
      * Set the current hotbar item and optionally notify the client

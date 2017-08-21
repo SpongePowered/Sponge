@@ -32,6 +32,7 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -48,6 +49,7 @@ import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
+import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -108,6 +110,7 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -609,6 +612,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      */
     @Overwrite
     public void processUseEntity(CPacketUseEntity packetIn) {
+        // Sponge start
         // All packets received by server are handled first on the Netty Thread
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
@@ -621,6 +625,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 return;
             }
         }
+        // Sponge end
 
         WorldServer worldserver = this.serverController.getWorld(this.player.dimension);
         Entity entity = packetIn.getEntityFromWorld(worldserver);
@@ -635,34 +640,55 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
 
             if (this.player.getDistanceSqToEntity(entity) < d0) {
-                // The client will only send this packet if INTERACT_AT is not successful.
-                // We can safely ignore this as we handle interactOn below during INTERACT_AT.
-                // if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
-                //    this.player.interactOn(entity);
-                // } else
-                EnumHand hand = packetIn.getHand();
-                ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
+                // Sponge start - Ignore CPacketUseEntity.Action.INTERACT
+                /*if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
+                    // The client will only send this packet if INTERACT_AT is not successful.
+                    // We can safely ignore this as we handle interactOn below during INTERACT_AT.
+                    //EnumHand enumhand = packetIn.getHand();
+                    //this.player.interactOn(entity, enumhand);
+                } else */
+                // Sponge end
+
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
-                    SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-                    Vec3d hitVec = packetIn.getHitVec();
-                    Optional<Vector3d> interactionPoint = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
+                    EnumHand hand = packetIn.getHand();
+
+                    // Sponge start - Fire interact events
+                    ItemStack itemstack = this.player.getHeldItem(hand);
+                    SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
+                    Optional<Vector3d> interactionPoint = Optional.of(VecHelper.toVector3d(packetIn.getHitVec()));
+
                     // Is interaction allowed with item in hand
-                    if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, interactionPoint, entity).isCancelled()) {
-                        return;
-                    }
-                    if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, entity, packetIn.getHand(), interactionPoint).isCancelled()) {
-                        // If INTERACT_AT is not successful, run the INTERACT logic
-                        if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
-                            this.player.interactOn(entity, hand);
+                    if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, interactionPoint, entity).isCancelled()
+                            || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, entity, hand, interactionPoint).isCancelled()) {
+                        // Restore held item in hand
+                        int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
+                        Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
+                        sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
+
+                        // Special handling for lead: The client assumes the interaction is successful
+                        // Detach entity manually again to fix it
+                        if (itemstack.getItem() == Items.LEAD) {
+                            sendPacket(new SPacketEntityAttach(entity, null));
                         }
-                    }
-                } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
-                    hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
-                    itemstack = this.player.getHeldItem(hand);
-                    SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
-                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, Optional.empty(), entity).isCancelled()) {
+
                         return;
                     }
+
+                    // If INTERACT_AT is not successful, run the INTERACT logic
+                    if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
+                        this.player.interactOn(entity, hand);
+                    }
+                    // Sponge end
+                } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
+                    // Sponge start - Call interact event
+                    EnumHand hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
+                    ItemStack itemstack = this.player.getHeldItem(hand);
+                    SpongeCommonEventFactory.lastPrimaryPacketTick = this.serverController.getTickCounter();
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, Optional.empty(), entity).isCancelled()) {
+                        ((IMixinEntityPlayerMP) this.player).restorePacketItem(hand);
+                        return;
+                    }
+                    // Sponge end
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.player) {
                         this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked"));
@@ -670,14 +696,16 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         return;
                     }
 
+                    // Sponge start
                     if (entity instanceof Player && !((World) this.player.world).getProperties().isPVPEnabled()) {
                         return; // PVP is disabled, ignore
                     }
 
-                    if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, entity, hand, packetIn.getHitVec()).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, entity, hand, null).isCancelled()) {
                         ((IMixinEntityPlayerMP) this.player).restorePacketItem(hand);
                         return;
                     }
+                    // Sponge end
 
                     this.player.attackTargetEntityWithCurrentItem(entity);
                 }
