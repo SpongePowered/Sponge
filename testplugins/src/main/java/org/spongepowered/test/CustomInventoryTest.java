@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.GuiIdProperty;
 import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
@@ -189,8 +190,10 @@ public class CustomInventoryTest {
         Optional<? extends Carrier> carrier = container.getCarrier();
         if (carrier.isPresent() && carrier.get() instanceof BasicCarrier) {
             for (SlotTransaction trans : event.getTransactions()) {
-                Integer slotClicked = trans.getSlot().getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
-                player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName()));
+                Slot slot = trans.getSlot();
+                Slot realSlot = slot.transform();
+                Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
+                player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
             }
         }
     }
