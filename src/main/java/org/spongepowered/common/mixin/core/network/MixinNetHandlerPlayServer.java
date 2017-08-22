@@ -646,7 +646,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
 
         if (item instanceof ItemBlock && ((ItemBlock) item).getBlock() == Blocks.CHEST) {
-            // Chest is handled in AbstractChestHorse.processInteract
+            // AbstractChestHorse.processInteract
             return entity instanceof AbstractChestHorse ? AbstractChestHorse.DATA_ID_CHEST : null;
         }
 
