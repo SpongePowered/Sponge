@@ -27,20 +27,28 @@ package org.spongepowered.common.mixin.core.network;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.passive.AbstractChestHorse;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -602,6 +610,50 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     }
 
     /**
+     * Attempts to find the {@link DataParameter} that was potentially modified
+     * when a player interacts with an entity.
+     *
+     * @param stack The item the player is holding
+     * @param entity The entity
+     * @return A possible data parameter or null if unknown
+     */
+    @Nullable
+    private static DataParameter<?> findModifiedEntityInteractDataParameter(ItemStack stack, Entity entity) {
+        Item item = stack.getItem();
+
+        if (item == Items.DYE) {
+            // ItemDye.itemInteractionForEntity
+            if (entity instanceof EntitySheep) {
+                return EntitySheep.DYE_COLOR;
+            }
+
+            // EntityWolf.processInteract
+            if (entity instanceof EntityWolf) {
+                return EntityWolf.COLLAR_COLOR;
+            }
+
+            return null;
+        }
+
+        if (item == Items.NAME_TAG) {
+            // ItemNameTag.itemInteractionForEntity
+            return entity instanceof EntityLivingBase && !(entity instanceof EntityPlayer) && stack.hasDisplayName() ? Entity.CUSTOM_NAME : null;
+        }
+
+        if (item == Items.SADDLE) {
+            // ItemSaddle.itemInteractionForEntity
+            return entity instanceof EntityPig ? EntityPig.SADDLED : null;
+        }
+
+        if (item instanceof ItemBlock && ((ItemBlock) item).getBlock() == Blocks.CHEST) {
+            // Chest is handled in AbstractChestHorse.processInteract
+            return entity instanceof AbstractChestHorse ? AbstractChestHorse.DATA_ID_CHEST : null;
+        }
+
+        return null;
+    }
+
+    /**
      * @author blood - April 5th, 2016
      *
      * @reason Due to all the changes we now do for this packet, it is much easier
@@ -665,10 +717,18 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
                         sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
 
-                        // Special handling for lead: The client assumes the interaction is successful
-                        // Detach entity manually again to fix it
+                        // Handle a few special cases where the client assumes that the interaction is successful,
+                        // which means that we need to force an update
                         if (itemstack.getItem() == Items.LEAD) {
+                            // Detach entity again
                             sendPacket(new SPacketEntityAttach(entity, null));
+                        } else {
+                            // Other cases may involve a specific DataParameter of the entity
+                            // We fix the client state by marking it as dirty so it will be updated on the client the next tick
+                            DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
+                            if (parameter != null) {
+                                entity.getDataManager().setDirty(parameter);
+                            }
                         }
 
                         return;
