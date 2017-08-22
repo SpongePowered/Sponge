@@ -597,6 +597,11 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
         Sponge.getCauseStackManager().popCause();
+        this.fieldMap.put("ignore_sleeping", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IgnoreSleeping"), "sponge:ignore_sleeping", "Ignore Sleeping"));
+
+        for (Key<?> key : this.fieldMap.values()) {
+            this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
+        }
 
     }
 

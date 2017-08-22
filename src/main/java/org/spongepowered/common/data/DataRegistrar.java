@@ -538,6 +538,15 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class, new
                 ItemDyeColorDataProcessor());
 
+        DataUtil.registerDualProcessor(SleepingData.class, SpongeSleepingData.class, ImmutableSleepingData.class, ImmutableSpongeSleepingData.class, 
+        		new PlayerSleepingDataProcessor());
+
+        DataUtil.registerDualProcessor(SleepingData.class, SpongeSleepingData.class, ImmutableSleepingData.class, ImmutableSpongeSleepingData.class, 
+        		new BatSleepingDataProcessor());
+
+        DataUtil.registerDualProcessor(IgnoreSleepingData.class, SpongeIgnoreSleepingData.class, ImmutableIgnoreSleepingData.class,
+                ImmutableSpongeIgnoreSleepingData.class, new IgnoreSleepingDataProcessor());
+
         // Block Processors
 
         DataUtil.registerDualProcessor(DirtData.class, SpongeDirtData.class, ImmutableDirtData.class,

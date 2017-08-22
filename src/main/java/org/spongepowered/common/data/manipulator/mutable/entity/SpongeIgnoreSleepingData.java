@@ -22,22 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.entity;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSleepingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SleepingData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSleepingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgnoreSleepingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.IgnoreSleepingData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeIgnoreSleepingData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
-public class ImmutableSpongeSleepingData extends AbstractImmutableBooleanData<ImmutableSleepingData, SleepingData> implements ImmutableSleepingData {
-    public ImmutableSpongeSleepingData(boolean value) {
-        super(ImmutableSleepingData.class, value, Keys.IS_SLEEPING, SpongeSleepingData.class, false);
+public class SpongeIgnoreSleepingData extends AbstractBooleanData<IgnoreSleepingData, ImmutableIgnoreSleepingData> implements IgnoreSleepingData {
+
+    public SpongeIgnoreSleepingData(boolean value) {
+        super(IgnoreSleepingData.class, value, Keys.IGNORE_SLEEPING, ImmutableSpongeIgnoreSleepingData.class, false);
+    }
+
+    public SpongeIgnoreSleepingData() {
+        this(false);
     }
 
     @Override
-    public ImmutableValue<Boolean> sleeping() {
+    public Value<Boolean> ignoreSleeping() {
         return this.getValueGetter();
     }
+
 }

@@ -25,19 +25,19 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSleepingData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SleepingData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableIgnoreSleepingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.IgnoreSleepingData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSleepingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeIgnoreSleepingData;
 
-public class ImmutableSpongeSleepingData extends AbstractImmutableBooleanData<ImmutableSleepingData, SleepingData> implements ImmutableSleepingData {
-    public ImmutableSpongeSleepingData(boolean value) {
-        super(ImmutableSleepingData.class, value, Keys.IS_SLEEPING, SpongeSleepingData.class, false);
+public class ImmutableSpongeIgnoreSleepingData extends AbstractImmutableBooleanData<ImmutableIgnoreSleepingData, IgnoreSleepingData> implements ImmutableIgnoreSleepingData {
+    public ImmutableSpongeIgnoreSleepingData(boolean value) {
+        super(ImmutableIgnoreSleepingData.class, value, Keys.IGNORE_SLEEPING, SpongeIgnoreSleepingData.class, false);
     }
 
     @Override
-    public ImmutableValue<Boolean> sleeping() {
+    public ImmutableValue<Boolean> ignoreSleeping() {
         return this.getValueGetter();
     }
 }
