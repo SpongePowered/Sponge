@@ -34,7 +34,7 @@ import org.spongepowered.common.item.inventory.custom.CustomInventory;
 @Mixin(CustomContainer.class)
 public abstract class MixinCustomContainer extends MixinContainer {
 
-    @Shadow public CustomInventory inv;
+    @Shadow(remap = false) public CustomInventory inv;
 
     @Override
     public PluginContainer getPlugin() {

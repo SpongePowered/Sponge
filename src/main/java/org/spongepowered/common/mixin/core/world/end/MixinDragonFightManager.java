@@ -75,7 +75,7 @@ public abstract class MixinDragonFightManager {
     @Shadow private void findAliveCrystals() { }
     @Shadow private void loadChunks() { }
     @Shadow private void generatePortal(boolean flag) { }
-    @Shadow private EntityDragon func_192445_m() {
+    @Shadow private EntityDragon createNewDragon() {
         return null; // Shadowed
     }
 
@@ -154,7 +154,7 @@ public abstract class MixinDragonFightManager {
 
                     if (list1.isEmpty()) {
                         LOGGER.debug("Haven\'t seen the dragon, respawning it");
-                        this.func_192445_m();
+                        this.createNewDragon();
                     } else {
                         LOGGER.debug("Haven\'t seen our dragon, but found another one to use.");
                         this.dragonUniqueId = list1.get(0).getUniqueID();

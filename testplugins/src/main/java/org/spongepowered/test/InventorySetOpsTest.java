@@ -69,7 +69,7 @@ public class InventorySetOpsTest {
                     nugget = true;
                 }
                 if (nugget && ItemTypes.IRON_INGOT.equals(transaction.getOriginal().getType())) {
-                    transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT, transaction.getOriginal().getCount()));
+                    transaction.setCustom(ItemStack.of(ItemTypes.GOLD_INGOT, transaction.getOriginal().getQuantity()));
                 }
             }
         }

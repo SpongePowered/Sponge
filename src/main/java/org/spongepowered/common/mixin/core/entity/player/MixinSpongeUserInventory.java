@@ -54,16 +54,14 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventory
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
-import java.util.List;
 import java.util.Optional;
 
 @Mixin(SpongeUserInventory.class)
 public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter, UserInventory<User> {
 
-    @Shadow @Final public NonNullList<ItemStack> mainInventory;
-    @Shadow @Final public NonNullList<ItemStack> armorInventory;
-    @Shadow @Final public NonNullList<ItemStack> offHandInventory;
-    @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
+    @Shadow(remap = false) @Final public NonNullList<ItemStack> mainInventory;
+    @Shadow(remap = false) @Final public NonNullList<ItemStack> armorInventory;
+    @Shadow(remap = false) @Final public NonNullList<ItemStack> offHandInventory;
 
     @Shadow public abstract int getInventoryStackLimit();
 

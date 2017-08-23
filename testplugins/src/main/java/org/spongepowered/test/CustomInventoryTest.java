@@ -41,7 +41,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.GuiIdProperty;
@@ -53,7 +52,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextAction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -173,8 +171,8 @@ public class CustomInventoryTest {
     }
 
     @Listener
-    public void onInventoryClick(ClickInventoryEvent event, @Root Player player, @Getter("getTargetInventory") CarriedInventory container) {
-        Optional<Carrier> carrier = container.getCarrier();
+    public void onInventoryClick(ClickInventoryEvent event, @Root Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
+        Optional<? extends Carrier> carrier = container.getCarrier();
         if (carrier.isPresent() && carrier.get() instanceof BasicCarrier) {
             for (SlotTransaction trans : event.getTransactions()) {
                 Integer slotClicked = trans.getSlot().getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
@@ -189,7 +187,7 @@ public class CustomInventoryTest {
 
         @Override
         public CarriedInventory<? extends Carrier> getInventory() {
-            return ((CarriedInventory) this.inventory);
+            return ((CarriedInventory<?>) this.inventory);
         }
 
         public void init(Inventory inventory) {
