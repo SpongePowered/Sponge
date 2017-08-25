@@ -48,4 +48,14 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     public Inventory parent() {
         return ((Inventory) this.inventory);
     }
+
+    @Override
+    public org.spongepowered.api.item.inventory.Slot transform(Type type) {
+        return this;
+    }
+
+    @Override
+    public org.spongepowered.api.item.inventory.Slot transform() {
+        return this.transform(Type.INVENTORY);
+    }
 }
