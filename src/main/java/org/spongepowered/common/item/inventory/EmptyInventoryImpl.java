@@ -259,6 +259,11 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
         return this.parent;
     }
 
+    @Override
+    public Inventory root() {
+        return this.parent == this ? this : this.parent.root();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T next() {

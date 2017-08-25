@@ -87,6 +87,11 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
         return this.parent == null ? this : this.parent();
     }
 
+    @Override
+    public Inventory root() {
+        return this.parent() == this ? this : this.parent.root();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T first() {
