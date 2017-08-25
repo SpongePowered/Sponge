@@ -63,6 +63,9 @@ public abstract class MixinInventoryBasic implements IInventory, LensProvider<II
 
     @Override
     public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        if (this.getSizeInventory() == 0) {
+            return null; // No Lens when inventory has no slots
+        }
         return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
     }
 
