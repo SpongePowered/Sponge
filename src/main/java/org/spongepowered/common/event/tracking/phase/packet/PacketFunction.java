@@ -424,7 +424,10 @@ public interface PacketFunction {
 
         } else if (state == PacketPhase.General.INTERACTION) {
             if (!context.getCapturedBlockSupplier().isEmpty()) {
-                TrackingUtil.processBlockCaptures(context.getCapturedBlocks(), state, context);
+                if (!TrackingUtil.processBlockCaptures(context.getCapturedBlocks(), state, context)) {
+                    // Stop entities like XP from being spawned
+                    return;
+                }
             } else {
                 context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
                     final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
