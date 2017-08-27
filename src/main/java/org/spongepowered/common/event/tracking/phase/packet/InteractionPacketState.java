@@ -54,6 +54,11 @@ final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
+    public boolean shouldCaptureEntity() {
+        return true;
+    }
+
+    @Override
     public boolean doesCaptureEntityDrops() {
         return true;
     }
