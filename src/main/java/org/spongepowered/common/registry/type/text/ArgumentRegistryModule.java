@@ -76,8 +76,7 @@ public final class ArgumentRegistryModule implements RegistryModule {
         this.argumentTypeMap.put("level", level);
 
         // TEAM
-        this.argumentTypeMap.put("team", factory.createInvertibleArgumentType("team", Integer.class,
-                                                                              org.spongepowered.api.scoreboard.Team.class.getName()));
+        this.argumentTypeMap.put("team", factory.createInvertibleArgumentType("team", String.class));
 
         // NAME
         this.argumentTypeMap.put("name", factory.createInvertibleArgumentType("name", String.class));
