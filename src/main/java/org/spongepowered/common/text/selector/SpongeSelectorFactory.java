@@ -201,6 +201,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType<T> createArgumentType(String key,
             Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
+            checkNotNull(converterKey, "converter key cannot be null");
             this.argumentLookupMap.put(key, new SpongeArgumentType<>(key,
                                                                      type, converterKey));
         }
@@ -216,7 +217,6 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType.Invertible<T> createInvertibleArgumentType(
             String key, Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
-            checkNotNull(converterKey, "converter key cannot be null");
             checkNotNull(converterKey, "converter key cannot be null");
             this.argumentLookupMap.put(key,
                                        new SpongeArgumentType.Invertible<>(key, type,

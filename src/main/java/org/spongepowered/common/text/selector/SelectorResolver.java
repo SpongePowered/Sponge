@@ -25,9 +25,9 @@
 package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.util.OptionalUtils.asSet;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -50,11 +50,11 @@ import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.selector.SelectorTypes;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,11 +76,12 @@ public class SelectorResolver {
 
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
 
-    private static Extent extentFromSource(CommandSource origin) {
+    private static Set<Extent> extentFromSource(CommandSource origin) {
         if (origin instanceof Locatable) {
-            return ((Locatable) origin).getWorld();
+            return ImmutableSet.of(((Locatable) origin).getWorld());
         }
-        return null;
+        // System
+        return ImmutableSet.copyOf(SpongeImpl.getGame().getServer().getWorlds());
     }
 
     private static Vector3d positionFromSource(CommandSource origin) {
@@ -94,24 +95,26 @@ public class SelectorResolver {
         return requiredType::isInstance;
     }
 
+    private final CommandSource origin;
     private final Collection<Extent> extents;
     private final Vector3d position;
     private final Selector selector;
     private final Predicate<Entity> selectorFilter;
 
     public SelectorResolver(Collection<? extends Extent> extents, Selector selector) {
-        this(extents, null, selector);
+        this(null, extents, null, selector);
     }
 
     public SelectorResolver(Location<World> location, Selector selector) {
-        this(ImmutableSet.of(location.getExtent()), location.getPosition(), selector);
+        this(null, ImmutableSet.of(location.getExtent()), location.getPosition(), selector);
     }
 
     public SelectorResolver(CommandSource origin, Selector selector) {
-        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), selector);
+        this(origin, extentFromSource(origin), positionFromSource(origin), selector);
     }
 
-    private SelectorResolver(Collection<? extends Extent> extents, @Nullable Vector3d position, Selector selector) {
+    private SelectorResolver(@Nullable CommandSource origin, Collection<? extends Extent> extents, @Nullable Vector3d position, Selector selector) {
+        this.origin = origin;
         this.extents = ImmutableSet.copyOf(extents);
         this.position = position == null ? Vector3d.ZERO : position;
         this.selector = checkNotNull(selector);
@@ -315,6 +318,15 @@ public class SelectorResolver {
 
     public List<Entity> resolve() {
         SelectorType selectorType = this.selector.getType();
+        
+        if (selectorType == SelectorTypes.SOURCE) {
+            if (this.origin != null && this.origin instanceof Entity && this.selectorFilter.test((Entity) this.origin)) {
+                return ImmutableList.of((Entity) this.origin);
+            } else {
+                return ImmutableList.of();
+            }
+        }
+        
         int defaultCount = 1;
         if (INFINITE_TYPES.contains(selectorType)) {
             defaultCount = 0;
@@ -326,19 +338,23 @@ public class SelectorResolver {
         Stream<Entity> entityStream = extents.stream()
                 .flatMap(ext -> ext.getEntities().stream())
                 .filter(this.selectorFilter);
-        if (maxToSelect != 0) {
-            if (selectorType == SelectorTypes.RANDOM) {
-                List<Entity> holder = entityStream.collect(Collectors.toList());
-                Collections.shuffle(holder);
-                entityStream = holder.stream();
-            } else {
-                entityStream = entityStream.sorted(distanceSort(isReversed));
-            }
-            entityStream = entityStream.limit(maxToSelect);
-        } else {
-            entityStream = entityStream.sorted(distanceSort(isReversed));
+        
+        if (maxToSelect == 0) {
+            return entityStream.sorted(distanceSort(isReversed))
+                    .collect(ImmutableList.toImmutableList());
         }
-        return entityStream.collect(GuavaCollectors.toImmutableList());
+        
+        if (selectorType == SelectorTypes.RANDOM) {
+            List<Entity> holder = entityStream.collect(Collectors.toList());
+            if (holder.isEmpty()) return ImmutableList.of();
+            
+            Collections.shuffle(holder);
+            return ImmutableList.copyOf(holder.subList(0, maxToSelect));
+        }
+        
+        return entityStream.sorted(distanceSort(isReversed))
+                .limit(maxToSelect)
+                .collect(ImmutableList.toImmutableList());
     }
 
     private Comparator<? super Entity> distanceSort(boolean isReversed) {
