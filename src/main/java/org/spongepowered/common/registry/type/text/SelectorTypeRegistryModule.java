@@ -40,6 +40,7 @@ public final class SelectorTypeRegistryModule extends AbstractCatalogRegistryMod
         register(CatalogKey.minecraft("all_players"), new SpongeSelectorType("minecraft:all_players", "a"));
         register(CatalogKey.minecraft("all_entities"), new SpongeSelectorType("minecraft:all_entities", "e"));
         register(CatalogKey.minecraft("nearest_player"), new SpongeSelectorType("minecraft:nearest_player", "p"));
+        register(CatalogKey.minecraft("source"), new SpongeSelectorType("minecraft:source", "s"));
         register(CatalogKey.minecraft("random"), new SpongeSelectorType("minecraft:random", "r"));
     }
 

@@ -25,10 +25,12 @@
 package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.util.OptionalUtils.asSet;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
@@ -39,22 +41,25 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
+import org.spongepowered.api.scoreboard.Score;
+import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.TeamMember;
+import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.Argument.Invertible;
 import org.spongepowered.api.text.selector.ArgumentHolder;
+import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.selector.SelectorTypes;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,12 +80,14 @@ import javax.annotation.Nullable;
 public class SelectorResolver {
 
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
+    private static final Set<ArgumentType<?>> LOCATION_BASED_ARGUMENTS;
 
-    private static Extent extentFromSource(CommandSource origin) {
-        if (origin instanceof Locatable) {
-            return ((Locatable) origin).getWorld();
-        }
-        return null;
+    static {
+        ImmutableSet.Builder<ArgumentType<?>> builder = ImmutableSet.builder();
+        builder.addAll(ArgumentTypes.POSITION.getTypes());
+        builder.addAll(ArgumentTypes.DIMENSION.getTypes());
+        builder.addAll(ArgumentTypes.RADIUS.getTypes());
+        LOCATION_BASED_ARGUMENTS = builder.build();
     }
 
     private static Vector3d positionFromSource(CommandSource origin) {
@@ -90,108 +97,80 @@ public class SelectorResolver {
         return null;
     }
 
-    private static <I, R extends I> Predicate<I> requireTypePredicate(Class<I> inputType, final Class<R> requiredType) {
-        return requiredType::isInstance;
-    }
-
+    private final CommandSource origin;
     private final Collection<Extent> extents;
     private final Vector3d position;
     private final Selector selector;
     private final Predicate<Entity> selectorFilter;
 
-    public SelectorResolver(Collection<? extends Extent> extents, Selector selector) {
-        this(extents, null, selector);
+    public SelectorResolver(Selector selector, Collection<? extends Extent> extents) {
+        this(selector, extents, null, null);
     }
 
-    public SelectorResolver(Location<World> location, Selector selector) {
-        this(ImmutableSet.of(location.getExtent()), location.getPosition(), selector);
+    public SelectorResolver(Selector selector, CommandSource origin) {
+        this(selector, SpongeImpl.getGame().getServer().getWorlds(), origin, positionFromSource(origin));
     }
 
-    public SelectorResolver(CommandSource origin, Selector selector) {
-        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), selector);
-    }
-
-    private SelectorResolver(Collection<? extends Extent> extents, @Nullable Vector3d position, Selector selector) {
-        this.extents = ImmutableSet.copyOf(extents);
-        this.position = position == null ? Vector3d.ZERO : position;
+    private SelectorResolver(Selector selector, Collection<? extends Extent> extents, @Nullable CommandSource origin, @Nullable Vector3d position) {
         this.selector = checkNotNull(selector);
+        this.extents = ImmutableSet.copyOf(extents);
+        this.origin = origin;
+        this.position = position == null ? Vector3d.ZERO : position;
         this.selectorFilter = makeFilter();
     }
 
     private Predicate<Entity> makeFilter() {
-        final Selector sel = this.selector;
         Vector3d position = getPositionOrDefault(this.position, ArgumentTypes.POSITION);
-        ArrayList<Predicate<Entity>> filters = new ArrayList<>(sel.getArguments().size());
-
-        if (isPlayerOnlySelector()) {
-            filters.add(requireTypePredicate(Entity.class, Player.class));
-        }
+        ArrayList<Predicate<Entity>> filters = new ArrayList<Predicate<Entity>>();
 
         addTypeFilters(filters);
-        addDimensionFilters(position, filters);
-        addRadiusFilters(position, filters);
         addLevelFilters(filters);
         addGamemodeFilters(filters);
-        addNameFilters(filters);
-        addRotationFilters(filters);
         addTeamFilters(filters);
         addScoreFilters(filters);
+        addNameFilters(filters);
+        addRadiusFilters(position, filters);
+        addDimensionFilters(position, filters);
+        addRotationFilters(filters);
 
         // Pack the list before returning it to improve space efficiency
         filters.trimToSize();
         return Functional.predicateAnd(filters);
     }
 
-    private boolean isPlayerOnlySelector() {
-        SelectorType type = this.selector.getType();
-        boolean untypedRandom = type == SelectorTypes.RANDOM && !this.selector.get(ArgumentTypes.ENTITY_TYPE).isPresent();
-        return type == SelectorTypes.ALL_PLAYERS || type == SelectorTypes.NEAREST_PLAYER || untypedRandom;
-    }
-
     private void addDimensionFilters(final Vector3d position, List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Vector3d boxDimensions = getPositionOrDefault(Vector3d.ZERO, ArgumentTypes.DIMENSION);
-        Vector3d det1 = position;
-        Vector3d det2 = position.add(boxDimensions);
-        final Vector3d boxMin = det1.min(det2);
-        final Vector3d boxMax = det1.max(det2);
-        if (sel.has(ArgumentTypes.DIMENSION.x())) {
-            filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getX() >= boxMin.getX() && pos.getX() <= boxMax.getX();
-            });
-        }
-        if (sel.has(ArgumentTypes.DIMENSION.y())) {
-            filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getY() >= boxMin.getY() && pos.getY() <= boxMax.getY();
-            });
-        }
-        if (sel.has(ArgumentTypes.DIMENSION.z())) {
-            filters.add(input -> {
-                Vector3d pos = input.getLocation().getPosition();
-                return pos.getZ() >= boxMin.getZ() && pos.getZ() <= boxMax.getZ();
-            });
-        }
+        if (this.selector.has(ArgumentTypes.DIMENSION.x()) || 
+                this.selector.has(ArgumentTypes.DIMENSION.y()) || 
+                this.selector.has(ArgumentTypes.DIMENSION.z())) return;
+
+        Integer x = this.selector.get(ArgumentTypes.DIMENSION.x()).orElse(0);
+        Integer y = this.selector.get(ArgumentTypes.DIMENSION.y()).orElse(0);
+        Integer z = this.selector.get(ArgumentTypes.DIMENSION.z()).orElse(0);
+        AABB axisalignedbb = getAABB(this.position.toInt(), x, y, z);
+        filters.add(input -> {
+            Optional<AABB> entityAABB = ((Entity) this.origin).getBoundingBox();
+            return !entityAABB.isPresent() || axisalignedbb.intersects(axisalignedbb);
+        });
     }
 
     private void addGamemodeFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Optional<GameMode> gamemode = sel.get(ArgumentTypes.GAME_MODE);
-        // If the gamemode is NOT_SET, that means accept any
-        if (gamemode.isPresent() && gamemode.get() != GameModes.NOT_SET) {
-            final GameMode actualMode = gamemode.get();
-            filters.add(input -> {
-                Optional<GameModeData> mode = input.get(GameModeData.class);
-                return mode.isPresent() && mode.get() == actualMode;
-            });
+        Optional<Invertible<GameMode>> gamemode = this.selector.getArgument(ArgumentTypes.GAME_MODE);
+        if (gamemode.isPresent()) {
+            final GameMode actualMode = gamemode.get().getValue();
+            // If the gamemode is NOT_SET, that means accept any
+            if (actualMode != GameModes.NOT_SET) {
+                final boolean inverted = gamemode.get().isInverted();
+                filters.add(input -> {
+                    Optional<GameModeData> mode = input.get(GameModeData.class);
+                    return inverted ^ (mode.isPresent() && mode.get().type().get() == actualMode);
+                });
+            }
         }
     }
 
     private void addLevelFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Optional<Integer> levelMin = sel.get(ArgumentTypes.LEVEL.minimum());
-        Optional<Integer> levelMax = sel.get(ArgumentTypes.LEVEL.maximum());
+        Optional<Integer> levelMin = this.selector.get(ArgumentTypes.LEVEL.minimum());
+        Optional<Integer> levelMax = this.selector.get(ArgumentTypes.LEVEL.maximum());
         if (levelMin.isPresent()) {
             final int actualMin = levelMin.get();
             filters.add(input -> {
@@ -209,8 +188,7 @@ public class SelectorResolver {
     }
 
     private void addNameFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Optional<Argument.Invertible<String>> nameOpt = sel.getArgument(ArgumentTypes.NAME);
+        Optional<Argument.Invertible<String>> nameOpt = this.selector.getArgument(ArgumentTypes.NAME);
         if (nameOpt.isPresent()) {
             final String name = nameOpt.get().getValue();
             final boolean inverted = nameOpt.get().isInverted();
@@ -222,39 +200,37 @@ public class SelectorResolver {
     }
 
     private void addRadiusFilters(final Vector3d position, List<Predicate<Entity>> filters) {
-        final Selector sel = this.selector;
-        Optional<Integer> radiusMin = sel.get(ArgumentTypes.RADIUS.minimum());
-        Optional<Integer> radiusMax = sel.get(ArgumentTypes.RADIUS.maximum());
+        Optional<Integer> radiusMin = this.selector.get(ArgumentTypes.RADIUS.minimum());
+        Optional<Integer> radiusMax = this.selector.get(ArgumentTypes.RADIUS.maximum());
         if (radiusMin.isPresent()) {
-            int radMin = radiusMin.get();
-            final int radMinSquared = radMin * radMin;
+            double radMin = Math.max(radiusMin.get(), 1.0E-4D);
+            final double radMinSquared = radMin * radMin;
             filters.add(input -> input.getLocation().getPosition().distanceSquared(position) >= radMinSquared);
         }
         if (radiusMax.isPresent()) {
-            int radMax = radiusMax.get();
-            final int radMaxSquared = radMax * radMax;
+            double radMax = Math.max(radiusMax.get(), 1.0E-4D);
+            final double radMaxSquared = radMax * radMax;
             filters.add(input -> input.getLocation().getPosition().distanceSquared(position) <= radMaxSquared);
         }
     }
 
     private void addRotationFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Optional<Double> rotMinX = sel.get(ArgumentTypes.ROTATION.minimum().x());
+        Optional<Double> rotMinX = this.selector.get(ArgumentTypes.ROTATION.minimum().x());
         if (rotMinX.isPresent()) {
             final double rmx = rotMinX.get();
             filters.add(input -> input.getRotation().getX() >= rmx);
         }
-        Optional<Double> rotMinY = sel.get(ArgumentTypes.ROTATION.minimum().y());
+        Optional<Double> rotMinY = this.selector.get(ArgumentTypes.ROTATION.minimum().y());
         if (rotMinY.isPresent()) {
             final double rmy = rotMinY.get();
             filters.add(input -> input.getRotation().getY() >= rmy);
         }
-        Optional<Double> rotMaxX = sel.get(ArgumentTypes.ROTATION.maximum().x());
+        Optional<Double> rotMaxX = this.selector.get(ArgumentTypes.ROTATION.maximum().x());
         if (rotMaxX.isPresent()) {
             final double rx = rotMaxX.get();
             filters.add(input -> input.getRotation().getX() <= rx);
         }
-        Optional<Double> rotMaxY = sel.get(ArgumentTypes.ROTATION.maximum().y());
+        Optional<Double> rotMaxY = this.selector.get(ArgumentTypes.ROTATION.maximum().y());
         if (rotMaxY.isPresent()) {
             final double ry = rotMaxY.get();
             filters.add(input -> input.getRotation().getY() <= ry);
@@ -262,43 +238,60 @@ public class SelectorResolver {
     }
 
     private void addScoreFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        sel.getArguments();
+        for (Argument<?> arg : this.selector.getArguments()) {
+            String key = arg.getType().getKey();
+            if (!key.startsWith("score_")) continue;    
+
+            String objectiveName = key.replaceAll("^score_", "").replaceAll("_min$", "");
+            boolean min = key.endsWith("_min");
+            filters.add(input -> {                
+                Optional<Scoreboard> scoreboard = Sponge.getGame().getServer().getServerScoreboard();
+                if (!scoreboard.isPresent()) return false;
+
+                Optional<Objective> objective = scoreboard.get().getObjective(objectiveName);
+                if (!objective.isPresent()) return false;
+
+                String name = input instanceof Player ? ((Player) input).getName() : input.getUniqueId().toString();
+                Optional<Score> value = objective.get().getScore(Text.of(name));
+                if (!value.isPresent()) return false;
+
+                if (min) {
+                    return ((Integer) arg.getValue()) < value.get().getScore();
+                } else {
+                    return ((Integer) arg.getValue()) > value.get().getScore();
+                }
+            });
+        }
     }
 
     private void addTeamFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Optional<Invertible<String>> teamOpt = sel.getArgument(ArgumentTypes.TEAM);
+        Optional<Invertible<String>> teamOpt = this.selector.getArgument(ArgumentTypes.TEAM);
         if (teamOpt.isPresent()) {
             Invertible<String> teamArg = teamOpt.get();
             final boolean inverted = teamArg.isInverted();
-            filters.add(new Predicate<Entity>() {
+            filters.add(input -> {
+                if (!(input instanceof TeamMember)) return teamArg.getValue().isEmpty() && inverted;
 
-                @Override
-                public boolean test(Entity input) {
-                    Collection<Team> teams = Sponge.getGame().getServer().getServerScoreboard().get().getTeams();
-                    if (input instanceof TeamMember) {
-                        return inverted != collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
-                    }
-                    return false;
+                Optional<Scoreboard> scoreboard = Sponge.getGame().getServer().getServerScoreboard();
+                if (!scoreboard.isPresent()) return false;
+
+                Optional<Team> team = scoreboard.get().getMemberTeam(((TeamMember) input).getTeamRepresentation());
+                if (teamArg.getValue().isEmpty()) {
+                    return inverted ^ team.isPresent();
+                } else {
+                    return inverted ^ (team.isPresent() && team.get().getName().equals(teamArg.getValue()));
                 }
-
-                private Collection<Text> collectMembers(Collection<Team> teams) {
-                    ImmutableSet.Builder<Text> users = ImmutableSet.builder();
-                    for (Team t : teams) {
-                        users.addAll(t.getMembers());
-                    }
-                    return users.build();
-                }
-
             });
         }
     }
 
     private void addTypeFilters(List<Predicate<Entity>> filters) {
-        Selector sel = this.selector;
-        Optional<Argument.Invertible<EntityType>> typeOpt = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
-        if (typeOpt.isPresent()) {
+        SelectorType selectorType = this.selector.getType();
+        Optional<Argument.Invertible<EntityType>> typeOpt = this.selector.getArgument(ArgumentTypes.ENTITY_TYPE);
+        boolean untypedRandom = selectorType == SelectorTypes.RANDOM && !typeOpt.isPresent();
+        if (selectorType == SelectorTypes.ALL_PLAYERS || selectorType == SelectorTypes.NEAREST_PLAYER || untypedRandom) {
+            filters.add(input -> input instanceof Player);
+        } else if (typeOpt.isPresent()) {
             Argument.Invertible<EntityType> typeArg = typeOpt.get();
             final boolean inverted = typeArg.isInverted();
             final EntityType type = typeArg.getValue();
@@ -315,6 +308,13 @@ public class SelectorResolver {
 
     public List<Entity> resolve() {
         SelectorType selectorType = this.selector.getType();
+        if (selectorType == SelectorTypes.SOURCE) {
+            if (this.origin != null && this.origin instanceof Entity && this.selectorFilter.test((Entity) this.origin)) {
+                return ImmutableList.of((Entity) this.origin);
+            }
+            return ImmutableList.of();
+        }
+
         int defaultCount = 1;
         if (INFINITE_TYPES.contains(selectorType)) {
             defaultCount = 0;
@@ -326,19 +326,23 @@ public class SelectorResolver {
         Stream<Entity> entityStream = extents.stream()
                 .flatMap(ext -> ext.getEntities().stream())
                 .filter(this.selectorFilter);
-        if (maxToSelect != 0) {
-            if (selectorType == SelectorTypes.RANDOM) {
-                List<Entity> holder = entityStream.collect(Collectors.toList());
-                Collections.shuffle(holder);
-                entityStream = holder.stream();
-            } else {
-                entityStream = entityStream.sorted(distanceSort(isReversed));
-            }
-            entityStream = entityStream.limit(maxToSelect);
-        } else {
-            entityStream = entityStream.sorted(distanceSort(isReversed));
+
+        if (maxToSelect == 0) {
+            return entityStream.sorted(distanceSort(isReversed))
+                    .collect(ImmutableList.toImmutableList());
         }
-        return entityStream.collect(GuavaCollectors.toImmutableList());
+
+        if (selectorType == SelectorTypes.RANDOM) {
+            List<Entity> holder = entityStream.collect(Collectors.toList());
+            if (holder.isEmpty()) return ImmutableList.of();
+
+            Collections.shuffle(holder);
+            return ImmutableList.copyOf(holder.subList(0, maxToSelect));
+        }
+
+        return entityStream.sorted(distanceSort(isReversed))
+                .limit(maxToSelect)
+                .collect(ImmutableList.toImmutableList());
     }
 
     private Comparator<? super Entity> distanceSort(boolean isReversed) {
@@ -352,7 +356,26 @@ public class SelectorResolver {
     }
 
     private Set<? extends Extent> getExtentSet() {
+        boolean location = this.selector.getArguments().stream()
+                .filter(arg -> LOCATION_BASED_ARGUMENTS.contains(arg.getType()))
+                .findAny()
+                .isPresent();
+        if (location && this.origin != null && this.origin instanceof Locatable) {
+            return ImmutableSet.of(((Locatable) this.origin).getWorld());
+        }
         return ImmutableSet.copyOf(this.extents);
     }
 
+    private static AABB getAABB(Vector3i pos, int x, int y, int z) {
+        boolean flag = x < 0;
+        boolean flag1 = y < 0;
+        boolean flag2 = z < 0;
+        int i = pos.getX() + (flag ? x : 0);
+        int j = pos.getY() + (flag1 ? y : 0);
+        int k = pos.getZ() + (flag2 ? z : 0);
+        int l = pos.getX() + (flag ? 0 : x) + 1;
+        int i1 = pos.getY() + (flag1 ? 0 : y) + 1;
+        int j1 = pos.getZ() + (flag2 ? 0 : z) + 1;
+        return new AABB((double)i, (double)j, (double)k, (double)l, (double)i1, (double)j1);
+    }
 }

@@ -178,6 +178,15 @@ public class SpongeSelectorFactory implements SelectorFactory {
 
     @Override
     public Optional<ArgumentType<?>> getArgumentType(String name) {
+        if (name.startsWith("score_")) {
+            String objective = name.replaceAll("^score_", "").replaceAll("_min$", "");
+            Limit<ArgumentType<Integer>> limit = createScoreArgumentType(objective);
+            if (name.endsWith("_min")) {
+                return Optional.of(limit.minimum());
+            } else {
+                return Optional.of(limit.maximum());
+            }
+        }
         return Optional.ofNullable(this.argumentLookupMap.get(name));
     }
 
@@ -201,6 +210,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType<T> createArgumentType(String key,
             Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
+            checkNotNull(converterKey, "converter key cannot be null");
             this.argumentLookupMap.put(key, new SpongeArgumentType<>(key,
                                                                      type, converterKey));
         }
@@ -216,7 +226,6 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType.Invertible<T> createInvertibleArgumentType(
             String key, Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
-            checkNotNull(converterKey, "converter key cannot be null");
             checkNotNull(converterKey, "converter key cannot be null");
             this.argumentLookupMap.put(key,
                                        new SpongeArgumentType.Invertible<>(key, type,
@@ -303,7 +312,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     private Argument<?> parseArgumentCreateShared(
             SpongeArgumentType<Object> type, String value) {
         Argument<?> created;
-        if (type instanceof ArgumentType.Invertible && value.charAt(0) == '!') {
+        if (type instanceof ArgumentType.Invertible && !value.isEmpty() && value.charAt(0) == '!') {
             created =
                     createArgument((ArgumentType.Invertible<Object>) type,
                             type.convert(value.substring(1)), true);

@@ -32,6 +32,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
+import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -102,7 +103,7 @@ public class SpongeSelector implements Selector {
 
     @Override
     public List<Entity> resolve(CommandSource origin) {
-        return new SelectorResolver(origin, this).resolve();
+        return new SelectorResolver(this, origin).resolve();
     }
 
     @Override
@@ -112,12 +113,22 @@ public class SpongeSelector implements Selector {
 
     @Override
     public List<Entity> resolve(Collection<? extends Extent> extents) {
-        return new SelectorResolver(extents, this).resolve();
+        return new SelectorResolver(this, extents).resolve();
     }
 
     @Override
     public List<Entity> resolve(Location<World> location) {
-        return new SelectorResolver(location, this).resolve();
+        Builder selector = Selector.builder().from(this);
+        if (!this.has(ArgumentTypes.POSITION.x())) {
+            selector.add(ArgumentTypes.POSITION.x(), location.getPosition().getFloorX());
+        }
+        if (!this.has(ArgumentTypes.POSITION.y())) {
+            selector.add(ArgumentTypes.POSITION.y(), location.getPosition().getFloorY());
+        }
+        if (!this.has(ArgumentTypes.POSITION.z())) {
+            selector.add(ArgumentTypes.POSITION.z(), location.getPosition().getFloorZ());
+        }
+        return new SelectorResolver(selector.build(), ImmutableSet.of(location.getExtent())).resolve();
     }
 
     @Override
@@ -133,8 +144,7 @@ public class SpongeSelector implements Selector {
     private String buildString() {
         StringBuilder result = new StringBuilder();
 
-        result.append('@').append(this.type.getKey().toString());
-
+        result.append('@').append(this.type.getName());
         if (!this.arguments.isEmpty()) {
             Collection<Argument<?>> args = this.arguments.values();
             result.append(args.stream().map(Argument::toPlain).collect(Collectors.joining(",", "[", "]")));
