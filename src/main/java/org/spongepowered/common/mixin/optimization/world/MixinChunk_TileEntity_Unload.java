@@ -47,11 +47,11 @@ public abstract class MixinChunk_TileEntity_Unload implements IMixinChunk {
 
     private static final List<TileEntity> EMPTY_LIST = new ArrayList<>();
 
-    @Shadow @Final private World worldObj;
+    @Shadow @Final private World world;
 
-    @Redirect(method = "onChunkUnload()V", at = @At(value = "INVOKE", target = "Ljava/util/Map;values()Ljava/util/Collection;"))
-    public Collection<TileEntity> onChunkUnloadHead(Map<BlockPos, TileEntity> tileEntityMap) {
-        ((IMixinWorld) this.worldObj).markTileEntitiesInChunkForRemoval((net.minecraft.world.chunk.Chunk)(Object) this);
+    @Redirect(method = "onUnload()V", at = @At(value = "INVOKE", target = "Ljava/util/Map;values()Ljava/util/Collection;", remap = false))
+    private Collection<TileEntity> onChunkUnloadHead(Map<BlockPos, TileEntity> tileEntityMap) {
+        ((IMixinWorld) this.world).markTileEntitiesInChunkForRemoval((net.minecraft.world.chunk.Chunk)(Object) this);
         // Forge: We return an empty list to remove all TEs in a chunk at once instead of marking each one for removal
         return EMPTY_LIST;
     }
