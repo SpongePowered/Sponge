@@ -53,7 +53,7 @@ dependencies {
 
     // Database connectors
     compile 'com.zaxxer:HikariCP:2.6.3'
-    runtime 'org.mariadb.jdbc:mariadb-java-client:2.1.0'
+    runtime 'org.mariadb.jdbc:mariadb-java-client:2.0.3'
     compile 'com.h2database:h2:1.4.196'
     runtime 'org.xerial:sqlite-jdbc:3.20.0'
 
