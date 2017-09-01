@@ -355,6 +355,7 @@ public class Adapter implements MinecraftInventoryAdapter {
      */
     private EmptyInventory empty;
 
+    @Nullable
     protected Inventory parent;
     protected Inventory next;
 
@@ -377,9 +378,9 @@ public class Adapter implements MinecraftInventoryAdapter {
         this.rootContainer = (Container) container;
     }
 
-    public Adapter(Fabric<IInventory> inventory, @Nullable Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public Adapter(Fabric<IInventory> inventory, @Nullable Lens<IInventory, net.minecraft.item.ItemStack> root, @Nullable Inventory parent) {
         this.inventory = inventory;
-        this.parent = checkNotNull(parent, "parent");
+        this.parent = parent == null ? this : parent;
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
         this.slots = this.initSlots(inventory, parent);
         this.rootContainer = null;
@@ -503,6 +504,9 @@ public class Adapter implements MinecraftInventoryAdapter {
     public PluginContainer getPlugin() {
         if (this.parent != this) {
             return this.parent.getPlugin();
+        }
+        if (this.rootContainer == null) {
+            return null;
         }
         return this.rootContainer.getPlugin();
     }
