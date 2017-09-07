@@ -53,7 +53,7 @@ public class OptimizationCategory extends ConfigCategory {
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
 
     @Setting(value = "async-lighting", comment = "Runs lighting updates async.")
-    private boolean asyncLighting = true;
+    private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
     @Setting(value = "tile-entity-unload", comment = "If enabled, uses Forge's 1.12 TE unload patch to fix MC-117075.\n"
             + "See https://github.com/MinecraftForge/MinecraftForge/pull/4281 for more info.\n"
@@ -91,8 +91,12 @@ public class OptimizationCategory extends ConfigCategory {
         return this.cacheTameableOwners;
     }
 
+    public AsyncLightingCategory getAsyncLightingCategory() {
+        return this.asyncLightingCategory;
+    }
+
     public boolean useAsyncLighting() {
-        return this.asyncLighting;
+        return this.asyncLightingCategory.isEnabled();
     }
 
     public boolean useTileEntityUnload() {
