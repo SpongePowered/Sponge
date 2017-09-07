@@ -8,6 +8,7 @@
     "mixins": [
         "MixinSpongeImplHooks_Item_Pre_Merge",
         "MixinWorldServer_Explosion",
+        "block.MixinBlockRedstoneWire",
         "entity.MixinEntityTameable_Cached_Owner",
         "world.MixinChunk_Async_Lighting",
         "world.MixinWorldServer_Async_Lighting",
