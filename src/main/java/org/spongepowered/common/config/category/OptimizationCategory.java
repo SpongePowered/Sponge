@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.config.category;
 
+import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+
+import java.io.IOException;
 
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
@@ -58,6 +61,21 @@ public class OptimizationCategory extends ConfigCategory {
             + "Note: This may cause issues with some mods so backup before enabling.")
     private boolean tileEntityUnload = false;
 
+    @Setting(value = "panda-redstone", comment = "If enabled, uses Panda4494's Redstone implementation which improves performance.\n"
+            + "See https://bugs.mojang.com/browse/MC-11193 for more information.\n"
+            + "Note: This optimization has a few issues which is explained in the bug report. We are not responsible for any issues this may cause.")
+    private boolean pandaRedstone = false;
+
+    public OptimizationCategory() {
+        try {
+            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
+            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
+            this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public StructureSaveCategory getStructureSaveCategory() {
         return this.structureSaveCategory;
     }
@@ -80,5 +98,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useTileEntityUnload() {
         return this.tileEntityUnload;
+    }
+
+    public boolean usePandaRedstone() {
+        return this.pandaRedstone;
     }
 }
