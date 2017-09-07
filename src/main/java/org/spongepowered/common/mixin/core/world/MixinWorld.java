@@ -1183,9 +1183,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     /**
-<<<<<<< HEAD
-     * @reason Avoid loading chunk for getting raw light.
-=======
      * @author blood - February 20th, 2017
      * @reason Avoids loading unloaded chunk when checking for sky.
      *

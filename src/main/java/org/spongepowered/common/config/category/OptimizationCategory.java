@@ -51,7 +51,7 @@ public class OptimizationCategory extends ConfigCategory {
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
 
     @Setting(value = "async-lighting", comment = "Runs lighting updates async.")
-    private boolean asyncLighting = true;
+    private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
     @Setting(value = "panda-redstone", comment = "If enabled, uses Panda4494's Redstone implementation which improves performance.\n"
             + "See https://bugs.mojang.com/browse/MC-11193 for more information.\n"
@@ -74,8 +74,12 @@ public class OptimizationCategory extends ConfigCategory {
         return this.cacheTameableOwners;
     }
 
+    public AsyncLightingCategory getAsyncLightingCategory() {
+        return this.asyncLightingCategory;
+    }
+
     public boolean useAsyncLighting() {
-        return this.asyncLighting;
+        return this.asyncLightingCategory.isEnabled();
     }
 
     public boolean usePandaRedstone() {

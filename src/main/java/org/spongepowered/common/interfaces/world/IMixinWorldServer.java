@@ -94,7 +94,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     boolean isLightLevel(Chunk chunk, BlockPos pos, int level);
 
-    boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos);
+    boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
 
     boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
 
