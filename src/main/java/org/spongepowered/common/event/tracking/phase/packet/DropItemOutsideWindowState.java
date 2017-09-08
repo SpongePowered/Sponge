@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -37,32 +36,23 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 
-final class DropItemOutsideWindowState extends BasicInventoryPacketState {
+final class DropItemOutsideWindowState extends DropItemWindowState {
 
     DropItemOutsideWindowState() {
         super(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_OUTSIDE_WINDOW);
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
-        return true;
-    }
-
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        super.populateContext(playerMP, packet, context);
-        // unused, to be removed and re-located when phase context is cleaned up
-        //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
-    }
-
-    @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+    public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+        if (capturedEntities.isEmpty()) {
+            return null;
+        }
+
         final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
                 .entity(EntityUtil.fromNative(playerMP))
                 .type(InternalSpawnTypes.DROPPED_ITEM)
@@ -76,10 +66,5 @@ final class DropItemOutsideWindowState extends BasicInventoryPacketState {
         return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
                ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(spawnCause, transaction, capturedEntities, openContainer, slotTransactions)
                : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(spawnCause, transaction, capturedEntities, openContainer, slotTransactions);
-    }
-
-    @Override
-    public boolean ignoresItemPreMerges() {
-        return true;
     }
 }

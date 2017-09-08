@@ -25,7 +25,7 @@
 package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
+import static org.spongepowered.common.event.tracking.TrackingUtil.handleCustomCursor;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;

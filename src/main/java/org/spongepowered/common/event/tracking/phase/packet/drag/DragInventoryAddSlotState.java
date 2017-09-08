@@ -24,12 +24,31 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 public final class DragInventoryAddSlotState extends NamedInventoryState {
 
     public DragInventoryAddSlotState(String name, int buttonId) {
         super(name, PacketPhase.MODE_DRAG | buttonId | PacketPhase.DRAG_STATUS_ADD_SLOT | PacketPhase.CLICK_INSIDE_WINDOW, PacketPhase.MASK_DRAG);
+    }
+
+    @Nullable
+    @Override
+    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+        return null;
     }
 
 }

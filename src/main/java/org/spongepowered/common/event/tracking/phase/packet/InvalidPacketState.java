@@ -26,12 +26,17 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 final class InvalidPacketState extends BasicPacketState {
 
     @Override
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
         return true;
+    }
+
+    @Override
+    public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
     }
 
 }

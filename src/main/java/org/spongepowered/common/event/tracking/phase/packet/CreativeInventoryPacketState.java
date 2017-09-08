@@ -24,12 +24,55 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+
+import java.util.ArrayList;
 
 final class CreativeInventoryPacketState extends BasicPacketState {
 
+
+    @Override
+    public void unwind(Packet<?> packet, EntityPlayerMP player, PhaseContext context) {
+        context.getCapturedItemsSupplier()
+                .ifPresentAndNotEmpty(items -> {
+                    if (items.isEmpty()) {
+                        return;
+                    }
+                    final Cause cause = Cause.source(EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                            .build())
+                            .build();
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add(EntityUtil.fromNative(item));
+                    }
+                    final DropItemEvent.Dispense
+                            dispense =
+                            SpongeEventFactory.createDropItemEventDispense(cause, entities);
+                    SpongeImpl.postEvent(dispense);
+                    if (!dispense.isCancelled()) {
+                        TrackingUtil.processSpawnedEntities(player, dispense);
+                    }
+                });
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        mixinContainer.setCaptureInventory(false);
+        mixinContainer.getCapturedTransactions().clear();
+    }
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {

@@ -25,27 +25,54 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
 
-final class SecondaryInventoryShiftClickState extends InventoryClickPacketState {
+abstract class DropItemWindowState extends InventoryClickPacketState {
 
-    SecondaryInventoryShiftClickState() {
-        super(PacketPhase.MODE_SHIFT_CLICK | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_NORMAL);
+    DropItemWindowState(int stateId) {
+        super(stateId);
     }
 
     @Override
-    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventShiftSecondary(cause, transaction, openContainer, slotTransactions);
+    public boolean doesCaptureEntityDrops() {
+        return true;
+    }
 
+    @Override
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+        super.populateContext(playerMP, packet, context);
+        // unused, to be removed and re-located when phase context is cleaned up
+        //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+    }
+
+    @Override
+    public abstract ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer,
+            Transaction<ItemStackSnapshot> transaction, List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause,
+            int usedButton);
+
+    @Override
+    protected SpawnEntityEvent fireSpawnEntityEvent(ClickInventoryEvent inventoryEvent, Cause cause, List<Entity> entities) {
+        return (ClickInventoryEvent.Drop) inventoryEvent;
+    }
+
+    @Override
+    protected void onCancelled(ClickInventoryEvent event) {
+        ((ClickInventoryEvent.Drop) event).getEntities().clear();
+    }
+
+    @Override
+    public boolean ignoresItemPreMerges() {
+        return true;
     }
 }

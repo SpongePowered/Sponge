@@ -25,66 +25,30 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 
-final class DropItemWithHotkeyState extends BasicInventoryPacketState {
+final class DropItemInWindowWithHotkeyState extends DropItemWindowState {
 
-    DropItemWithHotkeyState() {
+    DropItemInWindowWithHotkeyState() {
         super(PacketPhase.MODE_DROP | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_ANYWHERE);
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops() {
-        return true;
-    }
-
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        super.populateContext(playerMP, packet, context);
-        // unused, to be removed and re-located when phase context is cleaned up
-        //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
     }
 
     @Override
     public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-        final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
-                .entity(EntityUtil.fromNative(playerMP))
-                .type(InternalSpawnTypes.DROPPED_ITEM)
-                .build())
-                .named(NamedCause.of("Container", openContainer))
-                .build();
-
-        for (Entity currentEntity : capturedEntities) {
-            currentEntity.setCreator(playerMP.getUniqueID());
+        if (capturedEntities.isEmpty()) {
+            return null;
         }
-
-        // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
-        return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID ?
-               SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, slotTransactions) :
-               SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, slotTransactions);
-
-    }
-
-    @Override
-    public boolean ignoresItemPreMerges() {
-        return true;
+        return DropItemInGameWithHotkeyState.createDropItemEvent(playerMP, openContainer, transaction, slotTransactions, capturedEntities, cause,
+                usedButton);
     }
 
 }

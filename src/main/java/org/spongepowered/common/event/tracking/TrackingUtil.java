@@ -39,7 +39,14 @@ import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldProvider;
@@ -61,6 +68,7 @@ import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -81,8 +89,11 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
@@ -878,6 +889,95 @@ public final class TrackingUtil {
                 mixinEntityConsumer.accept(EntityUtil.toMixin(entity));
                 ((IMixinWorldServer) world).forceSpawnEntity(entity);
             }
+        }
+    }
+
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
+        for (SlotTransaction slotTransaction : slotTransactions) {
+
+            if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
+                continue;
+            }
+
+            final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
+            final int slotNumber = slot.slotNumber;
+            ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
+            final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
+            final Slot nmsSlot = openContainer.getSlot(slotNumber);
+            if (nmsSlot != null) {
+                nmsSlot.putStack(originalStack);
+            }
+        }
+        openContainer.detectAndSendChanges();
+        // If event is cancelled, always resync with player
+        // we must also validate the player still has the same container open after the event has been processed
+        if (eventCancelled && player.openContainer == openContainer) {
+            player.sendContainerToPlayer(openContainer);
+        }
+    }
+
+    public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
+        ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
+        player.inventory.setItemStack(cursor);
+        player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
+    }
+
+    public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
+        if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
+            final Slot slot = openContainer.getSlot(slotId);
+            if (slot != null) {
+                ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
+                final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(openContainer, slotId), snapshot, snapshot);
+                capturedTransactions.add(slotTransaction);
+            }
+        }
+    }
+
+    public static void handlePlayerSlotRestore(EntityPlayerMP player, ItemStack itemStack, EnumHand hand) {
+        if (itemStack.isEmpty() || itemStack == ItemTypeRegistryModule.NONE) {
+            return;
+        }
+
+        player.isChangingQuantityOnly = false;
+        int slotId = 0;
+        if (hand == EnumHand.OFF_HAND) {
+            player.inventory.offHandInventory.set(0, itemStack);
+            slotId = (player.inventory.mainInventory.size() + InventoryPlayer.getHotbarSize());
+        } else {
+            player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
+            final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
+            slotId = slot.slotNumber;
+        }
+
+        player.openContainer.detectAndSendChanges();
+        player.isChangingQuantityOnly = false;
+        player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, itemStack));
+    }
+
+    // Check if all transactions are invalid
+    public static boolean allTransactionsInvalid(List<SlotTransaction> slotTransactions) {
+        if (slotTransactions.size() == 0) {
+            return false;
+        }
+
+        for (SlotTransaction slotTransaction : slotTransactions) {
+            if (slotTransaction.isValid()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
+        List<Entity> entities = event.getEntities();
+        processEntities(player, entities);
+    }
+
+    public static void processEntities(EntityPlayerMP player, Collection<Entity> entities) {
+        for (Entity entity : entities) {
+            entity.setCreator(player.getUniqueID());
+            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
         }
     }
 }

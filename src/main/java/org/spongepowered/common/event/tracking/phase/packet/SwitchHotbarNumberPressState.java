@@ -36,7 +36,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
 import java.util.List;
 
-final class SwitchHotbarNumberPressState extends BasicInventoryPacketState {
+final class SwitchHotbarNumberPressState extends InventoryClickPacketState {
 
     SwitchHotbarNumberPressState() {
         super(PacketPhase.MODE_HOTBAR, PacketPhase.MASK_MODE);
