@@ -63,6 +63,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -111,8 +112,10 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Override
     public void firePostConstructEvents() {
         super.firePostConstructEvents();
-        handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
-        handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
+        if (ShouldFire.AI_TASK_EVENT_ADD) {
+            handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
+            handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
+        }
     }
 
     @SuppressWarnings("unchecked")
