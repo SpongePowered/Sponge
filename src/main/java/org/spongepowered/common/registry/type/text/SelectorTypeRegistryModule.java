@@ -60,6 +60,7 @@ public final class SelectorTypeRegistryModule implements AlternateCatalogRegistr
         this.selectorMappings.put("minecraft:all_players", new SpongeSelectorType("minecraft:all_players", "a"));
         this.selectorMappings.put("minecraft:all_entities", new SpongeSelectorType("minecraft:all_entities", "e"));
         this.selectorMappings.put("minecraft:nearest_player", new SpongeSelectorType("minecraft:nearest_player", "p"));
+        this.selectorMappings.put("minecraft:source", new SpongeSelectorType("minecraft:source", "s"));
         this.selectorMappings.put("minecraft:random", new SpongeSelectorType("minecraft:random", "r"));
     }
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -200,6 +201,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType<T> createArgumentType(String key,
             Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
+            checkNotNull(converterKey, "converter key cannot be null");
             this.argumentLookupMap.put(key, new SpongeArgumentType<>(key,
                                                                      type, converterKey));
         }
@@ -215,6 +217,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
     public <T> SpongeArgumentType.Invertible<T> createInvertibleArgumentType(
             String key, Class<T> type, String converterKey) {
         if (!this.argumentLookupMap.containsKey(key)) {
+            checkNotNull(converterKey, "converter key cannot be null");
             this.argumentLookupMap.put(key,
                                        new SpongeArgumentType.Invertible<>(key, type,
                                                                            converterKey));
