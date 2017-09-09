@@ -100,6 +100,7 @@ public final class EventContextKeysModule
         createKey("sponge:piston_extend", "Piston Extend", World.class);
         createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
         createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
+        createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {

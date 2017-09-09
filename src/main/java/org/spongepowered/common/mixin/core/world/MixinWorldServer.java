@@ -1264,7 +1264,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * The train of thought for how spawning is handled:
      * 1) This method is called in implementation
      * 2) handleVanillaSpawnEntity is called to associate various contextual SpawnCauses
-     * 3) {@link CauseTracker#spawnEntity(Entity)} is called to check if the entity is to
+     * 3) {@link CauseTracker#spawnEntity(org.spongepowered.api.world.World, Entity)} is called to
+     *    check if the entity is to
      *    be "collected" or "captured" in the current {@link PhaseContext} of the current phase
      * 4) If the entity is forced or is captured, {@code true} is returned, otherwise, the entity is
      *    passed along normal spawning handling.

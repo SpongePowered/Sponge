@@ -55,7 +55,11 @@ public interface IMixinChunk {
 
     Optional<User> getBlockOwner(BlockPos pos);
 
+    Optional<UUID> getBlockOwnerUUID(BlockPos pos);
+
     Optional<User> getBlockNotifier(BlockPos pos);
+
+    Optional<UUID> getBlockNotifierUUID(BlockPos pos);
 
     @Nullable
     IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot);

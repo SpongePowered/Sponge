@@ -49,7 +49,7 @@ import javax.inject.Inject;
 /**
  * Adds BedRock. Literally.
  */
-@Plugin(id = "recipetest", name = "Recipe Test", description = "A plugin to test recipes")
+//@Plugin(id = "recipetest", name = "Recipe Test", description = "A plugin to test recipes")
 public class RecipeTest {
 
     @Inject private PluginContainer plugin;

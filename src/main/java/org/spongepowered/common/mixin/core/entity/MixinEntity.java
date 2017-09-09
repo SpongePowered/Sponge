@@ -80,6 +80,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -464,18 +465,24 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         // TODO Add a 'Move' plugin phase or just keep it under Teleport?
-        CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
+            if (!Sponge.getCauseStackManager().getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
+            }
 
-        // TODO These methods need a Cause (maybe wait till Cause PR)
-        // TODO Need to not fire Teleport in all cases (especially when movement is local)
-        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
-        if (event.isCancelled()) {
-            CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
-            return false;
+            // TODO These methods need a Cause (maybe wait till Cause PR)
+            // TODO Need to not fire Teleport in all cases (especially when movement is local)
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+            if (event.isCancelled()) {
+                CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
+                return false;
+            }
+
+            location = event.getToTransform().getLocation();
+            this.rotationPitch = (float) event.getToTransform().getPitch();
+            this.rotationYaw = (float) event.getToTransform().getYaw();
         }
-        location = event.getToTransform().getLocation();
-        this.rotationPitch = (float) event.getToTransform().getPitch();
-        this.rotationYaw = (float) event.getToTransform().getYaw();
 
         final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);

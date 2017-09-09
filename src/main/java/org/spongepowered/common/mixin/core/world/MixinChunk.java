@@ -697,7 +697,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public Optional<UUID> getBlockOwnerUUID(BlockPos pos) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<User> getBlockNotifier(BlockPos pos) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<UUID> getBlockNotifierUUID(BlockPos pos) {
         return Optional.empty();
     }
 

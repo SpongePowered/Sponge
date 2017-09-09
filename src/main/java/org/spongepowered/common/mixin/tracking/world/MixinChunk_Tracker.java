@@ -161,43 +161,36 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Override
     public Optional<User> getBlockOwner(BlockPos pos) {
+        final int intKey = blockPosToInt(pos);
+        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
+        if (intTracker != null) {
+            final int notifierIndex = intTracker.ownerIndex;
+            return getValidatedUser(intKey, notifierIndex);
+        } else {
+            final short shortKey = blockPosToShort(pos);
+            if (this.trackedShortBlockPositions.get(shortKey) != null) {
+                PlayerTracker tracker = this.trackedShortBlockPositions.get(shortKey);
+                final int notifierIndex = tracker.ownerIndex;
+                return getValidatedUser(shortKey, notifierIndex);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<UUID> getBlockOwnerUUID(BlockPos pos) {
         final int key = blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
         if (intTracker != null) {
-            UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(intTracker.ownerIndex)).orElse(null);
-            if (uuid != null) {
-                UUID userUniqueId = uuid;
-                // get player if online
-                EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
-                    this.trackedIntBlockPositions.remove(key);
-                    return Optional.empty();
-                }
-                // player is not online, get or create user from storage
-                return this.getUserFromId(userUniqueId);
-            }
+            final int ownerIndex = intTracker.ownerIndex;
+            return getValidatedUUID(key, ownerIndex);
         } else {
             final short shortKey = blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
-                Optional<UUID> uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(shortTracker.ownerIndex));
-                if (uuid.isPresent()) {
-                    UUID userUniqueId = uuid.get();
-                    // get player if online
-                    EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
-                    if (player != null) {
-                        return Optional.of((User) player);
-                    }
-                    if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
-                        this.trackedShortBlockPositions.remove(shortKey);
-                        return Optional.empty();
-                    }
-                    // player is not online, get or create user from storage
-                    return this.getUserFromId(userUniqueId);
-                }
+                final int ownerIndex = shortTracker.ownerIndex;
+                return getValidatedUUID(shortKey, ownerIndex);
             }
         }
 
@@ -209,41 +202,66 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         final int intKey = blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
-            UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(intTracker.notifierIndex)).orElse(null);
-            if (uuid != null) {
-                UUID userUniqueId = uuid;
-                // get player if online
-                EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
-                    this.trackedIntBlockPositions.remove(intKey);
-                    return Optional.empty();
-                }
-                // player is not online, get or create user from storage
-                return this.getUserFromId(userUniqueId);
-            }
-        } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
-            short blockPos = blockPosToShort(pos);
-            PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPos);
-            UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex)).orElse(null);
-            if (uuid != null) {
-                UUID userUniqueId = uuid;
-                // get player if online
-                EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
-                    this.trackedShortBlockPositions.remove(blockPos);
-                    return Optional.empty();
-                }
-                // player is not online, get or create user from storage
-                return this.getUserFromId(userUniqueId);
+            final int notifierIndex = intTracker.notifierIndex;
+            return getValidatedUser(intKey, notifierIndex);
+        } else {
+            final short shortKey = blockPosToShort(pos);
+            if (this.trackedShortBlockPositions.get(shortKey) != null) {
+                PlayerTracker tracker = this.trackedShortBlockPositions.get(shortKey);
+                final int notifierIndex = tracker.notifierIndex;
+                return getValidatedUser(shortKey, notifierIndex);
             }
         }
 
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<UUID> getBlockNotifierUUID(BlockPos pos) {
+        final int key = blockPosToInt(pos);
+        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
+        if (intTracker != null) {
+            final int ownerIndex = intTracker.notifierIndex;
+            return getValidatedUUID(key, ownerIndex);
+        } else {
+            final short shortKey = blockPosToShort(pos);
+            final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
+            if (shortTracker != null) {
+                final int ownerIndex = shortTracker.notifierIndex;
+                return getValidatedUUID(shortKey, ownerIndex);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<User> getValidatedUser(int key, int ownerIndex) {
+        Optional<UUID> uuid = getValidatedUUID(key, ownerIndex);
+        if (uuid.isPresent()) {
+            UUID userUniqueId = uuid.get();
+            // get player if online
+            EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
+            if (player != null) {
+                return Optional.of((User) player);
+            }
+            // player is not online, get or create user from storage
+            return this.getUserFromId(userUniqueId);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<UUID> getValidatedUUID(int key, int ownerIndex) {
+        UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(ownerIndex)).orElse(null);
+        if (uuid != null) {
+            UUID userUniqueId = uuid;
+            // Verify id is valid and not invalid
+            if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
+                this.trackedIntBlockPositions.remove(key);
+                return Optional.empty();
+            }
+            // player is not online, get or create user from storage
+            return Optional.of(userUniqueId);
+        }
         return Optional.empty();
     }
 
