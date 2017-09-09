@@ -34,8 +34,6 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
@@ -51,8 +49,8 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -84,11 +82,6 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     @Override
     public boolean infinitePickupDelay() {
         return this.infinitePickupDelay;
-    }
-
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
-    public void onEntityItemUpdate(CallbackInfo ci) {
-        this.destructCause = Cause.of(NamedCause.of("ExpiredItem", this));
     }
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
@@ -202,11 +195,6 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     @Override
     public ItemType getItemType() {
         return (ItemType) getItem().getItem();
-    }
-
-    @Inject(method = "combineItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
-    public void onCombineItems(EntityItem other, CallbackInfoReturnable<Boolean> cir) {
-        this.destructCause = Cause.of(NamedCause.of("CombinedItem", other));
     }
 
     @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)

@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -35,7 +36,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventManager;
@@ -44,9 +47,9 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
-import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -339,9 +342,24 @@ public class SpongeEventManager implements EventManager {
 
     @SuppressWarnings("unchecked")
     protected boolean post(Event event, List<RegisteredListener<?>> handlers) {
+        if(!Sponge.getServer().isMainThread()) {
+            // If this event is being posted asynchronously then we don't want
+            // to do any timing or cause stack changes
+            for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
+                try {
+                    ((AbstractEvent) event).currentOrder = handler.getOrder();
+                    handler.handle(event);
+                } catch (Throwable e) {
+                    SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                }
+            }
+            ((AbstractEvent) event).currentOrder = null;
+            return event instanceof Cancellable && ((Cancellable) event).isCancelled();
+        }
+        TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
-            CauseTracker.getInstance().getCurrentContext().activeContainer(handler.getPlugin());
-            try {
+            Sponge.getCauseStackManager().pushCause(handler.getPlugin());
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 handler.getTimingsHandler().startTimingIfSync();
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
@@ -351,8 +369,8 @@ public class SpongeEventManager implements EventManager {
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             } finally {
                 handler.getTimingsHandler().stopTimingIfSync();
-                CauseTracker.getInstance().getCurrentContext().activeContainer(null);
             }
+            Sponge.getCauseStackManager().popCause();
         }
         if (event instanceof AbstractEvent) {
             ((AbstractEvent) event).currentOrder = null;

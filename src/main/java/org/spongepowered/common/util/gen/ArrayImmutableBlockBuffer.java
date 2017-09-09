@@ -27,7 +27,6 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -99,8 +98,8 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     }
 
     @Override
-    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker(Cause cause) {
-        return new SpongeBlockVolumeWorker<>(this, cause);
+    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
+        return new SpongeBlockVolumeWorker<>(this);
     }
 
     @Override

@@ -28,7 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -99,12 +98,7 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder) {
-    }
-
-    @Override
     public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
-        ((TickPhaseState) phaseState).associateBlockEventNotifier(context, pos, blockEvent);
     }
 
     @Override
@@ -118,11 +112,6 @@ public final class TickPhase extends TrackingPhase {
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         ((TickPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
-    }
-
-    @Override
-    public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
-        return ((TickPhaseState) state).generateTeleportCause(context);
     }
 
     @Override

@@ -43,10 +43,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("BreakEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("BreakEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -66,10 +66,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("ModifyEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("ModifyEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -82,10 +82,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("PlaceEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("PlaceEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -130,7 +130,4 @@ public enum BlockChange {
         return null;
     }
 
-    public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-
-    }
 }

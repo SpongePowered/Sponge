@@ -29,7 +29,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -58,8 +57,7 @@ public final class EntityPhase extends TrackingPhase {
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
         if (phaseState == State.CHANGING_DIMENSION) {
-            final WorldServer worldServer = context.firstNamed(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Expected to capture the target World for a teleport!", context));
+            final WorldServer worldServer = context.getRequiredExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class);
             ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
             return true;
         }

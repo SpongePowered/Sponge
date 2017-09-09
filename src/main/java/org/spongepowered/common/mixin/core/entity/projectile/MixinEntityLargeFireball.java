@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.world.GameRules;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -56,16 +55,6 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
 
     @Shadow public int explosionPower;
 
-    @Nullable private Cause detonationCause;
-
-    private Cause getDetonationCause() {
-        if (this.detonationCause != null) {
-            return this.detonationCause;
-        } else {
-            return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
-        }
-    }
-
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
         return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
@@ -84,8 +73,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
     }
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
         setDead();
     }
@@ -95,14 +83,20 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
                                                       double x, double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
         boolean griefer = ((IMixinGriefer) this).canGrief();
-        return detonate(getDetonationCause(), Explosion.builder()
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(this);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+            Sponge.getCauseStackManager().pushCause(getShooter());
+            Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(strength)
                 .canCauseFire(flaming && griefer)
                 .shouldPlaySmoke(smoking && griefer)
-                .shouldBreakBlocks(smoking && griefer))
-                .orElse(null);
+                .shouldBreakBlocks(smoking && griefer));
+
+            return ex.orElse(null);
+        }
     }
 
 }

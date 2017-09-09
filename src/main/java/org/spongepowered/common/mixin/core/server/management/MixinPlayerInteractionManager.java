@@ -51,10 +51,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -114,9 +115,11 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         @Nullable final ItemStack oldStack = stack.copy();
 
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
+        Sponge.getCauseStackManager().pushCause(player);
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
                 DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        Sponge.getCauseStackManager().popCause();
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
@@ -224,10 +227,13 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result) {
 
         if (lastOpenContainer != player.openContainer) {
-            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player), NamedCause.hitTarget(blockSnapshot)), player)) {
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
+            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                 result = EnumActionResult.FAIL;
                 SpongeCommonEventFactory.interactBlockEventCancelled = true;
             }
+            Sponge.getCauseStackManager().popCause();
         }
         return result;
     }

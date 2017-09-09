@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 
@@ -44,43 +45,37 @@ class WeatherTickPhaseState extends TickPhaseState {
 
     @Override
     public void processPostTick(PhaseContext phaseContext) {
-        phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-            final Cause.Builder builder = Cause.source(SpawnCause.builder()
-                    .type(InternalSpawnTypes.WEATHER)
-                    .build());
-            final SpawnEntityEvent
-                    spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities);
-            SpongeImpl.postEvent(spawnEntityEvent);
-            for (Entity entity : spawnEntityEvent.getEntities()) {
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-            }
-        });
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
-        });
-    }
-    @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+                final SpawnEntityEvent spawnEntityEvent =
+                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                SpongeImpl.postEvent(spawnEntityEvent);
+                for (Entity entity : spawnEntityEvent.getEntities()) {
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                }
+            });
+            phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
+                TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
+            });
+        }
     }
 
     @Override
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        final Cause.Builder builder = Cause.source(SpawnCause.builder()
-                .type(InternalSpawnTypes.WEATHER)
-                .build());
-        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-        capturedEntities.add(entity);
-        final SpawnEntityEvent
-                spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities);
-        SpongeImpl.postEvent(spawnEntityEvent);
-        if (!spawnEntityEvent.isCancelled()) {
-            for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+            capturedEntities.add(entity);
+            final SpawnEntityEvent spawnEntityEvent =
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+            SpongeImpl.postEvent(spawnEntityEvent);
+            if (!spawnEntityEvent.isCancelled()) {
+                for (Entity anEntity : spawnEntityEvent.getEntities()) {
+                    EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }

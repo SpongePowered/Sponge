@@ -30,10 +30,10 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -64,16 +64,12 @@ class PlaceBlockPacketState extends BasicPacketState {
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
         if (itemstack != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
+            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, itemstack);
         } else {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, ItemTypeRegistryModule.NONE));
+            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, ItemTypeRegistryModule.NONE);
         }
-        // unused, to be removed and re-located when phase context is cleaned up
-        //context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPos()));
-        //context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.getDirection()));
 
-        context
-                .addBlockCaptures()
+        context.addBlockCaptures()
                 .addEntityCaptures()
                 .addEntityDropCaptures();
     }
@@ -81,7 +77,7 @@ class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         PhaseContext context) {
-        Player player = context.first(Player.class).get();
+        Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = transaction.getFinal().getLocation().get();
         BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
         IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(pos);
@@ -93,7 +89,7 @@ class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void associateBlockEventNotifier(PhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
-        final Player player = context.first(Player.class).get();
+        final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = new Location<>(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatableBlock = LocatableBlock.builder()
                 .location(location)

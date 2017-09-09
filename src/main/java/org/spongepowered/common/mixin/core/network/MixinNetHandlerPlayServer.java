@@ -79,6 +79,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
@@ -86,8 +87,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -120,6 +120,7 @@ import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
@@ -210,7 +211,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseContext complete = PhaseContext.start()
-            .add(NamedCause.source(player))
+            .source(player)
             .addCaptures()
             .addEntityDropCaptures()
             .complete();
@@ -302,8 +303,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
         // applied, this is what it "is" right now. If the data shown in the world is desired, it can be fetched from Sign.getData
+        Sponge.getCauseStackManager().pushCause(this.player);
         final ChangeSignEvent event =
-                SpongeEventFactory.createChangeSignEvent(Cause.of(NamedCause.source(this.player)),
+                SpongeEventFactory.createChangeSignEvent(Sponge.getCauseStackManager().getCurrentCause(),
                     changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
         if (!SpongeImpl.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
@@ -312,6 +314,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             // it will be the text of the sign that was showing in the world
             ((Sign) tileentitysign).offer(existingSignData.get());
         }
+        Sponge.getCauseStackManager().popCause();
         tileentitysign.markDirty();
         worldserver.getPlayerChunkMap().markBlockForUpdate(blockpos);
     }
@@ -332,7 +335,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (this.player.interactionManager.isCreative()) {
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final PhaseContext context = peek.context;
-            final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
+            final boolean ignoresCreative = context.getRequiredExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class);
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
 
@@ -471,8 +474,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
+                Sponge.getCauseStackManager().pushCause(player);
+                MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                 SpongeImpl.postEvent(event);
+                Sponge.getCauseStackManager().popCause();
                 if (event.isCancelled()) {
                     mixinPlayer.setLocationAndAngles(fromTransform);
                     this.lastMoveLocation = from;
@@ -528,7 +533,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         Location<World> to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
         Transform<World> fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
         Transform<World> toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
-        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Cause.of(NamedCause.source(ridingEntity)), fromTransform, toTransform, this.getPlayer());
+        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, this.getPlayer());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             // There is no need to change the current riding entity position as it hasn't changed yet.
@@ -552,11 +557,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         final Player player = ((Player) this.player);
         final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
+        Sponge.getCauseStackManager().pushCause(player);
         final ClientConnectionEvent.Disconnect event = SpongeEventFactory.createClientConnectionEventDisconnect(
-                Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
+                Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
                 player, false
         );
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
         }
@@ -574,7 +581,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (!SpongeCommonEventFactory.playerInteractItemChanged) {
                 final CauseTracker causeTracker = CauseTracker.getInstance();
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
-                final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
+                final ItemStack itemStack = peek.context.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
 
                 // Only do a restore if something actually changed. The client does an identity check ('==')
                 // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
@@ -702,10 +709,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 // Sponge end
 
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
-                    EnumHand hand = packetIn.getHand();
 
                     // Sponge start - Fire interact events
-                    ItemStack itemstack = this.player.getHeldItem(hand);
+                    EnumHand hand = packetIn.getHand();
+                    ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
+
                     SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
                     Optional<Vector3d> interactionPoint = Optional.of(VecHelper.toVector3d(packetIn.getHitVec()));
 

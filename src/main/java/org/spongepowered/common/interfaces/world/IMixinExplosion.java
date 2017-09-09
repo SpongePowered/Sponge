@@ -24,15 +24,10 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import org.spongepowered.api.event.cause.Cause;
-
 public interface IMixinExplosion {
-
-    Cause createCause();
 
     void setShouldBreakBlocks(boolean shouldBreakBlocks);
 
     void setShouldDamageEntities(boolean shouldDamageEntities);
 
-    Cause getCreatedCause();
 }

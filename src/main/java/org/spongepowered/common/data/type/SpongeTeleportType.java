@@ -22,21 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.spawn;
+package org.spongepowered.common.data.type;
 
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 
-import org.spongepowered.api.event.cause.entity.spawn.LocatableBlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.common.AbstractLocatableBlockSpawnCauseBuilder;
+import java.util.Locale;
 
-public class SpongeLocatableBlockSpawnCauseBuilder extends AbstractLocatableBlockSpawnCauseBuilder<LocatableBlockSpawnCause, LocatableBlockSpawnCause.Builder>
-        implements LocatableBlockSpawnCause.Builder {
+public class SpongeTeleportType implements TeleportType {
 
-    @Override
-    public LocatableBlockSpawnCause build() {
-        checkState(this.spawnType != null, "SpawnType cannot be null!");
-        checkState(this.locatableBlock != null, "LocatableBlock cannot be null!");
-        return new SpongeLocatableBlockSpawnCause(this);
+    private String name;
+    private String id;
+
+    public SpongeTeleportType(String id, String name) {
+        this.name = name;
+        this.id = id.toLowerCase(Locale.ENGLISH);
     }
 
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeTeleportType other = (SpongeTeleportType) obj;
+        return this.id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
 }

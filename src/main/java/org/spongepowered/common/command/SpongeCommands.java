@@ -63,8 +63,6 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
@@ -485,7 +483,9 @@ public class SpongeCommands {
                 .executor((src, args) -> {
                     if (args.hasAny("reload") && src.hasPermission("sponge.command.plugins.reload")) {
                         src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
-                        SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Cause.of(NamedCause.source(src))));
+                        Sponge.getCauseStackManager().pushCause(src);
+                        SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()));
+                        Sponge.getCauseStackManager().popCause();
                         src.sendMessage(Text.of("Reload complete!"));
                     } else if (args.hasAny("plugin")) {
                         sendContainerMeta(src, args, "plugin");

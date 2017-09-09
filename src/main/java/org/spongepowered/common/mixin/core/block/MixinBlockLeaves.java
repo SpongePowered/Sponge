@@ -40,7 +40,6 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -87,7 +86,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                     .state((BlockState) state)
                     .build();
             causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                    .add(NamedCause.source(locatable))
+                    .source(locatable)
                     .addCaptures()
                     .complete());
         }
@@ -126,7 +125,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                         .state((BlockState) state)
                         .build();
                 causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                        .add(NamedCause.source(locatable))
+                        .source(locatable)
                         .addCaptures()
                         .complete());
             }

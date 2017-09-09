@@ -44,7 +44,6 @@ import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
@@ -62,7 +61,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -96,7 +94,6 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
 
-    private Cause cause = SpongeImpl.getImplementationCause();
     private BiomeGenerator biomegen;
     private boolean isVanilla = true;
 
@@ -215,7 +212,7 @@ public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, Ge
                 for (int y = 0; y < 6; y++) {
                     int y0 = min.getY() + y;
                     if (y <= this.rand.nextInt(5)) {
-                        buffer.setBlock(x0, y0, z0, BlockTypes.BEDROCK.getDefaultState(), this.cause);
+                        buffer.setBlock(x0, y0, z0, BlockTypes.BEDROCK.getDefaultState());
                     }
                 }
             }

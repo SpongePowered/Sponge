@@ -32,6 +32,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Property;
@@ -46,9 +47,8 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -84,7 +84,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
     @Nullable private final WeakReference<Entity> entityReference;
-    // TODO write optimization to lazy load and evaluate all of the manipulators for entities during events.
+    // TODO write optimization to lazy load and evaluate all of the manipulators
+    // for entities during events.
     private boolean isDirty = true;
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
@@ -117,7 +118,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.rotation = builder.rotation == null ? Vector3d.ZERO : builder.rotation;
         this.scale = builder.scale == null ? Vector3d.ZERO : builder.scale;
         this.entityReference = builder.entityReference;
-        if(this.compound != null) {
+        if (this.compound != null) {
             this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
             // TODO should ensure other elements are within the compound as well
         }
@@ -178,25 +179,25 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(Queries.WORLD_ID, this.worldUuid.toString())
-            .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
-            .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.WORLD_ID, this.worldUuid.toString())
+                .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
+                .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
-            .getContainer()
-            .createView(DataQueries.ENTITY_ROTATION)
+                .getContainer()
+                .createView(DataQueries.ENTITY_ROTATION)
                 .set(Queries.POSITION_X, this.rotation.getX())
                 .set(Queries.POSITION_Y, this.rotation.getY())
                 .set(Queries.POSITION_Z, this.rotation.getZ())
-            .getContainer()
-            .createView(DataQueries.ENTITY_SCALE)
+                .getContainer()
+                .createView(DataQueries.ENTITY_SCALE)
                 .set(Queries.POSITION_X, this.scale.getX())
                 .set(Queries.POSITION_Y, this.scale.getY())
                 .set(Queries.POSITION_Z, this.scale.getZ())
-            .getContainer()
-            .set(DataQueries.DATA_MANIPULATORS, dataList);
+                .getContainer()
+                .set(DataQueries.DATA_MANIPULATORS, dataList);
 
         if (this.entityUuid != null) {
             container.set(DataQueries.ENTITY_ID, this.entityUuid.toString());
@@ -389,16 +390,16 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setInteger("Dimension", ((IMixinWorldInfo)location.getExtent().getProperties()).getDimensionId());
+        newCompound.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
     }
 
     private SpongeEntitySnapshotBuilder createBuilder() {
         return new SpongeEntitySnapshotBuilder()
-            .type(this.getType())
-            .rotation(this.rotation)
-            .scale(this.scale);
+                .type(this.getType())
+                .rotation(this.rotation)
+                .scale(this.scale);
     }
 
     public Optional<NBTTagCompound> getCompound() {
@@ -426,17 +427,19 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return entity;
             }
         }
-        Entity newEntity = world.get().createEntity(getType(), this.position);
-        if (newEntity != null) {
-            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
-            if(this.compound != null) {
-                nmsEntity.readFromNBT(this.compound);
-            }
-
-            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of(NamedCause.source(SpawnCause.builder()
-                    .type(SpawnTypes.PLUGIN).build()), NamedCause.owner(world)));
-            if (spawnResult) {
-                return Optional.of((Entity) nmsEntity);
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
+            Entity newEntity = world.get().createEntity(getType(), this.position);
+            if (newEntity != null) {
+                net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
+                if (this.compound != null) {
+                    nmsEntity.readFromNBT(this.compound);
+                }
+    
+                boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
+                if (spawnResult) {
+                    return Optional.of((Entity) nmsEntity);
+                }
             }
         }
         return Optional.empty();

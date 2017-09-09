@@ -41,14 +41,16 @@ import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Direction;
@@ -130,11 +132,11 @@ public class PacketUtil {
                 PhaseContext context = EMPTY_INVALID;
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
                     context = PhaseContext.start()
-                            .add(NamedCause.source(packetPlayer))
-                            .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
-                            .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
-                            .add(NamedCause.of(InternalNamedCauses.Packet.CURSOR, cursor))
-                            .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
+                            .source(packetPlayer)
+                            .addExtra(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer)
+                            .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
+                            .addExtra(InternalNamedCauses.Packet.CURSOR, cursor)
+                            .addExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative);
 
                     TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                     context.owner((Player) packetPlayer);
@@ -169,9 +171,13 @@ public class PacketUtil {
             SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
             SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(playerMP);
             HandType handType = packet.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
-            AnimateHandEvent event = SpongeEventFactory.createAnimateHandEvent(Cause.of(NamedCause.source(playerMP)), handType, (Humanoid) playerMP);
-            if (SpongeImpl.postEvent(event)) {
-                return true;
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(playerMP);
+                AnimateHandEvent event =
+                        SpongeEventFactory.createAnimateHandEvent(Sponge.getCauseStackManager().getCurrentCause(), handType, (Humanoid) playerMP);
+                if (SpongeImpl.postEvent(event)) {
+                    return true;
+                }
             }
             return false;
         } else if (packetIn instanceof CPacketPlayerDigging) {
@@ -231,14 +237,20 @@ public class PacketUtil {
                 return lastTryBlockPacketItemResult;
             }
 
-            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
-            SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(playerMP)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
-            if (isCancelled) {
-                // Multiple slots may have been changed on the client. Right
-                // clicking armor is one example - the client changes it
-                // without the server telling it to.
-                playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory());
-                return true;
+            final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
+            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+
+            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(playerMP);
+                SpongeCommonEventFactory.callInteractBlockEventSecondary(Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
+                if (isCancelled) {
+                    // Multiple slots may have been changed on the client. Right
+                    // clicking armor is one example - the client changes it
+                    // without the server telling it to.
+                    playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory());
+                    return true;
+                }
             }
         } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
@@ -246,7 +258,10 @@ public class PacketUtil {
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             Vector3d interactionPoint = VecHelper.toVector3d(packet.getPos());
             BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
-            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.of(interactionPoint), blockSnapshot).isCancelled();
+            final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
+            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+
+            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.of(interactionPoint), blockSnapshot).isCancelled();
             lastTryBlockPacketItemResult = isCancelled;
             if(isCancelled) {
                 // update client

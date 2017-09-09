@@ -43,11 +43,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.Explosive;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -84,7 +82,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     public Vec3d position; // Added for Forge
     private boolean shouldBreakBlocks;
     private boolean shouldDamageEntities;
-    private Cause createdCause;
+//    private Cause createdCause;
 
     @Shadow @Final private List<BlockPos> affectedBlockPositions;
     @Shadow @Final private Map<EntityPlayer, Vec3d> playerKnockbackMap;
@@ -112,53 +110,54 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     }
 
 
-    @Override
-    public Cause createCause() {
-        if (this.createdCause != null) {
-            return this.createdCause;
-        }
-        Object source;
-        Object projectileSource = null;
-        Object igniter = null;
-        if (this.exploder == null) {
-            source = getWorld().getBlock(getLocation().getPosition().toInt());
-        } else {
-            source = this.exploder;
-            if (source instanceof Projectile) {
-                projectileSource = ((Projectile) this.exploder).getShooter();
-            }
-
-            // Don't use the exploder itself as igniter
-            igniter = getExplosivePlacedBy();
-            if (this.exploder == igniter) {
-                igniter = null;
-            }
-        }
-
-        final Cause.Builder builder = Cause.source(source);
-        if (projectileSource != null) {
-            if (igniter != null) {
-                builder.named(NamedCause.of("ProjectileSource", projectileSource)).named(NamedCause.of("Igniter", igniter));
-            } else {
-                builder.named(NamedCause.of("ProjectileSource", projectileSource));
-            }
-        } else if (igniter != null) {
-            builder.named(NamedCause.of("Igniter", igniter));
-        }
-        if (CauseTracker.ENABLED) {
-            final PhaseData phaseData = CauseTracker.getInstance().getCurrentPhaseData();
-            phaseData.state.getPhase().appendExplosionCause(phaseData);
-        }
-        return this.createdCause = builder.build();
-    }
-
-    @Override
-    public Cause getCreatedCause() {
-        if (this.createdCause == null) {
-            createCause();
-        }
-        return this.createdCause;
-    }
+    // TODO fix this whereever it was called from?
+//    @Override
+//    public Cause createCause() {
+//        if (this.createdCause != null) {
+//            return this.createdCause;
+//        }
+//        Object source;
+//        Object projectileSource = null;
+//        Object igniter = null;
+//        if (this.exploder == null) {
+//            source = getWorld().getBlock(getLocation().getPosition().toInt());
+//        } else {
+//            source = this.exploder;
+//            if (source instanceof Projectile) {
+//                projectileSource = ((Projectile) this.exploder).getShooter();
+//            }
+//
+//            // Don't use the exploder itself as igniter
+//            igniter = getExplosivePlacedBy();
+//            if (this.exploder == igniter) {
+//                igniter = null;
+//            }
+//        }
+//
+//        final Cause.Builder builder = Cause.source(source);
+//        if (projectileSource != null) {
+//            if (igniter != null) {
+//                builder.named(NamedCause.of("ProjectileSource", projectileSource)).named(NamedCause.of("Igniter", igniter));
+//            } else {
+//                builder.named(NamedCause.of("ProjectileSource", projectileSource));
+//            }
+//        } else if (igniter != null) {
+//            builder.named(NamedCause.of("Igniter", igniter));
+//        }
+//        if (CauseTracker.ENABLED) {
+//            final PhaseData phaseData = CauseTracker.getInstance().getCurrentPhaseData();
+//            phaseData.state.getPhase().appendExplosionCause(phaseData);
+//        }
+//        return this.createdCause = builder.build();
+//    }
+//
+//    @Override
+//    public Cause getCreatedCause() {
+//        if (this.createdCause == null) {
+//            createCause();
+//        }
+//        return this.createdCause;
+//    }
 
     /**
      * @author gabizou - September 8th, 2016
@@ -239,7 +238,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         for (Entity entity : list) {
             entities.add((org.spongepowered.api.entity.Entity) entity);
         }
-        ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(createCause(), blockPositions, entities, this, (World) this.world);
+        ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(Sponge.getCauseStackManager().getCurrentCause(), blockPositions, entities, this, (World) this.world);
         SpongeImpl.postEvent(detonate);
         if (detonate.isCancelled()) {
             this.affectedBlockPositions.clear();
@@ -376,7 +375,18 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
                 if (iblockstate.getMaterial() != Material.AIR) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
+                        // Sponge Start - Track the block position being destroyed
+                        final CauseTracker causeTracker = CauseTracker.getInstance();
+                        final PhaseData peek = causeTracker.getCurrentPhaseData();
+                        // We need to capture this block position if necessary
+                        if (peek.state.requiresBlockPosTracking()) {
+                            peek.context.getCaptureBlockPos().setPos(blockpos);
+                        }
                         block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
+                        // And then un-set the captured block position
+                        if (peek.state.requiresBlockPosTracking()) {
+                            peek.context.getCaptureBlockPos().setPos(null);
+                        }
                     }
 
                     // Sponge Start - Track the block position being destroyed

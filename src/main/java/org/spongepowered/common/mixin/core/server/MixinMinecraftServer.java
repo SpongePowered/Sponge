@@ -61,8 +61,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -386,8 +384,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         final CauseTracker causeTracker = CauseTracker.getInstance();
         if (CauseTracker.ENABLED) {
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(NamedCause.source(worldServer))
-                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, worldServer))
+                    .source(worldServer)
+                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, worldServer)
                     .addCaptures()
                     .complete());
         }
@@ -566,10 +564,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
         this.currentTabCompletionOptions = null;
 
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
+        Sponge.getCauseStackManager().pushCause(sender);
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Sponge.getCauseStackManager().getCurrentCause(),
                 ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), usingBlock);
         Sponge.getEventManager().post(event);
-
+        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             completions.clear();
         }
@@ -792,7 +791,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
     public Object onCall(Callable<?> callable) throws Exception {
         CauseTracker.getInstance().switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-            .add(NamedCause.source(callable))
+            .source(callable)
             .addCaptures()
             .complete()
         );

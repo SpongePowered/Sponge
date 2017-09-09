@@ -30,7 +30,6 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -101,7 +100,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
         if (phaseState == null || !phaseState.isInteraction()) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, NamedCause.of(NamedCause.BLOCK_PROTECTED, worldIn), playerIn).isCancelled()) {
+            // TODO BLOCK_PROTECTED flag
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }

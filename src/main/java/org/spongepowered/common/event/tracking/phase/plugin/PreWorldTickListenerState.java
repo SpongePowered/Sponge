@@ -28,8 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -46,15 +44,9 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
-    }
-
-    @Override
     public void processPostTick(PhaseContext phaseContext) {
         final IMixinWorldTickEvent worldTickEvent = phaseContext
-                .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
+                .getRequiredExtra(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class);
         final Object listener = phaseContext.getSource(Object.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 

@@ -54,9 +54,10 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.gen.IChunkGenerator;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -66,10 +67,9 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -141,7 +141,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     private boolean isSpawning = false;
     private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long cacheKey;
-    private Cause chunkCause;
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
     private static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
@@ -195,7 +194,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     this.sponge_world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
         }
         this.cacheKey = ChunkPos.asLong(this.x, this.z);
-        this.chunkCause = Cause.source(this.world).build();
     }
 
     @Override
@@ -276,7 +274,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     {
         this.loaded = true;
         this.world.addTileEntities(this.tileEntities.values());
-    
+
         for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
         {
             this.world.loadEntities(classinheritancemultimap);
@@ -296,7 +294,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(this.chunkCause, (Chunk) this));
+        SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
         if (!this.world.isRemote) {
             SpongeHooks.logChunkLoad(this.world, this.chunkPos);
         }
@@ -340,8 +338,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(this.chunkCause, (Chunk) this));
         if (!this.world.isRemote) {
+            SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
             SpongeHooks.logChunkUnload(this.world, this.chunkPos);
         }
         // Sponge end
@@ -382,7 +380,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public double getRegionalDifficultyFactor() {
         final boolean flag = this.world.getDifficulty() == EnumDifficulty.HARD;
         float moon = this.world.getCurrentMoonPhaseFactor();
-        float f2 = MathHelper.clamp((this.world.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f2 = MathHelper.clamp((this.world.getWorldTime() - 72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
         f3 += MathHelper.clamp(this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
         f3 += MathHelper.clamp(moon * 0.25F, 0.0F, f2);
@@ -437,13 +435,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState block) {
         checkBlockBounds(x, y, z);
         return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block, false);
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag) {
         return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, (this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15),
                 block, flag.updateNeighbors());
     }
@@ -460,13 +458,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
-        return this.sponge_world.restoreSnapshot(snapshot, force, flag, cause);
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
+        return this.sponge_world.restoreSnapshot(snapshot, force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
-        return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag, cause);
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
+        return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag);
     }
 
     public double getHighestYAt(double x, double z) {
@@ -543,8 +541,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public MutableBlockVolumeWorker<Chunk> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<Chunk> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
@@ -789,7 +787,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public Optional<UUID> getBlockOwnerUUID(BlockPos pos) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<User> getBlockNotifier(BlockPos pos) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<UUID> getBlockNotifierUUID(BlockPos pos) {
         return Optional.empty();
     }
 
@@ -830,8 +838,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean spawnEntity(org.spongepowered.api.entity.Entity entity, Cause cause) {
-        return this.sponge_world.spawnEntity(entity, cause);
+    public boolean spawnEntity(org.spongepowered.api.entity.Entity entity) {
+        return this.sponge_world.spawnEntity(entity);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -902,38 +910,38 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
-        return this.sponge_world.hitBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, cause);
+    public boolean hitBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        return this.sponge_world.hitBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, profile);
     }
 
     @Override
-    public boolean interactBlock(int x, int y, int z, Direction side, Cause cause) {
-        return this.sponge_world.interactBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, cause);
+    public boolean interactBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        return this.sponge_world.interactBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, profile);
     }
 
     @Override
-    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, Cause cause) {
-        return this.sponge_world.placeBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), block, side, cause);
+    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, GameProfile profile) {
+        return this.sponge_world.placeBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), block, side, profile);
     }
 
     @Override
-    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, Cause cause) {
-        return this.sponge_world.interactBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, side, cause);
+    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, GameProfile profile) {
+        return this.sponge_world.interactBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, side, profile);
     }
 
     @Override
-    public boolean digBlock(int x, int y, int z, Cause cause) {
-        return this.sponge_world.digBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), cause);
+    public boolean digBlock(int x, int y, int z, GameProfile profile) {
+        return this.sponge_world.digBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), profile);
     }
 
     @Override
-    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
-        return this.sponge_world.digBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, cause);
+    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+        return this.sponge_world.digBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, profile);
     }
 
     @Override
-    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
-        return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, cause);
+    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+        return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, profile);
     }
 
     @Redirect(method = "populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
@@ -947,7 +955,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
+                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
                     .addCaptures()
                     .complete());
         }
@@ -1187,14 +1195,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        if (neighbor != null) {
-            if (secondary != Direction.NONE) {
-                return neighbor.getNeighbor(secondary, shouldLoad);
-            }
-            return Optional.of(neighbor);
+        if (neighbor != null && secondary != Direction.NONE) {
+            return neighbor.getNeighbor(secondary, shouldLoad);
         }
 
-        return Optional.empty();
+        return Optional.ofNullable(neighbor);
     }
 
     private static int directionToIndex(Direction direction) {

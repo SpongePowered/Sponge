@@ -35,12 +35,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -113,14 +113,15 @@ public abstract class MixinMobSpawnerBaseLogic {
         if (type == null) {
             return null;
         }
-
-        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>(
-                ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return null;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
+            Transform<org.spongepowered.api.world.World> transform = new Transform<>(
+                    ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return null;
+            }
         }
         Entity entity;
         try {

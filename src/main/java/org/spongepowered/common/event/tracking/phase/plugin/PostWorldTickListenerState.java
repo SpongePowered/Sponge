@@ -28,8 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -41,11 +39,6 @@ import javax.annotation.Nullable;
 final class PostWorldTickListenerState extends ListenerPhaseState {
 
     PostWorldTickListenerState() {
-    }
-
-    @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 
     @Override
@@ -64,6 +57,6 @@ final class PostWorldTickListenerState extends ListenerPhaseState {
 
     @Override
     public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
-        context.getCapturedPlayerSupplier().addPlayer(playerMP);
+        context.source(playerMP);
     }
 }

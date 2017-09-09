@@ -31,11 +31,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,14 +52,15 @@ public abstract class MixinBlockDynamicLiquid {
 
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
     public void onCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, NamedCause.of(NamedCause.LIQUID_FLOW, worldIn)).isCancelled()) {
+        // TODO LIQUID_FLOW flag
+        if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
     }
 
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
-    public void onUpdateTick(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, NamedCause.of(NamedCause.LIQUID_FLOW, worldIn)).isCancelled()) {
+    public void onUpdateTick(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+        if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
             ci.cancel();
         }
     }
@@ -69,7 +68,7 @@ public abstract class MixinBlockDynamicLiquid {
     // Capture Lava falling on Water forming Stone
     @Inject(method = "updateTick", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
-    private void beforeSetBlockState(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+    private void beforeSetBlockState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         BlockPos sourcePos = pos.up();
         Location<org.spongepowered.api.world.World> loc = new Location<>(((org.spongepowered.api.world.World) worldIn), sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
         LocatableBlock source = LocatableBlock.builder().location(loc).build();
@@ -88,7 +87,7 @@ public abstract class MixinBlockDynamicLiquid {
     // Capture Fluids flowing into other blocks
     @Inject(method = "tryFlowInto", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/state/IBlockState;getMaterial()Lnet/minecraft/block/material/Material;"))
-    private void afterCanFlowInto(World worldIn, BlockPos pos, IBlockState state, int level, CallbackInfo ci) {
+    private void afterCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int level, CallbackInfo ci) {
         IBlockState defaultState = ((Block) (Object) this).getDefaultState();
         // Do not call events when just flowing into air or same liquid
         if (state.getMaterial() != Material.AIR && state.getMaterial() != defaultState.getMaterial()) {

@@ -28,9 +28,12 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
@@ -39,10 +42,12 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
 import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.api.world.schematic.Schematic;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
@@ -52,14 +57,14 @@ import org.spongepowered.common.world.schematic.SpongeSchematic;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class LegacySchematicTranslator implements DataTranslator<Schematic> {
 
     private static final LegacySchematicTranslator INSTANCE = new LegacySchematicTranslator();
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int MAX_SIZE = 65535;
-
-    private final Cause cause = Cause.source(this).build();
+    private static final DataQuery TILE_ID = DataQuery.of("id");
 
     public static LegacySchematicTranslator get() {
         return INSTANCE;
@@ -117,12 +122,19 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < length; z++) {
                     int index = (y * length + z) * width + x;
-                    int palette_id = (block_ids[index] << 4) | (block_data[index] & 0xFF);
+                    final int default_state_id = block_ids[index];
+                    final int blockData = block_data[index] & 0xF;
+                    int palette_id = default_state_id << 4 | blockData;
                     if (add_block != null) {
                         palette_id |= add_block[index] << 12;
                     }
-                    BlockState block = palette.get(palette_id).get();
-                    buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block, this.cause);
+                    Optional<BlockState> blockState = palette.get(palette_id);
+                    if (!blockState.isPresent()) {
+                        // At the very least get the default state id
+                        blockState = Optional.of((BlockState) Block.REGISTRY.getObjectById(default_state_id));
+                    }
+                    BlockState block = blockState.orElseGet(BlockTypes.COBBLESTONE::getDefaultState);
+                    buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block);
                 }
             }
         }
@@ -133,14 +145,21 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 int x = tile.getInt(DataQueries.X_POS).get();
                 int y = tile.getInt(DataQueries.Y_POS).get();
                 int z = tile.getInt(DataQueries.Z_POS).get();
+                final String tileType = tile.getString(TILE_ID).get();
+                final ResourceLocation name = new ResourceLocation(tileType);
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntity.REGISTRY.getObject(new ResourceLocation(tile.getString(DataQuery.of("id")).get())));
-                TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
-                        .state(buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ))
+                        .getForClass(TileEntity.REGISTRY.getObject(name));
+                final BlockState state = buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ);
+                // Somehow we need to get some DataFixers in here, because some data may be legacy from older versions before data
+                // fixers.
+                if (type!= null && SpongeImplHooks.hasBlockTileEntity(((Block) state.getType()), BlockUtil.toNative(state))) {
+                    TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
+                        .state(state)
                         .tileData(tile)
                         .tile(type)
                         .build();
-                tiles.put(new Vector3i(x - offsetX, y - offsetY, z - offsetZ), archetype);
+                    tiles.put(new Vector3i(x - offsetX, y - offsetY, z - offsetZ), archetype);
+                }
             }
         }
         SpongeSchematic schematic = new SpongeSchematic(buffer, tiles);
@@ -175,7 +194,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         data.set(DataQueries.Schematic.LEGACY_OFFSET_Y, -yMin);
         data.set(DataQueries.Schematic.LEGACY_OFFSET_Z, -zMin);
         SaveIterator itr = new SaveIterator(width, height, length);
-        schematic.getBlockWorker(this.cause).iterate(itr);
+        schematic.getBlockWorker().iterate(itr);
         byte[] blockids = itr.blockids;
         byte[] extraids = itr.extraids;
         byte[] blockdata = itr.blockdata;

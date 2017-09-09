@@ -99,9 +99,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
@@ -298,8 +298,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             if (state != EntityPhase.State.DEATH && !state.tracksEntityDeaths()) {
                 if (!tracksEntityDeaths) {
                     causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()
-                            .add(NamedCause.source(this))
-                            .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, cause))
+                            .source(this)
+                            .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
                             .addCaptures()
                             .addEntityDropCaptures()
                             .complete());
@@ -418,10 +418,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Inject(method = "handleClientSettings", at = @At("HEAD"))
     public void postClientSettingsEvent(CPacketClientSettings packet, CallbackInfo ci) {
         // TODO: add HandPreference to PlayerChangeClientSettingsEvent once DominantHandData is implemented
-        final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(this)),
+        Sponge.getCauseStackManager().pushCause(this);
+        final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Sponge.getCauseStackManager().getCurrentCause(),
                 (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
                 LocaleCache.getLocale(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
     }
 
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
@@ -590,15 +592,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public Optional<Container> openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, (EntityPlayerMP) (Object) this,
+    public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this,
                 inventory));
     }
 
     @Override
-    public boolean closeInventory(Cause cause) throws IllegalArgumentException {
+    public boolean closeInventory() throws IllegalArgumentException {
         ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
     }
 
     @Override
@@ -762,13 +764,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
-        ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
-                (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            ci.cancel();
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(this);
+            ChangeGameModeEvent.TargetPlayer event =
+                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
+                            (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                ci.cancel();
+            }
+            this.pendingGameType = (GameType) (Object) event.getGameMode();
         }
-        this.pendingGameType = (GameType) (Object) event.getGameMode();
     }
 
     /**

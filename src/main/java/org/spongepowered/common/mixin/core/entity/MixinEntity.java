@@ -77,11 +77,12 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -171,7 +172,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
-    protected Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
@@ -297,9 +297,11 @@ public abstract class MixinEntity implements IMixinEntity {
             cancellable = true)
     public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> ci) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
-            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Cause.of(NamedCause.source(this)), (Entity) vehicle))) {
+            Sponge.getCauseStackManager().pushCause(this);
+            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (Entity) vehicle))) {
                 ci.cancel();
             }
+            Sponge.getCauseStackManager().popCause();
         }
     }
 
@@ -322,13 +324,13 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public boolean dismountRidingEntity(DismountType type) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
-            if (SpongeImpl.postEvent(SpongeEventFactory
-                    .createRideEntityEventDismount(Cause
-                                    .of(NamedCause.source(this), NamedCause.of("DismountType", type)),
-                            type,
-                            (Entity) this.getRidingEntity()))
-                    ) {
-                return false;
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(this);
+                Sponge.getCauseStackManager().addContext(EventContextKeys.DISMOUNT_TYPE, type);
+                if (SpongeImpl.postEvent(SpongeEventFactory.
+                    createRideEntityEventDismount(Sponge.getCauseStackManager().getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
+                    return false;
+                }
             }
         }
 
@@ -472,18 +474,24 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         // TODO Add a 'Move' plugin phase or just keep it under Teleport?
-        CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
+            if (!Sponge.getCauseStackManager().getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
+            }
 
-        // TODO These methods need a Cause (maybe wait till Cause PR)
-        // TODO Need to not fire Teleport in all cases (especially when movement is local)
-        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
-        if (event.isCancelled()) {
-            CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
-            return false;
+            // TODO These methods need a Cause (maybe wait till Cause PR)
+            // TODO Need to not fire Teleport in all cases (especially when movement is local)
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+            if (event.isCancelled()) {
+                CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
+                return false;
+            }
+
+            location = event.getToTransform().getLocation();
+            this.rotationPitch = (float) event.getToTransform().getPitch();
+            this.rotationYaw = (float) event.getToTransform().getYaw();
         }
-        location = event.getToTransform().getLocation();
-        this.rotationPitch = (float) event.getToTransform().getPitch();
-        this.rotationYaw = (float) event.getToTransform().getYaw();
 
         final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
@@ -777,7 +785,7 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public boolean damage(double damage, org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource, Cause cause) {
+    public boolean damage(double damage, org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
         if (!(damageSource instanceof DamageSource)) {
             SpongeImpl.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
             return false;

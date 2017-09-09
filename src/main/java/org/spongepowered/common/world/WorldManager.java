@@ -55,8 +55,6 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.api.util.file.ForwardingFileVisitor;
@@ -427,7 +425,7 @@ public final class WorldManager {
         ((IMixinWorldInfo) worldInfo).getOrCreateWorldConfig().save();
         registerWorldProperties((WorldProperties) worldInfo);
 
-        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(Sponge.getServer())), archetype,
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), archetype,
                 (WorldProperties) worldInfo));
 
         saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
@@ -492,10 +490,10 @@ public final class WorldManager {
 
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(GeneralPhase.State.WORLD_UNLOAD, PhaseContext.start()
-                    .add(NamedCause.source(worldServer))
+                    .source(worldServer)
                     .complete());
         }
-        if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
+        if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
                 worldServer))) {
             if (CauseTracker.ENABLED) {
                 CauseTracker.getInstance().completePhase(GeneralPhase.State.WORLD_UNLOAD);
@@ -710,7 +708,7 @@ public final class WorldManager {
 
                 // If this is overworld and a new save, the WorldInfo has already been made but we want to still fire the construct event.
                 if (dimensionId == 0 && ((IMixinIntegratedServer) server).isNewSave()) {
-                    SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)), (WorldArchetype)
+                    SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(), (WorldArchetype)
                             (Object) worldSettings, (WorldProperties) worldInfo));
                 }
             } else {
@@ -780,7 +778,7 @@ public final class WorldManager {
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
-        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)),
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Sponge.getCauseStackManager().getCurrentCause(),
                 (WorldArchetype) (Object) worldSettings, (WorldProperties) worldInfo));
 
         return worldInfo;
@@ -814,7 +812,7 @@ public final class WorldManager {
         reorderWorldsVanillaFirst();
 
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
-        SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(Sponge.getServer())),
+        SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.World) worldServer));
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(false);

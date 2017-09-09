@@ -28,13 +28,11 @@ import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.TameEntityEvent;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -73,13 +71,16 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         ItemStack stack = player.getHeldItem(hand);
         if (random == 0) {
             stack.shrink(1);
-            if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
-                            NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
-                            this))) {
-                stack.grow(1);
-                return random;
+            try {
+                Sponge.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
+                Sponge.getCauseStackManager().pushCause(player);
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this))) {
+                    stack.grow(1);
+                    return random;
+                }
+            } finally {
+                Sponge.getCauseStackManager().popCauses(2);
             }
-
         }
         return 1;
     }

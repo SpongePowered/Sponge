@@ -35,7 +35,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -97,7 +96,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldIn;
             final SpongeBlockSnapshot spongeBlockSnapshot = mixinWorldServer.createSpongeBlockSnapshot(state, state, pos, 3);
             final PhaseContext phaseContext = PhaseContext.start()
-                    .add(NamedCause.source(spongeBlockSnapshot))
+                    .source(spongeBlockSnapshot)
                     .addBlockCaptures()
                     .addEntityCaptures()
                     .addEntityDropCaptures();

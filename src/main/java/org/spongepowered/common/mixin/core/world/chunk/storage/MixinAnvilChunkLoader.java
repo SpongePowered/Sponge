@@ -39,12 +39,12 @@ import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraft.world.storage.ThreadedFileIOBase;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -60,8 +60,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -193,13 +193,15 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         Vector3d position = new Vector3d(positionList.getDoubleAt(0), positionList.getDoubleAt(1), positionList.getDoubleAt(2));
         Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
-        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.CHUNK_LOAD).build();
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return null;
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return null;
+            }
+            return EntityList.createEntityFromNBT(compound, world);
         }
-        return EntityList.createEntityFromNBT(compound, world);
     }
 
     @Intrinsic // Forge method

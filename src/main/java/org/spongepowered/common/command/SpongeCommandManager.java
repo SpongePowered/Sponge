@@ -45,9 +45,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -264,9 +263,11 @@ public class SpongeCommandManager implements CommandManager {
     @Override
     public CommandResult process(CommandSource source, String commandLine) {
         final String[] argSplit = commandLine.split(" ", 2);
-        final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Cause.of(NamedCause.source(source)),
+        Sponge.getCauseStackManager().pushCause(source);
+        final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Sponge.getCauseStackManager().getCurrentCause(),
             argSplit.length > 1 ? argSplit[1] : "", argSplit[0], CommandResult.empty());
         Sponge.getGame().getEventManager().post(event);
+        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return event.getResult();
         }
@@ -280,10 +281,11 @@ public class SpongeCommandManager implements CommandManager {
         }
 
         try {
-            try {
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(source);
                 if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                     CauseTracker.getInstance().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
-                        .add(NamedCause.source(source))
+                        .source(source)
                         // unused, to be removed and re-located when phase context is cleaned up
                         //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
                         .addCaptures()
@@ -351,9 +353,11 @@ public class SpongeCommandManager implements CommandManager {
         try {
             final String[] argSplit = arguments.split(" ", 2);
             List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments, targetPosition));
-            final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Cause.source(src).build(),
+            Sponge.getCauseStackManager().pushCause(src);
+            final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Sponge.getCauseStackManager().getCurrentCause(),
                     ImmutableList.copyOf(suggestions), suggestions, argSplit.length > 1 ? argSplit[1] : "", argSplit[0], arguments, Optional.ofNullable(targetPosition), usingBlock); // TODO zml: Should this be exposed in the API?
             Sponge.getGame().getEventManager().post(event);
+            Sponge.getCauseStackManager().popCause();
             if (event.isCancelled()) {
                 return ImmutableList.of();
             }

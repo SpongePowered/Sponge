@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -67,7 +66,7 @@ public class SyncScheduler extends SchedulerBase {
     @Override
     protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
         CauseTracker.getInstance().switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-            .add(NamedCause.source(task))
+            .source(task)
             .addCaptures()
             .complete()
         );

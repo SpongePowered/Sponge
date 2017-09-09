@@ -38,9 +38,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.ModifierFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -90,9 +91,11 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
 
         // Sponge Start - Throw our event and handle appropriately
         final DamageSource damageSource = DamageSource.causeMobDamage((EntityMob) (Object) this);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Cause.source(damageSource).build(), originalFunctions,
+        Sponge.getCauseStackManager().pushCause(damageSource);
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
                 EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;
         }

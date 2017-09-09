@@ -34,7 +34,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -140,7 +140,6 @@ public abstract class MixinDragonFightManager {
                 final CauseTracker causeTracker = CauseTracker.getInstance();
                 causeTracker.switchToPhase(DragonPhase.State.RESPAWN_DRAGON, PhaseContext.start()
                     .addCaptures()
-                    .add(NamedCause.of("RespawnState", this.respawnState))
                     .complete());
                 // Sponge End
                 this.respawnState.process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);

@@ -64,14 +64,12 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLike
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.*;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.*;
-import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
@@ -152,11 +150,8 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
+import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
 import org.spongepowered.common.event.damage.*;
-import org.spongepowered.common.event.entity.teleport.SpongeEntityTeleportCauseBuilder;
-import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCauseBuilder;
-import org.spongepowered.common.event.entity.teleport.SpongeTeleportCauseBuilder;
-import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -193,6 +188,7 @@ import org.spongepowered.common.registry.type.event.DamageModifierTypeRegistryMo
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.registry.type.event.DamageTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.DismountTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.EventContextKeysModule;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
@@ -316,20 +312,11 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
             .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
             .registerBuilderSupplier(Ban.Builder.class, SpongeBanBuilder::new)
-            .registerBuilderSupplier(SpawnCause.Builder.class, SpongeSpawnCauseBuilder::new)
-            .registerBuilderSupplier(EntitySpawnCause.Builder.class, SpongeEntitySpawnCauseBuilder::new)
-            .registerBuilderSupplier(BreedingSpawnCause.Builder.class, SpongeBreedingSpawnCauseBuilder::new)
-            .registerBuilderSupplier(BlockSpawnCause.Builder.class, SpongeBlockSpawnCauseBuilder::new)
-            .registerBuilderSupplier(MobSpawnerSpawnCause.Builder.class, SpongeMobSpawnerSpawnCauseBuilder::new)
             .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
             .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
             .registerBuilderSupplier(TabListEntry.Builder.class, TabListEntryBuilder::new)
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-            .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
-            .registerBuilderSupplier(TeleportCause.Builder.class, SpongeTeleportCauseBuilder::new)
-            .registerBuilderSupplier(EntityTeleportCause.Builder.class, SpongeEntityTeleportCauseBuilder::new)
-            .registerBuilderSupplier(PortalTeleportCause.Builder.class, SpongePortalTeleportCauseBuilder::new)
             .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
             .registerBuilderSupplier(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
             .registerBuilderSupplier(TileEntityArchetype.Builder.class, SpongeTileEntityArchetypeBuilder::new)
@@ -340,7 +327,6 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
             .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
-            .registerBuilderSupplier(LocatableBlockSpawnCause.Builder.class, SpongeLocatableBlockSpawnCauseBuilder::new)
             .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
             .registerBuilderSupplier(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
             .registerBuilderSupplier(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
@@ -348,6 +334,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
             .registerBuilderSupplier(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
             .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
+            .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
         ;
     }
 
@@ -462,6 +449,7 @@ public final class CommonModuleRegistry {
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
+            .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
             .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
 
             // Miscellaneous Registries

@@ -46,6 +46,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
@@ -88,9 +89,9 @@ public final class SpongeImpl {
     @Inject private static SpongePropertyRegistry propertyRegistry;
 
     @Inject private static SpongeScheduler scheduler;
+    @Inject private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
-    private static Cause implementationCause;
 
     private SpongeImpl() {
     }
@@ -104,8 +105,6 @@ public final class SpongeImpl {
         for (Platform.Component component : Platform.Component.values()) {
             internalPlugins.add(platform.getContainer(component));
         }
-
-        implementationCause = Cause.source(platform.getContainer(IMPLEMENTATION)).build();
     }
 
     private static <T> T check(@Nullable T instance) {
@@ -191,10 +190,6 @@ public final class SpongeImpl {
         return internalPlugins;
     }
 
-    public static Cause getImplementationCause() {
-        return implementationCause;
-    }
-
     public static boolean postEvent(Event event) {
         return Sponge.getEventManager().post(event);
     }
@@ -207,8 +202,8 @@ public final class SpongeImpl {
 
     public static void postShutdownEvents() {
         check(game);
-        postState(GameState.GAME_STOPPING, SpongeEventFactory.createGameStoppingEvent(Cause.source(game).build()));
-        postState(GameState.GAME_STOPPED, SpongeEventFactory.createGameStoppedEvent(Cause.source(game).build()));
+        postState(GameState.GAME_STOPPING, SpongeEventFactory.createGameStoppingEvent(Sponge.getCauseStackManager().getCurrentCause()));
+        postState(GameState.GAME_STOPPED, SpongeEventFactory.createGameStoppedEvent(Sponge.getCauseStackManager().getCurrentCause()));
     }
 
     // TODO this code is used a BUNCH of times

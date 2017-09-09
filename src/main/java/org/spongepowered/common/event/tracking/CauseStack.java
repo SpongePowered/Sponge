@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.util.ArrayDeque;
@@ -44,7 +43,7 @@ import java.util.function.Consumer;
  */
 final class CauseStack {
 
-    private static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
+    private static final PhaseContext EMPTY = PhaseContext.start().complete();
     static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 

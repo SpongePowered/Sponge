@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketUseEntity;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -54,12 +53,9 @@ final class InteractEntityPacketState extends BasicPacketState {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
         net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
         if (entity != null) {
-            // unused, to be removed and re-located when phase context is cleaned up
-            //context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-            //context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
             final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
             if (stack != null) {
-                context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
             }
         }
 

@@ -90,8 +90,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -128,6 +126,7 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -183,11 +182,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
             GET_ENTITIES_WITHIN_AABB =
             "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+
     @Nullable private Context worldContext;
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
-    private NamedCause worldNamedCause;
     private it.unimi.dsi.fastutil.longs.LongCollection tileEntitiesChunkToBeRemoved = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
     // @formatter:off
@@ -308,7 +307,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     "sponge$dummy_world");
         }
         this.worldInfo = info;
-        this.worldNamedCause = NamedCause.source(this);
     }
 
     @SuppressWarnings("rawtypes")
@@ -409,8 +407,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
-        return setBlock(x, y, z, block, BlockChangeFlag.ALL, cause);
+    public boolean setBlock(int x, int y, int z, BlockState block) {
+        return setBlock(x, y, z, block, BlockChangeFlag.ALL);
     }
 
 
@@ -706,7 +704,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void triggerExplosion(Explosion explosion, Cause cause) {
+    public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
@@ -729,8 +727,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public MutableBlockVolumeWorker<World> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<World> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
@@ -766,12 +764,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         return snapshot.restore(force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, flag);
     }
@@ -1608,7 +1606,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (!this.isRemote && CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(GeneralPhase.State.TILE_ENTITY_UNLOAD, PhaseContext.start()
-                    .add(this.worldNamedCause)
+                    .source(this)
                     .complete());
         }
         this.startPendingTileEntityTimings(); // Sponge

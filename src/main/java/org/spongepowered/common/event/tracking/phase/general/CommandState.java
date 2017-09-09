@@ -25,17 +25,14 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
@@ -76,103 +73,86 @@ final class CommandState extends GeneralState {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
-        phaseContext.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    // TODO the entity spawn causes are not likely valid, need to investigate further.
-                    final Cause cause = Cause.source(
-                            SpawnCause.builder()
-                                    .type(InternalSpawnTypes.PLACEMENT)
-                                    .build())
-                            .named(NamedCause.of("CommandSource", sender))
-                            .build();
-                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        final boolean isPlayer = sender instanceof Player;
-                        final Player player = isPlayer ? (Player) sender : null;
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (isPlayer) {
-                                EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                            }
-                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                        }
-                    }
-                });
-        phaseContext.getCapturedEntityDropSupplier()
-                .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
-                    for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
-                        final UUID key = entry.getKey();
-                        @Nullable net.minecraft.entity.Entity foundEntity = null;
-                        for (WorldServer worldServer : WorldManager.getWorlds()) {
-                            final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
-                            if (entityFromUuid != null) {
-                                foundEntity = entityFromUuid;
-                                break;
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(sender);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            phaseContext.getCapturedEntitySupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        // TODO the entity spawn causes are not likely valid,
+                        // need to investigate further.
+                        final SpawnEntityEvent spawnEntityEvent =
+                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeImpl.postEvent(spawnEntityEvent);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            final boolean isPlayer = sender instanceof Player;
+                            final Player player = isPlayer ? (Player) sender : null;
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                if (isPlayer) {
+                                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                                }
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
-                        final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
-                        if (!affectedEntity.isPresent()) {
-                            continue;
-                        }
-                        final Collection<ItemDropData> itemStacks = entry.getValue();
-                        if (itemStacks.isEmpty()) {
-                            return;
-                        }
-                        final List<ItemDropData> items = new ArrayList<>();
-                        items.addAll(itemStacks);
-                        itemStacks.clear();
-
-                        final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
-                        if (!items.isEmpty()) {
-                            final List<Entity> itemEntities = items.stream()
-                                    .map(data -> data.create(minecraftWorld))
-                                    .map(EntityUtil::fromNative)
-                                    .collect(Collectors.toList());
-                            final Cause cause = Cause.source(EntitySpawnCause.builder()
-                                    .entity(affectedEntity.get())
-                                    .type(InternalSpawnTypes.DROPPED_ITEM)
-                                    .build()
-                            )
-                                    .named(NamedCause.of("CommandSource", sender))
-                                    .build();
-                            final DropItemEvent.Destruct
-                                    destruct =
-                                    SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities);
-                            SpongeImpl.postEvent(destruct);
-                            if (!destruct.isCancelled()) {
-                                final boolean isPlayer = sender instanceof Player;
-                                final Player player = isPlayer ? (Player) sender : null;
-                                for (Entity entity : destruct.getEntities()) {
-                                    if (isPlayer) {
-                                        EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                                    }
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                    });
+        }
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(sender);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            phaseContext.getCapturedEntityDropSupplier()
+                    .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
+                            final UUID key = entry.getKey();
+                            @Nullable
+                            net.minecraft.entity.Entity foundEntity = null;
+                            for (WorldServer worldServer : WorldManager.getWorlds()) {
+                                final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
+                                if (entityFromUuid != null) {
+                                    foundEntity = entityFromUuid;
+                                    break;
                                 }
                             }
+                            final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
+                            if (!affectedEntity.isPresent()) {
+                                continue;
+                            }
+                            final Collection<ItemDropData> itemStacks = entry.getValue();
+                            if (itemStacks.isEmpty()) {
+                                return;
+                            }
+                            final List<ItemDropData> items = new ArrayList<>();
+                            items.addAll(itemStacks);
+                            itemStacks.clear();
 
+                            final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
+                            if (!items.isEmpty()) {
+                                final List<Entity> itemEntities = items.stream()
+                                        .map(data -> data.create(minecraftWorld))
+                                        .map(EntityUtil::fromNative)
+                                        .collect(Collectors.toList());
+                                Sponge.getCauseStackManager().pushCause(affectedEntity.get());
+                                final DropItemEvent.Destruct destruct =
+                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                                SpongeImpl.postEvent(destruct);
+                                Sponge.getCauseStackManager().popCause();
+                                if (!destruct.isCancelled()) {
+                                    final boolean isPlayer = sender instanceof Player;
+                                    final Player player = isPlayer ? (Player) sender : null;
+                                    for (Entity entity : destruct.getEntities()) {
+                                        if (isPlayer) {
+                                            EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                                        }
+                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                                    }
+                                }
+
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
 
     @Override
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
-    }
-
-    @Override
-    public Cause generateTeleportCause(PhaseContext context) {
-        final Entity entity = context.getSource(Entity.class).orElse(null);
-        if (entity != null) {
-            return Cause
-                    .source(EntityTeleportCause.builder()
-                            .entity(entity)
-                            .type(TeleportTypes.COMMAND)
-                            .build()
-                    )
-                    .build();
-        }
-
-        return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.COMMAND).build()));
     }
 }

@@ -45,6 +45,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.util.Booleans;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -83,18 +84,18 @@ public final class CauseTracker {
     public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
 
     static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
-            context.forEach(namedCause -> {
-                        printer.add("        - Name: %s", namedCause.getName());
-                        printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
+            context.getExtraContext().entrySet().forEach(namedCause -> {
+                        printer.add("        - Name: %s", namedCause.getKey());
+                        printer.addWrapped(100, "          Object: %s", namedCause.getValue());
                     }
             );
 
     private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
         printer.add("    Context:");
-        data.context.forEach(namedCause -> {
-            printer.add("    - Name: %s", namedCause.getName());
-            final Object causeObject = namedCause.getCauseObject();
+        data.context.getExtraContext().entrySet().forEach(namedCause -> {
+            printer.add("    - Name: %s", namedCause.getKey());
+            final Object causeObject = namedCause.getValue();
             if (causeObject instanceof PhaseContext) {
                 CONTEXT_PRINTER.accept(printer, (PhaseContext) causeObject);
             } else {
@@ -110,7 +111,6 @@ public final class CauseTracker {
     public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
     public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
 
-    @SuppressWarnings("ConstantConditions")
     private CauseTracker() {
         // We cannot have two instances ever. ever ever.
         checkState(INSTANCE == null, "More than one CauseTracker instance is being created!!! Two cannot exist at once!");
@@ -602,7 +602,7 @@ public final class CauseTracker {
 
         if (!isForced && !mixinWorldServer.isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
-        } else {
+        }
             if (minecraftEntity instanceof EntityPlayer) {
                 EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
                 minecraftWorld.playerEntities.add(entityplayer);
@@ -613,9 +613,10 @@ public final class CauseTracker {
                 if (minecraftEntity instanceof IEntityOwnable) {
                     IEntityOwnable ownable = (IEntityOwnable) entity;
                     net.minecraft.entity.Entity owner = ownable.getOwner();
-                    if (owner != null && owner instanceof EntityPlayer) {
-                        context.owner = (User) owner;
-                        entity.setCreator(ownable.getOwnerId());
+                    if (owner != null&&owner instanceof EntityPlayer) {
+                            context. owner = (User) owner;
+
+                            entity.setCreator(ownable.getOwnerId());
                     }
                 } else if (minecraftEntity instanceof EntityThrowable) {
                     EntityThrowable throwable = (EntityThrowable) minecraftEntity;
@@ -662,21 +663,19 @@ public final class CauseTracker {
             minecraftWorld.loadedEntityList.add(minecraftEntity);
             mixinWorldServer.onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
             return true;
-        }
+
     }
 
     /**
-     * The core implementation of {@link World#spawnEntity(Entity, Cause)} that
+     * The core implementation of {@link World#spawnEntity(Entity)} that
      * bypasses any sort of cause tracking and throws an event directly
      *
      * @param world
      * @param entity
-     * @param cause
      * @return
      */
-    public boolean spawnEntityWithCause(World world, Entity entity, Cause cause) {
+    public boolean spawnEntityWithCause(World world, Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
-        checkNotNull(cause, "Cause cannot be null!");
 
         // Sponge Start - handle construction phases
         if (((IMixinEntity) entity).isInConstructPhase()) {
@@ -694,21 +693,21 @@ public final class CauseTracker {
 
         if (!isForced && !mixinWorldServer.isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
-        } else {
+        }
+        // Sponge Start - throw an event
+        final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
+        entities.add(entity);
 
-            // Sponge Start - throw an event
-            final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
-            entities.add(entity);
-
-            final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, entities);
+            final SpawnEntityEvent.Custom
+                    event =
+                    SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
             if (entity instanceof EntityPlayer || !event.isCancelled()) {
                 mixinWorldServer.forceSpawnEntity(entity);
             }
             // Sponge end
 
-            return true;
-        }
+        return true;
     }
 
 }
