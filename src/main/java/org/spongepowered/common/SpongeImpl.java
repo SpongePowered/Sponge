@@ -148,6 +148,10 @@ public final class SpongeImpl {
         return check(scheduler);
     }
 
+    public static SpongeCauseStackManager getCauseStackManager() {
+        return check(causeStackManager);
+    }
+
     public static PluginContainer getPlugin() {
         return Sponge.getPlatform().getContainer(IMPLEMENTATION);
     }

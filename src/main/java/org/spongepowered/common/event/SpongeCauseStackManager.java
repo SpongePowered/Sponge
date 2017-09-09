@@ -224,6 +224,9 @@ public class SpongeCauseStackManager implements CauseStackManager {
         // If there were any objects left on the stack then we pop them off
         while (this.cause.size() > this.min_depth) {
             this.cause.pop();
+
+            // and clear the cached causes
+            this.cached_cause = null;
         }
         this.min_depth = frame.old_min_depth;
     }
@@ -251,7 +254,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     public <T> Optional<T> getContext(EventContextKey<T> key) {
         enforceMainThread();
         checkNotNull(key, "key");
-        return Optional.ofNullable((T) this.ctx.get(key.getId()));
+        return Optional.ofNullable((T) this.ctx.get(key));
     }
 
     @Override
