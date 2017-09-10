@@ -481,7 +481,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      */
     @Overwrite
     public void sendMessage(ITextComponent component) {
-        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, true);
+        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, false);
     }
 
     @Override
