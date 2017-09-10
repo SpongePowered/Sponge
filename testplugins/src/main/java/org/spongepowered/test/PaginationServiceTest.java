@@ -54,7 +54,7 @@ public class PaginationServiceTest {
         final Optional<PaginationService> paginationService = Sponge.getServiceManager().provide(PaginationService.class);
         if (paginationService.isPresent()) {
             // Defaults to normal amount of lines per page to guarantee it is of appropriate size
-            paginationList = paginationService.get().builder()
+            this.paginationList = paginationService.get().builder()
                     .title(Text.of(TextColors.RED, "This Is A Test"))
                     .padding(Text.of(TextColors.GOLD, "="))
                     .header(Text.of("This is the header"))

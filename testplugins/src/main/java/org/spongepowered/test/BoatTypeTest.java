@@ -35,7 +35,6 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
@@ -60,7 +59,9 @@ public class BoatTypeTest {
                             Player player = (Player) src;
                             Boat boat = (Boat) player.getLocation().getExtent().createEntity(EntityTypes.BOAT, player.getLocation().getPosition());
                             boat.offer(Keys.TREE_TYPE, args.<TreeType>getOne("tree").orElse(TreeTypes.OAK));
-                            player.getWorld().spawnEntity(boat, Cause.source(player).build());
+                            Sponge.getCauseStackManager().pushCause(player);
+                            player.getWorld().spawnEntity(boat);
+                            Sponge.getCauseStackManager().popCause();
                             return CommandResult.success();
                         })
                         .build(),
