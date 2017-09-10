@@ -294,6 +294,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, new VehicleDataProcessor());
 
+        DataUtil.registerDualProcessor(TreeData.class, SpongeTreeData.class, ImmutableTreeData.class,
+                ImmutableSpongeTreeData.class, new BoatTreeTypeValueProcessor());
+
         DataUtil.registerDualProcessor(PassengerData.class, SpongePassengerData.class, ImmutablePassengerData.class,
                 ImmutableSpongePassengerData.class, new PassengerDataProcessor());
 
