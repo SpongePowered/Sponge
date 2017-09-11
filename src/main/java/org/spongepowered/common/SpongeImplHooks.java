@@ -287,4 +287,8 @@ public final class SpongeImplHooks {
     public static void onTileEntityChunkUnload(net.minecraft.tileentity.TileEntity tileEntity) {
         // forge only method
     }
+
+    public static boolean canConnectRedstone(Block block, IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+        return state.canProvidePower() && side != null;
+    }
 }
