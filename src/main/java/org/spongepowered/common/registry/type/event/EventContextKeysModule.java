@@ -39,6 +39,7 @@ import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -48,7 +49,6 @@ import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.Locale;
-import java.util.UUID;
 
 @SuppressWarnings("rawtypes")
 @RegisterCatalog(EventContextKeys.class)
@@ -75,7 +75,7 @@ public final class EventContextKeysModule
 
     @Override
     public void registerDefaults() {
-        createKey("sponge:creator", "Creator", UUID.class);
+        createKey("sponge:creator", "Creator", User.class);
         createKey("sponge:damage_type", "Damage Type", DamageType.class);
         createKey("sponge:dismount_type", "Dimension Type", DismountType.class);
         createKey("sponge:igniter", "Igniter", User.class);
@@ -101,6 +101,7 @@ public final class EventContextKeysModule
         createKey("sponge:block_hit", "Block Hit", BlockSnapshot.class);
         createKey("sponge:entity_hit", "Entity Hit", BlockSnapshot.class);
         createKey("sponge:used_item", "Used Item", ItemStackSnapshot.class);
+        createKey("sponge:plugin", "Plugin", PluginContainer.class);
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {

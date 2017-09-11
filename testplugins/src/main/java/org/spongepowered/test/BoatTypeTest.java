@@ -59,9 +59,7 @@ public class BoatTypeTest {
                             Player player = (Player) src;
                             Boat boat = (Boat) player.getLocation().getExtent().createEntity(EntityTypes.BOAT, player.getLocation().getPosition());
                             boat.offer(Keys.TREE_TYPE, args.<TreeType>getOne("tree").orElse(TreeTypes.OAK));
-                            Sponge.getCauseStackManager().pushCause(player);
                             player.getWorld().spawnEntity(boat);
-                            Sponge.getCauseStackManager().popCause();
                             return CommandResult.success();
                         })
                         .build(),
