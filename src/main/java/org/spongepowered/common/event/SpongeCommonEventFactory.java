@@ -238,11 +238,15 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
+        }
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
+        }
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, @Nullable Object source) {
@@ -260,39 +264,37 @@ public class SpongeCommonEventFactory {
         }
 
         EntityPlayer player = null;
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            User owner = data.context.getOwner().orElse(null);
-            User notifier = data.context.getNotifier().orElse(null);
-            // handle FakePlayer
-            boolean isFake = false;
-            if (source instanceof EntityPlayer) {
-                player = (EntityPlayer) source;
-                if (SpongeImplHooks.isFakePlayer(player)) {
-                    isFake = true;
-                }
+        User owner = data.context.getOwner().orElse(null);
+        User notifier = data.context.getNotifier().orElse(null);
+        // handle FakePlayer
+        boolean isFake = false;
+        if (source instanceof EntityPlayer) {
+            player = (EntityPlayer) source;
+            if (SpongeImplHooks.isFakePlayer(player)) {
+                isFake = true;
             }
-
-            if(owner != null) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
-            }
-            if (notifier != null) {
-                Optional<Player> oplayer = data.context.getSource(Player.class);
-                if (oplayer.isPresent()) {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, oplayer.get());
-                } else {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
-                }
-            }
-            if(isFake) {
-                Sponge.getCauseStackManager().pushCause(owner);
-            }
-            Sponge.getCauseStackManager().pushCause(source);
-
-            ChangeBlockEvent.Pre event =
-                    SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(), locations);
-            SpongeImpl.postEvent(event);
-            return event;
         }
+
+        if(owner != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
+        }
+        if (notifier != null) {
+            Optional<Player> oplayer = data.context.getSource(Player.class);
+            if (oplayer.isPresent()) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, oplayer.get());
+            } else {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
+            }
+        }
+        if(isFake) {
+            Sponge.getCauseStackManager().pushCause(owner);
+        }
+        Sponge.getCauseStackManager().pushCause(source);
+
+        ChangeBlockEvent.Pre event =
+                SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(), locations);
+        SpongeImpl.postEvent(event);
+        return event;
     }
 
     public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, @Nullable Object source) {
@@ -408,15 +410,16 @@ public class SpongeCommonEventFactory {
             }
             locations.add(new Location<>((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
         }
-        if (extending) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.PISTON_EXTEND, world.asSpongeWorld());
-        } else {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.PISTON_RETRACT, world.asSpongeWorld());
-        }
 
-        // String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
-        return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), locatable)
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (extending) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.PISTON_EXTEND, world.asSpongeWorld());
+            } else {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.PISTON_RETRACT, world.asSpongeWorld());
+            }
+            return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), locatable)
                 .isCancelled();
+        }
     }
 
     @SuppressWarnings("rawtypes")
