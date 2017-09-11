@@ -305,6 +305,9 @@ public final class SpongeImplHooks {
         // forge only method
     }
 
+    public static boolean canConnectRedstone(Block block, IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+        return state.canProvidePower() && side != null;
+    }
     // Crafting
 
     public static Optional<ItemStack> getContainerItem(ItemStack itemStack) {

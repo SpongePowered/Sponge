@@ -27,13 +27,16 @@ package org.spongepowered.common.mixin.optimization.block;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockObserver;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.BlockRedstoneComparator;
 import net.minecraft.block.BlockRedstoneDiode;
+import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -46,10 +49,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImplHooks;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = BlockRedstoneWire.class, priority = 1001)
 public abstract class MixinBlockRedstoneWire extends Block {
@@ -326,7 +332,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
             // canConnectTo() is not the nicest solution here as it returns true for e.g. the front of a repeater
             // canBlockBePowereFromSide catches these cases
             if (connectedSides.contains(facing.getOpposite()) || facing == EnumFacing.DOWN
-                    || (facing.getAxis().isHorizontal() && BlockRedstoneWire.canConnectTo(worldIn.getBlockState(offsetPos), facing))) {
+                    || (facing.getAxis().isHorizontal() && canConnectToBlock(worldIn.getBlockState(offsetPos), facing, worldIn, pos))) {
                 if (this.canBlockBePoweredFromSide(worldIn.getBlockState(offsetPos), facing, true))
                     set.add(offsetPos);
             }
@@ -498,6 +504,30 @@ public abstract class MixinBlockRedstoneWire extends Block {
             } else {
                 return 0;
             }
+        }
+    }
+
+    // Forge adds 2 params to canConnectTo so we need to copy method in order to access it
+    private static boolean canConnectToBlock(IBlockState blockState, @Nullable EnumFacing side, IBlockAccess world, BlockPos pos)
+    {
+        Block block = blockState.getBlock();
+
+        if (block == Blocks.REDSTONE_WIRE)
+        {
+            return true;
+        }
+        else if (Blocks.UNPOWERED_REPEATER.isSameDiode(blockState))
+        {
+            EnumFacing enumfacing = (EnumFacing)blockState.getValue(BlockRedstoneRepeater.FACING);
+            return enumfacing == side || enumfacing.getOpposite() == side;
+        }
+        else if (Blocks.OBSERVER == blockState.getBlock())
+        {
+            return side == blockState.getValue(BlockObserver.FACING);
+        }
+        else
+        {
+            return SpongeImplHooks.canConnectRedstone(block, blockState, world, pos, side);
         }
     }
 }
