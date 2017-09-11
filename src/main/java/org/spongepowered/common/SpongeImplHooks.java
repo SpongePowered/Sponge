@@ -36,6 +36,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -263,5 +264,9 @@ public final class SpongeImplHooks {
 
     public static void onTileEntityChunkUnload(net.minecraft.tileentity.TileEntity tileEntity) {
         // forge only method
+    }
+
+    public static boolean canConnectRedstone(Block block, IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+        return state.canProvidePower() && side != null;
     }
 }

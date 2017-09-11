@@ -67,7 +67,7 @@ public class OptimizationCategory extends ConfigCategory {
 
     public OptimizationCategory() {
         try {
-            // Enabled ny default on SpongeVanilla, disabled by default on SpongeForge.
+            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
             // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
             this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
         } catch (IOException e) {
