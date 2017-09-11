@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.inject.plugin;
 
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
-import com.google.inject.TypeLiteral;
 import org.slf4j.Logger;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetId;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelId;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -73,15 +69,6 @@ public class PluginModule extends AbstractModule {
         this.bind(ChannelBinding.RawDataChannel.class).annotatedWith(ChannelId.class).toProvider(ChannelBindingProvider.Raw.class);
         this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
-        this.bindEventContextKey(this.pluginClass);
-
         this.install(new PluginConfigurationModule());
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void bindEventContextKey(final Class<T> klass) {
-        final TypeToken<EventContextKey<T>> token = new TypeToken<EventContextKey<T>>() {}.where(new TypeParameter<T>() {}, klass);
-        final TypeLiteral<EventContextKey<T>> literal = (TypeLiteral<EventContextKey<T>>) TypeLiteral.get(token.getType());
-        this.bind(literal).toProvider(EventContextKey.builder(klass).id(this.container.getId()).name(this.container.getName())::build);
     }
 }
