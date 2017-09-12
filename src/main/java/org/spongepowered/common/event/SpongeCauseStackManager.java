@@ -95,6 +95,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     public CauseStackManager pushCause(Object obj) {
         enforceMainThread();
         checkNotNull(obj, "obj");
+        this.cached_cause = null;
         this.cause.push(obj);
         return this;
     }
