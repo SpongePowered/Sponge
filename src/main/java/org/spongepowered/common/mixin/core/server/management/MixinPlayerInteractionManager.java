@@ -113,13 +113,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
         @Nullable final ItemStack oldStack = stack.copy();
-
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        Sponge.getCauseStackManager().pushCause(player);
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack,
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
                 DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
-        Sponge.getCauseStackManager().popCause();
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }

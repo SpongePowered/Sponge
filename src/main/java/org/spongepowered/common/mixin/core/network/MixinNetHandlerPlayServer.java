@@ -85,6 +85,7 @@ import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -209,16 +210,19 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             player.onUpdateEntity();
             return;
         }
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseContext complete = PhaseContext.start()
-            .source(player)
-            .addCaptures()
-            .addEntityDropCaptures()
-            .complete();
-        causeTracker.switchToPhase(TickPhase.Tick.PLAYER, complete, () -> {
-            player.onUpdateEntity();
-            return null;
-        });
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(player);
+            final CauseTracker causeTracker = CauseTracker.getInstance();
+            final PhaseContext complete = PhaseContext.start()
+                .source(player)
+                .addCaptures()
+                .addEntityDropCaptures()
+                .complete();
+            causeTracker.switchToPhase(TickPhase.Tick.PLAYER, complete, () -> {
+                player.onUpdateEntity();
+                return null;
+            });
+        }
     }
 
     @Override
