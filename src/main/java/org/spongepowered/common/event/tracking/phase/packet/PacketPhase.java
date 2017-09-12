@@ -65,7 +65,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -250,7 +249,7 @@ public final class PacketPhase extends TrackingPhase {
         return PacketPhase.General.UNKNOWN;
     }
 
-    public PhaseContext populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext context) {
+    public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
         ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
@@ -261,8 +260,8 @@ public final class PacketPhase extends TrackingPhase {
     // TrackingPhase specific methods overridden for state specific handling
 
     @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         final Player player = context.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be tracking a player, but not!", context));
         ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
@@ -285,8 +284,8 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX,
+                                        int chunkZ) {
         return ((IPacketState) phaseState).shouldCaptureEntity()
                ? context.getCapturedEntities().add(entity)
                : ((IPacketState) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
@@ -295,7 +294,7 @@ public final class PacketPhase extends TrackingPhase {
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(IPhaseState phaseState,
-        PhaseContext phaseContext) {
+        PhaseContext<?> phaseContext) {
         if (phaseState == General.INVALID) { // Invalid doesn't capture any packets.
             return;
         }
@@ -323,13 +322,13 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext<?> phaseContext,
         ArrayList<Entity> entities) {
         ((IPacketState) unwindingState).postSpawnEntities(phaseContext, entities);
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
         ((BasicPacketState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }
 

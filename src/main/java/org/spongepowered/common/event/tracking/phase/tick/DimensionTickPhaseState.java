@@ -52,7 +52,7 @@ class DimensionTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext<?> phaseContext) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedBlockSupplier()
@@ -101,7 +101,7 @@ class DimensionTickPhaseState extends TickPhaseState {
 
      */
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());

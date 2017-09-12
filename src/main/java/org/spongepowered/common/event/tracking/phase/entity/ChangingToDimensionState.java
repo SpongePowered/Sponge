@@ -39,7 +39,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
 //                final MoveEntityEvent.Teleport.Portal portalEvent = context.firstNamed(InternalNamedCauses.Teleporting.TELEPORT_EVENT, MoveEntityEvent.Teleport.Portal.class)
 //                                .orElseThrow(PhaseUtil.throwWithContext("Expected to capture a portal event!", context));
 //
@@ -126,7 +126,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 
     @Nullable
     @Override
-    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext context, MoveEntityEvent.Teleport.Portal event) {
+    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext<?> context, MoveEntityEvent.Teleport.Portal event) {
         final net.minecraft.entity.Entity teleportingEntity = context.getSource(net.minecraft.entity.Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be teleporting an entity!", context));
         // The rest of this is to be handled in the phase.

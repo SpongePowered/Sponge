@@ -67,20 +67,20 @@ public final class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
         ((BlockPhaseState) state).unwind(phaseContext);
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX,
+                                        int chunkZ) {
         return this.allowEntitySpawns(phaseState)
                ? context.getCapturedEntities().add(entity)
                : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
 
     @Override
-    public boolean isRestoring(IPhaseState state, PhaseContext phaseContext, int updateFlag) {
+    public boolean isRestoring(IPhaseState state, PhaseContext<?> phaseContext, int updateFlag) {
         return state == State.RESTORING_BLOCKS && (updateFlag & 1) == 0;
     }
 

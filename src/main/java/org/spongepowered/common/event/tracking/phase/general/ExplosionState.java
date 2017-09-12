@@ -82,7 +82,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
         final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack();
@@ -108,7 +108,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext context) {
+    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;
         }
@@ -235,7 +235,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext<?> phaseContext,
         BlockPos pos) {
         boolean match = false;
         final Vector3i blockPos = VecHelper.toVector3i(pos);
@@ -249,7 +249,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();

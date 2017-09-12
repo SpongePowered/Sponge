@@ -41,7 +41,6 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
 import java.util.ArrayList;
 
@@ -67,15 +66,15 @@ abstract class TickPhaseState implements IPhaseState {
         return true;
     }
 
-    public void processPostTick(PhaseContext phaseContext) { }
+    public void processPostTick(PhaseContext<?> phaseContext) { }
 
 
-    public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
 
-    public void processPostSpawns(PhaseContext phaseContext, ArrayList<Entity> entities) {
+    public void processPostSpawns(PhaseContext<?> phaseContext, ArrayList<Entity> entities) {
         final SpawnEntityEvent
                 event =
                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
@@ -87,9 +86,9 @@ abstract class TickPhaseState implements IPhaseState {
         }
     }
 
-    public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
 
     }
 
-    public abstract boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ);
+    public abstract boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ);
 }

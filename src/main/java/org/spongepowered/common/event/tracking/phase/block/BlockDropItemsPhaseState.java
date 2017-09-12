@@ -53,7 +53,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(PhaseContext phaseContext) {
+    void unwind(PhaseContext<?> phaseContext) {
         final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -48,7 +48,7 @@ final class DispensePhaseState extends BlockPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext phaseContext) {
+    void unwind(PhaseContext<?> phaseContext) {
         final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
         phaseContext.getCapturedBlockSupplier()

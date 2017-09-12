@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
  * between what is suggested to be a {@link Cause} for an {@link Event} versus
  * the context of which a {@link IPhaseState} is being completed with.
  */
-public class PhaseContext {
+public class PhaseContext<P extends PhaseContext> {
 
     private boolean isCompleted = false;
 
@@ -83,11 +83,11 @@ public class PhaseContext {
     private Object source;
     private PluginContainer activeContainer;
 
-    public static PhaseContext start() {
+    public static PhaseContext<?> start() {
         return new PhaseContext();
     }
 
-    public PhaseContext addExtra(String key, Object val) {
+    public PhaseContext<?> addExtra(String key, Object val) {
         this.extraContext.put(key, val);
         return this;
     }
@@ -119,13 +119,13 @@ public class PhaseContext {
         return this.extraContext;
     }
 
-    public PhaseContext source(Object owner) {
+    public PhaseContext<?> source(Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.source = owner;
         return this;
     }
 
-    public PhaseContext owner(User owner) {
+    public PhaseContext<?> owner(User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.owner != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
@@ -134,7 +134,7 @@ public class PhaseContext {
         return this;
     }
 
-    public PhaseContext notifier(User notifier) {
+    public PhaseContext<?> notifier(User notifier) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.notifier != null) {
             throw new IllegalStateException("Notifier for this phase context is already set!");
@@ -151,7 +151,7 @@ public class PhaseContext {
         checkState(this.captureBlockPos == null, "CaptureBlockPos is already set!");
     }
 
-    public PhaseContext addBlockCaptures() {
+    public PhaseContext<?> addBlockCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
@@ -169,7 +169,7 @@ public class PhaseContext {
         return this;
     }
 
-    public PhaseContext addCaptures() {
+    public PhaseContext<?> addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
@@ -194,7 +194,7 @@ public class PhaseContext {
         return this;
     }
 
-    public PhaseContext addEntityCaptures() {
+    public PhaseContext<?> addEntityCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
@@ -209,7 +209,7 @@ public class PhaseContext {
         return this;
     }
 
-    public PhaseContext addEntityDropCaptures() {
+    public PhaseContext<?> addEntityDropCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.entityItemDropsSupplier == null, "EntityItemDropsSupplier is already set!");
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
@@ -222,14 +222,14 @@ public class PhaseContext {
     }
 
     // TODO to be moved to listener based phase contexts when gabizou gets to restructuring PhaseContexts...
-    public PhaseContext player() {
+    public PhaseContext<?> player() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturePlayer == null, "Already capturing a player object!");
         this.capturePlayer = new CapturePlayer();
         return this;
     }
 
-    public PhaseContext complete() {
+    public PhaseContext<?> complete() {
         this.isCompleted = true;
         return this;
     }
@@ -399,7 +399,7 @@ public class PhaseContext {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final PhaseContext other = (PhaseContext) obj;
+        final PhaseContext<?> other = (PhaseContext<?>) obj;
         return Objects.equals(this.isCompleted, other.isCompleted);
     }
 
@@ -410,7 +410,7 @@ public class PhaseContext {
                 .toString();
     }
 
-    public PhaseContext activeContainer(PluginContainer plugin) {
+    public PhaseContext<?> activeContainer(PluginContainer plugin) {
         this.activeContainer = plugin;
         return this;
     }

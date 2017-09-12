@@ -42,7 +42,7 @@ final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);

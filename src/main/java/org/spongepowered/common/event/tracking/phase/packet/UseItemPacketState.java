@@ -29,8 +29,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -38,7 +36,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -55,7 +52,7 @@ class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
@@ -70,7 +67,7 @@ class UseItemPacketState extends BasicPacketState {
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext context) {
+        PhaseContext<?> context) {
         Player player = context.getRequiredExtra(InternalNamedCauses.Packet.PACKET_PLAYER, Player.class);
         BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation().get()).getBlockPos();
         IMixinChunk spongeChunk = (IMixinChunk) EntityUtil.getMinecraftWorld(player).getChunkFromBlockCoords(pos);

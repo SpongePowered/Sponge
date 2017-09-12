@@ -52,7 +52,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         final Location<World> worldLocation = locatable.getLocation();

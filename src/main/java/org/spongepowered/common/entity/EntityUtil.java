@@ -315,7 +315,7 @@ public final class EntityUtil {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState state = peek.state;
-        final PhaseContext context = peek.context;
+        final PhaseContext<?> context = peek.context;
 
         MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
@@ -377,7 +377,7 @@ public final class EntityUtil {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(teleporter);
             Sponge.getCauseStackManager().pushCause(mixinEntity);
-            final PhaseContext context = PhaseContext.start();
+            final PhaseContext<?> context = PhaseContext.start();
             // unused, to be removed and re-located when phase context is cleaned up
             //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_WORLD, fromWorld))
             //.add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, teleporter))
@@ -945,7 +945,7 @@ public final class EntityUtil {
             }
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
-            final PhaseContext phaseContext = peek.context;
+            final PhaseContext<?> phaseContext = peek.context;
     
             if (item.isEmpty()) {
                 return null;
@@ -1021,7 +1021,7 @@ public final class EntityUtil {
             }
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
-            final PhaseContext phaseContext = peek.context;
+            final PhaseContext<?> phaseContext = peek.context;
     
             if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 final Collection<ItemDropData> itemStacks;

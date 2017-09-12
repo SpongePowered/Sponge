@@ -53,7 +53,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         super.populateContext(playerMP, packet, context);
         // unused, to be removed and re-located when phase context is cleaned up
         //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));

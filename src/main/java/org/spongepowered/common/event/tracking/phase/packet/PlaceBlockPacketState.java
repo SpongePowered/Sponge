@@ -59,7 +59,7 @@ class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
@@ -76,7 +76,7 @@ class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext context) {
+        PhaseContext<?> context) {
         Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = transaction.getFinal().getLocation().get();
         BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
@@ -88,7 +88,7 @@ class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void associateBlockEventNotifier(PhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void associateBlockEventNotifier(PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
         final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = new Location<>(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatableBlock = LocatableBlock.builder()

@@ -73,7 +73,7 @@ import java.util.Optional;
 
 public class PacketUtil {
 
-    private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
+    private static final PhaseContext<?> EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
     private static boolean lastTryBlockPacketItemResult = true;
@@ -89,7 +89,7 @@ public class PacketUtil {
                     return;
                 }
                 boolean ignoreCreative = false;
-    
+
                 // This is another horrible hack required since the client sends a C10 packet for every slot
                 // containing an itemstack after a C16 packet in the following scenarios :
                 // 1. Opening creative inventory after initial server join.
@@ -102,14 +102,14 @@ public class PacketUtil {
     //                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
     //            } else
                 if (creativeCheck(packetIn, packetPlayer)) {
-    
+
                     long packetDiff = System.currentTimeMillis() - lastInventoryOpenPacketTimeStamp;
                     // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
                     if (packetDiff < 100) {
                         ignoreCreative = true;
                     }
                 }
-    
+
                 // Don't process movement capture logic if player hasn't moved
                 boolean ignoreMovementCapture = false;
                 if (packetIn instanceof CPacketPlayer) {
@@ -129,7 +129,7 @@ public class PacketUtil {
                     if (packetState == null) {
                         throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                     }
-                    PhaseContext context = EMPTY_INVALID;
+                    PhaseContext<?> context = EMPTY_INVALID;
                     if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
                         context = PhaseContext.start()
                                 .source(packetPlayer)
@@ -137,7 +137,7 @@ public class PacketUtil {
                                 .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
                                 .addExtra(InternalNamedCauses.Packet.CURSOR, cursor)
                                 .addExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative);
-    
+
                         TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                         context.owner((Player) packetPlayer);
                         context.notifier((Player) packetPlayer);
@@ -149,7 +149,7 @@ public class PacketUtil {
                         packetIn.processPacket(netHandler);
                         return null;
                     });
-    
+
                     if (packetIn instanceof CPacketClientStatus) {
                         // update the reference of player
                         packetPlayer = ((NetHandlerPlayServer) netHandler).player;

@@ -285,7 +285,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
-                PhaseContext context = PhaseContext.start()
+                PhaseContext<?> context = PhaseContext.start()
                         .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4))
                         .addBlockCaptures()
                         .addEntityCaptures();
@@ -334,7 +334,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = currentPhase.state;
             if (canCaptureItems && currentState.tracksBlockSpecificDrops()) {
-                final PhaseContext context = currentPhase.context;
+                final PhaseContext<?> context = currentPhase.context;
                 final Multimap<BlockPos, ItemDropData> multimap = context.getCapturedBlockDrops();
                 final Collection<ItemDropData> itemStacks = multimap.get(pos);
                 SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(stack).position(VecHelper.toVector3d(pos)).build());

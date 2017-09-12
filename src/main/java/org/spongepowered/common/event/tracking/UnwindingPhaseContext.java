@@ -29,15 +29,15 @@ import org.spongepowered.common.event.InternalNamedCauses;
 
 import java.util.Optional;
 
-final class UnwindingPhaseContext extends PhaseContext {
+final class UnwindingPhaseContext extends PhaseContext<?> {
 
-    static PhaseContext unwind(IPhaseState state, PhaseContext context) {
+    static PhaseContext<?> unwind(IPhaseState state, PhaseContext<?> context) {
         return new UnwindingPhaseContext(state, context);
     }
 
-    private PhaseContext unwindingContext;
+    private PhaseContext<?> unwindingContext;
 
-    UnwindingPhaseContext(IPhaseState unwindingState, PhaseContext unwindingContext) {
+    UnwindingPhaseContext(IPhaseState unwindingState, PhaseContext<?> unwindingContext) {
         addExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, unwindingContext);
         addExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, unwindingState);
         this.unwindingContext = unwindingContext;

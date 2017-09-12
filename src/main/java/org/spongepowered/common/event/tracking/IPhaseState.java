@@ -39,15 +39,17 @@ import javax.annotation.Nullable;
  * A literal phase state of which the {@link World} is currently running
  * in. The state itself is owned by {@link TrackingPhase}s as the phase
  * defines what to do upon
- * {@link TrackingPhase#unwind(IPhaseState, PhaseContext)}.
+ * {@link TrackingPhase#unwind(IPhaseState, PhaseContext<?>)}.
  * As these should be enums, there's no data that should be stored on
  * this state. It can have control flow with {@link #canSwitchTo(IPhaseState)}
  * where preventing switching to another state is possible (likely points out
  * either errors or runaway states not being unwound).
  */
-public interface IPhaseState {
+public interface IPhaseState<C extends PhaseContext<?>> {
 
     TrackingPhase getPhase();
+
+    C start();
 
     default boolean canSwitchTo(IPhaseState state) {
         return false;
@@ -57,7 +59,7 @@ public interface IPhaseState {
         return false;
     }
 
-    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext<?> context) {
 
     }
 
@@ -97,13 +99,13 @@ public interface IPhaseState {
         return false;
     }
 
-    default boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
+    default boolean shouldCaptureBlockChangeOrSkip(PhaseContext<?> phaseContext, BlockPos pos) {
         return true;
     }
     default boolean isInteraction() {
         return false;
     }
-    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext context) {
+    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext<?> context) {
 
     }
 

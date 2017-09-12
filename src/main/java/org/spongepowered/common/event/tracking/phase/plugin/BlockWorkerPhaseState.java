@@ -33,7 +33,7 @@ public class BlockWorkerPhaseState extends PluginPhaseState {
     }
 
     @Override
-    void processPostTick(PhaseContext phaseContext) {
+    void processPostTick(PhaseContext<?> phaseContext) {
         phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
 
         });

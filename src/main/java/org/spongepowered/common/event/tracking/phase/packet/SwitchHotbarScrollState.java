@@ -45,7 +45,7 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         super.populateContext(playerMP, packet, context);
         context.addExtra(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem);
     }

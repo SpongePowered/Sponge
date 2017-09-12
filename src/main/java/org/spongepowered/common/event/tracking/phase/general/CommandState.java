@@ -68,7 +68,7 @@ final class CommandState extends GeneralState {
     }
 
     @Override
-    void unwind(PhaseContext phaseContext) {
+    void unwind(PhaseContext<?> phaseContext) {
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
@@ -152,7 +152,7 @@ final class CommandState extends GeneralState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 }

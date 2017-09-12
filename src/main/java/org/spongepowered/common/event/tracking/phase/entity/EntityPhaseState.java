@@ -45,11 +45,11 @@ public abstract class EntityPhaseState implements IPhaseState {
     }
 
     @Nullable
-    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext context, MoveEntityEvent.Teleport.Portal event) {
+    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext<?> context, MoveEntityEvent.Teleport.Portal event) {
         return null;
     }
 
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
 
     }
 }

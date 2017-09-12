@@ -31,7 +31,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 final class ChatPacketState extends BasicPacketState {
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
 //        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
         // unused, to be removed and re-located when phase context is cleaned up
 //        if (chatMessage.getMessage().contains("kill")) {

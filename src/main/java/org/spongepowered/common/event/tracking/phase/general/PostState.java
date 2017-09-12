@@ -46,22 +46,22 @@ final class PostState extends GeneralState {
         return false; // TODO - check that this really is needed.
     }
     @Override
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
         final IPhaseState unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-        final PhaseContext unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+        final PhaseContext<?> unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
         this.getPhase().postDispatch(unwindingState, unwindingContext, context);
     }
 
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
         final IPhaseState phaseState = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-        final PhaseContext unwinding = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+        final PhaseContext<?> unwinding = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
         final PhaseData phaseData = new PhaseData(unwinding, phaseState);
         phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 }

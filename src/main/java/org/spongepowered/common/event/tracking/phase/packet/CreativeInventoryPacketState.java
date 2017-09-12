@@ -32,7 +32,7 @@ final class CreativeInventoryPacketState extends BasicPacketState {
 
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         context
                 .addEntityCaptures()
                 .addEntityDropCaptures();

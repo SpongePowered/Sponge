@@ -72,7 +72,7 @@ final class CustomExplosionState extends PluginPhaseState {
     }
 
     @Override
-    void processPostTick(PhaseContext context) {
+    void processPostTick(PhaseContext<?> context) {
         final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
@@ -96,7 +96,7 @@ final class CustomExplosionState extends PluginPhaseState {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext context) {
+    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;
         }
@@ -213,7 +213,7 @@ final class CustomExplosionState extends PluginPhaseState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext<?> phaseContext, BlockPos pos) {
         final Vector3i blockPos = VecHelper.toVector3i(pos);
         for (final BlockSnapshot capturedSnapshot : phaseContext.getCapturedBlocks()) {
             if (capturedSnapshot.getPosition().equals(blockPos)) {

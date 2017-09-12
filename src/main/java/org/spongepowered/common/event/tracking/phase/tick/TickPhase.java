@@ -62,7 +62,7 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext context) {
+    public void unwind(IPhaseState state, PhaseContext<?> context) {
         ((TickPhaseState) state).processPostTick(context);
     }
 
@@ -78,12 +78,12 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return ((TickPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
     }
 
     @Override
-    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext<?> phaseContext,
         ArrayList<Entity> entities) {
         ((TickPhaseState) unwindingState).processPostSpawns(phaseContext, entities);
 
@@ -98,19 +98,19 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
         if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
 
         }
     }
 
     @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         ((TickPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
@@ -125,7 +125,7 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
         ((TickPhaseState) currentPhaseData.state).appendExplosionContext(phaseContext, currentPhaseData.context);
     }
 }

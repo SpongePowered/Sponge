@@ -50,7 +50,6 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public abstract class TrackingPhase {
      * @param state The state
      * @param phaseContext The context of the current state being unwound
      */
-    public abstract void unwind(IPhaseState state, PhaseContext phaseContext);
+    public abstract void unwind(IPhaseState state, PhaseContext<?> phaseContext);
 
 
     /**
@@ -84,7 +83,7 @@ public abstract class TrackingPhase {
      * states that deem it necessary to have some post processing for
      * advanced game mechanics. This is always performed when capturing
      * has been turned on during a phases's
-     * {@link #unwind(IPhaseState, PhaseContext)} is
+     * {@link #unwind(IPhaseState, PhaseContext<?>)} is
      * dispatched. The rules of post dispatch are as follows:
      * - Entering extra phases is not allowed: This is to avoid
      *  potential recursion in various corner cases.
@@ -103,14 +102,14 @@ public abstract class TrackingPhase {
      *     contains the root cause for the state
      * @param postContext The post dispatch context captures containing any
      */
-    public void postDispatch(IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
+    public void postDispatch(IPhaseState unwindingState, PhaseContext<?> unwindingContext, PhaseContext<?> postContext) {
     }
 
     public void processPostItemSpawns(IPhaseState unwindingState, ArrayList<Entity> items) {
         TrackingUtil.splitAndSpawnEntities(items);
     }
 
-    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext<?> phaseContext,
             ArrayList<Entity> entities) {
         final User creator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
         TrackingUtil.splitAndSpawnEntities(
@@ -147,7 +146,7 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext context) {
+    public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext<?> context) {
         return false;
     }
 
@@ -183,16 +182,16 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext context) {
+    public void associateAdditionalCauses(IPhaseState state, PhaseContext<?> context) {
 
     }
 
 
-    public boolean isRestoring(IPhaseState state, PhaseContext context, int updateFlag) {
+    public boolean isRestoring(IPhaseState state, PhaseContext<?> context, int updateFlag) {
         return false;
     }
 
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext<?> context,
             CauseTracker causeTracker) {
 
     }
@@ -213,7 +212,7 @@ public abstract class TrackingPhase {
      * @param context
      * @param newContext
      */
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
         final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -242,7 +241,7 @@ public abstract class TrackingPhase {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());
@@ -267,16 +266,16 @@ public abstract class TrackingPhase {
                 .toString();
     }
 
-    public Optional<DamageSource> createDestructionDamageSource(IPhaseState state, PhaseContext context, net.minecraft.entity.Entity entity) {
+    public Optional<DamageSource> createDestructionDamageSource(IPhaseState state, PhaseContext<?> context, net.minecraft.entity.Entity entity) {
         return Optional.empty();
     }
 
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
 
@@ -292,7 +291,7 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
 
     }
 

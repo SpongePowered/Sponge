@@ -48,7 +48,7 @@ class PlayerTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext<?> phaseContext) {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -85,7 +85,7 @@ class PlayerTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.owner(player);
@@ -94,7 +94,7 @@ class PlayerTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -95,13 +95,13 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
         ((GeneralState) state).unwind(phaseContext);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void postDispatch(IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
+    public void postDispatch(IPhaseState unwindingState, PhaseContext<?> unwindingContext, PhaseContext<?> postContext) {
         final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlockSupplier().orEmptyList();
         final List<Entity> contextEntities = postContext.getCapturedEntitySupplier().orEmptyList();
         final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsSupplier().orEmptyList();
@@ -132,8 +132,8 @@ public final class GeneralPhase extends TrackingPhase {
      * @param unwinding
      */
     @SuppressWarnings({"unchecked"})
-    public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess,
-        IPhaseState unwindingState, PhaseContext unwinding) {
+    public static void processBlockTransactionListsPost(PhaseContext<?> postContext, List<BlockSnapshot> snapshotsToProcess,
+                                                        IPhaseState unwindingState, PhaseContext<?> unwinding) {
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[TrackingUtil.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[TrackingUtil.EVENT_COUNT];
@@ -215,8 +215,8 @@ public final class GeneralPhase extends TrackingPhase {
         performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
 
-    private static void performPostBlockAdditions( PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions,
-             IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
+    private static void performPostBlockAdditions(PhaseContext<?> postContext, List<Transaction<BlockSnapshot>> transactions,
+                                                  IPhaseState unwindingState, PhaseContext<?> unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
@@ -330,11 +330,11 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
             final IPhaseState unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-            final PhaseContext unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+            final PhaseContext<?> unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
             unwindingState.getPhase()
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {
@@ -351,12 +351,12 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return ((GeneralState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
     }
 
     @Override
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
         if (currentPhaseData.state == Post.UNWINDING) {
             ((PostState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
             return;

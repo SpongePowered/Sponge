@@ -864,7 +864,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
                 return list.add((BlockEventData) obj);
             }
-            final PhaseContext context = currentPhase.context;
+            final PhaseContext<?> context = currentPhase.context;
 
             final LocatableBlock locatable = LocatableBlock.builder()
                     .location(new Location<>(this, pos.getX(), pos.getY(), pos.getZ()))
@@ -1076,7 +1076,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
         if (!isWorldGen && !handlesOwnCompletion) {
-            final PhaseContext context = PhaseContext.start()
+            final PhaseContext<?> context = PhaseContext.start()
                     .addCaptures()
                     .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag);
             context.complete();
@@ -1191,7 +1191,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkNotNull(origin, "location");
         final CauseTracker causeTracker = CauseTracker.getInstance();
         if (CauseTracker.ENABLED) {
-            final PhaseContext phaseContext = PhaseContext.start()
+            final PhaseContext<?> phaseContext = PhaseContext.start()
                     .addEntityCaptures()
                     .addEntityDropCaptures()
                     .addBlockCaptures();
@@ -1619,7 +1619,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - Cause tracking
         this.processingExplosion = true;
         if (CauseTracker.ENABLED) {
-            PhaseContext phaseContext = PhaseContext.start()
+            PhaseContext<?> phaseContext = PhaseContext.start()
                     .addEntityCaptures()
                     .addEntityDropCaptures()
                     .addBlockCaptures();

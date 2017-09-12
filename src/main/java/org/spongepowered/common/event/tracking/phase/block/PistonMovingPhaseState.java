@@ -50,7 +50,7 @@ final class PistonMovingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext phaseContext) {
+    void unwind(PhaseContext<?> phaseContext) {
         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (!TrackingUtil.processBlockCaptures(capturedBlocks, this, phaseContext)) {

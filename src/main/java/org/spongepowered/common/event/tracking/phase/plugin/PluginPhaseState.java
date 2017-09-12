@@ -36,7 +36,7 @@ public class PluginPhaseState implements IPhaseState {
         return TrackingPhases.PLUGIN;
     }
 
-    void processPostTick(PhaseContext phaseContext) {
+    void processPostTick(PhaseContext<?> phaseContext) {
     }
 
 }

@@ -63,7 +63,7 @@ final class DeathPhase extends EntityPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
         final Entity dyingEntity =
                 context.getSource(Entity.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));

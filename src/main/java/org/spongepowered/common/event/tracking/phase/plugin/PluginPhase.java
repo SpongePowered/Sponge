@@ -28,8 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -77,13 +75,13 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
         ((PluginPhaseState) state).processPostTick(phaseContext);
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos,
-            IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos,
+                                        IMixinBlockEventData blockEvent) {
         if (phaseState instanceof ListenerPhaseState) {
             ((ListenerPhaseState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
         }
@@ -91,15 +89,15 @@ public final class PluginPhase extends TrackingPhase {
 
 
     @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
         }
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext<?> context,
             CauseTracker causeTracker) {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);

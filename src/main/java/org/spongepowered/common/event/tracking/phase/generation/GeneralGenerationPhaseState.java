@@ -90,7 +90,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return true;
     }
 
-    public final void unwind(PhaseContext context) {
+    public final void unwind(PhaseContext<?> context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;

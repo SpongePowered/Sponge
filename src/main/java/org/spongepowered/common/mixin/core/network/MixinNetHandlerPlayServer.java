@@ -212,7 +212,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             final CauseTracker causeTracker = CauseTracker.getInstance();
-            final PhaseContext complete = PhaseContext.start()
+            final PhaseContext<?> complete = PhaseContext.start()
                 .source(player)
                 .addCaptures()
                 .addEntityDropCaptures()
@@ -329,7 +329,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         if (this.player.interactionManager.isCreative()) {
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
-            final PhaseContext context = peek.context;
+            final PhaseContext<?> context = peek.context;
             final boolean ignoresCreative = context.getRequiredExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class);
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();

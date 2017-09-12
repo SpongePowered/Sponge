@@ -140,7 +140,7 @@ public final class TrackingUtil {
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(entityIn);
-            final PhaseContext phaseContext = PhaseContext.start()
+            final PhaseContext<?> phaseContext = PhaseContext.start()
                     .source(entityIn)
                     .addEntityCaptures()
                     .addBlockCaptures();
@@ -172,7 +172,7 @@ public final class TrackingUtil {
             return;
         }
         Sponge.getCauseStackManager().pushCause(entity);
-        final PhaseContext phaseContext = PhaseContext.start()
+        final PhaseContext<?> phaseContext = PhaseContext.start()
                 .source(entity)
                 .addEntityCaptures()
                 .addBlockCaptures();
@@ -202,7 +202,7 @@ public final class TrackingUtil {
             return;
         }
         Sponge.getCauseStackManager().pushCause(tile);
-        final PhaseContext phaseContext = PhaseContext.start()
+        final PhaseContext<?> phaseContext = PhaseContext.start()
                 .source(tile)
                 .addEntityCaptures()
                 .addBlockCaptures();
@@ -254,7 +254,7 @@ public final class TrackingUtil {
                     .state((BlockState) state)
                     .build();
             Sponge.getCauseStackManager().pushCause(locatable);
-            final PhaseContext phaseContext = PhaseContext.start()
+            final PhaseContext<?> phaseContext = PhaseContext.start()
                     .source(locatable)
                     .addBlockCaptures()
                     .addEntityCaptures();
@@ -294,7 +294,7 @@ public final class TrackingUtil {
                     .state((BlockState) state)
                     .build();
             Sponge.getCauseStackManager().pushCause(locatable);
-            final PhaseContext phaseContext = PhaseContext.start()
+            final PhaseContext<?> phaseContext = PhaseContext.start()
                     .source(locatable)
                     .addEntityCaptures()
                     .addBlockCaptures();
@@ -313,7 +313,7 @@ public final class TrackingUtil {
         }
     }
 
-    private static void checkAndAssignBlockTickConfig(Block block, WorldServer minecraftWorld, PhaseContext phaseContext) {
+    private static void checkAndAssignBlockTickConfig(Block block, WorldServer minecraftWorld, PhaseContext<?> phaseContext) {
         if (block instanceof IModData_BlockCapturing) {
             IModData_BlockCapturing capturingBlock = (IModData_BlockCapturing) block;
             if (capturingBlock.requiresBlockCapturingRefresh()) {
@@ -343,7 +343,7 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
-        final PhaseContext phaseContext = PhaseContext.start()
+        final PhaseContext<?> phaseContext = PhaseContext.start()
                 .addBlockCaptures()
                 .addEntityCaptures();
 
@@ -373,7 +373,7 @@ public final class TrackingUtil {
         final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
         if (shouldEnterBlockDropPhase) {
             BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4);
-            PhaseContext context = PhaseContext.start()
+            PhaseContext<?> context = PhaseContext.start()
                     .source(snapshot)
                     .addBlockCaptures()
                     .addEntityCaptures();
@@ -394,7 +394,7 @@ public final class TrackingUtil {
     }
 
     static boolean trackBlockChange(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
-            PhaseContext phaseContext, IPhaseState phaseState) {
+                                    PhaseContext<?> phaseContext, IPhaseState phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
         if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
@@ -482,7 +482,7 @@ public final class TrackingUtil {
         return owner;
     }
 
-    public static Supplier<IllegalStateException> throwWithContext(String s, PhaseContext phaseContext) {
+    public static Supplier<IllegalStateException> throwWithContext(String s, PhaseContext<?> phaseContext) {
         return () -> {
             final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Exception trying to process over a phase!").centre().hr();
@@ -510,7 +510,7 @@ public final class TrackingUtil {
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked"})
-    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState state, PhaseContext context) {
+    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState state, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return false;
         }
@@ -658,7 +658,7 @@ public final class TrackingUtil {
     }
 
     public static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState phaseState,
-        PhaseContext phaseContext, boolean noCancelledTransactions) {
+                                                PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
@@ -734,7 +734,7 @@ public final class TrackingUtil {
     }
 
     public static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, SpongeBlockSnapshot newBlockSnapshot,
-        PhaseContext phaseContext, IPhaseState phaseState) {
+                                                      PhaseContext<?> phaseContext, IPhaseState phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
                 .map(EntityUtil::fromNative)
@@ -763,7 +763,7 @@ public final class TrackingUtil {
     }
 
     public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot,
-        PhaseContext phaseContext, IPhaseState state) {
+                                                  PhaseContext<?> phaseContext, IPhaseState state) {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
                 .map(ItemDropData::getStack)
@@ -819,7 +819,7 @@ public final class TrackingUtil {
     }
 
     public static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, SpongeBlockSnapshot newBlockSnapshot,
-        PhaseContext phaseContext, IPhaseState phaseState) {
+                                             PhaseContext<?> phaseContext, IPhaseState phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
             .map(EntityUtil::fromNative)

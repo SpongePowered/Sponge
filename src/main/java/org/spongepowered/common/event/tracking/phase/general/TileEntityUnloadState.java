@@ -36,12 +36,12 @@ public class TileEntityUnloadState extends GeneralState {
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    void unwind(PhaseContext<?> context) {
 
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext<?> phaseContext,
         BlockPos pos) {
         return false;
     }

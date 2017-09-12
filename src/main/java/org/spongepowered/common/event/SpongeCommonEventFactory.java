@@ -206,7 +206,7 @@ public class SpongeCommonEventFactory {
             if (sourceEntity != null) {
                 Sponge.getCauseStackManager().pushCause(sourceEntity);
             } else {
-                PhaseContext context = causeTracker.getCurrentContext();
+                PhaseContext<?> context = causeTracker.getCurrentContext();
 
                 final Optional<LocatableBlock> currentTickingBlock = context.getSource(LocatableBlock.class);
                 if (currentTickingBlock.isPresent()) {
@@ -438,7 +438,7 @@ public class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
-        final PhaseContext context = peek.context;
+        final PhaseContext<?> context = peek.context;
         // Don't fire notify events during world gen or while restoring
         if (peek.state.getPhase().isWorldGeneration(peek.state) || peek.state == State.RESTORING_BLOCKS) {
             return null;

@@ -87,7 +87,7 @@ public class MixinChunk_Collisions {
                 return true;
             }
 
-            final PhaseContext phaseContext = CauseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> phaseContext = CauseTracker.getInstance().getCurrentContext();
             LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class).orElse(null);
             if (locatable != null) {
                 BlockType blockType =locatable.getLocation().getBlockType();
