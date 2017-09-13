@@ -105,7 +105,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -263,24 +262,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         tileEntityIn.invalidate();
     }
 
-    /**
-     * @author blood - August 13th, 2017
-     * @reason Due to many changes, overwrite makes this method easier
-     * to read and maintain.
-     *
-     */
-    @Overwrite
-    public void onLoad()
-    {
-        this.loaded = true;
-        this.world.addTileEntities(this.tileEntities.values());
-
-        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
-        {
-            this.world.loadEntities(classinheritancemultimap);
-        }
-
-        // Sponge start
+    @Inject(method = "onLoad", at = @At("RETURN"))
+    public void onLoadReturn(CallbackInfo ci) {
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.world.getChunkProvider();
@@ -298,33 +281,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (!this.world.isRemote) {
             SpongeHooks.logChunkLoad(this.world, this.chunkPos);
         }
-        // Sponge end
     }
 
-    /**
-     * @author blood - August 13th, 2017
-     * @reason Due to many changes, overwrite makes this method easier
-     * to read and maintain.
-     *
-     */
-    @Overwrite
-    public void onUnload()
-    {
-        this.loaded = false;
-
-        // Sponge start
-        ((IMixinWorld) this.world).markTileEntitiesInChunkForRemoval((net.minecraft.world.chunk.Chunk)(Object) this);
-        if (false) // Forge: remove all TEs in a chunk at once instead of marking each one for removal
-        for (TileEntity tileentity : this.tileEntities.values())
-        {
-            this.world.markTileEntityForRemoval(tileentity);
-        }
-
-        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists)
-        {
-            this.world.unloadEntities(classinheritancemultimap);
-        }
-
+    @Inject(method = "onUnload", at = @At("RETURN"))
+    public void onUnload(CallbackInfo ci) {
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.world.getChunkProvider();
@@ -342,7 +302,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             SpongeImpl.postEvent(SpongeEventFactory.createUnloadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
             SpongeHooks.logChunkUnload(this.world, this.chunkPos);
         }
-        // Sponge end
     }
 
     @Override
