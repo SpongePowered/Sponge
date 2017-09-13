@@ -33,7 +33,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRa
 public abstract class MixinWorldServer_Activation extends MixinWorld {
 
     @Override
-    protected void entityActivationCheck() {
+    public void entityActivationCheck() {
         EntityActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
     }
 

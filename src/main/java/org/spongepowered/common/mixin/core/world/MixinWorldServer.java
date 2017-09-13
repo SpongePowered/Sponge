@@ -66,6 +66,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.GameType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
@@ -230,7 +231,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private SpongeConfig<?> activeConfig;
     protected long weatherStartTime;
     protected Weather prevWeather;
-    protected WorldTimingsHandler timings = new WorldTimingsHandler((WorldServer) (Object) this);
+    protected WorldTimingsHandler timings;
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
@@ -249,13 +250,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int updateEntityTick;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow protected abstract void createBonusChest();
+    @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
-    @Shadow protected abstract void playerCheckLight();
-    @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
-    @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
+    @Shadow public abstract void playerCheckLight();
+    @Shadow public abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
+    @Shadow public boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
         return false; // Shadowed
     }
 
@@ -271,7 +272,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
+        if (info == null) {
+            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
+                    new RuntimeException("Stack trace:"));
+            this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT),
+                    "sponge$dummy_world");
+        }
+        // Checks to make sure no mod has changed our worldInfo and if so, reverts back to original.
+        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
+        // This change is not needed as all worlds use separate save handlers.
         this.worldInfo = info;
+        this.worldNamedCause = NamedCause.source(this);
+        this.timings = new WorldTimingsHandler((WorldServer) (Object) this);
         this.dimensionId = dimensionId;
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
@@ -1416,7 +1428,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @SuppressWarnings("Duplicates")
     @Override
-    protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
+    public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
@@ -1428,7 +1440,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    protected void onUpdateTileEntities(ITickable tile) {
+    public void onUpdateTileEntities(ITickable tile) {
         this.updateTileEntity(tile);
     }
 
@@ -1446,7 +1458,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
+    public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
@@ -1459,7 +1471,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
+    public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
@@ -1738,7 +1750,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @return True if the chunk is loaded and neighbors are loaded
      */
     @Override
-    protected boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
+    public boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
             BlockPos samePosition) {
         final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         return !(chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded());
@@ -1966,75 +1978,75 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
 
     @Override
-    protected void startEntityGlobalTimings() {
+    public void startEntityGlobalTimings() {
         this.timings.entityTick.startTiming();
         co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
     }
 
     @Override
-    protected void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
+    public void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
         EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
     }
 
     @Override
-    protected void stopEntityTickTimingStartEntityRemovalTiming() {
+    public void stopEntityTickTimingStartEntityRemovalTiming() {
         this.timings.entityTick.stopTiming();
         this.timings.entityRemoval.startTiming();
     }
 
     @Override
-    protected void stopEntityRemovalTiming() {
+    public void stopEntityRemovalTiming() {
         this.timings.entityRemoval.stopTiming();
     }
 
     @Override
-    protected void startEntityTickTiming() {
+    public void startEntityTickTiming() {
         this.timings.entityTick.startTiming();
     }
 
     @Override
-    protected void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
+    public void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
         EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
     }
 
     @Override
-    protected void stopEntityTickSectionBeforeRemove() {
+    public void stopEntityTickSectionBeforeRemove() {
        this.timings.entityTick.stopTiming();
     }
 
     @Override
-    protected void startEntityRemovalTick() {
+    public void startEntityRemovalTick() {
         this.timings.entityRemoval.startTiming();
     }
 
     @Override
-    protected void startTileTickTimer() {
+    public void startTileTickTimer() {
         this.timings.tileEntityTick.startTiming();
     }
 
     @Override
-    protected void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) {
+    public void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) {
         ((IMixinTileEntity) updatingTileEntity).getTimingsHandler().stopTiming();
     }
 
     @Override
-    protected void stopTileEntityAndStartRemoval() {
+    public void stopTileEntityAndStartRemoval() {
         this.timings.tileEntityTick.stopTiming();
         this.timings.tileEntityRemoval.startTiming();
     }
 
     @Override
-    protected void stopTileEntityRemovelInWhile() {
+    public void stopTileEntityRemovelInWhile() {
         this.timings.tileEntityRemoval.stopTiming();
     }
 
     @Override
-    protected void startPendingTileEntityTimings() {
+    public void startPendingTileEntityTimings() {
         this.timings.tileEntityPending.startTiming();
     }
 
     @Override
-    protected void endPendingTileEntities() {
+    public void endPendingTileEntities() {
         this.timings.tileEntityPending.stopTiming();
         TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
     }
