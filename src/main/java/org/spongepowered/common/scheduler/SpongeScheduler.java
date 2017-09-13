@@ -36,6 +36,7 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -43,6 +44,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -184,5 +187,18 @@ public class SpongeScheduler implements Scheduler {
 
     public <T> CompletableFuture<T> submitAsyncTask(Callable<T> callable) {
         return Functional.asyncFailableFuture(callable, this.asyncScheduler.getExecutor());
+    }
+
+    public Future<?> callSync(Runnable runnable) {
+        return callSync(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    public <V> Future<V> callSync(Callable<V> callable) {
+        final FutureTask<V> runnable = new FutureTask<>(callable);
+        createTaskBuilder().execute(runnable).submit(SpongeImpl.getPlugin());
+        return runnable;
     }
 }

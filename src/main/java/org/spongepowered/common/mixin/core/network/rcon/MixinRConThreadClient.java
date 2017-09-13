@@ -28,40 +28,48 @@ import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.network.rcon.RConThreadClient;
+import net.minecraft.network.rcon.RConUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.source.RconSource;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinRConConsoleSource;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.ExecutionException;
 
 @Mixin(RConThreadClient.class)
 public abstract class MixinRConThreadClient extends RConThreadBase implements RemoteConnection {
 
+    @Shadow private void sendMultipacketResponse(int p_72655_1_, String p_72655_2_) throws IOException {}
+    @Shadow private void sendResponse(int p_72654_1_, int p_72654_2_, String message) throws IOException {}
+    @Shadow private void closeSocket() {}
+    @Shadow private void sendLoginFailedResponse() throws IOException {}
+
     @Shadow private boolean loggedIn;
     @Shadow private Socket clientSocket;
+    @Shadow @Final private String rconPassword;
+    @Shadow @Final private byte[] buffer;
 
     private RConConsoleSource source;
 
     protected MixinRConThreadClient(IServer p_i45300_1_, String p_i45300_2_) {
         super(p_i45300_1_, p_i45300_2_);
-    }
-
-    private void initSource() {
-        this.source = new RConConsoleSource(SpongeImpl.getServer());
-        Object clientThread = this;
-        ((IMixinRConConsoleSource) this.source).setConnection((RConThreadClient) clientThread);
     }
 
     @Override
@@ -74,49 +82,116 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         return (InetSocketAddress) this.clientSocket.getLocalSocketAddress();
     }
 
-    @Redirect(method = "run", at = @At(value = "INVOKE", target = "net.minecraft.network.rcon.IServer.handleRConCommand(Ljava/lang/String;)"
-            + "Ljava/lang/String;"))
-    public String commandExecutionHook(IServer server, String commandStr) {
-        try {
-            synchronized (this.clientSocket) {
-                SpongeImpl.getServer().getCommandManager().executeCommand(this.source, commandStr);
-                final String logContents = this.source.getLogContents();
-                this.source.resetLog();
-                return logContents;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Inject(method = "run", at = @At(value = "INVOKE", target = "net.minecraft.network.rcon.RConThreadClient.sendResponse(IILjava/lang/String;)V",
-            shift = At.Shift.BEFORE))
-    public void rconLoginCallback(CallbackInfo ci) throws IOException {
-        if (this.source == null) {
-            initSource();
-        }
-        Sponge.getCauseStackManager().pushCause(this.source);
-        RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(Sponge.getCauseStackManager().getCurrentCause(),
-            (RconSource) this.source);
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
-        if (event.isCancelled()) {
-            this.loggedIn = false;
-            throw new IOException("Cancelled login");
-        }
-    }
-
     @Inject(method = "closeSocket", at = @At("HEAD"))
-    public void rconLogoutCallback(CallbackInfo ci){
-        if (this.source == null) {
-            initSource();
-        }
+    public void rconLogoutCallback(CallbackInfo ci) {
         if (this.loggedIn) {
-            Sponge.getCauseStackManager().pushCause(this.source);
-            SpongeImpl.postEvent(SpongeEventFactory.createRconConnectionEventDisconnect(Sponge.getCauseStackManager().getCurrentCause(),
-                (RconSource) this.source));
-            Sponge.getCauseStackManager().popCause();
+            final Cause cause = Cause.of(EventContext.empty(), this, this.source);
+            final RconConnectionEvent.Disconnect event = SpongeEventFactory.createRconConnectionEventDisconnect(
+                    cause, (RconSource) this.source);
+            SpongeImpl.getScheduler().callSync(() -> SpongeImpl.postEvent(event));
         }
+    }
+
+    /**
+     * @author Cybermaxke
+     * @reason Fix RCON, is completely broken
+     */
+    @Override
+    @Overwrite
+    public void run() {
+        // Initialize the source
+        this.source = new RConConsoleSource(SpongeImpl.getServer());
+        ((IMixinRConConsoleSource) this.source).setConnection((RConThreadClient) (Object) this);
+
+        // Call the connection event
+        final Cause connectCause = Cause.of(EventContext.empty(), this, this.source);
+        final RconConnectionEvent.Connect connectEvent = SpongeEventFactory.createRconConnectionEventConnect(
+                connectCause, (RconSource) this.source);
+        try {
+            SpongeImpl.getScheduler().callSync(() -> SpongeImpl.postEvent(connectEvent)).get();
+        } catch (InterruptedException | ExecutionException ignored) {
+            closeSocket();
+            return;
+        }
+        if (connectEvent.isCancelled()) {
+            closeSocket();
+            return;
+        }
+        while (true) {
+            try {
+                if (!this.running) {
+                    break;
+                }
+
+                final BufferedInputStream bufferedinputstream = new BufferedInputStream(this.clientSocket.getInputStream());
+                final int i = bufferedinputstream.read(this.buffer, 0, this.buffer.length);
+
+                if (10 <= i) {
+                    int j = 0;
+                    final int k = RConUtils.getBytesAsLEInt(this.buffer, 0, i);
+
+                    if (k != i - 4) {
+                        break;
+                    }
+
+                    j += 4;
+                    final int l = RConUtils.getBytesAsLEInt(this.buffer, j, i);
+                    j += 4;
+                    final int i1 = RConUtils.getRemainingBytesAsLEInt(this.buffer, j);
+                    j += 4;
+
+                    switch (i1) {
+                        case 2:
+                            if (this.loggedIn) {
+                                final String command = RConUtils.getBytesAsString(this.buffer, j, i);
+                                try {
+                                    // Execute the command on the main thread and wait for it
+                                    SpongeImpl.getScheduler().callSync(() -> {
+                                        final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                                        // Only add the RemoteConnection here, the RconSource
+                                        // will be added by the command manager
+                                        causeStackManager.pushCause(this);
+                                        SpongeImpl.getServer().getCommandManager().executeCommand(this.source, command);
+                                        causeStackManager.popCause();
+                                    }).get();
+                                    final String logContents = this.source.getLogContents();
+                                    this.source.resetLog();
+                                    sendMultipacketResponse(l, logContents);
+                                } catch (Exception exception) {
+                                    sendMultipacketResponse(l, "Error executing: " + command + " (" + exception.getMessage() + ")");
+                                }
+                                continue;
+                            }
+                            sendLoginFailedResponse();
+                            break;
+                        case 3:
+                            final String password = RConUtils.getBytesAsString(this.buffer, j, i);
+                            if (!password.isEmpty() && password.equals(this.rconPassword)) {
+                                final Cause cause = Cause.of(EventContext.empty(), this, this.source);
+                                final RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(
+                                        cause, (RconSource) this.source);
+                                SpongeImpl.getScheduler().callSync(() -> SpongeImpl.postEvent(event)).get();
+                                if (!event.isCancelled()) {
+                                    this.loggedIn = true;
+                                    sendResponse(l, 2, "");
+                                    continue;
+                                }
+                            }
+
+                            this.loggedIn = false;
+                            sendLoginFailedResponse();
+                            break;
+                        default:
+                            sendMultipacketResponse(l, String.format("Unknown request %s", Integer.toHexString(i1)));
+                    }
+                }
+            } catch (IOException e) {
+                break;
+            } catch (Exception e) {
+                SpongeImpl.getLogger().error("Exception whilst parsing RCON input", e);
+                break;
+            }
+        }
+        closeSocket();
     }
 }
