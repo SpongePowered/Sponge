@@ -126,13 +126,11 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
@@ -187,7 +185,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
-    private it.unimi.dsi.fastutil.longs.LongCollection tileEntitiesChunkToBeRemoved = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -1591,16 +1588,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.stopTileEntityRemovelInWhile(); // Sponge
         }
 
-        // This is handled below in removeTileEntitiesForRemovedChunks
-        if (false && !this.tileEntitiesToBeRemoved.isEmpty()) {
+        if (!this.tileEntitiesToBeRemoved.isEmpty()) {
             // Sponge start - use forge hook
             for (Object tile : this.tileEntitiesToBeRemoved) {
                SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
             }
             // Sponge end
 
-            this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
-            this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
+            // forge: faster "contains" makes this removal much more efficient
+            java.util.Set<net.minecraft.tileentity.TileEntity> remove = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+            remove.addAll(this.tileEntitiesToBeRemoved);
+            this.tickableTileEntities.removeAll(remove);
+            this.loadedTileEntityList.removeAll(remove);
             this.tileEntitiesToBeRemoved.clear();
         }
 
@@ -1610,7 +1609,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     .complete());
         }
         this.startPendingTileEntityTimings(); // Sponge
-        this.removeTileEntitiesForRemovedChunks();
         if (!this.isRemote && CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GeneralPhase.State.TILE_ENTITY_UNLOAD);
         }
@@ -1641,42 +1639,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.endPendingTileEntities(); // Sponge
         // this.profiler.endSection(); // Sponge - Don't use the profiler
         // this.profiler.endSection(); // Sponge - Don't use the profiler
-    }
-
-    @Override
-    public void markTileEntitiesInChunkForRemoval(net.minecraft.world.chunk.Chunk chunk)
-    {
-        if (!chunk.getTileEntityMap().isEmpty())
-        {
-            long pos = net.minecraft.util.math.ChunkPos.asLong(chunk.x, chunk.z);
-            this.tileEntitiesChunkToBeRemoved.add(pos);
-        }
-    }
-
-    private void removeTileEntitiesForRemovedChunks()
-    {
-        if (!this.tileEntitiesChunkToBeRemoved.isEmpty())
-        {
-            java.util.function.Predicate<net.minecraft.tileentity.TileEntity> isInChunk = (tileEntity) ->
-            {
-                BlockPos tilePos = tileEntity.getPos();
-                long tileChunkPos = net.minecraft.util.math.ChunkPos.asLong(tilePos.getX() >> 4, tilePos.getZ() >> 4);
-                return this.tileEntitiesChunkToBeRemoved.contains(tileChunkPos);
-            };
-            java.util.function.Predicate<net.minecraft.tileentity.TileEntity> isInChunkDoUnload = (tileEntity) ->
-            {
-                boolean inChunk = isInChunk.test(tileEntity);
-                if (inChunk)
-                {
-                    SpongeImplHooks.onTileEntityChunkUnload(tileEntity);
-                    ((IMixinTileEntity) tileEntity).setActiveChunk(null);
-                }
-                return inChunk;
-            };
-            this.tickableTileEntities.removeIf(isInChunk);
-            this.loadedTileEntityList.removeIf(isInChunkDoUnload);
-            this.tileEntitiesChunkToBeRemoved.clear();
-        }
     }
 
     /**
