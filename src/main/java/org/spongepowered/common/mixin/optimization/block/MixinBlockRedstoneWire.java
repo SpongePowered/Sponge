@@ -523,7 +523,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
         }
         else
         {
-            return Blocks.OBSERVER == blockState.getBlock() ? side == blockState.getValue(BlockObserver.FACING) : SpongeImplHooks.canConnectRedstone(block, blockState, world, pos, side);;
+            return Blocks.OBSERVER == blockState.getBlock() ? side == blockState.getValue(BlockObserver.FACING) : SpongeImplHooks.canConnectRedstone(block, blockState, world, pos, side);
         }
     }
 }
