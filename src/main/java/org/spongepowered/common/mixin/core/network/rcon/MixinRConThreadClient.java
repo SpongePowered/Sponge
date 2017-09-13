@@ -184,7 +184,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                                 continue;
                             }
                             sendLoginFailedResponse();
-                            break;
+                            break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                         case 3:
                             final String password = RConUtils.getBytesAsString(this.buffer, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
@@ -209,9 +209,10 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
 
                             this.loggedIn = false;
                             sendLoginFailedResponse();
-                            break;
+                            break; // Sponge: 'continue' -> 'break', disconnect if login failed
                         default:
                             sendMultipacketResponse(l, String.format("Unknown request %s", Integer.toHexString(i1)));
+                            break; // Sponge: 'continue' -> 'break', disconnect when a invalid operation is requested
                     }
                 }
             } catch (IOException e) {
