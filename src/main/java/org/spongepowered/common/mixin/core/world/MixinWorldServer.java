@@ -1012,11 +1012,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         sbu.setPriority(priority);
         ((IMixinNextTickListEntry) sbu).setWorld((WorldServer) (Object) this);
-        if (!((WorldServer) (Object) this).isBlockLoaded(sbu.position)) {
-            this.tmpScheduledObj = sbu;
-            return;
-        }
-
         this.tmpScheduledObj = sbu;
     }
 
