@@ -36,7 +36,7 @@ import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActi
 public abstract class MixinWorldServer_TileEntityActivation extends MixinWorld {
 
     @Override
-    protected void spongeTileEntityActivation() {
+    public void spongeTileEntityActivation() {
         TileEntityActivation.activateTileEntities((WorldServer) (Object) this);
     }
 
