@@ -29,6 +29,8 @@ import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.network.rcon.RConThreadClient;
 import net.minecraft.network.rcon.RConUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.event.CauseStackManager;
@@ -53,6 +55,8 @@ import java.util.concurrent.ExecutionException;
 
 @Mixin(RConThreadClient.class)
 public abstract class MixinRConThreadClient extends RConThreadBase implements RemoteConnection {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow private void sendMultipacketResponse(int p_72655_1_, String p_72655_2_) throws IOException {}
     @Shadow private void sendResponse(int p_72654_1_, int p_72654_2_, String message) throws IOException {}
@@ -103,6 +107,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     @Override
     @Overwrite
     public void run() {
+        /// Sponge: START
         // Initialize the source
         this.source = new RConConsoleSource(SpongeImpl.getServer());
         ((IMixinRConConsoleSource) this.source).setConnection((RConThreadClient) (Object) this);
@@ -128,6 +133,9 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             closeSocket();
             return;
         }
+        /// Sponge: END
+        /// Sponge: All 'return' operations are replaced by 'break' and
+        ///         'closeSocket' is moved out of the loop
         while (true) {
             try {
                 if (!this.running) {
@@ -156,6 +164,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                             if (this.loggedIn) {
                                 final String command = RConUtils.getBytesAsString(this.buffer, j, i);
                                 try {
+                                    /// Sponge: START
                                     // Execute the command on the main thread and wait for it
                                     SpongeImpl.getScheduler().callSync(() -> {
                                         final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
@@ -168,6 +177,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                                     final String logContents = this.source.getLogContents();
                                     this.source.resetLog();
                                     sendMultipacketResponse(l, logContents);
+                                    /// Sponge: END
                                 } catch (Exception exception) {
                                     sendMultipacketResponse(l, "Error executing: " + command + " (" + exception.getMessage() + ")");
                                 }
@@ -178,6 +188,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                         case 3:
                             final String password = RConUtils.getBytesAsString(this.buffer, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
+                                /// Sponge: START
                                 final RconConnectionEvent.Login event = SpongeImpl.getScheduler().callSync(() -> {
                                     final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
                                     causeStackManager.pushCause(this);
@@ -193,6 +204,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                                     sendResponse(l, 2, "");
                                     continue;
                                 }
+                                /// Sponge: END
                             }
 
                             this.loggedIn = false;
@@ -205,7 +217,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             } catch (IOException e) {
                 break;
             } catch (Exception e) {
-                SpongeImpl.getLogger().error("Exception whilst parsing RCON input", e);
+                LOGGER.error("Exception whilst parsing RCON input", e);
                 break;
             }
         }
