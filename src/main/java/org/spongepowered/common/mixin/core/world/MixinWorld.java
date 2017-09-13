@@ -74,7 +74,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -183,7 +182,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
-    private NamedCause worldNamedCause;
+    protected NamedCause worldNamedCause;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -227,10 +226,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean checkLight(BlockPos pos);
     @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
-    @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isAreaLoaded(BlockPos from, BlockPos to);
     @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
-    @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
@@ -239,7 +239,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
-    @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
+    @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
@@ -288,22 +288,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else {
             return ((IMixinWorldProvider) provider).createServerWorldBorder();
         }
-    }
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
-            CallbackInfo ci) {
-        if (info == null && !this.isRemote) {
-            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
-                    new RuntimeException("Stack trace:"));
-            this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT),
-                    "sponge$dummy_world");
-        }
-        // Checks to make sure no mod has changed our worldInfo and if so, reverts back to original.
-        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
-        // This change is not needed as all worlds use separate save handlers.
-        this.worldInfo = info;
-        this.worldNamedCause = NamedCause.source(this);
     }
 
     @SuppressWarnings("rawtypes")
