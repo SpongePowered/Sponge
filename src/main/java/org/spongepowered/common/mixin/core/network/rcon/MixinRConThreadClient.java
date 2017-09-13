@@ -33,8 +33,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.asm.mixin.Final;
@@ -85,10 +83,16 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     @Inject(method = "closeSocket", at = @At("HEAD"))
     public void rconLogoutCallback(CallbackInfo ci) {
         if (this.loggedIn) {
-            final Cause cause = Cause.of(EventContext.empty(), this, this.source);
-            final RconConnectionEvent.Disconnect event = SpongeEventFactory.createRconConnectionEventDisconnect(
-                    cause, (RconSource) this.source);
-            SpongeImpl.getScheduler().callSync(() -> SpongeImpl.postEvent(event));
+            SpongeImpl.getScheduler().callSync(() -> {
+                final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                causeStackManager.pushCause(this);
+                causeStackManager.pushCause(this.source);
+                final RconConnectionEvent.Disconnect event = SpongeEventFactory.createRconConnectionEventDisconnect(
+                        causeStackManager.getCurrentCause(), (RconSource) this.source);
+                SpongeImpl.postEvent(event);
+                causeStackManager.popCauses(2);
+                return event;
+            });
         }
     }
 
@@ -104,11 +108,18 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         ((IMixinRConConsoleSource) this.source).setConnection((RConThreadClient) (Object) this);
 
         // Call the connection event
-        final Cause connectCause = Cause.of(EventContext.empty(), this, this.source);
-        final RconConnectionEvent.Connect connectEvent = SpongeEventFactory.createRconConnectionEventConnect(
-                connectCause, (RconSource) this.source);
+        final RconConnectionEvent.Connect connectEvent;
         try {
-            SpongeImpl.getScheduler().callSync(() -> SpongeImpl.postEvent(connectEvent)).get();
+            connectEvent = SpongeImpl.getScheduler().callSync(() -> {
+                final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                causeStackManager.pushCause(this);
+                causeStackManager.pushCause(this.source);
+                final RconConnectionEvent.Connect event = SpongeEventFactory.createRconConnectionEventConnect(
+                        causeStackManager.getCurrentCause(), (RconSource) this.source);
+                SpongeImpl.postEvent(event);
+                causeStackManager.popCauses(2);
+                return event;
+            }).get();
         } catch (InterruptedException | ExecutionException ignored) {
             closeSocket();
             return;
@@ -167,10 +178,16 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
                         case 3:
                             final String password = RConUtils.getBytesAsString(this.buffer, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
-                                final Cause cause = Cause.of(EventContext.empty(), this, this.source);
-                                final RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(
-                                        cause, (RconSource) this.source);
-                                SpongeImpl.getScheduler().callSync(() -> SpongeImpl.postEvent(event)).get();
+                                final RconConnectionEvent.Login event = SpongeImpl.getScheduler().callSync(() -> {
+                                    final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                                    causeStackManager.pushCause(this);
+                                    causeStackManager.pushCause(this.source);
+                                    final RconConnectionEvent.Login event1 = SpongeEventFactory.createRconConnectionEventLogin(
+                                            causeStackManager.getCurrentCause(), (RconSource) this.source);
+                                    SpongeImpl.postEvent(event1);
+                                    causeStackManager.popCauses(2);
+                                    return event1;
+                                }).get();
                                 if (!event.isCancelled()) {
                                     this.loggedIn = true;
                                     sendResponse(l, 2, "");
