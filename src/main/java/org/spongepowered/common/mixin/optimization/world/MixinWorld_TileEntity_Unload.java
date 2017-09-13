@@ -51,7 +51,7 @@ public abstract class MixinWorld_TileEntity_Unload implements IMixinWorld {
         this.processingLoadedTiles = true;
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", args = "log=true", target = "Ljava/util/List;isEmpty()Z", ordinal = 0))
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z", ordinal = 0))
     public boolean onUpdateEntitiesUnloadTiles(List<TileEntity> tileList) {
         for (Object tile : tileList)
         {
