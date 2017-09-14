@@ -44,7 +44,7 @@ import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
 
-abstract class LocationBasedTickPhaseState extends TickPhaseState {
+abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
     LocationBasedTickPhaseState() {
     }

@@ -78,6 +78,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -1061,6 +1062,6 @@ public interface PacketFunction {
 
     PacketFunction HANDLED_EXTERNALLY = UNKNOWN_PACKET;
 
-    void unwind(Packet<?> packet, IPacketState state, EntityPlayerMP player, PhaseContext<?> context);
+    void unwind(Packet<?> packet, IPhaseState<?> state, EntityPlayerMP player, PhaseContext<?> context);
 
 }

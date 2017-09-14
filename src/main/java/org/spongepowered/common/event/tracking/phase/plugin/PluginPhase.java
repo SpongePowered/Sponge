@@ -75,11 +75,6 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
-        ((PluginPhaseState) state).processPostTick(phaseContext);
-    }
-
-    @Override
     public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos,
                                         IMixinBlockEventData blockEvent) {
         if (phaseState instanceof ListenerPhaseState) {

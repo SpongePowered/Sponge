@@ -26,9 +26,8 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 
-public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
-
-    protected BlockTickContext(IPhaseState<BlockTickContext> phaseState) {
-        super(phaseState);
+public class TileEntityTickContext extends LocationBasedTickContext<TileEntityTickContext> {
+    public TileEntityTickContext() {
+        super(TickPhase.Tick.TILE_ENTITY);
     }
 }

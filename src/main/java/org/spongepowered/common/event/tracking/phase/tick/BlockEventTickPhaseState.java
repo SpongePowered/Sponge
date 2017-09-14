@@ -60,9 +60,14 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-class BlockEventTickPhaseState extends TickPhaseState {
+class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     BlockEventTickPhaseState() {
+    }
+
+    @Override
+    public BlockEventTickContext start() {
+        return new BlockEventTickContext();
     }
 
     @Override
@@ -124,7 +129,7 @@ class BlockEventTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(BlockEventTickContext phaseContext) {
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));

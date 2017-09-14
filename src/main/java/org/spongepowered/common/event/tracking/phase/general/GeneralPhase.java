@@ -43,13 +43,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CapturedMultiMapSupplier;
-import org.spongepowered.common.event.tracking.CapturedSupplier;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -77,7 +71,7 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     public static final class Post {
-        public static final IPhaseState UNWINDING = new PostState();
+        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = new PostState();
 
         private Post() { }
     }
@@ -92,11 +86,6 @@ public final class GeneralPhase extends TrackingPhase {
 
     private static final class Holder {
         static final GeneralPhase INSTANCE = new GeneralPhase();
-    }
-
-    @Override
-    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
-        ((GeneralState) state).unwind(phaseContext);
     }
 
     @SuppressWarnings("unchecked")

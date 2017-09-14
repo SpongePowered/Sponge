@@ -46,14 +46,6 @@ public final class EntityPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
-        if (state instanceof EntityPhaseState) {
-            ((EntityPhaseState) state).unwind(phaseContext);
-        }
-
-    }
-
-    @Override
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX,
                                         int chunkZ) {
         if (phaseState == State.CHANGING_DIMENSION) {

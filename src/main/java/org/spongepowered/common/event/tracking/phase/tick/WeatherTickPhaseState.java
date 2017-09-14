@@ -38,13 +38,18 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
 
-class WeatherTickPhaseState extends TickPhaseState {
+class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
     WeatherTickPhaseState() {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public TickContext.General start() {
+        return new TickContext.General(this);
+    }
+
+    @Override
+    public void unwind(TickContext.General phaseContext) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {

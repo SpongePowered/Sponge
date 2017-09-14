@@ -46,7 +46,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-abstract class TickPhaseState implements IPhaseState {
+abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C> {
 
     TickPhaseState() {
     }
@@ -66,7 +66,8 @@ abstract class TickPhaseState implements IPhaseState {
         return true;
     }
 
-    public void processPostTick(PhaseContext<?> phaseContext) { }
+    @Override
+    public void unwind(C phaseContext) { }
 
 
     public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
@@ -91,4 +92,6 @@ abstract class TickPhaseState implements IPhaseState {
     }
 
     public abstract boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ);
+
+
 }

@@ -77,6 +77,7 @@ import javax.annotation.Nullable;
  * proxy object entering and processing between different states of the
  * world and its objects.
  */
+@SuppressWarnings("unchecked")
 public final class CauseTracker {
 
     public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
@@ -201,9 +202,9 @@ public final class CauseTracker {
         this.stack.pop();
     }
 
-    public void completePhase(IPhaseState prevState) {
+    public void completePhase(IPhaseState<?> prevState) {
         final PhaseData currentPhaseData = this.stack.peek();
-        final IPhaseState state = currentPhaseData.state;
+        final IPhaseState<?> state = currentPhaseData.state;
         final boolean isEmpty = this.stack.isEmpty();
         if (isEmpty) {
             // The random occurrence that we're told to complete a phase
@@ -242,7 +243,7 @@ public final class CauseTracker {
             }
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
                 this.currentProcessingState = currentPhaseData;
-                phase.unwind(state, context);
+                ((IPhaseState) state).unwind(context);
                 this.currentProcessingState = null;
             } catch (Exception | NoClassDefFoundError e) {
                 printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);

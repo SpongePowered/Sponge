@@ -48,9 +48,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
+class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
 
     TileEntityTickPhaseState() {
+    }
+
+    @Override
+    public TileEntityTickContext start() {
+        return new TileEntityTickContext();
     }
 
     @Override
@@ -68,7 +73,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(TileEntityTickContext phaseContext) {
         final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
         final Optional<User> notifier = phaseContext.getNotifier();

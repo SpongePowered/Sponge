@@ -42,13 +42,18 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import java.util.ArrayList;
 import java.util.List;
 
-class PlayerTickPhaseState extends TickPhaseState {
+class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
     PlayerTickPhaseState() {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public PlayerTickContext start() {
+        return new PlayerTickContext();
+    }
+
+    @Override
+    public void unwind(PlayerTickContext phaseContext) {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

@@ -22,13 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
-public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
+@SuppressWarnings("unchecked")
+public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    protected BlockTickContext(IPhaseState<BlockTickContext> phaseState) {
-        super(phaseState);
+    EntityPlayerMP packetPlayer;
+    Packet<?> packet;
+
+    protected PacketContext(BasicPacketState<? extends P> state) {
+        super(state);
     }
+
+
 }

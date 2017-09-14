@@ -69,14 +69,13 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-class EntityTickPhaseState extends TickPhaseState {
+class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     EntityTickPhaseState() {
     }
-
     @SuppressWarnings("unchecked")
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(EntityTickContext phaseContext) {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
         final Optional<User> creator = phaseContext.getOwner();
@@ -302,6 +301,11 @@ class EntityTickPhaseState extends TickPhaseState {
                 //((Entity) entity).setTransform(event.getToTransform());
             }
         }
+    }
+
+    @Override
+    public EntityTickContext start() {
+        return new EntityTickContext();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

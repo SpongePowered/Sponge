@@ -104,6 +104,7 @@ import java.util.stream.Collectors;
  * A simple utility for aiding in tracking, either with resolving notifiers
  * and owners, or proxying out the logic for ticking a block, entity, etc.
  */
+@SuppressWarnings("unchecked")
 public final class TrackingUtil {
 
     public static final int BREAK_BLOCK_INDEX = 0;
@@ -707,7 +708,7 @@ public final class TrackingUtil {
                 newState.getBlock().onBlockAdded(mixinWorldServer.asMinecraftWorld(), pos, newState);
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
-                    peek.state.getPhase().unwind(peek.state, peek.context);
+                    peek.state.unwind(peek.context);
                 }
             }
 
@@ -727,7 +728,7 @@ public final class TrackingUtil {
 
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             if (peek.state == GeneralPhase.Post.UNWINDING) {
-                peek.state.getPhase().unwind(peek.state, peek.context);
+                peek.state.unwind(peek.context);
             }
         }
         return noCancelledTransactions;

@@ -58,32 +58,13 @@ import javax.annotation.Nullable;
 
 public abstract class TrackingPhase {
 
-    /**
-     * The exit point of any phase. Every phase should have an unwinding
-     * process where if anything is captured, events should be thrown and
-     * processed accordingly. The outcome of each phase is dependent on
-     * the {@link IPhaseState} provded, as different states require different
-     * handling.
-     *
-     * <p>Examples of this include: {@link PacketPhase}, {@link TickPhase}, etc.
-     * </p>
-     *
-     * <p>Note that the {@link CauseTracker} is only provided for easy access
-     * to the {@link WorldServer}, {@link IMixinWorldServer}, and
-     * {@link World} instances.</p>
-     *
-     * @param state The state
-     * @param phaseContext The context of the current state being unwound
-     */
-    public abstract void unwind(IPhaseState state, PhaseContext<?> phaseContext);
-
 
     /**
      * This is the post dispatch method that is automatically handled for
      * states that deem it necessary to have some post processing for
      * advanced game mechanics. This is always performed when capturing
      * has been turned on during a phases's
-     * {@link #unwind(IPhaseState, PhaseContext<?>)} is
+     * {@link IPhaseState#unwind(IPhaseState, PhaseContext<?>)} is
      * dispatched. The rules of post dispatch are as follows:
      * - Entering extra phases is not allowed: This is to avoid
      *  potential recursion in various corner cases.

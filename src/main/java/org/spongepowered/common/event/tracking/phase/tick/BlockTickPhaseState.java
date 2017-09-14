@@ -49,12 +49,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-class BlockTickPhaseState extends LocationBasedTickPhaseState {
+class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
 
     private final String name;
 
     BlockTickPhaseState(String name) {
         this.name = name;
+    }
+
+    @Override
+    public BlockTickContext start() {
+        return new BlockTickContext(this);
     }
 
     @Override
@@ -70,8 +75,8 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> context) {
-        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
+    public void unwind(BlockTickContext context) {
+        final LocatableBlock locatableBlock = context.requireSource(LocatableBlock.class);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(locatableBlock);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
@@ -156,7 +161,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext<?> context) {
+    public void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, BlockTickContext context) {
         if (context.shouldProcessImmediately()) {
             TrackingUtil.processBlockCaptures(context.getCapturedBlocks(), this, context);
             context.getCapturedBlockSupplier().get().remove(snapshot);
@@ -168,4 +173,5 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
     public String toString() {
         return this.name;
     }
+
 }

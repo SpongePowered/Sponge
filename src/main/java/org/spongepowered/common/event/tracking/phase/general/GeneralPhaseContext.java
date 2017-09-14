@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
-public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
+public class GeneralPhaseContext<C extends GeneralPhaseContext<C>> extends PhaseContext<C> {
 
-    protected BlockTickContext(IPhaseState<BlockTickContext> phaseState) {
-        super(phaseState);
+    public GeneralPhaseContext(IPhaseState<C> state) {
+        super(state);
     }
 }

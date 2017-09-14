@@ -67,11 +67,6 @@ public final class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
-        ((BlockPhaseState) state).unwind(phaseContext);
-    }
-
-    @Override
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX,
                                         int chunkZ) {
         return this.allowEntitySpawns(phaseState)

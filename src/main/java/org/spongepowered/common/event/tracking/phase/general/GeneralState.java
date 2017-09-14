@@ -38,9 +38,10 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 
-abstract class GeneralState implements IPhaseState {
+abstract class GeneralState<G extends GeneralPhaseContext<G>> implements IPhaseState<G> {
 
-    abstract void unwind(PhaseContext<?> context);
+    @Override
+    public abstract void unwind(G context);
 
     @Override
     public final TrackingPhase getPhase() {

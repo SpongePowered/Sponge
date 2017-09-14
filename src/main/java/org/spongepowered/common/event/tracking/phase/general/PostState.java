@@ -29,10 +29,16 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 
-final class PostState extends GeneralState {
+final class PostState extends GeneralState<UnwindingPhaseContext> {
+
+    @Override
+    public UnwindingPhaseContext start() {
+        return null;
+    }
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
@@ -45,8 +51,9 @@ final class PostState extends GeneralState {
     public boolean tracksBlockRestores() {
         return false; // TODO - check that this really is needed.
     }
+
     @Override
-    void unwind(PhaseContext<?> context) {
+    public void unwind(UnwindingPhaseContext context) {
         final IPhaseState unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
         final PhaseContext<?> unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
         this.getPhase().postDispatch(unwindingState, unwindingContext, context);

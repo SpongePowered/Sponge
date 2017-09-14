@@ -42,8 +42,13 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.ArrayList;
 
-class DimensionTickPhaseState extends TickPhaseState {
+class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     DimensionTickPhaseState() {
+    }
+
+    @Override
+    public DimensionContext start() {
+        return new DimensionContext();
     }
 
     @Override
@@ -52,7 +57,7 @@ class DimensionTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(DimensionContext phaseContext) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedBlockSupplier()

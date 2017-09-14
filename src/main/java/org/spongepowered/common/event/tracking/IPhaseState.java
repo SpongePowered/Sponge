@@ -26,11 +26,15 @@ package org.spongepowered.common.event.tracking;
 
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
@@ -39,13 +43,13 @@ import javax.annotation.Nullable;
  * A literal phase state of which the {@link World} is currently running
  * in. The state itself is owned by {@link TrackingPhase}s as the phase
  * defines what to do upon
- * {@link TrackingPhase#unwind(IPhaseState, PhaseContext<?>)}.
+ * {@link IPhaseState#unwind(PhaseContext)}.
  * As these should be enums, there's no data that should be stored on
  * this state. It can have control flow with {@link #canSwitchTo(IPhaseState)}
  * where preventing switching to another state is possible (likely points out
  * either errors or runaway states not being unwound).
  */
-public interface IPhaseState<C extends PhaseContext<?>> {
+public interface IPhaseState<C extends PhaseContext<C>> {
 
     TrackingPhase getPhase();
 
@@ -54,6 +58,25 @@ public interface IPhaseState<C extends PhaseContext<?>> {
     default boolean canSwitchTo(IPhaseState state) {
         return false;
     }
+
+    /**
+     * The exit point of any phase. Every phase should have an unwinding
+     * process where if anything is captured, events should be thrown and
+     * processed accordingly. The outcome of each phase is dependent on
+     * the {@link IPhaseState} provded, as different states require different
+     * handling.
+     *
+     * <p>Examples of this include: {@link PacketPhase}, {@link TickPhase}, etc.
+     * </p>
+     *
+     * <p>Note that the {@link CauseTracker} is only provided for easy access
+     * to the {@link WorldServer}, {@link IMixinWorldServer}, and
+     * {@link World} instances.</p>
+     *
+     * @param phaseContext The context of the current state being unwound
+     */
+    void unwind(C phaseContext);
+
 
     default boolean ignoresBlockTracking() {
         return false;
@@ -99,13 +122,15 @@ public interface IPhaseState<C extends PhaseContext<?>> {
         return false;
     }
 
-    default boolean shouldCaptureBlockChangeOrSkip(PhaseContext<?> phaseContext, BlockPos pos) {
+    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos) {
         return true;
     }
+
     default boolean isInteraction() {
         return false;
     }
-    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext<?> context) {
+
+    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, C context) {
 
     }
 

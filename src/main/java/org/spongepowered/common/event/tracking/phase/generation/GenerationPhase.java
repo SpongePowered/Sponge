@@ -99,11 +99,6 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext<?> phaseContext) {
-        ((GeneralGenerationPhaseState) state).unwind(phaseContext);
-    }
-
-    @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return false;
     }
