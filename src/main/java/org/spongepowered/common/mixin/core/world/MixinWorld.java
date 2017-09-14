@@ -1633,11 +1633,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     /**
      * Overridden in {@link MixinWorldServer_TileEntityActivation}
      */
-    protected void spongeTileEntityActivation() {
+    public void spongeTileEntityActivation() {
 
     }
 
-    protected void entityActivationCheck() {
+    public void entityActivationCheck() {
         // Overridden in MixinWorldServer_Activation
     }
 
