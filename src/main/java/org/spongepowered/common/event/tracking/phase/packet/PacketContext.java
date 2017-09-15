@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 @SuppressWarnings("unchecked")
@@ -35,7 +34,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     EntityPlayerMP packetPlayer;
     Packet<?> packet;
 
-    protected PacketContext(BasicPacketState<? extends P> state) {
+    protected PacketContext(PacketState<? extends P> state) {
         super(state);
     }
 

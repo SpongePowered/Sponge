@@ -60,9 +60,11 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -110,33 +112,33 @@ public class PacketUtil {
                     }
                 }
 
-                // Don't process movement capture logic if player hasn't moved
-                boolean ignoreMovementCapture = false;
-                if (packetIn instanceof CPacketPlayer) {
-                    CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
-                    if (movingPacket instanceof CPacketPlayer.Rotation) {
-                        ignoreMovementCapture = true;
-                    } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
-                        ignoreMovementCapture = true;
-                    }
+            // Don't process movement capture logic if player hasn't moved
+            boolean ignoreMovementCapture = false;
+            if (packetIn instanceof CPacketPlayer) {
+                CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
+                if (movingPacket instanceof CPacketPlayer.Rotation) {
+                    ignoreMovementCapture = true;
+                } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
+                    ignoreMovementCapture = true;
                 }
-                if (ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
-                    packetIn.processPacket(netHandler);
-                } else {
-                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                    final CauseTracker causeTracker = CauseTracker.getInstance();
-                    IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
-                    if (packetState == null) {
-                        throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
-                    }
-                    PhaseContext<?> context = EMPTY_INVALID;
-                    if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                        context = PhaseContext.start()
-                                .source(packetPlayer)
-                                .addExtra(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer)
-                                .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
-                                .addExtra(InternalNamedCauses.Packet.CURSOR, cursor)
-                                .addExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative);
+            }
+            if ( ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
+                packetIn.processPacket(netHandler);
+            } else {
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
+                final CauseTracker causeTracker = CauseTracker.getInstance();
+                IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                if (packetState == null) {
+                    throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
+                }
+                PhaseContext<?> context = EMPTY_INVALID;
+                if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
+                    context = PhaseContext.start()
+                            .source(packetPlayer)
+                            .addExtra(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer)
+                            .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
+                            .addExtra(InternalNamedCauses.Packet.CURSOR, cursor)
+                            .addExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative);
 
                         TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                         context.owner((Player) packetPlayer);

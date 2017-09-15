@@ -89,36 +89,36 @@ public final class PacketPhase extends TrackingPhase {
 
     public static final class General {
 
-        public static final IPhaseState<?> UNKNOWN = new UnknownPacketState();
-        public static final IPhaseState<?> MOVEMENT = new MovementPacketState();
-        public static final IPhaseState<?> INTERACTION = new InteractionPacketState();
-        public static final IPhaseState<?> IGNORED = new IgnoredPacketState();
-        public static final IPhaseState<?> INTERACT_ENTITY = new InteractEntityPacketState();
-        public static final IPhaseState<?> ATTACK_ENTITY = new AttackEntityPacketState();
-        public static final IPhaseState<?> INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
-        public static final IPhaseState<?> CHAT = new ChatPacketState();
-        public static final IPhaseState<?> CREATIVE_INVENTORY = new CreativeInventoryPacketState();
-        public static final IPhaseState<?> NO_CAPTURE_USE_ITEM = new NoCaptureUseItemPacketState();
-        public static final IPhaseState<?> PLACE_BLOCK = new PlaceBlockPacketState();
-        public static final IPhaseState<?> OPEN_INVENTORY = new BasicPacketState();
-        public static final IPhaseState<?> REQUEST_RESPAWN = new BasicPacketState();
-        public static final IPhaseState<?> USE_ITEM = new UseItemPacketState();
-        public static final IPhaseState<?> INVALID = new InvalidPacketState();
-        public static final IPhaseState<?> CLIENT_SETTINGS = new BasicPacketState();
-        public static final IPhaseState<?> START_RIDING_JUMP = new BasicPacketState();
-        public static final IPhaseState<?> ANIMATION = new BasicPacketState();
-        public static final IPhaseState<?> START_SNEAKING = new BasicPacketState();
-        public static final IPhaseState<?> STOP_SNEAKING = new BasicPacketState();
-        public static final IPhaseState<?> START_SPRINTING = new BasicPacketState();
-        public static final IPhaseState<?> STOP_SPRINTING = new BasicPacketState();
-        public static final IPhaseState<?> STOP_SLEEPING = new StopSleepingPacketState();
-        public static final IPhaseState<?> CLOSE_WINDOW = new CloseWindowState();
-        public static final IPhaseState<?> UPDATE_SIGN = new UpdateSignState();
-        public static final IPhaseState<?> RESOURCE_PACK = new UpdateSignState();
-        public static final IPhaseState<?> STOP_RIDING_JUMP = new BasicPacketState();
-        public static final IPhaseState<?> HANDLED_EXTERNALLY = new UnknownPacketState();
-        public static final IPhaseState<?> START_FALL_FLYING = new BasicPacketState();
-        public static final IPhaseState<?> SWAP_HAND_ITEMS = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> UNKNOWN = new UnknownPacketState();
+        public static final IPhaseState<BasicPacketContext> MOVEMENT = new MovementPacketState();
+        public static final IPhaseState<BasicPacketContext> INTERACTION = new InteractionPacketState();
+        public static final IPhaseState<BasicPacketContext> IGNORED = new IgnoredPacketState();
+        public static final IPhaseState<BasicPacketContext> INTERACT_ENTITY = new InteractEntityPacketState();
+        public static final IPhaseState<BasicPacketContext> ATTACK_ENTITY = new AttackEntityPacketState();
+        public static final IPhaseState<BasicPacketContext> INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
+        public static final IPhaseState<BasicPacketContext> CHAT = new ChatPacketState();
+        public static final IPhaseState<BasicPacketContext> CREATIVE_INVENTORY = new CreativeInventoryPacketState();
+        public static final IPhaseState<BasicPacketContext> NO_CAPTURE_USE_ITEM = new NoCaptureUseItemPacketState();
+        public static final IPhaseState<BasicPacketContext> PLACE_BLOCK = new PlaceBlockPacketState();
+        public static final IPhaseState<BasicPacketContext> OPEN_INVENTORY = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> REQUEST_RESPAWN = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> USE_ITEM = new UseItemPacketState();
+        public static final IPhaseState<BasicPacketContext> INVALID = new InvalidPacketState();
+        public static final IPhaseState<BasicPacketContext> CLIENT_SETTINGS = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> START_RIDING_JUMP = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> ANIMATION = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> START_SNEAKING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> STOP_SNEAKING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> START_SPRINTING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> STOP_SPRINTING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> STOP_SLEEPING = new StopSleepingPacketState();
+        public static final IPhaseState<BasicPacketContext> CLOSE_WINDOW = new CloseWindowState();
+        public static final IPhaseState<BasicPacketContext> UPDATE_SIGN = new UpdateSignState();
+        public static final IPhaseState<BasicPacketContext> RESOURCE_PACK = new UpdateSignState();
+        public static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
+        public static final IPhaseState<BasicPacketContext> START_FALL_FLYING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> SWAP_HAND_ITEMS = new BasicPacketState();
     }
 
     public static final class Inventory {
@@ -231,18 +231,18 @@ public final class PacketPhase extends TrackingPhase {
     public final static int PACKET_BUTTON_SECONDARY_ID = 0;
     public final static int PACKET_BUTTON_MIDDLE_ID = 0;
 
-    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPhaseState<?>>> packetTranslationMap = new IdentityHashMap<>();
+    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPhaseState<? extends PacketContext<?>>>> packetTranslationMap = new IdentityHashMap<>();
     private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
 
     // General use methods
 
-    public boolean isPacketInvalid(Packet<?> packetIn, EntityPlayerMP packetPlayer, IPacketState packetState) {
-        return ((BasicPacketState<?>) packetState).isPacketIgnored(packetIn, packetPlayer);
+    public boolean isPacketInvalid(Packet<?> packetIn, EntityPlayerMP packetPlayer, IPhaseState<? extends PacketContext<?>> packetState) {
+        return ((PacketState<?>) packetState).isPacketIgnored(packetIn, packetPlayer);
     }
 
     @SuppressWarnings({"SuspiciousMethodCalls"})
-    public IPhaseState<?> getStateForPacket(Packet<?> packet) {
-        final Function<Packet<?>, IPhaseState<?>> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
+    public IPhaseState<? extends PacketContext<?>> getStateForPacket(Packet<?> packet) {
+        final Function<Packet<?>, IPhaseState<? extends PacketContext<?>>> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
         if (packetStateFunction != null) {
             return packetStateFunction.apply(packet);
         }
@@ -252,7 +252,7 @@ public final class PacketPhase extends TrackingPhase {
     public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState<?> state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
-        ((BasicPacketState<?>) state).populateContext(entityPlayerMP, packet, context);
+        ((PacketState<?>) state).populateContext(entityPlayerMP, packet, context);
         return context;
     }
 
@@ -270,7 +270,7 @@ public final class PacketPhase extends TrackingPhase {
 
     @Override
     public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
-        return ((BasicPacketState<?>) currentState).doesCaptureEntityDrops();
+        return ((PacketState<?>) currentState).doesCaptureEntityDrops();
     }
 
     @Override
@@ -280,15 +280,15 @@ public final class PacketPhase extends TrackingPhase {
 
     @Override
     public boolean ignoresItemPreMerging(IPhaseState<?> currentState) {
-        return ((BasicPacketState<?>) currentState).ignoresItemPreMerges();
+        return ((PacketState<?>) currentState).ignoresItemPreMerges();
     }
 
     @Override
     public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
                                         int chunkZ) {
-        return ((BasicPacketState<?>) phaseState).shouldCaptureEntity()
+        return ((PacketState<?>) phaseState).shouldCaptureEntity()
                ? context.getCapturedEntities().add(entity)
-               : ((BasicPacketState<?>) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
+               : ((PacketState<?>) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
     }
 
     @SuppressWarnings("unchecked")
@@ -312,7 +312,7 @@ public final class PacketPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
-        return ((BasicPacketState<?>) currentState).doBlockCapturing();
+        return ((PacketState<?>) currentState).doBlockCapturing();
     }
 
     @Override
@@ -323,12 +323,12 @@ public final class PacketPhase extends TrackingPhase {
     @Override
     public void processPostEntitySpawns(IPhaseState<?> unwindingState, PhaseContext<?> phaseContext,
         ArrayList<Entity> entities) {
-        ((BasicPacketState<?>) unwindingState).postSpawnEntities(phaseContext, entities);
+        ((PacketState<?>) unwindingState).postSpawnEntities(phaseContext, entities);
     }
 
     @Override
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
-        ((BasicPacketState<?>) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
+        ((PacketState<?>) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }
 
     // Inventory packet specific methods
@@ -429,7 +429,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketPlayerDigging.class, packet -> {
             final CPacketPlayerDigging playerDigging = (CPacketPlayerDigging) packet;
             final CPacketPlayerDigging.Action action = playerDigging.getAction();
-            final IPhaseState<?> state = INTERACTION_ACTION_MAPPINGS.get(action);
+            final IPhaseState<? extends PacketContext<?>> state = INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? General.UNKNOWN : state;
         });
         this.packetTranslationMap.put(CPacketPlayerTryUseItemOnBlock.class, packet -> {
@@ -473,7 +473,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketResourcePackStatus.class, packet -> General.RESOURCE_PACK);
     }
 
-    public static final ImmutableMap<CPacketEntityAction.Action, IPhaseState<?>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPhaseState<?>>builder()
+    private static final ImmutableMap<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>>builder()
             .put(CPacketEntityAction.Action.START_SNEAKING, General.START_SNEAKING)
             .put(CPacketEntityAction.Action.STOP_SNEAKING, General.STOP_SNEAKING)
             .put(CPacketEntityAction.Action.STOP_SLEEPING, General.STOP_SLEEPING)
@@ -484,7 +484,7 @@ public final class PacketPhase extends TrackingPhase {
             .put(CPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
             .put(CPacketEntityAction.Action.START_FALL_FLYING, General.START_FALL_FLYING)
             .build();
-    public static final ImmutableMap<CPacketPlayerDigging.Action, IPhaseState<?>> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPhaseState<?>>builder()
+    private static final ImmutableMap<CPacketPlayerDigging.Action, IPhaseState<? extends PacketContext<?>>> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPhaseState<? extends PacketContext<?>>>builder()
             .put(CPacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, General.INTERACTION)

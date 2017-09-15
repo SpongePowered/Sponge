@@ -709,7 +709,7 @@ public interface PacketFunction {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(snapshot);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE,
-                    itemStack.getItem() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
+                    itemStack.getType() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final SpawnEntityEvent spawnEntityEvent =

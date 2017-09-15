@@ -43,10 +43,10 @@ public final class PluginPhase extends TrackingPhase {
 
     public static final class State {
         public static final IPhaseState<?> BLOCK_WORKER = new BlockWorkerPhaseState();
-        public static final IPhaseState<?> CUSTOM_SPAWN = new PluginPhaseState();
+        public static final IPhaseState<?> CUSTOM_SPAWN = new BasicPluginState();
         public static final IPhaseState<ExplosionContext> CUSTOM_EXPLOSION = new CustomExplosionState();
         public static final IPhaseState<?> SCHEDULED_TASK = new ScheduledTaskPhaseState();
-        public static final IPhaseState<?> TELEPORT = new PluginPhaseState();
+        public static final IPhaseState<?> TELEPORT = new BasicPluginState();
 
         private State() {
         }

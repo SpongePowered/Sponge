@@ -39,7 +39,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class BasicInventoryPacketState extends BasicPacketState {
+public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
 
     /**
@@ -110,4 +110,8 @@ public class BasicInventoryPacketState extends BasicPacketState {
         return true;
     }
 
+    @Override
+    public InventoryPacketContext start() {
+        return new InventoryPacketContext(this);
+    }
 }

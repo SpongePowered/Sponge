@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-public class BlockWorkerPhaseState extends PluginPhaseState {
+public class BlockWorkerPhaseState extends BasicPluginState {
 
     BlockWorkerPhaseState() {
     }

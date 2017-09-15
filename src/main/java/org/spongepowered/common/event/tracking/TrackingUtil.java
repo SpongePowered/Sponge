@@ -394,11 +394,12 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     static boolean trackBlockChange(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
                                     PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
-        if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
+        if (((IPhaseState) phaseState).shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
             //final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
             originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flags);
             final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
@@ -411,7 +412,7 @@ public final class TrackingUtil {
                 capturedSnapshots.remove(originalBlockSnapshot);
                 return false;
             }
-            phaseState.postTrackBlock(originalBlockSnapshot, causeTracker, phaseContext);
+            ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, causeTracker, phaseContext);
         } else {
             originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
@@ -709,7 +710,7 @@ public final class TrackingUtil {
                 newState.getBlock().onBlockAdded(mixinWorldServer.asMinecraftWorld(), pos, newState);
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
-                    peek.state.unwind(peek.context);
+                    ((IPhaseState) peek.state).unwind(peek.context);
                 }
             }
 

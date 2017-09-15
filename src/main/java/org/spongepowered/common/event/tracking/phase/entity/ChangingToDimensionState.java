@@ -32,14 +32,19 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import javax.annotation.Nullable;
 
-final class ChangingToDimensionState extends EntityPhaseState {
+final class ChangingToDimensionState extends EntityPhaseState<BasicEntityContext> {
 
     ChangingToDimensionState() {
     }
 
+    @Override
+    public BasicEntityContext start() {
+        return new BasicEntityContext(this);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(PhaseContext<?> context) {
+    public void unwind(BasicEntityContext context) {
 //                final MoveEntityEvent.Teleport.Portal portalEvent = context.firstNamed(InternalNamedCauses.Teleporting.TELEPORT_EVENT, MoveEntityEvent.Teleport.Portal.class)
 //                                .orElseThrow(PhaseUtil.throwWithContext("Expected to capture a portal event!", context));
 //

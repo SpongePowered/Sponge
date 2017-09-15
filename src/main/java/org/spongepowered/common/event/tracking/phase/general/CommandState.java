@@ -55,10 +55,15 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class CommandState extends GeneralState {
+final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public CommandPhaseContext start() {
+        return new CommandPhaseContext(this);
+    }
+
+    @Override
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return state instanceof BlockPhaseState;
     }
 
@@ -68,7 +73,7 @@ final class CommandState extends GeneralState {
     }
 
     @Override
-    void unwind(PhaseContext<?> phaseContext) {
+    public void unwind(CommandPhaseContext phaseContext) {
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()

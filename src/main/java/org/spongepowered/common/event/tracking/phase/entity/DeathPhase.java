@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-final class DeathPhase extends EntityPhaseState {
+final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
 
     DeathPhase() {
 
@@ -63,7 +63,12 @@ final class DeathPhase extends EntityPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext<?> context) {
+    public BasicEntityContext start() {
+        return new BasicEntityContext(this);
+    }
+
+    @Override
+    public void unwind(BasicEntityContext context) {
         final Entity dyingEntity =
                 context.getSource(Entity.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));

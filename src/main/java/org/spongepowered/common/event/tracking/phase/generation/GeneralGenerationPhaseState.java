@@ -38,6 +38,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
@@ -48,7 +49,7 @@ import java.util.Set;
 /**
  * A generalized
  */
-class GeneralGenerationPhaseState implements IPhaseState {
+class GeneralGenerationPhaseState implements IPhaseState<GeneralizedContext> {
 
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
@@ -81,6 +82,11 @@ class GeneralGenerationPhaseState implements IPhaseState {
     }
 
     @Override
+    public GeneralizedContext start() {
+        return new GeneralizedContext(this);
+    }
+
+    @Override
     public final boolean canSwitchTo(IPhaseState<?> state) {
         return this.compatibleStates.contains(state);
     }
@@ -90,7 +96,8 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return true;
     }
 
-    public final void unwind(PhaseContext<?> context) {
+    @Override
+    public final void unwind(GeneralizedContext context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;

@@ -52,13 +52,18 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-final class DeathUpdateState extends EntityPhaseState {
+final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
 
     DeathUpdateState() {
     }
 
     @Override
-    void unwind(PhaseContext<?> context) {
+    public BasicEntityContext start() {
+        return new BasicEntityContext(this);
+    }
+
+    @Override
+    public void unwind(BasicEntityContext context) {
         final Entity dyingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         context.getCapturedItemsSupplier()

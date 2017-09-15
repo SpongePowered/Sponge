@@ -30,4 +30,5 @@ final class IgnoredPacketState extends BasicPacketState {
     public boolean ignoresItemPreMerges() {
         return true;
     }
+
 }

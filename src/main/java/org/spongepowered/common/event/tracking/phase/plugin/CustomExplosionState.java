@@ -67,7 +67,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return true;
     }
 
@@ -223,7 +223,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext<?> phaseContext, BlockPos pos) {
+    public boolean shouldCaptureBlockChangeOrSkip(ExplosionContext phaseContext, BlockPos pos) {
         final Vector3i blockPos = VecHelper.toVector3i(pos);
         for (final BlockSnapshot capturedSnapshot : phaseContext.getCapturedBlocks()) {
             if (capturedSnapshot.getPosition().equals(blockPos)) {

@@ -26,9 +26,10 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
-public class BlockPhaseState implements IPhaseState {
+public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
 
     BlockPhaseState() {
     }
@@ -43,7 +44,13 @@ public class BlockPhaseState implements IPhaseState {
         return TrackingPhases.BLOCK;
     }
 
-    void unwind(PhaseContext<?> context) {
+    @Override
+    public GeneralizedContext start() {
+        return new GeneralizedContext(this);
+    }
+
+    @Override
+    public void unwind(GeneralizedContext context) {
 
     }
 
