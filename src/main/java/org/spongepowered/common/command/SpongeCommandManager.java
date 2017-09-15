@@ -69,11 +69,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -84,7 +86,9 @@ import javax.inject.Inject;
  */
 @Singleton
 public class SpongeCommandManager implements CommandManager {
-    private final Logger log;
+
+    private static final Pattern SPACE_PATTERN = Pattern.compile(" ", Pattern.LITERAL);
+    private final Logger logger;
     private final SimpleDispatcher dispatcher;
     private final Multimap<PluginContainer, CommandMapping> owners = HashMultimap.create();
     private final Map<CommandMapping, PluginContainer> reverseOwners = new ConcurrentHashMap<>();
@@ -107,7 +111,7 @@ public class SpongeCommandManager implements CommandManager {
      * @param disambiguator The function to resolve a single command when multiple options are available
      */
     public SpongeCommandManager(Logger logger, Disambiguator disambiguator) {
-        this.log = logger;
+        this.logger = logger;
         this.dispatcher = new SimpleDispatcher(disambiguator);
     }
 
@@ -138,9 +142,10 @@ public class SpongeCommandManager implements CommandManager {
         synchronized (this.lock) {
             // <namespace>:<alias> for all commands
             List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
-            for (String alias : aliases) {
-                alias = alias.toLowerCase().replace(" ", "");
+            for (final String originalAlias : aliases) {
+                final String alias = this.fixAlias(container, originalAlias);
                 if (aliasesWithPrefix.contains(alias)) {
+                    this.logger.warn("Plugin '{}' is attempting to register duplicate alias '{}'", container.getId(), alias);
                     continue;
                 }
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
@@ -166,6 +171,31 @@ public class SpongeCommandManager implements CommandManager {
 
             return mapping;
         }
+    }
+
+    private String fixAlias(final PluginContainer plugin, final String original) {
+        String fixed = original.toLowerCase(Locale.ENGLISH);
+        final boolean caseChanged = !original.equals(fixed);
+        final boolean spaceFound = original.indexOf(' ') > -1;
+        if (spaceFound) {
+            fixed = SPACE_PATTERN.matcher(fixed).replaceAll("");
+        }
+        if (caseChanged || spaceFound) {
+            final String description = buildAliasDescription(caseChanged, spaceFound);
+            this.logger.warn("Plugin '{}' is attempting to register command '{}' with {} - adjusting to '{}'", plugin.getId(), original, description, fixed);
+        }
+        return fixed;
+    }
+
+    private static String buildAliasDescription(final boolean caseChanged, final boolean spaceFound) {
+        String description = caseChanged ? "an uppercase character" : "";
+        if (spaceFound) {
+            if (!description.isEmpty()) {
+                description += " and ";
+            }
+            description += "a space";
+        }
+        return description;
     }
 
     @Override
@@ -339,7 +369,7 @@ public class SpongeCommandManager implements CommandManager {
                         .replace("\r", "\n")))); // I mean I guess somebody could be running this on like OS 9?
             }
             source.sendMessage(error(t("Error occurred while executing command: %s", excBuilder.build())));
-            this.log.error(TextSerializers.PLAIN.serialize(t("Error occurred while executing command '%s' for source %s: %s", commandLine, source.toString(), String
+            this.logger.error(TextSerializers.PLAIN.serialize(t("Error occurred while executing command '%s' for source %s: %s", commandLine, source.toString(), String
                     .valueOf(thr.getMessage()))), thr);
         }
         return CommandResult.empty();
