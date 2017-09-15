@@ -33,11 +33,14 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.biome.BiomeTypes;
@@ -47,6 +50,7 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.listener.AllCauseListener;
 import org.spongepowered.common.event.listener.BeforeAfterCauseListener;
 import org.spongepowered.common.event.listener.CancelledListener;
+import org.spongepowered.common.event.listener.ContextValueCauseListener;
 import org.spongepowered.common.event.listener.CovariantGetterListener;
 import org.spongepowered.common.event.listener.DataHasListener;
 import org.spongepowered.common.event.listener.DataSupportsListener;
@@ -367,6 +371,34 @@ public class EventFilterTest {
 
         afterCauseListenerEx.handle(event2);
         Assert.assertTrue("Listener with @After with exclusions was not called when proper Cause was provided!", listener.afterCauseCalledEx);
+    }
+
+    @Test
+    public void testNamedCauseListener() throws Exception {
+        ContextValueCauseListener listener = new ContextValueCauseListener();
+        AnnotatedEventListener namedCauseListener = this.getListener(listener, "namedCauseListener", SubEvent.class, User.class);
+        AnnotatedEventListener namedCauseListenerInc = this.getListener(listener, "namedCauseListenerInclude", SubEvent.class, Object.class);
+        AnnotatedEventListener namedCauseListenerEx = this.getListener(listener, "namedCauseListenerExclude", SubEvent.class, Object.class);
+
+        Cause cause1 = Cause.of(EventContext.empty(), Text.of());
+        final EventContextKey mock = mock(EventContextKey.class);
+        when(mock.getName()).thenReturn("Owner");
+        Cause cause2 = Cause.of(EventContext.builder().add(mock, mock(User.class)).build(), Text.of());
+
+        SubEvent event1 = new SubEvent(cause1);
+        SubEvent event2 = new SubEvent(cause2);
+
+        namedCauseListener.handle(event1);
+        Assert.assertFalse("Listener with @ContextValue was called with improper parameter!", listener.namedCauseListenerCalled);
+
+        namedCauseListener.handle(event2);
+        Assert.assertTrue("Listener with @ContextValue was not called when proper Cause was provided!", listener.namedCauseListenerCalled);
+
+        namedCauseListenerInc.handle(event2);
+        Assert.assertTrue("Listener with @ContextValue with inclusions was not called when proper Cause was provided!", listener.namedCauseListenerCalledInc);
+
+        namedCauseListenerEx.handle(event2);
+        Assert.assertFalse("Listener with @ContextValue with exclusions was called when an improper Cause was provided!", listener.namedCauseListenerCalledEx);
     }
 
     @Test

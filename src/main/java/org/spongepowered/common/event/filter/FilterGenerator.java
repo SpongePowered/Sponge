@@ -51,6 +51,7 @@ import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.filter.cause.After;
 import org.spongepowered.api.event.filter.cause.All;
 import org.spongepowered.api.event.filter.cause.Before;
+import org.spongepowered.api.event.filter.cause.ContextValue;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -72,6 +73,7 @@ import org.spongepowered.common.event.filter.delegate.GetterFilterSourceDelegate
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.LastCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.NamedCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ParameterFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.ParameterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDelegate;
@@ -317,6 +319,7 @@ public class FilterGenerator {
         CAUSE_ALL(All.class),
         CAUSE_ROOT(Root.class),
         GETTER(Getter.class),
+        CONTEXT_NAMED(ContextValue.class),
         ;
 
         private final Class<? extends Annotation> cls;
@@ -343,6 +346,9 @@ public class FilterGenerator {
             }
             if (this == CAUSE_ROOT) {
                 return new RootCauseFilterSourceDelegate((Root) anno);
+            }
+            if (this == CONTEXT_NAMED) {
+                return new NamedCauseFilterSourceDelegate((ContextValue) anno);
             }
             if (this == GETTER) {
                 return new GetterFilterSourceDelegate((Getter) anno);
