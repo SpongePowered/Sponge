@@ -55,11 +55,6 @@ public class OptimizationCategory extends ConfigCategory {
     @Setting(value = "async-lighting", comment = "Runs lighting updates async.")
     private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
-    @Setting(value = "tile-entity-unload", comment = "If enabled, uses Forge's 1.12 TE unload patch to fix MC-117075.\n"
-            + "See https://github.com/MinecraftForge/MinecraftForge/pull/4281 for more info.\n"
-            + "Note: This may cause issues with some mods so backup before enabling.")
-    private boolean tileEntityUnload = false;
-
     @Setting(value = "panda-redstone", comment = "If enabled, uses Panda4494's Redstone implementation which improves performance.\n"
             + "See https://bugs.mojang.com/browse/MC-11193 for more information.\n"
             + "Note: This optimization has a few issues which is explained in the bug report. We are not responsible for any issues this may cause.")
@@ -97,10 +92,6 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useAsyncLighting() {
         return this.asyncLightingCategory.isEnabled();
-    }
-
-    public boolean useTileEntityUnload() {
-        return this.tileEntityUnload;
     }
 
     public boolean usePandaRedstone() {
