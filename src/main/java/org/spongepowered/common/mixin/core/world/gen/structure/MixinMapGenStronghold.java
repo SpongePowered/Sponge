@@ -22,32 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen;
+package org.spongepowered.common.mixin.core.world.gen.structure;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.MapGenBase;
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.gen.GenerationPopulator;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.gen.structure.MapGenStronghold;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.gen.ChunkBufferPrimer;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(MapGenBase.class)
-public abstract class MixinMapGenBase implements GenerationPopulator {
 
-    @Shadow public net.minecraft.world.World world;
+@Mixin(MapGenStronghold.class)
+public abstract class MixinMapGenStronghold extends MixinMapGenStructure {
 
-    @Shadow public abstract void generate(net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
-
-    @Override
-    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeVolume biomes) {
-        Preconditions.checkNotNull(world);
-        int x = buffer.getBlockMin().getX() / 16;
-        int z = buffer.getBlockMin().getZ() / 16;
-        generate((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
+    @Inject(method = "getNearestStructurePos", at = @At("HEAD"))
+    private void onGetNearestStructurePos(World worldIn, BlockPos pos, boolean findUnexplored, CallbackInfoReturnable<BlockPos> ci) {
+        if (this.world == null) {
+            this.world = worldIn;
+        }
     }
-
 }

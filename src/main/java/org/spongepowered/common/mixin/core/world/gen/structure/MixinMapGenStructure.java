@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.core.world.gen.MixinMapGenBase;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
@@ -49,7 +50,7 @@ import java.util.Random;
  * phase and the population phase of chunk creation.
  */
 @Mixin(MapGenStructure.class)
-public abstract class MixinMapGenStructure implements Populator {
+public abstract class MixinMapGenStructure extends MixinMapGenBase implements Populator {
 
     private static boolean generatingStructures = false;
 
