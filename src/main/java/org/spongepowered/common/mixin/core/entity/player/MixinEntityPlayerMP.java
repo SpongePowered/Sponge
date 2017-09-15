@@ -364,7 +364,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     @Overwrite
     public Entity changeDimension(int dimensionId) {
-        return EntityUtil.teleportPlayerToDimension(this, dimensionId);
+        return EntityUtil.teleportPlayerToDimension((EntityPlayerMP)(Object) this, dimensionId);
     }
 
     @Override
