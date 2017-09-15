@@ -658,9 +658,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     side = rayTraceResult.sideHit;
                 }
 
+                Sponge.getCauseStackManager().pushCause(player); 
                 if (player.getHeldItemMainhand() != null) {
                     if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, Optional.empty(), blockSnapshot).isCancelled()) {
                         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+                        Sponge.getCauseStackManager().popCause();
                         return;
                     }
                 }
@@ -670,6 +672,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 } else {
                     SpongeCommonEventFactory.callInteractBlockEventPrimary(player, EnumHand.MAIN_HAND);
                 }
+                Sponge.getCauseStackManager().popCause();
             }
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
