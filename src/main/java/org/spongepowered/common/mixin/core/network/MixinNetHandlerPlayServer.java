@@ -171,7 +171,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private final Deque<SPacketResourcePackSend> resourcePackRequests = new LinkedList<>();
 
     // Store the last block right-clicked
-    private boolean allowClientLocationUpdate = true;
     @Nullable private Item lastItem;
 
     @Override
@@ -225,11 +224,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Override
-    public void setAllowClientLocationUpdate(boolean flag) {
-        this.allowClientLocationUpdate = flag;
-    }
-
     /**
      * @param manager The player network connection
      * @param packet The original packet to be sent
@@ -237,9 +231,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      */
     @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void onSendPacket(NetworkManager manager, Packet<?> packet) {
-        if (!this.allowClientLocationUpdate && packet instanceof SPacketPlayerPosLook) {
-            return;
-        }
         packet = this.rewritePacket(packet);
         if (packet != null) {
             manager.sendPacket(packet);

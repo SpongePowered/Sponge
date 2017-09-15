@@ -36,8 +36,6 @@ public interface IMixinNetHandlerPlayServer {
 
     void resendLatestResourcePackRequest();
 
-    void setAllowClientLocationUpdate(boolean flag);
-
     void captureCurrentPlayerPosition();
 
     void setLastMoveLocation(Location<World> location);
