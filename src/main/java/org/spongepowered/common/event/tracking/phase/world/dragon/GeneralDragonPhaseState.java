@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.world.dragon;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
@@ -38,7 +38,7 @@ public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> 
     }
 
     @Override
-    public GeneralizedContext start() {
+    public GeneralizedContext createContext() {
         return new GeneralizedContext(this);
     }
 

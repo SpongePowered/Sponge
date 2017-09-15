@@ -104,7 +104,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.PlayerPhase;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
@@ -765,12 +765,14 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))
     private void onPlayerRemoveFromWorldFromDisconnect(WorldServer world, Entity player, EntityPlayerMP playerMP) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PhaseContext.start()
-                .source(playerMP)
-                .addCaptures()
-                .complete()
-        );
-        world.removeEntity(player);
+        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createContext().source(playerMP).addCaptures().buildAndSwitch()) {
+            causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PlayerPhase.State.PLAYER_LOGOUT.createContext()
+                    .source(playerMP)
+                    .addCaptures()
+                    .buildAndSwitch()
+            );
+            world.removeEntity(player);
+        }
         causeTracker.completePhase(PlayerPhase.State.PLAYER_LOGOUT);
     }
 

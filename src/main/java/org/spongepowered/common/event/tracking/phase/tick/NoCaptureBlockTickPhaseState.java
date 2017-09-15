@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
 

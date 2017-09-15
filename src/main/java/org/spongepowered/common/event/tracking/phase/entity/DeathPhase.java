@@ -41,7 +41,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
@@ -63,7 +62,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext start() {
+    public BasicEntityContext createContext() {
         return new BasicEntityContext(this);
     }
 

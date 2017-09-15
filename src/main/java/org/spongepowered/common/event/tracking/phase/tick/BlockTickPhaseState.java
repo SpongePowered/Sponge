@@ -58,8 +58,10 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BlockTickContext start() {
-        return new BlockTickContext(this);
+    public BlockTickContext createContext() {
+        return new BlockTickContext(this)
+                .addEntityCaptures()
+                .addBlockCaptures();
     }
 
     @Override

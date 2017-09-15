@@ -36,7 +36,7 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
-    public UnwindingPhaseContext start() {
+    public UnwindingPhaseContext createContext() {
         return null;
     }
 

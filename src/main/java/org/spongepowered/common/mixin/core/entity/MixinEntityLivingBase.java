@@ -273,7 +273,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     causeTracker.switchToPhase(EntityPhase.State.DEATH, context
                         .addCaptures()
                         .addEntityDropCaptures()
-                        .complete());
+                        .buildAndSwitch());
                 }
             } else {
                 this.tracksEntityDeaths = false;
@@ -523,7 +523,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                                         .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, source)
                                         .addCaptures()
                                         .addEntityDropCaptures()
-                                        .complete());
+                                        .buildAndSwitch());
                             }
                             this.onDeath(source);
                             if (enterDeathPhase) {

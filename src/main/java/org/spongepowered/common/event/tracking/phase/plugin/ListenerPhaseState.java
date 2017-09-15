@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext> {
 
     @Override
-    public ListenerPhaseContext start() {
+    public ListenerPhaseContext createContext() {
         return new ListenerPhaseContext(this);
     }
 

@@ -190,9 +190,10 @@ public final class CauseTracker {
 
     /**
      * Used when exception occurs during the main body of a phase.
-     * Avoids running the normal unwinding code
+     * Avoids running the normal unwinding code and always pops from
+     * the stack.
      */
-    public void abortCurrentPhase(Throwable t) {
+    private void abortCurrentPhase(Throwable t) {
         PhaseData data = this.stack.peek();
         this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
 
@@ -200,9 +201,16 @@ public final class CauseTracker {
         // Therefore, we skip running the normal unwind functions that completePhase calls,
         // and simply op the phase from the stack.
         this.stack.pop();
+    }    /**
+     * Used when exception occurs during the main body of a phase.
+     * Avoids running the normal unwinding code
+     */
+    public void printExceptionFromPhase(Throwable t) {
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", t);
+
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unused", "try"})
     public void completePhase(IPhaseState<?> prevState) {
         final PhaseData currentPhaseData = this.stack.peek();
         final IPhaseState<?> state = currentPhaseData.state;
@@ -234,31 +242,24 @@ public final class CauseTracker {
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
         final PhaseContext<?> context = currentPhaseData.context;
-        try {
-            if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
-                // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
-                switchToPhase(GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
-                        .addCaptures()
-                        .addEntityDropCaptures()
-                        .complete());
-            }
+        try (final UnwindingPhaseContext unwinding = needsPost(state, phase) ?
+                UnwindingPhaseContext.unwind(state, context) : null) { // Since the if statement checks for a post, this will automatically close the post anyways
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
                 this.currentProcessingState = currentPhaseData;
                 ((IPhaseState) state).unwind(context);
                 this.currentProcessingState = null;
             } catch (Exception | NoClassDefFoundError e) {
                 printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
-            }
-            if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
-                try {
-                    completePhase(GeneralPhase.Post.UNWINDING);
-                } catch (Exception | NoClassDefFoundError e) {
-                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
-                }
+                this.currentProcessingState = null;
             }
         } catch (Exception | NoClassDefFoundError e) {
             printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
+            this.currentProcessingState = null;
         }
+    }
+
+    private boolean needsPost(IPhaseState<?> state, TrackingPhase phase) {
+        return state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state);
     }
 
     private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
@@ -349,7 +350,7 @@ public final class CauseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, Exception e) {
+    public void printMessageWithCaughtException(String header, String subHeader, Throwable e) {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
     }
 

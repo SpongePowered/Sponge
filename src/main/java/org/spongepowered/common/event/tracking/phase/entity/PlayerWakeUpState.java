@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
@@ -33,7 +32,7 @@ final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext start() {
+    public BasicEntityContext createContext() {
         return new BasicEntityContext(this);
     }
 

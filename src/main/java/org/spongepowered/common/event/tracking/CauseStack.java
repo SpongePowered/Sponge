@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  */
 final class CauseStack {
 
-    private static final PhaseContext<?> EMPTY = PhaseContext.start().complete();
+    private static final PhaseContext<?> EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
     static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 

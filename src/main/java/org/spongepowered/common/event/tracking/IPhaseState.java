@@ -53,7 +53,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     TrackingPhase getPhase();
 
-    C start();
+    C createContext();
 
     default boolean canSwitchTo(IPhaseState<?> state) {
         return false;

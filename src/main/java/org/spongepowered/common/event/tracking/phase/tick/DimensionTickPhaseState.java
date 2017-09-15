@@ -47,8 +47,11 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
-    public DimensionContext start() {
-        return new DimensionContext();
+    public DimensionContext createContext() {
+        return new DimensionContext()
+                .addBlockCaptures()
+                .addEntityCaptures()
+                .addEntityDropCaptures();
     }
 
     @Override

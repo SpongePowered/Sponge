@@ -100,6 +100,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -374,22 +375,19 @@ public final class EntityUtil {
         }
 
         adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+             BasicEntityContext context = EntityPhase.State.CHANGING_DIMENSION.createContext().addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
+                     .addBlockCaptures()
+                     .addEntityCaptures()
+                     .buildAndSwitch()
+            ) {
             Sponge.getCauseStackManager().pushCause(teleporter);
             Sponge.getCauseStackManager().pushCause(mixinEntity);
-            final PhaseContext<?> context = PhaseContext.start();
-            // unused, to be removed and re-located when phase context is cleaned up
-            //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_WORLD, fromWorld))
-            //.add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, teleporter))
-            //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_TRANSFORM, fromTransform))
-            context.addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
-                    .addBlockCaptures()
-                    .addEntityCaptures();
+
             Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
-            context.complete();
+            context.buildAndSwitch();
             final CauseTracker causeTracker = CauseTracker.getInstance();
-            causeTracker.switchToPhase(EntityPhase.State.CHANGING_DIMENSION, context);
-    
+
     
             if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
                 fromWorld.profiler.startSection("placing");
@@ -412,7 +410,7 @@ public final class EntityUtil {
     
             if (event.isCancelled()) {
                 // Mods may cancel this event in order to run custom transfer logic
-                // We need to make sure to only restore the location if 
+                // We need to make sure to only restore the location if
                 if (!portalExitTransform.getExtent().getUniqueId().equals(mixinEntity.getLocation().getExtent().getUniqueId())) {
                     // update cache
                     ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));

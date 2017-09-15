@@ -35,6 +35,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -47,7 +48,7 @@ public class PlayerPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState<?> PLAYER_LOGOUT = new PlayerPhaseState();
+        public static final IPhaseState<GeneralizedContext> PLAYER_LOGOUT = new PlayerPhaseState();
     }
 
     static final class PlayerPhaseState implements IPhaseState<GeneralizedContext> {
@@ -61,7 +62,7 @@ public class PlayerPhase extends TrackingPhase {
         }
 
         @Override
-        public GeneralizedContext start() {
+        public GeneralizedContext createContext() {
             return new GeneralizedContext(this);
         }
 

@@ -889,7 +889,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
-        return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
+        return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
@@ -1079,7 +1079,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             final PhaseContext<?> context = PhaseContext.start()
                     .addCaptures()
                     .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag);
-            context.complete();
+            context.buildAndSwitch();
             causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
         }
         final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
@@ -1196,7 +1196,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     .addEntityDropCaptures()
                     .addBlockCaptures();
             phaseContext.addExtra("Explosion", explosion);
-            phaseContext.complete();
+            phaseContext.buildAndSwitch();
             causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
         }
         final Explosion mcExplosion;
@@ -1630,7 +1630,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
             final PhaseData currentPhaseData = CauseTracker.getInstance().getCurrentPhaseData();
             currentPhaseData.state.getPhase().appendContextPreExplosion(phaseContext, currentPhaseData);
-            phaseContext.complete();
+            phaseContext.buildAndSwitch();
             CauseTracker.getInstance().switchToPhase(GeneralPhase.State.EXPLOSION, phaseContext);
         }
         // Sponge End

@@ -58,7 +58,7 @@ import javax.annotation.Nullable;
 final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
-    public CommandPhaseContext start() {
+    public CommandPhaseContext createContext() {
         return new CommandPhaseContext(this);
     }
 

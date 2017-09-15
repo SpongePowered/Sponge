@@ -62,10 +62,10 @@ import javax.annotation.Nullable;
  * the context of which a {@link IPhaseState} is being completed with.
  */
 @SuppressWarnings("unchecked")
-public class PhaseContext<P extends PhaseContext<P>> {
+public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     private final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
-    private boolean isCompleted = false;
+    protected boolean isCompleted = false;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;
     @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
@@ -85,10 +85,6 @@ public class PhaseContext<P extends PhaseContext<P>> {
 
     private Object source;
     private PluginContainer activeContainer;
-
-    public static DefaultPhaseContext start() {
-        return new DefaultPhaseContext(null);
-    }
 
     public P addExtra(String key, Object val) {
         this.extraContext.put(key, val);
@@ -233,8 +229,9 @@ public class PhaseContext<P extends PhaseContext<P>> {
         return (P) this;
     }
 
-    public P complete() {
+    public P buildAndSwitch() {
         this.isCompleted = true;
+        CauseTracker.getInstance().switchToPhase(this.state, this);
         return (P) this;
     }
 
@@ -420,6 +417,11 @@ public class PhaseContext<P extends PhaseContext<P>> {
                 .toString();
     }
 
+    public P markEmpty() {
+        this.isCompleted = true;
+        return (P) this;
+    }
+
     public P activeContainer(PluginContainer plugin) {
         this.activeContainer = plugin;
         return (P) this;
@@ -427,6 +429,11 @@ public class PhaseContext<P extends PhaseContext<P>> {
 
     public PluginContainer getActiveContainer() {
         return this.activeContainer;
+    }
+
+    @Override
+    public void close() { // Should never throw an exception
+        CauseTracker.getInstance().completePhase(this.state);
     }
 
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {

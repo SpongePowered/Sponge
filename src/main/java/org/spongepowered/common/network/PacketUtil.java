@@ -63,9 +63,11 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -74,13 +76,14 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 
 public class PacketUtil {
+    @SuppressWarnings("unchecked")
+    private static final PhaseContext<?> EMPTY = new BasicPacketContext((PacketState) PacketPhase.General.INVALID).markEmpty();
 
-    private static final PhaseContext<?> EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
     private static boolean lastTryBlockPacketItemResult = true;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "unused"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (CauseTracker.ENABLED && netHandler instanceof NetHandlerPlayServer) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -131,26 +134,26 @@ public class PacketUtil {
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
-                PhaseContext<?> context = EMPTY_INVALID;
+                PhaseContext<?> context = EMPTY;
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                    context = PhaseContext.start()
+                    context = packetState.createContext()
                             .source(packetPlayer)
                             .addExtra(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer)
                             .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
                             .addExtra(InternalNamedCauses.Packet.CURSOR, cursor)
                             .addExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative);
 
-                        TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
-                        context.owner((Player) packetPlayer);
-                        context.notifier((Player) packetPlayer);
-                        context.complete();
-                    } else {
-                        packetState = PacketPhase.General.INVALID;
-                    }
-                    causeTracker.switchToPhase(packetState, context, () -> {
-                        packetIn.processPacket(netHandler);
-                        return null;
-                    });
+                    TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
+                    context.owner((Player) packetPlayer);
+                    context.notifier((Player) packetPlayer);
+                    context.buildAndSwitch();
+                } else {
+                    packetState = PacketPhase.General.INVALID;
+                }
+                try (PhaseContext<?> packetContext = context.buildAndSwitch () ) {
+                    packetIn.processPacket(netHandler);
+
+                }
 
                     if (packetIn instanceof CPacketClientStatus) {
                         // update the reference of player

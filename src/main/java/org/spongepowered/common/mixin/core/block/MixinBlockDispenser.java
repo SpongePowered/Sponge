@@ -107,7 +107,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
                     .ifPresent(phaseContext::notifier);
 
             CauseTracker.getInstance().switchToPhase(BlockPhase.State.DISPENSE, phaseContext
-                    .complete());
+                    .buildAndSwitch());
         }
     }
 

@@ -33,8 +33,11 @@ import java.util.Optional;
 
 public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPhaseContext> {
 
-    static PhaseContext<?> unwind(IPhaseState<?> state, PhaseContext<?> context) {
-        return new UnwindingPhaseContext(state, context);
+    static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
+        return new UnwindingPhaseContext(state, context)
+                .addCaptures()
+                .addEntityDropCaptures()
+                .buildAndSwitch();
     }
 
     private PhaseContext<?> unwindingContext;

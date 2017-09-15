@@ -44,7 +44,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.*;
-import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -62,7 +62,7 @@ import javax.annotation.Nullable;
 public final class GeneralPhase extends TrackingPhase {
 
     public static final class State {
-        public static final IPhaseState<?> COMMAND = new CommandState();
+        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
         public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
         public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
         public static final IPhaseState<?> TILE_ENTITY_UNLOAD = new TileEntityUnloadState();

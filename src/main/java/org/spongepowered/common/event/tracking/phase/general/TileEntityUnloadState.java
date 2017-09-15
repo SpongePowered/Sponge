@@ -26,8 +26,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 
 public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
 
@@ -37,7 +36,7 @@ public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
     }
 
     @Override
-    public GeneralizedContext start() {
+    public GeneralizedContext createContext() {
         return new GeneralizedContext(this);
     }
 

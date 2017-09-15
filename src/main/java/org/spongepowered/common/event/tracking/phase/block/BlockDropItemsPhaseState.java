@@ -37,9 +37,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
@@ -50,6 +49,13 @@ import java.util.stream.Collectors;
 final class BlockDropItemsPhaseState extends BlockPhaseState {
 
     BlockDropItemsPhaseState() {
+    }
+
+    @Override
+    public GeneralizedContext createContext() {
+        return super.createContext()
+                .addBlockCaptures()
+                .addEntityCaptures();
     }
 
     @SuppressWarnings("unchecked")

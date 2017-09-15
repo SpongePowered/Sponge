@@ -25,8 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.GeneralizedContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 
 final class CompletePhase extends GeneralState<GeneralizedContext> {
     @Override
@@ -35,7 +34,7 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
     }
 
     @Override
-    public GeneralizedContext start() {
+    public GeneralizedContext createContext() {
         return new GeneralizedContext(this);
     }
 
