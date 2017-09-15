@@ -55,7 +55,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     C start();
 
-    default boolean canSwitchTo(IPhaseState state) {
+    default boolean canSwitchTo(IPhaseState<?> state) {
         return false;
     }
 

@@ -33,7 +33,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-final class InteractionPacketState extends BasicPacketState {
+final class InteractionPacketState extends BasicPacketState<BasicPacketContext> {
 
 
     @Override
@@ -63,7 +63,12 @@ final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public BasicPacketContext start() {
+        return new BasicPacketContext(this);
+    }
+
+    @Override
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return state == BlockPhase.State.BLOCK_DECAY || state == BlockPhase.State.BLOCK_DROP_ITEMS;
     }
 

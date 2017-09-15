@@ -62,7 +62,7 @@ import javax.annotation.Nullable;
  * the context of which a {@link IPhaseState} is being completed with.
  */
 @SuppressWarnings("unchecked")
-public class PhaseContext<P extends PhaseContext> {
+public class PhaseContext<P extends PhaseContext<P>> {
 
     private final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     private boolean isCompleted = false;

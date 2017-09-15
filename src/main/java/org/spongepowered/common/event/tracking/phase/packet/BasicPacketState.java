@@ -53,7 +53,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public class BasicPacketState<P extends PacketContext<P>> implements IPhaseState<P> {
+public abstract class BasicPacketState<P extends PacketContext<P>> implements IPhaseState<P> {
 
     private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
 
@@ -82,11 +82,6 @@ public class BasicPacketState<P extends PacketContext<P>> implements IPhaseState
     @Override
     public final TrackingPhase getPhase() {
         return TrackingPhases.PACKET;
-    }
-
-    @Override
-    public P start() {
-        return new BasicPacketContext(this);
     }
 
     public boolean matches(int packetState) {

@@ -50,7 +50,7 @@ import java.util.Set;
  */
 class GeneralGenerationPhaseState implements IPhaseState {
 
-    private Set<IPhaseState> compatibleStates = new HashSet<>();
+    private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
     private final String id;
 
@@ -58,7 +58,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
         this.id = id;
     }
 
-    final GeneralGenerationPhaseState addCompatibleState(IPhaseState state) {
+    final GeneralGenerationPhaseState addCompatibleState(IPhaseState<?> state) {
         if (this.isBaked) {
             throw new IllegalStateException("This state is already baked! " + this.id);
         }
@@ -81,7 +81,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
     }
 
     @Override
-    public final boolean canSwitchTo(IPhaseState state) {
+    public final boolean canSwitchTo(IPhaseState<?> state) {
         return this.compatibleStates.contains(state);
     }
 

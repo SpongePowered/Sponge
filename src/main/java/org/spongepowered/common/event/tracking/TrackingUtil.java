@@ -265,10 +265,10 @@ public final class TrackingUtil {
     
             // We have to associate any notifiers in case of scheduled block updates from other sources
             final PhaseData current = causeTracker.getCurrentPhaseData();
-            final IPhaseState currentState = current.state;
+            final IPhaseState<?> currentState = current.state;
             currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
             // Now actually switch to the new phase
-            IPhaseState phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+            IPhaseState<?> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
     
             causeTracker.switchToPhase(phase, phaseContext.complete());
             block.updateTick(minecraftWorld, pos, state, random);
@@ -304,10 +304,10 @@ public final class TrackingUtil {
     
             // We have to associate any notifiers in case of scheduled block updates from other sources
             final PhaseData current = causeTracker.getCurrentPhaseData();
-            final IPhaseState currentState = current.state;
+            final IPhaseState<?> currentState = current.state;
             currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
             // Now actually switch to the new phase
-            IPhaseState phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+            IPhaseState<?> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
             causeTracker.switchToPhase(phase, phaseContext.complete());
             block.randomTick(minecraftWorld, pos, state, random);
             causeTracker.completePhase(phase);
@@ -361,7 +361,7 @@ public final class TrackingUtil {
             phaseContext.notifier(blockEvent.getSourceUser());
         }
 
-        IPhaseState phase = blockEvent.getCaptureBlocks() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
+        IPhaseState<?> phase = blockEvent.getCaptureBlocks() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
         causeTracker.switchToPhase(phase, phaseContext.complete());
         boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase(phase);
@@ -370,7 +370,7 @@ public final class TrackingUtil {
 
     public static void performBlockDrop(Block block, IMixinWorldServer mixinWorld, BlockPos pos, IBlockState state, float chance, int fortune) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        final IPhaseState currentState = causeTracker.getCurrentState();
+        final IPhaseState<?> currentState = causeTracker.getCurrentState();
         final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
         if (shouldEnterBlockDropPhase) {
             BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4);
@@ -395,7 +395,7 @@ public final class TrackingUtil {
     }
 
     static boolean trackBlockChange(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
-                                    PhaseContext<?> phaseContext, IPhaseState phaseState) {
+                                    PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
         if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
@@ -431,7 +431,7 @@ public final class TrackingUtil {
         return true;
     }
 
-    private static void associateBlockChangeWithSnapshot(IPhaseState phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, List<BlockSnapshot> capturedSnapshots) {
+    private static void associateBlockChangeWithSnapshot(IPhaseState<?> phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, List<BlockSnapshot> capturedSnapshots) {
         Block originalBlock = currentState.getBlock();
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
             if (newBlock == Blocks.AIR) {
@@ -511,7 +511,7 @@ public final class TrackingUtil {
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked"})
-    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState state, PhaseContext<?> context) {
+    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return false;
         }
@@ -658,7 +658,8 @@ public final class TrackingUtil {
         }
     }
 
-    public static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState phaseState,
+    @SuppressWarnings("rawtypes")
+    public static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState<?> phaseState,
                                                 PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
@@ -728,14 +729,14 @@ public final class TrackingUtil {
 
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             if (peek.state == GeneralPhase.Post.UNWINDING) {
-                peek.state.unwind(peek.context);
+                ((IPhaseState) peek.state).unwind(peek.context);
             }
         }
         return noCancelledTransactions;
     }
 
     public static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, SpongeBlockSnapshot newBlockSnapshot,
-                                                      PhaseContext<?> phaseContext, IPhaseState phaseState) {
+                                                      PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
                 .map(EntityUtil::fromNative)
@@ -764,7 +765,7 @@ public final class TrackingUtil {
     }
 
     public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot,
-                                                  PhaseContext<?> phaseContext, IPhaseState state) {
+                                                  PhaseContext<?> phaseContext, IPhaseState<?> state) {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
                 .map(ItemDropData::getStack)
@@ -820,7 +821,7 @@ public final class TrackingUtil {
     }
 
     public static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, SpongeBlockSnapshot newBlockSnapshot,
-                                             PhaseContext<?> phaseContext, IPhaseState phaseState) {
+                                             PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
             .map(EntityUtil::fromNative)

@@ -44,11 +44,21 @@ import javax.annotation.Nullable;
  * A specialized phase for forge event listeners during pre tick, may need to do the same
  * if SpongeAPI adds pre tick events.
  */
-abstract class ListenerPhaseState extends PluginPhaseState {
+abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext> {
+
+    @Override
+    public ListenerPhaseContext start() {
+        return new ListenerPhaseContext(this);
+    }
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
         return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
+    }
+
+    @Override
+    public void unwind(ListenerPhaseContext phaseContext) {
+
     }
 
     @Override

@@ -30,7 +30,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.Objects;
 
-public class StopSleepingPacketState extends BasicPacketState {
+public class StopSleepingPacketState extends BasicPacketState<BasicPacketContext> {
 
     StopSleepingPacketState() {
     }
@@ -43,5 +43,10 @@ public class StopSleepingPacketState extends BasicPacketState {
     @Override
     public String toString() {
         return Objects.toString(this);
+    }
+
+    @Override
+    public BasicPacketContext start() {
+        return new BasicPacketContext(this);
     }
 }

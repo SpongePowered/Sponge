@@ -83,14 +83,14 @@ public abstract class TrackingPhase {
      *     contains the root cause for the state
      * @param postContext The post dispatch context captures containing any
      */
-    public void postDispatch(IPhaseState unwindingState, PhaseContext<?> unwindingContext, PhaseContext<?> postContext) {
+    public void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, PhaseContext<?> postContext) {
     }
 
-    public void processPostItemSpawns(IPhaseState unwindingState, ArrayList<Entity> items) {
+    public void processPostItemSpawns(IPhaseState<?> unwindingState, ArrayList<Entity> items) {
         TrackingUtil.splitAndSpawnEntities(items);
     }
 
-    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext<?> phaseContext,
+    public void processPostEntitySpawns(IPhaseState<?> unwindingState, PhaseContext<?> phaseContext,
             ArrayList<Entity> entities) {
         final User creator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
         TrackingUtil.splitAndSpawnEntities(
@@ -106,7 +106,7 @@ public abstract class TrackingPhase {
     // Default methods that are basic qualifiers, leaving up to the phase and state to decide
     // whether they perform capturing.
 
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
+    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         return true;
     }
 
@@ -115,64 +115,64 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public boolean allowEntitySpawns(IPhaseState currentState) {
+    public boolean allowEntitySpawns(IPhaseState<?> currentState) {
         return true;
     }
 
-    public boolean ignoresBlockEvent(IPhaseState phaseState) {
+    public boolean ignoresBlockEvent(IPhaseState<?> phaseState) {
         return false;
     }
 
-    public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
+    public boolean ignoresScheduledUpdates(IPhaseState<?> phaseState) {
         return false;
     }
 
-    public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext<?> context) {
+    public boolean alreadyCapturingBlockTicks(IPhaseState<?> phaseState, PhaseContext<?> context) {
         return false;
     }
 
-    public boolean alreadyCapturingEntitySpawns(IPhaseState state) {
+    public boolean alreadyCapturingEntitySpawns(IPhaseState<?> state) {
         return false;
     }
 
-    public boolean alreadyCapturingEntityTicks(IPhaseState state) {
+    public boolean alreadyCapturingEntityTicks(IPhaseState<?> state) {
         return false;
     }
 
-    public boolean alreadyCapturingTileTicks(IPhaseState state) {
+    public boolean alreadyCapturingTileTicks(IPhaseState<?> state) {
         return false;
     }
 
-    public boolean requiresPost(IPhaseState state) {
+    public boolean requiresPost(IPhaseState<?> state) {
         return true;
     }
 
-    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return false;
     }
 
-    public boolean ignoresItemPreMerging(IPhaseState currentState) {
+    public boolean ignoresItemPreMerging(IPhaseState<?> currentState) {
         return false;
     }
 
-    public boolean isWorldGeneration(IPhaseState state) {
+    public boolean isWorldGeneration(IPhaseState<?> state) {
         return false;
     }
 
-    public boolean doesCaptureEntityDrops(IPhaseState currentState) {
+    public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
         return false;
     }
 
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext<?> context) {
+    public void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
 
     }
 
 
-    public boolean isRestoring(IPhaseState state, PhaseContext<?> context, int updateFlag) {
+    public boolean isRestoring(IPhaseState<?> state, PhaseContext<?> context, int updateFlag) {
         return false;
     }
 
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext<?> context,
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState<?> state, PhaseContext<?> context,
             CauseTracker causeTracker) {
 
     }
@@ -193,7 +193,7 @@ public abstract class TrackingPhase {
      * @param context
      * @param newContext
      */
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState<?> currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
         final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -222,7 +222,7 @@ public abstract class TrackingPhase {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());
@@ -247,28 +247,28 @@ public abstract class TrackingPhase {
                 .toString();
     }
 
-    public Optional<DamageSource> createDestructionDamageSource(IPhaseState state, PhaseContext<?> context, net.minecraft.entity.Entity entity) {
+    public Optional<DamageSource> createDestructionDamageSource(IPhaseState<?> state, PhaseContext<?> context, net.minecraft.entity.Entity entity) {
         return Optional.empty();
     }
 
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
 
-    public boolean isTicking(IPhaseState state) {
+    public boolean isTicking(IPhaseState<?> state) {
         return false;
     }
 
-    public boolean handlesOwnPhaseCompletion(IPhaseState state) {
+    public boolean handlesOwnPhaseCompletion(IPhaseState<?> state) {
         return false;
     }
 
-    public boolean requiresDimensionTransferBetweenWorlds(IPhaseState state) {
+    public boolean requiresDimensionTransferBetweenWorlds(IPhaseState<?> state) {
         return false;
     }
 

@@ -59,13 +59,13 @@ public final class GenerationPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState CHUNK_LOADING = new GeneralGenerationPhaseState("CHUNK_LOADING").bake();
+        public static final IPhaseState<?> CHUNK_LOADING = new GeneralGenerationPhaseState("CHUNK_LOADING").bake();
 
-        public static final IPhaseState WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState("WORLD_SPAWNER_SPAWNING").bake();
+        public static final IPhaseState<?> WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState("WORLD_SPAWNER_SPAWNING").bake();
 
-        public static final IPhaseState POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
+        public static final IPhaseState<?> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
-        public static final IPhaseState TERRAIN_GENERATION = new GeneralGenerationPhaseState("TERRAIN_GENERATION");
+        public static final IPhaseState<?> TERRAIN_GENERATION = new GeneralGenerationPhaseState("TERRAIN_GENERATION");
 
         static {
             ((GeneralGenerationPhaseState) POPULATOR_RUNNING)
@@ -99,17 +99,17 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
+    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         return false;
     }
 
     @Override
-    public boolean ignoresBlockEvent(IPhaseState phaseState) {
+    public boolean ignoresBlockEvent(IPhaseState<?> phaseState) {
         return true;
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return true;
     }
 
@@ -119,12 +119,12 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState<?> currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX,
+    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
                                         int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
@@ -141,7 +141,7 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean isWorldGeneration(IPhaseState state) {
+    public boolean isWorldGeneration(IPhaseState<?> state) {
         return true;
     }
 

@@ -29,7 +29,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
-public class PluginPhaseState implements IPhaseState {
+public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> implements IPhaseState<P> {
 
     @Override
     public final TrackingPhase getPhase() {

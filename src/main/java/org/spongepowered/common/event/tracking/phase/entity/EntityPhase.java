@@ -35,18 +35,18 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 public final class EntityPhase extends TrackingPhase {
 
     public static final class State {
-        public static final IPhaseState DEATH = new DeathPhase();
-        public static final IPhaseState DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState LEAVING_DIMENSION = new LeavingDimensionState();
-        public static final IPhaseState PLAYER_WAKE_UP = new PlayerWakeUpState();
+        public static final IPhaseState<?> DEATH = new DeathPhase();
+        public static final IPhaseState<?> DEATH_UPDATE = new DeathUpdateState();
+        public static final IPhaseState<?> CHANGING_DIMENSION = new ChangingToDimensionState();
+        public static final IPhaseState<?> LEAVING_DIMENSION = new LeavingDimensionState();
+        public static final IPhaseState<?> PLAYER_WAKE_UP = new PlayerWakeUpState();
 
         private State() {
         }
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext<?> context, Entity entity, int chunkX,
+    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
                                         int chunkZ) {
         if (phaseState == State.CHANGING_DIMENSION) {
             final WorldServer worldServer = context.getRequiredExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class);
@@ -57,7 +57,7 @@ public final class EntityPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(IPhaseState currentState) {
+    public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
         return true;
     }
 

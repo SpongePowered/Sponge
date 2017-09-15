@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-public class BasicPacketContext<B extends BasicPacketContext<B>> extends PacketContext<B> {
+public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
-    public BasicPacketContext(BasicPacketState<? extends B> state) {
+    public BasicPacketContext(BasicPacketState<? extends BasicPacketContext> state) {
         super(state);
     }
 }

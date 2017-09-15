@@ -55,7 +55,17 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CustomExplosionState extends PluginPhaseState {
+final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
+    @Override
+    public ExplosionContext start() {
+        return new ExplosionContext();
+    }
+
+    @Override
+    public void unwind(ExplosionContext phaseContext) {
+
+    }
+
     @Override
     public boolean canSwitchTo(IPhaseState state) {
         return true;

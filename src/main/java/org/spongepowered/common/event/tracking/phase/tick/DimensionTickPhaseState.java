@@ -52,7 +52,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return super.canSwitchTo(state) || state.getPhase() == TrackingPhases.DRAGON;
     }
 

@@ -38,7 +38,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 
-abstract class GeneralState<G extends GeneralPhaseContext<G>> implements IPhaseState<G> {
+abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G> {
 
     @Override
     public abstract void unwind(G context);
@@ -49,7 +49,7 @@ abstract class GeneralState<G extends GeneralPhaseContext<G>> implements IPhaseS
     }
 
     /**
-     * A duplicate of {@link TrackingPhase#spawnEntityOrCapture(IPhaseState, PhaseContext<?>, Entity, int, int)}
+     * A duplicate of {@link TrackingPhase#spawnEntityOrCapture(IPhaseState, PhaseContext, Entity, int, int)}
      * such that the general states will not know what to do for entity spawns. Eventually, this is going to be centralized
      * so that it's not always delegated between the phases and phase states.
      *

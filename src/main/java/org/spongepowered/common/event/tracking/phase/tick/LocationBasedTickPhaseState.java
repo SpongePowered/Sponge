@@ -83,7 +83,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
 
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return super.canSwitchTo(state) || state == GenerationPhase.State.CHUNK_LOADING;
     }
 

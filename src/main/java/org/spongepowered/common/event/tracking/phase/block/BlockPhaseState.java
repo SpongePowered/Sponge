@@ -34,7 +34,7 @@ public class BlockPhaseState implements IPhaseState {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return false;
     }
 
