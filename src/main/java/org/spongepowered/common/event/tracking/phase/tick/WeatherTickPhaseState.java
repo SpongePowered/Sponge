@@ -46,10 +46,10 @@ class WeatherTickPhaseState extends TickPhaseState {
     @Override
     public void processPostTick(PhaseContext phaseContext) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
                 final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
                     EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
@@ -64,11 +64,11 @@ class WeatherTickPhaseState extends TickPhaseState {
     @Override
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             final ArrayList<Entity> capturedEntities = new ArrayList<>();
             capturedEntities.add(entity);
             final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), capturedEntities);
             SpongeImpl.postEvent(spawnEntityEvent);
             if (!spawnEntityEvent.isCancelled()) {
                 for (Entity anEntity : spawnEntityEvent.getEntities()) {

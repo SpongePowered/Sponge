@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 @Singleton
 public class SpongeCauseStackManager implements CauseStackManager {
 
@@ -56,8 +58,8 @@ public class SpongeCauseStackManager implements CauseStackManager {
     private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
 
     private int min_depth = 0;
-    private Cause cached_cause;
-    private EventContext cached_ctx;
+    @Nullable private Cause cached_cause;
+    @Nullable private EventContext cached_ctx;
 
     @Inject
     private SpongeCauseStackManager() { }
@@ -275,8 +277,8 @@ public class SpongeCauseStackManager implements CauseStackManager {
     public static class CauseStackFrameImpl implements StackFrame {
 
         // lazy loaded
-        private Map<EventContextKey<?>, Object> stored_ctx_values;
-        private Set<EventContextKey<?>> new_ctx_values;
+        @Nullable private Map<EventContextKey<?>, Object> stored_ctx_values;
+        @Nullable private Set<EventContextKey<?>> new_ctx_values;
         public int old_min_depth;
 
         public Exception stack_debug = null;
@@ -321,6 +323,38 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 this.new_ctx_values = new HashSet<>();
             }
             this.new_ctx_values.add(key);
+        }
+
+        @Override
+        public Cause getCurrentCause() {
+            return Sponge.getCauseStackManager().getCurrentCause();
+        }
+
+        @Override
+        public EventContext getCurrentContext() {
+            return Sponge.getCauseStackManager().getCurrentContext();
+        }
+
+        @Override
+        public StackFrame pushCause(Object obj) {
+            Sponge.getCauseStackManager().pushCause(obj);
+            return this;
+        }
+
+        @Override
+        public Object popCause() {
+            return Sponge.getCauseStackManager().popCause();
+        }
+
+        @Override
+        public <T> StackFrame addContext(EventContextKey<T> key, T value) {
+            Sponge.getCauseStackManager().addContext(key, value);
+            return this;
+        }
+
+        @Override
+        public <T> Optional<T> removeContext(EventContextKey<T> key) {
+            return Sponge.getCauseStackManager().removeContext(key);
         }
 
         @Override

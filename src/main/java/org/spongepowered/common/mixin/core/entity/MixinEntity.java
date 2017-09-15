@@ -325,10 +325,10 @@ public abstract class MixinEntity implements IMixinEntity {
     public boolean dismountRidingEntity(DismountType type) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(this);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.DISMOUNT_TYPE, type);
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeImpl.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(Sponge.getCauseStackManager().getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
+                    createRideEntityEventDismount(frame.getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
                     return false;
                 }
             }
@@ -476,8 +476,8 @@ public abstract class MixinEntity implements IMixinEntity {
         // TODO Add a 'Move' plugin phase or just keep it under Teleport?
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
-            if (!Sponge.getCauseStackManager().getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
+            if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
+                frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
             }
 
             // TODO These methods need a Cause (maybe wait till Cause PR)

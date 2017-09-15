@@ -86,14 +86,14 @@ final class ExplosionState extends GeneralState {
         final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack();
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
-            Sponge.getCauseStackManager().pushCause(explosion);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
+            frame.pushCause(explosion);
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
             context.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
@@ -146,12 +146,12 @@ final class ExplosionState extends GeneralState {
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                 if (mainEvent != null) {
-                    Sponge.getCauseStackManager().pushCause(mainEvent);
+                    frame.pushCause(mainEvent);
                 }
             }
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
     
-            final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(Sponge.getCauseStackManager().getCurrentCause(), explosion, transactions);
+            final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(frame.getCurrentCause(), explosion, transactions);
             if (postEvent == null) { // Means that we have had no actual block changes apparently?
                 return;
             }

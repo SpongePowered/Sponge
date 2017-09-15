@@ -75,17 +75,17 @@ final class CustomExplosionState extends PluginPhaseState {
     void processPostTick(PhaseContext context) {
         final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
-            Sponge.getCauseStackManager().pushCause(explosion);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
+            frame.pushCause(explosion);
             if (context.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+                frame.addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
             }
             if (context.getOwner().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+                frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(
-                            blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
+                            blocks -> processBlockCaptures(blocks, explosion, frame.getCurrentCause(), context));
             context.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
@@ -121,10 +121,10 @@ final class CustomExplosionState extends PluginPhaseState {
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if(context.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+                frame.addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
             }
             if(context.getOwner().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+                frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             try {
                 this.getPhase().associateAdditionalCauses(this, context);
@@ -140,7 +140,7 @@ final class CustomExplosionState extends PluginPhaseState {
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                 if (mainEvent != null) {
-                    Sponge.getCauseStackManager().pushCause(mainEvent);
+                    frame.pushCause(mainEvent);
                 }
             }
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];

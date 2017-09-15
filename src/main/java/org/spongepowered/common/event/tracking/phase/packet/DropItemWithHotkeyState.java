@@ -63,9 +63,9 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            Sponge.getCauseStackManager().pushCause(openContainer);
-            Sponge.getCauseStackManager().pushCause(playerMP);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            frame.pushCause(openContainer);
+            frame.pushCause(playerMP);
             for (Entity currentEntity : capturedEntities) {
                 currentEntity.setCreator(playerMP.getUniqueID());   
             }
@@ -73,9 +73,9 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding
             // 'control')
             ClickInventoryEvent.Drop event = usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
-                    ? SpongeEventFactory.createClickInventoryEventDropSingle(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                    ? SpongeEventFactory.createClickInventoryEventDropSingle(frame.getCurrentCause(), transaction,
                             capturedEntities, openContainer, slotTransactions)
-                    : SpongeEventFactory.createClickInventoryEventDropFull(Sponge.getCauseStackManager().getCurrentCause(), transaction, capturedEntities,
+                    : SpongeEventFactory.createClickInventoryEventDropFull(frame.getCurrentCause(), transaction, capturedEntities,
                             openContainer, slotTransactions);
             // TODO the nature of how this event is handled prevents the cause information being preserved through
             // the event call, somehow should not release this frame until after the event is posted

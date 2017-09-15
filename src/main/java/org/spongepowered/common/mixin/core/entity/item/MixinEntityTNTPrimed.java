@@ -176,9 +176,9 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
         if (this.fuse == this.fuseDuration - 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 if (this.detonator != null) {
-                    Sponge.getCauseStackManager().pushCause(this.detonator);
+                    frame.pushCause(this.detonator);
                 }
-                Sponge.getCauseStackManager().pushCause(this);
+                frame.pushCause(this);
                 postPrime();
             }
         }

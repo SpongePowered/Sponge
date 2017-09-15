@@ -65,15 +65,15 @@ final class DeathUpdateState extends EntityPhaseState {
                 .ifPresentAndNotEmpty(items -> {
                     final DamageSource damageSource = context.getRequiredExtra(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class);
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        Sponge.getCauseStackManager().pushCause(dyingEntity);
-                        Sponge.getCauseStackManager().pushCause(damageSource);
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        frame.pushCause(dyingEntity);
+                        frame.pushCause(damageSource);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         final ArrayList<Entity> entities = new ArrayList<>();
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
                         }
                         final DropItemEvent.Destruct destruct =
-                                SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                                SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(destruct);
                         if (!destruct.isCancelled()) {
                             for (Entity entity : destruct.getEntities()) {
@@ -89,10 +89,10 @@ final class DeathUpdateState extends EntityPhaseState {
                             .collect(Collectors.toList());
                     if (!experience.isEmpty()) {
                         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            Sponge.getCauseStackManager().pushCause(dyingEntity);
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                            frame.pushCause(dyingEntity);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                             final SpawnEntityEvent event =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
+                                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), experience);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
                                 for (Entity entity : event.getEntities()) {
@@ -107,10 +107,10 @@ final class DeathUpdateState extends EntityPhaseState {
                             .collect(Collectors.toList());
                     if (!other.isEmpty()) {
                         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            Sponge.getCauseStackManager().pushCause(dyingEntity);
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
+                            frame.pushCause(dyingEntity);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
                             final SpawnEntityEvent event1 =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), other);
+                                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), other);
                             SpongeImpl.postEvent(event1);
                             if (!event1.isCancelled()) {
                                 for (Entity entity : event1.getEntities()) {

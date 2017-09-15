@@ -83,7 +83,7 @@ public class PacketUtil {
         if (CauseTracker.ENABLED && netHandler instanceof NetHandlerPlayServer) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
-                Sponge.getCauseStackManager().pushCause(packetPlayer);
+                frame.pushCause(packetPlayer);
                 // If true, logic was handled in Pre so return
                 if (firePreEvents(packetIn, packetPlayer)) {
                     return;

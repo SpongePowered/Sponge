@@ -313,7 +313,7 @@ public class SpongeCommandManager implements CommandManager {
 
         try {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(source);
+                frame.pushCause(source);
                 if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                     CauseTracker.getInstance().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
                         .source(source)

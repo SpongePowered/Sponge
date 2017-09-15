@@ -96,11 +96,11 @@ class GeneralGenerationPhaseState implements IPhaseState {
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
     
             final SpawnEntityEvent.Spawner
                     event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(), spawnedEntities);
+                    SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), spawnedEntities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity entity : event.getEntities()) {
