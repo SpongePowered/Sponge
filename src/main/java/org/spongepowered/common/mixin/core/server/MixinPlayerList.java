@@ -630,46 +630,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             return;
         }
 
-        WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
-        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
-        toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
-        // Support vanilla clients teleporting to custom dimensions
-        final int dimensionId = playerIn.dimension;
-
-        // Send dimension registration
-        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
-        } else {
-            // Force vanilla client to refresh its chunk cache if same dimension type
-            if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
-                playerIn.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
-            }
-        }
-        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
-        fromWorld.removeEntityDangerously(playerIn);
-        playerIn.isDead = false;
-        // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
-        ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
-        playerIn.setWorld(toWorld);
-        toWorld.spawnEntity(playerIn);
-        toWorld.updateEntityWithOptionalForce(playerIn, false);
-        this.preparePlayer(playerIn, fromWorld);
-        playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
-        playerIn.interactionManager.setWorld(toWorld);
-        this.updateTimeAndWeatherForPlayer(playerIn, toWorld);
-        this.syncPlayerInventory(playerIn);
-
-        // Update reducedDebugInfo game rule
-        playerIn.connection.sendPacket(new SPacketEntityStatus(playerIn,
-                toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
-
-        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-            playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
-        }
-        ((IMixinEntityPlayerMP) playerIn).refreshXpHealthAndFood();
-
-        SpongeImplHooks.handlePostChangeDimensionEvent(playerIn, fromWorld, toWorld);
+        EntityUtil.transferPlayerToDimension(event, playerIn);
     }
 
     // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal

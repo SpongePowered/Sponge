@@ -66,36 +66,52 @@ public class TileEntityActivation {
         TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
         TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
-        IModData_Activation spongeEntity = (IModData_Activation) tileEntity;
+        IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
         SpongeTileEntityType spongeType = (SpongeTileEntityType) type;
         if (spongeType == null || spongeType.getModId() == null) {
             return true;
         }
         TileEntityActivationModCategory tileEntityMod = config.getModList().get(spongeType.getModId().toLowerCase());
         int defaultActivationRange = config.getDefaultBlockRange();
+        int defaultTickRate = config.getDefaultTickRate();
         if (tileEntityMod == null) {
             // use default activation range
-            spongeEntity.setActivationRange(defaultActivationRange);
+            spongeTileEntity.setActivationRange(defaultActivationRange);
             if (defaultActivationRange <= 0) {
                 return true;
             }
             return false;
         } else if (!tileEntityMod.isEnabled()) {
-            spongeEntity.setActivationRange(defaultActivationRange);
+            spongeTileEntity.setActivationRange(defaultActivationRange);
+            spongeTileEntity.setSpongeTickRate(defaultTickRate);
             return true;
         }
 
         Integer defaultModActivationRange = tileEntityMod.getDefaultBlockRange();
         Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(type.getName().toLowerCase());
         if (defaultModActivationRange != null && tileEntityActivationRange == null) {
-            spongeEntity.setActivationRange(defaultModActivationRange);
+            spongeTileEntity.setActivationRange(defaultModActivationRange);
             if (defaultModActivationRange <= 0) {
                 return true;
             }
-            return false;
         } else if (tileEntityActivationRange != null) {
-            spongeEntity.setActivationRange(tileEntityActivationRange);
+            spongeTileEntity.setActivationRange(tileEntityActivationRange);
             if (tileEntityActivationRange <= 0) {
+                return true;
+            }
+        }
+
+        Integer defaultModTickRate = tileEntityMod.getDefaultTickRate();
+        Integer tileEntityTickRate = tileEntityMod.getTileEntityTickRateList().get(type.getName().toLowerCase());
+        if (defaultModTickRate != null && tileEntityTickRate == null) {
+            spongeTileEntity.setSpongeTickRate(defaultModTickRate);
+            if (defaultModTickRate <= 0) {
+                return true;
+            }
+            return false;
+        } else if (tileEntityTickRate != null) {
+            spongeTileEntity.setSpongeTickRate(tileEntityTickRate);
+            if (tileEntityTickRate <= 0) {
                 return true;
             }
         }

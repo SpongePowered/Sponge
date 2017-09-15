@@ -50,7 +50,6 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
@@ -108,7 +107,6 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
@@ -158,7 +156,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private final Deque<SPacketResourcePackSend> resourcePackRequests = new LinkedList<>();
 
     // Store the last block right-clicked
-    private boolean allowClientLocationUpdate = true;
     @Nullable private Item lastItem;
 
     @Override
@@ -209,11 +206,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         });
     }
 
-    @Override
-    public void setAllowClientLocationUpdate(boolean flag) {
-        this.allowClientLocationUpdate = flag;
-    }
-
     /**
      * @param manager The player network connection
      * @param packet The original packet to be sent
@@ -221,9 +213,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      */
     @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void onSendPacket(NetworkManager manager, Packet<?> packet) {
-        if (!this.allowClientLocationUpdate && packet instanceof SPacketPlayerPosLook) {
-            return;
-        }
         packet = this.rewritePacket(packet);
         if (packet != null) {
             manager.sendPacket(packet);
@@ -319,7 +308,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
         if (this.player.interactionManager.isCreative()) {
-            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.player.getServerWorld();
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final PhaseContext context = peek.context;
             final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
