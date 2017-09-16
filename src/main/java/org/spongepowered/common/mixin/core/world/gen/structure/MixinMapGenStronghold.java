@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MapGenStronghold.class)
 public abstract class MixinMapGenStronghold extends MixinMapGenStructure {
 
-    @Inject(method = "getNearestStructurePos", at = @At("HEAD"))
-    private void onGetNearestStructurePos(World worldIn, BlockPos pos, boolean findUnexplored, CallbackInfoReturnable<BlockPos> ci) {
+    @Inject(method = "getClosestStrongholdPos", at = @At("HEAD"))
+    private void onGetClosestStrongholdPos(World worldIn, BlockPos pos, CallbackInfoReturnable<BlockPos> ci) {
         if (this.worldObj == null) {
             this.worldObj = worldIn;
         }
