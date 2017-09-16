@@ -145,7 +145,7 @@ public class SpongeCommandManager implements CommandManager {
             for (final String originalAlias : aliases) {
                 final String alias = this.fixAlias(container, originalAlias);
                 if (aliasesWithPrefix.contains(alias)) {
-                    this.logger.warn("Plugin '{}' is attempting to register duplicate alias '{}'", container.getId(), alias);
+                    this.logger.debug("Plugin '{}' is attempting to register duplicate alias '{}'", container.getId(), alias);
                     continue;
                 }
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
