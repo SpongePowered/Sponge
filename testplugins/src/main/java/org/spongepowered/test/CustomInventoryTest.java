@@ -34,7 +34,6 @@ import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
@@ -58,8 +57,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Optional;
-
 /**
  * When trying to break an Inventory TE while sneaking you open a custom Version of it instead.
  * Clicks in the opened Inventory are recorded with their SlotIndex in your Chat.
@@ -73,8 +70,8 @@ public class CustomInventoryTest {
         if (!player.get(Keys.IS_SNEAKING).orElse(false)) {
             return;
         }
-        event.getTargetBlock().getLocation().ifPresent(loc ->{
-                interactCarrier(event, player, loc);
+        event.getTargetBlock().getLocation().ifPresent(loc -> {
+                    interactCarrier(event, player, loc);
                     interactOtherBlock(event, player, loc);
                 }
         );
@@ -92,7 +89,7 @@ public class CustomInventoryTest {
             } else {
                 builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
             }
-            Inventory inventory =  builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Mule")))
+            Inventory inventory = builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Mule")))
                     .withCarrier(((Horse) event.getTargetEntity()))
                     .build(this);
             int i = 1;
@@ -110,7 +107,7 @@ public class CustomInventoryTest {
             } else {
                 builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
             }
-            Inventory inventory =  builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Llama")))
+            Inventory inventory = builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Llama")))
                     .withCarrier(((Horse) event.getTargetEntity()))
                     .build(this);
             int i = 1;
@@ -170,19 +167,19 @@ public class CustomInventoryTest {
 
     private void interactCarrier(InteractBlockEvent.Primary event, Player player, Location<World> loc) {
         loc.getTileEntity().ifPresent(te -> {
-                    if (te instanceof Carrier) {
-                        BasicCarrier myCarrier = new BasicCarrier();
-                        Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
-                                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName())))
-                                .withCarrier(myCarrier)
-                                .build(this);
-                        myCarrier.init(custom);
-                        Sponge.getCauseStackManager().pushCause(player);
-                        player.openInventory(custom);
-                        Sponge.getCauseStackManager().popCause();
-                        event.setCancelled(true);
-                    }
-                });
+            if (te instanceof Carrier) {
+                BasicCarrier myCarrier = new BasicCarrier();
+                Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
+                        .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName())))
+                        .withCarrier(myCarrier)
+                        .build(this);
+                myCarrier.init(custom);
+                Sponge.getCauseStackManager().pushCause(player);
+                player.openInventory(custom);
+                Sponge.getCauseStackManager().popCause();
+                event.setCancelled(true);
+            }
+        });
     }
 
     @Listener
