@@ -37,6 +37,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
@@ -181,20 +182,16 @@ public class CustomInventoryTest {
                         Sponge.getCauseStackManager().popCause();
                         event.setCancelled(true);
                     }
-                })
-        ;
+                });
     }
 
     @Listener
-    public void onInventoryClick(ClickInventoryEvent event, @Root Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
-        Optional<? extends Carrier> carrier = container.getCarrier();
-        if (carrier.isPresent() && carrier.get() instanceof BasicCarrier) {
-            for (SlotTransaction trans : event.getTransactions()) {
-                Slot slot = trans.getSlot();
-                Slot realSlot = slot.transform();
-                Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
-                player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
-            }
+    public void onInventoryClick(ClickInventoryEvent event, @First Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
+        for (SlotTransaction trans : event.getTransactions()) {
+            Slot slot = trans.getSlot();
+            Slot realSlot = slot.transform();
+            Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
+            player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
         }
     }
 
