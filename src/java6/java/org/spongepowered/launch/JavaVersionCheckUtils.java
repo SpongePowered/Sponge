@@ -30,7 +30,7 @@ import javax.swing.JOptionPane;
 
 public class JavaVersionCheckUtils {
 
-    private static final String REQUIRED_VERSION = "1.8.0_40";
+    private static final String REQUIRED_VERSION = "1.8.0_20";
 
     private static final String ERROR_MESSAGE = "We have detected that you are JRE version %s, which is out of date!\n"
                                                 + "In order to run Sponge, you **must** be running JRE version %s (or above).\n"
