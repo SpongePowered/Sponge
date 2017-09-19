@@ -72,7 +72,6 @@ import org.spongepowered.common.util.QueuedChunk;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mixin(AnvilChunkLoader.class)
@@ -86,7 +85,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToRemove;
+    @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToSave;
     @Shadow @Final private File chunkSaveLocation;
     @Shadow private boolean flushing;
 
@@ -210,13 +209,13 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
 
         // Sponge start - Chunk queue improvements
         // if (this.field_193415_c.contains(chunkcoordintpair)) {
-        //     for (ChunkPos pendingChunkCoord : this.chunksToRemove.keySet()) { 
+        //     for (ChunkPos pendingChunkCoord : this.chunksToSave.keySet()) {
         //         if (pendingChunkCoord.equals(chunkcoordintpair)) {
         //             return true;
         //         }
         //     }
         // }
-        if (this.chunksToRemove.containsKey(chunkcoordintpair)) {
+        if (this.chunksToSave.containsKey(chunkcoordintpair)) {
             return true;
         }
         // Sponge end
@@ -234,7 +233,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     @Overwrite
     protected void addChunkToPending(ChunkPos pos, NBTTagCompound compound) {
         synchronized (this.lock) {
-            this.chunksToRemove.put(pos, compound);
+            this.chunksToSave.put(pos, compound);
         }
         this.queue.add(new QueuedChunk(pos, compound));
 
@@ -288,8 +287,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                 }
 
                 synchronized (this.lock) {
-                    if (this.chunksToRemove.get(chunkpos) == nbttagcompound) {
-                        this.chunksToRemove.remove(chunkpos);
+                    if (this.chunksToSave.get(chunkpos) == nbttagcompound) {
+                        this.chunksToSave.remove(chunkpos);
                     }
                 }
                 // Sponge - This will not equal if a newer version is still

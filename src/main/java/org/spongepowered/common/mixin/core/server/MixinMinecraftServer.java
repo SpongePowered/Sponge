@@ -132,7 +132,7 @@ import javax.annotation.Nullable;
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
-    @Shadow @Final private static Logger LOG;
+    @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
@@ -391,7 +391,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        LOG.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
+        LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
         BlockPos blockpos = worldServer.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
         for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -730,7 +730,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     if (autoSaveInterval <= 0
                             || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {
-                            LOG.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                            LOGGER.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                     + worldserver.provider.getDimensionType().getName() + ". "
                                     + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
                                     + " zero in the corresponding world config.");
@@ -741,11 +741,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         continue;
                     }
                     if (logAutoSave) {
-                        LOG.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                        LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                 + worldserver.provider.getDimensionType().getName());
                     }
                 } else if (!dontLog) {
-                    LOG.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                    LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                             + worldserver.provider.getDimensionType().getName());
                 }
                 // Sponge end

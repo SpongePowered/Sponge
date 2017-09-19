@@ -140,7 +140,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     private static final String
             SERVER_SEND_PACKET_TO_ALL_PLAYERS =
             "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
-    @Shadow @Final private static Logger LOG;
+    @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
@@ -212,11 +212,11 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         try {
-            LOG.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
+            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
             netManager.sendPacket(new SPacketDisconnect(reason));
             netManager.closeChannel(reason);
         } catch (Exception exception) {
-            LOG.error("Error whilst disconnecting player", exception);
+            LOGGER.error("Error whilst disconnecting player", exception);
         }
     }
 
@@ -343,7 +343,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        LOG.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
+        LOGGER.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
                 + worldServer.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) worldServer).getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         // Sponge end
@@ -391,7 +391,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                     }
 
                     if (!playerIn.isRiding()) {
-                        LOG.warn("Couldn\'t reattach entity to player");
+                        LOGGER.warn("Couldn\'t reattach entity to player");
                         worldServer.removeEntityDangerously(entity2);
 
                         for (Entity entity3 : entity2.getRecursivePassengers()) {

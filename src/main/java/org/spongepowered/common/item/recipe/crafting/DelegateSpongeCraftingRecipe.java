@@ -81,7 +81,7 @@ public class DelegateSpongeCraftingRecipe extends AbstractSpongeCraftingRecipe {
     }
 
     @Override
-    public boolean isHidden() {
+    public boolean isDynamic() {
         return true; // For RecipeBook
     }
 }

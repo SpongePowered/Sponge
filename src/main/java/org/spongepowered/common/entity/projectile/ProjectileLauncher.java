@@ -180,7 +180,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<TippedArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
                 TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.world, source);
-                ((EntityTippedArrow) arrow).setAim(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                ((EntityTippedArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getExtent(), arrow);
             }
         });
@@ -189,7 +189,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<Egg> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Egg egg = (Egg) new EntityEgg(source.world, source);
-                ((EntityThrowable) egg).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                ((EntityThrowable) egg).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), egg);
             }
         });
@@ -217,7 +217,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<Snowball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Snowball snowball = (Snowball) new EntitySnowball(source.world, source);
-                ((EntityThrowable) snowball).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                ((EntityThrowable) snowball).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), snowball);
             }
         });
@@ -226,7 +226,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location<?> loc) {
                 ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.world, source);
-                ((EntityThrowable) expBottle).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.7F, 0);
+                ((EntityThrowable) expBottle).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.7F, 0);
                 return doLaunch(loc.getExtent(), expBottle);
             }
         });
@@ -236,7 +236,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<EnderPearl> createProjectile(EntityLivingBase source, Location<?> loc) {
                 EnderPearl pearl = (EnderPearl) new EntityEnderPearl(source.world, source);
-                ((EntityThrowable) pearl).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                ((EntityThrowable) pearl).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), pearl);
             }
         });
@@ -296,7 +296,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
                 ThrownPotion potion = (ThrownPotion) new EntityPotion(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
-                ((EntityThrowable) potion).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.5F, 0);
+                ((EntityThrowable) potion).shoot(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.5F, 0);
                 return doLaunch(loc.getExtent(), potion);
             }
         });
@@ -315,7 +315,7 @@ public class ProjectileLauncher {
                 EntityLlama llama = (EntityLlama) source;
                 LlamaSpit llamaSpit = (LlamaSpit) new EntityLlamaSpit(llama.world, (EntityLlama) source);
                 Vec3d lookVec = llama.getLook(1);
-                ((EntityLlamaSpit) llamaSpit).setThrowableHeading(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
+                ((EntityLlamaSpit) llamaSpit).shoot(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
                 return doLaunch(loc.getExtent(), llamaSpit);
             }
         });

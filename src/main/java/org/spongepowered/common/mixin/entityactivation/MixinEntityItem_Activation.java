@@ -37,13 +37,13 @@ public abstract class MixinEntityItem_Activation extends MixinEntity_Activation 
 
     @Shadow public abstract ItemStack getItem();
 
-    @Shadow private int delayBeforeCanPickup;
+    @Shadow private int pickupDelay;
     @Shadow private int age;
 
     @Override
     public void inactiveTick() {
-        if (this.delayBeforeCanPickup > 0 && this.delayBeforeCanPickup != 32767) {
-            --this.delayBeforeCanPickup;
+        if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
+            --this.pickupDelay;
         }
 
         if (!this.world.isRemote && this.age >= ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getItemDespawnRate()) {

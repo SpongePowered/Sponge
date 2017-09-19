@@ -50,7 +50,7 @@ public class SpongeShapedRecipe extends ShapedRecipes implements CatalogType {
     }
 
     @Override
-    public boolean isHidden() {
+    public boolean isDynamic() {
         return true; // For RecipeBook
     }
 }

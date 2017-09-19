@@ -44,7 +44,6 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -62,7 +61,7 @@ import java.util.List;
 public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
 
     private static final int MAGIC_PREVIOUS = -1;
-    @Shadow private int delayBeforeCanPickup;
+    @Shadow private int pickupDelay;
     @Shadow private int age;
     @Shadow public abstract ItemStack getItem();
     /**
@@ -98,17 +97,17 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Override
     public int getPickupDelay() {
-        return this.infinitePickupDelay ? this.previousPickupDelay : this.delayBeforeCanPickup;
+        return this.infinitePickupDelay ? this.previousPickupDelay : this.pickupDelay;
     }
 
     @Override
     public void setPickupDelay(int delay, boolean infinite) {
-        this.delayBeforeCanPickup = delay;
+        this.pickupDelay = delay;
         boolean previous = this.infinitePickupDelay;
         this.infinitePickupDelay = infinite;
         if (infinite && !previous) {
-            this.previousPickupDelay = this.delayBeforeCanPickup;
-            this.delayBeforeCanPickup = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+            this.previousPickupDelay = this.pickupDelay;
+            this.pickupDelay = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
         } else if (!infinite) {
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
@@ -155,13 +154,13 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         }
 
         if (this.infinitePickupDelay) {
-            if (this.previousPickupDelay != this.delayBeforeCanPickup) {
-                this.previousPickupDelay = this.delayBeforeCanPickup;
+            if (this.previousPickupDelay != this.pickupDelay) {
+                this.previousPickupDelay = this.pickupDelay;
             }
 
-            this.delayBeforeCanPickup = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
-        } else if (this.delayBeforeCanPickup == DataConstants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
-            this.delayBeforeCanPickup = this.previousPickupDelay;
+            this.pickupDelay = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (this.pickupDelay == DataConstants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
+            this.pickupDelay = this.previousPickupDelay;
             this.previousPickupDelay = MAGIC_PREVIOUS;
         }
 
@@ -199,7 +198,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem) (Object) this, this.delayBeforeCanPickup, ((Entity) this).getCreator().orElse(null))) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, ((Entity) this).getCreator().orElse(null))) {
             ci.cancel();
         }
     }

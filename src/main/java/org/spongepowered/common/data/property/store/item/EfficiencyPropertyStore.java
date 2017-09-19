@@ -37,8 +37,7 @@ public class EfficiencyPropertyStore extends AbstractItemStackPropertyStore<Effi
     protected Optional<EfficiencyProperty> getFor(ItemStack itemStack) {
         if (itemStack.getItem() instanceof ItemTool) {
             final ItemTool tool = (ItemTool) itemStack.getItem();
-            final double efficiency = tool.efficiencyOnProperMaterial;
-            return Optional.of(new EfficiencyProperty(efficiency));
+            return Optional.of(new EfficiencyProperty(tool.efficiency));
         }
         return Optional.empty();
     }

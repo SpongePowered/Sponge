@@ -137,7 +137,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     }
 
-    @Shadow protected abstract void setBeenAttacked();
+    @Shadow protected abstract void markVelocityChanged();
     @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow protected abstract float getSoundVolume();
     @Shadow protected abstract float getSoundPitch();
@@ -485,7 +485,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
 
                     if (source != DamageSource.DROWN && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
-                        this.setBeenAttacked();
+                        this.markVelocityChanged();
                     }
 
                     if (entity != null) {
@@ -781,7 +781,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
             if ((Object) this instanceof EntityCreature)
             {
-                ((EntityCreature) (Object) this).getNavigator().clearPathEntity();
+                ((EntityCreature) (Object) this).getNavigator().clearPath();
             }
 
             return true;
