@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -37,6 +38,7 @@ import javax.annotation.Nullable;
 
 public class SpongeObjectiveBuilder implements Objective.Builder {
 
+    private static final int MAX_NAME_LENGTH = 16;
     @Nullable private String name;
     @Nullable private Text displayName;
     @Nullable private Criterion criterion;
@@ -45,6 +47,8 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
     @Override
     public Objective.Builder name(String name) {
         checkNotNull(name, "Name cannot be null");
+        checkArgument(MAX_NAME_LENGTH >= name.length(), "name '%s' is too long: %s characters over limit of %s",
+                name, MAX_NAME_LENGTH - name.length(), MAX_NAME_LENGTH);
         this.name = name;
         return this;
     }
