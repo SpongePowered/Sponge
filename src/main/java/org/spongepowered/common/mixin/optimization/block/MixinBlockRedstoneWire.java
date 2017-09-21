@@ -457,6 +457,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
      * @param pos The position
      * @param state The block state
      */
+    @Override
     @Overwrite
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         if (!worldIn.isRemote) {
@@ -474,6 +475,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
      * @param worldIn The world
      * @param pos The position
      */
+    @Override
     @Overwrite
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         super.breakBlock(worldIn, pos, state);
@@ -494,6 +496,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
      * @param pos The position
      * @param side The side
      */
+    @Override
     @Overwrite
     public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
         if (!this.canProvidePower) {

@@ -52,8 +52,6 @@ public abstract class MixinInventoryBasic implements IInventory, LensProvider<II
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
-    @Shadow public abstract int getSizeInventory();
-
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
