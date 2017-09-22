@@ -30,7 +30,7 @@ final class LeavingDimensionState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext createContext() {
+    public BasicEntityContext createPhaseContext() {
         return new BasicEntityContext(this);
     }
 }

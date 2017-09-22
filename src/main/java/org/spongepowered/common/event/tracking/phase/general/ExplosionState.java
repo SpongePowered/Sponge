@@ -63,8 +63,12 @@ import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChange
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
     @Override
-    public ExplosionContext createContext() {
-        return new ExplosionContext();
+    public ExplosionContext createPhaseContext() {
+        return new ExplosionContext()
+            .addEntityCaptures()
+            .addEntityDropCaptures()
+            .addBlockCaptures()
+            .populateFromCurrentState();
     }
 
     @Override

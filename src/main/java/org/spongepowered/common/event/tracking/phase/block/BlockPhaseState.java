@@ -44,7 +44,7 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
-    public GeneralizedContext createContext() {
+    public GeneralizedContext createPhaseContext() {
         return new GeneralizedContext(this);
     }
 

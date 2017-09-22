@@ -765,8 +765,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))
     private void onPlayerRemoveFromWorldFromDisconnect(WorldServer world, Entity player, EntityPlayerMP playerMP) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createContext().source(playerMP).addCaptures().buildAndSwitch()) {
-            causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PlayerPhase.State.PLAYER_LOGOUT.createContext()
+        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(playerMP).addCaptures().buildAndSwitch()) {
+            causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext()
                     .source(playerMP)
                     .addCaptures()
                     .buildAndSwitch()

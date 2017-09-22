@@ -57,7 +57,7 @@ import java.util.List;
 
 final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
     @Override
-    public ExplosionContext createContext() {
+    public ExplosionContext createPhaseContext() {
         return new ExplosionContext();
     }
 

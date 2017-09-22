@@ -48,7 +48,7 @@ import java.util.Set;
 /**
  * A generalized
  */
-class GeneralGenerationPhaseState implements IPhaseState<GeneralizedContext> {
+abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
 
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
@@ -80,10 +80,20 @@ class GeneralGenerationPhaseState implements IPhaseState<GeneralizedContext> {
         return TrackingPhases.GENERATION;
     }
 
-    @Override
-    public GeneralizedContext createContext() {
-        return new GeneralizedContext(this);
+    public static class Generic extends GeneralGenerationPhaseState<GenericGenerationContext> {
+
+        public Generic(String id) {
+            super(id);
+        }
+
+        @Override
+        public GenericGenerationContext createPhaseContext() {
+            return new GenericGenerationContext(this)
+                    .addCaptures();
+        }
+
     }
+
 
     @Override
     public final boolean canSwitchTo(IPhaseState<?> state) {
@@ -96,7 +106,7 @@ class GeneralGenerationPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
-    public final void unwind(GeneralizedContext context) {
+    public final void unwind(G context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;

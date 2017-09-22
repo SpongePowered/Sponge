@@ -65,7 +65,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
@@ -487,45 +486,39 @@ public final class WorldManager {
                 }
             }
         }
+        try (PhaseContext<?> context = GeneralPhase.State.WORLD_UNLOAD.createPhaseContext()
+            .source(worldServer)
+            .buildAndSwitch()) {
 
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.WORLD_UNLOAD, PhaseContext.start()
-                    .source(worldServer)
-                    .complete());
-        }
-        if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
-                worldServer))) {
-            if (CauseTracker.ENABLED) {
-                CauseTracker.getInstance().completePhase(GeneralPhase.State.WORLD_UNLOAD);
+            if (SpongeImpl.postEvent(
+                SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
+                    worldServer))) {
+                return false;
             }
-            return false;
-        }
 
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
-        final int dimensionId = mixinWorldServer.getDimensionId();
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+            final int dimensionId = mixinWorldServer.getDimensionId();
 
-        try {
-            // Don't save if server is stopping to avoid duplicate saving.
-            if (server.isServerRunning()) {
-                saveWorld(worldServer, true);
-                mixinWorldServer.getActiveConfig().save();
+            try {
+                // Don't save if server is stopping to avoid duplicate saving.
+                if (server.isServerRunning()) {
+                    saveWorld(worldServer, true);
+                    mixinWorldServer.getActiveConfig().save();
+                }
+            } catch (MinecraftException e) {
+                e.printStackTrace();
+            } finally {
+                worldByDimensionId.remove(dimensionId);
+                weakWorldByWorld.remove(worldServer);
+                ((IMixinMinecraftServer) server).removeWorldTickTimes(dimensionId);
+                SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
+                reorderWorldsVanillaFirst();
             }
-        } catch (MinecraftException e) {
-            e.printStackTrace();
-        } finally {
-            worldByDimensionId.remove(dimensionId);
-            weakWorldByWorld.remove(worldServer);
-            ((IMixinMinecraftServer) server).removeWorldTickTimes(dimensionId);
-            SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
-            reorderWorldsVanillaFirst();
-        }
 
-        if (!server.isServerRunning()) {
-            unregisterDimension(dimensionId);
-        }
+            if (!server.isServerRunning()) {
+                unregisterDimension(dimensionId);
+            }
 
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GeneralPhase.State.WORLD_UNLOAD);
         }
         return true;
     }

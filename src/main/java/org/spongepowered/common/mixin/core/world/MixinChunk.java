@@ -911,12 +911,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Inject(method = "populate(Lnet/minecraft/world/gen/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
     private void onPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
-        if (CauseTracker.ENABLED && !this.world.isRemote) {
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
-                    .addCaptures()
-                    .complete());
+        if (!this.world.isRemote) {
+            GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+                    .world(this.world)
+                    .buildAndSwitch();
         }
     }
 
@@ -926,7 +924,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
     )
     private void onPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
-        if (CauseTracker.ENABLED && !this.world.isRemote) {
+        if (!this.world.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }

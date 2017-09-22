@@ -37,6 +37,12 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 public class ScheduledTaskPhaseState extends BasicPluginState {
 
     @Override
+    public BasicPluginContext createPhaseContext() {
+        return super.createPhaseContext()
+            .addCaptures();
+    }
+
+    @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
         return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
     }

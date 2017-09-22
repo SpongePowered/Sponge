@@ -285,10 +285,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
-                PhaseContext<?> context = PhaseContext.start()
-                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4))
-                        .addBlockCaptures()
-                        .addEntityCaptures();
+                PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
+                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4));
 
                 // unused, to be removed and re-located when phase context is cleaned up
                 //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))

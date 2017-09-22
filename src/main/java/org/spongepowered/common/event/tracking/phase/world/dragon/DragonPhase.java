@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
@@ -41,7 +42,7 @@ public final class DragonPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState RESPAWN_DRAGON = new GeneralDragonPhaseState();
+        public static final IPhaseState<GeneralizedContext> RESPAWN_DRAGON = new GeneralDragonPhaseState();
 
 
         private State() {

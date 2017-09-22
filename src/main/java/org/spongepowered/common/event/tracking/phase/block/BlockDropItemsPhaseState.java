@@ -52,8 +52,8 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public GeneralizedContext createContext() {
-        return super.createContext()
+    public GeneralizedContext createPhaseContext() {
+        return super.createPhaseContext()
                 .addBlockCaptures()
                 .addEntityCaptures();
     }

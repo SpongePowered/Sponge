@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -125,12 +126,22 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
+    public P owner(Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::owner);
+        return (P) this;
+    }
+
     public P owner(User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.owner != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
         }
         this.owner = checkNotNull(owner, "Owner cannot be null!");
+        return (P) this;
+    }
+
+    public P notifier(Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::notifier);
         return (P) this;
     }
 

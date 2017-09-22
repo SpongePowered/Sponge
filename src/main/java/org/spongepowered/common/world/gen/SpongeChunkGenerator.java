@@ -76,6 +76,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -355,23 +356,19 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     }
                     timing.startTimingIfSync();
                 }
-                if (CauseTracker.ENABLED) {
-                    causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                            .addExtra(InternalNamedCauses.WorldGeneration.WORLD, world)
-                            .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type)
-                            .addEntityCaptures()
-                            .complete());
-                }
-                if (populator instanceof IFlaggedPopulator) {
-                    ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
-                } else {
-                    populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
-                }
-                if (Timings.isTimingsEnabled()) {
-                    timing.stopTimingIfSync();
-                }
-                if (CauseTracker.ENABLED) {
-                    causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
+                try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                    .world(world)
+                    .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type)
+                    .buildAndSwitch()) {
+
+                    if (populator instanceof IFlaggedPopulator) {
+                        ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
+                    } else {
+                        populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
+                    }
+                    if (Timings.isTimingsEnabled()) {
+                        timing.stopTimingIfSync();
+                    }
                 }
             }
         }
@@ -405,19 +402,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        final CauseTracker causeTracker = CauseTracker.getInstance();
-                        if (CauseTracker.ENABLED) {
-                            causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
-                                    .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType())
-                                    .addEntityCaptures()
-                                    .complete());
-                        }
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+                         GenerationContext context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                             .world(this.world)
+                            .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType())
+                            .buildAndSwitch()) {
                         flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
-                        if (CauseTracker.ENABLED) {
-                            causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
-                        }
                     }
                 }
             }

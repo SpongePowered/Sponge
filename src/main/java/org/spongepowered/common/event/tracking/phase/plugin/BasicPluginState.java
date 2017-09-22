@@ -2,7 +2,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
     @Override
-    public BasicPluginContext createContext() {
+    public BasicPluginContext createPhaseContext() {
         return new BasicPluginContext(this);
     }
 

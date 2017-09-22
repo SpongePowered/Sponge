@@ -24,9 +24,32 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
+
+import javax.annotation.Nullable;
+
 public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext> {
 
     public ExplosionContext() {
         super(GeneralPhase.State.EXPLOSION);
+    }
+
+    public ExplosionContext populateFromCurrentState() {
+        final PhaseData currentPhaseData = CauseTracker.getInstance().getCurrentPhaseData();
+        currentPhaseData.state.getPhase().appendContextPreExplosion(this, currentPhaseData);
+        return this;
+    }
+
+    public ExplosionContext potentialExplosionSource(WorldServer worldServer, @Nullable Entity entityIn) {
+        if (entityIn != null) {
+            this.source(entityIn);
+        } else {
+            this.source(worldServer);
+        }
+        return this;
     }
 }

@@ -181,7 +181,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState<?> currentState = causeTracker.getCurrentState();
         if (!currentState.tracksBlockRestores()) {
-            BlockPhase.State.RESTORING_BLOCKS.createContext().buildAndSwitch();
+            BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch();
         }
 
         BlockPos pos = VecHelper.toBlockPos(this.pos);

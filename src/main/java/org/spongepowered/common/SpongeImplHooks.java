@@ -265,9 +265,8 @@ public final class SpongeImplHooks {
     @Nullable
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createContext()
+        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(task)
-                .addCaptures()
                 .buildAndSwitch())  {
             final Object o = Util.runTask(task, logger);
             return o;

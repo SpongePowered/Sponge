@@ -66,7 +66,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public BlockEventTickContext createContext() {
+    public BlockEventTickContext createPhaseContext() {
         return new BlockEventTickContext()
                 .addBlockCaptures()
                 .addEntityCaptures();

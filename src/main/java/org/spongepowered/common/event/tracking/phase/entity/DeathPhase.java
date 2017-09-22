@@ -62,8 +62,14 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext createContext() {
-        return new BasicEntityContext(this);
+    public boolean tracksEntityDeaths() {
+        return true;
+    }
+
+    @Override
+    public BasicEntityContext createPhaseContext() {
+        return new BasicEntityContext(this).addCaptures()
+            .addEntityDropCaptures();
     }
 
     @Override

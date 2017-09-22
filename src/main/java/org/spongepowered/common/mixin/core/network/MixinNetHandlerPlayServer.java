@@ -206,12 +206,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
     private void onPlayerTick(EntityPlayerMP player) {
-        if (player.world.isRemote || !CauseTracker.ENABLED) {
+        if (player.world.isRemote) {
             player.onUpdateEntity();
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             PlayerTickContext context = TickPhase.Tick.PLAYER.createContext()
+             PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext()
                  .source(player)
                  .buildAndSwitch()) {
             Sponge.getCauseStackManager().pushCause(player);

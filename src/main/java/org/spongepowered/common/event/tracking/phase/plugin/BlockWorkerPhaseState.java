@@ -33,6 +33,12 @@ public class BlockWorkerPhaseState extends BasicPluginState {
     }
 
     @Override
+    public BasicPluginContext createPhaseContext() {
+        return super.createPhaseContext()
+            .addCaptures();
+    }
+
+    @Override
     void processPostTick(PhaseContext<?> phaseContext) {
         phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
 

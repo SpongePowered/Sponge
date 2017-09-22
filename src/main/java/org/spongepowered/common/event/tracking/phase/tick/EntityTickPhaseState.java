@@ -304,7 +304,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public EntityTickContext createContext() {
+    public EntityTickContext createPhaseContext() {
         return new EntityTickContext();
     }
 

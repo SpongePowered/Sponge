@@ -98,7 +98,9 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -382,34 +384,30 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        if (CauseTracker.ENABLED) {
-            causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .source(worldServer)
-                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, worldServer)
-                    .addCaptures()
-                    .complete());
-        }
-        int i = 0;
-        this.setUserMessage("menu.generatingTerrain");
-        LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
-        BlockPos blockpos = worldServer.getSpawnPoint();
-        long j = MinecraftServer.getCurrentTimeMillis();
-        for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
-            for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
-                long i1 = MinecraftServer.getCurrentTimeMillis();
 
-                if (i1 - j > 1000L) {
-                    this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
-                    j = i1;
+        try (GenerationContext context =GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+            .source(worldServer)
+            .world( worldServer)
+            .buildAndSwitch()) {
+            int i = 0;
+            this.setUserMessage("menu.generatingTerrain");
+            LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
+            BlockPos blockpos = worldServer.getSpawnPoint();
+            long j = MinecraftServer.getCurrentTimeMillis();
+            for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
+                for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
+                    long i1 = MinecraftServer.getCurrentTimeMillis();
+
+                    if (i1 - j > 1000L) {
+                        this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
+                        j = i1;
+                    }
+
+                    ++i;
+                    worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
                 }
-
-                ++i;
-                worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
             }
-        }
-        this.clearCurrentTask();
-        if (CauseTracker.ENABLED) {
-            causeTracker.completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            this.clearCurrentTask();
         }
         chunkProviderServer.setForceChunkRequests(false);
     }
@@ -658,7 +656,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     side = rayTraceResult.sideHit;
                 }
 
-                Sponge.getCauseStackManager().pushCause(player); 
+                Sponge.getCauseStackManager().pushCause(player);
                 if (player.getHeldItemMainhand() != null) {
                     if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, Optional.empty(), blockSnapshot).isCancelled()) {
                         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
@@ -793,19 +791,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
     public Object onCall(Callable<?> callable) throws Exception {
-        CauseTracker.getInstance().switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-            .source(callable)
-            .addCaptures()
-            .complete()
-        );
         Object value;
-        try {
+        try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+                .source(callable)
+                .buildAndSwitch()) {
             value = callable.call();
         } catch (Exception e) {
             throw e;
-        }
-        finally {
-            CauseTracker.getInstance().completePhase(PluginPhase.State.SCHEDULED_TASK);
         }
         return value;
     }

@@ -80,8 +80,6 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public final class CauseTracker {
 
-    public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
-
     static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
             context.getExtraContext().entrySet().forEach(namedCause -> {
                         printer.add("        - Name: %s", namedCause.getKey());
@@ -418,11 +416,9 @@ public final class CauseTracker {
 
         try {
             // Sponge start - prepare notification
-            if (CauseTracker.ENABLED) {
-                final PhaseData peek = this.stack.peek();
-                final IPhaseState<?> state = peek.state;
-                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
-            }
+            final PhaseData peek = this.stack.peek();
+            final IPhaseState<?> state = peek.state;
+            state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
             iblockstate.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
@@ -474,7 +470,7 @@ public final class CauseTracker {
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState<?> phaseState = phaseData.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        if (CauseTracker.ENABLED && this.isVerbose && isComplete) {
+        if (this.isVerbose && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
@@ -488,7 +484,7 @@ public final class CauseTracker {
                     .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
         }
-        if (CauseTracker.ENABLED && phaseState.getPhase().requiresBlockCapturing(phaseState)) {
+        if (phaseState.getPhase().requiresBlockCapturing(phaseState)) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.

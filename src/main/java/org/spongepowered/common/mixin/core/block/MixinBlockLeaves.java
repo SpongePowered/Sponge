@@ -57,7 +57,6 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -77,7 +76,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        final boolean isBlockAlready = CauseTracker.ENABLED && causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
+        final boolean isBlockAlready = causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
         final IPhaseState currentState = causeTracker.getCurrentPhaseData().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
         if (isBlockAlready && !isWorldGen) {
@@ -85,10 +84,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                     .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                     .state((BlockState) state)
                     .build();
-            causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+            BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                     .source(locatable)
                     .addCaptures()
-                    .complete());
+                    .buildAndSwitch();
         }
         boolean result = worldIn.setBlockState(pos, state, flags);
         if (isBlockAlready && !isWorldGen) {
@@ -113,7 +112,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private void destroy(net.minecraft.world.World worldIn, BlockPos pos) {
         final IBlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
-        if (CauseTracker.ENABLED && !worldIn.isRemote) {
+        if (!worldIn.isRemote) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
@@ -124,10 +123,9 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                         .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                         .state((BlockState) state)
                         .build();
-                causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                        .source(locatable)
+                BlockPhase.State.BLOCK_DECAY.createPhaseContext().source(locatable)
                         .addCaptures()
-                        .complete());
+                        .buildAndSwitch();
             }
             this.dropBlockAsItem(worldIn, pos, state, 0);
             worldIn.setBlockToAir(pos);

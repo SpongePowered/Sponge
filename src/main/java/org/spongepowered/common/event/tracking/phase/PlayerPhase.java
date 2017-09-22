@@ -62,7 +62,7 @@ public class PlayerPhase extends TrackingPhase {
         }
 
         @Override
-        public GeneralizedContext createContext() {
+        public GeneralizedContext createPhaseContext() {
             return new GeneralizedContext(this);
         }
 

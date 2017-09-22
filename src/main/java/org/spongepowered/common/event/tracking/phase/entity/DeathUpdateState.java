@@ -57,8 +57,10 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
-    public BasicEntityContext createContext() {
-        return new BasicEntityContext(this);
+    public BasicEntityContext createPhaseContext() {
+        return new BasicEntityContext(this)
+            .addCaptures()
+            .addEntityDropCaptures();
     }
 
     @Override

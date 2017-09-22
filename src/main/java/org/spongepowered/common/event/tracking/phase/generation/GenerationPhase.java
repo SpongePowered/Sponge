@@ -59,16 +59,16 @@ public final class GenerationPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState<?> CHUNK_LOADING = new GeneralGenerationPhaseState("CHUNK_LOADING").bake();
+        public static final IPhaseState<GenericGenerationContext> CHUNK_LOADING = new GeneralGenerationPhaseState.Generic("CHUNK_LOADING").bake();
 
-        public static final IPhaseState<?> WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState("WORLD_SPAWNER_SPAWNING").bake();
+        public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState.Generic("WORLD_SPAWNER_SPAWNING").bake();
 
-        public static final IPhaseState<?> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
+        public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
-        public static final IPhaseState<?> TERRAIN_GENERATION = new GeneralGenerationPhaseState("TERRAIN_GENERATION");
+        public static final IPhaseState<GenericGenerationContext> TERRAIN_GENERATION = new TerrainGenerationState();
 
         static {
-            ((GeneralGenerationPhaseState) POPULATOR_RUNNING)
+            ((GeneralGenerationPhaseState<?>) POPULATOR_RUNNING)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
@@ -76,7 +76,7 @@ public final class GenerationPhase extends TrackingPhase {
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
                     .bake();
-            ((GeneralGenerationPhaseState) TERRAIN_GENERATION)
+            ((GeneralGenerationPhaseState<?>) TERRAIN_GENERATION)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)

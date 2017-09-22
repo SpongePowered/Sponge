@@ -111,7 +111,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public InventoryPacketContext createContext() {
+    public InventoryPacketContext createPhaseContext() {
         return new InventoryPacketContext(this);
     }
 }

@@ -143,7 +143,7 @@ public final class TrackingUtil {
         }
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entityIn);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = TickPhase.Tick.ENTITY.createContext();
+             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext();
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
         ) {
             Sponge.getCauseStackManager().pushCause(entityIn);
@@ -171,7 +171,7 @@ public final class TrackingUtil {
         }
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = TickPhase.Tick.ENTITY.createContext();
+             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext();
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
              ) {
             Sponge.getCauseStackManager().pushCause(entity);
@@ -202,7 +202,7 @@ public final class TrackingUtil {
         }
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(tile);
-            final PhaseContext<?> phaseContext = TickPhase.Tick.TILE_ENTITY.createContext()
+            final PhaseContext<?> phaseContext = TickPhase.Tick.TILE_ENTITY.createPhaseContext()
                     .source(tile);
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
@@ -254,7 +254,7 @@ public final class TrackingUtil {
                     .build();
             Sponge.getCauseStackManager().pushCause(locatable);
             IPhaseState<?> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
-            final PhaseContext<?> phaseContext = phase.createContext()
+            final PhaseContext<?> phaseContext = phase.createPhaseContext()
                     .source(locatable);
     
             checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
@@ -294,7 +294,7 @@ public final class TrackingUtil {
                     .build();
             Sponge.getCauseStackManager().pushCause(locatable);
             IPhaseState<?> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
-            final PhaseContext<?> phaseContext = phase.createContext()
+            final PhaseContext<?> phaseContext = phase.createPhaseContext()
                     .source(locatable);
     
             checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
@@ -326,7 +326,7 @@ public final class TrackingUtil {
 
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
-        try (DimensionContext context = TickPhase.Tick.DIMENSION.createContext().source(worldProvider).buildAndSwitch()) {
+        try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider).buildAndSwitch()) {
             worldProvider.onWorldUpdateEntities();
         }
     }
@@ -335,7 +335,7 @@ public final class TrackingUtil {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
         IPhaseState<?> phase = blockEvent.getCaptureBlocks() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
-        final PhaseContext<?> phaseContext = phase.createContext();
+        final PhaseContext<?> phaseContext = phase.createPhaseContext();
 
         Object source = blockEvent.getTickBlock() != null ? blockEvent.getTickBlock() : blockEvent.getTickTileEntity();
         if (source != null) {

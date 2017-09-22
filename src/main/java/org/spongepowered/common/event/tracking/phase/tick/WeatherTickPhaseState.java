@@ -44,8 +44,8 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     }
 
     @Override
-    public TickContext.General createContext() {
-        return new TickContext.General(this);
+    public TickContext.General createPhaseContext() {
+        return new TickContext.General(this).addCaptures();
     }
 
     @Override

@@ -50,6 +50,12 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     BlockDecayPhaseState() {
     }
 
+    @Override
+    public GeneralizedContext createPhaseContext() {
+        return super.createPhaseContext()
+            .addCaptures();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(GeneralizedContext context) {

@@ -30,4 +30,11 @@ final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
         super(id);
     }
 
+    @Override
+    public GenerationContext createPhaseContext() {
+        return new PopulatorPhaseContext(this)
+            .addEntityCaptures();
+    }
+
+
 }

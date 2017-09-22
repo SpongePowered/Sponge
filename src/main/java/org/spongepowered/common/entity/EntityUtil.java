@@ -376,7 +376,7 @@ public final class EntityUtil {
 
         adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             BasicEntityContext context = EntityPhase.State.CHANGING_DIMENSION.createContext().addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
+             BasicEntityContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
                      .addBlockCaptures()
                      .addEntityCaptures()
                      .buildAndSwitch()
@@ -949,7 +949,7 @@ public final class EntityUtil {
                 return null;
             }
     
-            if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
                     final Collection<ItemDropData> itemStacks = multimap.get(entity.getUniqueID());
@@ -968,7 +968,7 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
     
             // FIFTH - Capture the entity maybe?
-            if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     // We are capturing per entity drop
                     phaseContext.getCapturedEntityItemDropSupplier().get().put(entity.getUniqueID(), entityitem);
@@ -1021,7 +1021,7 @@ public final class EntityUtil {
             final IPhaseState currentState = peek.state;
             final PhaseContext<?> phaseContext = peek.context;
     
-            if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 final Collection<ItemDropData> itemStacks;
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -1065,7 +1065,7 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     // We are capturing per entity drop
                     phaseContext.getCapturedEntityItemDropSupplier().get().put(player.getUniqueID(), entityitem);
