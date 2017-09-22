@@ -45,18 +45,18 @@ public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProce
 
     @Override
     public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, defaultValue);
+        return new SpongeValue<>(this.key, false, defaultValue);
     }
 
     @Override
     protected boolean set(EntityItem container, Boolean value) {
-        ((IMixinEntityItem) container).setPickupDelay(value ? DataConstants.Entity.Item.MAGIC_NO_DESPAWN : DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
+        ((IMixinEntityItem) container).setDespawnDelay(value ? DataConstants.Entity.Item.MAGIC_NO_DESPAWN : DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityItem container) {
-        return Optional.of(((IMixinEntityItem) container).infinitePickupDelay());
+        return Optional.of(((IMixinEntityItem) container).infiniteDespawnDelay());
     }
 
     @Override
