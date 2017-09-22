@@ -56,9 +56,6 @@ final class InteractAtEntityPacketState extends BasicPacketState {
         if (stack != null) {
             context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
         }
-        context.addEntityDropCaptures()
-                .addEntityCaptures()
-                .addBlockCaptures();
     }
 
     @Override

@@ -42,17 +42,12 @@ public final class InternalNamedCauses {
 
     public static final class Packet {
 
-        public static final String CAPTURED_PACKET = "Packet";
         public static final String OPEN_CONTAINER = "OpenContainer";
-        public static final String CURSOR = "Cursor";
         public static final String ITEM_USED = "ItemUsed";
-        public static final String PACKET_PLAYER = "PacketPlayer";
-        public static final String TARGETED_ENTITY = "TargetedEntity";
         public static final String TRACKED_ENTITY_ID = "TargetedEntityId";
         public static final String PLACED_BLOCK_POSITION = "PlacedBlockPosition";
         public static final String PLACED_BLOCK_FACING = "BlockFacingPlacedAgainst";
         public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
-        public static final String IGNORING_CREATIVE = "IgnoringCreative";
         public static final String HAND_USED = "HandUsed";
         public static final String RESPONDED_RESOURCE_PACK = "OriginalResourcePack";
 

@@ -86,7 +86,6 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                     .build();
             BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                     .source(locatable)
-                    .addCaptures()
                     .buildAndSwitch();
         }
         boolean result = worldIn.setBlockState(pos, state, flags);
@@ -123,8 +122,8 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                         .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                         .state((BlockState) state)
                         .build();
-                BlockPhase.State.BLOCK_DECAY.createPhaseContext().source(locatable)
-                        .addCaptures()
+                BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+                    .source(locatable)
                         .buildAndSwitch();
             }
             this.dropBlockAsItem(worldIn, pos, state, 0);

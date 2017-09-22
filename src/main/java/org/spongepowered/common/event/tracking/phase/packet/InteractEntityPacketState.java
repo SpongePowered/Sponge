@@ -59,9 +59,6 @@ final class InteractEntityPacketState extends BasicPacketState {
             }
         }
 
-        context.addEntityDropCaptures()
-                .addEntityCaptures()
-                .addBlockCaptures();
     }
 
     @Override

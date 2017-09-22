@@ -118,7 +118,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
-        Transaction<BlockSnapshot> snapshotTransaction, PhaseContext<?> context) {
+        Transaction<BlockSnapshot> snapshotTransaction, BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
         final Vector3d changedPosition = changedLocation.getPosition();

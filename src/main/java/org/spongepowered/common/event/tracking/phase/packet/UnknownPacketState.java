@@ -45,9 +45,4 @@ final class UnknownPacketState extends BasicPacketState {
         return true;
     }
 
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
-        context.addBlockCaptures().addEntityCaptures().addEntityDropCaptures();
-    }
-
 }

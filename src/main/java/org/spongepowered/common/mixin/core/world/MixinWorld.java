@@ -1595,10 +1595,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!this.isRemote) {
             try (final PhaseContext<?> context = GeneralPhase.State.TILE_ENTITY_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
                 this.startPendingTileEntityTimings(); // Sponge
-                this.removeTileEntitiesForRemovedChunks();
             }
-        } else {
-            this.removeTileEntitiesForRemovedChunks();
         }
 
         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs

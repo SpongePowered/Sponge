@@ -59,16 +59,12 @@ class UseItemPacketState extends BasicPacketState {
         if (itemstack != null) {
             context.addExtra(InternalNamedCauses.Packet.ITEM_USED, itemstack);
         }
-
-        context.addEntityCaptures()
-               .addEntityDropCaptures()
-               .addBlockCaptures();
     }
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext<?> context) {
-        Player player = context.getRequiredExtra(InternalNamedCauses.Packet.PACKET_PLAYER, Player.class);
+        BasicPacketContext context) {
+        Player player = context.getSpongePlayer();
         BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation().get()).getBlockPos();
         IMixinChunk spongeChunk = (IMixinChunk) EntityUtil.getMinecraftWorld(player).getChunkFromBlockCoords(pos);
         if (blockChange == BlockChange.PLACE) {

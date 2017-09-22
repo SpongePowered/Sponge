@@ -165,41 +165,6 @@ public final class CauseTracker {
     }
 
     /**
-     * This method pushes a new phase onto the stack, runs phaseBody,
-     * and calls completePhase afterwards.
-     *
-     * <p>This method ensures that the necessary cleanup is performed if
-     * an exception is thrown by phaseBody - i.e. logging a message,
-     * and calling completePhase</p>
-     * @param state
-     * @param context
-     * @param phaseBody
-     */
-    public void switchToPhase(IPhaseState<?> state, PhaseContext<?> context, Callable<Void> phaseBody) {
-        this.switchToPhase(state, context);
-        try {
-            phaseBody.call();
-        } catch (Exception | NoClassDefFoundError e) {
-            this.abortCurrentPhase(e);
-            return;
-        }
-        this.completePhase(state);
-    }
-
-    /**
-     * Used when exception occurs during the main body of a phase.
-     * Avoids running the normal unwinding code and always pops from
-     * the stack.
-     */
-    private void abortCurrentPhase(Throwable t) {
-        PhaseData data = this.stack.peek();
-        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
-
-        // Since an exception occured during the main phase code, we don't know what state we're in.
-        // Therefore, we skip running the normal unwind functions that completePhase calls,
-        // and simply op the phase from the stack.
-        this.stack.pop();
-    }    /**
      * Used when exception occurs during the main body of a phase.
      * Avoids running the normal unwinding code
      */
@@ -302,7 +267,7 @@ public final class CauseTracker {
     }
 
     private void printEmptyStackOnCompletion() {
-        final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpected ").centre().hr()
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpectedly Completing An Empty Stack").centre().hr()
                 .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
                                 + "a change to any world takes place, however, we have been told"
                                 + "to complete a \"phase\" without having entered any phases."

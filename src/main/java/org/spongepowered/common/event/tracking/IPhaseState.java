@@ -82,7 +82,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext<?> context) {
+    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, C context) {
 
     }
 

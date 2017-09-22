@@ -340,8 +340,8 @@ public abstract class MixinWorldEntitySpawner {
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
     private static void onPerformWorldGenSpawningHead(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
-                .addCaptures()
                 .source(worldServer)
+                .world(worldServer)
                 .buildAndSwitch();
     }
 

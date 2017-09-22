@@ -59,8 +59,9 @@ public abstract class MixinWorldServer_Explosion extends MixinWorld {
     }
 
 
-    @Inject(method = "newExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Explosion;doExplosionB(Z)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onCallExplosion(Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<Explosion> callbackInfo, Explosion explosion) {
+    @Redirect(method = "newExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Explosion;doExplosionB(Z)V"))
+    private void onCallExplosion(Explosion explosion, boolean spawnParticles, Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking) {
+        explosion.doExplosionB(spawnParticles);
         for (EntityPlayer playerEntity : this.playerEntities) {
             final Vec3d knockback = explosion.getPlayerKnockbackMap().get(playerEntity);
             if (knockback != null) {

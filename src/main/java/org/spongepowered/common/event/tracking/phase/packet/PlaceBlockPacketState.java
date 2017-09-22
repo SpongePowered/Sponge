@@ -69,14 +69,11 @@ class PlaceBlockPacketState extends BasicPacketState {
             context.addExtra(InternalNamedCauses.Packet.ITEM_USED, ItemTypeRegistryModule.NONE);
         }
 
-        context.addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
     }
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext<?> context) {
+        BasicPacketContext context) {
         Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = transaction.getFinal().getLocation().get();
         BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();

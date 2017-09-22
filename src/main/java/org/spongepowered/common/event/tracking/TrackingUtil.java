@@ -143,7 +143,8 @@ public final class TrackingUtil {
         }
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entityIn);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext();
+             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext()
+                    .source(entityIn);
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
         ) {
             Sponge.getCauseStackManager().pushCause(entityIn);
@@ -157,6 +158,7 @@ public final class TrackingUtil {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, notifier);
                         context.owner(notifier);
                     });
+            context.buildAndSwitch();
             entityIn.onUpdate();
         }
     }
@@ -200,10 +202,10 @@ public final class TrackingUtil {
             // Don't tick TE's in chunks queued for unload
             return;
         }
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+             final PhaseContext<?> phaseContext = TickPhase.Tick.TILE_ENTITY.createPhaseContext()
+                 .source(tile)) {
             Sponge.getCauseStackManager().pushCause(tile);
-            final PhaseContext<?> phaseContext = TickPhase.Tick.TILE_ENTITY.createPhaseContext()
-                    .source(tile);
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
             chunk.getBlockNotifier(pos)
@@ -218,20 +220,22 @@ public final class TrackingUtil {
                 blockOwner = chunk.getBlockOwner(pos).orElse(null);
                 mixinTileEntity.setSpongeOwner(blockOwner);
             }
-            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, blockOwner);
+            if (blockOwner != null) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, blockOwner);
+                phaseContext.owner(blockOwner);
+            }
             phaseContext.owner = blockOwner;
             // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
             // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
-                    .buildAndSwitch());
 
-            try (Timing timing = mixinTileEntity.getTimingsHandler().startTiming();
-                 PhaseContext<?> context = phaseContext.buildAndSwitch()) {
+            // Finally, switch the context now that we have the owner and notifier
+            phaseContext.buildAndSwitch();
+
+            try (Timing timing = mixinTileEntity.getTimingsHandler().startTiming()) {
                 tile.update();
-            } catch (Exception e) {
-                causeTracker.printExceptionFromPhase(e);
             }
+        } catch (Exception e) {
+            CauseTracker.getInstance().printExceptionFromPhase(e);
         }
     }
 
@@ -676,7 +680,7 @@ public final class TrackingUtil {
             }
 
             proxyBlockAccess.proceed();
-            phaseState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
+            ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
             final int minecraftChangeFlag = oldBlockSnapshot.getUpdateFlag();
             if (((minecraftChangeFlag & 2) != 0)) { // Always try to notify clients of the change.

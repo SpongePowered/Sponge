@@ -291,25 +291,6 @@ public final class PacketPhase extends TrackingPhase {
                : ((PacketState<?>) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
     }
 
-    @SuppressWarnings("unchecked")
-    public void unwind(IPhaseState<?> phaseState,
-        PhaseContext<?> phaseContext) {
-        if (phaseState == General.INVALID) { // Invalid doesn't capture any packets.
-            return;
-        }
-        final Packet<?> packetIn = phaseContext.getRequiredExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class);
-        final EntityPlayerMP player = phaseContext.getSource(EntityPlayerMP.class).get();
-        final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
-
-        final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
-        checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
-        if (unwindFunction != null) {
-            unwindFunction.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
-        } else {
-            PacketFunction.UNKNOWN_PACKET.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
-        }
-    }
-
     @Override
     public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         return ((PacketState<?>) currentState).doBlockCapturing();

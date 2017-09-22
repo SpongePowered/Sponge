@@ -344,7 +344,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCreateBonusChest(CallbackInfo ci) {
         GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
                 .source(this)
-                .addCaptures()
                 .buildAndSwitch();
     }
 
@@ -1066,16 +1065,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
-        if (!isWorldGen && !handlesOwnCompletion) {
-            PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-                .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag)
-                .buildAndSwitch();
+        try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
+                ? null
+                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+                                           .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag)
+                                           .buildAndSwitch()) {
+            return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         }
-        final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
-        if (!isWorldGen && !handlesOwnCompletion) {
-            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
-        }
-        return state;
     }
 
     private void checkBlockBounds(int x, int y, int z) {
@@ -1179,57 +1175,59 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-                .addEntityCaptures()
-                .addEntityDropCaptures()
-                .addBlockCaptures();
-        phaseContext.addExtra("Explosion", explosion);
-        phaseContext.buildAndSwitch();
-        causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
-        final Explosion mcExplosion;
-        try {
-            // Since we already have the API created implementation Explosion, let's use it.
-            mcExplosion = (Explosion) explosion;
-        } catch (Exception e) {
-            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+
+        try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
+            .addEntityCaptures()
+            .addEntityDropCaptures()
+            .addBlockCaptures()) {
+            phaseContext.addExtra("Explosion", explosion)
+                .buildAndSwitch();
+            final Explosion mcExplosion;
+            try {
+                // Since we already have the API created implementation Explosion, let's use it.
+                mcExplosion = (Explosion) explosion;
+            } catch (Exception e) {
+                new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
                     .add("An explosion that was expected to be used for this implementation does not")
                     .add("originate from this implementation.")
                     .add(e)
                     .trace();
-            return;
-        }
-        final double x = mcExplosion.x;
-        final double y = mcExplosion.y;
-        final double z = mcExplosion.z;
-        final boolean damagesTerrain = mcExplosion.damagesTerrain;
-        final float strength = explosion.getRadius();
-
-        // Set up the pre event
-        final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(), explosion, this);
-        if (SpongeImpl.postEvent(event)) {
-            this.processingExplosion = false;
-            causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
-            return;
-        }
-        // Sponge End
-
-        mcExplosion.doExplosionA();
-        mcExplosion.doExplosionB(false);
-
-        if (!damagesTerrain) {
-            mcExplosion.clearAffectedBlockPositions();
-        }
-
-        for (EntityPlayer entityplayer : this.playerEntities) {
-            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
-                        mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+                return;
             }
-        }
+            final double x = mcExplosion.x;
+            final double y = mcExplosion.y;
+            final double z = mcExplosion.z;
+            final boolean damagesTerrain = mcExplosion.damagesTerrain;
+            final float strength = explosion.getRadius();
 
-        // Sponge Start - end processing
-        this.processingExplosion = false;
-        causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
+            // Set up the pre event
+            final ExplosionEvent.Pre
+                event =
+                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(), explosion, this);
+            if (SpongeImpl.postEvent(event)) {
+                this.processingExplosion = false;
+                return;
+            }
+            // Sponge End
+
+            mcExplosion.doExplosionA();
+            mcExplosion.doExplosionB(false);
+
+            if (!damagesTerrain) {
+                mcExplosion.clearAffectedBlockPositions();
+            }
+
+            for (EntityPlayer entityplayer : this.playerEntities) {
+                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                    ((EntityPlayerMP) entityplayer).connection
+                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
+                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+                }
+            }
+
+            // Sponge Start - end processing
+            this.processingExplosion = false;
+        }
         // Sponge End
     }
 

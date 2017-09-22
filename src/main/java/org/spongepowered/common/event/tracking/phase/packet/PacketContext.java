@@ -26,6 +26,8 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 @SuppressWarnings("unchecked")
@@ -33,10 +35,50 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     EntityPlayerMP packetPlayer;
     Packet<?> packet;
+    private ItemStackSnapshot cursor;
+    private boolean ignoreCreative;
 
     protected PacketContext(PacketState<? extends P> state) {
         super(state);
     }
 
+    public P packet(Packet<?> packet) {
+        this.packet = packet;
+        return (P) this;
+    }
 
+    public P packetPlayer(EntityPlayerMP playerMP) {
+        this.packetPlayer = playerMP;
+        return (P) this;
+    }
+
+    public P cursor(ItemStackSnapshot snapshot) {
+        this.cursor = snapshot;
+        return (P) this;
+    }
+
+    public P ignoreCreative(boolean creative) {
+        this.ignoreCreative = creative;
+        return (P) this;
+    }
+
+    public EntityPlayerMP getPacketPlayer() {
+        return packetPlayer;
+    }
+
+    public Player getSpongePlayer() {
+        return (Player) this.packetPlayer;
+    }
+
+    public <K extends Packet<?>> K getPacket() {
+        return (K) packet;
+    }
+
+    public ItemStackSnapshot getCursor() {
+        return cursor;
+    }
+
+    public boolean getIgnoringCreative() {
+        return ignoreCreative;
+    }
 }

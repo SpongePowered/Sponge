@@ -301,7 +301,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                     context.owner(owner);
                 }
                 context.buildAndSwitch();
-                causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, context);
             }
         }
     }

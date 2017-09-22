@@ -385,9 +385,6 @@ public final class EntityUtil {
             Sponge.getCauseStackManager().pushCause(mixinEntity);
 
             Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
-            context.buildAndSwitch();
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-
     
             if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
                 fromWorld.profiler.startSection("placing");
@@ -397,8 +394,7 @@ public final class EntityUtil {
             }
     
             // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
-            causeTracker.completePhase(EntityPhase.State.CHANGING_DIMENSION);
-    
+
             // Grab the exit location of entity after being placed into portal
             final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins

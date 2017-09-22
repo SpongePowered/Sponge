@@ -34,9 +34,6 @@ final class CloseWindowState extends BasicPacketState {
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
         context
-                .addExtra(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer)
-                .addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
+                .addExtra(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer);
     }
 }

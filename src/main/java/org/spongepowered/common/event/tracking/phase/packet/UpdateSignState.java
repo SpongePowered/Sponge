@@ -30,12 +30,4 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 
 final class UpdateSignState extends BasicPacketState {
 
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
-        context
-                .addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
-
-    }
 }

@@ -35,9 +35,4 @@ public class StopSleepingPacketState extends BasicPacketState {
     StopSleepingPacketState() {
     }
 
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
-        context.addBlockCaptures();
-    }
-
 }

@@ -766,14 +766,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     private void onPlayerRemoveFromWorldFromDisconnect(WorldServer world, Entity player, EntityPlayerMP playerMP) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(playerMP).addCaptures().buildAndSwitch()) {
-            causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext()
-                    .source(playerMP)
-                    .addCaptures()
-                    .buildAndSwitch()
-            );
             world.removeEntity(player);
         }
-        causeTracker.completePhase(PlayerPhase.State.PLAYER_LOGOUT);
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))

@@ -346,8 +346,7 @@ public interface PacketFunction {
                                 entities.add(EntityUtil.fromNative(item));
                             }
 
-                            final CPacketPlayerDigging packetIn =
-                                    context.getRequiredExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketPlayerDigging.class);
+                            final CPacketPlayerDigging packetIn = context.getPacket();
 
                             CPacketPlayerDigging.Action action = packetIn.getAction();
 
@@ -600,8 +599,8 @@ public interface PacketFunction {
         }
 
         // TODO clear this shit out of the context
-        final CPacketClickWindow packetIn = context.getRequiredExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class);
-        final ItemStackSnapshot lastCursor = context.getRequiredExtra(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
+        final CPacketClickWindow packetIn = context.getPacket();
+        final ItemStackSnapshot lastCursor = context.getCursor();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
@@ -825,7 +824,7 @@ public interface PacketFunction {
     });
     PacketFunction CLOSE_WINDOW = ((packet, state, player, context) -> {
         final Container container = context.getRequiredExtra(InternalNamedCauses.Packet.OPEN_CONTAINER, Container.class);
-        ItemStackSnapshot lastCursor = context.getRequiredExtra(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
+        ItemStackSnapshot lastCursor = context.getCursor();
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
@@ -886,7 +885,7 @@ public interface PacketFunction {
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
         if (state == PacketPhase.Inventory.OPEN_INVENTORY) {
-            final ItemStackSnapshot lastCursor = context.getRequiredExtra(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
+            final ItemStackSnapshot lastCursor = context.getCursor();
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -1062,6 +1061,6 @@ public interface PacketFunction {
 
     PacketFunction HANDLED_EXTERNALLY = UNKNOWN_PACKET;
 
-    void unwind(Packet<?> packet, IPhaseState<?> state, EntityPlayerMP player, PhaseContext<?> context);
+    void unwind(Packet<?> packet, IPhaseState<?> state, EntityPlayerMP player, PacketContext<?> context);
 
 }

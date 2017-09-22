@@ -62,12 +62,13 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void unwind(P phaseContext) {
         if (this == PacketPhase.General.INVALID) { // Invalid doesn't capture any packets.
             return;
         }
-        final Packet<?> packetIn = phaseContext.getRequiredExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class);
+        final Packet<?> packetIn = phaseContext.getPacket();
         final EntityPlayerMP player = phaseContext.getSource(EntityPlayerMP.class).get();
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
 
@@ -184,7 +185,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     @Override
     public String toString() {
-        return Objects.toString(this);
+        return Objects.toString("PacketState");
     }
 
 }

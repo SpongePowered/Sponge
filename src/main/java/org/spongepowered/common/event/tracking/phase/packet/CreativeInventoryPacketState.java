@@ -24,19 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import org.spongepowered.common.event.tracking.PhaseContext;
-
 final class CreativeInventoryPacketState extends BasicPacketState {
-
-
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
-        context
-                .addEntityCaptures()
-                .addEntityDropCaptures();
-    }
 
     @Override
     public boolean ignoresItemPreMerges() {

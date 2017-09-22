@@ -205,6 +205,7 @@ public final class GeneralPhase extends TrackingPhase {
         performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
 
+    @SuppressWarnings("unchecked")
     private static void performPostBlockAdditions(PhaseContext<?> postContext, List<Transaction<BlockSnapshot>> transactions,
                                                   IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
@@ -257,7 +258,7 @@ public final class GeneralPhase extends TrackingPhase {
 
             proxyBlockAccess.proceed();
 
-            unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, unwindingPhaseContext);
+            ((IPhaseState) unwindingState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, unwindingPhaseContext);
 
             if (((updateFlag & 2) != 0)) {
                 // Since notifyBlockUpdate is basically to tell clients that the block position has changed,

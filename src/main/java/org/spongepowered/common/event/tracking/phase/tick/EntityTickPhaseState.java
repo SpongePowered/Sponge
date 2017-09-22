@@ -305,13 +305,13 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     public EntityTickContext createPhaseContext() {
-        return new EntityTickContext();
+        return new EntityTickContext().addCaptures();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext<?> context) {
+        EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());

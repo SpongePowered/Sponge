@@ -512,16 +512,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                             final boolean enterDeathPhase = !causeTracker.getCurrentState().tracksEntityDeaths();
                             if (enterDeathPhase) {
                                 Sponge.getCauseStackManager().pushCause(this);
-                                final PhaseContext<?> context = EntityPhase.State.DEATH.createPhaseContext()
-                                    .source(this)
-                                    .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, source);
-                                this.getCreatorUser().ifPresent(context::owner);
-                                this.getNotifierUser().ifPresent(context::notifier);
-                                context.buildAndSwitch();
                             }
-                            this.onDeath(source);
-                            if (enterDeathPhase) {
-                                causeTracker.completePhase(EntityPhase.State.DEATH);
+                            try (final PhaseContext<?> context = !enterDeathPhase
+                                                                 ? null
+                                                                 : EntityPhase.State.DEATH.createPhaseContext()
+                                                                     .source(this)
+                                                                     .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, source)
+                                                                     .owner(() -> this.getCreatorUser())
+                                                                     .notifier(() -> this.getNotifierUser())
+                                                                     .buildAndSwitch()) {
+                                this.onDeath(source);
                             }
                         }
                     }

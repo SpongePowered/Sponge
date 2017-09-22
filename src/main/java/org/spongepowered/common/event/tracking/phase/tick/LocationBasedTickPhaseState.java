@@ -69,7 +69,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
-        Transaction<BlockSnapshot> snapshotTransaction, PhaseContext<?> context) {
+        Transaction<BlockSnapshot> snapshotTransaction, T context) {
         final Location<World> location = getLocatableBlockSourceFromContext(context).getLocation();
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();

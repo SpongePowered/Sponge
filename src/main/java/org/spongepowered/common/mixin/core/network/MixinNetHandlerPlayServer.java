@@ -114,6 +114,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -324,8 +325,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         if (this.player.interactionManager.isCreative()) {
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
-            final PhaseContext<?> context = peek.context;
-            final boolean ignoresCreative = context.getRequiredExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class);
+            final PacketContext<?> context = (PacketContext<?>) peek.context;
+            final boolean ignoresCreative = context.getIgnoringCreative();
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
 
