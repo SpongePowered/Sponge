@@ -39,9 +39,18 @@ public abstract class MixinEntityLivingBase {
     @Shadow public int deathTime;
 
     @Redirect(method = "onDeathUpdate", at = @At(value = "FIELD", target = ENTITY_LIVING_BASE_DEATH_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupDeathTime(EntityLivingBase self, int modifier) {
+    private void fixupDeathTime(EntityLivingBase self, int vanillaNewDeathTime) {
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.deathTime = Math.min(20, this.deathTime + ticks);
+        int newDeathTime = this.deathTime + ticks;
+        // At tick 20, XP is dropped and the death animation finishes. The
+        // entity is also removed from the world... except in the case of
+        // players, which are not removed until they log out or click Respawn.
+        // For players, then, let the death time pass 20 to avoid XP
+        // multiplication - not just duplication, but *multiplication*.
+        if (vanillaNewDeathTime <= 20 && newDeathTime > 20) {
+            newDeathTime = 20;
+        }
+        this.deathTime = newDeathTime;
     }
 
 }
