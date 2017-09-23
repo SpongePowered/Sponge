@@ -42,7 +42,7 @@ public abstract class MixinPlayerInteractionManager {
 
     @Redirect(method = "updateBlockRemoving", at = @At(value = "FIELD", target = PLAYER_INTERACTION_BLOCK_DAMAGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupDiggingTime(PlayerInteractionManager self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) this.world.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         this.curblockDamage += ticks;
     }
 
