@@ -18,6 +18,7 @@
         "MixinPlayerInteractionManager",
         "MixinTileEntityBrewingStand",
         "MixinTileEntityFurnace",
+        "MixinWorld",
         "MixinWorldServer"
     ],
     "server": [

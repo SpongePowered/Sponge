@@ -24,28 +24,24 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
-@Mixin(EntityPlayerMP.class)
-public abstract class MixinEntityPlayerMP extends Entity {
+import javax.annotation.Nullable;
 
-    private static final String ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD = "Lnet/minecraft/entity/player/EntityPlayerMP;timeUntilPortal:I";
+@Mixin(World.class)
+public abstract class MixinWorld implements IMixinRealTimeTicking {
 
-    public MixinEntityPlayerMP(World worldIn) {
-        super(worldIn);
+    @Shadow @Nullable public abstract MinecraftServer getMinecraftServer();
+
+    @Override
+    public long getRealTimeTicks() {
+        if (this.getMinecraftServer() != null) {
+            return ((IMixinRealTimeTicking) this.getMinecraftServer()).getRealTimeTicks();
+        }
+        return 1;
     }
-
-    @Redirect(method = "decrementTimeUntilPortal", at = @At(value = "FIELD", target = ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    public void fixupPortalCooldown(EntityPlayerMP self, int modifier) {
-        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.timeUntilPortal = Math.max(0, this.timeUntilPortal - ticks);
-    }
-
 }

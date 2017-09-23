@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(value = TileEntityFurnace.class, priority = 1001)
 public abstract class MixinTileEntityFurnace extends TileEntity {
@@ -45,19 +45,19 @@ public abstract class MixinTileEntityFurnace extends TileEntity {
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_BURN_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupBurnTime(TileEntityFurnace self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.getWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.furnaceBurnTime = Math.max(0, this.furnaceBurnTime - ticks);
     }
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupCookTime(TileEntityFurnace self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.getWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.cookTime = Math.min(this.totalCookTime, this.cookTime + ticks);
     }
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 3))
     public void fixupCookTimeCooldown(TileEntityFurnace self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.getWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.cookTime = MathHelper.clamp(this.cookTime - (2 * ticks), 0, this.totalCookTime);
     }
 

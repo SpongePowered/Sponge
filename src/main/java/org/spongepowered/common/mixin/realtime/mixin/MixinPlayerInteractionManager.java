@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager {
@@ -42,7 +42,7 @@ public abstract class MixinPlayerInteractionManager {
 
     @Redirect(method = "updateBlockRemoving", at = @At(value = "FIELD", target = PLAYER_INTERACTION_BLOCK_DAMAGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupDiggingTime(PlayerInteractionManager self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.world.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.world.getMinecraftServer()).getRealTimeTicks();
         this.curblockDamage += ticks;
     }
 

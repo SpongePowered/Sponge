@@ -28,7 +28,7 @@ import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityAgeable.class)
 public abstract class MixinEntityAgeable {
@@ -38,14 +38,14 @@ public abstract class MixinEntityAgeable {
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 0))
     public void fixupGrowingUp(EntityAgeable self, int age) {
         // Subtract the one the original update method added
-        int diff = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks() - 1;
+        int diff = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks() - 1;
         self.setGrowingAge(Math.min(0, age + diff));
     }
 
     @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = ENTITY_AGEABLE_SET_GROWING_AGE_METHOD, ordinal = 1))
     public void fixupBreedingCooldown(EntityAgeable self, int age) {
         // Subtract the one the original update method added
-        int diff = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks() - 1;
+        int diff = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks() - 1;
         self.setGrowingAge(Math.max(0, age - diff));
     }
 
