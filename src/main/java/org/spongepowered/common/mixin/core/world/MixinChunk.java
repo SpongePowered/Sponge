@@ -939,7 +939,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
         final List<Entity> entities = new ArrayList<>();
-        getEntitiesOfTypeWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entities,
+        getEntitiesOfTypeWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entities,
             entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
         return entities.stream().map(entity -> (org.spongepowered.api.entity.Entity) entity).collect(Collectors.toSet());
     }
