@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer {
@@ -45,13 +45,13 @@ public abstract class MixinNetHandlerPlayServer {
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_CHAT_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupChatSpamCheck(NetHandlerPlayServer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) serverController).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) serverController).getRealTimeTicks();
         this.chatSpamThresholdCount = Math.max(0, this.chatSpamThresholdCount - ticks);
     }
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = NET_HANDLER_PLAY_DROP_SPAM_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupDropSpamCheck(NetHandlerPlayServer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) serverController).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.serverController).getRealTimeTicks();
         this.itemDropThreshold = Math.max(0, this.itemDropThreshold - ticks);
     }
 

@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 // TODO(amaranth): Should this handle fire ticks too? Mobs can't move fast enough
 @Mixin(Entity.class)
@@ -45,13 +45,13 @@ public abstract class MixinEntity {
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "FIELD", target = ENTITY_RIDABLE_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupEntityCooldown(Entity self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.world.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         this.rideCooldown = Math.max(0, this.rideCooldown - ticks);
     }
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "FIELD", target = ENTITY_PORTAL_COUNTER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupPortalCounter(Entity self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.world.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.world).getRealTimeTicks();
         this.portalCounter += ticks;
     }
 

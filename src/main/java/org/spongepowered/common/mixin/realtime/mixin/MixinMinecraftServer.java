@@ -29,10 +29,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
+public abstract class MixinMinecraftServer implements IMixinRealTimeTicking {
 
     private static long lastTickNanos = System.nanoTime();
     private static long realTimeTicks = 1;
