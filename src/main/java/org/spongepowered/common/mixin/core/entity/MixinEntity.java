@@ -90,7 +90,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
-import org.spongepowered.api.util.blockray.BlockRay;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
@@ -756,7 +755,7 @@ public abstract class MixinEntity implements IMixinEntity {
             return Optional.empty();
         }
         try {
-            return Optional.of(VecHelper.toSponge(boundingBox));
+            return Optional.of(VecHelper.toSpongeAABB(boundingBox));
         } catch (IllegalArgumentException exception) {
             // Bounding box is degenerate, the entity doesn't actually have one
             return Optional.empty();

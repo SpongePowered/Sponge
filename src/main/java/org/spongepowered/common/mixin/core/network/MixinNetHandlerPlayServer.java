@@ -711,11 +711,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
 
                     SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
-                    Optional<Vector3d> interactionPoint = Optional.of(VecHelper.toVector3d(packetIn.getHitVec()));
 
                     // Is interaction allowed with item in hand
-                    if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, interactionPoint, entity).isCancelled()
-                            || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, entity, hand, interactionPoint).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
+                                    .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
+                            entity, hand, VecHelper.toVector3d(packetIn.getHitVec())).isCancelled()) {
                         // Restore held item in hand
                         int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
                         Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
@@ -748,7 +748,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     EnumHand hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
                     ItemStack itemstack = this.player.getHeldItem(hand);
                     SpongeCommonEventFactory.lastPrimaryPacketTick = this.serverController.getTickCounter();
-                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, Optional.empty(), entity).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn.getHitVec()), entity).isCancelled()) {
                         ((IMixinEntityPlayerMP) this.player).restorePacketItem(hand);
                         return;
                     }

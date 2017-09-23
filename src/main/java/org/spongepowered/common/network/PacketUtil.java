@@ -41,6 +41,8 @@ import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
@@ -196,9 +198,13 @@ public class PacketUtil {
                 case ABORT_DESTROY_BLOCK:
                 case STOP_DESTROY_BLOCK:
                     final BlockPos pos = packet.getPosition();
-                    Vector3d interactionPoint = VecHelper.toVector3d(pos);
-                    BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
-                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, Optional.of(interactionPoint), blockSnapshot).isCancelled()) {
+                    final Vector3d interactionPoint = VecHelper.toVector3d(pos);
+                    final BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
+                    final RayTraceResult result = playerMP.world.rayTraceBlocks(new Vec3d(playerMP.posX, playerMP.posY + (double)playerMP
+                            .getEyeHeight(), playerMP.posZ), VecHelper.toVec3d(pos));
+
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, result == null ? null :
+                            VecHelper.toVector3d(result.hitVec), blockSnapshot).isCancelled()) {
                         ((IMixinEntityPlayerMP) playerMP).sendBlockChange(pos, playerMP.world.getBlockState(pos));
                         return true;
                     }
@@ -217,7 +223,9 @@ public class PacketUtil {
                         return true;
                     }
                     if (packet.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                        if (SpongeCommonEventFactory.callInteractBlockEventPrimary(playerMP, blockSnapshot, EnumHand.MAIN_HAND, packet.getFacing()).isCancelled()) {
+
+                        if (SpongeCommonEventFactory.callInteractBlockEventPrimary(playerMP, blockSnapshot, EnumHand.MAIN_HAND, packet.getFacing(),
+                                result == null ? null : VecHelper.toVector3d(result.hitVec)).isCancelled()) {
                             ((IMixinEntityPlayerMP) playerMP).sendBlockChange(pos, playerMP.world.getBlockState(pos));
                             return true;
                         }
@@ -239,8 +247,11 @@ public class PacketUtil {
 
             final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
-            SpongeCommonEventFactory.callInteractBlockEventSecondary(playerMP, heldItem, Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
+
+            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), null, BlockSnapshot
+                    .NONE).isCancelled();
+            SpongeCommonEventFactory.callInteractBlockEventSecondary(playerMP, heldItem, null, BlockSnapshot.NONE, Direction.NONE,
+                    packet.getHand());
             if (isCancelled) {
                 // Multiple slots may have been changed on the client. Right
                 // clicking armor is one example - the client changes it
@@ -253,12 +264,15 @@ public class PacketUtil {
             lastTryBlockPacketTimeStamp = System.currentTimeMillis();
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             Vector3d interactionPoint = VecHelper.toVector3d(packet.getPos());
+            final Vec3d startPos = new Vec3d(playerMP.posX, playerMP.posY + playerMP.getEyeHeight(), playerMP.posZ);;
+            final RayTraceResult result = playerMP.world.rayTraceBlocks(startPos, VecHelper.toVec3d(packet.getPos()));
             BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
             final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.of(interactionPoint), blockSnapshot).isCancelled();
+            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), result ==
+                    null ? null : VecHelper.toVector3d(result.hitVec), blockSnapshot).isCancelled();
             lastTryBlockPacketItemResult = isCancelled;
-            if(isCancelled) {
+            if (isCancelled) {
                 // update client
                 BlockPos pos = packet.getPos();
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos));
