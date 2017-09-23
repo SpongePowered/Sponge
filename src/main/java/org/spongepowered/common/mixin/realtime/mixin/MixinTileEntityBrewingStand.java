@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(TileEntityBrewingStand.class)
 public abstract class MixinTileEntityBrewingStand extends TileEntity {
@@ -41,7 +41,7 @@ public abstract class MixinTileEntityBrewingStand extends TileEntity {
 
     @Redirect(method = "update", at = @At(value = "FIELD", target = BREWING_STAND_BREW_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupBrewTime(TileEntityBrewingStand self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.getWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) this.getWorld()).getRealTimeTicks();
         this.brewTime = Math.max(0, this.brewTime - ticks);
     }
 

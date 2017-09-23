@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.realtime;
 
-public interface IMixinMinecraftServer {
+public interface IMixinRealTimeTicking {
 
     long getRealTimeTicks();
 }
