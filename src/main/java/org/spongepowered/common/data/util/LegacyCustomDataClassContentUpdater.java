@@ -25,12 +25,14 @@
 package org.spongepowered.common.data.util;
 
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.DataRegistrationNotFoundException;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
-public class LegacyCustomDataClassContentUpdater implements DataContentUpdater{
+import java.util.Optional;
+
+public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {
@@ -47,9 +49,12 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater{
     public DataView update(DataView content) {
         final String className = content.getString(DataQueries.DATA_CLASS).get();
 
-        final DataRegistration<?, ?> registration = SpongeManipulatorRegistry.getInstance().getRegistrationForLegacyId(className)
-                .orElseThrow(() -> new DataRegistrationNotFoundException(className));
-        content.set(DataQueries.DATA_ID, registration.getId());
+        final Optional<DataRegistration<?, ?>> registration = SpongeManipulatorRegistry.getInstance().getRegistrationForLegacyId(className);
+        if (!registration.isPresent()) {
+            SpongeImpl.getLogger().warn("Could not find data registration for class '{}' - ignoring", className);
+            return content;
+        }
+        content.set(DataQueries.DATA_ID, registration.get().getId());
         content.remove(DataQueries.DATA_CLASS);
         return content;
     }
