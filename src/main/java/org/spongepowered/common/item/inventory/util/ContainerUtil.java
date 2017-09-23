@@ -403,14 +403,16 @@ public final class ContainerUtil {
             return ((CustomContainer) container).inv.getCarrier();
         } else if (container instanceof ContainerChest) {
             IInventory inventory = ((ContainerChest) container).getLowerChestInventory();
-            if (inventory instanceof TileEntityChest) {
-                return (Carrier) inventory;
-            } else if (inventory instanceof InventoryLargeChest) {
-                return ((Carrier) ((InventoryLargeChest) inventory).lowerChest);
-                // TODO: Decide what the carrier should be (wrapper of 2 Block-based carriers including info which block is the upper inventory)
-            } else {
-                return carrierOrNull(inventory);
+            if (inventory instanceof Carrier) {
+                if (inventory instanceof TileEntityChest) {
+                    return (Carrier) inventory;
+                } else if (inventory instanceof InventoryLargeChest) {
+                    return ((Carrier) ((InventoryLargeChest) inventory).lowerChest);
+                    // TODO: Decide what the carrier should be (wrapper of 2 Block-based carriers including info which block is the upper inventory)
+                }
             }
+
+            return carrierOrNull(inventory);
         } else if (container instanceof ContainerHopper) {
             return carrierOrNull(((ContainerHopper) container).hopperInventory);
         } else if (container instanceof ContainerDispenser) {
