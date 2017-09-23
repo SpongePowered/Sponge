@@ -27,6 +27,7 @@ package org.spongepowered.common.data.property.store.item;
 import com.google.common.collect.ImmutableSet;  
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import org.spongepowered.api.block.BlockType;
@@ -44,7 +45,7 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
     @Override
     protected Optional<HarvestingProperty> getFor(ItemStack itemStack) {
         final Item item = itemStack.getItem();
-        if (item instanceof ItemTool) {
+        if (item instanceof ItemTool && !(item instanceof ItemPickaxe)) {
             final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ItemTool) item).effectiveBlocks);
             return Optional.of(new HarvestingProperty(blocks));
         }
