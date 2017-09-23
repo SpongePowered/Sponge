@@ -61,9 +61,9 @@ final class PistonMovingPhaseState extends BlockPhaseState {
             }
             final LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class)
                     .orElseThrow(TrackingUtil.throwWithContext("Could not find a piston locatable block!", phaseContext));
-            Sponge.getCauseStackManager().pushCause(locatable);
+            frame.pushCause(locatable);
             phaseContext.addNotifierAndOwnerToCauseStack();
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         final ArrayList<Entity> entities = new ArrayList<>();

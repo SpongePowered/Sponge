@@ -81,15 +81,15 @@ public class PlayerPhase extends TrackingPhase {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing a player leaving, but we're not!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
             phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
                     entities.add(EntityUtil.fromNative(item));
                 }
                 final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeEventFactory.createDropItemEventDispense(frame.getCurrentCause(), entities);
                 SpongeImpl.postEvent(dispense);
                 if (!dispense.isCancelled()) {
                     for (Entity entity : dispense.getEntities()) {
@@ -97,7 +97,7 @@ public class PlayerPhase extends TrackingPhase {
                     }
                 }
             });
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             phaseContext.getCapturedItemStackSupplier().ifPresentAndNotEmpty(items -> {
                 final List<EntityItem> drops = items.stream()
                         .map(drop -> drop.create(EntityUtil.getMinecraftWorld(player)))
@@ -105,7 +105,7 @@ public class PlayerPhase extends TrackingPhase {
                 final List<Entity> entities = (List<Entity>) (List<?>) drops;
                 if (!entities.isEmpty()) {
                     DropItemEvent.Custom event =
-                            SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                            SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         for (Entity droppedItem : event.getEntities()) {

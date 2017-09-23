@@ -264,7 +264,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 this.tracksEntityDeaths =
                     CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
                 if (this.tracksEntityDeaths) {
-                    Sponge.getCauseStackManager().pushCause(this);
+                    frame.pushCause(this);
                     final PhaseContext context = PhaseContext.start()
                         .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
                         .source(this);
@@ -515,7 +515,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
                             if (enterDeathPhase) {
-                                Sponge.getCauseStackManager().pushCause(this);
+                                frame.pushCause(this);
                                 final PhaseContext context = PhaseContext.start().source(this);
                                 this.getCreatorUser().ifPresent(context::owner);
                                 this.getNotifierUser().ifPresent(context::notifier);
@@ -611,7 +611,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 DamageEventHandler.generateCauseFor(damageSource);
     
-                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
+                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), originalFunctions, this, originalDamage);
                 if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
                     Sponge.getEventManager().post(event);
                 }
@@ -839,7 +839,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!entityLivingBase.world.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(entityLivingBase);
+                frame.pushCause(entityLivingBase);
                 causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
                         .addCaptures()
                         .addEntityDropCaptures()

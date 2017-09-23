@@ -74,14 +74,14 @@ final class CommandState extends GeneralState {
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(sender);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            frame.pushCause(sender);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid,
                         // need to investigate further.
                         final SpawnEntityEvent spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             final boolean isPlayer = sender instanceof Player;
@@ -96,8 +96,8 @@ final class CommandState extends GeneralState {
                     });
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(sender);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.pushCause(sender);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             phaseContext.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
                         for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
@@ -129,11 +129,11 @@ final class CommandState extends GeneralState {
                                         .map(data -> data.create(minecraftWorld))
                                         .map(EntityUtil::fromNative)
                                         .collect(Collectors.toList());
-                                Sponge.getCauseStackManager().pushCause(affectedEntity.get());
+                                frame.pushCause(affectedEntity.get());
                                 final DropItemEvent.Destruct destruct =
-                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
                                 SpongeImpl.postEvent(destruct);
-                                Sponge.getCauseStackManager().popCause();
+                                frame.popCause();
                                 if (!destruct.isCancelled()) {
                                     final boolean isPlayer = sender instanceof Player;
                                     final Player player = isPlayer ? (Player) sender : null;

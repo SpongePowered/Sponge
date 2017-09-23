@@ -52,18 +52,18 @@ class PlayerTickPhaseState extends TickPhaseState {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
             phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
                 final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
                     EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                     EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             });
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
                 final ArrayList<Entity> capturedEntities = new ArrayList<>();
                 for (EntityItem entity : entities) {
@@ -71,7 +71,7 @@ class PlayerTickPhaseState extends TickPhaseState {
                 }
 
                 final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+                        SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), capturedEntities);
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
                     EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
@@ -98,12 +98,12 @@ class PlayerTickPhaseState extends TickPhaseState {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
             final List<Entity> entities = new ArrayList<>(1);
             entities.add(entity);
             final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
             SpongeImpl.postEvent(spawnEntityEvent);
             if (!spawnEntityEvent.isCancelled()) {
                 for (Entity anEntity : spawnEntityEvent.getEntities()) {

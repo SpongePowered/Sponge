@@ -765,9 +765,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.pushCause(this);
             ChangeGameModeEvent.TargetPlayer event =
-                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
                             (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {

@@ -114,10 +114,10 @@ public abstract class MixinMobSpawnerBaseLogic {
             return null;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
             Transform<org.spongepowered.api.world.World> transform = new Transform<>(
                     ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 return null;

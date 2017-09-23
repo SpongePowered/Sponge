@@ -210,7 +210,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
+            frame.pushCause(player);
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseContext complete = PhaseContext.start()
                 .source(player)

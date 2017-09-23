@@ -54,8 +54,8 @@ final class DispensePhaseState extends BlockPhaseState {
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(blockSnapshot);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DISPENSE);
+            frame.pushCause(blockSnapshot);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DISPENSE);
             phaseContext.addNotifierAndOwnerToCauseStack();
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {

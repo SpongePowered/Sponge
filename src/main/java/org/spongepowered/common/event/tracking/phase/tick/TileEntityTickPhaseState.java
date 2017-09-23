@@ -80,8 +80,8 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                     .ifPresentAndNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
                     });
-            Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            frame.pushCause(tickingTile.getLocatableBlock());
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
@@ -90,7 +90,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                         }
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), capturedEntities);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
@@ -126,13 +126,13 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         // Separate experience from other entities
         if (entity instanceof EntityXPOrb) {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                frame.pushCause(tickingTile.getLocatableBlock());
+                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
                 context.addNotifierAndOwnerToCauseStack();
                 final ArrayList<Entity> exp = new ArrayList<>();
                 exp.add(entity);
                 final SpawnEntityEvent event =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), exp);
+                        SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), exp);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity anEntity : event.getEntities()) {
@@ -149,12 +149,12 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final List<Entity> nonExpEntities = new ArrayList<>(1);
         nonExpEntities.add(entity);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
+            frame.pushCause(tickingTile.getLocatableBlock());
+            frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
             context.addNotifierAndOwnerToCauseStack();
             final SpawnEntityEvent
                     spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
+                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), nonExpEntities);
             SpongeImpl.postEvent(spawnEntityEvent);
             if (!spawnEntityEvent.isCancelled()) {
                 for (Entity anEntity : spawnEntityEvent.getEntities()) {

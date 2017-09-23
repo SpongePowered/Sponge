@@ -626,9 +626,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     {
                         // Sponge Start - Throw construction events
                         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            Sponge.getCauseStackManager().pushCause(this.getWeather());
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                            ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
+                            frame.pushCause(this.getWeather());
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                            ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
                             SpongeImpl.postEvent(constructEntityEvent);
                             if (!constructEntityEvent.isCancelled()) {
                                 // Sponge End
@@ -640,7 +640,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 // Sponge Start - Throw a construct event for the lightning
                             }
     
-                            ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING, transform);
+                            ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING, transform);
                             SpongeImpl.postEvent(lightning);
                             if (!lightning.isCancelled()) {
                                 // Sponge End
@@ -652,9 +652,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     {
                         // Sponge start - Throw construction event for lightningbolts
                         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            Sponge.getCauseStackManager().pushCause(this.getWeather());
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                            frame.pushCause(this.getWeather());
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                                     EntityTypes.LIGHTNING, transform);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
@@ -1163,9 +1163,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
-            Sponge.getCauseStackManager().pushCause(this);
-            SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            frame.pushCause(this);
+            SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(frame.getCurrentCause(), Lists.newArrayList(entityList));
             SpongeImpl.postEvent(chunkLoad);
             if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
                 for (Entity successful : chunkLoad.getEntities()) {

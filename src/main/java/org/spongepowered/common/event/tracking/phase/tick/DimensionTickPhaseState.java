@@ -54,7 +54,7 @@ class DimensionTickPhaseState extends TickPhaseState {
     @Override
     public void processPostTick(PhaseContext phaseContext) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
@@ -63,7 +63,7 @@ class DimensionTickPhaseState extends TickPhaseState {
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
@@ -79,7 +79,7 @@ class DimensionTickPhaseState extends TickPhaseState {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
                         final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), capturedEntities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
@@ -109,8 +109,8 @@ class DimensionTickPhaseState extends TickPhaseState {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled() && event.getEntities().size() > 0) {
                 for (Entity item: event.getEntities()) {

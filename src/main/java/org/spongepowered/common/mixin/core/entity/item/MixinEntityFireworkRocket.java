@@ -169,8 +169,8 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     protected void onUpdate(CallbackInfo ci) {
         if (this.fireworkAge == 1) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(this);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.THROWER, getShooter());
                 postPrime();
             }
         }

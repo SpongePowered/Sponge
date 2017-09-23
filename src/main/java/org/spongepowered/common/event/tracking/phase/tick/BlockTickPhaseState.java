@@ -73,8 +73,8 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
     public void processPostTick(PhaseContext context) {
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(locatableBlock);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.pushCause(locatableBlock);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             final User entityCreator = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
@@ -85,7 +85,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
                         final SpawnEntityEvent spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), capturedEntities);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         for (Entity entity : spawnEntityEvent.getEntities()) {
                             if (entityCreator != null) {
@@ -112,18 +112,18 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
         final Optional<User> notifier = context.getNotifier();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(locatableBlock);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+            frame.pushCause(locatableBlock);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
             if (notifier.isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier.get());
+                frame.addContext(EventContextKeys.NOTIFIER, notifier.get());
             }
             if (owner.isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner.get());
+                frame.addContext(EventContextKeys.OWNER, owner.get());
             }
             if (entity instanceof EntityXPOrb) {
                 final ArrayList<Entity> entities = new ArrayList<>(1);
                 entities.add(entity);
-                final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity anEntity : event.getEntities()) {
@@ -138,9 +138,9 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
             }
             final List<Entity> nonExpEntities = new ArrayList<>(1);
             nonExpEntities.add(entity);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
             final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
+                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), nonExpEntities);
             SpongeImpl.postEvent(spawnEntityEvent);
             if (!spawnEntityEvent.isCancelled()) {
                 for (Entity anEntity : spawnEntityEvent.getEntities()) {

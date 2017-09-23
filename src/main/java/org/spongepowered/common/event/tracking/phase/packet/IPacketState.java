@@ -80,10 +80,10 @@ public interface IPacketState extends IPhaseState {
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player packet, but didn't get anything",
                                 phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            Sponge.getCauseStackManager().pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            frame.pushCause(player);
             final SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity entity : event.getEntities()) {
@@ -118,11 +118,11 @@ public interface IPacketState extends IPhaseState {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, player);
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            frame.addContext(EventContextKeys.NOTIFIER, player);
+            frame.addContext(EventContextKeys.OWNER, player);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity newEntity : event.getEntities()) {

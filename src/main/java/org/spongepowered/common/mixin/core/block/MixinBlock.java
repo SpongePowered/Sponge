@@ -259,10 +259,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(worldIn.getBlockState(pos));
+            frame.pushCause(worldIn.getBlockState(pos));
             final ConstructEntityEvent.Pre
                     eventPre =
-                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, position);
+                    SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
             SpongeImpl.postEvent(eventPre);
             if (eventPre.isCancelled()) {
                 callbackInfo.cancel();
