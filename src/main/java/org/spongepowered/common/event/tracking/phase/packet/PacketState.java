@@ -38,7 +38,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -48,7 +47,9 @@ import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -56,34 +57,30 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 public abstract class PacketState<P extends PacketContext<P>> implements IPhaseState<P> {
 
-    private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
-
     PacketState() {
 
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void unwind(P phaseContext) {
-        if (this == PacketPhase.General.INVALID) { // Invalid doesn't capture any packets.
-            return;
-        }
-        final Packet<?> packetIn = phaseContext.getPacket();
-        final EntityPlayerMP player = phaseContext.getSource(EntityPlayerMP.class).get();
-        final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
+    protected static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
+        List<Entity> entities = event.getEntities();
+        processEntities(player, entities);
+    }
 
-        final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
-        checkArgument(true, "PhaseState passed in is not an instance of IPacketState! Got %s", this);
-        if (unwindFunction != null) {
-            unwindFunction.unwind(packetIn, this, player, phaseContext);
-        } else {
-            PacketFunction.UNKNOWN_PACKET.unwind(packetIn, this, player, phaseContext);
+    protected static void processEntities(EntityPlayerMP player, Collection<Entity> entities) {
+        for (Entity entity : entities) {
+            entity.setCreator(player.getUniqueID());
+            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
         }
     }
 
     @Override
     public final TrackingPhase getPhase() {
         return TrackingPhases.PACKET;
+    }
+
+    @Override
+    public void unwind(P phaseContext) {
+        // DO NOTHING - basically some packets don't really need special handling.
     }
 
     public boolean matches(int packetState) {
@@ -94,7 +91,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
     }
 
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext<?> context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, P context) {
 
     }
 
@@ -148,7 +145,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
      * Defaulted method for packet phase states to spawn an entity directly.
      * This should be overridden by all packet phase states that are handling spawns
      * customarily with contexts and such. Captured entities are handled in
-     * their respective {@link PacketFunction}s.
+     * their respective {@link PacketState#unwind(PhaseContext)}s.
      *
      * @param context
      * @param entity

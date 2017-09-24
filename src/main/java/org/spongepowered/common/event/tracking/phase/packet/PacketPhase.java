@@ -106,7 +106,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPhaseState<BasicPacketContext> INVALID = new InvalidPacketState();
         public static final IPhaseState<BasicPacketContext> CLIENT_SETTINGS = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> START_RIDING_JUMP = new BasicPacketState();
-        public static final IPhaseState<BasicPacketContext> ANIMATION = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> ANIMATION = new AnimationPacketState();
         public static final IPhaseState<BasicPacketContext> START_SNEAKING = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> STOP_SNEAKING = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> START_SPRINTING = new BasicPacketState();
@@ -114,7 +114,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPhaseState<BasicPacketContext> STOP_SLEEPING = new StopSleepingPacketState();
         public static final IPhaseState<BasicPacketContext> CLOSE_WINDOW = new CloseWindowState();
         public static final IPhaseState<BasicPacketContext> UPDATE_SIGN = new UpdateSignState();
-        public static final IPhaseState<BasicPacketContext> RESOURCE_PACK = new UpdateSignState();
+        public static final IPhaseState<BasicPacketContext> RESOURCE_PACK = new ResourcePackState();
         public static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
         public static final IPhaseState<BasicPacketContext> START_FALL_FLYING = new BasicPacketState();
@@ -129,7 +129,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState();
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
-        public static final BasicInventoryPacketState DROP_INVENTORY = new BasicInventoryPacketState();
+        public static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
         public static final BasicInventoryPacketState PRIMARY_INVENTORY_SHIFT_CLICK = new PrimaryInventoryShiftClick();
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_SHIFT_CLICK = new SecondaryInventoryShiftClickState();
@@ -232,7 +232,6 @@ public final class PacketPhase extends TrackingPhase {
     public final static int PACKET_BUTTON_MIDDLE_ID = 0;
 
     private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPhaseState<? extends PacketContext<?>>>> packetTranslationMap = new IdentityHashMap<>();
-    private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
 
     // General use methods
 
@@ -252,7 +251,7 @@ public final class PacketPhase extends TrackingPhase {
     public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState<?> state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
-        ((PacketState<?>) state).populateContext(entityPlayerMP, packet, context);
+        ((PacketState) state).populateContext(entityPlayerMP, packet, (PacketContext) context);
         return context;
     }
 
@@ -349,41 +348,10 @@ public final class PacketPhase extends TrackingPhase {
 
     private PacketPhase() {
         setupPacketToStateMapping();
-        setupPacketToUnwindMapping();
     }
 
     private static final class Holder {
         static final PacketPhase INSTANCE = new PacketPhase();
-    }
-
-    // TODO - move these into the packet state classes for unwinding instead of using packet functions.
-    public void setupPacketToUnwindMapping() {
-        this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketUseEntity.class, PacketFunction.USE_ENTITY);
-        this.packetUnwindMap.put(CPacketPlayer.class, PacketFunction.MOVEMENT);
-        this.packetUnwindMap.put(CPacketPlayer.Position.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
-        this.packetUnwindMap.put(CPacketPlayer.Rotation.class, PacketFunction.MOVEMENT);
-        this.packetUnwindMap.put(CPacketPlayer.PositionRotation.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
-        this.packetUnwindMap.put(CPacketPlayerDigging.class, PacketFunction.ACTION);
-        this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.USE_ITEM);
-        this.packetUnwindMap.put(CPacketPlayerTryUseItemOnBlock.class, PacketFunction.PLACE_BLOCK);
-        this.packetUnwindMap.put(CPacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
-        this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.STOP_SLEEPING);
-        this.packetUnwindMap.put(CPacketEntityAction.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketInput.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketCloseWindow.class, PacketFunction.CLOSE_WINDOW);
-        this.packetUnwindMap.put(CPacketClickWindow.class, PacketFunction.INVENTORY);
-        this.packetUnwindMap.put(CPacketConfirmTransaction.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketCreativeInventoryAction.class, PacketFunction.CREATIVE);
-        this.packetUnwindMap.put(CPacketEnchantItem.class, PacketFunction.ENCHANTMENT);
-        this.packetUnwindMap.put(CPacketUpdateSign.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketPlayerAbilities.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketTabComplete.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketClientStatus.class, PacketFunction.CLIENT_STATUS);
-        this.packetUnwindMap.put(CPacketCustomPayload.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketSpectate.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketResourcePackStatus.class, PacketFunction.RESOURCE_PACKET);
     }
 
 

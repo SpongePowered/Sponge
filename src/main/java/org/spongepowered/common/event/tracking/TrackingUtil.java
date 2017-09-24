@@ -172,21 +172,20 @@ public final class TrackingUtil {
             return;
         }
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        final Optional<User> notifierUser = mixinEntity.getNotifierUser();
+        final Optional<User> creatorUser = mixinEntity.getCreatorUser();
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext();
+             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext()
+                    .notifier(() -> notifierUser)
+                    .owner(() -> creatorUser)
+                    .buildAndSwitch();
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
              ) {
             Sponge.getCauseStackManager().pushCause(entity);
-            mixinEntity.getNotifierUser()
-                    .ifPresent(notifier -> {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
-                        context.notifier(notifier);
-                    });
-            mixinEntity.getCreatorUser()
-                    .ifPresent(notifier -> {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, notifier);
-                        context.owner(notifier);
-                    });
+            notifierUser
+                    .ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            creatorUser
+                    .ifPresent(notifier -> frame.addContext(EventContextKeys.OWNER, notifier));
             entity.updateRidden();
         }
     }

@@ -29,17 +29,6 @@ public final class InternalNamedCauses {
     private InternalNamedCauses() {
     }
 
-    public static final class WorldGeneration {
-
-        public static final String CAPTURED_POPULATOR = "PopulatorType";
-        public static final String CHUNK_PROVIDER = "ChunkProvider";
-        public static final String STRUCTURE = "Structure";
-        public static final String WORLD = "World";
-
-        private WorldGeneration() {
-        }
-    }
-
     public static final class Packet {
 
         public static final String OPEN_CONTAINER = "OpenContainer";
@@ -48,18 +37,12 @@ public final class InternalNamedCauses {
         public static final String PLACED_BLOCK_POSITION = "PlacedBlockPosition";
         public static final String PLACED_BLOCK_FACING = "BlockFacingPlacedAgainst";
         public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
-        public static final String HAND_USED = "HandUsed";
-        public static final String RESPONDED_RESOURCE_PACK = "OriginalResourcePack";
 
         private Packet() {}
     }
 
     public static final class Tracker {
 
-        // Capturing - All of these do not map to a List, they map to specific list suppliers
-        public static final String CAPTURED_BLOCKS = "CapturedBlocks";
-        public static final String CAPTURED_ENTITIES = "CapturedEntities";
-        public static final String CAPTURED_ITEMS = "CapturedItems";
         public static final String UNWINDING_STATE = "UnwindingState";
         public static final String UNWINDING_CONTEXT = "UnwindingContext";
         public static final String CAPTURED_BLOCK_DROPS = "CapturedBlockDropMap";

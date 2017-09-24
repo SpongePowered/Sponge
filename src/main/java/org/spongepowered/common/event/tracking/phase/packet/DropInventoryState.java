@@ -32,49 +32,52 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 
-final class CreativeInventoryPacketState extends BasicPacketState {
+public class DropInventoryState extends BasicInventoryPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops() {
-        // We specifically capture because the entities are already
-        // being captured in a drop event, and therefor will be
-        // spawned manually into the world by the creative event handling.
-        return true;
-    }
-
-    @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        context.getCapturedItemsSupplier()
-            .ifPresentAndNotEmpty(items -> {
-                if (items.isEmpty()) {
-                    return;
-                }
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-                    Sponge.getCauseStackManager().pushCause(player);
+        final ItemStack usedStack = context.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+        final Entity spongePlayer = EntityUtil.fromNative(player);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(spongePlayer);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            context.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+
+            context.getCapturedItemsSupplier()
+                .ifPresentAndNotEmpty(items -> {
+
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
                         entities.add(EntityUtil.fromNative(item));
                     }
-                    final DropItemEvent.Dispense dispense =
+                    final DropItemEvent.Dispense dropItemEvent =
                         SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dispense);
-                    if (!dispense.isCancelled()) {
-                        processSpawnedEntities(player, dispense);
+                    SpongeImpl.postEvent(dropItemEvent);
+                    if (!dropItemEvent.isCancelled()) {
+                        processSpawnedEntities(player, dropItemEvent);
                     }
-                }
-            });
+                });
+
+            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+            mixinContainer.setCaptureInventory(false);
+            mixinContainer.getCapturedTransactions().clear();
+        }
+
     }
 }

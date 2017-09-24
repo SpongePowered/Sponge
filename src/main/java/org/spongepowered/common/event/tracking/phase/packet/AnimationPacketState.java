@@ -24,24 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
-import net.minecraft.inventory.Container;
+import java.util.List;
 
-public class BasicPacketContext extends PacketContext<BasicPacketContext> {
+public class AnimationPacketState extends BasicPacketState {
 
-    private Container container;
-
-    public BasicPacketContext(PacketState<? extends BasicPacketContext> state) {
-        super(state);
-    }
-
-    public BasicPacketContext openContainer(Container openContainer) {
-        this.container = openContainer;
-        return this;
-    }
-
-    public Container getOpenContainer() {
-        return checkNotNull(container, "Open Container was null!");
+    @Override
+    public void unwind(BasicPacketContext context) {
+        final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+        TrackingUtil.processBlockCaptures(capturedBlocks, this, context);
     }
 }

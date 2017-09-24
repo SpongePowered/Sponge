@@ -358,7 +358,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 }
                 try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
                     .world(world)
-                    .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type)
+                    .populator(type)
                     .buildAndSwitch()) {
 
                     if (populator instanceof IFlaggedPopulator) {
@@ -405,7 +405,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                          GenerationContext context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
                              .world(this.world)
-                            .addExtra(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType())
+                             .populator(populator.getType())
                             .buildAndSwitch()) {
                         flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
                     }
