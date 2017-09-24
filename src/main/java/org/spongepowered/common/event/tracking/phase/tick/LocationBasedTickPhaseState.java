@@ -44,18 +44,18 @@ import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
 
-abstract class LocationBasedTickPhaseState extends TickPhaseState {
+abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
     LocationBasedTickPhaseState() {
     }
 
-    abstract Location<World> getLocationSourceFromContext(PhaseContext context);
+    abstract Location<World> getLocationSourceFromContext(PhaseContext<?> context);
 
-    abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext context);
+    abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
 
     @Override
-    public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (sourcePos == null) {
             LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
             sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
@@ -69,7 +69,7 @@ abstract class LocationBasedTickPhaseState extends TickPhaseState {
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
-        Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+        Transaction<BlockSnapshot> snapshotTransaction, T context) {
         final Location<World> location = getLocatableBlockSourceFromContext(context).getLocation();
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
@@ -83,7 +83,7 @@ abstract class LocationBasedTickPhaseState extends TickPhaseState {
 
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return super.canSwitchTo(state) || state == GenerationPhase.State.CHUNK_LOADING;
     }
 

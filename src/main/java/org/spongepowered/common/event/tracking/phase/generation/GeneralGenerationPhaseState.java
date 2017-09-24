@@ -37,7 +37,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
@@ -48,9 +48,9 @@ import java.util.Set;
 /**
  * A generalized
  */
-class GeneralGenerationPhaseState implements IPhaseState {
+abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
 
-    private Set<IPhaseState> compatibleStates = new HashSet<>();
+    private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
     private final String id;
 
@@ -58,7 +58,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
         this.id = id;
     }
 
-    final GeneralGenerationPhaseState addCompatibleState(IPhaseState state) {
+    final GeneralGenerationPhaseState addCompatibleState(IPhaseState<?> state) {
         if (this.isBaked) {
             throw new IllegalStateException("This state is already baked! " + this.id);
         }
@@ -80,8 +80,23 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return TrackingPhases.GENERATION;
     }
 
+    public static class Generic extends GeneralGenerationPhaseState<GenericGenerationContext> {
+
+        public Generic(String id) {
+            super(id);
+        }
+
+        @Override
+        public GenericGenerationContext createPhaseContext() {
+            return new GenericGenerationContext(this)
+                    .addCaptures();
+        }
+
+    }
+
+
     @Override
-    public final boolean canSwitchTo(IPhaseState state) {
+    public final boolean canSwitchTo(IPhaseState<?> state) {
         return this.compatibleStates.contains(state);
     }
 
@@ -90,7 +105,8 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return true;
     }
 
-    public final void unwind(PhaseContext context) {
+    @Override
+    public final void unwind(G context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;

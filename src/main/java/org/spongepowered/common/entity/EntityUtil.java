@@ -100,6 +100,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -315,7 +316,7 @@ public final class EntityUtil {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState state = peek.state;
-        final PhaseContext context = peek.context;
+        final PhaseContext<?> context = peek.context;
 
         MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
@@ -374,22 +375,16 @@ public final class EntityUtil {
         }
 
         adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+             BasicEntityContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
+                     .addBlockCaptures()
+                     .addEntityCaptures()
+                     .buildAndSwitch()
+            ) {
             Sponge.getCauseStackManager().pushCause(teleporter);
             Sponge.getCauseStackManager().pushCause(mixinEntity);
-            final PhaseContext context = PhaseContext.start();
-            // unused, to be removed and re-located when phase context is cleaned up
-            //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_WORLD, fromWorld))
-            //.add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, teleporter))
-            //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_TRANSFORM, fromTransform))
-            context.addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
-                    .addBlockCaptures()
-                    .addEntityCaptures();
+
             Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
-            context.complete();
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            causeTracker.switchToPhase(EntityPhase.State.CHANGING_DIMENSION, context);
-    
     
             if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
                 fromWorld.profiler.startSection("placing");
@@ -399,8 +394,7 @@ public final class EntityUtil {
             }
     
             // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
-            causeTracker.completePhase(EntityPhase.State.CHANGING_DIMENSION);
-    
+
             // Grab the exit location of entity after being placed into portal
             final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
@@ -412,7 +406,7 @@ public final class EntityUtil {
     
             if (event.isCancelled()) {
                 // Mods may cancel this event in order to run custom transfer logic
-                // We need to make sure to only restore the location if 
+                // We need to make sure to only restore the location if
                 if (!portalExitTransform.getExtent().getUniqueId().equals(mixinEntity.getLocation().getExtent().getUniqueId())) {
                     // update cache
                     ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
@@ -945,13 +939,13 @@ public final class EntityUtil {
             }
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
-            final PhaseContext phaseContext = peek.context;
+            final PhaseContext<?> phaseContext = peek.context;
     
             if (item.isEmpty()) {
                 return null;
             }
     
-            if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
                     final Collection<ItemDropData> itemStacks = multimap.get(entity.getUniqueID());
@@ -970,7 +964,7 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
     
             // FIFTH - Capture the entity maybe?
-            if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     // We are capturing per entity drop
                     phaseContext.getCapturedEntityItemDropSupplier().get().put(entity.getUniqueID(), entityitem);
@@ -1021,9 +1015,9 @@ public final class EntityUtil {
             }
             final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
-            final PhaseContext phaseContext = peek.context;
+            final PhaseContext<?> phaseContext = peek.context;
     
-            if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 final Collection<ItemDropData> itemStacks;
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -1067,7 +1061,7 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     // We are capturing per entity drop
                     phaseContext.getCapturedEntityItemDropSupplier().get().put(player.getUniqueID(), entityitem);

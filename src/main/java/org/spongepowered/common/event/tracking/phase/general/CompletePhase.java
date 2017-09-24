@@ -25,16 +25,23 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 
-final class CompletePhase extends GeneralState {
+final class CompletePhase extends GeneralState<GeneralizedContext> {
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return true;
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    public GeneralizedContext createPhaseContext() {
+        return new GeneralizedContext(this);
+    }
+
+    @Override
+    public void unwind(GeneralizedContext context) {
 
     }
+
+
 }

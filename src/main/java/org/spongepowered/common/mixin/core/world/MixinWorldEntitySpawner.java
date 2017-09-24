@@ -101,186 +101,195 @@ public abstract class MixinWorldEntitySpawner {
             return 0;
         }
 
-        Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
-        while (chunkIterator.hasNext()) {
-            Chunk chunk = chunkIterator.next();
-            ((IMixinChunk) chunk).setIsSpawning(false);
-            chunkIterator.remove();
-        }
-
-        IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServerIn);
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
-                .source(worldServerIn)
-                .addCaptures()
-                .complete());
-        }
-        spongeWorld.getTimingsHandler().mobSpawn.startTiming();
-
-        int chunkSpawnCandidates = 0;
-        final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
-                SpongeImpl.getServer().getPlayerList().getViewDistance());
-        // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
-        // Since we allow for custom ranges, we need to adjust the div count based on the
-        // mob spawn range set by server.
-        final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1)*(2 * mobSpawnRange + 1);
-
-        for (EntityPlayer entityplayer : worldServerIn.playerEntities) {
-            // We treat players who do not affect spawning as "spectators"
-            if (!((IMixinEntityPlayer) entityplayer).affectsSpawning() || entityplayer.isSpectator()) {
-                continue;
+        try (PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
+                .world(worldServerIn)
+                .buildAndSwitch()) {
+            Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
+            while (chunkIterator.hasNext()) {
+                Chunk chunk = chunkIterator.next();
+                ((IMixinChunk) chunk).setIsSpawning(false);
+                chunkIterator.remove();
             }
 
-            int playerPosX = MathHelper.floor(entityplayer.posX / 16.0D);
-            int playerPosZ = MathHelper.floor(entityplayer.posZ / 16.0D);
+            IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServerIn);
+            spongeWorld.getTimingsHandler().mobSpawn.startTiming();
 
-            for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
-                for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
-                    boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
-                    final Chunk chunk = ((IMixinChunkProviderServer) worldServerIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
-                    if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
-                        // Don't attempt to spawn in an unloaded chunk
-                        continue;
-                    }
+            int chunkSpawnCandidates = 0;
+            final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
+                SpongeImpl.getServer().getPlayerList().getViewDistance());
+            // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
+            // Since we allow for custom ranges, we need to adjust the div count based on the
+            // mob spawn range set by server.
+            final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1) * (2 * mobSpawnRange + 1);
 
-                    final IMixinChunk spongeChunk = (IMixinChunk) chunk;
-                    ++chunkSpawnCandidates;
-                    final ChunkPos chunkPos = chunk.getPos();
-                    if (!flag && worldServerIn.getWorldBorder().contains(chunkPos)) {
-                        PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
+            for (EntityPlayer entityplayer : worldServerIn.playerEntities) {
+                // We treat players who do not affect spawning as "spectators"
+                if (!((IMixinEntityPlayer) entityplayer).affectsSpawning() || entityplayer.isSpectator()) {
+                    continue;
+                }
 
-                        if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.isSpawning()) {
-                            this.eligibleSpawnChunks.add(chunk);
-                            spongeChunk.setIsSpawning(true);
+                int playerPosX = MathHelper.floor(entityplayer.posX / 16.0D);
+                int playerPosZ = MathHelper.floor(entityplayer.posZ / 16.0D);
+
+                for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
+                    for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
+                        boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
+                        final Chunk
+                            chunk =
+                            ((IMixinChunkProviderServer) worldServerIn.getChunkProvider())
+                                .getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
+                        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
+                            // Don't attempt to spawn in an unloaded chunk
+                            continue;
+                        }
+
+                        final IMixinChunk spongeChunk = (IMixinChunk) chunk;
+                        ++chunkSpawnCandidates;
+                        final ChunkPos chunkPos = chunk.getPos();
+                        if (!flag && worldServerIn.getWorldBorder().contains(chunkPos)) {
+                            PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
+
+                            if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.isSpawning()) {
+                                this.eligibleSpawnChunks.add(chunk);
+                                spongeChunk.setIsSpawning(true);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // If there are no eligible chunks, return early
-        if (this.eligibleSpawnChunks.size() == 0) {
-            if (CauseTracker.ENABLED) {
-                CauseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
-            }
-            spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
-            return 0;
-        }
-
-        int totalSpawned = 0;
-        final long worldTotalTime = worldServerIn.getTotalWorldTime();
-        final SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
-
-        labelOuterLoop:
-        for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
-            int limit = 0;
-            int tickRate = 0;
-            if (enumCreatureType == EnumCreatureType.MONSTER) {
-                limit = activeConfig.getConfig().getSpawner().getMonsterSpawnLimit();
-                tickRate = activeConfig.getConfig().getSpawner().getMonsterTickRate();
-            } else if (enumCreatureType == EnumCreatureType.CREATURE) {
-                limit = activeConfig.getConfig().getSpawner().getAnimalSpawnLimit();
-                tickRate = activeConfig.getConfig().getSpawner().getAnimalTickRate();
-            } else if (enumCreatureType == EnumCreatureType.WATER_CREATURE) {
-                limit = activeConfig.getConfig().getSpawner().getAquaticSpawnLimit();
-                tickRate = activeConfig.getConfig().getSpawner().getAquaticTickRate();
-            } else if (enumCreatureType == EnumCreatureType.AMBIENT) {
-                limit = activeConfig.getConfig().getSpawner().getAmbientSpawnLimit();
-                tickRate = activeConfig.getConfig().getSpawner().getAmbientTickRate();
+            // If there are no eligible chunks, return early
+            if (this.eligibleSpawnChunks.size() == 0) {
+                spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+                return 0;
             }
 
-            if (limit == 0 || tickRate == 0 || (worldTotalTime % tickRate) != 0L) {
-                continue;
-            }
+            int totalSpawned = 0;
+            final long worldTotalTime = worldServerIn.getTotalWorldTime();
+            final SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
 
-            if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
-                int entityCount = SpongeImplHooks.countEntities(worldServerIn, enumCreatureType, true);
-                int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
-                if (entityCount > maxCount) {
-                    continue labelOuterLoop;
+            labelOuterLoop:
+            for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
+                int limit = 0;
+                int tickRate = 0;
+                if (enumCreatureType == EnumCreatureType.MONSTER) {
+                    limit = activeConfig.getConfig().getSpawner().getMonsterSpawnLimit();
+                    tickRate = activeConfig.getConfig().getSpawner().getMonsterTickRate();
+                } else if (enumCreatureType == EnumCreatureType.CREATURE) {
+                    limit = activeConfig.getConfig().getSpawner().getAnimalSpawnLimit();
+                    tickRate = activeConfig.getConfig().getSpawner().getAnimalTickRate();
+                } else if (enumCreatureType == EnumCreatureType.WATER_CREATURE) {
+                    limit = activeConfig.getConfig().getSpawner().getAquaticSpawnLimit();
+                    tickRate = activeConfig.getConfig().getSpawner().getAquaticTickRate();
+                } else if (enumCreatureType == EnumCreatureType.AMBIENT) {
+                    limit = activeConfig.getConfig().getSpawner().getAmbientSpawnLimit();
+                    tickRate = activeConfig.getConfig().getSpawner().getAmbientTickRate();
                 }
 
-                chunkIterator = this.eligibleSpawnChunks.iterator();
-                int mobLimit = maxCount - entityCount + 1;
-                labelChunkStart:
-                while (chunkIterator.hasNext() && mobLimit > 0) {
-                    final Chunk chunk = chunkIterator.next();
-                    final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-                    final BlockPos blockpos = getRandomChunkPosition(worldServerIn, chunk);
-                    int k1 = blockpos.getX();
-                    int l1 = blockpos.getY();
-                    int i2 = blockpos.getZ();
-                    IBlockState iblockstate = worldServerIn.getBlockState(blockpos);
+                if (limit == 0 || tickRate == 0 || (worldTotalTime % tickRate) != 0L) {
+                    continue;
+                }
 
-                    if (!iblockstate.isNormalCube()) {
-                        int spawnCount = 0;
-                        for (int spawnLimit = 0; spawnLimit < 3; ++spawnLimit) {
-                            int l2 = k1;
-                            int i3 = l1;
-                            int j3 = i2;
-                            Biome.SpawnListEntry spawnListEntry = null;
-                            IEntityLivingData ientitylivingdata = null;
-                            int l3 = MathHelper.ceil(Math.random() * 4.0D);
+                if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
+                    int entityCount = SpongeImplHooks.countEntities(worldServerIn, enumCreatureType, true);
+                    int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
+                    if (entityCount > maxCount) {
+                        continue labelOuterLoop;
+                    }
 
-                            for (int i4 = 0; i4 < l3; ++i4) {
-                                l2 += worldServerIn.rand.nextInt(6) - worldServerIn.rand.nextInt(6);
-                                i3 += worldServerIn.rand.nextInt(1) - worldServerIn.rand.nextInt(1);
-                                j3 += worldServerIn.rand.nextInt(6) - worldServerIn.rand.nextInt(6);
-                                mutableBlockPos.setPos(l2, i3, j3);
-                                final double spawnX = l2 + 0.5F;
-                                final double spawnY = i3;
-                                final double spawnZ = j3 + 0.5F;
+                    chunkIterator = this.eligibleSpawnChunks.iterator();
+                    int mobLimit = maxCount - entityCount + 1;
+                    labelChunkStart:
+                    while (chunkIterator.hasNext() && mobLimit > 0) {
+                        final Chunk chunk = chunkIterator.next();
+                        final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+                        final BlockPos blockpos = getRandomChunkPosition(worldServerIn, chunk);
+                        int k1 = blockpos.getX();
+                        int l1 = blockpos.getY();
+                        int i2 = blockpos.getZ();
+                        IBlockState iblockstate = worldServerIn.getBlockState(blockpos);
 
-                                if (!worldServerIn.isAnyPlayerWithinRangeAt(spawnX, spawnY, spawnZ, 24.0D) && worldServerIn.getSpawnPoint().distanceSq(spawnX, spawnY, spawnZ) >= 576.0D) {
-                                    if (spawnListEntry == null) {
-                                        spawnListEntry = worldServerIn.getSpawnListEntryForTypeAt(enumCreatureType, mutableBlockPos);
+                        if (!iblockstate.isNormalCube()) {
+                            int spawnCount = 0;
+                            for (int spawnLimit = 0; spawnLimit < 3; ++spawnLimit) {
+                                int l2 = k1;
+                                int i3 = l1;
+                                int j3 = i2;
+                                Biome.SpawnListEntry spawnListEntry = null;
+                                IEntityLivingData ientitylivingdata = null;
+                                int l3 = MathHelper.ceil(Math.random() * 4.0D);
 
+                                for (int i4 = 0; i4 < l3; ++i4) {
+                                    l2 += worldServerIn.rand.nextInt(6) - worldServerIn.rand.nextInt(6);
+                                    i3 += worldServerIn.rand.nextInt(1) - worldServerIn.rand.nextInt(1);
+                                    j3 += worldServerIn.rand.nextInt(6) - worldServerIn.rand.nextInt(6);
+                                    mutableBlockPos.setPos(l2, i3, j3);
+                                    final double spawnX = l2 + 0.5F;
+                                    final double spawnY = i3;
+                                    final double spawnZ = j3 + 0.5F;
+
+                                    if (!worldServerIn.isAnyPlayerWithinRangeAt(spawnX, spawnY, spawnZ, 24.0D)
+                                        && worldServerIn.getSpawnPoint().distanceSq(spawnX, spawnY, spawnZ) >= 576.0D) {
                                         if (spawnListEntry == null) {
-                                            break;
-                                        }
-                                    }
+                                            spawnListEntry = worldServerIn.getSpawnListEntryForTypeAt(enumCreatureType, mutableBlockPos);
 
-                                    final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.entityClass);
-                                    if (entityType != null) {
-                                        Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
-                                        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) worldServerIn, vector3d);
-                                        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform);
-                                        if (SpongeImpl.postEvent(event)) {
-                                            continue;
-                                        }
-                                    }
-
-                                    if (worldServerIn.canCreatureTypeSpawnHere(enumCreatureType, spawnListEntry, mutableBlockPos) && WorldEntitySpawner.canCreatureTypeSpawnAtLocation(EntitySpawnPlacementRegistry.getPlacementForEntity(spawnListEntry.entityClass), worldServerIn, mutableBlockPos)) {
-                                        EntityLiving entityliving;
-
-                                        try {
-                                            entityliving = spawnListEntry.entityClass.getConstructor(new Class<?>[] {World.class}).newInstance(worldServerIn);
-                                        } catch (Exception exception) {
-                                            exception.printStackTrace();
-                                            continue labelOuterLoop;
-                                        }
-
-                                        entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServerIn.rand.nextFloat() * 360.0F, 0.0F);
-                                        final boolean entityNotColliding = entityliving.isNotColliding();
-
-                                        if (SpongeImplHooks.canEntitySpawnHere(entityliving, ientitylivingdata, entityNotColliding)) {
-                                            // handled in hook
-                                            //ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
-
-                                            if (entityNotColliding) {
-                                                ++spawnCount;
-                                                worldServerIn.spawnEntity(entityliving);
-                                            } else {
-                                                entityliving.setDead();
-                                            }
-
-                                            mobLimit--;
-                                            if (mobLimit <= 0 || spawnCount >= SpongeImplHooks.getMaxSpawnPackSize(entityliving)) {
-                                                continue labelChunkStart;
+                                            if (spawnListEntry == null) {
+                                                break;
                                             }
                                         }
 
-                                        totalSpawned += spawnCount;
+                                        final EntityType entityType = EntityTypeRegistryModule.getInstance().getForClass(spawnListEntry.entityClass);
+                                        if (entityType != null) {
+                                            Vector3d vector3d = new Vector3d(spawnX, spawnY, spawnZ);
+                                            Transform<org.spongepowered.api.world.World>
+                                                transform =
+                                                new Transform<>((org.spongepowered.api.world.World) worldServerIn, vector3d);
+                                            ConstructEntityEvent.Pre
+                                                event =
+                                                SpongeEventFactory
+                                                    .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType,
+                                                        transform);
+                                            if (SpongeImpl.postEvent(event)) {
+                                                continue;
+                                            }
+                                        }
+
+                                        if (worldServerIn.canCreatureTypeSpawnHere(enumCreatureType, spawnListEntry, mutableBlockPos)
+                                            && WorldEntitySpawner.canCreatureTypeSpawnAtLocation(
+                                            EntitySpawnPlacementRegistry.getPlacementForEntity(spawnListEntry.entityClass), worldServerIn,
+                                            mutableBlockPos)) {
+                                            EntityLiving entityliving;
+
+                                            try {
+                                                entityliving =
+                                                    spawnListEntry.entityClass.getConstructor(new Class<?>[]{World.class}).newInstance(worldServerIn);
+                                            } catch (Exception exception) {
+                                                exception.printStackTrace();
+                                                continue labelOuterLoop;
+                                            }
+
+                                            entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServerIn.rand.nextFloat() * 360.0F, 0.0F);
+                                            final boolean entityNotColliding = entityliving.isNotColliding();
+
+                                            if (SpongeImplHooks.canEntitySpawnHere(entityliving, ientitylivingdata, entityNotColliding)) {
+                                                // handled in hook
+                                                //ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+
+                                                if (entityNotColliding) {
+                                                    ++spawnCount;
+                                                    worldServerIn.spawnEntity(entityliving);
+                                                } else {
+                                                    entityliving.setDead();
+                                                }
+
+                                                mobLimit--;
+                                                if (mobLimit <= 0 || spawnCount >= SpongeImplHooks.getMaxSpawnPackSize(entityliving)) {
+                                                    continue labelChunkStart;
+                                                }
+                                            }
+
+                                            totalSpawned += spawnCount;
+                                        }
                                     }
                                 }
                             }
@@ -288,14 +297,11 @@ public abstract class MixinWorldEntitySpawner {
                     }
                 }
             }
-        }
 
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
-        }
-        spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+            spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
 
-        return totalSpawned;
+            return totalSpawned;
+        }
     }
 
     private static BlockPos getRandomChunkPosition(World worldIn, Chunk chunk)
@@ -333,19 +339,15 @@ public abstract class MixinWorldEntitySpawner {
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
     private static void onPerformWorldGenSpawningHead(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
-                .addCaptures()
+        GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
                 .source(worldServer)
-                .complete());
-        }
+                .world(worldServer)
+                .buildAndSwitch();
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
-        }
+        CauseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
         spawnerEntityType = null;
     }
 

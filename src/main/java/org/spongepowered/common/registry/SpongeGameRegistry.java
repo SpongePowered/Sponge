@@ -472,11 +472,13 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeVillagerRegistry.getInstance();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public TextSerializerFactory getTextSerializerFactory() {
         return SpongeTextSerializerFactory.INSTANCE;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public SpongeSelectorFactory getSelectorFactory() {
         return SpongeSelectorFactory.INSTANCE;

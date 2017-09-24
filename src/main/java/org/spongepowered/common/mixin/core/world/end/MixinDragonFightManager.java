@@ -34,13 +34,11 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 
 import java.util.List;
@@ -137,13 +135,11 @@ public abstract class MixinDragonFightManager {
                 }
 
                 // Sponge Start - Cause tracker - todo: do more logistical configuration of how this all works.
-                final CauseTracker causeTracker = CauseTracker.getInstance();
-                causeTracker.switchToPhase(DragonPhase.State.RESPAWN_DRAGON, PhaseContext.start()
-                    .addCaptures()
-                    .complete());
-                // Sponge End
-                this.respawnState.process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
-                causeTracker.completePhase(DragonPhase.State.RESPAWN_DRAGON); // Sponge - Complete cause tracker
+                try (GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext().buildAndSwitch()) {
+                    // Sponge End
+                    this.respawnState
+                        .process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
+                }// Sponge - Complete cause tracker
             }
 
             if (!this.dragonKilled) {

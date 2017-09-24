@@ -147,8 +147,8 @@ public final class ContainerUtil {
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
         final IPhaseState currentState = currentPhase.state;
-        if (CauseTracker.ENABLED && currentState.tracksBlockSpecificDrops()) {
-            final PhaseContext context = currentPhase.context;
+        if (currentState.tracksBlockSpecificDrops()) {
+            final PhaseContext<?> context = currentPhase.context;
             if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 // Add itemstack to pre merge list
                 final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();

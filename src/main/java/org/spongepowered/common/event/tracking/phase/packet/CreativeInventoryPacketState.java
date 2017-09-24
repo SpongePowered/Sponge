@@ -24,19 +24,21 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+
+import java.util.ArrayList;
 
 final class CreativeInventoryPacketState extends BasicPacketState {
-
-
-    @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        context
-                .addEntityCaptures()
-                .addEntityDropCaptures();
-    }
 
     @Override
     public boolean ignoresItemPreMerges() {
@@ -49,5 +51,30 @@ final class CreativeInventoryPacketState extends BasicPacketState {
         // being captured in a drop event, and therefor will be
         // spawned manually into the world by the creative event handling.
         return true;
+    }
+
+    @Override
+    public void unwind(BasicPacketContext context) {
+        final EntityPlayerMP player = context.getPacketPlayer();
+        context.getCapturedItemsSupplier()
+            .ifPresentAndNotEmpty(items -> {
+                if (items.isEmpty()) {
+                    return;
+                }
+                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                    Sponge.getCauseStackManager().pushCause(player);
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add(EntityUtil.fromNative(item));
+                    }
+                    final DropItemEvent.Dispense dispense =
+                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeImpl.postEvent(dispense);
+                    if (!dispense.isCancelled()) {
+                        processSpawnedEntities(player, dispense);
+                    }
+                }
+            });
     }
 }

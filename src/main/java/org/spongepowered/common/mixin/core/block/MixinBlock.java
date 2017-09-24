@@ -285,10 +285,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
-                PhaseContext context = PhaseContext.start()
-                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4))
-                        .addBlockCaptures()
-                        .addEntityCaptures();
+                PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
+                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4));
 
                 // unused, to be removed and re-located when phase context is cleaned up
                 //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
@@ -302,8 +300,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 if (owner != null) {
                     context.owner(owner);
                 }
-                context.complete();
-                causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, context);
+                context.buildAndSwitch();
             }
         }
     }
@@ -334,7 +331,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = currentPhase.state;
             if (canCaptureItems && currentState.tracksBlockSpecificDrops()) {
-                final PhaseContext context = currentPhase.context;
+                final PhaseContext<?> context = currentPhase.context;
                 final Multimap<BlockPos, ItemDropData> multimap = context.getCapturedBlockDrops();
                 final Collection<ItemDropData> itemStacks = multimap.get(pos);
                 SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(stack).position(VecHelper.toVector3d(pos)).build());

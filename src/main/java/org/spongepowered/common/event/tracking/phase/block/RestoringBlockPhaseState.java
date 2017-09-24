@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 
 final class RestoringBlockPhaseState extends BlockPhaseState {
 
@@ -32,7 +32,7 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext phaseContext) {
+    public void unwind(GeneralizedContext phaseContext) {
 
     }
 

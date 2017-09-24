@@ -160,9 +160,12 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -339,20 +342,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .source(this)
-                    .addCaptures()
-                    .complete());
-        }
+        GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+                .source(this)
+                .buildAndSwitch();
     }
 
 
     @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
-        }
+        CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -604,70 +602,74 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
             if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
             {
-                if (CauseTracker.ENABLED) {
-                    causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
-                            .addCaptures()
-                            .source(this)
-                            .complete());
-                }
-                // Sponge end
-                this.updateLCG = this.updateLCG * 3 + 1013904223;
-                int l = this.updateLCG >> 2;
-                BlockPos blockpos = this.adjustPosToNearbyEntity(new BlockPos(j + (l & 15), 0, k + (l >> 8 & 15)));
+                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)
+                    .buildAndSwitch()) {
+                    // Sponge end
+                    this.updateLCG = this.updateLCG * 3 + 1013904223;
+                    int l = this.updateLCG >> 2;
+                    BlockPos blockpos = this.adjustPosToNearbyEntity(new BlockPos(j + (l & 15), 0, k + (l >> 8 & 15)));
 
-                if (this.isRainingAt(blockpos))
-                {
-                    DifficultyInstance difficultyinstance = this.getDifficultyForLocation(blockpos);
+                    if (this.isRainingAt(blockpos)) {
+                        DifficultyInstance difficultyinstance = this.getDifficultyForLocation(blockpos);
 
-                    // Sponge - create a transform to be used for events
-                    final Transform<org.spongepowered.api.world.World> transform = new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
+                        // Sponge - create a transform to be used for events
+                        final Transform<org.spongepowered.api.world.World>
+                            transform =
+                            new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
 
-                    if (this.rand.nextDouble() < difficultyinstance.getAdditionalDifficulty() * 0.05D)
-                    {
-                        // Sponge Start - Throw construction events
-                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            Sponge.getCauseStackManager().pushCause(this.getWeather());
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                            ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
-                            SpongeImpl.postEvent(constructEntityEvent);
-                            if (!constructEntityEvent.isCancelled()) {
-                                // Sponge End
-                                EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
-                                entityhorse.setTrap(true);
-                                entityhorse.setGrowingAge(0);
-                                entityhorse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
-                                this.spawnEntity(entityhorse);
-                                // Sponge Start - Throw a construct event for the lightning
+                        if (this.rand.nextDouble() < difficultyinstance.getAdditionalDifficulty() * 0.05D) {
+                            // Sponge Start - Throw construction events
+                            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                                Sponge.getCauseStackManager().pushCause(this.getWeather());
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                ConstructEntityEvent.Pre
+                                    constructEntityEvent =
+                                    SpongeEventFactory
+                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
+                                SpongeImpl.postEvent(constructEntityEvent);
+                                if (!constructEntityEvent.isCancelled()) {
+                                    // Sponge End
+                                    EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
+                                    entityhorse.setTrap(true);
+                                    entityhorse.setGrowingAge(0);
+                                    entityhorse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                                    this.spawnEntity(entityhorse);
+                                    // Sponge Start - Throw a construct event for the lightning
+                                }
+
+                                ConstructEntityEvent.Pre
+                                    lightning =
+                                    SpongeEventFactory
+                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING,
+                                            transform);
+                                SpongeImpl.postEvent(lightning);
+                                if (!lightning.isCancelled()) {
+                                    // Sponge End
+                                    this.addWeatherEffect(
+                                        new EntityLightningBolt((WorldServer) (Object) this, (double) blockpos.getX(), (double) blockpos.getY(),
+                                            (double) blockpos.getZ(), true));
+                                } // Sponge - Brackets.
                             }
-    
-                            ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING, transform);
-                            SpongeImpl.postEvent(lightning);
-                            if (!lightning.isCancelled()) {
-                                // Sponge End
-                                this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
-                            } // Sponge - Brackets.
+                        } else {
+                            // Sponge start - Throw construction event for lightningbolts
+                            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                                Sponge.getCauseStackManager().pushCause(this.getWeather());
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                ConstructEntityEvent.Pre
+                                    event =
+                                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                                        EntityTypes.LIGHTNING, transform);
+                                SpongeImpl.postEvent(event);
+                                if (!event.isCancelled()) {
+                                    // Sponge End
+                                    this.addWeatherEffect(
+                                        new EntityLightningBolt((WorldServer) (Object) this, (double) blockpos.getX(), (double) blockpos.getY(),
+                                            (double) blockpos.getZ(), false));
+                                } // Sponge - Brackets.
+                            }
                         }
                     }
-                    else
-                    {
-                        // Sponge start - Throw construction event for lightningbolts
-                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            Sponge.getCauseStackManager().pushCause(this.getWeather());
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-                            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                                    EntityTypes.LIGHTNING, transform);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                // Sponge End
-                                this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
-                            } // Sponge - Brackets.
-                        }
-                    }
-                }
-                // Sponge Start - Cause tracker unwind
-                if (CauseTracker.ENABLED) {
-                    causeTracker.completePhase(TickPhase.Tick.WEATHER);
-                }
+                } // Sponge - brackets
                 // Sponge End
 
             }
@@ -680,31 +682,27 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
             {
                 // Sponge Start - Enter weather phase for snow and ice and flooding.
-                causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
-                        .addCaptures()
+                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext()
                         .source(this)
-                        .complete());
-                // Sponge End
-                this.updateLCG = this.updateLCG * 3 + 1013904223;
-                int j2 = this.updateLCG >> 2;
-                BlockPos blockpos1 = this.getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
-                BlockPos blockpos2 = blockpos1.down();
+                        .buildAndSwitch()) {
+                    // Sponge End
+                    this.updateLCG = this.updateLCG * 3 + 1013904223;
+                    int j2 = this.updateLCG >> 2;
+                    BlockPos blockpos1 = this.getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
+                    BlockPos blockpos2 = blockpos1.down();
 
-                if (this.canBlockFreezeNoWater(blockpos2))
-                {
-                    this.setBlockState(blockpos2, Blocks.ICE.getDefaultState());
-                }
+                    if (this.canBlockFreezeNoWater(blockpos2)) {
+                        this.setBlockState(blockpos2, Blocks.ICE.getDefaultState());
+                    }
 
-                if (flag && this.canSnowAt(blockpos1, true))
-                {
-                    this.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState());
-                }
+                    if (flag && this.canSnowAt(blockpos1, true)) {
+                        this.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState());
+                    }
 
-                if (flag && this.getBiome(blockpos2).canRain())
-                {
-                    this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
-                }
-                causeTracker.completePhase(TickPhase.Tick.WEATHER); // Sponge - complete weather phase
+                    if (flag && this.getBiome(blockpos2).canRain()) {
+                        this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
+                    }
+                } // Sponge - brackets
             }
 
             this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
@@ -739,7 +737,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 spongeBlock.getTimingsHandler().startTiming();
                                 final PhaseData currentTuple = causeTracker.getCurrentPhaseData();
                                 final IPhaseState phaseState = currentTuple.state;
-                                if (!CauseTracker.ENABLED || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
+                                if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
                                     block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
                                 } else {
                                     TrackingUtil.randomTickBlock(causeTracker, this, block, pos, iblockstate, this.rand);
@@ -795,13 +793,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         } else {
             this.resetUpdateEntityTick();
         }*/
-        // Sponge end
 
-        if (CauseTracker.ENABLED) {
-            TrackingUtil.tickWorldProvider(this);
-        } else {
-            this.provider.onWorldUpdateEntities();
-        }
+        TrackingUtil.tickWorldProvider(this);
+        // Sponge end
         super.updateEntities();
     }
 
@@ -857,23 +851,22 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         }
 
-        if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
-            final IPhaseState phaseState = currentPhase.state;
-            if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
-                return list.add((BlockEventData) obj);
-            }
-            final PhaseContext context = currentPhase.context;
 
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<>(this, pos.getX(), pos.getY(), pos.getZ()))
-                    .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
-                    .build();
-
-            blockEvent.setTickBlock(locatable);
-            phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, this, pos, blockEvent);
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
+        final IPhaseState phaseState = currentPhase.state;
+        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
+            return list.add((BlockEventData) obj);
         }
+        final PhaseContext<?> context = currentPhase.context;
+
+        final LocatableBlock locatable = LocatableBlock.builder()
+            .location(new Location<>(this, pos.getX(), pos.getY(), pos.getZ()))
+            .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
+            .build();
+
+        blockEvent.setTickBlock(locatable);
+        phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -881,15 +874,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
-        if (!CauseTracker.ENABLED) {
-            fireBlockEvent(event);
-        }
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
-        return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
+        return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
@@ -1070,23 +1060,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkBlockBounds(x, y, z);
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
-        boolean isWorldGen = CauseTracker.ENABLED && peek.state.getPhase().isWorldGeneration(peek.state);
-        boolean handlesOwnCompletion = CauseTracker.ENABLED && peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
+        boolean isWorldGen = peek.state.getPhase().isWorldGeneration(peek.state);
+        boolean handlesOwnCompletion = peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
-        if (!isWorldGen && !handlesOwnCompletion) {
-            final PhaseContext context = PhaseContext.start()
-                    .addCaptures()
-                    .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag);
-            context.complete();
-            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
+        try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
+                ? null
+                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+                                           .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag)
+                                           .buildAndSwitch()) {
+            return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         }
-        final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
-        if (!isWorldGen && !handlesOwnCompletion) {
-            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
-        }
-        return state;
     }
 
     private void checkBlockBounds(int x, int y, int z) {
@@ -1190,62 +1175,58 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        if (CauseTracker.ENABLED) {
-            final PhaseContext phaseContext = PhaseContext.start()
-                    .addEntityCaptures()
-                    .addEntityDropCaptures()
-                    .addBlockCaptures();
-            phaseContext.addExtra("Explosion", explosion);
-            phaseContext.complete();
-            causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
-        }
-        final Explosion mcExplosion;
-        try {
-            // Since we already have the API created implementation Explosion, let's use it.
-            mcExplosion = (Explosion) explosion;
-        } catch (Exception e) {
-            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+
+        try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
+            .addEntityCaptures()
+            .addEntityDropCaptures()
+            .addBlockCaptures()) {
+            phaseContext.addExtra("Explosion", explosion)
+                .buildAndSwitch();
+            final Explosion mcExplosion;
+            try {
+                // Since we already have the API created implementation Explosion, let's use it.
+                mcExplosion = (Explosion) explosion;
+            } catch (Exception e) {
+                new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
                     .add("An explosion that was expected to be used for this implementation does not")
                     .add("originate from this implementation.")
                     .add(e)
                     .trace();
-            return;
-        }
-        final double x = mcExplosion.x;
-        final double y = mcExplosion.y;
-        final double z = mcExplosion.z;
-        final boolean damagesTerrain = mcExplosion.damagesTerrain;
-        final float strength = explosion.getRadius();
+                return;
+            }
+            final double x = mcExplosion.x;
+            final double y = mcExplosion.y;
+            final double z = mcExplosion.z;
+            final boolean damagesTerrain = mcExplosion.damagesTerrain;
+            final float strength = explosion.getRadius();
 
-        // Set up the pre event
-        final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(), explosion, this);
-        if (SpongeImpl.postEvent(event)) {
+            // Set up the pre event
+            final ExplosionEvent.Pre
+                event =
+                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(), explosion, this);
+            if (SpongeImpl.postEvent(event)) {
+                this.processingExplosion = false;
+                return;
+            }
+            // Sponge End
+
+            mcExplosion.doExplosionA();
+            mcExplosion.doExplosionB(false);
+
+            if (!damagesTerrain) {
+                mcExplosion.clearAffectedBlockPositions();
+            }
+
+            for (EntityPlayer entityplayer : this.playerEntities) {
+                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                    ((EntityPlayerMP) entityplayer).connection
+                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
+                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+                }
+            }
+
+            // Sponge Start - end processing
             this.processingExplosion = false;
-            if (CauseTracker.ENABLED) {
-                causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
-            }
-            return;
-        }
-        // Sponge End
-
-        mcExplosion.doExplosionA();
-        mcExplosion.doExplosionB(false);
-
-        if (!damagesTerrain) {
-            mcExplosion.clearAffectedBlockPositions();
-        }
-
-        for (EntityPlayer entityplayer : this.playerEntities) {
-            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
-                        mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
-            }
-        }
-
-        // Sponge Start - end processing
-        this.processingExplosion = false;
-        if (CauseTracker.ENABLED) {
-            causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
         }
         // Sponge End
     }
@@ -1322,7 +1303,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
         final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
-        if (!CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
+        if (peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
             state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
             // No seriously, if this is not set back to false, all future updates are processed immediately
@@ -1411,7 +1392,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entityIn.onUpdate();
             return;
         }
@@ -1429,7 +1410,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
 
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingTileTicks(state)) {
+        if (state.getPhase().alreadyCapturingTileTicks(state)) {
             tile.update();
             return;
         }
@@ -1441,7 +1422,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.onUpdate();
             return;
         }
@@ -1454,7 +1435,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.updateRidden();
             return;
         }
@@ -1465,16 +1446,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "wakeAllPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;wakeUpPlayer(ZZZ)V"))
     private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(EntityPhase.State.PLAYER_WAKE_UP, PhaseContext.start()
-                    .source(player)
-                    .addCaptures()
-                    .complete()
-            );
-        }
-        player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(EntityPhase.State.PLAYER_WAKE_UP);
+        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
+                .source(player)
+                .addCaptures()
+                .buildAndSwitch()) {
+            player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         }
     }
 
@@ -1524,13 +1500,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean spawnEntity(Entity entity) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (CauseTracker.ENABLED && !state.getPhase().alreadyCapturingEntitySpawns(state)) {
-            causeTracker.switchToPhase(PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
+        if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {
+            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
                 .addCaptures()
-                .complete());
-            causeTracker.spawnEntityWithCause(this, entity);
-            causeTracker.completePhase(PluginPhase.State.CUSTOM_SPAWN);
-            return true;
+                .buildAndSwitch()) {
+                causeTracker.spawnEntityWithCause(this, entity);
+                return true;
+            }
         }
         return causeTracker.spawnEntityWithCause(this, entity);
     }
@@ -1600,8 +1576,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     /**
      * @author gabizou - September 10th, 2016
+     * @author gabizou - September 21st, 2017 - Update for PhaseContext refactor.
      * @reason Due to the amount of changes, and to ensure that Forge's events are being properly
      * thrown, we must overwrite to have our hooks in place where we need them to be and when.
+     * Likewise, since the event context is very ambiguously created, we may have an entity
+     * coming in, or no entity, the explosion must always have a "source" in some context.
      *
      * @param entityIn The entity that caused the explosion
      * @param x The x position
@@ -1617,67 +1596,49 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
         // Sponge Start - Cause tracking
-        this.processingExplosion = true;
-        if (CauseTracker.ENABLED) {
-            PhaseContext phaseContext = PhaseContext.start()
-                    .addEntityCaptures()
-                    .addEntityDropCaptures()
-                    .addBlockCaptures();
-            if (entityIn != null) {
-                phaseContext.source(entityIn);
-            } else {
-                phaseContext.source(this);
-            }
-            final PhaseData currentPhaseData = CauseTracker.getInstance().getCurrentPhaseData();
-            currentPhaseData.state.getPhase().appendContextPreExplosion(phaseContext, currentPhaseData);
-            phaseContext.complete();
-            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.EXPLOSION, phaseContext);
-        }
-        // Sponge End
+        try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
+                .potentialExplosionSource((WorldServer) (Object) this, entityIn)
+                .buildAndSwitch()) {
+            this.processingExplosion = true;
+            // Sponge End
 
-        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+            Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
-        // Sponge Start - More cause tracking
-        if (CauseTracker.ENABLED) {
+            // Sponge Start - More cause tracking
             try {
                 CauseTracker.getInstance().getCurrentContext().addExtra("Explosion", ((org.spongepowered.api.world.explosion.Explosion) explosion));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        // Set up the pre event
-        final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+            // Set up the pre event
+            final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.explosion.Explosion) explosion, this);
-        if (SpongeImpl.postEvent(event)) {
+            if (SpongeImpl.postEvent(event)) {
+                this.processingExplosion = false;
+                return explosion;
+            }
+            // Sponge End
+
+            explosion.doExplosionA();
+            explosion.doExplosionB(false);
+
+            if (!isSmoking) {
+                explosion.clearAffectedBlockPositions();
+            }
+
+            for (EntityPlayer entityplayer : this.playerEntities) {
+                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                    ((EntityPlayerMP) entityplayer).connection
+                        .sendPacket(new SPacketExplosion(x, y, z, strength, explosion.getAffectedBlockPositions(),
+                            explosion.getPlayerKnockbackMap().get(entityplayer)));
+                }
+            }
+
+            // Sponge Start - end processing
             this.processingExplosion = false;
-            if (CauseTracker.ENABLED) {
-                CauseTracker.getInstance().completePhase(GeneralPhase.State.EXPLOSION);
-            }
+            // Sponge End
             return explosion;
-        }
-        // Sponge End
-
-        explosion.doExplosionA();
-        explosion.doExplosionB(false);
-
-        if (!isSmoking) {
-            explosion.clearAffectedBlockPositions();
-        }
-
-        for (EntityPlayer entityplayer : this.playerEntities) {
-            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, explosion.getAffectedBlockPositions(),
-                        explosion.getPlayerKnockbackMap().get(entityplayer)));
-            }
-        }
-
-        // Sponge Start - end processing
-        this.processingExplosion = false;
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GeneralPhase.State.EXPLOSION);
-        }
-        // Sponge End
-        return explosion;
+        } // Sponge - brackets
     }
 
     /**

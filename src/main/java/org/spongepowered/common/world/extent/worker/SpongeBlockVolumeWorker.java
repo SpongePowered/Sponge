@@ -38,8 +38,7 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMapper;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMerger;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeReducer;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
 import java.util.function.BiFunction;
@@ -74,23 +73,18 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int yMax = unmodifiableVolume.getBlockMax().getY();
         final int zMax = unmodifiableVolume.getBlockMax().getZ();
         // a single go, requiring only one event
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                .source(this)
-                .addCaptures()
-                .complete());
-        }
-        for (int z = zMin; z <= zMax; z++) {
-            for (int y = yMin; y <= yMax; y++) {
-                for (int x = xMin; x <= xMax; x++) {
-                    final BlockState block = mapper.map(unmodifiableVolume, x, y, z);
+        try (BasicPluginContext phaseState = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+            .source(this)
+            .buildAndSwitch()) {
+            for (int z = zMin; z <= zMax; z++) {
+                for (int y = yMin; y <= yMax; y++) {
+                    for (int x = xMin; x <= xMax; x++) {
+                        final BlockState block = mapper.map(unmodifiableVolume, x, y, z);
 
-                    destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block);
+                        destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block);
+                    }
                 }
             }
-        }
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 
@@ -112,22 +106,18 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int yMax = firstUnmodifiableVolume.getBlockMax().getY();
         final int zMax = firstUnmodifiableVolume.getBlockMax().getZ();
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                    .source(this)
-                    .complete());
-        }
-        for (int z = zMin; z <= zMax; z++) {
-            for (int y = yMin; y <= yMax; y++) {
-                for (int x = xMin; x <= xMax; x++) {
-                    final BlockState block = merger.merge(firstUnmodifiableVolume, x, y, z,
-                        secondUnmodifiableVolume, x + xOffsetSecond, y + yOffsetSecond, z + zOffsetSecond);
-                    destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block);
+        try (BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+            .source(this)
+            .buildAndSwitch()) {
+            for (int z = zMin; z <= zMax; z++) {
+                for (int y = yMin; y <= yMax; y++) {
+                    for (int x = xMin; x <= xMax; x++) {
+                        final BlockState block = merger.merge(firstUnmodifiableVolume, x, y, z,
+                            secondUnmodifiableVolume, x + xOffsetSecond, y + yOffsetSecond, z + zOffsetSecond);
+                        destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block);
+                    }
                 }
             }
-        }
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 
@@ -139,22 +129,16 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = this.volume.getBlockMax().getX();
         final int yMax = this.volume.getBlockMax().getY();
         final int zMax = this.volume.getBlockMax().getZ();
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if (CauseTracker.ENABLED) {
-                CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                        .source(this)
-                        .addCaptures()
-                        .complete());
-            }
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+            BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+                .source(this)
+                .buildAndSwitch()) {
             for (int z = zMin; z <= zMax; z++) {
                 for (int y = yMin; y <= yMax; y++) {
                     for (int x = xMin; x <= xMax; x++) {
                         visitor.visit(this.volume, x, y, z);
                     }
                 }
-            }
-            if (CauseTracker.ENABLED) {
-                CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
             }
         }
     }

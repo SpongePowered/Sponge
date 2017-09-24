@@ -42,6 +42,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -51,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -60,9 +62,11 @@ import javax.annotation.Nullable;
  * between what is suggested to be a {@link Cause} for an {@link Event} versus
  * the context of which a {@link IPhaseState} is being completed with.
  */
-public class PhaseContext {
+@SuppressWarnings("unchecked")
+public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    private boolean isCompleted = false;
+    private final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
+    protected boolean isCompleted = false;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;
     @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
@@ -77,19 +81,15 @@ public class PhaseContext {
     @Nullable private CapturePlayer capturePlayer;
     @Nullable protected User owner;
     @Nullable protected User notifier;
-    protected final Map<String, Object> extraContext = Maps.newHashMap();
-    protected boolean processImmediately;
+    private final Map<String, Object> extraContext = Maps.newHashMap();
+    private boolean processImmediately;
 
     private Object source;
     private PluginContainer activeContainer;
 
-    public static PhaseContext start() {
-        return new PhaseContext();
-    }
-
-    public PhaseContext addExtra(String key, Object val) {
+    public P addExtra(String key, Object val) {
         this.extraContext.put(key, val);
-        return this;
+        return (P) this;
     }
 
     public Object getExtra(String key) {
@@ -97,6 +97,7 @@ public class PhaseContext {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T> T getExtra(String key, Class<T> type) {
         Object o = this.extraContext.get(key);
         if (type.isInstance(o)) {
@@ -119,28 +120,38 @@ public class PhaseContext {
         return this.extraContext;
     }
 
-    public PhaseContext source(Object owner) {
+    public P source(Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.source = owner;
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext owner(User owner) {
+    public P owner(Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::owner);
+        return (P) this;
+    }
+
+    public P owner(User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.owner != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
         }
         this.owner = checkNotNull(owner, "Owner cannot be null!");
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext notifier(User notifier) {
+    public P notifier(Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::notifier);
+        return (P) this;
+    }
+
+    public P notifier(User notifier) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.notifier != null) {
             throw new IllegalStateException("Notifier for this phase context is already set!");
         }
         this.notifier = checkNotNull(notifier, "Notifier cannot be null!");
-        return this;
+        return (P) this;
     }
 
     private void checkBlockSuppliers() {
@@ -151,7 +162,7 @@ public class PhaseContext {
         checkState(this.captureBlockPos == null, "CaptureBlockPos is already set!");
     }
 
-    public PhaseContext addBlockCaptures() {
+    public P addBlockCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
@@ -166,10 +177,10 @@ public class PhaseContext {
 
         CaptureBlockPos blockPos = new CaptureBlockPos();
         this.captureBlockPos = blockPos;
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext addCaptures() {
+    public P addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
@@ -191,10 +202,10 @@ public class PhaseContext {
 
         CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
         this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext addEntityCaptures() {
+    public P addEntityCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
@@ -206,10 +217,10 @@ public class PhaseContext {
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
         this.capturedItemStackSupplier = capturedItemStackSupplier;
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext addEntityDropCaptures() {
+    public P addEntityDropCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.entityItemDropsSupplier == null, "EntityItemDropsSupplier is already set!");
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
@@ -218,20 +229,21 @@ public class PhaseContext {
         this.entityItemDropsSupplier = entityItemDropsSupplier;
         EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
         this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
-        return this;
+        return (P) this;
     }
 
     // TODO to be moved to listener based phase contexts when gabizou gets to restructuring PhaseContexts...
-    public PhaseContext player() {
+    public P player() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturePlayer == null, "Already capturing a player object!");
         this.capturePlayer = new CapturePlayer();
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext complete() {
+    public P buildAndSwitch() {
         this.isCompleted = true;
-        return this;
+        CauseTracker.getInstance().switchToPhase(this.state, this);
+        return (P) this;
     }
 
     public boolean isComplete() {
@@ -255,6 +267,11 @@ public class PhaseContext {
             return Optional.of((T) this.source);
         }
         return Optional.empty();
+    }
+
+    public <T> T requireSource(Class<T> targetClass) {
+        return getSource(targetClass)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
     }
 
     public Optional<User> getOwner() {
@@ -383,7 +400,8 @@ public class PhaseContext {
         }
     }
 
-    PhaseContext() {
+    protected PhaseContext(IPhaseState<? extends P> state) {
+        this.state = state;
     }
 
     @Override
@@ -399,7 +417,7 @@ public class PhaseContext {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final PhaseContext other = (PhaseContext) obj;
+        final PhaseContext<?> other = (PhaseContext<?>) obj;
         return Objects.equals(this.isCompleted, other.isCompleted);
     }
 
@@ -410,13 +428,23 @@ public class PhaseContext {
                 .toString();
     }
 
-    public PhaseContext activeContainer(PluginContainer plugin) {
+    public P markEmpty() {
+        this.isCompleted = true;
+        return (P) this;
+    }
+
+    public P activeContainer(PluginContainer plugin) {
         this.activeContainer = plugin;
-        return this;
+        return (P) this;
     }
 
     public PluginContainer getActiveContainer() {
         return this.activeContainer;
+    }
+
+    @Override
+    public void close() { // Should never throw an exception
+        CauseTracker.getInstance().completePhase(this.state);
     }
 
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {

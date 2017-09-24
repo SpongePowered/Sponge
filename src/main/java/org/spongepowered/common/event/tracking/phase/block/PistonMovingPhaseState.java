@@ -37,8 +37,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ final class PistonMovingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext phaseContext) {
+    public void unwind(GeneralizedContext phaseContext) {
         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (!TrackingUtil.processBlockCaptures(capturedBlocks, this, phaseContext)) {

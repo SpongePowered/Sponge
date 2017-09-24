@@ -32,13 +32,13 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 public final class BlockPhase extends TrackingPhase {
 
     public static final class State {
-        public static final IPhaseState BLOCK_DECAY = new BlockDecayPhaseState();
-        public static final IPhaseState RESTORING_BLOCKS = new RestoringBlockPhaseState();
-        public static final IPhaseState DISPENSE = new DispensePhaseState();
-        public static final IPhaseState BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
-        public static final IPhaseState BLOCK_ADDED = null;
-        public static final IPhaseState BLOCK_BREAK = null;
-        public static final IPhaseState PISTON_MOVING = new PistonMovingPhaseState();
+        public static final IPhaseState<?> BLOCK_DECAY = new BlockDecayPhaseState();
+        public static final IPhaseState<?> RESTORING_BLOCKS = new RestoringBlockPhaseState();
+        public static final IPhaseState<?> DISPENSE = new DispensePhaseState();
+        public static final IPhaseState<?> BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
+        public static final IPhaseState<?> BLOCK_ADDED = null;
+        public static final IPhaseState<?> BLOCK_BREAK = null;
+        public static final IPhaseState<?> PISTON_MOVING = new PistonMovingPhaseState();
 
         private State() {
         }
@@ -57,30 +57,25 @@ public final class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
+    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         return currentState != State.RESTORING_BLOCKS;
     }
 
     @Override
-    public boolean allowEntitySpawns(IPhaseState currentState) {
+    public boolean allowEntitySpawns(IPhaseState<?> currentState) {
         return ((BlockPhaseState) currentState).allowsSpawns();
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
-        ((BlockPhaseState) state).unwind(phaseContext);
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
+                                        int chunkZ) {
         return this.allowEntitySpawns(phaseState)
                ? context.getCapturedEntities().add(entity)
                : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
 
     @Override
-    public boolean isRestoring(IPhaseState state, PhaseContext phaseContext, int updateFlag) {
+    public boolean isRestoring(IPhaseState<?> state, PhaseContext<?> phaseContext, int updateFlag) {
         return state == State.RESTORING_BLOCKS && (updateFlag & 1) == 0;
     }
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
-
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -60,7 +58,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-final class ExplosionState extends GeneralState {
+import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
+
+final class ExplosionState extends GeneralState<ExplosionContext> {
+
+    @Override
+    public ExplosionContext createPhaseContext() {
+        return new ExplosionContext()
+            .addEntityCaptures()
+            .addEntityDropCaptures()
+            .addBlockCaptures()
+            .populateFromCurrentState();
+    }
+
     @Override
     public boolean canSwitchTo(IPhaseState state) {
         return true;
@@ -82,7 +92,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    public void unwind(ExplosionContext context) {
         final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack();
@@ -108,7 +118,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext context) {
+    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;
         }
@@ -235,7 +245,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
+    public boolean shouldCaptureBlockChangeOrSkip(ExplosionContext phaseContext,
         BlockPos pos) {
         boolean match = false;
         final Vector3i blockPos = VecHelper.toVector3i(pos);
@@ -249,7 +259,7 @@ final class ExplosionState extends GeneralState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();

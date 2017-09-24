@@ -32,7 +32,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import javax.annotation.Nullable;
 
-public abstract class EntityPhaseState implements IPhaseState {
+public abstract class EntityPhaseState<E extends EntityContext<E>> implements IPhaseState<E> {
 
     @Override
     public final TrackingPhase getPhase() {
@@ -45,11 +45,12 @@ public abstract class EntityPhaseState implements IPhaseState {
     }
 
     @Nullable
-    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext context, MoveEntityEvent.Teleport.Portal event) {
+    public net.minecraft.entity.Entity returnTeleportResult(PhaseContext<?> context, MoveEntityEvent.Teleport.Portal event) {
         return null;
     }
 
-    void unwind(PhaseContext context) {
+    @Override
+    public void unwind(E context) {
 
     }
 }

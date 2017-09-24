@@ -69,14 +69,13 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-class EntityTickPhaseState extends TickPhaseState {
+class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     EntityTickPhaseState() {
     }
-
     @SuppressWarnings("unchecked")
     @Override
-    public void processPostTick(PhaseContext phaseContext) {
+    public void unwind(EntityTickContext phaseContext) {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
         final Optional<User> creator = phaseContext.getOwner();
@@ -304,10 +303,15 @@ class EntityTickPhaseState extends TickPhaseState {
         }
     }
 
+    @Override
+    public EntityTickContext createPhaseContext() {
+        return new EntityTickContext().addCaptures();
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext context) {
+        EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
@@ -324,12 +328,12 @@ class EntityTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostSpawns(PhaseContext phaseContext, ArrayList<Entity> entities) {
+    public void processPostSpawns(PhaseContext<?> phaseContext, ArrayList<Entity> entities) {
         super.processPostSpawns(phaseContext, entities);
     }
 
     @Override
-    public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
         context.getOwner().ifPresent(explosionContext::owner);
         context.getNotifier().ifPresent(explosionContext::notifier);
         final Entity tickingEntity = context.getSource(Entity.class)
@@ -338,7 +342,7 @@ class EntityTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
         final Optional<User> creator = context.getOwner();

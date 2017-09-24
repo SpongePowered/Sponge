@@ -26,22 +26,27 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 
-public class TileEntityUnloadState extends GeneralState {
+public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return true;
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    public GeneralizedContext createPhaseContext() {
+        return new GeneralizedContext(this);
+    }
+
+    @Override
+    public void unwind(GeneralizedContext context) {
 
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
+    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
         BlockPos pos) {
         return false;
     }

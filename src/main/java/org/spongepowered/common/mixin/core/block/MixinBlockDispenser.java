@@ -37,14 +37,13 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirection
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -55,6 +54,8 @@ import java.util.Random;
 
 @Mixin(BlockDispenser.class)
 public abstract class MixinBlockDispenser extends MixinBlock {
+
+    @Shadow protected abstract void dispense(World worldIn, BlockPos pos);
 
     private static final String DISPENSE_ITEM =
             "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V";
@@ -90,31 +91,16 @@ public abstract class MixinBlockDispenser extends MixinBlock {
                 DirectionResolver.getFor(blockState.getValue(BlockDispenser.FACING)));
     }
 
-    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
-    private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        if (CauseTracker.ENABLED) {
-            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldIn;
-            final SpongeBlockSnapshot spongeBlockSnapshot = mixinWorldServer.createSpongeBlockSnapshot(state, state, pos, 3);
-            final PhaseContext phaseContext = PhaseContext.start()
-                    .source(spongeBlockSnapshot)
-                    .addBlockCaptures()
-                    .addEntityCaptures()
-                    .addEntityDropCaptures();
-            final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
-            mixinChunk.getBlockOwner(pos)
-                    .ifPresent(phaseContext::owner);
-            mixinChunk.getBlockNotifier(pos)
-                    .ifPresent(phaseContext::notifier);
-
-            CauseTracker.getInstance().switchToPhase(BlockPhase.State.DISPENSE, phaseContext
-                    .complete());
-        }
-    }
-
-    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))
-    private void onDispenseReturn(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(BlockPhase.State.DISPENSE);
+    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
+    private void onSpongeDispense(BlockDispenser blockDispenser, World worldIn, BlockPos pos, World world, BlockPos position, IBlockState state, Random rand) {
+        final SpongeBlockSnapshot spongeBlockSnapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3);
+        final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
+        try (PhaseContext<?> context = BlockPhase.State.DISPENSE.createPhaseContext()
+            .source(spongeBlockSnapshot)
+            .owner(() -> mixinChunk.getBlockOwner(pos))
+            .notifier(() -> mixinChunk.getBlockNotifier(pos))
+            .buildAndSwitch()) {
+            this.dispense(worldIn, pos);
         }
     }
 

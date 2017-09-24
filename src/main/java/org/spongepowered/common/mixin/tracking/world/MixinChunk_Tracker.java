@@ -358,18 +358,17 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Inject(method = "onLoad", at = @At("HEAD"))
     private void startLoad(CallbackInfo callbackInfo) {
-        if (CauseTracker.ENABLED && !this.world.isRemote) {
-            CauseTracker.getInstance().switchToPhase(GenerationPhase.State.CHUNK_LOADING, PhaseContext.start()
-                .source(this)
-                .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
-                .addCaptures()
-                .complete());
+        if (!this.world.isRemote) {
+            GenerationPhase.State.CHUNK_LOADING.createPhaseContext()
+                    .source(this)
+                    .world(this.world)
+                    .buildAndSwitch();
         }
     }
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void endLoad(CallbackInfo callbackInfo) {
-        if (CauseTracker.ENABLED && !this.world.isRemote) {
+        if (!this.world.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
         }
     }

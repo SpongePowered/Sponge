@@ -42,17 +42,25 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.ArrayList;
 
-class DimensionTickPhaseState extends TickPhaseState {
+class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     DimensionTickPhaseState() {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public DimensionContext createPhaseContext() {
+        return new DimensionContext()
+                .addBlockCaptures()
+                .addEntityCaptures()
+                .addEntityDropCaptures();
+    }
+
+    @Override
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return super.canSwitchTo(state) || state.getPhase() == TrackingPhases.DRAGON;
     }
 
     @Override
-    public void processPostTick(PhaseContext phaseContext) {
+    public void unwind(DimensionContext phaseContext) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedBlockSupplier()
@@ -101,7 +109,7 @@ class DimensionTickPhaseState extends TickPhaseState {
 
      */
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());

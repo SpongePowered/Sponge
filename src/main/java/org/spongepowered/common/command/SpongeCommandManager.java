@@ -56,9 +56,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.io.PrintWriter;
@@ -312,33 +310,26 @@ public class SpongeCommandManager implements CommandManager {
         }
 
         try {
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+                 // Since we know we are in the main thread, this is safe to do without a thread check
+                 CommandPhaseContext context = GeneralPhase.State.COMMAND.createPhaseContext()
+                         .source(source)
+                         .addCaptures()
+                         .addEntityDropCaptures()
+                         .buildAndSwitch()) {
                 Sponge.getCauseStackManager().pushCause(source);
-                if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                    CauseTracker.getInstance().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
-                        .source(source)
-                        // unused, to be removed and re-located when phase context is cleaned up
-                        //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
-                        .addCaptures()
-                        .addEntityDropCaptures()
-                        .complete());
-                }
                 final CommandResult result = this.dispatcher.process(source, commandLine);
-                this.completeCommandPhase();
                 return result;
             } catch (InvocationCommandException ex) {
-                this.completeCommandPhase();
                 if (ex.getCause() != null) {
                     throw ex.getCause();
                 }
             } catch (CommandPermissionException ex) {
-                this.completeCommandPhase();
                 Text text = ex.getText();
                 if (text != null) {
                     source.sendMessage(error(text));
                 }
             } catch (CommandException ex) {
-                this.completeCommandPhase();
                 Text text = ex.getText();
                 if (text != null) {
                     source.sendMessage(error(text));
@@ -352,7 +343,6 @@ public class SpongeCommandManager implements CommandManager {
                 }
             }
         } catch (Throwable thr) {
-            this.completeCommandPhase();
             Text.Builder excBuilder;
             if (thr instanceof TextMessageException) {
                 Text text = ((TextMessageException) thr).getText();
@@ -427,9 +417,4 @@ public class SpongeCommandManager implements CommandManager {
         return this.dispatcher.size();
     }
 
-    private void completeCommandPhase() {
-        if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            CauseTracker.getInstance().completePhase(GeneralPhase.State.COMMAND);
-        }
-    }
 }

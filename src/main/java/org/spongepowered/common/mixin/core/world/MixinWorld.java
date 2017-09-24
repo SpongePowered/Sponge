@@ -1592,15 +1592,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        if (!this.isRemote && CauseTracker.ENABLED) {
-            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.TILE_ENTITY_UNLOAD, PhaseContext.start()
-                    .source(this)
-                    .complete());
+        if (!this.isRemote) {
+            try (final PhaseContext<?> context = GeneralPhase.State.TILE_ENTITY_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
+                this.startPendingTileEntityTimings(); // Sponge
+            }
         }
-        this.startPendingTileEntityTimings(); // Sponge
-        if (!this.isRemote && CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GeneralPhase.State.TILE_ENTITY_UNLOAD);
-        }
+
         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
         // this.profiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 

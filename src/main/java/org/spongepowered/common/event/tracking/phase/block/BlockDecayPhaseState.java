@@ -37,8 +37,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
@@ -50,9 +50,15 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     BlockDecayPhaseState() {
     }
 
+    @Override
+    public GeneralizedContext createPhaseContext() {
+        return super.createPhaseContext()
+            .addCaptures();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(PhaseContext context) {
+    public void unwind(GeneralizedContext context) {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         final Location<World> worldLocation = locatable.getLocation();

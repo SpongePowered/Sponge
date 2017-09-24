@@ -29,20 +29,26 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
@@ -55,23 +61,19 @@ class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
         if (itemstack != null) {
             context.addExtra(InternalNamedCauses.Packet.ITEM_USED, itemstack);
         }
-
-        context.addEntityCaptures()
-               .addEntityDropCaptures()
-               .addBlockCaptures();
     }
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        PhaseContext context) {
-        Player player = context.getRequiredExtra(InternalNamedCauses.Packet.PACKET_PLAYER, Player.class);
+        BasicPacketContext context) {
+        Player player = context.getSpongePlayer();
         BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation().get()).getBlockPos();
         IMixinChunk spongeChunk = (IMixinChunk) EntityUtil.getMinecraftWorld(player).getChunkFromBlockCoords(pos);
         if (blockChange == BlockChange.PLACE) {
@@ -79,5 +81,31 @@ class UseItemPacketState extends BasicPacketState {
         }
 
         spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
+    }
+
+    @Override
+    public void unwind(BasicPacketContext context) {
+        final EntityPlayerMP player = context.getPacketPlayer();
+        final ItemStack itemStack = context.getRequiredExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().pushCause(snapshot);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE,
+                itemStack.getType() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
+            context.getCapturedEntitySupplier()
+                .ifPresentAndNotEmpty(entities -> {
+                    final SpawnEntityEvent spawnEntityEvent =
+                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeImpl.postEvent(spawnEntityEvent);
+                    if (!spawnEntityEvent.isCancelled()) {
+                        processSpawnedEntities(player, spawnEntityEvent);
+                    }
+                });
+        }
+        context.getCapturedBlockSupplier()
+            .ifPresentAndNotEmpty(
+                originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, this, context));
+
     }
 }

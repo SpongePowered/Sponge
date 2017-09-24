@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
 
@@ -34,8 +33,7 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
-        BlockPos pos) {
+    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
         return false;
     }
 

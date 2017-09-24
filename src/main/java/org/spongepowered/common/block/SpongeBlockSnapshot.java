@@ -180,34 +180,32 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
         CauseTracker causeTracker = CauseTracker.getInstance();
-        final IPhaseState currentState = causeTracker.getCurrentState();
-        if (!currentState.tracksBlockRestores()) {
-            causeTracker.switchToPhase(BlockPhase.State.RESTORING_BLOCKS, PhaseContext.start().complete());
-        }
+        final IPhaseState<?> currentState = causeTracker.getCurrentState();
+        // We need to deterministically define the context as nullable if we don't need to enter.
+        // this way we guarantee an exit.
+        try (PhaseContext<?> context = !currentState.tracksBlockRestores()
+            ? null
+            : BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch()) {
 
-        BlockPos pos = VecHelper.toBlockPos(this.pos);
-        IBlockState current = world.getBlockState(pos);
-        IBlockState replaced = (IBlockState) this.blockState;
-        if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
-            if (currentState.tracksBlockRestores()) {
-                causeTracker.completePhase(BlockPhase.State.RESTORING_BLOCKS);
+            BlockPos pos = VecHelper.toBlockPos(this.pos);
+            IBlockState current = world.getBlockState(pos);
+            IBlockState replaced = (IBlockState) this.blockState;
+            if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock()
+                .getMetaFromState(replaced))) {
+                return false;
             }
-            return false;
-        }
 
-        mixinWorldServer.setBlockState(pos, replaced, flag);
-        world.getPlayerChunkMap().markBlockForUpdate(pos);
-        if (this.compound != null) {
-            final TileEntity te = world.getTileEntity(pos);
-            if (te != null) {
-                te.readFromNBT(this.compound);
-                te.markDirty();
+            mixinWorldServer.setBlockState(pos, replaced, flag);
+            world.getPlayerChunkMap().markBlockForUpdate(pos);
+            if (this.compound != null) {
+                final TileEntity te = world.getTileEntity(pos);
+                if (te != null) {
+                    te.readFromNBT(this.compound);
+                    te.markDirty();
+                }
             }
+            return true;
         }
-        if (!currentState.tracksBlockRestores()) {
-            causeTracker.completePhase(BlockPhase.State.RESTORING_BLOCKS);
-        }
-        return true;
     }
 
     @Override

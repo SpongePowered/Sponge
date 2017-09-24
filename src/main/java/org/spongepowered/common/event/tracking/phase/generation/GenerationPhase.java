@@ -25,14 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -40,7 +37,6 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 
@@ -63,16 +59,16 @@ public final class GenerationPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState CHUNK_LOADING = new GeneralGenerationPhaseState("CHUNK_LOADING").bake();
+        public static final IPhaseState<GenericGenerationContext> CHUNK_LOADING = new GeneralGenerationPhaseState.Generic("CHUNK_LOADING").bake();
 
-        public static final IPhaseState WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState("WORLD_SPAWNER_SPAWNING").bake();
+        public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState.Generic("WORLD_SPAWNER_SPAWNING").bake();
 
-        public static final IPhaseState POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
+        public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
-        public static final IPhaseState TERRAIN_GENERATION = new GeneralGenerationPhaseState("TERRAIN_GENERATION");
+        public static final IPhaseState<GenericGenerationContext> TERRAIN_GENERATION = new TerrainGenerationState();
 
         static {
-            ((GeneralGenerationPhaseState) POPULATOR_RUNNING)
+            ((GeneralGenerationPhaseState<?>) POPULATOR_RUNNING)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
@@ -80,7 +76,7 @@ public final class GenerationPhase extends TrackingPhase {
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
                     .bake();
-            ((GeneralGenerationPhaseState) TERRAIN_GENERATION)
+            ((GeneralGenerationPhaseState<?>) TERRAIN_GENERATION)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
@@ -103,22 +99,17 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
-        ((GeneralGenerationPhaseState) state).unwind(phaseContext);
-    }
-
-    @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
+    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         return false;
     }
 
     @Override
-    public boolean ignoresBlockEvent(IPhaseState phaseState) {
+    public boolean ignoresBlockEvent(IPhaseState<?> phaseState) {
         return true;
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return true;
     }
 
@@ -128,13 +119,13 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState<?> currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
+                                        int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
@@ -150,7 +141,7 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean isWorldGeneration(IPhaseState state) {
+    public boolean isWorldGeneration(IPhaseState<?> state) {
         return true;
     }
 

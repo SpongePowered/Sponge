@@ -183,28 +183,20 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
-    public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
-        if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .addCaptures()
-                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
-                    .complete());
-        }
+    private void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
+        GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+            .world(this.world)
+            .buildAndSwitch();
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", shift = Shift.AFTER))
-    public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
-        }
+    private void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
+        CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
-    public void onError(CallbackInfoReturnable<Chunk> ci) {
-        if (CauseTracker.ENABLED) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
-        }
+    private void onError(CallbackInfoReturnable<Chunk> ci) {
+        CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     private boolean canDenyChunkRequest() {
@@ -216,32 +208,31 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             return false;
         }
 
-        if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            final IPhaseState currentState = causeTracker.getCurrentState();
-            // States that cannot deny chunks
-            if (currentState == TickPhase.Tick.PLAYER
-                    || currentState == TickPhase.Tick.DIMENSION
-                    || currentState == EntityPhase.State.CHANGING_DIMENSION
-                    || currentState == EntityPhase.State.LEAVING_DIMENSION) {
-                return false;
-            }
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final IPhaseState currentState = causeTracker.getCurrentState();
+        // TODO - write a tristate for whether the state can deny chunks
+        // States that cannot deny chunks
+        if (currentState == TickPhase.Tick.PLAYER
+            || currentState == TickPhase.Tick.DIMENSION
+            || currentState == EntityPhase.State.CHANGING_DIMENSION
+            || currentState == EntityPhase.State.LEAVING_DIMENSION) {
+            return false;
+        }
 
-            // States that can deny chunks
-            if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
-                    || currentState == PluginPhase.Listener.PRE_SERVER_TICK_LISTENER
-                    || currentState == PluginPhase.Listener.POST_SERVER_TICK_LISTENER
-                    || currentState == PluginPhase.Listener.PRE_WORLD_TICK_LISTENER
-                    || currentState == PluginPhase.Listener.POST_WORLD_TICK_LISTENER) {
-                return true;
-            }
+        // States that can deny chunks
+        if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
+            || currentState == PluginPhase.Listener.PRE_SERVER_TICK_LISTENER
+            || currentState == PluginPhase.Listener.POST_SERVER_TICK_LISTENER
+            || currentState == PluginPhase.Listener.PRE_WORLD_TICK_LISTENER
+            || currentState == PluginPhase.Listener.POST_WORLD_TICK_LISTENER) {
+            return true;
+        }
 
-            // Phases that can deny chunks
-            if (currentState.getPhase() == TrackingPhases.BLOCK
-                    || currentState.getPhase() == TrackingPhases.ENTITY
-                    || currentState.getPhase() == TrackingPhases.TICK) {
-                return true;
-            }
+        // Phases that can deny chunks
+        if (currentState.getPhase() == TrackingPhases.BLOCK
+            || currentState.getPhase() == TrackingPhases.ENTITY
+            || currentState.getPhase() == TrackingPhases.TICK) {
+            return true;
         }
 
 

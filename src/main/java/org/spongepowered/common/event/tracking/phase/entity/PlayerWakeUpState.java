@@ -24,16 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-final class PlayerWakeUpState extends EntityPhaseState {
+final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
     PlayerWakeUpState() {
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    public BasicEntityContext createPhaseContext() {
+        return new BasicEntityContext(this);
+    }
+
+    @Override
+    public void unwind(BasicEntityContext context) {
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil
                 .processBlockCaptures(blocks, this, context));
     }

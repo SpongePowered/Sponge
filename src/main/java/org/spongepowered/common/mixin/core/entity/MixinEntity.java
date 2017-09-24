@@ -90,7 +90,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
-import org.spongepowered.api.util.blockray.BlockRay;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
@@ -123,7 +122,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -473,82 +472,83 @@ public abstract class MixinEntity implements IMixinEntity {
             return false;
         }
 
-        // TODO Add a 'Move' plugin phase or just keep it under Teleport?
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            CauseTracker.getInstance().switchToPhase(PluginPhase.State.TELEPORT, PhaseContext.start().complete());
-            if (!Sponge.getCauseStackManager().getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
-            }
+        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext().buildAndSwitch()) {
 
-            // TODO These methods need a Cause (maybe wait till Cause PR)
-            // TODO Need to not fire Teleport in all cases (especially when movement is local)
-            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
-            if (event.isCancelled()) {
-                CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
-                return false;
-            }
-
-            location = event.getToTransform().getLocation();
-            this.rotationPitch = (float) event.getToTransform().getPitch();
-            this.rotationYaw = (float) event.getToTransform().getYaw();
-        }
-
-        final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
-        chunkProviderServer.setForceChunkRequests(true);
-
-        final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
-        final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
-
-        boolean isTeleporting = true;
-
-        if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-            final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getExtent();
-            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
-                // Close open containers
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
-                if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                    entityPlayerMP.closeContainer();
+            // TODO Add a 'Move' plugin phase or just keep it under Teleport?
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();) {
+                if (!Sponge.getCauseStackManager().getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
                 }
+
+                // TODO These methods need a Cause (maybe wait till Cause PR)
+                // TODO Need to not fire Teleport in all cases (especially when movement is local)
+                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+                if (event.isCancelled()) {
+                    return false;
+                }
+
+                location = event.getToTransform().getLocation();
+                this.rotationPitch = (float) event.getToTransform().getPitch();
+                this.rotationYaw = (float) event.getToTransform().getYaw();
             }
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
-                    ((IMixinWorldServer) nmsWorld).getDimensionId());
-        } else {
-            double distance = location.getPosition().distance(this.getPosition());
 
-            if (distance <= 4) {
-                isTeleporting = false;
-            }
+            final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
+            chunkProviderServer.setForceChunkRequests(true);
 
-            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+            final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
+            final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
-                // No reason to attempt to load chunks unless we're teleporting
-                if (isTeleporting) {
+            boolean isTeleporting = true;
+
+            if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
+                final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getExtent();
+                if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
                     // Close open containers
+                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
                     if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
                         entityPlayerMP.closeContainer();
                     }
-
-                    ((WorldServer) location.getExtent()).getChunkProvider()
-                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                 }
-                entityPlayerMP.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
-                ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+                EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
+                    ((IMixinWorldServer) nmsWorld).getDimensionId());
             } else {
-                setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
-            }
-        }
+                double distance = location.getPosition().distance(this.getPosition());
 
-        if (isTeleporting) {
-            // Re-attach passengers
-            for (net.minecraft.entity.Entity passenger : passengers) {
-                passenger.startRiding(thisEntity, true);
-            }
-        }
+                if (distance <= 4) {
+                    isTeleporting = false;
+                }
 
-        chunkProviderServer.setForceChunkRequests(false);
-        CauseTracker.getInstance().completePhase(PluginPhase.State.TELEPORT);
-        return true;
+                if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
+                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+
+                    // No reason to attempt to load chunks unless we're teleporting
+                    if (isTeleporting) {
+                        // Close open containers
+                        if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                            entityPlayerMP.closeContainer();
+                        }
+
+                        ((WorldServer) location.getExtent()).getChunkProvider()
+                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                    }
+                    entityPlayerMP.connection
+                        .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                    ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+                } else {
+                    setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+                }
+            }
+
+            if (isTeleporting) {
+                // Re-attach passengers
+                for (net.minecraft.entity.Entity passenger : passengers) {
+                    passenger.startRiding(thisEntity, true);
+                }
+            }
+
+            chunkProviderServer.setForceChunkRequests(false);
+            return true;
+        }
     }
 
 

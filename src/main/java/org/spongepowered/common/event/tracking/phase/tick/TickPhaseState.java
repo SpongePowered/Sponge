@@ -41,13 +41,12 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
-abstract class TickPhaseState implements IPhaseState {
+abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C> {
 
     TickPhaseState() {
     }
@@ -58,7 +57,7 @@ abstract class TickPhaseState implements IPhaseState {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
     }
 
@@ -67,15 +66,16 @@ abstract class TickPhaseState implements IPhaseState {
         return true;
     }
 
-    public void processPostTick(PhaseContext phaseContext) { }
+    @Override
+    public void unwind(C phaseContext) { }
 
 
-    public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
 
-    public void processPostSpawns(PhaseContext phaseContext, ArrayList<Entity> entities) {
+    public void processPostSpawns(PhaseContext<?> phaseContext, ArrayList<Entity> entities) {
         final SpawnEntityEvent
                 event =
                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
@@ -87,9 +87,11 @@ abstract class TickPhaseState implements IPhaseState {
         }
     }
 
-    public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
 
     }
 
-    public abstract boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ);
+    public abstract boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ);
+
+
 }

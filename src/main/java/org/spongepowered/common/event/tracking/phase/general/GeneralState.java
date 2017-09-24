@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -36,13 +35,13 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 
-abstract class GeneralState implements IPhaseState {
+abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G> {
 
-    abstract void unwind(PhaseContext context);
+    @Override
+    public abstract void unwind(G context);
 
     @Override
     public final TrackingPhase getPhase() {
@@ -65,7 +64,7 @@ abstract class GeneralState implements IPhaseState {
      * @param chunkZ
      * @return
      */
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());

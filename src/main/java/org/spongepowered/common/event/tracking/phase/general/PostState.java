@@ -29,10 +29,16 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 
-final class PostState extends GeneralState {
+final class PostState extends GeneralState<UnwindingPhaseContext> {
+
+    @Override
+    public UnwindingPhaseContext createPhaseContext() {
+        return null;
+    }
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
@@ -45,23 +51,24 @@ final class PostState extends GeneralState {
     public boolean tracksBlockRestores() {
         return false; // TODO - check that this really is needed.
     }
+
     @Override
-    void unwind(PhaseContext context) {
+    public void unwind(UnwindingPhaseContext context) {
         final IPhaseState unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-        final PhaseContext unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+        final PhaseContext<?> unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
         this.getPhase().postDispatch(unwindingState, unwindingContext, context);
     }
 
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
         final IPhaseState phaseState = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-        final PhaseContext unwinding = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+        final PhaseContext<?> unwinding = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
         final PhaseData phaseData = new PhaseData(unwinding, phaseState);
         phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 }

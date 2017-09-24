@@ -28,8 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -44,21 +42,21 @@ import javax.annotation.Nullable;
 public final class PluginPhase extends TrackingPhase {
 
     public static final class State {
-        public static final IPhaseState BLOCK_WORKER = new BlockWorkerPhaseState();
-        public static final IPhaseState CUSTOM_SPAWN = new PluginPhaseState();
-        public static final IPhaseState CUSTOM_EXPLOSION = new CustomExplosionState();
-        public static final IPhaseState SCHEDULED_TASK = new ScheduledTaskPhaseState();
-        public static final IPhaseState TELEPORT = new PluginPhaseState();
+        public static final IPhaseState<BasicPluginContext> BLOCK_WORKER = new BlockWorkerPhaseState();
+        public static final IPhaseState<BasicPluginContext> CUSTOM_SPAWN = new BasicPluginState();
+        public static final IPhaseState<ExplosionContext> CUSTOM_EXPLOSION = new CustomExplosionState();
+        public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
+        public static final IPhaseState<BasicPluginContext> TELEPORT = new BasicPluginState();
 
         private State() {
         }
     }
 
     public static final class Listener {
-        public static final IPhaseState PRE_WORLD_TICK_LISTENER = new PreWorldTickListenerState();
-        public static final IPhaseState POST_WORLD_TICK_LISTENER = new PostWorldTickListenerState();
-        public static final IPhaseState PRE_SERVER_TICK_LISTENER = new PreServerTickListenerState();
-        public static final IPhaseState POST_SERVER_TICK_LISTENER = new PostServerTickListenerState();
+        public static final IPhaseState<ListenerPhaseContext> PRE_WORLD_TICK_LISTENER = new PreWorldTickListenerState();
+        public static final IPhaseState<ListenerPhaseContext> POST_WORLD_TICK_LISTENER = new PostWorldTickListenerState();
+        public static final IPhaseState<ListenerPhaseContext> PRE_SERVER_TICK_LISTENER = new PreServerTickListenerState();
+        public static final IPhaseState<ListenerPhaseContext> POST_SERVER_TICK_LISTENER = new PostServerTickListenerState();
 
         private Listener() {
         }
@@ -77,13 +75,8 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
-        ((PluginPhaseState) state).processPostTick(phaseContext);
-    }
-
-    @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos,
-            IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos,
+                                        IMixinBlockEventData blockEvent) {
         if (phaseState instanceof ListenerPhaseState) {
             ((ListenerPhaseState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
         }
@@ -91,15 +84,15 @@ public final class PluginPhase extends TrackingPhase {
 
 
     @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
         }
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState<?> state, PhaseContext<?> context,
             CauseTracker causeTracker) {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);
@@ -107,7 +100,7 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean handlesOwnPhaseCompletion(IPhaseState state) {
+    public boolean handlesOwnPhaseCompletion(IPhaseState<?> state) {
         return state == State.BLOCK_WORKER;
     }
 }

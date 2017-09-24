@@ -24,22 +24,55 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Lists;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
@@ -53,10 +86,54 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        super.populateContext(playerMP, packet, context);
-        // unused, to be removed and re-located when phase context is cleaned up
-        //context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+    public void unwind(InventoryPacketContext context) {
+        final EntityPlayerMP player = context.getPacketPlayer();
+        final ItemStack usedStack = context.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+        final Entity spongePlayer = EntityUtil.fromNative(player);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(spongePlayer);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+
+            context.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            context.getCapturedItemsSupplier()
+                .ifPresentAndNotEmpty(items -> {
+
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add(EntityUtil.fromNative(item));
+                    }
+
+                    final CPacketPlayerDigging packetIn = context.getPacket();
+
+                    CPacketPlayerDigging.Action action = packetIn.getAction();
+
+                    final int usedButton = action == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+
+                    Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                    final IMixinContainer mixinContainer = ContainerUtil.toMixin( player.openContainer);
+                    List<SlotTransaction> slotTrans = mixinContainer.getCapturedTransactions();
+                    ClickInventoryEvent.Drop dropItemEvent = ((DropItemWithHotkeyState) this)
+                        .createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton);
+
+                    SpongeImpl.postEvent(dropItemEvent);
+                    if (!dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
+                        processSpawnedEntities(player, dropItemEvent);
+                    } else {
+                        ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
+                    }
+                    slotTrans.clear();
+                    mixinContainer.setCaptureInventory(false);
+                });
+            context.getCapturedEntityDropSupplier()
+                .ifPresentAndNotEmpty(itemMapping -> {
+
+                });
+            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+            mixinContainer.setCaptureInventory(false);
+            mixinContainer.getCapturedTransactions().clear();
+        }
     }
 
     @Override

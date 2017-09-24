@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  */
 final class CauseStack {
 
-    private static final PhaseContext EMPTY = PhaseContext.start().complete();
+    private static final PhaseContext<?> EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
     static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
@@ -62,12 +62,12 @@ final class CauseStack {
         return phase == null ? CauseStack.EMPTY_DATA : phase;
     }
 
-    IPhaseState peekState() {
+    IPhaseState<?> peekState() {
         final PhaseData peek = this.states.peek();
         return peek == null ? GeneralPhase.State.COMPLETE : peek.state;
     }
 
-    PhaseContext peekContext() {
+    PhaseContext<?> peekContext() {
         final PhaseData peek = this.states.peek();
         return peek == null ? CauseStack.EMPTY : peek.context;
     }
@@ -83,12 +83,12 @@ final class CauseStack {
         return this;
     }
 
-    CauseStack push(IPhaseState state, PhaseContext context) {
+    CauseStack push(IPhaseState<?> state, PhaseContext<?> context) {
         return push(new PhaseData(context, state));
     }
 
     public void forEach(Consumer<PhaseData> consumer) {
-        this.states.forEach(consumer::accept);
+        this.states.forEach(consumer);
     }
 
     public boolean isEmpty() {

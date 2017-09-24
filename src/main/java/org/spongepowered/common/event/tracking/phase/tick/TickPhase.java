@@ -44,26 +44,20 @@ public final class TickPhase extends TrackingPhase {
 
     public static final class Tick {
 
-        public static final IPhaseState NO_CAPTURE_BLOCK = new NoCaptureBlockTickPhaseState("NoCaptureBlockTickPhase");
-        public static final IPhaseState BLOCK = new BlockTickPhaseState("BlockTickPhase");
+        public static final IPhaseState<BlockTickContext> NO_CAPTURE_BLOCK = new NoCaptureBlockTickPhaseState("NoCaptureBlockTickPhase");
+        public static final IPhaseState<BlockTickContext> BLOCK = new BlockTickPhaseState("BlockTickPhase");
+        public static final IPhaseState<BlockTickContext> RANDOM_BLOCK = new BlockTickPhaseState("RandomBlockTickPhase");
 
-        public static final IPhaseState RANDOM_BLOCK = new BlockTickPhaseState("RandomBlockTickPhase");
+        public static final IPhaseState<EntityTickContext> ENTITY = new EntityTickPhaseState();
 
-        public static final IPhaseState ENTITY = new EntityTickPhaseState();
-
-        public static final IPhaseState DIMENSION = new DimensionTickPhaseState();
-        public static final IPhaseState TILE_ENTITY = new TileEntityTickPhaseState();
-        public static final IPhaseState BLOCK_EVENT = new BlockEventTickPhaseState();
-        public static final IPhaseState PLAYER = new PlayerTickPhaseState();
-        public static final IPhaseState WEATHER = new WeatherTickPhaseState();
+        public static final IPhaseState<DimensionContext> DIMENSION = new DimensionTickPhaseState();
+        public static final IPhaseState<TileEntityTickContext> TILE_ENTITY = new TileEntityTickPhaseState();
+        public static final IPhaseState<BlockEventTickContext> BLOCK_EVENT = new BlockEventTickPhaseState();
+        public static final IPhaseState<PlayerTickContext> PLAYER = new PlayerTickPhaseState();
+        public static final IPhaseState<?> WEATHER = new WeatherTickPhaseState();
 
         private Tick() { // No instances for you!
         }
-    }
-
-    @Override
-    public void unwind(IPhaseState state, PhaseContext context) {
-        ((TickPhaseState) state).processPostTick(context);
     }
 
     public static TickPhase getInstance() {
@@ -78,19 +72,19 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        return ((TickPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
+    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+        return ((TickPhaseState<?>) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
     }
 
     @Override
-    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(IPhaseState<?> unwindingState, PhaseContext<?> phaseContext,
         ArrayList<Entity> entities) {
-        ((TickPhaseState) unwindingState).processPostSpawns(phaseContext, entities);
+        ((TickPhaseState<?>) unwindingState).processPostSpawns(phaseContext, entities);
 
     }
 
     @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
+    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         if (currentState == Tick.NO_CAPTURE_BLOCK) {
             return false;
         }
@@ -98,34 +92,34 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState<?> currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
         if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
 
         }
     }
 
     @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        ((TickPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
+    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        ((TickPhaseState<?>) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
     @Override
-    public boolean isTicking(IPhaseState state) {
+    public boolean isTicking(IPhaseState<?> state) {
         return true;
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return currentState != Tick.NO_CAPTURE_BLOCK;
     }
 
     @Override
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
-        ((TickPhaseState) currentPhaseData.state).appendExplosionContext(phaseContext, currentPhaseData.context);
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
+        ((TickPhaseState<?>) currentPhaseData.state).appendExplosionContext(phaseContext, currentPhaseData.context);
     }
 }

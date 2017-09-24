@@ -57,13 +57,15 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -72,15 +74,16 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 
 public class PacketUtil {
+    @SuppressWarnings("unchecked")
+    private static final PhaseContext<?> EMPTY = new BasicPacketContext((PacketState) PacketPhase.General.INVALID).markEmpty();
 
-    private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
     private static boolean lastTryBlockPacketItemResult = true;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "unused"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
-        if (CauseTracker.ENABLED && netHandler instanceof NetHandlerPlayServer) {
+        if (netHandler instanceof NetHandlerPlayServer) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 Sponge.getCauseStackManager().pushCause(packetPlayer);
@@ -89,7 +92,7 @@ public class PacketUtil {
                     return;
                 }
                 boolean ignoreCreative = false;
-    
+
                 // This is another horrible hack required since the client sends a C10 packet for every slot
                 // containing an itemstack after a C16 packet in the following scenarios :
                 // 1. Opening creative inventory after initial server join.
@@ -102,14 +105,14 @@ public class PacketUtil {
     //                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
     //            } else
                 if (creativeCheck(packetIn, packetPlayer)) {
-    
+
                     long packetDiff = System.currentTimeMillis() - lastInventoryOpenPacketTimeStamp;
                     // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
                     if (packetDiff < 100) {
                         ignoreCreative = true;
                     }
                 }
-    
+
                 // Don't process movement capture logic if player hasn't moved
                 boolean ignoreMovementCapture = false;
                 if (packetIn instanceof CPacketPlayer) {
@@ -125,31 +128,28 @@ public class PacketUtil {
                 } else {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
                     final CauseTracker causeTracker = CauseTracker.getInstance();
-                    IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                    IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                     if (packetState == null) {
                         throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                     }
-                    PhaseContext context = EMPTY_INVALID;
+                    PhaseContext<?> context = EMPTY;
                     if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                        context = PhaseContext.start()
-                                .source(packetPlayer)
-                                .addExtra(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer)
-                                .addExtra(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn)
-                                .addExtra(InternalNamedCauses.Packet.CURSOR, cursor)
-                                .addExtra(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative);
-    
+                        context = packetState.createPhaseContext()
+                            .source(packetPlayer)
+                            .packetPlayer(packetPlayer)
+                            .packet(packetIn)
+                            .cursor(cursor)
+                            .ignoreCreative(ignoreCreative);
+
                         TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                         context.owner((Player) packetPlayer);
                         context.notifier((Player) packetPlayer);
-                        context.complete();
-                    } else {
-                        packetState = PacketPhase.General.INVALID;
                     }
-                    causeTracker.switchToPhase(packetState, context, () -> {
+                    try (PhaseContext<?> packetContext = context.buildAndSwitch()) {
                         packetIn.processPacket(netHandler);
-                        return null;
-                    });
-    
+
+                    }
+
                     if (packetIn instanceof CPacketClientStatus) {
                         // update the reference of player
                         packetPlayer = ((NetHandlerPlayServer) netHandler).player;

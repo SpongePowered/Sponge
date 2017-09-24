@@ -35,6 +35,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -47,10 +48,10 @@ public class PlayerPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState PLAYER_LOGOUT = new PlayerPhaseState();
+        public static final IPhaseState<GeneralizedContext> PLAYER_LOGOUT = new PlayerPhaseState();
     }
 
-    static final class PlayerPhaseState implements IPhaseState {
+    static final class PlayerPhaseState implements IPhaseState<GeneralizedContext> {
 
         PlayerPhaseState() {
         }
@@ -58,6 +59,16 @@ public class PlayerPhase extends TrackingPhase {
         @Override
         public TrackingPhase getPhase() {
             return TrackingPhases.PLAYER;
+        }
+
+        @Override
+        public GeneralizedContext createPhaseContext() {
+            return new GeneralizedContext(this);
+        }
+
+        @Override
+        public void unwind(GeneralizedContext phaseContext) {
+
         }
     }
 
@@ -74,8 +85,7 @@ public class PlayerPhase extends TrackingPhase {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(IPhaseState<?> state, PhaseContext<?> phaseContext) {
         // Since currently all we have is PLAYER_LOGOUT, don't care about
         // states.
         final Player player = phaseContext.getSource(Player.class)

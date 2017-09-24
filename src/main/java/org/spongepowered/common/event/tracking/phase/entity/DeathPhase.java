@@ -41,7 +41,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
@@ -51,7 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-final class DeathPhase extends EntityPhaseState {
+final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
 
     DeathPhase() {
 
@@ -63,7 +62,18 @@ final class DeathPhase extends EntityPhaseState {
     }
 
     @Override
-    void unwind(PhaseContext context) {
+    public boolean tracksEntityDeaths() {
+        return true;
+    }
+
+    @Override
+    public BasicEntityContext createPhaseContext() {
+        return new BasicEntityContext(this).addCaptures()
+            .addEntityDropCaptures();
+    }
+
+    @Override
+    public void unwind(BasicEntityContext context) {
         final Entity dyingEntity =
                 context.getSource(Entity.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));

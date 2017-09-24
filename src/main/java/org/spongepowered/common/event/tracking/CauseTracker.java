@@ -34,7 +34,6 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -49,7 +48,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -79,11 +77,10 @@ import javax.annotation.Nullable;
  * proxy object entering and processing between different states of the
  * world and its objects.
  */
+@SuppressWarnings("unchecked")
 public final class CauseTracker {
 
-    public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
-
-    static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
+    static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
             context.getExtraContext().entrySet().forEach(namedCause -> {
                         printer.add("        - Name: %s", namedCause.getKey());
                         printer.addWrapped(100, "          Object: %s", namedCause.getValue());
@@ -97,7 +94,7 @@ public final class CauseTracker {
             printer.add("    - Name: %s", namedCause.getKey());
             final Object causeObject = namedCause.getValue();
             if (causeObject instanceof PhaseContext) {
-                CONTEXT_PRINTER.accept(printer, (PhaseContext) causeObject);
+                CONTEXT_PRINTER.accept(printer, (PhaseContext<?>) causeObject);
             } else {
                 printer.addWrapped(100, "      Object: %s", causeObject);
             }
@@ -124,12 +121,12 @@ public final class CauseTracker {
 
     // ----------------- STATE ACCESS ----------------------------------
 
-    public void switchToPhase(IPhaseState state, PhaseContext phaseContext) {
+    public void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        final IPhaseState currentState = this.stack.peek().state;
+        final IPhaseState<?> currentState = this.stack.peek().state;
         if (this.isVerbose) {
             if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
                 // This printing is to detect possibilities of a phase not being cleared properly
@@ -145,45 +142,41 @@ public final class CauseTracker {
         this.stack.push(state, phaseContext);
     }
 
-    /**
-     * This method pushes a new phase onto the stack, runs phaseBody,
-     * and calls completePhase afterwards.
-     *
-     * <p>This method ensures that the necessary cleanup is performed if
-     * an exception is thrown by phaseBody - i.e. logging a message,
-     * and calling completePhase</p>
-     * @param state
-     * @param context
-     * @param phaseBody
-     */
-    public void switchToPhase(IPhaseState state, PhaseContext context, Callable<Void> phaseBody) {
-        this.switchToPhase(state, context);
-        try {
-            phaseBody.call();
-        } catch (Exception | NoClassDefFoundError e) {
-            this.abortCurrentPhase(e);
-            return;
+    public void switchToPhase(PhaseData phaseData) {
+        checkNotNull(phaseData.state, "State cannot be null!");
+        checkNotNull(phaseData.state.getPhase(), "Phase cannot be null!");
+        checkNotNull(phaseData.context, "PhaseContext cannot be null!");
+        checkArgument(phaseData.context.isComplete(), "PhaseContext must be complete!");
+
+        final IPhaseState<?> currentState = this.stack.peek().state;
+        if (this.isVerbose) {
+            if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
+                // This printing is to detect possibilities of a phase not being cleared properly
+                // and resulting in a "runaway" phase state accumulation.
+                printRunawayPhase(phaseData.state, phaseData.context);
+            }
+            if (!currentState.canSwitchTo(phaseData.state) && phaseData.state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
+                // This is to detect incompatible phase switches.
+                printPhaseIncompatibility(currentState, phaseData.state);
+            }
         }
-        this.completePhase(state);
+
+        this.stack.push(phaseData.state, phaseData.context);
     }
 
     /**
      * Used when exception occurs during the main body of a phase.
      * Avoids running the normal unwinding code
      */
-    public void abortCurrentPhase(Throwable t) {
-        PhaseData data = this.stack.peek();
-        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
+    public void printExceptionFromPhase(Throwable t) {
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", t);
 
-        // Since an exception occured during the main phase code, we don't know what state we're in.
-        // Therefore, we skip running the normal unwind functions that completePhase calls,
-        // and simply op the phase from the stack.
-        this.stack.pop();
     }
 
-    public void completePhase(IPhaseState prevState) {
+    @SuppressWarnings({"rawtypes", "unused", "try"})
+    public void completePhase(IPhaseState<?> prevState) {
         final PhaseData currentPhaseData = this.stack.peek();
-        final IPhaseState state = currentPhaseData.state;
+        final IPhaseState<?> state = currentPhaseData.state;
         final boolean isEmpty = this.stack.isEmpty();
         if (isEmpty) {
             // The random occurrence that we're told to complete a phase
@@ -211,35 +204,28 @@ public final class CauseTracker {
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
-        final PhaseContext context = currentPhaseData.context;
-        try {
-            if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
-                // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
-                switchToPhase(GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
-                        .addCaptures()
-                        .addEntityDropCaptures()
-                        .complete());
-            }
+        final PhaseContext<?> context = currentPhaseData.context;
+        try (final UnwindingPhaseContext unwinding = needsPost(state, phase) ?
+                UnwindingPhaseContext.unwind(state, context) : null) { // Since the if statement checks for a post, this will automatically close the post anyways
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
                 this.currentProcessingState = currentPhaseData;
-                phase.unwind(state, context);
+                ((IPhaseState) state).unwind(context);
                 this.currentProcessingState = null;
             } catch (Exception | NoClassDefFoundError e) {
                 printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
-            }
-            if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
-                try {
-                    completePhase(GeneralPhase.Post.UNWINDING);
-                } catch (Exception | NoClassDefFoundError e) {
-                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
-                }
+                this.currentProcessingState = null;
             }
         } catch (Exception | NoClassDefFoundError e) {
             printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
+            this.currentProcessingState = null;
         }
     }
 
-    private void printRunnawayPhaseCompletion(IPhaseState state) {
+    private boolean needsPost(IPhaseState<?> state, TrackingPhase phase) {
+        return state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state);
+    }
+
+    private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Completing Phase").centre().hr();
         printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
@@ -262,7 +248,7 @@ public final class CauseTracker {
         }
     }
 
-    private void printIncorrectPhaseCompletion(IPhaseState prevState, IPhaseState state) {
+    private void printIncorrectPhaseCompletion(IPhaseState<?> prevState, IPhaseState<?> state) {
         PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
                 .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
                         + "a change to any world takes place, however, we are attempting"
@@ -281,7 +267,7 @@ public final class CauseTracker {
     }
 
     private void printEmptyStackOnCompletion() {
-        final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpected ").centre().hr()
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpectedly Completing An Empty Stack").centre().hr()
                 .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
                                 + "a change to any world takes place, however, we have been told"
                                 + "to complete a \"phase\" without having entered any phases."
@@ -294,7 +280,7 @@ public final class CauseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    private void printRunawayPhase(IPhaseState state, PhaseContext context) {
+    private void printRunawayPhase(IPhaseState<?> state, PhaseContext<?> context) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add("Switching Phase").centre().hr();
         printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
@@ -310,7 +296,7 @@ public final class CauseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    private void printPhaseIncompatibility(IPhaseState currentState, IPhaseState incompatibleState) {
+    private void printPhaseIncompatibility(IPhaseState<?> currentState, IPhaseState<?> incompatibleState) {
         PrettyPrinter printer = new PrettyPrinter(80);
         printer.add("Switching Phase").centre().hr();
         printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
@@ -327,11 +313,11 @@ public final class CauseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, Exception e) {
+    public void printMessageWithCaughtException(String header, String subHeader, Throwable e) {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Throwable t) {
+    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState<?> state, PhaseContext<?> context, Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -366,11 +352,11 @@ public final class CauseTracker {
         return this.stack.peek();
     }
 
-    public IPhaseState getCurrentState() {
+    public IPhaseState<?> getCurrentState() {
         return this.stack.peekState();
     }
 
-    public PhaseContext getCurrentContext() {
+    public PhaseContext<?> getCurrentContext() {
         return this.stack.peekContext();
     }
 
@@ -395,11 +381,9 @@ public final class CauseTracker {
 
         try {
             // Sponge start - prepare notification
-            if (CauseTracker.ENABLED) {
-                final PhaseData peek = this.stack.peek();
-                final IPhaseState state = peek.state;
-                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
-            }
+            final PhaseData peek = this.stack.peek();
+            final IPhaseState<?> state = peek.state;
+            state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
             iblockstate.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
@@ -449,9 +433,9 @@ public final class CauseTracker {
 
         // Now we need to do some of our own logic to see if we need to capture.
         final PhaseData phaseData = this.stack.peek();
-        final IPhaseState phaseState = phaseData.state;
+        final IPhaseState<?> phaseState = phaseData.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        if (CauseTracker.ENABLED && this.isVerbose && isComplete) {
+        if (this.isVerbose && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
@@ -465,7 +449,7 @@ public final class CauseTracker {
                     .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
         }
-        if (CauseTracker.ENABLED && phaseState.getPhase().requiresBlockCapturing(phaseState)) {
+        if (phaseState.getPhase().requiresBlockCapturing(phaseState)) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
@@ -567,7 +551,7 @@ public final class CauseTracker {
      * This is the replacement of {@link WorldServer#spawnEntity(net.minecraft.entity.Entity)}
      * where it captures into phases. The causes and relations are processed by the phases.
      *
-     * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
+     * The difference between {@link #spawnEntityWithCause(World, Entity)} is that it bypasses
      * any phases and directly throws a spawn entity event.
      *
      * @param world The world
@@ -586,8 +570,8 @@ public final class CauseTracker {
         final WorldServer minecraftWorld = (WorldServer) world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) minecraftWorld;
         final PhaseData phaseData = this.stack.peek();
-        final IPhaseState phaseState = phaseData.state;
-        final PhaseContext context = phaseData.context;
+        final IPhaseState<?> phaseState = phaseData.state;
+        final PhaseContext<?> context = phaseData.context;
         final TrackingPhase phase = phaseState.getPhase();
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
