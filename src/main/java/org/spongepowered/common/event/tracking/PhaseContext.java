@@ -27,28 +27,24 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,47 +74,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
     @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
     @Nullable private CaptureBlockPos captureBlockPos;
-    @Nullable private CapturePlayer capturePlayer;
     @Nullable protected User owner;
     @Nullable protected User notifier;
-    private final Map<String, Object> extraContext = Maps.newHashMap();
     private boolean processImmediately;
 
     private Object source;
     private PluginContainer activeContainer;
-
-    public P addExtra(String key, Object val) {
-        this.extraContext.put(key, val);
-        return (P) this;
-    }
-
-    public Object getExtra(String key) {
-        return this.extraContext.get(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    public <T> T getExtra(String key, Class<T> type) {
-        Object o = this.extraContext.get(key);
-        if (type.isInstance(o)) {
-            return (T) o;
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getRequiredExtra(String key, Class<T> type) {
-        Object o = this.extraContext.get(key);
-        if (type.isInstance(o)) {
-            return (T) o;
-        }
-        throw TrackingUtil.throwWithContext("Extra context value " + key + " with type " + type.getName()
-                + " was requested but was not present in the phase context.", this).get();
-    }
-
-    public Map<String, Object> getExtraContext() {
-        return this.extraContext;
-    }
 
     public P source(Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
@@ -233,12 +194,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     // TODO to be moved to listener based phase contexts when gabizou gets to restructuring PhaseContexts...
-    public P player() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        checkState(this.capturePlayer == null, "Already capturing a player object!");
-        this.capturePlayer = new CapturePlayer();
-        return (P) this;
-    }
+
 
     public P buildAndSwitch() {
         this.isCompleted = true;
@@ -379,18 +335,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 .getPos();
     }
 
-    public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
-        if (this.capturePlayer == null) {
-            throw TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this)
-                    .get();
-        }
-        return this.capturePlayer;
-    }
-
-    public Optional<Player> getCapturedPlayer() throws IllegalStateException {
-        return getCapturedPlayerSupplier().getPlayer();
-    }
-
     public void addNotifierAndOwnerToCauseStack() {
         if (this.owner != null) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, this.owner);
@@ -447,6 +391,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         CauseTracker.getInstance().completePhase(this.state);
     }
 
+    public void printCustom(PrettyPrinter printer) {
+        // TODO - needs to be fleshed out more with each specific phase context.
+    }
+
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {
 
         BlockItemDropsSupplier() {
@@ -499,51 +447,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     static final class CapturedBlockEntitySpawnSupplier extends CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> {
 
         CapturedBlockEntitySpawnSupplier() {
-        }
-    }
-
-    public static final class CapturePlayer {
-
-        @Nullable private Player player;
-
-        CapturePlayer() {
-
-        }
-
-        CapturePlayer(@Nullable Player player) {
-            this.player = player;
-        }
-
-        public Optional<Player> getPlayer() {
-            return Optional.ofNullable(this.player);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CapturePlayer that = (CapturePlayer) o;
-            return com.google.common.base.Objects.equal(this.player, that.player);
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.player);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.MoreObjects.toStringHelper(this)
-                    .add("player", this.player)
-                    .toString();
-        }
-
-        public void addPlayer(EntityPlayerMP playerMP) {
-            this.player = ((Player) playerMP);
         }
     }
 

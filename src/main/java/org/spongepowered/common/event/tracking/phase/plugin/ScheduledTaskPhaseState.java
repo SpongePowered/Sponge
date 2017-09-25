@@ -48,10 +48,9 @@ public class ScheduledTaskPhaseState extends BasicPluginState {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(BasicPluginContext phaseContext) {
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
             TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
         });
     }
-
 }

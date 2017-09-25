@@ -36,7 +36,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
@@ -50,7 +49,7 @@ public class DropInventoryState extends BasicInventoryPacketState {
     @Override
     public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        final ItemStack usedStack = context.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStack usedStack = context.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

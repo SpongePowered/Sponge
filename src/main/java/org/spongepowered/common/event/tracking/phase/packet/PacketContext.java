@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
@@ -37,6 +38,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     Packet<?> packet;
     private ItemStackSnapshot cursor;
     private boolean ignoreCreative;
+    private ItemStack itemUsed;
 
     protected PacketContext(PacketState<? extends P> state) {
         super(state);
@@ -80,5 +82,14 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public boolean getIgnoringCreative() {
         return ignoreCreative;
+    }
+
+    public P itemUsed(ItemStack stack) {
+        this.itemUsed = stack;
+        return (P) this;
+    }
+
+    public ItemStack getItemUsed() {
+        return itemUsed;
     }
 }

@@ -321,10 +321,6 @@ public final class TrackingUtil {
                 capturingBlock.initializeBlockCapturingState(minecraftWorld);
                 capturingBlock.requiresBlockCapturingRefresh(false);
             }
-            // TODO ????
-            //phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, ((IModData_BlockCapturing) block).processTickChangesImmediately()));
-        } else {
-            //phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, false));
         }
     }
 

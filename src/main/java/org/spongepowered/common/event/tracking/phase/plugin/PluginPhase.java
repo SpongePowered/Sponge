@@ -78,7 +78,7 @@ public final class PluginPhase extends TrackingPhase {
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos,
                                         IMixinBlockEventData blockEvent) {
         if (phaseState instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
+            ((ListenerPhaseState) phaseState).associateBlockEventNotifier((ListenerPhaseContext) context, mixinWorld, pos, blockEvent);
         }
     }
 
@@ -87,7 +87,7 @@ public final class PluginPhase extends TrackingPhase {
     public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
+            ((ListenerPhaseState) state).associateNeighborBlockNotifier((ListenerPhaseContext) context, sourcePos, block, notifyPos, minecraftWorld, notifier);
         }
     }
 
@@ -95,7 +95,7 @@ public final class PluginPhase extends TrackingPhase {
     public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState<?> state, PhaseContext<?> context,
             CauseTracker causeTracker) {
         if (state instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);
+            ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks((ListenerPhaseContext) context, playerMP, itemStack);
         }
     }
 

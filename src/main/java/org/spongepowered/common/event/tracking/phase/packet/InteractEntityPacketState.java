@@ -39,7 +39,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -74,7 +73,7 @@ final class InteractEntityPacketState extends BasicPacketState {
         if (entity != null) {
             final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
             if (stack != null) {
-                context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
+                context.itemUsed(stack);
             }
         }
 
@@ -100,9 +99,6 @@ final class InteractEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        // final Optional<ItemStack> itemStack =
-        // context.firstNamed(InternalNamedCauses.Packet.ITEM_USED,
-        // ItemStack.class);
         final World spongeWorld = EntityUtil.getSpongeWorld(player);
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 

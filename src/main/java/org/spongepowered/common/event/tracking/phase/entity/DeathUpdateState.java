@@ -39,7 +39,6 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -69,7 +68,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         context.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
-                    final DamageSource damageSource = context.getRequiredExtra(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class);
+                    final DamageSource damageSource = context.getDamageSource();
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().pushCause(dyingEntity);
                         Sponge.getCauseStackManager().pushCause(damageSource);

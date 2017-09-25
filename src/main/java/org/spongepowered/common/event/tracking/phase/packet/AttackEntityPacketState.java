@@ -31,19 +31,16 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -73,14 +70,9 @@ final class AttackEntityPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
-//        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-//        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
-        // unused, to be removed and re-located when phase context is cleaned up
-        //context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-        //context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if(stack != null) {
-            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
+            context.itemUsed(stack);
         }
     }
 
@@ -98,9 +90,6 @@ final class AttackEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        // final Optional<ItemStack> itemStack =
-        // context.firstNamed(InternalNamedCauses.Packet.ITEM_USED,
-        // ItemStack.class);
         final World spongeWorld = EntityUtil.getSpongeWorld(player);
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 

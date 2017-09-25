@@ -31,7 +31,6 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -69,16 +68,16 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
     }
 
 
-    public void associateBlockEventNotifier(PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void associateBlockEventNotifier(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
-    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+    public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
 
-    public void capturePlayerUsingStackToBreakBlocks(PhaseContext<?> context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+    public void capturePlayerUsingStackToBreakBlocks(ListenerPhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
 
     }
 

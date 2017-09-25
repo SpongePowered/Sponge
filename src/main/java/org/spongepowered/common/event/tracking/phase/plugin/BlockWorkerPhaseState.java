@@ -39,12 +39,11 @@ public class BlockWorkerPhaseState extends BasicPluginState {
     }
 
     @Override
-    void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(BasicPluginContext phaseContext) {
         phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
 
         });
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
-
+            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
     }
 }

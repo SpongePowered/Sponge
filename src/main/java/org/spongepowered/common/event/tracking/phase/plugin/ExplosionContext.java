@@ -24,9 +24,23 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.common.event.tracking.PhaseContext;
+
 public class ExplosionContext extends PluginPhaseContext<ExplosionContext> {
+
+    private Explosion explosion;
 
     public ExplosionContext() {
         super(PluginPhase.State.CUSTOM_EXPLOSION);
+    }
+
+    public ExplosionContext explosion(Explosion explosion) {
+        this.explosion = explosion;
+        return this;
+    }
+
+    public Explosion getExplosion() {
+        return explosion;
     }
 }

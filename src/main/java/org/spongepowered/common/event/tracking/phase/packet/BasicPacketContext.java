@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
@@ -44,4 +45,10 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
     public Container getOpenContainer() {
         return checkNotNull(container, "Open Container was null!");
     }
+
+    public Container getContainer() {
+        return container;
+    }
+
+
 }

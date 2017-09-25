@@ -83,7 +83,6 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
@@ -265,7 +264,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (this.tracksEntityDeaths) {
                     Sponge.getCauseStackManager().pushCause(this);
                     final PhaseContext<?> context = EntityPhase.State.DEATH.createPhaseContext()
-                        .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
+                        .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
                         .source(this);
                     this.getNotifierUser().ifPresent(context::notifier);
                     this.getCreatorUser().ifPresent(context::owner);
@@ -517,9 +516,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                                                                  ? null
                                                                  : EntityPhase.State.DEATH.createPhaseContext()
                                                                      .source(this)
-                                                                     .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, source)
-                                                                     .owner(() -> this.getCreatorUser())
-                                                                     .notifier(() -> this.getNotifierUser())
+                                                                     .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
+                                                                     .owner(this::getCreatorUser)
+                                                                     .notifier(this::getNotifierUser)
                                                                      .buildAndSwitch()) {
                                 this.onDeath(source);
                             }

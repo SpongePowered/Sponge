@@ -64,7 +64,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -146,7 +145,7 @@ public final class PacketPhase extends TrackingPhase {
 
         public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
         public static final BasicInventoryPacketState OPEN_INVENTORY = new BasicInventoryPacketState();
-        public static final BasicInventoryPacketState ENCHANT_ITEM = new BasicInventoryPacketState();
+        public static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
                 .add(INVENTORY)

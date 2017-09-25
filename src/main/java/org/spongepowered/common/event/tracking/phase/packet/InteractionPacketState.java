@@ -47,7 +47,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
@@ -78,7 +77,7 @@ final class InteractionPacketState extends BasicPacketState {
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
-            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
+            context.itemUsed(stack);
         }
     }
 
@@ -112,7 +111,7 @@ final class InteractionPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext phaseContext) {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
-        final ItemStack usedStack = phaseContext.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStack usedStack = phaseContext.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

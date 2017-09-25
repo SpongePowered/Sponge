@@ -43,7 +43,6 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -57,7 +56,7 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        context.addExtra(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem);
+        context.setHighlightedSlotId(playerMP.inventory.currentItem);
     }
 
     @Override
@@ -72,7 +71,7 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
         final EntityPlayerMP player = context.getPacketPlayer();
         final CPacketHeldItemChange itemChange = context.getPacket();
-        final int previousSlot = context.getRequiredExtra(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class);
+        final int previousSlot = context.getHighlightedSlotId();
         final net.minecraft.inventory.Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
         int preHotbarSize = inventory.mainInventory.size() - InventoryPlayer.getHotbarSize() + inventory.armorInventory.size() + 4 + 1; // Crafting Grid & Result

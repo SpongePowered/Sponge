@@ -24,10 +24,23 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class BasicEntityContext extends EntityContext<BasicEntityContext> {
+
+    private DamageSource damageSource;
+
     public BasicEntityContext(IPhaseState<? extends BasicEntityContext> state) {
         super(state);
+    }
+
+    public DamageSource getDamageSource() {
+        return damageSource;
+    }
+
+    public BasicEntityContext setDamageSource(DamageSource damageSource) {
+        this.damageSource = damageSource;
+        return this;
     }
 }

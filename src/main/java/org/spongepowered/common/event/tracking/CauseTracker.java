@@ -81,15 +81,13 @@ import javax.annotation.Nullable;
 public final class CauseTracker {
 
     static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
-            context.getExtraContext().entrySet().forEach(namedCause -> {
-                        printer.add("        - Name: %s", namedCause.getKey());
-                        printer.addWrapped(100, "          Object: %s", namedCause.getValue());
-                    }
-            );
+        context.printCustom(printer);
 
     private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
         printer.add("    Context:");
+        data.context.printCustom(printer);
+        /*
         data.context.getExtraContext().entrySet().forEach(namedCause -> {
             printer.add("    - Name: %s", namedCause.getKey());
             final Object causeObject = namedCause.getValue();
@@ -99,6 +97,7 @@ public final class CauseTracker {
                 printer.addWrapped(100, "      Object: %s", causeObject);
             }
         });
+        */
     };
 
     private final CauseStack stack = new CauseStack();

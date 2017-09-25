@@ -38,7 +38,6 @@ public final class BlockPhase extends TrackingPhase {
         public static final IPhaseState<?> BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
         public static final IPhaseState<?> BLOCK_ADDED = null;
         public static final IPhaseState<?> BLOCK_BREAK = null;
-        public static final IPhaseState<?> PISTON_MOVING = new PistonMovingPhaseState();
 
         private State() {
         }

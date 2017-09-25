@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 
@@ -42,18 +41,18 @@ final class PostServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void processPostTick(PhaseContext<?> phaseContext) {
+    public void unwind(ListenerPhaseContext phaseContext) {
+
         final Object listener = phaseContext.getSource(Object.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
             TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
         });
-
     }
 
     @Override
-    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+    public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getCapturedPlayer().ifPresent(player ->
                 ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
@@ -62,7 +61,7 @@ final class PostServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlocks(PhaseContext<?> context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+    public void capturePlayerUsingStackToBreakBlocks(ListenerPhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

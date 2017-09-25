@@ -36,7 +36,4 @@ public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> implemen
         return TrackingPhases.PLUGIN;
     }
 
-    void processPostTick(PhaseContext<?> phaseContext) {
-    }
-
 }

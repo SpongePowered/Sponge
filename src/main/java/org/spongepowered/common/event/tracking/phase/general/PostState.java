@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -54,14 +53,14 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
     public void unwind(UnwindingPhaseContext context) {
-        final IPhaseState unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-        final PhaseContext<?> unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+        final IPhaseState unwindingState = context.getUnwindingState();
+        final PhaseContext<?> unwindingContext = context.getUnwindingContext();
         this.getPhase().postDispatch(unwindingState, unwindingContext, context);
     }
 
     public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
-        final IPhaseState phaseState = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-        final PhaseContext<?> unwinding = currentPhaseData.context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+        final IPhaseState phaseState = ((UnwindingPhaseContext) currentPhaseData.context).getUnwindingState();
+        final PhaseContext<?> unwinding = ((UnwindingPhaseContext) currentPhaseData.context).getUnwindingContext();
         final PhaseData phaseData = new PhaseData(unwinding, phaseState);
         phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
 

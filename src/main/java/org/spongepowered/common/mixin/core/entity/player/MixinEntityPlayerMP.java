@@ -152,7 +152,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -297,7 +296,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             if (!tracksEntityDeaths) {
                 EntityPhase.State.DEATH.createPhaseContext()
                     .source(this)
-                    .addExtra(InternalNamedCauses.General.DAMAGE_SOURCE, cause)
+                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
                     .buildAndSwitch();
             }
         } else {

@@ -60,7 +60,6 @@ import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
-import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
@@ -109,10 +108,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -572,7 +569,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (!SpongeCommonEventFactory.playerInteractItemChanged) {
                 final CauseTracker causeTracker = CauseTracker.getInstance();
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
-                final ItemStack itemStack = peek.context.getExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+                final ItemStack itemStack = ItemStackUtil.toNative(((PacketContext<?>) peek.context).getItemUsed());
 
                 // Only do a restore if something actually changed. The client does an identity check ('==')
                 // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up

@@ -93,7 +93,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
 
     @Override
     public void unwind(ExplosionContext context) {
-        final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
+        final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack();
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);

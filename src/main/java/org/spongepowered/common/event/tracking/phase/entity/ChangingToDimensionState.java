@@ -32,96 +32,21 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import javax.annotation.Nullable;
 
-final class ChangingToDimensionState extends EntityPhaseState<BasicEntityContext> {
+final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext> {
 
     ChangingToDimensionState() {
     }
 
     @Override
-    public BasicEntityContext createPhaseContext() {
-        return new BasicEntityContext(this);
+    public TeleportingContext createPhaseContext() {
+        return new TeleportingContext(this)
+            .addBlockCaptures()
+            .addEntityCaptures();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(BasicEntityContext context) {
-//                final MoveEntityEvent.Teleport.Portal portalEvent = context.firstNamed(InternalNamedCauses.Teleporting.TELEPORT_EVENT, MoveEntityEvent.Teleport.Portal.class)
-//                                .orElseThrow(PhaseUtil.throwWithContext("Expected to capture a portal event!", context));
-//
-//                // Throw our event now
-//                SpongeImpl.postEvent(portalEvent);
-//
-//                final IMixinEntity mixinEntity = context.getSource(IMixinEntity.class)
-//                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be teleporting an entity!", context));
-//                final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(mixinEntity);
-//
-//                // Reset the player connection to allow position update packets
-//                if (minecraftEntity instanceof EntityPlayerMP) {
-//                    ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) minecraftEntity).connection).setAllowClientLocationUpdate(true);
-//                }
-//
-//                final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
-//
-//
-//                final Teleporter targetTeleporter = context.firstNamed(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, Teleporter.class)
-//                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a targetTeleporter for a teleportation!", context));
-//
-//                final Transform<World> fromTransform = (Transform<World>) context.firstNamed(InternalNamedCauses.Teleporting.FROM_TRANSFORM, Transform.class)
-//                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing an origination Transform!", context));
-//
-//                final IMixinTeleporter targetMixinTeleporter = (IMixinTeleporter) targetTeleporter;
-//                if (portalEvent.isCancelled()) {
-//                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
-//                    mixinEntity.setLocationAndAngles(fromTransform);
-//                    return;
-//                }
-//
-//                final Transform targetTransform = context.firstNamed(InternalNamedCauses.Teleporting.TARGET_TRANSFORM, Transform.class)
-//                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a target Transform!", context));
-//
-//                final WorldServer targetWorldServer = context.firstNamed(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class)
-//                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a target WorldServer!", context));
-//                final WorldServer fromWorldServer = context.firstNamed(InternalNamedCauses.Teleporting.FROM_WORLD, WorldServer.class)
-//                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing an origination WorldServer!", context));
-//                // Plugins may change transforms on us. Gotta reset the targetTeleporter cache
-//                final Transform<World> eventTargetTransform = portalEvent.getToTransform();
-//                if (!targetTransform.equals(eventTargetTransform)) {
-//
-//                    if (fromWorldServer == eventTargetTransform.getExtent()) {
-//                        portalEvent.setCancelled(true);
-//
-//                        targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
-//                        mixinEntity.setLocationAndAngles(eventTargetTransform);
-//                        if (minecraftEntity instanceof EntityPlayerMP) {
-//                            final EntityPlayerMP minecraftPlayer = (EntityPlayerMP) minecraftEntity;
-//                            // close any open inventory
-//                            minecraftPlayer.closeScreen();
-//                            // notify client
-//                            minecraftPlayer.connection.setPlayerLocation(minecraftPlayer.posX, minecraftPlayer.posY, minecraftPlayer.posZ,
-//                                    minecraftPlayer.rotationYaw, minecraftPlayer.rotationPitch);
-//                        }
-//                        return;
-//                    }
-//                } else {
-//                    if (targetWorldServer.provider instanceof WorldProviderEnd) {
-//                        final BlockPos blockpos = minecraftEntity.world.getTopSolidOrLiquidBlock(targetWorldServer.getSpawnPoint());
-//                        minecraftEntity.moveToBlockPosAndAngles(blockpos, minecraftEntity.rotationYaw, minecraftEntity.rotationPitch);
-//                    }
-//                }
-//
-//                final IMixinWorldServer targetMixinWorldServer = (IMixinWorldServer) targetWorldServer;
-//                final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-//                final CauseTracker targetCauseTracker = targetMixinWorldServer.getCauseTracker();
-//                if (capturedBlocks.isEmpty()
-//                    || !GeneralFunctions.processBlockCaptures(capturedBlocks, targetCauseTracker, State.CHANGING_DIMENSION, context)) {
-//                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
-//                }
-//
-//                if (!portalEvent.getKeepsVelocity()) {
-//                    minecraftEntity.motionX = 0;
-//                    minecraftEntity.motionY = 0;
-//                    minecraftEntity.motionZ = 0;
-//                }
+    public void unwind(TeleportingContext context) {
     }
 
     @Override

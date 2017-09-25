@@ -58,12 +58,35 @@ import java.util.List;
 final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
     @Override
     public ExplosionContext createPhaseContext() {
-        return new ExplosionContext();
+        return new ExplosionContext()
+            .addEntityCaptures()
+            .addEntityDropCaptures()
+            .addBlockCaptures();
     }
 
     @Override
-    public void unwind(ExplosionContext phaseContext) {
+    public void unwind(ExplosionContext context) {
 
+        final Explosion explosion = context.getExplosion();
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
+            Sponge.getCauseStackManager().pushCause(explosion);
+            if (context.getNotifier().isPresent()) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+            }
+            if (context.getOwner().isPresent()) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+            }
+            context.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(
+                    blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
+            context.getCapturedEntitySupplier()
+                .ifPresentAndNotEmpty(entities -> {
+                    final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+                    TrackingUtil.splitAndSpawnEntities(entities, entity -> entity.setCreator(user.getUniqueId()));
+
+                });
+        }
     }
 
     @Override
@@ -79,30 +102,6 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
     @Override
     public boolean tracksBlockSpecificDrops() {
         return true;
-    }
-
-    @Override
-    void processPostTick(PhaseContext<?> context) {
-        final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
-            Sponge.getCauseStackManager().pushCause(explosion);
-            if (context.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
-            }
-            if (context.getOwner().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
-            }
-            context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(
-                            blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
-            context.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
-                        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                        TrackingUtil.splitAndSpawnEntities(entities, entity -> entity.setCreator(user.getUniqueId()));
-
-                    });
-        }
     }
 
     @SuppressWarnings({"unchecked"})

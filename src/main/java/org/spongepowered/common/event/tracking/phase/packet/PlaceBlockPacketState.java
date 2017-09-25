@@ -50,7 +50,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -80,11 +79,7 @@ class PlaceBlockPacketState extends BasicPacketState {
         final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
-        if (itemstack != null) {
-            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, itemstack);
-        } else {
-            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, ItemTypeRegistryModule.NONE);
-        }
+        context.itemUsed(itemstack);
 
     }
 
@@ -122,7 +117,7 @@ class PlaceBlockPacketState extends BasicPacketState {
 
         // Note - CPacketPlayerTryUseItem is swapped with
         // CPacketPlayerBlockPlacement
-        final ItemStack itemStack = context.getRequiredExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
             .ifPresentAndNotEmpty(entities -> {

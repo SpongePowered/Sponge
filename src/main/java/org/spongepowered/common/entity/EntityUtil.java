@@ -93,15 +93,14 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -376,9 +375,7 @@ public final class EntityUtil {
 
         adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             BasicEntityContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().addExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld)
-                     .addBlockCaptures()
-                     .addEntityCaptures()
+             TeleportingContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld)
                      .buildAndSwitch()
             ) {
             Sponge.getCauseStackManager().pushCause(teleporter);

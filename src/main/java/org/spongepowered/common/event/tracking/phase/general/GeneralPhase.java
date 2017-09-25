@@ -42,7 +42,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -324,8 +323,8 @@ public final class GeneralPhase extends TrackingPhase {
     public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
-            final IPhaseState<?> unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
-            final PhaseContext<?> unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
+            final IPhaseState<?> unwindingState = ((UnwindingPhaseContext) context).getUnwindingState();
+            final PhaseContext<?> unwindingContext = ((UnwindingPhaseContext) context).getUnwindingContext();
             unwindingState.getPhase()
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {

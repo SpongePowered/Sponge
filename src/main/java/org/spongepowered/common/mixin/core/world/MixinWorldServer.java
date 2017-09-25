@@ -153,7 +153,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -1068,7 +1067,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
                 ? null
                 : PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-                                           .addExtra(InternalNamedCauses.General.BLOCK_CHANGE, flag)
                                            .buildAndSwitch()) {
             return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         }
@@ -1177,11 +1175,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = CauseTracker.getInstance();
 
         try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-            .addEntityCaptures()
-            .addEntityDropCaptures()
-            .addBlockCaptures()) {
-            phaseContext.addExtra("Explosion", explosion)
-                .buildAndSwitch();
+                .explosion(explosion)
+                .buildAndSwitch()) {
             final Explosion mcExplosion;
             try {
                 // Since we already have the API created implementation Explosion, let's use it.
@@ -1595,21 +1590,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
+        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+
         // Sponge Start - Cause tracking
         try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
                 .potentialExplosionSource((WorldServer) (Object) this, entityIn)
+                .explosion(explosion)
                 .buildAndSwitch()) {
             this.processingExplosion = true;
             // Sponge End
 
-            Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
             // Sponge Start - More cause tracking
-            try {
-                CauseTracker.getInstance().getCurrentContext().addExtra("Explosion", ((org.spongepowered.api.world.explosion.Explosion) explosion));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             // Set up the pre event
             final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.explosion.Explosion) explosion, this);

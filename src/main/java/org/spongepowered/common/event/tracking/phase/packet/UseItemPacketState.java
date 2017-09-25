@@ -43,7 +43,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -65,9 +64,7 @@ class UseItemPacketState extends BasicPacketState {
         final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
-        if (itemstack != null) {
-            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, itemstack);
-        }
+        context.itemUsed(itemstack);
     }
 
     @Override
@@ -86,7 +83,7 @@ class UseItemPacketState extends BasicPacketState {
     @Override
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        final ItemStack itemStack = context.getRequiredExtra(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);

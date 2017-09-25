@@ -25,7 +25,19 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
+
+    private int highlightedSlotId;
+
     public InventoryPacketContext(PacketState<? extends InventoryPacketContext> state) {
         super(state);
+    }
+
+    public int getHighlightedSlotId() {
+        return highlightedSlotId;
+    }
+
+    public InventoryPacketContext setHighlightedSlotId(int highlightedSlotId) {
+        this.highlightedSlotId = highlightedSlotId;
+        return this;
     }
 }

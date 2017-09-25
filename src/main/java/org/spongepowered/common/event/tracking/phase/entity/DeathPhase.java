@@ -39,7 +39,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -77,7 +76,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
         final Entity dyingEntity =
                 context.getSource(Entity.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
-        final DamageSource damageSource = context.getRequiredExtra(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class);
+        final DamageSource damageSource = context.getDamageSource();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(damageSource);
             Sponge.getCauseStackManager().pushCause(dyingEntity);

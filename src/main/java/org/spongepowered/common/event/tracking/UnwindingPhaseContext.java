@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhaseContext;
 
@@ -40,12 +39,13 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
                 .buildAndSwitch();
     }
 
+    private IPhaseState<?> unwindingState;
+
     private PhaseContext<?> unwindingContext;
 
     private UnwindingPhaseContext(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext) {
         super(GeneralPhase.Post.UNWINDING);
-        addExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, unwindingContext);
-        addExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, unwindingState);
+        this.unwindingState = unwindingState;
         this.unwindingContext = unwindingContext;
     }
 
@@ -59,4 +59,11 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
         return this.unwindingContext.getNotifier();
     }
 
+    public PhaseContext<?> getUnwindingContext() {
+        return unwindingContext;
+    }
+
+    public IPhaseState<?> getUnwindingState() {
+        return unwindingState;
+    }
 }

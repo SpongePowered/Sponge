@@ -28,10 +28,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketUseEntity;
-import net.minecraft.world.WorldServer;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -43,17 +40,14 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -79,7 +73,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
         if (stack != null) {
-            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
+            context.itemUsed(stack);
         }
     }
 
@@ -98,9 +92,6 @@ final class InteractAtEntityPacketState extends BasicPacketState {
             // Something happened?
             return;
         }
-        // final Optional<ItemStack> itemStack =
-        // context.firstNamed(InternalNamedCauses.Packet.ITEM_USED,
-        // ItemStack.class);
         final World spongeWorld = EntityUtil.getSpongeWorld(player);
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 

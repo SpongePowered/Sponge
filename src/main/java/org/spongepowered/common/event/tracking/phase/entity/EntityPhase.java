@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -37,7 +36,7 @@ public final class EntityPhase extends TrackingPhase {
     public static final class State {
         public static final IPhaseState<BasicEntityContext> DEATH = new DeathPhase();
         public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<BasicEntityContext> CHANGING_DIMENSION = new ChangingToDimensionState();
+        public static final IPhaseState<TeleportingContext> CHANGING_DIMENSION = new ChangingToDimensionState();
         public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
 
@@ -49,7 +48,7 @@ public final class EntityPhase extends TrackingPhase {
     public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
                                         int chunkZ) {
         if (phaseState == State.CHANGING_DIMENSION) {
-            final WorldServer worldServer = context.getRequiredExtra(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class);
+            final WorldServer worldServer = ((TeleportingContext) context).getTargetWorld();
             ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
             return true;
         }
