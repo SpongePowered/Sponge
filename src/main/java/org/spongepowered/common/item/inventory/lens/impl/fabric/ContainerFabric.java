@@ -32,6 +32,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
 import java.util.Collection;
@@ -117,8 +118,19 @@ public class ContainerFabric extends MinecraftFabric {
             return new FixedTranslation("Container");
         }
 
-        Slot slot = container.getSlot(0);
-        return slot.inventory != null && slot.inventory.getDisplayName() != null ? new FixedTranslation(slot.inventory.getDisplayName().getUnformattedText()) : new FixedTranslation("UNKNOWN: " + container.getClass().getName());
+        try
+        {
+            Slot slot = container.getSlot(0);
+            return slot.inventory != null && slot.inventory.getDisplayName() != null ?
+                    new FixedTranslation(slot.inventory.getDisplayName().getUnformattedText()) :
+                    new FixedTranslation("UNKNOWN: " + container.getClass().getName());
+        }
+        catch (AbstractMethodError e)
+        {
+            SpongeImpl.getLogger().warn("AbstractMethodError! Could not find displayName for " +
+                    container.getSlot(0).inventory.getClass().getName(), e);
+            return new FixedTranslation("UNKNOWN: " + container.getClass().getName());
+        }
     }
 
 }
