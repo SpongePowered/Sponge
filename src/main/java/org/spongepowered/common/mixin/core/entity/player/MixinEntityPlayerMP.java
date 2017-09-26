@@ -155,6 +155,7 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -294,66 +295,65 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             final IPhaseState state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
             if (!tracksEntityDeaths) {
-                EntityPhase.State.DEATH.createPhaseContext()
-                    .source(this)
-                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-                    .buildAndSwitch();
+                ;
             }
         } else {
             causeTracker = null;
             tracksEntityDeaths = false;
         }
-        // Sponge end
+        try (PhaseContext<?> context = tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()
+            .source(this)
+            .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
+            .buildAndSwitch() : null) {
+            // Sponge end
 
-        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
-        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+            boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
+            this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 
-        if (flag) {
-            Team team = this.getTeam();
+            if (flag) {
+                Team team = this.getTeam();
 
-            if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
-                if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                    this.mcServer.getPlayerList().sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
-                } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                    this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
+                    if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                        this.mcServer.getPlayerList()
+                            .sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                    } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                        this.mcServer.getPlayerList()
+                            .sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                    }
+                } else {
+                    this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
                 }
-            } else {
-                this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
-            }
-        }
-
-        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.destroyVanishingCursedItems();
-            this.inventory.dropAllItems();
-        }
-
-        for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
-            Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
-            score.incrementScore();
-        }
-
-        EntityLivingBase entitylivingbase = this.getAttackingEntity();
-
-        if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
-
-            if (entitylist$entityegginfo != null) {
-                this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.awardKillScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
-        }
+            if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+                this.destroyVanishingCursedItems();
+                this.inventory.dropAllItems();
+            }
 
-        this.addStat(StatList.DEATHS);
-        this.takeStat(StatList.TIME_SINCE_DEATH);
-        this.extinguish();
-        this.setFlag(0, false);
-        this.getCombatTracker().reset();
-        // Sponge Start - Finish cause tracker
-        if (causeTracker != null && tracksEntityDeaths) {
-            causeTracker.completePhase(EntityPhase.State.DEATH_UPDATE);
-        }
-        // Sponge end
+            for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
+                Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
+                score.incrementScore();
+            }
+
+            EntityLivingBase entitylivingbase = this.getAttackingEntity();
+
+            if (entitylivingbase != null) {
+                EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
+
+                if (entitylist$entityegginfo != null) {
+                    this.addStat(entitylist$entityegginfo.entityKilledByStat);
+                }
+
+                entitylivingbase.awardKillScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
+            }
+
+            this.addStat(StatList.DEATHS);
+            this.takeStat(StatList.TIME_SINCE_DEATH);
+            this.extinguish();
+            this.setFlag(0, false);
+            this.getCombatTracker().reset();
+        } // Sponge - brackets
     }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))

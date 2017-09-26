@@ -85,6 +85,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -273,7 +274,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     // This method can be called directly by pistons, mods, etc. so the hook must go here
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     public void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
-        if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
+        if (!((IMixinWorld) worldIn).isFake()) {
             if (CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
                 ci.cancel();
                 return;
@@ -307,7 +308,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
-        if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
+        if (!((IMixinWorld) worldIn).isFake()) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);

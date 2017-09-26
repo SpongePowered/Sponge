@@ -57,9 +57,11 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.List;
 import java.util.Optional;
@@ -80,19 +82,19 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final IPhaseState currentState = causeTracker.getCurrentPhaseData().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
         if (isBlockAlready && !isWorldGen) {
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build();
-            BlockPhase.State.BLOCK_DECAY.createPhaseContext()
-                    .source(locatable)
-                    .buildAndSwitch();
+            final LocatableBlock locatable = ;
+            ;
         }
-        boolean result = worldIn.setBlockState(pos, state, flags);
-        if (isBlockAlready && !isWorldGen) {
-            causeTracker.completePhase(BlockPhase.State.BLOCK_DECAY);
+        try (PhaseContext<?> context = isBlockAlready && !isWorldGen
+                                       ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+                                           .source(LocatableBlock.builder()
+                                               .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                                               .state((BlockState) state)
+                                               .build())
+                                           .buildAndSwitch()
+                                       : null) {
+            return worldIn.setBlockState(pos, state, flags);
         }
-        return result;
     }
 
     /**
@@ -111,25 +113,20 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private void destroy(net.minecraft.world.World worldIn, BlockPos pos) {
         final IBlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
-        if (!worldIn.isRemote) {
+        if (!((IMixinWorld) worldIn).isFake()) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
             final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
             final boolean isBlockAlready = causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
-            if (isBlockAlready && !isWorldGen) {
-                final LocatableBlock locatable = LocatableBlock.builder()
-                        .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
-                        .state((BlockState) state)
-                        .build();
-                BlockPhase.State.BLOCK_DECAY.createPhaseContext()
-                    .source(locatable)
-                        .buildAndSwitch();
-            }
-            this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.setBlockToAir(pos);
-            if (isBlockAlready && !isWorldGen) {
-                causeTracker.completePhase(BlockPhase.State.BLOCK_DECAY);
+            try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
+                .source(LocatableBlock.builder()
+                    .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                    .state((BlockState) state)
+                    .build())
+                .buildAndSwitch() : null) {
+                this.dropBlockAsItem(worldIn, pos, state, 0);
+                worldIn.setBlockToAir(pos);
             }
             return;
         }
