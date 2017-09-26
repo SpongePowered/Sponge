@@ -44,6 +44,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -393,6 +394,18 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public void printCustom(PrettyPrinter printer) {
         // TODO - needs to be fleshed out more with each specific phase context.
+    }
+
+    public List<BlockSnapshot> getCapturedBlocksOrEmptyList() {
+        return this.blocksSupplier != null ? this.blocksSupplier.orEmptyList() : Collections.emptyList();
+    }
+
+    public List<Entity> getCapturedEntitiesOrEmptyList() {
+        return this.capturedEntitiesSupplier != null ? this.capturedEntitiesSupplier.orEmptyList() : Collections.emptyList();
+    }
+
+    public List<EntityItem> getCapturedItemsOrEmptyList() {
+        return this.capturedItemsSupplier != null ? this.capturedItemsSupplier.orEmptyList() : Collections.emptyList();
     }
 
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {
