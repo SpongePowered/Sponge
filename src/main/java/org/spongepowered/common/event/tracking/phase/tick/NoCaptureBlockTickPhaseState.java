@@ -41,4 +41,9 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     public boolean tracksBlockSpecificDrops() {
         return false;
     }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
 }

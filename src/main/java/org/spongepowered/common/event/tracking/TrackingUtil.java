@@ -505,7 +505,7 @@ public final class TrackingUtil {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             try {
-                state.getPhase().associateAdditionalCauses(state, context);
+                state.associateAdditionalCauses(state, context);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.

@@ -143,7 +143,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             try {
-                this.getPhase().associateAdditionalCauses(this, context);
+                this.associateAdditionalCauses(this, context);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.

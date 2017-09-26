@@ -32,7 +32,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -59,9 +58,9 @@ public final class GenerationPhase extends TrackingPhase {
 
     public static final class State {
 
-        public static final IPhaseState<GenericGenerationContext> CHUNK_LOADING = new GeneralGenerationPhaseState.Generic("CHUNK_LOADING").bake();
+        public static final IPhaseState<GenericGenerationContext> CHUNK_LOADING = new BasicGenerationState("CHUNK_LOADING").bake();
 
-        public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState.Generic("WORLD_SPAWNER_SPAWNING").bake();
+        public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState().bake();
 
         public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
@@ -99,23 +98,8 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
-        return false;
-    }
-
-    @Override
-    public boolean ignoresBlockEvent(IPhaseState<?> phaseState) {
-        return true;
-    }
-
-    @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return true;
-    }
-
-    @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.state != GenerationPhase.State.WORLD_SPAWNER_SPAWNING;
     }
 
     @Override

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-public class TerrainGenerationState extends GeneralGenerationPhaseState.Generic {
+public class TerrainGenerationState extends BasicGenerationState {
 
     TerrainGenerationState() {
         super("TERRAIN_GENERATION");

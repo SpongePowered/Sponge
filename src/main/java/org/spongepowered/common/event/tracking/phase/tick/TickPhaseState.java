@@ -67,6 +67,11 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
+    public boolean isTicking() {
+        return true;
+    }
+
+    @Override
     public void unwind(C phaseContext) { }
 
 
@@ -75,7 +80,8 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
 
     }
 
-    public void processPostSpawns(PhaseContext<?> phaseContext, ArrayList<Entity> entities) {
+    @Override
+    public void postProcessSpawns(C phaseContext, ArrayList<Entity> entities) {
         final SpawnEntityEvent
                 event =
                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);

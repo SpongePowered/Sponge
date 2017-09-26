@@ -548,6 +548,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *
      * @reason Added chunk and block tick optimizations, timings, cause tracking, and pre-construction events.
      */
+    @SuppressWarnings("unchecked")
     @Override
     @Overwrite
     protected void updateBlocks() {
@@ -736,7 +737,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 spongeBlock.getTimingsHandler().startTiming();
                                 final PhaseData currentTuple = causeTracker.getCurrentPhaseData();
                                 final IPhaseState phaseState = currentTuple.state;
-                                if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
+                                if (phaseState.alreadyCapturingBlockTicks(currentTuple.context)) {
                                     block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
                                 } else {
                                     TrackingUtil.randomTickBlock(causeTracker, this, block, pos, iblockstate, this.rand);
@@ -804,12 +805,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
+    @SuppressWarnings("unchecked")
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData phaseData = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
-        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.context) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
+        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -854,7 +856,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = currentPhase.state;
-        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
+        if (phaseState.ignoresBlockEvent()) {
             return list.add((BlockEventData) obj);
         }
         final PhaseContext<?> context = currentPhase.context;
@@ -875,7 +877,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
-        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
+        if (phaseState.ignoresBlockEvent()) {
             return fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
@@ -996,7 +998,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
 
-        if (phaseState.getPhase().ignoresScheduledUpdates(phaseState)) {
+        if (phaseState.ignoresScheduledUpdates()) {
             this.tmpScheduledObj = sbu;
             return;
         }
@@ -1060,7 +1062,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         boolean isWorldGen = peek.state.getPhase().isWorldGeneration(peek.state);
-        boolean handlesOwnCompletion = peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
+        boolean handlesOwnCompletion = peek.state.handlesOwnStateCompletion();
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
@@ -1298,7 +1300,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
         final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
-        if (peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
+        if (peek.state.ignoresBlockUpdateTick(peek)) {
             state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
             // No seriously, if this is not set back to false, all future updates are processed immediately

@@ -59,8 +59,9 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
         return this.unwindingContext.getNotifier();
     }
 
-    public PhaseContext<?> getUnwindingContext() {
-        return unwindingContext;
+    @SuppressWarnings("unchecked")
+    public <T extends PhaseContext<T>> T getUnwindingContext() {
+        return (T) unwindingContext;
     }
 
     public IPhaseState<?> getUnwindingState() {

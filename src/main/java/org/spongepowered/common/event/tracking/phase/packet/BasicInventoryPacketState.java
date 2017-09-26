@@ -94,7 +94,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public boolean doBlockCapturing() {
+    public boolean requiresBlockCapturing() {
         return false;
     }
 

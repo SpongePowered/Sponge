@@ -43,7 +43,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.util.Booleans;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -67,7 +66,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
@@ -204,7 +202,7 @@ public final class CauseTracker {
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
         final PhaseContext<?> context = currentPhaseData.context;
-        try (final UnwindingPhaseContext unwinding = needsPost(state, phase) ?
+        try (final UnwindingPhaseContext unwinding = state.requiresPost() ?
                 UnwindingPhaseContext.unwind(state, context) : null) { // Since the if statement checks for a post, this will automatically close the post anyways
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
                 this.currentProcessingState = currentPhaseData;
@@ -218,10 +216,6 @@ public final class CauseTracker {
             printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
             this.currentProcessingState = null;
         }
-    }
-
-    private boolean needsPost(IPhaseState<?> state, TrackingPhase phase) {
-        return state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state);
     }
 
     private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
@@ -448,7 +442,7 @@ public final class CauseTracker {
                     .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
         }
-        if (phaseState.getPhase().requiresBlockCapturing(phaseState)) {
+        if (phaseState.requiresBlockCapturing()) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
@@ -575,7 +569,7 @@ public final class CauseTracker {
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         // Certain phases disallow entity spawns (such as block restoration)
-        if (!isForced && !phase.allowEntitySpawns(phaseState)) {
+        if (!isForced && !phaseState.allowEntitySpawns()) {
             return false;
         }
 

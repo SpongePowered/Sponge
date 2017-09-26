@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -36,6 +38,9 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -77,6 +82,34 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     void unwind(C phaseContext);
 
+    /**
+     * This is the post dispatch method that is automatically handled for
+     * states that deem it necessary to have some post processing for
+     * advanced game mechanics. This is always performed when capturing
+     * has been turned on during a phases's
+     * {@link IPhaseState#unwind(PhaseContext<?>)} is
+     * dispatched. The rules of post dispatch are as follows:
+     * - Entering extra phases is not allowed: This is to avoid
+     *  potential recursion in various corner cases.
+     * - The unwinding phase context is provided solely as a root
+     *  cause tracking for any nested notifications that require
+     *  association of causes
+     * - The unwinding phase is used with the unwinding state to
+     *  further exemplify during what state that was unwinding
+     *  caused notifications. This narrows down to the exact cause
+     *  of the notifications.
+     * - post dispatch may loop several times until no more notifications
+     *  are required to be dispatched. This may include block physics for
+     *  neighbor notification events.
+     *
+     * @param unwindingState
+     * @param unwindingContext The context of the state that was unwinding,
+     *     contains the root cause for the state
+     * @param postContext The post dispatch context captures containing any
+     * */
+    default void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, C postContext) {
+
+    }
 
     default boolean ignoresBlockTracking() {
         return false;
@@ -137,5 +170,64 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default boolean requiresBlockPosTracking() {
         return false;
+    }
+
+    default boolean isTicking() {
+        return false;
+    }
+
+    default boolean handlesOwnStateCompletion() {
+        return false;
+    }
+
+    default Optional<DamageSource> createDestructionDamageSource(PhaseContext<?> context, Entity entity) {
+        return Optional.empty();
+    }
+
+    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
+
+    }
+
+    default boolean doesCaptureEntityDrops() {
+        return false;
+    }
+
+    default boolean requiresPost() {
+        return true;
+    }
+
+    default boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return false;
+    }
+
+    default boolean allowEntitySpawns() {
+        return true;
+    }
+
+    default boolean ignoresBlockEvent() {
+        return false;
+    }
+
+    default boolean ignoresScheduledUpdates() {
+        return false;
+    }
+
+    default boolean alreadyCapturingBlockTicks(C context) {
+        return false;
+    }
+    default boolean requiresBlockCapturing() {
+        return true;
+    }
+
+    default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
+        final User creator = unwindingContext.getNotifier().orElseGet(() -> unwindingContext.getOwner().orElse(null));
+        TrackingUtil.splitAndSpawnEntities(
+            entities,
+            entity -> {
+                if (creator != null) {
+                    entity.setCreator(creator.getUniqueId());
+                }
+            }
+        );
     }
 }

@@ -517,7 +517,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
+            if (event == null && !peek.state.isTicking()) {
                 return;
             }
             listToFill.clear();
@@ -540,7 +540,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
+            if (event == null && !peek.state.isTicking()) {
                 return;
             }
             listToFill.clear();
@@ -687,7 +687,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             // cancelled.
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
-            final boolean requiresCapturing = peek.state.getPhase().requiresBlockCapturing(peek.state);
+            final boolean requiresCapturing = peek.state.requiresBlockCapturing();
             if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.

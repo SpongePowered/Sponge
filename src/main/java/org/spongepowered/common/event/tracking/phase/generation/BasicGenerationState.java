@@ -22,20 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.PhaseContext;
+public class BasicGenerationState extends GeneralGenerationPhaseState<GenericGenerationContext> {
 
-final class NoCaptureUseItemPacketState extends UseItemPacketState {
-
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BasicPacketContext phaseContext, BlockPos pos) {
-        return false;
+    public BasicGenerationState(String id) {
+        super(id);
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
-        return false;
+    public GenericGenerationContext createPhaseContext() {
+        return new GenericGenerationContext(this)
+                .addCaptures();
     }
+
 }

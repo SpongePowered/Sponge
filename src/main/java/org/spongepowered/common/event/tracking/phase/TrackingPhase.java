@@ -58,77 +58,11 @@ import javax.annotation.Nullable;
 
 public abstract class TrackingPhase {
 
-
-    /**
-     * This is the post dispatch method that is automatically handled for
-     * states that deem it necessary to have some post processing for
-     * advanced game mechanics. This is always performed when capturing
-     * has been turned on during a phases's
-     * {@link IPhaseState#unwind(IPhaseState, PhaseContext<?>)} is
-     * dispatched. The rules of post dispatch are as follows:
-     * - Entering extra phases is not allowed: This is to avoid
-     *  potential recursion in various corner cases.
-     * - The unwinding phase context is provided solely as a root
-     *  cause tracking for any nested notifications that require
-     *  association of causes
-     * - The unwinding phase is used with the unwinding state to
-     *  further exemplify during what state that was unwinding
-     *  caused notifications. This narrows down to the exact cause
-     *  of the notifications.
-     * - post dispatch may loop several times until no more notifications
-     *  are required to be dispatched. This may include block physics for
-     *  neighbor notification events.
-     *  @param unwindingState The state that was unwinding
-     * @param unwindingContext The context of the state that was unwinding,
-     *     contains the root cause for the state
-     * @param postContext The post dispatch context captures containing any
-     */
-    public void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, PhaseContext<?> postContext) {
-    }
-
-    public void processPostItemSpawns(IPhaseState<?> unwindingState, ArrayList<Entity> items) {
-        TrackingUtil.splitAndSpawnEntities(items);
-    }
-
-    public void processPostEntitySpawns(IPhaseState<?> unwindingState, PhaseContext<?> phaseContext,
-            ArrayList<Entity> entities) {
-        final User creator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-        TrackingUtil.splitAndSpawnEntities(
-                entities,
-                entity -> {
-                    if (creator != null) {
-                        entity.setCreator(creator.getUniqueId());
-                    }
-                }
-        );
-    }
-
     // Default methods that are basic qualifiers, leaving up to the phase and state to decide
     // whether they perform capturing.
 
     public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
         return true;
-    }
-
-    // TODO
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return false;
-    }
-
-    public boolean allowEntitySpawns(IPhaseState<?> currentState) {
-        return true;
-    }
-
-    public boolean ignoresBlockEvent(IPhaseState<?> phaseState) {
-        return false;
-    }
-
-    public boolean ignoresScheduledUpdates(IPhaseState<?> phaseState) {
-        return false;
-    }
-
-    public boolean alreadyCapturingBlockTicks(IPhaseState<?> phaseState, PhaseContext<?> context) {
-        return false;
     }
 
     public boolean alreadyCapturingEntitySpawns(IPhaseState<?> state) {
@@ -141,10 +75,6 @@ public abstract class TrackingPhase {
 
     public boolean alreadyCapturingTileTicks(IPhaseState<?> state) {
         return false;
-    }
-
-    public boolean requiresPost(IPhaseState<?> state) {
-        return true;
     }
 
     public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
@@ -161,10 +91,6 @@ public abstract class TrackingPhase {
 
     public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
         return false;
-    }
-
-    public void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
-
     }
 
 
@@ -211,7 +137,7 @@ public abstract class TrackingPhase {
      * is required that the entity cannot be captured, returning {@code false} will mark it
      * to spawn into the world, bypassing any of the bulk spawn events or capturing.
      *
-     * <p>NOTE: This method should only be called and handled if and only if {@link #allowEntitySpawns(IPhaseState)}
+     * <p>NOTE: This method should only be called and handled if and only if {@link IPhaseState#allowEntitySpawns()}
      * returns {@code true}. Violation of this will have unforseen consequences.</p>
      *
      *
@@ -247,10 +173,6 @@ public abstract class TrackingPhase {
                 .toString();
     }
 
-    public Optional<DamageSource> createDestructionDamageSource(IPhaseState<?> state, PhaseContext<?> context, net.minecraft.entity.Entity entity) {
-        return Optional.empty();
-    }
-
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
@@ -260,23 +182,8 @@ public abstract class TrackingPhase {
 
     }
 
-    public boolean isTicking(IPhaseState<?> state) {
-        return false;
-    }
-
-    public boolean handlesOwnPhaseCompletion(IPhaseState<?> state) {
-        return false;
-    }
-
-    public boolean requiresDimensionTransferBetweenWorlds(IPhaseState<?> state) {
-        return false;
-    }
-
     public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
 
     }
 
-    public void appendExplosionCause(PhaseData phaseData) {
-
-    }
 }

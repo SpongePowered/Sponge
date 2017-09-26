@@ -43,5 +43,13 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
 
     }
 
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
 
+    @Override
+    public boolean requiresBlockPosTracking() {
+        return false;
+    }
 }

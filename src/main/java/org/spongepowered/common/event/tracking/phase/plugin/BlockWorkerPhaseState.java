@@ -46,4 +46,9 @@ public class BlockWorkerPhaseState extends BasicPluginState {
         phaseContext.getCapturedBlockSupplier()
             .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
     }
+
+    @Override
+    public boolean handlesOwnStateCompletion() {
+        return true;
+    }
 }

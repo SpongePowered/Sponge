@@ -53,7 +53,8 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
 
     }
 
-    public boolean allowsSpawns() {
+    @Override
+    public boolean allowEntitySpawns() {
         return true;
     }
 }

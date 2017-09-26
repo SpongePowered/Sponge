@@ -35,10 +35,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-public class OpenInventoryState extends BasicPacketState {
+public class OpenInventoryState extends BasicInventoryPacketState {
 
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         final ItemStackSnapshot lastCursor = context.getCursor();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());

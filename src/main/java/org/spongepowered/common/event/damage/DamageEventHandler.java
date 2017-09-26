@@ -424,18 +424,6 @@ public class DamageEventHandler {
         return new DamageFunction(modifier, function);
     }
 
-    public static DamageSource getEntityDamageSource(@Nullable Entity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        if (entity.world instanceof IMixinWorldServer) {
-            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
-            return peek.state.getPhase().createDestructionDamageSource(peek.state, peek.context, entity).orElse(null);
-        }
-        return null;
-    }
-
     public static DamageFunction provideCooldownAttackStrengthFunction(EntityPlayer player,
             float attackStrength) {
         // TODO: direct cause creation: bad bad bad

@@ -55,11 +55,6 @@ public final class EntityPhase extends TrackingPhase {
         return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
 
-    @Override
-    public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
-        return true;
-    }
-
 
     public static EntityPhase getInstance() {
         return Holder.INSTANCE;

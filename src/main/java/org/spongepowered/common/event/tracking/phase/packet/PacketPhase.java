@@ -95,15 +95,11 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPhaseState<BasicPacketContext> INTERACT_ENTITY = new InteractEntityPacketState();
         public static final IPhaseState<BasicPacketContext> ATTACK_ENTITY = new AttackEntityPacketState();
         public static final IPhaseState<BasicPacketContext> INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
-        public static final IPhaseState<BasicPacketContext> CHAT = new ChatPacketState();
         public static final IPhaseState<BasicPacketContext> CREATIVE_INVENTORY = new CreativeInventoryPacketState();
-        public static final IPhaseState<BasicPacketContext> NO_CAPTURE_USE_ITEM = new NoCaptureUseItemPacketState();
         public static final IPhaseState<BasicPacketContext> PLACE_BLOCK = new PlaceBlockPacketState();
-        public static final IPhaseState<BasicPacketContext> OPEN_INVENTORY = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> REQUEST_RESPAWN = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> USE_ITEM = new UseItemPacketState();
         public static final IPhaseState<BasicPacketContext> INVALID = new InvalidPacketState();
-        public static final IPhaseState<BasicPacketContext> CLIENT_SETTINGS = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> START_RIDING_JUMP = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> ANIMATION = new AnimationPacketState();
         public static final IPhaseState<BasicPacketContext> START_SNEAKING = new BasicPacketState();
@@ -144,7 +140,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
 
         public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
-        public static final BasicInventoryPacketState OPEN_INVENTORY = new BasicInventoryPacketState();
+        public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
         public static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
@@ -267,11 +263,6 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
-        return ((PacketState<?>) currentState).doesCaptureEntityDrops();
-    }
-
-    @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return currentState == General.INTERACTION;
     }
@@ -289,21 +280,6 @@ public final class PacketPhase extends TrackingPhase {
                : ((PacketState<?>) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
     }
 
-    @Override
-    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
-        return ((PacketState<?>) currentState).doBlockCapturing();
-    }
-
-    @Override
-    public boolean requiresPost(IPhaseState<?> state) {
-        return state != General.INVALID;
-    }
-
-    @Override
-    public void processPostEntitySpawns(IPhaseState<?> unwindingState, PhaseContext<?> phaseContext,
-        ArrayList<Entity> entities) {
-        ((PacketState<?>) unwindingState).postSpawnEntities(phaseContext, entities);
-    }
 
     @Override
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {

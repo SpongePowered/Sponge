@@ -99,8 +99,4 @@ public final class PluginPhase extends TrackingPhase {
         }
     }
 
-    @Override
-    public boolean handlesOwnPhaseCompletion(IPhaseState<?> state) {
-        return state == State.BLOCK_WORKER;
-    }
 }

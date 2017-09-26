@@ -328,8 +328,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public void processPostSpawns(PhaseContext<?> phaseContext, ArrayList<Entity> entities) {
-        super.processPostSpawns(phaseContext, entities);
+    public void postProcessSpawns(EntityTickContext phaseContext, ArrayList<Entity> entities) {
+        super.postProcessSpawns(phaseContext, entities);
     }
 
     @Override

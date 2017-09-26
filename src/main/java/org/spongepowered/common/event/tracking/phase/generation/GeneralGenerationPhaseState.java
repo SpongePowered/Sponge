@@ -38,6 +38,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
@@ -80,20 +81,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         return TrackingPhases.GENERATION;
     }
 
-    public static class Generic extends GeneralGenerationPhaseState<GenericGenerationContext> {
-
-        public Generic(String id) {
-            super(id);
-        }
-
-        @Override
-        public GenericGenerationContext createPhaseContext() {
-            return new GenericGenerationContext(this)
-                    .addCaptures();
-        }
-
-    }
-
 
     @Override
     public final boolean canSwitchTo(IPhaseState<?> state) {
@@ -103,6 +90,21 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     @Override
     public final boolean isExpectedForReEntrance() {
         return true;
+    }
+
+    @Override
+    public boolean ignoresBlockEvent() {
+        return true;
+    }
+
+    @Override
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return true;
+    }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
     }
 
     @Override

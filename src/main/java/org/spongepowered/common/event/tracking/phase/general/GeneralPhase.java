@@ -88,32 +88,6 @@ public final class GeneralPhase extends TrackingPhase {
         static final GeneralPhase INSTANCE = new GeneralPhase();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, PhaseContext<?> postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlockSupplier().orEmptyList();
-        final List<Entity> contextEntities = postContext.getCapturedEntitySupplier().orEmptyList();
-        final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsSupplier().orEmptyList();
-        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
-            return;
-        }
-        if (!contextBlocks.isEmpty()) {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-            contextBlocks.clear();
-            processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingContext);
-        }
-        if (!contextEntities.isEmpty()) {
-            final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
-            contextEntities.clear();
-            unwindingState.getPhase().processPostEntitySpawns(unwindingState, unwindingContext, entities);
-        }
-        if (!contextItems.isEmpty()) {
-            final ArrayList<Entity> items = new ArrayList<>(contextItems);
-            contextItems.clear();
-            unwindingState.getPhase().processPostItemSpawns(unwindingState, items);
-        }
-
-    }
 
     /**
      *  @param snapshotsToProcess
@@ -280,16 +254,6 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.state == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean ignoresBlockEvent(IPhaseState<?> phaseState) {
-        return false;
-    }
-
-    @Override
     public boolean alreadyCapturingEntitySpawns(IPhaseState<?> state) {
         return state == Post.UNWINDING || state == State.EXPLOSION;
     }
@@ -315,11 +279,6 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
-        return currentState != State.COMPLETE;
-    }
-
-    @Override
     public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
@@ -333,11 +292,6 @@ public final class GeneralPhase extends TrackingPhase {
                             .setBlockNotifier(notifyPos, player.getUniqueId()));
 
         }
-    }
-
-    @Override
-    public boolean ignoresScheduledUpdates(IPhaseState<?> phaseState) {
-        return phaseState == Post.UNWINDING;
     }
 
     @Override

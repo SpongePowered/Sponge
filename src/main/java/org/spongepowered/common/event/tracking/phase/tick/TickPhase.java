@@ -77,21 +77,6 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void processPostEntitySpawns(IPhaseState<?> unwindingState, PhaseContext<?> phaseContext,
-        ArrayList<Entity> entities) {
-        ((TickPhaseState<?>) unwindingState).processPostSpawns(phaseContext, entities);
-
-    }
-
-    @Override
-    public boolean requiresBlockCapturing(IPhaseState<?> currentState) {
-        if (currentState == Tick.NO_CAPTURE_BLOCK) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
     }
 
@@ -108,10 +93,6 @@ public final class TickPhase extends TrackingPhase {
         ((TickPhaseState<?>) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
-    @Override
-    public boolean isTicking(IPhaseState<?> state) {
-        return true;
-    }
 
     @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {

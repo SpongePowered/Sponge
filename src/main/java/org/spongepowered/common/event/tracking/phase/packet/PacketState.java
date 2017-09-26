@@ -48,9 +48,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -103,25 +101,25 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return false;
     }
 
+    @Override
     public boolean doesCaptureEntityDrops() {
         return false;
     }
 
-    public boolean doBlockCapturing() {
+    @Override
+    public boolean requiresBlockCapturing() {
         return true;
     }
 
     /**
      * A defaulted method to handle entities that are spawned due to packet placement during post processing.
      * Examples can include a player placing a redstone block priming a TNT explosive.
-     *  @param phaseContext The phase context
+     * @param phaseContext The phase context
      * @param entities The list of entities to spawn
      */
-    public void postSpawnEntities(PhaseContext<?> phaseContext, ArrayList<Entity> entities) {
-        final Player player =
-                phaseContext.getSource(Player.class)
-                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player packet, but didn't get anything",
-                                phaseContext));
+    @Override
+    public void postProcessSpawns(P phaseContext, ArrayList<Entity> entities) {
+        final Player player = phaseContext.getSpongePlayer();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             Sponge.getCauseStackManager().pushCause(player);
