@@ -97,6 +97,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                                 EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
+                        entities.clear();
                     });
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
@@ -120,6 +121,8 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                                 }
                             }
                         }
+                        drops.clear();
+
                     });
         }
     }
