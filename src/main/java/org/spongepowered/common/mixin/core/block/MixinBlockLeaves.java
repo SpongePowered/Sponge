@@ -81,10 +81,6 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isBlockAlready = causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
         final IPhaseState currentState = causeTracker.getCurrentPhaseData().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
-        if (isBlockAlready && !isWorldGen) {
-            final LocatableBlock locatable = ;
-            ;
-        }
         try (PhaseContext<?> context = isBlockAlready && !isWorldGen
                                        ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                                            .source(LocatableBlock.builder()
