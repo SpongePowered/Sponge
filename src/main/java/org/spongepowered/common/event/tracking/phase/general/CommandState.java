@@ -157,7 +157,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(CommandPhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 }

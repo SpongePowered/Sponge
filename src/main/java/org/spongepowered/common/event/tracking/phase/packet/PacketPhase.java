@@ -273,15 +273,6 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
-                                        int chunkZ) {
-        return ((PacketState<?>) phaseState).shouldCaptureEntity()
-               ? context.getCapturedEntities().add(entity)
-               : ((PacketState<?>) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
-    }
-
-
-    @Override
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
         ((PacketState<?>) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }

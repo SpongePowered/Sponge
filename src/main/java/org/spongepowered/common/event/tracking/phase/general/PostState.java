@@ -116,7 +116,7 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(UnwindingPhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 }

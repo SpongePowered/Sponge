@@ -89,14 +89,6 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public boolean doesCaptureEntityDrops(IPhaseState<?> currentState) {
-        return false;
-    }
-
-
-    public boolean isRestoring(IPhaseState<?> state, PhaseContext<?> context, int updateFlag) {
-        return false;
-    }
 
     public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState<?> state, PhaseContext<?> context,
             CauseTracker causeTracker) {
@@ -129,43 +121,6 @@ public abstract class TrackingPhase {
     }
 
     // Actual capture methods
-
-    /**
-     * This is Step 3 of entity spawning. It is used for the sole purpose of capturing an entity spawn
-     * and doesn't actually spawn an entity into the world until the current phase is unwound.
-     * The method itself should technically capture entity spawns, however, in the event it
-     * is required that the entity cannot be captured, returning {@code false} will mark it
-     * to spawn into the world, bypassing any of the bulk spawn events or capturing.
-     *
-     * <p>NOTE: This method should only be called and handled if and only if {@link IPhaseState#allowEntitySpawns()}
-     * returns {@code true}. Violation of this will have unforseen consequences.</p>
-     *
-     *
-     * @param phaseState The current phase state
-     * @param context The current context
-     * @param entity The entity being captured
-     * @param chunkX The chunk x position
-     * @param chunkZ The chunk z position
-     * @return True if the entity was successfully captured
-     */
-    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
-        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-        if (user != null) {
-            entity.setCreator(user.getUniqueId());
-        }
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled() && event.getEntities().size() > 0) {
-            for (Entity item: event.getEntities()) {
-                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-            }
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public String toString() {

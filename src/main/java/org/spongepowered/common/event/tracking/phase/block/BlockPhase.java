@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
 public final class BlockPhase extends TrackingPhase {
@@ -55,17 +53,5 @@ public final class BlockPhase extends TrackingPhase {
         static final BlockPhase INSTANCE = new BlockPhase();
     }
 
-    @Override
-    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
-                                        int chunkZ) {
-        return phaseState.allowEntitySpawns()
-               ? context.getCapturedEntities().add(entity)
-               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
-    }
-
-    @Override
-    public boolean isRestoring(IPhaseState<?> state, PhaseContext<?> phaseContext, int updateFlag) {
-        return state == State.RESTORING_BLOCKS && (updateFlag & 1) == 0;
-    }
 
 }

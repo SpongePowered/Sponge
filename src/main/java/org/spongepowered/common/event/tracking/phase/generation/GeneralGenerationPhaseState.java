@@ -41,7 +41,9 @@ import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -126,6 +128,22 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
                 }
             }
         }
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
+            entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            for (Entity item : event.getEntities()) {
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

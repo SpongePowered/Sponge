@@ -112,7 +112,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(BlockTickContext context, Entity entity, int chunkX, int chunkZ) {
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
         final Optional<User> owner = context.getOwner();
         final Optional<User> notifier = context.getNotifier();

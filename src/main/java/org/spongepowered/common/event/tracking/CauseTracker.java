@@ -620,7 +620,7 @@ public final class CauseTracker {
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
                 try {
-                    return phase.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
                 } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us

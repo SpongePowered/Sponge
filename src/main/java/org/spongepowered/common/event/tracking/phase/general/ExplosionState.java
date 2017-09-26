@@ -259,7 +259,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();

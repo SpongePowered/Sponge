@@ -108,23 +108,6 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
-                                        int chunkZ) {
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
-                entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled() && event.getEntities().size() > 0) {
-            for (Entity item : event.getEntities()) {
-                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public boolean isWorldGeneration(IPhaseState<?> state) {
         return true;
     }

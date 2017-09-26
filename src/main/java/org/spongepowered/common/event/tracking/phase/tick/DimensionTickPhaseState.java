@@ -36,7 +36,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
@@ -109,7 +108,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
 
      */
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(DimensionContext context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());

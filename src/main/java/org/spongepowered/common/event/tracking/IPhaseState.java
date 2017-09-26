@@ -28,10 +28,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
@@ -109,6 +113,42 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * */
     default void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, C postContext) {
 
+    }
+
+    /**
+     * This is Step 3 of entity spawning. It is used for the sole purpose of capturing an entity spawn
+     * and doesn't actually spawn an entity into the world until the current phase is unwound.
+     * The method itself should technically capture entity spawns, however, in the event it
+     * is required that the entity cannot be captured, returning {@code false} will mark it
+     * to spawn into the world, bypassing any of the bulk spawn events or capturing.
+     *
+     * <p>NOTE: This method should only be called and handled if and only if {@link IPhaseState#allowEntitySpawns()}
+     * returns {@code true}. Violation of this will have unforseen consequences.</p>
+     *
+     *
+     * @param context The current context
+     * @param entity The entity being captured
+     * @param chunkX The chunk x position
+     * @param chunkZ The chunk z position
+     * @return True if the entity was successfully captured
+     */
+    default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
+        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+        if (user != null) {
+            entity.setCreator(user.getUniqueId());
+        }
+        final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+            entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            for (org.spongepowered.api.entity.Entity item: event.getEntities()) {
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+            }
+            return true;
+        }
+        return false;
     }
 
     default boolean ignoresBlockTracking() {

@@ -91,7 +91,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(BlockEventTickContext context, Entity entity, int chunkX, int chunkZ) {
         final Optional<User> notifier = context.getNotifier();
         final Optional<User> owner = context.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));

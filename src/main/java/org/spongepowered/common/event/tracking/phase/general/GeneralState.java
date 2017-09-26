@@ -49,7 +49,7 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
     }
 
     /**
-     * A duplicate of {@link TrackingPhase#spawnEntityOrCapture(IPhaseState, PhaseContext, Entity, int, int)}
+     * A duplicate of {@link IPhaseState#spawnEntityOrCapture(PhaseContext, Entity, int, int)}
      * such that the general states will not know what to do for entity spawns. Eventually, this is going to be centralized
      * so that it's not always delegated between the phases and phase states.
      *
@@ -64,7 +64,8 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
      * @param chunkZ
      * @return
      */
-    public boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    @Override
+    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());

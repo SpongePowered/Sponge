@@ -44,17 +44,6 @@ public final class EntityPhase extends TrackingPhase {
         }
     }
 
-    @Override
-    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX,
-                                        int chunkZ) {
-        if (phaseState == State.CHANGING_DIMENSION) {
-            final WorldServer worldServer = ((TeleportingContext) context).getTargetWorld();
-            ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
-            return true;
-        }
-        return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
-    }
-
 
     public static EntityPhase getInstance() {
         return Holder.INSTANCE;

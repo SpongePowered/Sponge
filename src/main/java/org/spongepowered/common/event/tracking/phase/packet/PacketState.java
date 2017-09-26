@@ -135,6 +135,13 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         }
     }
 
+    @Override
+    public boolean spawnEntityOrCapture(P context, Entity entity, int chunkX, int chunkZ) {
+        return this.shouldCaptureEntity()
+        ? context.getCapturedEntities().add(entity)
+        : this.spawnEntity(context, entity, chunkX, chunkZ);
+    }
+
     public boolean shouldCaptureEntity() {
         return false;
     }
@@ -151,7 +158,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
      * @param chunkZ
      * @return True if the entity was spawned
      */
-    public boolean spawnEntity(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntity(P context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.world;
         final Player player = context.getSource(Player.class)

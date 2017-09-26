@@ -97,7 +97,8 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
 
     }
 
-    public abstract boolean spawnEntityOrCapture(PhaseContext<?> context, Entity entity, int chunkX, int chunkZ);
+    @Override
+    public abstract boolean spawnEntityOrCapture(C context, Entity entity, int chunkX, int chunkZ);
 
 
 }

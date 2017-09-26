@@ -72,11 +72,6 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState<?> phaseState, PhaseContext<?> context, Entity entity, int chunkX, int chunkZ) {
-        return ((TickPhaseState<?>) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
-    }
-
-    @Override
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
     }
 

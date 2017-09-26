@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -51,6 +52,11 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     @Override
     public void unwind(GeneralizedContext context) {
 
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
     }
 
     @Override
