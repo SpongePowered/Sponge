@@ -55,6 +55,8 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     public final void ifPresentAndNotEmpty(Consumer<List<T>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             consumer.accept(this.captured);
+            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
+            // with recycling the captured object.
         }
     }
 
