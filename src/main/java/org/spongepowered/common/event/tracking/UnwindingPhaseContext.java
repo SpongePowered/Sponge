@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhaseContext;
 
@@ -66,5 +67,12 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
 
     public IPhaseState<?> getUnwindingState() {
         return unwindingState;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "UnwindingState", this.unwindingState)
+            .add("    - %s: %s", "UnwindingContext", this.unwindingContext);
     }
 }

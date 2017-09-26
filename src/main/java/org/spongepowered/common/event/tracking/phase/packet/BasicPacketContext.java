@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.asm.util.PrettyPrinter;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
@@ -50,5 +51,10 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
         return container;
     }
 
-
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "OpenContainer", this.container)
+            ;
+    }
 }

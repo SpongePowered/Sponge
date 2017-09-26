@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import org.spongepowered.asm.util.PrettyPrinter;
+
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
     private int highlightedSlotId;
@@ -39,5 +41,11 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
     public InventoryPacketContext setHighlightedSlotId(int highlightedSlotId) {
         this.highlightedSlotId = highlightedSlotId;
         return this;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "HighlightedSlotId", this.highlightedSlotId);
     }
 }

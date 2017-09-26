@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class TeleportingContext extends EntityContext<TeleportingContext> {
@@ -43,5 +44,11 @@ public class TeleportingContext extends EntityContext<TeleportingContext> {
     public TeleportingContext setTargetWorld(WorldServer targetWorld) {
         this.targetWorld = targetWorld;
         return this;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "TargetTeleportWorld", this.targetWorld);
     }
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
@@ -43,5 +44,11 @@ public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseConte
 
     public PopulatorType getPopulatorType() {
         return this.type;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "PopulatorType", this.type);
     }
 }

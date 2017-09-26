@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -64,5 +65,11 @@ public class GenerationContext<G extends GenerationContext<G>> extends PhaseCont
 
     public World getWorld() {
         return this.world;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "World", this.world);
     }
 }

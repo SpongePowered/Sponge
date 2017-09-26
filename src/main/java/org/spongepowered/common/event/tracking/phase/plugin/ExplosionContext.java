@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 public class ExplosionContext extends PluginPhaseContext<ExplosionContext> {
@@ -42,5 +43,12 @@ public class ExplosionContext extends PluginPhaseContext<ExplosionContext> {
 
     public Explosion getExplosion() {
         return explosion;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "CustomExplosion", this.explosion)
+            ;
     }
 }

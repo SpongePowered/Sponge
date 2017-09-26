@@ -38,8 +38,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -80,7 +78,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     private boolean processImmediately;
 
     private Object source;
-    private PluginContainer activeContainer;
 
     public P source(Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
@@ -206,6 +203,25 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     public boolean isComplete() {
         return this.isCompleted;
     }
+
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        printer
+            .add("    - %s: %s", "Owner", this.owner)
+            .add("    - %s: %s", "Notifier", this.notifier)
+            .add("    - %s: %s", "Source", this.source)
+            .add("    - %s: %s", "CapturedBlocks", this.blocksSupplier)
+            .add("    - %s: %s", "BlockItemDrops", this.blockItemDropsSupplier)
+            .add("    - %s: %s", "BlockItemEntityDrops", this.blockItemEntityDropsSupplier)
+            .add("    - %s: %s", "CapturedItems", this.capturedItemsSupplier)
+            .add("    - %s: %s", "CapturedEntities", this.capturedEntitiesSupplier)
+            .add("    - %s: %s", "CapturedItemStack", this.capturedItemStackSupplier)
+            .add("    - %s: %s", "EntityItemDrops", this.entityItemDropsSupplier)
+            .add("    - %s: %s", "EntityItemEntityDrops", this.entityItemEntityDropsSupplier)
+            .add("    - %s: %s", "BlockEntitySpawns", this.blockEntitySpawnSupplier)
+            .add("    - %s: %s", "CapturedBlockPosition", this.captureBlockPos);
+        return printer;
+    }
+
 
     public boolean shouldProcessImmediately() {
         return this.processImmediately;
@@ -378,23 +394,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    public P activeContainer(PluginContainer plugin) {
-        this.activeContainer = plugin;
-        return (P) this;
-    }
-
-    public PluginContainer getActiveContainer() {
-        return this.activeContainer;
-    }
-
     @Override
     public void close() { // Should never throw an exception
         CauseTracker.getInstance().completePhase(this.state);
     }
 
-    public void printCustom(PrettyPrinter printer) {
-        // TODO - needs to be fleshed out more with each specific phase context.
-    }
 
     public List<BlockSnapshot> getCapturedBlocksOrEmptyList() {
         return this.blocksSupplier != null ? this.blocksSupplier.orEmptyList() : Collections.emptyList();
@@ -460,51 +464,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     static final class CapturedBlockEntitySpawnSupplier extends CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> {
 
         CapturedBlockEntitySpawnSupplier() {
-        }
-    }
-
-    public static final class CaptureExplosion {
-
-        @Nullable private Explosion explosion;
-
-        CaptureExplosion() {
-
-        }
-
-        CaptureExplosion(@Nullable Explosion explosion) {
-            this.explosion = explosion;
-        }
-
-        public Optional<Explosion> getExplosion() {
-            return Optional.ofNullable(this.explosion);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CaptureExplosion that = (CaptureExplosion) o;
-            return com.google.common.base.Objects.equal(this.explosion, that.explosion);
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.explosion);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.MoreObjects.toStringHelper(this)
-                    .add("explosion", this.explosion)
-                    .toString();
-        }
-
-        public void addExplosion(Explosion explosion) {
-            this.explosion = explosion;
         }
     }
 

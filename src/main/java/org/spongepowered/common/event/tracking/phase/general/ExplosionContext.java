@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -67,5 +68,11 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
 
     public org.spongepowered.api.world.explosion.Explosion getSpongeExplosion() {
         return (org.spongepowered.api.world.explosion.Explosion) this.explosion;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "Explosion", this.explosion);
     }
 }

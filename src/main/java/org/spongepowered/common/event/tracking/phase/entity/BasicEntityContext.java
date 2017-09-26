@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class BasicEntityContext extends EntityContext<BasicEntityContext> {
@@ -42,5 +43,11 @@ public class BasicEntityContext extends EntityContext<BasicEntityContext> {
     public BasicEntityContext setDamageSource(DamageSource damageSource) {
         this.damageSource = damageSource;
         return this;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "DamageSource", this.damageSource);
     }
 }

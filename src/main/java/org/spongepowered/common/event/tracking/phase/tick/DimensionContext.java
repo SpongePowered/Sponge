@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import javax.annotation.Nullable;
@@ -53,5 +54,12 @@ public final class DimensionContext extends TickContext<DimensionContext> {
             throw new IllegalStateException("Expected to be ticking on a world!");
         }
         return this.world;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "World", this.world)
+            ;
     }
 }

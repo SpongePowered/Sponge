@@ -29,6 +29,7 @@ import net.minecraft.network.Packet;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 @SuppressWarnings("unchecked")
@@ -91,5 +92,15 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public ItemStack getItemUsed() {
         return itemUsed;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "PacketPlayer", this.packetPlayer)
+            .add("    - %s: %s", "Packet", this.packet)
+            .add("    - %s: %s", "IgnoreCreative", this.ignoreCreative)
+            .add("    - %s: %s", "ItemStackUsed", this.itemUsed);
+
     }
 }

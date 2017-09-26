@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
@@ -74,6 +75,13 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
         return getCapturedPlayerSupplier().getPlayer();
     }
 
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "Listener", this.object)
+            .add("    - %s: %s", "CapturePlayer", this.capturePlayer)
+            ;
+    }
 
     public static final class CapturePlayer {
 
