@@ -37,8 +37,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
@@ -74,7 +72,7 @@ public class SizeDataTest {
                             entity.offer(Keys.BASE_SIZE, base.floatValue());
                             entity.offer(Keys.HEIGHT, height.floatValue());
 
-                            player.getWorld().spawnEntity(entity, Cause.of(NamedCause.source(player)));
+                            player.getWorld().spawnEntity(entity);
 
                             player.sendMessage(Text.of(TextColors.DARK_GREEN, "You have successfully spawned a " + entityType.getName() + " with the following stats:"));
                             player.sendMessage(Text.of(TextColors.GOLD, "Base size(width): ", TextColors.GRAY, entity.get(Keys.BASE_SIZE).orElse(1f)));
