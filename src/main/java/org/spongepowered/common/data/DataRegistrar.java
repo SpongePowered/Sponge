@@ -435,6 +435,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(AreaEffectCloudData.class, SpongeAreaEffectData.class, ImmutableAreaEffectCloudData.class,
                 ImmutableSpongeAreaEffectCloudData.class, new AreaEffectCloudDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(SizeData.class, SpongeSizeData.class, ImmutableSizeData.class,
+                ImmutableSpongeSizeData.class, new SizeDataProcessor());
+
         // Item Processors
 
         DataUtil.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -811,6 +814,9 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultValueProcessor());
         DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultZombieValueProcessor());
         DataUtil.registerValueProcessor(Keys.AGE, new AgeableAgeValueProcessor());
+        DataUtil.registerValueProcessor(Keys.BASE_SIZE, new BaseSizeValueProcessor());
+        DataUtil.registerValueProcessor(Keys.HEIGHT, new HeightValueProcessor());
+        DataUtil.registerValueProcessor(Keys.SCALE, new ScaleValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();

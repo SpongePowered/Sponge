@@ -254,6 +254,8 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
 
+    @Shadow public abstract void setEntityBoundingBox(AxisAlignedBB bb);
+
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
         if (worldIn instanceof IMixinWorldServer) {
@@ -1344,4 +1346,27 @@ public abstract class MixinEntity implements IMixinEntity {
     public void setActiveChunk(@Nullable IMixinChunk chunk) {
         this.activeChunk = new WeakReference<IMixinChunk>(chunk);
     }
+
+    public void setSpongeSize(float base, float height) {
+        if (this.width != base || this.height != height) {
+            this.width = base;
+            this.height = height;
+            final AxisAlignedBB axisAlignedBB = this.getEntityBoundingBox();
+            this.setEntityBoundingBox(new AxisAlignedBB(axisAlignedBB.minX, axisAlignedBB.minY, axisAlignedBB.minZ,
+                    axisAlignedBB.minX + this.width, axisAlignedBB.minY + (double)this.height,
+                    axisAlignedBB.minZ + this.width));
+        }
+    }
+
+    @Override
+    public float getSizeScale() {
+        if (this.origWidth == 0 || this.origHeight == 0) {
+            this.origWidth = this.width;
+            this.origHeight = this.height;
+        }
+        double scaleW = this.width / this.origWidth;
+        double scaleH = this.height / this.origHeight;
+        return (float) (scaleH + scaleW) / 2;
+    }
+
 }

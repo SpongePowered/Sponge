@@ -144,4 +144,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     @Nullable IMixinChunk getActiveChunk();
 
     void setActiveChunk(IMixinChunk chunk);
+
+    void setSpongeSize(float base, float height);
+
+    float getSizeScale();
+
 }

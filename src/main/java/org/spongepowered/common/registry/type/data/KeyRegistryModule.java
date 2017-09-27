@@ -544,8 +544,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("attack_damage", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityAttackDamage"), "sponge:entity_attack_damage", "Entity Attack Damage"));
 
-        this.fieldMap.put("base_size", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityBaseSize"), "sponge:base_size", "Entity Base Size"));
-
         this.fieldMap.put("damage_entity_map", makeMapKey(TypeTokens.ENTITY_TYPE_DOUBLE_MAP_TOKEN, TypeTokens.ENTITY_TYPE_DOUBLE_MAP_VALUE_TOKEN, of("DamageEntityTypeMap"), "sponge:entity_type_damage_map", "Entity Type Damage Map"));
 
         this.fieldMap.put("dominant_hand", makeSingleKey(TypeTokens.HAND_PREFERENCE_TYPE_TOKEN, TypeTokens.HAND_PREFERENCE_VALUE_TOKEN, of("HandPreference"), "sponge:hand_preference", "Hand Preference"));
@@ -555,8 +553,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("fluid_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("LiquidLevel"), "sponge:fluid_level", "Fluid Level"));
 
         this.fieldMap.put("health_scale", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("HealthScale"), "sponge:health_scale", "Health Scale"));
-
-        this.fieldMap.put("height", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityHeight"), "sponge:entity_height", "Entity Height"));
 
         this.fieldMap.put("held_experience", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("HeldExperience"), "sponge:held_experience", "Held Experience"));
 
@@ -569,8 +565,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("llama_strength", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("LlamaStrength"), "sponge:llama_strength", "Llama Strength"));
 
         this.fieldMap.put("llama_variant", makeSingleKey(TypeTokens.LLAMA_VARIANT_TOKEN, TypeTokens.LLAMA_VARIANT_VALUE_TOKEN, of("LlamaVariant"), "sponge:llama_variant", "Llama Variant"));
-
-        this.fieldMap.put("scale", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("EntityScale"), "sponge:entity_scale", "Entity Scale"));
 
         this.fieldMap.put("will_shatter", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("WillShatter"), "sponge:will_shatter", "Will Shatter"));
 
@@ -586,6 +580,11 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("is_baby", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsBaby"), "sponge:is_baby", "Is Baby"));
 
         this.fieldMap.put("health_scale", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, of("HealthScale"), "sponge:health_scale", "Health Scale"));
+
+        this.fieldMap.put("base_size", makeSingleKey(TypeTokens.FLOAT_TOKEN, TypeTokens.BOUNDED_FLOAT_VALUE_TOKEN, of("EntityBaseSize"), "sponge:base_size", "Entity Base Size"));
+        this.fieldMap.put("height", makeSingleKey(TypeTokens.FLOAT_TOKEN, TypeTokens.BOUNDED_FLOAT_VALUE_TOKEN, of("EntityHeight"), "sponge:entity_height", "Entity Height"));
+        this.fieldMap.put("scale", makeSingleKey(TypeTokens.FLOAT_TOKEN, TypeTokens.BOUNDED_FLOAT_VALUE_TOKEN, of("EntityScale"), "sponge:entity_scale", "Entity Scale"));
+
 
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
