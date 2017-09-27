@@ -580,6 +580,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         {
             // this.profiler.startSection("getChunk"); // Sponge - Don't use the profiler
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
+            final net.minecraft.world.World world = chunk.getWorld();
             int j = chunk.x * 16;
             int k = chunk.z * 16;
             // this.profiler.endStartSection("checkNextLight"); // Sponge - Don't use the profiler
@@ -617,7 +618,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                             transform =
                             new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
 
-                        if (this.rand.nextDouble() < difficultyinstance.getAdditionalDifficulty() * 0.05D) {
+                        if (world.getGameRules().getBoolean("doMobSpawning") && this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
                             // Sponge Start - Throw construction events
                             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                                 Sponge.getCauseStackManager().pushCause(this.getWeather());
@@ -646,7 +647,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 if (!lightning.isCancelled()) {
                                     // Sponge End
                                     this.addWeatherEffect(
-                                        new EntityLightningBolt((WorldServer) (Object) this, (double) blockpos.getX(), (double) blockpos.getY(),
+                                        new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
                                             (double) blockpos.getZ(), true));
                                 } // Sponge - Brackets.
                             }
@@ -663,7 +664,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 if (!event.isCancelled()) {
                                     // Sponge End
                                     this.addWeatherEffect(
-                                        new EntityLightningBolt((WorldServer) (Object) this, (double) blockpos.getX(), (double) blockpos.getY(),
+                                        new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
                                             (double) blockpos.getZ(), false));
                                 } // Sponge - Brackets.
                             }
@@ -738,7 +739,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 final PhaseData currentTuple = causeTracker.getCurrentPhaseData();
                                 final IPhaseState phaseState = currentTuple.state;
                                 if (phaseState.alreadyCapturingBlockTicks(currentTuple.context)) {
-                                    block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
+                                    block.randomTick(world, pos, iblockstate, this.rand);
                                 } else {
                                     TrackingUtil.randomTickBlock(causeTracker, this, block, pos, iblockstate, this.rand);
                                 }
