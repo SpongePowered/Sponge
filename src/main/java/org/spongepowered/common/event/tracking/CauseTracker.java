@@ -202,8 +202,11 @@ public final class CauseTracker {
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
         final PhaseContext<?> context = currentPhaseData.context;
-        try (final UnwindingPhaseContext unwinding = state.requiresPost() ?
-                UnwindingPhaseContext.unwind(state, context) : null) { // Since the if statement checks for a post, this will automatically close the post anyways
+        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, context) ) {
+            // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
+            // will not attempt to close the phase context. If it is required,
+            // it already automaticaly pushes onto the phase stack, along with
+            // a new list of capture lists
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
                 this.currentProcessingState = currentPhaseData;
                 ((IPhaseState) state).unwind(context);

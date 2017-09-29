@@ -59,6 +59,9 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
     public final void ifPresentAndNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             consumer.accept(this.captured);
+
+            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
+            // with recycling the captured object.
         }
     }
 
@@ -67,6 +70,9 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
             for (K key : this.captured.asMap().keySet()) {
                 biConsumer.accept(key, this.captured.get(key)); // Note that this will cause the consumer to be called for each key
             }
+
+            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
+            // with recycling the captured object.
         }
     }
 
@@ -75,6 +81,9 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
             if (this.captured.containsKey(key)) {
                 consumer.accept(this.captured.get(key));
             }
+
+            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
+            // with recycling the captured object.
         }
     }
 
