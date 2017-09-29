@@ -489,11 +489,14 @@ public final class TrackingUtil {
             // correct builder array entry.
             TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(snapshot));
         }
-
         for (int i = 0; i < EVENT_COUNT; i++) {
             // Build each event array
             transactionArrays[i] = transactionBuilders[i].build();
         }
+
+        // Clear captured snapshots after processing them
+        context.getCapturedBlocksOrEmptyList().clear();
+
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
