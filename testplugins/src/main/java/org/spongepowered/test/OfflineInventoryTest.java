@@ -26,10 +26,13 @@ package org.spongepowered.test;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -37,7 +40,13 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.extent.ArchetypeVolume;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -50,10 +59,31 @@ public class OfflineInventoryTest {
 
     @Inject private Logger logger;
 
+    private Set<UUID> receiveDiamonds = new HashSet<>();
+
+    @Listener
+    public void onGamePreInitialization(GamePreInitializationEvent event) {
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                .description(Text.of("Fills your hotbar with diamonds when you are offline"))
+                .executor((src, args) -> {
+                    if (!(src instanceof Player)) {
+                        src.sendMessage(Text.of(TextColors.RED, "Player only."));
+                        return CommandResult.success();
+                    }
+                    Player player = (Player) src;
+                    receiveDiamonds.add(player.getUniqueId());
+                    src.sendMessage(Text.of(TextColors.GREEN, "You will receive diamonds."));
+                    return CommandResult.success();
+                })
+                .build(), "getmesomediamonds");
+    }
+
     @Listener
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
         UUID uuid = player.getUniqueId();
-        Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
+        if (receiveDiamonds.remove(uuid)) {
+            Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
+        }
     }
 
     private void run(UUID uuid) {

@@ -29,6 +29,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.api.Sponge;
@@ -68,7 +69,8 @@ import java.util.Optional;
         TileEntityLockable.class,
         CustomInventory.class,
         InventoryBasic.class,
-        SpongeUserInventory.class
+        SpongeUserInventory.class,
+        InventoryCrafting.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {
@@ -85,6 +87,11 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     @Override
     public Inventory parent() {
         return this.parent == null ? this : this.parent();
+    }
+
+    @Override
+    public Inventory root() {
+        return this.parent() == this ? this : this.parent.root();
     }
 
     @SuppressWarnings("unchecked")

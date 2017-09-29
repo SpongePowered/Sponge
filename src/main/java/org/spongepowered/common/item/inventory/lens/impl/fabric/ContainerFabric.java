@@ -133,4 +133,7 @@ public class ContainerFabric extends MinecraftFabric {
         }
     }
 
+    public Container getContainer() {
+        return this.container;
+    }
 }
