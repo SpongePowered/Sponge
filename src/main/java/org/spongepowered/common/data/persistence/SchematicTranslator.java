@@ -95,6 +95,17 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             throw new InvalidDataException(String.format("Unknown schematic version %d (current version is %d)", version, VERSION));
         }
         DataView metadata = view.getView(DataQueries.Schematic.METADATA).orElse(null);
+        if (metadata != null) {
+            Optional<DataView> dot_data = metadata.getView(DataQuery.of("."));
+            if (dot_data.isPresent()) {
+                DataView data = dot_data.get();
+                for (DataQuery key : data.getKeys(false)) {
+                    if (!metadata.contains(key)) {
+                        metadata.set(key, data.get(key).get());
+                    }
+                }
+            }
+        }
 
         // TODO error handling for these optionals
         int width = view.getShort(DataQueries.Schematic.WIDTH).get();
@@ -201,7 +212,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final int length = schematic.getBlockSize().getZ();
         if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
             throw new IllegalArgumentException(String.format(
-                "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
+                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
         }
         data.set(DataQueries.Schematic.WIDTH, width);
         data.set(DataQueries.Schematic.HEIGHT, height);
@@ -250,9 +261,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
             Vector3i pos = entry.getKey();
             DataContainer tiledata = entry.getValue().getTileData();
-            int[] apos = new int[]{pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
+            int[] apos = new int[] {pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
             tiledata.set(DataQueries.Schematic.TILEENTITY_POS, apos);
-            if(!tiledata.contains(DataQueries.CONTENT_VERSION)) {
+            if (!tiledata.contains(DataQueries.CONTENT_VERSION)) {
                 // Set a default content version of 1
                 tiledata.set(DataQueries.CONTENT_VERSION, 1);
             }
