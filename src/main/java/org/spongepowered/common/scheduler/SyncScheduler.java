@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 

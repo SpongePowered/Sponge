@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -102,7 +102,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (this.world.isRemote) {
             return;
         }
-        if (CauseTracker.getInstance().getCurrentState().ignoresBlockTracking()) {
+        if (PhaseTracker.getInstance().getCurrentState().ignoresBlockTracking()) {
             // Don't track chunk gen
             return;
         }
@@ -367,7 +367,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void endLoad(CallbackInfo callbackInfo) {
         if (!this.world.isRemote) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
+            PhaseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
         }
     }
 

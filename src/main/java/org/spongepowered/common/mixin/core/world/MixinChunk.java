@@ -95,7 +95,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
@@ -505,7 +505,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.world.isRemote || CauseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
+        if (this.world.isRemote || PhaseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -514,7 +514,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
-        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
+        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.isTicking()) {
@@ -528,7 +528,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.world.isRemote || CauseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
+        if (this.world.isRemote || PhaseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -537,7 +537,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
-        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
+        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.isTicking()) {
@@ -685,8 +685,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when
             // cancelled.
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+            final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final boolean requiresCapturing = peek.state.requiresBlockCapturing();
             if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
@@ -923,7 +923,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     )
     private void onPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (!this.world.isRemote) {
-            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 

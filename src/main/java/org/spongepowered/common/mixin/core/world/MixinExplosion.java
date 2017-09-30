@@ -60,7 +60,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -144,8 +144,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 //        } else if (igniter != null) {
 //            builder.named(NamedCause.of("Igniter", igniter));
 //        }
-//        if (CauseTracker.ENABLED) {
-//            final PhaseData phaseData = CauseTracker.getInstance().getCurrentPhaseData();
+//        if (PhaseTracker.ENABLED) {
+//            final PhaseData phaseData = PhaseTracker.getInstance().getCurrentPhaseData();
 //            phaseData.state.getPhase().appendExplosionCause(phaseData);
 //        }
 //        return this.createdCause = builder.build();
@@ -376,8 +376,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                 if (iblockstate.getMaterial() != Material.AIR) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
                         // Sponge Start - Track the block position being destroyed
-                        final CauseTracker causeTracker = CauseTracker.getInstance();
-                        final PhaseData peek = causeTracker.getCurrentPhaseData();
+                        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                        final PhaseData peek = phaseTracker.getCurrentPhaseData();
                         // We need to capture this block position if necessary
                         if (peek.state.requiresBlockPosTracking()) {
                             peek.context.getCaptureBlockPos().setPos(blockpos);
@@ -390,8 +390,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                     }
 
                     // Sponge Start - Track the block position being destroyed
-                    final CauseTracker causeTracker = CauseTracker.getInstance();
-                    final PhaseData peek = causeTracker.getCurrentPhaseData();
+                    final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                    final PhaseData peek = phaseTracker.getCurrentPhaseData();
                     // We need to capture this block position if necessary
                     if (peek.state.requiresBlockPosTracking()) {
                         peek.context.getCaptureBlockPos().setPos(blockpos);

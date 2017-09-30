@@ -104,7 +104,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
@@ -201,12 +201,12 @@ public class SpongeCommonEventFactory {
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, @Nullable net.minecraft.entity.Entity sourceEntity,
             List<net.minecraft.entity.Entity> entities) {
 
-        CauseTracker causeTracker = CauseTracker.getInstance();
+        PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (sourceEntity != null) {
                 Sponge.getCauseStackManager().pushCause(sourceEntity);
             } else {
-                PhaseContext<?> context = causeTracker.getCurrentContext();
+                PhaseContext<?> context = phaseTracker.getCurrentContext();
 
                 final Optional<LocatableBlock> currentTickingBlock = context.getSource(LocatableBlock.class);
                 if (currentTickingBlock.isPresent()) {
@@ -225,7 +225,7 @@ public class SpongeCommonEventFactory {
                     }
                 }
             }
-            causeTracker.getCurrentPhaseData().context.addNotifierAndOwnerToCauseStack();
+            phaseTracker.getCurrentPhaseData().context.addNotifierAndOwnerToCauseStack();
 
             List<Entity> spEntities = (List<Entity>) (List<?>) entities;
             CollideEntityEvent event =
@@ -260,8 +260,8 @@ public class SpongeCommonEventFactory {
      * @return The event
      */
     private static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, @Nullable Object source) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseData data = causeTracker.getCurrentPhaseData();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData data = phaseTracker.getCurrentPhaseData();
         if (source == null) {
             source = data.context.getSource(LocatableBlock.class).orElse(null);
             if (source == null) {
@@ -310,8 +310,8 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, @Nullable Object source) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseData data = causeTracker.getCurrentPhaseData();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData data = phaseTracker.getCurrentPhaseData();
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
@@ -346,8 +346,8 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseData data = causeTracker.getCurrentPhaseData();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData data = phaseTracker.getCurrentPhaseData();
 
         BlockState fromState = BlockUtil.fromNative(worldIn.getBlockState(pos));
         BlockState toState = BlockUtil.fromNative(state);
@@ -436,8 +436,8 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet notifiedSides) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseData peek = causeTracker.getCurrentPhaseData();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final PhaseContext<?> context = peek.context;
         // Don't fire notify events during world gen or while restoring
         if (peek.state.getPhase().isWorldGeneration(peek.state) || peek.state == State.RESTORING_BLOCKS) {
@@ -658,7 +658,7 @@ public class SpongeCommonEventFactory {
             return false;
         }
 
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause( entity);
 
@@ -677,7 +677,7 @@ public class SpongeCommonEventFactory {
             if (!cancelled) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
-                    final PhaseData peek = causeTracker.getCurrentPhaseData();
+                    final PhaseData peek = phaseTracker.getCurrentPhaseData();
                     final Optional<User> notifier = peek.context.getNotifier();
                     if (notifier.isPresent()) {
                         IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
@@ -691,14 +691,14 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             RayTraceResult movingObjectPosition) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(projectile);
             Sponge.getCauseStackManager().addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? ProjectileSource.UNKNOWN
                     : projectileSource);
-            final Optional<User> owner = causeTracker.getCurrentPhaseData().context.getOwner();
+            final Optional<User> owner = phaseTracker.getCurrentPhaseData().context.getOwner();
             owner.ifPresent(user -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, user));
 
             Location<World> impactPoint = new Location<>((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.hitVec));

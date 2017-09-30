@@ -51,7 +51,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 @Mixin(MobSpawnerBaseLogic.class)
@@ -105,7 +105,7 @@ public abstract class MixinMobSpawnerBaseLogic {
                                 + "entity types. This may be a bug with a mod or sponge.")
                 .add("%s : %s", "Entity Name", entityTypeString)
                 .add();
-            CauseTracker.getInstance().generateVersionInfo(printer);
+            PhaseTracker.getInstance().generateVersionInfo(printer);
             printer.trace(System.err, SpongeImpl.getLogger(), Level.WARN);
             return null;
         }

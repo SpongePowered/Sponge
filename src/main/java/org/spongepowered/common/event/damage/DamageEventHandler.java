@@ -63,12 +63,9 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -78,8 +75,6 @@ import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class DamageEventHandler {
 

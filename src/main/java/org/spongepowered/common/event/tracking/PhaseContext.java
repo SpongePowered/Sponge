@@ -196,7 +196,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P buildAndSwitch() {
         this.isCompleted = true;
-        CauseTracker.getInstance().switchToPhase(this.state, this);
+        PhaseTracker.getInstance().switchToPhase(this.state, this);
         return (P) this;
     }
 
@@ -396,7 +396,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Override
     public void close() { // Should never throw an exception
-        CauseTracker.getInstance().completePhase(this.state);
+        PhaseTracker.getInstance().completePhase(this.state);
     }
 
 

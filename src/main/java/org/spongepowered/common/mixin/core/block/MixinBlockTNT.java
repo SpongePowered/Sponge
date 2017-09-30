@@ -75,7 +75,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (this.igniter != null) {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.IGNITER, (Living) this.igniter);
-            } // TODO Maybe add the player or any active entity from the CauseTracker?
+            } // TODO Maybe add the player or any active entity from the PhaseTracker?
             this.primeCancelled = !mixin.shouldPrime();
         }
         return !this.primeCancelled && world.spawnEntity(tnt);

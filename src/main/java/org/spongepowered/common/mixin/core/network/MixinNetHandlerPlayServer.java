@@ -109,7 +109,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -321,7 +321,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
         if (this.player.interactionManager.isCreative()) {
-            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final PacketContext<?> context = (PacketContext<?>) peek.context;
             final boolean ignoresCreative = context.getIgnoringCreative();
             boolean clickedOutside = packetIn.getSlotId() < 0;
@@ -567,8 +567,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             //SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
             // If a plugin or mod has changed the item, avoid restoring
             if (!SpongeCommonEventFactory.playerInteractItemChanged) {
-                final CauseTracker causeTracker = CauseTracker.getInstance();
-                final PhaseData peek = causeTracker.getCurrentPhaseData();
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                final PhaseData peek = phaseTracker.getCurrentPhaseData();
                 final ItemStack itemStack = ItemStackUtil.toNative(((PacketContext<?>) peek.context).getItemUsed());
 
                 // Only do a restore if something actually changed. The client does an identity check ('==')

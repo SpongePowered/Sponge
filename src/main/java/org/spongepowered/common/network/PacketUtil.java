@@ -58,7 +58,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -127,7 +127,7 @@ public class PacketUtil {
                     packetIn.processPacket(netHandler);
                 } else {
                     final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                    final CauseTracker causeTracker = CauseTracker.getInstance();
+                    final PhaseTracker phaseTracker = PhaseTracker.getInstance();
                     IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                     if (packetState == null) {
                         throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());

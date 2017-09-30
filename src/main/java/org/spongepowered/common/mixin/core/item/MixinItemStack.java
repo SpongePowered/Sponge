@@ -69,7 +69,7 @@ import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
@@ -152,10 +152,10 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
     private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
         if (!worldIn.isRemote) {
-            final CauseTracker causeTracker = CauseTracker.getInstance();
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+            final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            state.getPhase().capturePlayerUsingStackToBreakBlock((ItemStack)this, (EntityPlayerMP) playerIn, state, peek.context, causeTracker);
+            state.getPhase().capturePlayerUsingStackToBreakBlock((ItemStack)this, (EntityPlayerMP) playerIn, state, peek.context, phaseTracker);
         }
     }
 

@@ -73,7 +73,7 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -293,7 +293,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         IMixinWorldServer world = (IMixinWorldServer) this.world;
         world.getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;

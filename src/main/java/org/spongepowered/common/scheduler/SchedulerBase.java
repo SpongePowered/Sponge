@@ -32,7 +32,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.util.Map;
 import java.util.Optional;

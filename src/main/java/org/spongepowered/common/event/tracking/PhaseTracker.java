@@ -76,7 +76,7 @@ import javax.annotation.Nullable;
  * world and its objects.
  */
 @SuppressWarnings("unchecked")
-public final class CauseTracker {
+public final class PhaseTracker {
 
     static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer);
@@ -105,15 +105,15 @@ public final class CauseTracker {
     public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
     public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
 
-    private CauseTracker() {
+    private PhaseTracker() {
         // We cannot have two instances ever. ever ever.
-        checkState(INSTANCE == null, "More than one CauseTracker instance is being created!!! Two cannot exist at once!");
+        checkState(INSTANCE == null, "More than one PhaseTracker instance is being created!!! Two cannot exist at once!");
     }
 
-    private static final CauseTracker INSTANCE = new CauseTracker();
+    private static final PhaseTracker INSTANCE = new PhaseTracker();
 
-    public static CauseTracker getInstance() {
-        return checkNotNull(INSTANCE, "CauseTracker instance was illegally set to null!");
+    public static PhaseTracker getInstance() {
+        return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
     }
 
     // ----------------- STATE ACCESS ----------------------------------

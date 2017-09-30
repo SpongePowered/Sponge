@@ -78,7 +78,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * <p>Examples of this include: {@link PacketPhase}, {@link TickPhase}, etc.
      * </p>
      *
-     * <p>Note that the {@link CauseTracker} is only provided for easy access
+     * <p>Note that the {@link PhaseTracker} is only provided for easy access
      * to the {@link WorldServer}, {@link IMixinWorldServer}, and
      * {@link World} instances.</p>
      *
@@ -203,7 +203,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, C context) {
+    default void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, C context) {
 
     }
 

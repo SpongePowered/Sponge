@@ -66,7 +66,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.SpongeCommands;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -262,14 +262,14 @@ public final class SpongeImplHooks {
 
     @Nullable
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(task)
                 .buildAndSwitch())  {
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
-            causeTracker.printExceptionFromPhase(e);
+            phaseTracker.printExceptionFromPhase(e);
             return null;
         }
     }
@@ -288,7 +288,7 @@ public final class SpongeImplHooks {
     }
 
     public static boolean isRestoringBlocks(World world) {
-        if (CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
             return true;
         }
 

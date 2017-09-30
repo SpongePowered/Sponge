@@ -94,7 +94,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -381,7 +381,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
 
         try (GenerationContext context =GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
             .source(worldServer)
@@ -812,7 +812,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
     private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
-        report.makeCategory("Sponge CauseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
+        report.makeCategory("Sponge PhaseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }
 }

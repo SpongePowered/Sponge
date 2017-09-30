@@ -32,6 +32,6 @@ public class CauseTrackerCrashHandler implements ICrashReportDetail<String> {
 
     @Override
     public String call() throws Exception {
-        return CauseTracker.getInstance().dumpStack();
+        return PhaseTracker.getInstance().dumpStack();
     }
 }
