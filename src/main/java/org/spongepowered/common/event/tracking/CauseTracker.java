@@ -623,6 +623,7 @@ public final class CauseTracker {
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
                 try {
+                    Sponge.getCauseStackManager().pushCause(world);
                     return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
                 } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
