@@ -435,6 +435,7 @@
         "tileentity.MixinTileEntityMobSpawner",
         "tileentity.MixinTileEntityNote",
         "tileentity.MixinTileEntityPiston",
+        "tileentity.MixinTileEntityShulkerBox",
         "tileentity.MixinTileEntitySign",
         "tileentity.MixinTileEntitySkull",
         "tileentity.MixinTileEntityStructure",
