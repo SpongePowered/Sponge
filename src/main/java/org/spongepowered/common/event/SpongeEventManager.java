@@ -347,13 +347,17 @@ public class SpongeEventManager implements EventManager {
             // to do any timing or cause stack changes
             for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
                 try {
-                    ((AbstractEvent) event).currentOrder = handler.getOrder();
+                    if (event instanceof AbstractEvent) {
+                        ((AbstractEvent) event).currentOrder = handler.getOrder();
+                    }
                     handler.handle(event);
                 } catch (Throwable e) {
                     SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
                 }
             }
-            ((AbstractEvent) event).currentOrder = null;
+            if (event instanceof AbstractEvent) {
+                ((AbstractEvent) event).currentOrder = null;
+            }
             return event instanceof Cancellable && ((Cancellable) event).isCancelled();
         }
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
