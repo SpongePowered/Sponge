@@ -36,7 +36,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -74,6 +73,7 @@ import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.util.SpawnerSpawnType;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -253,13 +253,11 @@ public final class SpongeImplHooks {
         return entityLiving.getMaxSpawnedInChunk();
     }
 
-    public static boolean canEntitySpawnHere(EntityLiving entityLiving, IEntityLivingData entityLivingData, boolean entityNotColliding) {
+    public static SpawnerSpawnType canEntitySpawnHere(EntityLiving entityLiving, boolean entityNotColliding) {
         if (entityLiving.getCanSpawnHere() && entityNotColliding) {
-            entityLivingData = entityLiving.onInitialSpawn(entityLiving.world.getDifficultyForLocation(new BlockPos(entityLiving)), entityLivingData);
-            return true;
+            return SpawnerSpawnType.NORMAL;
         }
-
-        return false;
+        return SpawnerSpawnType.NONE;
     }
 
     @Nullable
