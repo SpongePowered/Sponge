@@ -153,7 +153,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -286,19 +286,19 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
             return;
         }
-        // Double check that the CauseTracker is already capturing the Death phase
-        final CauseTracker causeTracker;
+        // Double check that the PhaseTracker is already capturing the Death phase
+        final PhaseTracker phaseTracker;
         final boolean tracksEntityDeaths;
         if (!this.world.isRemote) {
-            causeTracker = CauseTracker.getInstance();
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
+            phaseTracker = PhaseTracker.getInstance();
+            final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
             if (!tracksEntityDeaths) {
                 ;
             }
         } else {
-            causeTracker = null;
+            phaseTracker = null;
             tracksEntityDeaths = false;
         }
         try (PhaseContext<?> context = tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()

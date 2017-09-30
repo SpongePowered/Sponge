@@ -134,7 +134,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             this.metadata = DataContainer.createNew();
         }
         for (Map.Entry<String, Object> entry : this.metaValues.entrySet()) {
-            this.metadata.set(DataQuery.of(".", entry.getKey()), entry.getValue());
+            this.metadata.set(DataQuery.of('.', entry.getKey()), entry.getValue());
         }
         if (this.volume == null) {
             final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.palette, min, size);

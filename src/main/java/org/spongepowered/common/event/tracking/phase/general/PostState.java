@@ -83,9 +83,9 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     @SuppressWarnings("unchecked")
     @Override
     public void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, UnwindingPhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = unwindingContext.getCapturedBlocksOrEmptyList();
-        final List<Entity> contextEntities = unwindingContext.getCapturedEntitiesOrEmptyList();
-        final List<Entity> contextItems = (List<Entity>) (List<?>) unwindingContext.getCapturedItemsOrEmptyList();
+        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocksOrEmptyList();
+        final List<Entity> contextEntities = postContext.getCapturedEntitiesOrEmptyList();
+        final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsOrEmptyList();
         if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
             return;
         }

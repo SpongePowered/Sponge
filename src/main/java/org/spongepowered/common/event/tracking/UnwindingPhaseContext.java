@@ -31,9 +31,15 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhaseContext
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPhaseContext> {
 
+    @Nullable
     static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
+        if (!state.requiresPost()) {
+            return null;
+        }
         return new UnwindingPhaseContext(state, context)
                 .addCaptures()
                 .addEntityDropCaptures()

@@ -22,76 +22,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.inventory;
 
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.inventory.IMixinSlot;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
-@Mixin(Slot.class)
-public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter {
-
-    @Shadow @Final public int slotIndex;
-    @Shadow @Final public IInventory inventory;
+@Mixin(InventoryCrafting.class)
+@Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
+public abstract class MixinInventoryCrafting implements IInventory, LensProvider<IInventory, ItemStack> {
 
     protected Fabric<IInventory> fabric;
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
+    @Shadow public abstract int getSizeInventory();
+
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = MinecraftFabric.of(this);
-        this.slots = new SlotCollection.Builder().add(1).build();
-        this.lens = new SlotLensImpl(0);
+        this.fabric = new DefaultInventoryFabric(this);
+        this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
+        this.lens = getRootLens(fabric, ((InventoryAdapter) this));
     }
 
     @Override
-    public int getSlotIndex() {
-        return this.slotIndex;
+    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        if (this.getSizeInventory() == 0) {
+            return null; // No Lens when inventory has no slots
+        }
+        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
     }
 
-    @Override
-    public Inventory parent() {
-        return ((Inventory) this.inventory);
-    }
-
-    @Override
-    public org.spongepowered.api.item.inventory.Slot transform(Type type) {
-        return this;
-    }
-
-    @Override
-    public org.spongepowered.api.item.inventory.Slot transform() {
-        return this.transform(Type.INVENTORY);
-    }
-
-    @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }
 
-    @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens<IInventory, ItemStack> inventory$getRootLens() {
         return this.lens;
     }
 
-    @Override
-    public Fabric<IInventory> getInventory() {
+    public Fabric<IInventory> inventory$getInventory() {
         return this.fabric;
     }
+
 }

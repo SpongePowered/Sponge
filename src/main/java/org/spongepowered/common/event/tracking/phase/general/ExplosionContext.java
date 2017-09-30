@@ -28,8 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 
 import javax.annotation.Nullable;
@@ -43,7 +42,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
     }
 
     public ExplosionContext populateFromCurrentState() {
-        final PhaseData currentPhaseData = CauseTracker.getInstance().getCurrentPhaseData();
+        final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
         currentPhaseData.state.getPhase().appendContextPreExplosion(this, currentPhaseData);
         return this;
     }

@@ -36,7 +36,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -45,8 +44,8 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -59,21 +58,22 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.SpongeCommands;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.FakePlayer;
 
 import java.util.Collection;
@@ -254,25 +254,23 @@ public final class SpongeImplHooks {
         return entityLiving.getMaxSpawnedInChunk();
     }
 
-    public static boolean canEntitySpawnHere(EntityLiving entityLiving, IEntityLivingData entityLivingData, boolean entityNotColliding) {
+    public static SpawnerSpawnType canEntitySpawnHere(EntityLiving entityLiving, boolean entityNotColliding) {
         if (entityLiving.getCanSpawnHere() && entityNotColliding) {
-            entityLivingData = entityLiving.onInitialSpawn(entityLiving.world.getDifficultyForLocation(new BlockPos(entityLiving)), entityLivingData);
-            return true;
+            return SpawnerSpawnType.NORMAL;
         }
-
-        return false;
+        return SpawnerSpawnType.NONE;
     }
 
     @Nullable
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(task)
                 .buildAndSwitch())  {
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
-            causeTracker.printExceptionFromPhase(e);
+            phaseTracker.printExceptionFromPhase(e);
             return null;
         }
     }
@@ -291,7 +289,7 @@ public final class SpongeImplHooks {
     }
 
     public static boolean isRestoringBlocks(World world) {
-        if (CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
             return true;
         }
 

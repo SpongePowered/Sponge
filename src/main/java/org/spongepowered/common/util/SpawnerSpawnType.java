@@ -22,16 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.util;
 
-import net.minecraft.crash.ICrashReportDetail;
-
-public class CauseTrackerCrashHandler implements ICrashReportDetail<String> {
-
-    public static final CauseTrackerCrashHandler INSTANCE = new CauseTrackerCrashHandler();
-
-    @Override
-    public String call() throws Exception {
-        return PhaseTracker.getInstance().dumpStack();
-    }
+public enum SpawnerSpawnType {
+    NONE,
+    NORMAL,
+    SPECIAL;
 }

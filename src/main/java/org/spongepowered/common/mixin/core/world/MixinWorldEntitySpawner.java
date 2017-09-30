@@ -55,7 +55,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -63,6 +63,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.SpawnerSpawnType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -270,9 +271,11 @@ public abstract class MixinWorldEntitySpawner {
                                             entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServerIn.rand.nextFloat() * 360.0F, 0.0F);
                                             final boolean entityNotColliding = entityliving.isNotColliding();
 
-                                            if (SpongeImplHooks.canEntitySpawnHere(entityliving, ientitylivingdata, entityNotColliding)) {
-                                                // handled in hook
-                                                //ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+                                            final SpawnerSpawnType type = SpongeImplHooks.canEntitySpawnHere(entityliving, entityNotColliding);
+                                            if (type != SpawnerSpawnType.NONE) {
+                                                if (type == SpawnerSpawnType.NORMAL) {
+                                                    ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+                                                }
 
                                                 if (entityNotColliding) {
                                                     ++spawnCount;
@@ -346,7 +349,7 @@ public abstract class MixinWorldEntitySpawner {
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        CauseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
+        PhaseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
         spawnerEntityType = null;
     }
 

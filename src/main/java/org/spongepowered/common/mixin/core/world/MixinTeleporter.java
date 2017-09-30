@@ -304,7 +304,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     // Adds boolean to turn on special tracking if called from API
     public Optional<Location<World>> createTeleporter(Location<World> nearLocation, boolean plugin) {
 //        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
-//        final CauseTracker causeTracker = CauseTracker.getInstance();
+//        final PhaseTracker causeTracker = PhaseTracker.getInstance();
 //        if (plugin) {
 //            Cause teleportCause = Cause.of(NamedCause.source(this));
 //            if (causeTracker.getCurrentCause() != null) {

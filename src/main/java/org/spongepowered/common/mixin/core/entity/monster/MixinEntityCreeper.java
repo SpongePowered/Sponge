@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
@@ -86,7 +86,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Inject(method = "onDeath", at = @At("RETURN"))
     private void onDeath(DamageSource damageSource, CallbackInfo ci) {
         if (!this.world.isRemote && this.tracksEntityDeaths) {
-            CauseTracker.getInstance().completePhase(EntityPhase.State.DEATH);
+            PhaseTracker.getInstance().completePhase(EntityPhase.State.DEATH);
             this.tracksEntityDeaths = false;
         }
     }

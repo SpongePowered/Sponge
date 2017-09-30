@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -189,12 +189,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", shift = Shift.AFTER))
     private void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
-        CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
     private void onError(CallbackInfoReturnable<Chunk> ci) {
-        CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     private boolean canDenyChunkRequest() {
@@ -206,8 +206,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             return false;
         }
 
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final IPhaseState currentState = causeTracker.getCurrentState();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final IPhaseState currentState = phaseTracker.getCurrentState();
         // TODO - write a tristate for whether the state can deny chunks
         // States that cannot deny chunks
         if (currentState == TickPhase.Tick.PLAYER

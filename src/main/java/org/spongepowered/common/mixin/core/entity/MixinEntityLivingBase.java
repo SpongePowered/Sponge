@@ -86,7 +86,7 @@ import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -241,7 +241,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
      *
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles all living entity death events
      * (except players). Note should be taken that normally, there are lists for drops captured, however, the drops
-     * are retroactively captured by the CauseTracker and associated through the different phases, depending on
+     * are retroactively captured by the PhaseTracker and associated through the different phases, depending on
      * how they are handled, so no lists and flags on the entities themselves are needed as they are tracked through
      * the {@link PhaseContext} of the current {@link IPhaseState} at which this method is called. The compatibility
      * for Forge's events to throw are handled specially in SpongeForge.
@@ -253,14 +253,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause)) {
             return;
         }
-        // Double check that the CauseTracker is already capturing the Death phase
-        final CauseTracker causeTracker = CauseTracker.getInstance();
+        // Double check that the PhaseTracker is already capturing the Death phase
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
             if (!this.world.isRemote) {
-                final PhaseData peek = causeTracker.getCurrentPhaseData();
+                final PhaseData peek = phaseTracker.getCurrentPhaseData();
                 final IPhaseState state = peek.state;
-                this.tracksEntityDeaths = !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+                this.tracksEntityDeaths = !phaseTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
                 if (this.tracksEntityDeaths) {
                     Sponge.getCauseStackManager().pushCause(this);
                     final PhaseContext<?> context = EntityPhase.State.DEATH.createPhaseContext()
@@ -277,7 +277,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (this.dead) {
                 // Sponge Start - ensure that we finish the tracker if necessary
                 if (this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
-                    causeTracker.completePhase(EntityPhase.State.DEATH);
+                    phaseTracker.completePhase(EntityPhase.State.DEATH);
                 }
                 // Sponge End
                 return;
@@ -315,9 +315,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
                 this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
             }
-            if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+            if (phaseTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
                 this.tracksEntityDeaths = false;
-                causeTracker.completePhase(EntityPhase.State.DEATH);
+                phaseTracker.completePhase(EntityPhase.State.DEATH);
             }
 
         }
@@ -506,9 +506,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         }
 
                         // Sponge Start - notify the cause tracker
-                        final CauseTracker causeTracker = CauseTracker.getInstance();
+                        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
                         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            final boolean enterDeathPhase = !causeTracker.getCurrentState().tracksEntityDeaths();
+                            final boolean enterDeathPhase = !phaseTracker.getCurrentState().tracksEntityDeaths();
                             if (enterDeathPhase) {
                                 Sponge.getCauseStackManager().pushCause(this);
                             }
@@ -830,7 +830,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote) {
-            final CauseTracker causeTracker = CauseTracker.getInstance();
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                  PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext()
                         .source(entityLivingBase)

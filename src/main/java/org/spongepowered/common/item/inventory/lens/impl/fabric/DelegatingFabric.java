@@ -91,4 +91,7 @@ public class DelegatingFabric extends MinecraftFabric {
         this.slot.onSlotChanged();
     }
 
+    public Slot getDelegate() {
+        return this.slot;
+    }
 }

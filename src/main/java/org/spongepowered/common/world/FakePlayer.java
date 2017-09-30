@@ -47,7 +47,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -110,7 +110,7 @@ public interface FakePlayer {
 
         private static void tearDownPlayer(EntityPlayerMP player) {
             // Tear down cause capture
-            CauseTracker.getInstance().completePhase(CauseTracker.getInstance().getCurrentState());
+            PhaseTracker.getInstance().completePhase(PhaseTracker.getInstance().getCurrentState());
 
             player.inventory.clear();
             player.world = null;

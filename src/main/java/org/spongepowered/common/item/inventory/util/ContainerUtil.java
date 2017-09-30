@@ -62,7 +62,7 @@ import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -145,7 +145,7 @@ public final class ContainerUtil {
      * @param inventory The inventory to drop items from
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
-        final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
+        final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
         final IPhaseState currentState = currentPhase.state;
         if (currentState.tracksBlockSpecificDrops()) {
             final PhaseContext<?> context = currentPhase.context;

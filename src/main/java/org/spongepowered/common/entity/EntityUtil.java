@@ -93,12 +93,8 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -312,8 +308,8 @@ public final class EntityUtil {
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
 
         // Use origin world to get correct cause
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseData peek = causeTracker.getCurrentPhaseData();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final IPhaseState state = peek.state;
         final PhaseContext<?> context = peek.context;
 
@@ -934,7 +930,7 @@ public final class EntityUtil {
             if (item == null) {
                 return null;
             }
-            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
             final PhaseContext<?> phaseContext = peek.context;
     
@@ -1010,7 +1006,7 @@ public final class EntityUtil {
             if (item == null) {
                 return null;
             }
-            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
             final PhaseContext<?> phaseContext = peek.context;
     

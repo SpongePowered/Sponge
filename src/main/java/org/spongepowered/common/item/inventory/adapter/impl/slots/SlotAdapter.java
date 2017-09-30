@@ -32,12 +32,13 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.DelegatingFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FakeSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
@@ -156,7 +157,7 @@ public class SlotAdapter extends Adapter implements Slot {
 //        this.inventory.markDirty();
 //        return InventoryTransactionResult.successNoTransactions();
 
-        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
+        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         int maxStackSize = this.slot.getMaxStackSize(this.inventory);
@@ -185,7 +186,7 @@ public class SlotAdapter extends Adapter implements Slot {
 
     @Override
     public InventoryTransactionResult set(ItemStack stack) {
-        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
+        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
@@ -256,7 +257,27 @@ public class SlotAdapter extends Adapter implements Slot {
         return super.getMaxStackSize();
     }
 
-//    @Override
+    @Override
+    public Slot transform(Type type) {
+        switch (type) {
+            case INVENTORY:
+                if (this.inventory instanceof DelegatingFabric) {
+                    return ((Slot) ((DelegatingFabric) this.inventory).getDelegate());
+                }
+                if (this.inventory instanceof ContainerFabric) {
+                    return ((Slot) ((ContainerFabric) this.inventory).getContainer().getSlot(this.slotNumber));
+                }
+            default:
+                return this;
+        }
+    }
+
+    @Override
+    public Slot transform() {
+        return this.transform(Type.INVENTORY);
+    }
+
+    //    @Override
 //    public Iterator<Inventory> iterator() {
 //        // TODO
 //        return super.iterator();

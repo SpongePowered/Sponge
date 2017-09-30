@@ -51,6 +51,11 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     }
 
     @Override
+    default Inventory root() {
+        return this.parent() == this ? this : this.parent().root();
+    }
+
+    @Override
     default Optional<ItemStack> poll() {
         return Adapter.Logic.pollSequential(this);
     }

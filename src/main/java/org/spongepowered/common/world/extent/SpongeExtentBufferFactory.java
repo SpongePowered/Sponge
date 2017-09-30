@@ -42,23 +42,23 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
     }
 
     @Override
-    public MutableBiomeVolume createBiomeBuffer(Vector3i size) {
-        return new ByteArrayMutableBiomeBuffer(Vector3i.ZERO, size);
+    public MutableBiomeVolume createBiomeBuffer(Vector3i min, Vector3i size) {
+        return new ByteArrayMutableBiomeBuffer(min, size);
     }
 
     @Override
-    public MutableBiomeVolume createThreadSafeBiomeBuffer(Vector3i size) {
-        throw new UnsupportedOperationException();
+    public MutableBiomeVolume createThreadSafeBiomeBuffer(Vector3i min, Vector3i size) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
-    public MutableBlockVolume createBlockBuffer(Vector3i size) {
-        return new ArrayMutableBlockBuffer(Vector3i.ZERO, size);
+    public MutableBlockVolume createBlockBuffer(Vector3i min, Vector3i size) {
+        return new ArrayMutableBlockBuffer(min, size);
     }
 
     @Override
-    public MutableBlockVolume createThreadSafeBlockBuffer(Vector3i size) {
-        throw new UnsupportedOperationException();
+    public MutableBlockVolume createThreadSafeBlockBuffer(Vector3i min, Vector3i size) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

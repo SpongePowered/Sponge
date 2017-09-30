@@ -235,7 +235,7 @@ public final class TrackingUtil {
                 tile.update();
             }
         } catch (Exception e) {
-            CauseTracker.getInstance().printExceptionFromPhase(e);
+            PhaseTracker.getInstance().printExceptionFromPhase(e);
         }
     }
 
@@ -262,10 +262,10 @@ public final class TrackingUtil {
                     .source(locatable);
     
             checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
-            final CauseTracker causeTracker = CauseTracker.getInstance();
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
     
             // We have to associate any notifiers in case of scheduled block updates from other sources
-            final PhaseData current = causeTracker.getCurrentPhaseData();
+            final PhaseData current = phaseTracker.getCurrentPhaseData();
             final IPhaseState<?> currentState = current.state;
             currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
             // Now actually switch to the new phase
@@ -273,13 +273,13 @@ public final class TrackingUtil {
             try (PhaseContext<?> context = phaseContext.buildAndSwitch()) {
                 block.updateTick(minecraftWorld, pos, state, random);
             } catch (Exception | NoClassDefFoundError e) {
-                causeTracker.printExceptionFromPhase(e);
+                phaseTracker.printExceptionFromPhase(e);
             }
         }
     }
 
-    public static void randomTickBlock(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Block block,
-        BlockPos pos, IBlockState state, Random random) {
+    public static void randomTickBlock(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Block block,
+                                       BlockPos pos, IBlockState state, Random random) {
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(minecraftWorld);
@@ -304,7 +304,7 @@ public final class TrackingUtil {
             checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
     
             // We have to associate any notifiers in case of scheduled block updates from other sources
-            final PhaseData current = causeTracker.getCurrentPhaseData();
+            final PhaseData current = phaseTracker.getCurrentPhaseData();
             final IPhaseState<?> currentState = current.state;
             currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
             // Now actually switch to the new phase
@@ -356,7 +356,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    static boolean trackBlockChange(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
+    static boolean trackBlockChange(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
                                     PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
@@ -373,7 +373,7 @@ public final class TrackingUtil {
                 capturedSnapshots.remove(originalBlockSnapshot);
                 return false;
             }
-            ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, causeTracker, phaseContext);
+            ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, phaseTracker, phaseContext);
         } else {
             originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
@@ -450,7 +450,7 @@ public final class TrackingUtil {
             final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Exception trying to process over a phase!").centre().hr();
             printer.addWrapped(40, "%s :", "PhaseContext");
-            CauseTracker.CONTEXT_PRINTER.accept(printer, phaseContext);
+            PhaseTracker.CONTEXT_PRINTER.accept(printer, phaseContext);
             printer.add("Stacktrace:");
             final IllegalStateException exception = new IllegalStateException(s + " Please analyze the current phase context. ");
             printer.add(exception);
@@ -489,11 +489,14 @@ public final class TrackingUtil {
             // correct builder array entry.
             TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(snapshot));
         }
-
         for (int i = 0; i < EVENT_COUNT; i++) {
             // Build each event array
             transactionArrays[i] = transactionBuilders[i].build();
         }
+
+        // Clear captured snapshots after processing them
+        context.getCapturedBlocksOrEmptyList().clear();
+
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
@@ -666,10 +669,10 @@ public final class TrackingUtil {
             // We call onBlockAdded here for both TE blocks (BlockContainer's) and other blocks.
             // MixinChunk#setBlockState will only call onBlockAdded for BlockContainers when it's passed a null newBlockSnapshot,
             // which only happens when capturing is not being done.
-            final CauseTracker causeTracker = CauseTracker.getInstance();
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock()) {
                 newState.getBlock().onBlockAdded(mixinWorldServer.asMinecraftWorld(), pos, newState);
-                final PhaseData peek = causeTracker.getCurrentPhaseData();
+                final PhaseData peek = phaseTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
                     ((IPhaseState) peek.state).unwind(peek.context);
                 }
@@ -689,7 +692,7 @@ public final class TrackingUtil {
                 mixinWorldServer.asMinecraftWorld().updateObservingBlocksAt(pos, newState.getBlock());
             }
 
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
+            final PhaseData peek = phaseTracker.getCurrentPhaseData();
             if (peek.state == GeneralPhase.Post.UNWINDING) {
                 ((IPhaseState) peek.state).unwind(peek.context);
             }

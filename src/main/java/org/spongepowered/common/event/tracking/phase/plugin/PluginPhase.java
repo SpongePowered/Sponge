@@ -30,7 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -94,7 +94,7 @@ public final class PluginPhase extends TrackingPhase {
 
     @Override
     public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState<?> state, PhaseContext<?> context,
-            CauseTracker causeTracker) {
+            PhaseTracker phaseTracker) {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks((ListenerPhaseContext) context, playerMP, itemStack);
         }

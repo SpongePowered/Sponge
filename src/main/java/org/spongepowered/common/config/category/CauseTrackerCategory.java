@@ -38,7 +38,7 @@ public class CauseTrackerCategory extends ConfigCategory {
     boolean isVerbose = true;
 
     @Setting(value = "verbose-errors", comment = "If true, the cause tracker will dump extra information about the current phases"
-                                                + "when certain non-CauseTracker related exceptions occur. This is usually not necessary, as the information "
+                                                + "when certain non-PhaseTracker related exceptions occur. This is usually not necessary, as the information "
                                                 + "in the exception itself can normally be used to determine the cause of the issue")
     boolean verboseErrors = false;
 

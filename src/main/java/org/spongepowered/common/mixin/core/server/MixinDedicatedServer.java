@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -96,8 +96,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     @Override
     public boolean isBlockProtected(net.minecraft.world.World worldIn, BlockPos pos, EntityPlayer playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        final PhaseData peek = causeTracker.getCurrentPhaseData();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
         if (phaseState == null || !phaseState.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
