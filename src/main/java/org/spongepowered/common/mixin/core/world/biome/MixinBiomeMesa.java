@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world.biome;
 
+import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeMesa;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.api.world.gen.populator.Forest;
+import org.spongepowered.api.world.gen.populator.Ore;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +57,24 @@ public abstract class MixinBiomeMesa extends MixinBiome {
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.brycePillars, this.hasForest));
         super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        String s = world.getWorldInfo().getGeneratorOptions();
+        ChunkGeneratorSettings settings;
+        if (s != null) {
+            settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
+        } else {
+            settings = ChunkGeneratorSettings.Factory.jsonToFactory("").build();
+        }
+
+        // Extra gold is generated in mesa biomes
+        Ore gold = Ore.builder()
+                .ore((BlockState) Blocks.GOLD_ORE.getDefaultState())
+                .size(settings.goldSize)
+                .perChunk(20)
+                .height(VariableAmount.baseWithRandomAddition(32, 80 - 32))
+                .build();
+        gensettings.getPopulators().add(gold);
+
+        BiomeDecorator theBiomeDecorator = this.decorator;
         gensettings.getGroundCoverLayers().clear();
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();

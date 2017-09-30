@@ -30,11 +30,8 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,22 +42,9 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntityHorse.class)
 @Implements(@Interface(iface = RideableHorse.class, prefix = "rideableHorse$", unique = true))
 public abstract class MixinEntityHorse extends MixinAbstractHorse implements RideableHorse {
-
-    @Override
-    public Translation getTranslation() {
-        final HorseData horseData = getHorseData();
-        final HorseVariant horseVariant = horseData.variant().get();
-        return horseVariant.getTranslation();
-    }
-
-    @Override
-    public Value<HorseVariant> variant() {
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
-    }
 
     @Override
     public Value<HorseStyle> style() {
@@ -74,7 +58,7 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
 
     @Override
     public HorseData getHorseData() {
-        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this), HorseVariants.HORSE);
+        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this));
     }
 
     @Override

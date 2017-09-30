@@ -32,25 +32,35 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 @Mixin(GameType.class)
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
 public abstract class MixinGameType {
-    @Shadow String name;
 
-    public String getId() {
-        return this.name;
+    @Nullable private String spongeId;
+
+    @Shadow public abstract String shadow$getName();
+
+    public String gamemode$getId() {
+        if (this.spongeId == null) {
+            final String gameTypeName = this.shadow$getName().equals("") ? "not_set" : this.shadow$getName().toLowerCase(Locale.ENGLISH);
+            this.spongeId = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + gameTypeName;
+        }
+        return this.spongeId;
     }
 
     @Intrinsic
     public String gamemode$getName() {
-        return this.name;
+        return shadow$getName();
     }
 
-    public Translation getTranslation() {
-        return new SpongeTranslation("gameMode." + this.name.toLowerCase(Locale.ENGLISH));
+    public Translation gamemode$getTranslation() {
+        return new SpongeTranslation("gameMode." + this.shadow$getName().toLowerCase(Locale.ENGLISH));
     }
 }

@@ -25,13 +25,6 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.entity.living.player.User;
-
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public interface IMixinNextTickListEntry {
 

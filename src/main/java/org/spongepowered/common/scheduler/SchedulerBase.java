@@ -28,10 +28,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import co.aikar.timings.TimingsManager;
-
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.util.Map;
 import java.util.Optional;
@@ -176,14 +177,20 @@ abstract class SchedulerBase {
      * @param task The task to start
      */
     protected void startTask(final ScheduledTask task) {
-        this.executeTaskRunnable(() -> {
+        this.executeTaskRunnable(task, () -> {
             task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            if(!task.isAsynchronous()) {
+                Sponge.getCauseStackManager().pushCause(task.getOwner());
+            }
             task.getTimingsHandler().startTimingIfSync();
             try {
                 task.getConsumer().accept(task);
             } catch (Throwable t) {
                 SpongeImpl.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
                                              task.getOwner(), t);
+            }
+            if(!task.isAsynchronous()) {
+                Sponge.getCauseStackManager().popCause();
             }
             task.getTimingsHandler().stopTimingIfSync();
         });
@@ -194,6 +201,6 @@ abstract class SchedulerBase {
      *
      * @param runnable The runnable to run
      */
-    protected abstract void executeTaskRunnable(Runnable runnable);
+    protected abstract void executeTaskRunnable(ScheduledTask task, Runnable runnable);
 
 }

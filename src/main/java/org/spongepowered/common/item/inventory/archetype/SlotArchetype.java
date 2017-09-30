@@ -35,6 +35,6 @@ import java.util.Map;
 public class SlotArchetype extends CompositeInventoryArchetype {
 
     public SlotArchetype(Map<String, InventoryProperty<String, ?>> properties) {
-        super("minecraft:slot", "Slot", Collections.emptyList(), properties);
+        super("minecraft:slot", "Slot", Collections.emptyList(), properties, null);
     }
 }

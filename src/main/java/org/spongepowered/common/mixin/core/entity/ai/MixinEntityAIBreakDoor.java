@@ -42,6 +42,6 @@ public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.theEntity).canGrief();
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.entity).canGrief();
     }
 }

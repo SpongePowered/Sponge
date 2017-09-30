@@ -24,16 +24,27 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -41,17 +52,102 @@ import javax.annotation.Nullable;
  * A literal phase state of which the {@link World} is currently running
  * in. The state itself is owned by {@link TrackingPhase}s as the phase
  * defines what to do upon
- * {@link TrackingPhase#unwind(CauseTracker, IPhaseState, PhaseContext)}.
+ * {@link IPhaseState#unwind(PhaseContext)}.
  * As these should be enums, there's no data that should be stored on
  * this state. It can have control flow with {@link #canSwitchTo(IPhaseState)}
  * where preventing switching to another state is possible (likely points out
  * either errors or runaway states not being unwound).
  */
-public interface IPhaseState {
+public interface IPhaseState<C extends PhaseContext<C>> {
 
     TrackingPhase getPhase();
 
-    default boolean canSwitchTo(IPhaseState state) {
+    C createPhaseContext();
+
+    default boolean canSwitchTo(IPhaseState<?> state) {
+        return false;
+    }
+
+    /**
+     * The exit point of any phase. Every phase should have an unwinding
+     * process where if anything is captured, events should be thrown and
+     * processed accordingly. The outcome of each phase is dependent on
+     * the {@link IPhaseState} provded, as different states require different
+     * handling.
+     *
+     * <p>Examples of this include: {@link PacketPhase}, {@link TickPhase}, etc.
+     * </p>
+     *
+     * <p>Note that the {@link CauseTracker} is only provided for easy access
+     * to the {@link WorldServer}, {@link IMixinWorldServer}, and
+     * {@link World} instances.</p>
+     *
+     * @param phaseContext The context of the current state being unwound
+     */
+    void unwind(C phaseContext);
+
+    /**
+     * This is the post dispatch method that is automatically handled for
+     * states that deem it necessary to have some post processing for
+     * advanced game mechanics. This is always performed when capturing
+     * has been turned on during a phases's
+     * {@link IPhaseState#unwind(PhaseContext<?>)} is
+     * dispatched. The rules of post dispatch are as follows:
+     * - Entering extra phases is not allowed: This is to avoid
+     *  potential recursion in various corner cases.
+     * - The unwinding phase context is provided solely as a root
+     *  cause tracking for any nested notifications that require
+     *  association of causes
+     * - The unwinding phase is used with the unwinding state to
+     *  further exemplify during what state that was unwinding
+     *  caused notifications. This narrows down to the exact cause
+     *  of the notifications.
+     * - post dispatch may loop several times until no more notifications
+     *  are required to be dispatched. This may include block physics for
+     *  neighbor notification events.
+     *
+     * @param unwindingState
+     * @param unwindingContext The context of the state that was unwinding,
+     *     contains the root cause for the state
+     * @param postContext The post dispatch context captures containing any
+     * */
+    default void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, C postContext) {
+
+    }
+
+    /**
+     * This is Step 3 of entity spawning. It is used for the sole purpose of capturing an entity spawn
+     * and doesn't actually spawn an entity into the world until the current phase is unwound.
+     * The method itself should technically capture entity spawns, however, in the event it
+     * is required that the entity cannot be captured, returning {@code false} will mark it
+     * to spawn into the world, bypassing any of the bulk spawn events or capturing.
+     *
+     * <p>NOTE: This method should only be called and handled if and only if {@link IPhaseState#allowEntitySpawns()}
+     * returns {@code true}. Violation of this will have unforseen consequences.</p>
+     *
+     *
+     * @param context The current context
+     * @param entity The entity being captured
+     * @param chunkX The chunk x position
+     * @param chunkZ The chunk z position
+     * @return True if the entity was successfully captured
+     */
+    default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
+        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+        if (user != null) {
+            entity.setCreator(user.getUniqueId());
+        }
+        final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+            entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            for (org.spongepowered.api.entity.Entity item: event.getEntities()) {
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+            }
+            return true;
+        }
         return false;
     }
 
@@ -59,7 +155,7 @@ public interface IPhaseState {
         return false;
     }
 
-    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, C context) {
 
     }
 
@@ -99,15 +195,79 @@ public interface IPhaseState {
         return false;
     }
 
-    default boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
+    default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos) {
         return true;
     }
+
     default boolean isInteraction() {
         return false;
     }
-    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext context) {
+
+    default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, C context) {
 
     }
 
 
+    default boolean requiresBlockPosTracking() {
+        return false;
+    }
+
+    default boolean isTicking() {
+        return false;
+    }
+
+    default boolean handlesOwnStateCompletion() {
+        return false;
+    }
+
+    default Optional<DamageSource> createDestructionDamageSource(PhaseContext<?> context, Entity entity) {
+        return Optional.empty();
+    }
+
+    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
+
+    }
+
+    default boolean doesCaptureEntityDrops() {
+        return false;
+    }
+
+    default boolean requiresPost() {
+        return true;
+    }
+
+    default boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return false;
+    }
+
+    default boolean allowEntitySpawns() {
+        return true;
+    }
+
+    default boolean ignoresBlockEvent() {
+        return false;
+    }
+
+    default boolean ignoresScheduledUpdates() {
+        return false;
+    }
+
+    default boolean alreadyCapturingBlockTicks(C context) {
+        return false;
+    }
+    default boolean requiresBlockCapturing() {
+        return true;
+    }
+
+    default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
+        final User creator = unwindingContext.getNotifier().orElseGet(() -> unwindingContext.getOwner().orElse(null));
+        TrackingUtil.splitAndSpawnEntities(
+            entities,
+            entity -> {
+                if (creator != null) {
+                    entity.setCreator(creator.getUniqueId());
+                }
+            }
+        );
+    }
 }

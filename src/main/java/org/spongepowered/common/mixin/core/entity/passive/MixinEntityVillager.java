@@ -80,7 +80,7 @@ import javax.annotation.Nullable;
 
 @Mixin(EntityVillager.class)
 @Implements({@Interface(iface = Villager.class, prefix = "villager$"), @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
-public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager, CarriedInventory {
+public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager, CarriedInventory<Villager> {
 
     @Shadow private boolean isPlaying; // isPlaying
     @Shadow private int careerId; // careerId
@@ -230,6 +230,11 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this;
+        return this;
+    }
+
+    @Override
+    public Optional<Villager> getCarrier() {
+        return Optional.of(this);
     }
 }

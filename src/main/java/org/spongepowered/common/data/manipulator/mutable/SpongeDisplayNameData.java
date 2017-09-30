@@ -33,10 +33,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@ImplementationRequiredForTest
 public class SpongeDisplayNameData extends AbstractSingleData<Text, DisplayNameData, ImmutableDisplayNameData> implements DisplayNameData {
 
     public SpongeDisplayNameData() {

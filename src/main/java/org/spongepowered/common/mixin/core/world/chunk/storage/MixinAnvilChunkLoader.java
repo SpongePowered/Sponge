@@ -34,14 +34,17 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFileCache;
+import net.minecraft.world.storage.ThreadedFileIOBase;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -49,6 +52,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -56,29 +60,37 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.QueuedChunk;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mixin(AnvilChunkLoader.class)
 @Implements(@Interface(iface = IMixinAnvilChunkLoader.class, prefix = "loader$"))
 public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
 
+    private ConcurrentLinkedQueue<QueuedChunk> queue = new ConcurrentLinkedQueue<>();
+    private final Object lock = new Object();
+
     private static final String ENTITY_LIST_CREATE_FROM_NBT =
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
 
-    @Shadow @Final private Set<ChunkPos> pendingAnvilChunksCoordinates;
-    @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToRemove;
+    @Shadow @Final private static Logger LOGGER;
+    @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToSave;
     @Shadow @Final private File chunkSaveLocation;
+    @Shadow private boolean flushing;
+
+    @Shadow
+    public abstract void writeChunkData(ChunkPos pos, NBTTagCompound compound);
 
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
     public void onWriteChunkToNBT(net.minecraft.world.chunk.Chunk chunkIn, World worldIn, NBTTagCompound compound, CallbackInfo ci) {
@@ -116,7 +128,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     }
 
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX, int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
+    public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
+            int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
             Map<Integer, PlayerTracker> trackedIntPlayerPositions = Maps.newHashMap();
             Map<Short, PlayerTracker> trackedShortPlayerPositions = Maps.newHashMap();
@@ -151,16 +164,16 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     /**
      * @author gabizou - January 30th, 2016
      *
-     * Attempts to redirect EntityList spawning an entity. Forge rewrites this method to
-     * handle it in a different method, so this will not actually inject in SpongeForge.
+     *         Attempts to redirect EntityList spawning an entity. Forge
+     *         rewrites this method to handle it in a different method, so this
+     *         will not actually inject in SpongeForge.
      *
      * @param compound
      * @param world
      * @return
      */
-    @Redirect(method = "readChunkFromNBT(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;",
-            at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
-    private Entity onReadEntity(NBTTagCompound compound, World world) {
+    @Redirect(method = "readChunkEntity", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
+    private static Entity onReadChunkEntity(NBTTagCompound compound, World world, Chunk chunk) {
         if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
                     EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
@@ -179,28 +192,114 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         Vector3d position = new Vector3d(positionList.getDoubleAt(0), positionList.getDoubleAt(1), positionList.getDoubleAt(2));
         Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
-        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.CHUNK_LOAD).build();
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return null;
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return null;
+            }
+            return EntityList.createEntityFromNBT(compound, world);
         }
-        return EntityList.createEntityFromNBT(compound, world);
     }
 
     @Intrinsic // Forge method
     public boolean loader$chunkExists(World world, int x, int z) {
         ChunkPos chunkcoordintpair = new ChunkPos(x, z);
 
-        if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair)) {
-            for (ChunkPos pendingChunkCoord : this.chunksToRemove.keySet()) {
-                if (pendingChunkCoord.equals(chunkcoordintpair)) {
-                    return true;
-                }
-            }
+        // Sponge start - Chunk queue improvements
+        // if (this.field_193415_c.contains(chunkcoordintpair)) {
+        //     for (ChunkPos pendingChunkCoord : this.chunksToSave.keySet()) {
+        //         if (pendingChunkCoord.equals(chunkcoordintpair)) {
+        //             return true;
+        //         }
+        //     }
+        // }
+        if (this.chunksToSave.containsKey(chunkcoordintpair)) {
+            return true;
         }
+        // Sponge end
 
         return RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z) != null;
+    }
+
+    /**
+     * @author aikar - February 19th, 2017
+     * @reason Chunk queue improvements.
+     *
+     * @param pos The chunk position to queue
+     * @param compound The NBTTagCompound containing chunk data
+     */
+    @Overwrite
+    protected void addChunkToPending(ChunkPos pos, NBTTagCompound compound) {
+        synchronized (this.lock) {
+            this.chunksToSave.put(pos, compound);
+        }
+        this.queue.add(new QueuedChunk(pos, compound));
+
+        ThreadedFileIOBase.getThreadedIOInstance().queueIO((AnvilChunkLoader) (Object) this);
+    }
+
+    /**
+     * @author aikar - February 19th, 2017
+     * @reason Refactor entire method for chunk queue improvements.
+     * @return Whether write was successful
+     */
+    @Overwrite
+    public boolean writeNextIO() {
+        QueuedChunk chunk = this.queue.poll();
+        if (chunk == null) {
+            if (this.flushing) {
+                LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", new Object[] {this.chunkSaveLocation.getName()});
+            }
+
+            return false;
+        } else {
+            ChunkPos chunkpos = chunk.coords;
+            boolean lvt_3_1_;
+
+            try {
+                // this.field_193415_c.add(chunkpos);
+                NBTTagCompound nbttagcompound = chunk.compound;
+
+                if (nbttagcompound != null) {
+                    int attempts = 0;
+                    Exception laste = null;
+                    while (attempts++ < 5) {
+                        try {
+                            this.writeChunkData(chunkpos, nbttagcompound);
+                            laste = null;
+                            break;
+                        } catch (Exception exception) {
+                            // LOGGER.error((String)"Failed to save chunk",
+                            // (Throwable)exception);
+                            laste = exception;
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (laste != null) {
+                        laste.printStackTrace();
+                    }
+                }
+
+                synchronized (this.lock) {
+                    if (this.chunksToSave.get(chunkpos) == nbttagcompound) {
+                        this.chunksToSave.remove(chunkpos);
+                    }
+                }
+                // Sponge - This will not equal if a newer version is still
+                // pending
+                lvt_3_1_ = true;
+            } finally {
+                // this.field_193415_c.remove(chunkpos);
+            }
+
+            return lvt_3_1_;
+        }
     }
 
     @Override

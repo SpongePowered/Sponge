@@ -59,6 +59,8 @@ public interface IMixinWorldInfo {
 
     void setIsMod(boolean isMod);
 
+    SpongeConfig<WorldConfig> getOrCreateWorldConfig();
+
     SpongeConfig<WorldConfig> getWorldConfig();
 
     /**
@@ -73,8 +75,6 @@ public interface IMixinWorldInfo {
     void setDimensionType(DimensionType type);
 
     void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
 
     void setScoreboard(ServerScoreboard scoreboard);
 

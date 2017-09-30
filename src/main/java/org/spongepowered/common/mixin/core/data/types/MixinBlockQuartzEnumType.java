@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockQuartz;
 import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -33,17 +34,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockQuartz.EnumType.class)
-@Implements(@Interface(iface = QuartzType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = QuartzType.class, prefix = "quartz$"))
 public abstract class MixinBlockQuartzEnumType {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
+    @Shadow @Final private String unlocalizedName;
 
-    public String shadow$getId() {
-        return getName();
+    public String quartz$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String quartz$getName() {
+        return this.unlocalizedName;
     }
 }

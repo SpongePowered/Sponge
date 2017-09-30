@@ -24,35 +24,35 @@
  */
 package org.spongepowered.common.world;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
 public final class SpongeProxyBlockAccess implements IBlockAccess {
 
-    private final IBlockAccess original;
     private final List<Transaction<BlockSnapshot>> transactions;
     private final List<BlockPos> poses;
     private final LinkedHashMap<BlockPos, IBlockState> processed = new LinkedHashMap<>();
     private int index;
+    private WorldServer processingWorld;
 
-    public SpongeProxyBlockAccess(IBlockAccess original, List<Transaction<BlockSnapshot>> snapshotTransaction) {
-        this.original = original;
+    public SpongeProxyBlockAccess(List<Transaction<BlockSnapshot>> snapshotTransaction) {
         this.transactions = snapshotTransaction;
         this.poses = this.transactions.stream()
             .map(transaction -> ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos())
-            .collect(GuavaCollectors.toImmutableList());
+            .collect(ImmutableList.toImmutableList());
         this.index = 0;
+        this.processingWorld = ((WorldServer) snapshotTransaction.get(0).getOriginal().getLocation().get().getExtent());
     }
 
     public void proceed() {
@@ -62,7 +62,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
 
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
-        return this.original.getTileEntity(pos);
+        return this.processingWorld != null ? this.processingWorld.getTileEntity(pos) : null;
     }
 
     @Override
@@ -78,16 +78,16 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
             }
         }
 
-        return this.original.getBlockState(pos);
+        return this.processingWorld.getBlockState(pos);
     }
 
     @Override
     public boolean isAirBlock(BlockPos pos) {
-        return this.original.isAirBlock(pos);
+        return this.processingWorld.isAirBlock(pos);
     }
 
     @Override
     public int getStrongPower(BlockPos pos, EnumFacing direction) {
-        return this.original.getStrongPower(pos, direction);
+        return this.processingWorld.getStrongPower(pos, direction);
     }
 }

@@ -73,11 +73,11 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
         this.generateSpawnOnLoad = idIn == 0;
         this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
-        this.sanitizedId = modId + ":" + dimName;
+        this.sanitizedId = this.modId + ":" + dimName;
         String contextId = this.sanitizedId.replace(":", ".");
         this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
-            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType)(Object) this);
+            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) this);
         }
     }
 
@@ -132,7 +132,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
      * their ids 1:1, this is a safe change that ensures a mixup can't happen.
      */
     @Overwrite
-    public static DimensionType getById(int dimensionId) {
-        return WorldManager.getDimensionType(dimensionId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionId));
+    public static DimensionType getById(int dimensionTypeId) {
+        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
     }
 }

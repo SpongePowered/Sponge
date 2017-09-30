@@ -24,54 +24,29 @@
  */
 package org.spongepowered.common.registry.type.boss;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import net.minecraft.world.BossInfo;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarColors;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Locale;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-public final class BossBarColorRegistryModule implements CatalogRegistryModule<BossBarColor> {
-
-    @RegisterCatalog(BossBarColors.class)
-    public final Map<String, BossBarColor> colorMap = Maps.newHashMap();
-
-    @Override
-    public void registerDefaults() {
-        this.colorMap.put("pink", (BossBarColor) (Object) BossInfo.Color.PINK);
-        this.colorMap.put("blue", (BossBarColor) (Object) BossInfo.Color.BLUE);
-        this.colorMap.put("red", (BossBarColor) (Object) BossInfo.Color.RED);
-        this.colorMap.put("green", (BossBarColor) (Object) BossInfo.Color.GREEN);
-        this.colorMap.put("yellow", (BossBarColor) (Object) BossInfo.Color.YELLOW);
-        this.colorMap.put("purple", (BossBarColor) (Object) BossInfo.Color.PURPLE);
-        this.colorMap.put("white", (BossBarColor) (Object) BossInfo.Color.WHITE);
-    }
-
-    @Override
-    public Optional<BossBarColor> getById(String id) {
-        return Optional.ofNullable(this.colorMap.get(checkNotNull(id, "id").toLowerCase()));
-    }
-
-    @Override
-    public Collection<BossBarColor> getAll() {
-        return ImmutableSet.copyOf(this.colorMap.values());
-    }
+@RegisterCatalog(BossBarColors.class)
+public final class BossBarColorRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BossInfo.Color, BossBarColor> {
 
     @AdditionalRegistration
     public void customRegistration() {
         for (BossInfo.Color color : BossInfo.Color.values()) {
-            if (!this.colorMap.containsKey(color.name().toLowerCase())) {
-                this.colorMap.put(color.name().toLowerCase(), (BossBarColor) (Object) color);
+            if (!this.catalogTypeMap.containsKey(enumAs(color).getId())) {
+                this.catalogTypeMap.put(enumAs(color).getId().toLowerCase(Locale.ENGLISH), (BossBarColor) (Object) color);
             }
         }
     }
 
+    @Override
+    protected BossInfo.Color[] getValues() {
+        return BossInfo.Color.values();
+    }
 }

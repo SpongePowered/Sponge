@@ -24,37 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockSlab;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class PortionTypeRegistryModule implements CatalogRegistryModule<PortionType> {
-
-    @RegisterCatalog(PortionTypes.class)
-    private final Map<String, PortionType> portionTypeMappings = new ImmutableMap.Builder<String, PortionType>()
-        .put("bottom", (PortionType) (Object) BlockSlab.EnumBlockHalf.BOTTOM)
-        .put("top", (PortionType) (Object) BlockSlab.EnumBlockHalf.TOP)
-        .build();
+@RegisterCatalog(PortionTypes.class)
+public final class PortionTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockSlab.EnumBlockHalf, PortionType> {
 
     @Override
-    public Optional<PortionType> getById(String id) {
-        return Optional.ofNullable(this.portionTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockSlab.EnumBlockHalf[] getValues() {
+        return BlockSlab.EnumBlockHalf.values();
     }
-
-    @Override
-    public Collection<PortionType> getAll() {
-        return ImmutableList.copyOf(this.portionTypeMappings.values());
-    }
-
 }

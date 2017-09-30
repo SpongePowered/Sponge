@@ -34,11 +34,12 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.IMixinChunk;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,10 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     Entity getTeleportVehicle();
 
     void setTeleportVehicle(Entity entity);
+
+    boolean dismountRidingEntity(DismountType type);
+
+    boolean removePassengers(DismountType type);
 
     Optional<User> getTrackedPlayer(String nbtKey);
 
@@ -123,10 +128,6 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setDestructCause(Cause cause);
 
-    SpawnCause getSpawnCause();
-
-    void setSpawnCause(SpawnCause spawnCause);
-
     void setLocationAndAngles(Location<World> location);
 
     void setLocationAndAngles(Transform<World> transform);
@@ -135,4 +136,12 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     // Timings
     Timing getTimingsHandler();
+
+    default void onJoinWorld() {
+
+    }
+
+    @Nullable IMixinChunk getActiveChunk();
+
+    void setActiveChunk(IMixinChunk chunk);
 }

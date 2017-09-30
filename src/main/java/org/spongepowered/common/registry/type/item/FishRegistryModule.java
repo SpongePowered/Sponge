@@ -24,52 +24,32 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.Fishes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(Fishes.class)
+public final class FishRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ItemFishFood.FishType, Fish> {
 
-public final class FishRegistryModule implements CatalogRegistryModule<Fish> {
-
-    @RegisterCatalog(Fishes.class)
-    private final Map<String, Fish> fishMap = new HashMap<>();
-
-    @Override
-    public Optional<Fish> getById(String id) {
-        return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public FishRegistryModule() {
+        super(new String[] {"raw."});
     }
 
     @Override
-    public Collection<Fish> getAll() {
-       return ImmutableList.copyOf(this.fishMap.values());
-    }
-
-    @Override
-    public void registerDefaults() {
-        for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            this.fishMap.put(fishType.name().toLowerCase(Locale.ENGLISH), (Fish) (Object) fishType);
-        }
+    protected ItemFishFood.FishType[] getValues() {
+        return ItemFishFood.FishType.values();
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (!this.fishMap.containsValue((Fish) (Object) fishType)) {
-                this.fishMap.put(fishType.name().toLowerCase(Locale.ENGLISH), (Fish) (Object) fishType);
+            if (!this.catalogTypeMap.containsValue(enumAs(fishType))) {
+                this.catalogTypeMap.put(enumAs(fishType).getId(), (Fish) (Object) fishType);
             }
         }
     }
-
 
 }

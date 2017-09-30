@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenVines;
@@ -86,7 +86,7 @@ public abstract class MixinWorldGenVines extends WorldGenerator implements Vine 
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "Vine")
                 .add("PerChunk", this.count)
                 .toString();

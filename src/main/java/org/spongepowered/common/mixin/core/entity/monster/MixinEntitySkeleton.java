@@ -25,31 +25,10 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData;
-import org.spongepowered.api.data.type.SkeletonType;
-import org.spongepowered.api.data.type.SkeletonTypes;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.WhiteSkeleton;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@SuppressWarnings("deprecation")
 @Mixin(EntitySkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinAbstractSkeleton implements WhiteSkeleton {
-
-    @Deprecated
-    @Override
-    public SkeletonData getSkeletonData() {
-        return new SpongeSkeletonData(SkeletonTypes.NORMAL);
-    }
-
-    @Deprecated
-    @Override
-    public Value<SkeletonType> variant() {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, SkeletonTypes.NORMAL, SkeletonTypes.NORMAL);
-    }
-
 
 }

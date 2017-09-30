@@ -39,7 +39,7 @@ public class MixinBossInfoOverlay implements BossBarOverlay {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
-        this.name = ((Enum) (Object) this).name();
+        this.name = ((Enum<?>) (Object) this).name();
         this.id = this.name.toLowerCase();
     }
 

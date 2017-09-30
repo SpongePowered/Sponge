@@ -37,7 +37,6 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModDat
 @Mixin(Block.class)
 public abstract class MixinBlock_Collisions implements IModData_Collisions {
 
-    private BlockType collisionBlockType = (BlockType)(Object) this;
     private int maxCollisions = 8;
     private String modId;
     @SuppressWarnings("unused")
@@ -83,16 +82,15 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
     public void initializeCollisionState(World worldIn) {
         SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
         EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
-        IModData_Collisions spongeBlock = (IModData_Collisions) this.collisionBlockType;
-        spongeBlock.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
-        String[] ids = this.collisionBlockType.getId().split(":");
+        this.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
+        String[] ids = ((BlockType) this).getId().split(":");
         String modId = ids[0];
         String name = ids[1];
         CollisionModCategory collisionMod = collisionCat.getModList().get(modId);
         if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
             collisionMod = new CollisionModCategory(modId);
             collisionCat.getModList().put(modId, collisionMod);
-            collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
+            collisionMod.getBlockList().put(name, this.getMaxCollisions());
             if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
                 activeConfig.save();
             }
@@ -100,25 +98,25 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
             return;
         } else if (collisionMod != null) {
             if (!collisionMod.isEnabled()) {
-                spongeBlock.setMaxCollisions(-1);
+                this.setMaxCollisions(-1);
                 return;
             }
             // check mod overrides
             Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("blocks");
             if (modCollisionMax != null) {
-                spongeBlock.setMaxCollisions(modCollisionMax);
+                this.setMaxCollisions(modCollisionMax);
             }
 
             Integer blockMaxCollision = collisionMod.getBlockList().get(name);
             // entity overrides
             if (blockMaxCollision == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-                collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
+                collisionMod.getBlockList().put(name, this.getMaxCollisions());
             } else if (blockMaxCollision != null) {
-                spongeBlock.setMaxCollisions(blockMaxCollision);
+                this.setMaxCollisions(blockMaxCollision);
             }
         }
 
-        if (spongeBlock.getMaxCollisions() <= 0) {
+        if (this.getMaxCollisions() <= 0) {
             return;
         }
 

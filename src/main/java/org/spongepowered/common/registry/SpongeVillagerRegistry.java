@@ -68,9 +68,8 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         final Multimap<Integer, TradeOfferListMutator> multimap = this.careerGeneratorMap.get(checkNotNull(career, "Career cannot be null!"));
         if (multimap == null) {
             return ImmutableMultimap.of();
-        } else {
-            return ImmutableMultimap.copyOf(multimap);
         }
+        return ImmutableMultimap.copyOf(multimap);
     }
 
     @Override

@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityZombieVillager.class)
 public abstract class MixinEntityZombieVillager {
@@ -40,7 +40,7 @@ public abstract class MixinEntityZombieVillager {
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD, ordinal = 0))
     public int fixupConversionTimeBoost(EntityZombieVillager self) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         return this.getConversionProgress() * ticks;
     }
 

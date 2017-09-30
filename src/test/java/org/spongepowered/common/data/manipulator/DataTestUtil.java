@@ -24,51 +24,30 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.extra.fluid.FluidTypes;
-import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.type.SpongeCommonFluidType;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
-import org.spongepowered.common.registry.type.data.KeyRegistryModule;
-import org.spongepowered.common.registry.util.RegistryModuleLoader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 final class DataTestUtil {
 
     private DataTestUtil() {}
 
-    @SuppressWarnings("unchecked")
     static List<Object[]> generateManipulatorTestObjects() throws Exception {
-        KeyRegistryModule.getInstance().registerDefaults();
-        generateKeyMap();
-        setupCatalogTypes();
-        SpongeGame mockGame = mock(SpongeGame.class);
-
-        when(mockGame.getDataManager()).thenReturn(SpongeDataManager.getInstance());
-        DataRegistrar.setupSerialization(mockGame);
-        final List<Object[]> list = new ArrayList<>();
-
         final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> manipulatorBuilderMap = getBuilderMap();
         final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap = getDelegateMap();
-        delegateMap.entrySet().stream().filter(entry -> isValidForTesting(entry.getKey())).forEach(entry -> {
-            list.add(new Object[]{entry.getKey().getSimpleName(), entry.getKey(), manipulatorBuilderMap.get(entry.getKey())});
-        });
-        return list;
+        return delegateMap.entrySet().stream()
+                .filter(entry -> isValidForTesting(entry.getKey()))
+                .map(entry -> new Object[]{entry.getKey().getSimpleName(), entry.getKey(), manipulatorBuilderMap.get(entry.getKey())})
+                .collect(Collectors.toList());
     }
 
     private static boolean isValidForTesting(Class<?> clazz) {
@@ -77,26 +56,10 @@ final class DataTestUtil {
     }
 
     @SuppressWarnings("unchecked")
-    private static void generateKeyMap() throws Exception {
-        Field mapGetter = KeyRegistryModule.class.getDeclaredField("fieldMap");
-        mapGetter.setAccessible(true);
-        final Map<String, Key<?>> mapping = (Map<String, Key<?>>) mapGetter.get(KeyRegistryModule.getInstance());
-        for (Field field : Keys.class.getDeclaredFields()) {
-            if (!mapping.containsKey(field.getName().toLowerCase())) {
-                continue;
-            }
-            Field modifierField = Field.class.getDeclaredField("modifiers");
-            modifierField.setAccessible(true);
-            modifierField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(null, mapping.get(field.getName().toLowerCase()));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     private static Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> getDelegateMap() throws Exception {
-        final Field delegateField = SpongeDataManager.class.getDeclaredField("processorMap");
+        final Field delegateField = SpongeManipulatorRegistry.class.getDeclaredField("dataProcessorDelegates");
         delegateField.setAccessible(true);
-        return (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) delegateField.get(SpongeDataManager.getInstance());
+        return (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) delegateField.get(SpongeManipulatorRegistry.getInstance());
 
     }
 
@@ -107,26 +70,4 @@ final class DataTestUtil {
         return (Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>>) builderMap.get(SpongeDataManager.getInstance());
     }
 
-
-    public static void setStaticFinalField(Field field, Object value) throws ReflectiveOperationException {
-        field.setAccessible(true);
-
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
-        field.set(null, value);
-    }
-
-    private static void setupCatalogTypes() {
-        for (Field field : FluidTypes.class.getDeclaredFields()) {
-            try {
-                setStaticFinalField(field, new SpongeCommonFluidType(field.getName().toLowerCase()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-
-    }
 }

@@ -71,61 +71,59 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         checkArgument(!blockId.isEmpty(), "Block id cannot be empty!");
         if (instance.isRegistered(property)) {
             return instance.propertyIdMap.get(property);
-        } else {
-            final String lowerCasedBlockId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, blockId);
-            final String modId = lowerCasedBlockId.split(":")[0];
-            final String propertyName = property.getName();
-            final String lastAttemptId = lowerCasedBlockId + "_" + property.getName();
-            try { // Seriously, don't look past this try state. just continue on with your day...
-                  // I warned you...
-                final String originalClass = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, block.getClass().getSimpleName());
-                Class<?> blockClass = block.getClass();
-                while (true) {
-                    if (blockClass == Object.class) {
-                        final String propertyId = modId + ":" + originalClass + "_" + property.getName();
-                        LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(),
-                                propertyId);
-                        instance.register(property, propertyId);
-                        return propertyId;
-                    }
-                    // Had enough?
-                    for (Field field : blockClass.getDeclaredFields()) {
-                        field.setAccessible(true);
-
-                        final boolean isStatic = Modifier.isStatic(field.getModifiers());
-                        final Object o = isStatic ? field.get(null) : field.get(block);
-
-                        if (property != o) {
-                            continue;
-                        }
-                        final String className = field.getDeclaringClass().getSimpleName().replace("Block", "").replace("block", "");
-                        final String classNameId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, className);
-                        final String propertyClassName = isStatic ? classNameId : originalClass;
-                        final String combinedId = modId + ":" + propertyClassName + "_" + propertyName.toLowerCase(Locale.ENGLISH);
-                        if (instance.idPropertyMap.containsKey(combinedId)) {
-                            // in this case, we really do have to fall back on the full block id...
-                            if (instance.idPropertyMap.containsKey(lastAttemptId)) {
-                                // we really are screwed...
-                                throw new IllegalArgumentException("Sorry! Someone is trying to re-register a block with the same property instances of"
-                                                                   + "block: " + blockId + " , with property: " + propertyName);
-                            } else {
-                                instance.register((IProperty<?>) o, lastAttemptId);
-                                return lastAttemptId;
-                            }
-                        }
-                        instance.register(((IProperty<?>) o), combinedId);
-                        return combinedId;
-                    }
-                    blockClass = blockClass.getSuperclass();
+        }
+        final String lowerCasedBlockId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, blockId);
+        final String modId = lowerCasedBlockId.split(":")[0];
+        final String propertyName = property.getName();
+        final String lastAttemptId = lowerCasedBlockId + "_" + property.getName();
+        try { // Seriously, don't look past this try state. just continue on with your day...
+              // I warned you...
+            final String originalClass = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, block.getClass().getSimpleName());
+            Class<?> blockClass = block.getClass();
+            while (true) {
+                if (blockClass == Object.class) {
+                    final String propertyId = modId + ":" + originalClass + "_" + property.getName();
+                    LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(),
+                            propertyId);
+                    instance.register(property, propertyId);
+                    return propertyId;
                 }
+                // Had enough?
+                for (Field field : blockClass.getDeclaredFields()) {
+                    field.setAccessible(true);
 
-            } catch (Exception e) {
-                LogManager.getLogger("Sponge").warn("An exception was thrown while trying to resolve the property "
-                                                    + property.getName() +"'s owning class, assigning "
-                                                    + "fallback id: " + lastAttemptId, e);
-                instance.register(property, lastAttemptId);
-                return lastAttemptId;
+                    final boolean isStatic = Modifier.isStatic(field.getModifiers());
+                    final Object o = isStatic ? field.get(null) : field.get(block);
+
+                    if (property != o) {
+                        continue;
+                    }
+                    final String className = field.getDeclaringClass().getSimpleName().replace("Block", "").replace("block", "");
+                    final String classNameId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, className);
+                    final String propertyClassName = isStatic ? classNameId : originalClass;
+                    final String combinedId = modId + ":" + propertyClassName + "_" + propertyName.toLowerCase(Locale.ENGLISH);
+                    if (instance.idPropertyMap.containsKey(combinedId)) {
+                        // in this case, we really do have to fall back on the full block id...
+                        if (instance.idPropertyMap.containsKey(lastAttemptId)) {
+                            // we really are screwed...
+                            throw new IllegalArgumentException("Sorry! Someone is trying to re-register a block with the same property instances of"
+                                                               + "block: " + blockId + " , with property: " + propertyName);
+                        }
+                        instance.register((IProperty<?>) o, lastAttemptId);
+                        return lastAttemptId;
+                    }
+                    instance.register(((IProperty<?>) o), combinedId);
+                    return combinedId;
+                }
+                blockClass = blockClass.getSuperclass();
             }
+
+        } catch (Exception e) {
+            LogManager.getLogger("Sponge").warn("An exception was thrown while trying to resolve the property "
+                                                + property.getName() +"'s owning class, assigning "
+                                                + "fallback id: " + lastAttemptId, e);
+            instance.register(property, lastAttemptId);
+            return lastAttemptId;
         }
     }
 

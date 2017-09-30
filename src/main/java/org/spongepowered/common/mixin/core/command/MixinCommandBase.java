@@ -25,13 +25,19 @@
 package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommand;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 
+import javax.annotation.Nullable;
+
 @Mixin(CommandBase.class)
-public abstract class MixinCommandBase implements IMixinCommandBase {
+public abstract class MixinCommandBase implements IMixinCommandBase, ICommand {
 
     private boolean expandedSelector;
+    @Nullable private String namespacedAlias = null;
 
     @Override
     public boolean isExpandedSelector() {
@@ -41,6 +47,16 @@ public abstract class MixinCommandBase implements IMixinCommandBase {
     @Override
     public void setExpandedSelector(boolean expandedSelector) {
         this.expandedSelector = expandedSelector;
+    }
+
+    @Override
+    public void updateNamespacedAlias(String ownerId) {
+        this.namespacedAlias = ownerId + ":" + getName();
+    }
+
+    @Redirect(method = "checkPermission", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/CommandBase;getName()Ljava/lang/String;"))
+    private String onCheckPermissionGetNameCall(CommandBase thisObject) {
+        return this.namespacedAlias == null ? getName() : this.namespacedAlias;
     }
 
 }

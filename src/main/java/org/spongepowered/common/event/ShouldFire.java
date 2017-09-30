@@ -36,6 +36,9 @@ public class ShouldFire {
     // SPAWN_ENTITY_EVENT and SPAWN_ENTITY_EVENT_SPAWNER will be true
     // However, SPAWN_ENTITY_EVENT_CHUNKLOAD will be false
 
+    public static boolean AI_TASK_EVENT_ADD = false;
+    public static boolean AI_TASK_EVENT_REMOVE = false;
+
     public static boolean SPAWN_ENTITY_EVENT = false;
     public static boolean SPAWN_ENTITY_EVENT_CHUNKLOAD = false;
     public static boolean SPAWN_ENTITY_EVENT_SPAWNER = false;
@@ -59,4 +62,5 @@ public class ShouldFire {
     public static boolean DEFUSE_EXPLOSIVE_EVENT_PRE = false;
     public static boolean DEFUSE_EXPLOSIVE_EVENT_POST = false;
 
+    public static boolean TICK_BLOCK_EVENT = false;
 }

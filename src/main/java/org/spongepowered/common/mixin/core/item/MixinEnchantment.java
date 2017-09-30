@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -56,6 +56,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     @Shadow public abstract int getMaxEnchantability(int level);
     @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
     @Shadow public abstract String shadow$getName();
+    @Shadow public abstract boolean isTreasureEnchantment();
 
     private String id = "";
 
@@ -122,8 +123,13 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     }
 
     @Override
+    public boolean isTreasure() {
+        return isTreasureEnchantment();
+    }
+
+    @Override
     public String toString() {
-        return Objects.toStringHelper("Enchantment")
+        return MoreObjects.toStringHelper("Enchantment")
                 .add("Name", shadow$getName())
                 .add("Id", getId())
                 .toString();

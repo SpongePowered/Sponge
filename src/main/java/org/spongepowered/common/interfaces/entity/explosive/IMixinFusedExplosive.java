@@ -27,13 +27,9 @@ package org.spongepowered.common.interfaces.entity.explosive;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.explosive.DefuseExplosiveEvent;
 import org.spongepowered.api.event.entity.explosive.PrimeExplosiveEvent;
 import org.spongepowered.common.event.ShouldFire;
-
-import javax.annotation.Nullable;
 
 public interface IMixinFusedExplosive extends IMixinExplosive {
 
@@ -45,36 +41,36 @@ public interface IMixinFusedExplosive extends IMixinExplosive {
 
     void setFuseTicksRemaining(int fuseTicks);
 
-    default boolean shouldPrime(@Nullable Cause cause) {
+    default boolean shouldPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             PrimeExplosiveEvent.Pre event = SpongeEventFactory.createPrimeExplosiveEventPre(
-                    cause != null ? cause : Cause.of(NamedCause.source(this)), (FusedExplosive) this);
+                    Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             return !Sponge.getEventManager().post(event);
         }
         return true;
     }
 
-    default void postPrime(@Nullable Cause cause) {
+    default void postPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_POST) {
             PrimeExplosiveEvent.Post event = SpongeEventFactory.createPrimeExplosiveEventPost(
-                    cause != null ? cause: Cause.of(NamedCause.source(this)), (FusedExplosive) this);
+                    Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }
     }
 
-    default boolean shouldDefuse(@Nullable Cause cause) {
+    default boolean shouldDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_PRE) {
             DefuseExplosiveEvent.Pre event = SpongeEventFactory.createDefuseExplosiveEventPre(
-                    cause != null ? cause : Cause.of(NamedCause.source(this)), (FusedExplosive) this);
+                    Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             return !Sponge.getEventManager().post(event);
         }
         return true;
     }
 
-    default void postDefuse(@Nullable Cause cause) {
+    default void postDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_POST) {
             DefuseExplosiveEvent.Post event = SpongeEventFactory.createDefuseExplosiveEventPost(
-                    cause != null ? cause : Cause.of(NamedCause.source(this)), (FusedExplosive) this);
+                    Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }
     }

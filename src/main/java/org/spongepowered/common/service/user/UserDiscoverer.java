@@ -43,6 +43,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.util.SpongeUsernameCache;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
@@ -105,6 +106,7 @@ class UserDiscoverer {
     }
 
     static User findByUsername(String username) {
+        // check mojang cache
         PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
         HashSet<String> names = Sets.newHashSet(cache.getUsernames());
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
@@ -113,6 +115,13 @@ class UserDiscoverer {
                 return findByProfile((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
+
+        // check username cache
+        final UUID uuid = SpongeUsernameCache.getLastKnownUUID(username);
+        if (uuid != null) {
+            return create(new GameProfile(uuid, username));
+        }
+
         return null;
     }
 
@@ -191,13 +200,13 @@ class UserDiscoverer {
     }
 
     private static User getFromStoredData(org.spongepowered.api.profile.GameProfile profile) {
+        // Always cache user to avoid constant lookups in storage when file does not exist
+        final User user = create((GameProfile) profile);
         // Note: Uses the overworld's player data
         final File dataFile = getPlayerDataFile(profile.getUniqueId());
         if (dataFile == null) {
             return null;
         }
-
-        final User user = create((GameProfile) profile);
 
         try {
             ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));

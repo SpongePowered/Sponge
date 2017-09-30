@@ -38,7 +38,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityEnderPearl;
@@ -56,10 +57,10 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
@@ -73,7 +74,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -104,6 +105,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -129,12 +131,20 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.FakePlayer;
@@ -142,10 +152,12 @@ import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -162,15 +174,11 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld implements World, IMixinWorld {
 
-    private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
-    private static final String PROFILER_ES = "Lnet/minecraft/profiler/Profiler;endSection()V";
-    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
-
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
     private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
     private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
-    private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 0, BLOCK_MAX.getZ());
+    private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
     private static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
     private static final String
             CHECK_NO_ENTITY_COLLISION =
@@ -179,14 +187,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
             GET_ENTITIES_WITHIN_AABB =
             "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-    private Context worldContext;
+
+    @Nullable private Context worldContext;
     protected boolean processingExplosion = false;
+    protected boolean isDefinitelyFake = false;
+    protected boolean hasChecked = false;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public WorldProvider provider;
     @Shadow @Final public Random rand;
-    @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final public Profiler profiler;
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
@@ -195,16 +206,22 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @Shadow @Final protected ISaveHandler saveHandler;
     @Shadow protected List<IWorldEventListener> eventListeners;
+    @Shadow public int[] lightUpdateBlockList;
+    @Shadow public int skylightSubtracted;
+    @Shadow public int seaLevel;
 
     @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
+    @Shadow protected IChunkProvider chunkProvider;
     @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
-    @Shadow protected int updateLCG;
 
+    @Shadow protected int updateLCG;
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
+
     @Shadow protected abstract void tickPlayers();
 
     @Shadow public net.minecraft.world.World init() {
@@ -212,23 +229,29 @@ public abstract class MixinWorld implements World, IMixinWorld {
         throw new RuntimeException("Bad things have happened");
     }
 
-    @Shadow public abstract boolean checkLight(BlockPos pos);
-    @Shadow protected abstract boolean isValid(BlockPos pos);
-    @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
-    @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
-    @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
+    // To be overridden in MixinWorldServer_Lighting
+    @Shadow public abstract int getLight(BlockPos pos);
+    @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
+    @Shadow public abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
+    @Shadow public abstract int getSkylightSubtracted();
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
+    @Shadow public abstract WorldInfo getWorldInfo();
+    @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
+    @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
+    @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isAreaLoaded(BlockPos from, BlockPos to);
+    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
+    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
+    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract BiomeProvider getBiomeProvider();
-    @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
-    @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
-    @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
+    @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
@@ -262,6 +285,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract void notifyLightSet(BlockPos pos);
+    @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
+        return null; // Shadowed
+    }
+    @Shadow public abstract int getHeight(int x, int z);
 
     // @formatter:on
 
@@ -270,33 +298,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
         if (this.isRemote) {
             return provider.createWorldBorder();
-        } else {
-            return ((IMixinWorldProvider) provider).createServerWorldBorder();
         }
-    }
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
-            CallbackInfo ci) {
-        if (info == null) {
-            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
-                    new RuntimeException("Stack trace:"));
-            this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT),
-                    "sponge$dummy_world");
-        }
-        this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
+        return ((IMixinWorldProvider) provider).createServerWorldBorder();
     }
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "getCollisionBoxes", at = @At("HEAD"), cancellable = true)
-    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
-            CallbackInfoReturnable<List> cir) {
+    @Inject(method = "getCollisionBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)
+    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis, CallbackInfoReturnable<List<AxisAlignedBB>> cir) {
         if (this.isRemote || entity == null) {
             return;
         }
         if (entity.world != null && !entity.world.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
-            cir.setReturnValue(new ArrayList());
+            cir.setReturnValue(new ArrayList<>());
         }
     }
 
@@ -304,6 +318,34 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Player> getPlayers() {
         return ImmutableList.copyOf((Collection<Player>) (Object) this.playerEntities);
+    }
+
+    /**
+     * Specifically verify the {@link UUID} for this world is going to be valid, in
+     * certain cases, there are mod worlds that are extending {@link net.minecraft.world.World}
+     * and have custom {@link WorldInfo}s, which ends up causing issues with
+     * plugins expecting a valid uuid for each world.
+     *
+     * <p>TODO There may be some issues with plugins somehow picking up these "fake"
+     * worlds with regards to their block changes, and therefor cause issues when
+     * those plugins are finding those worlds, instead of traditional
+     * {@link WorldServer} instances.</p>
+     *
+     * @return The world id, verified from the properties
+     */
+    @Override
+    public UUID getUniqueId() {
+        final WorldProperties properties = this.getProperties();
+        final UUID worldId = properties.getUniqueId();
+        if (worldId == null) {
+            // Some mod worlds make their own WorldInfos for "fake" worlds.
+            // Specifically fixes https://github.com/SpongePowered/SpongeForge/issues/1527
+            // and https://github.com/BuildCraft/BuildCraft/issues/3594
+            final IMixinWorldInfo mixinWorldInfo = (IMixinWorldInfo) properties;
+            mixinWorldInfo.setUniqueId(UUID.randomUUID());
+            return properties.getUniqueId();
+        }
+        return worldId;
     }
 
     @Override
@@ -329,6 +371,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public int getHighestYAt(int x, int z) {
+        return this.getHeight(x, z);
+    }
+
+    @Override
+    public int getPrecipitationLevelAt(int x, int z) {
+        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
+    }
+
+    @Override
     public BlockState getBlock(int x, int y, int z) {
         if (!containsBlock(x, y, z)) {
             return BlockTypes.AIR.getDefaultState();
@@ -348,8 +400,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
-        return setBlock(x, y, z, block, BlockChangeFlag.ALL, cause);
+    public boolean setBlock(int x, int y, int z, BlockState block) {
+        return setBlock(x, y, z, block, BlockChangeFlag.ALL);
     }
 
 
@@ -431,8 +483,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        checkArgument(type != null, "The entity type cannot be null!");
-        checkArgument(position != null, "The position cannot be null!");
+        return this.createEntity(type, position, false);
+    }
+
+    @Override
+    public Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        return this.createEntity(type, position, true);
+    }
+
+    private Entity createEntity(EntityType type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
+        checkNotNull(type, "The entity type cannot be null!");
+        checkNotNull(position, "The position cannot be null!");
 
         Entity entity = null;
 
@@ -441,7 +502,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         double y = position.getY();
         double z = position.getZ();
 
-        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(EntityDragonPart.class)) {
+        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(MultiPartEntityPart.class)) {
             // Unable to construct these
             throw new IllegalArgumentException("Cannot construct " + type.getId() + " please look to using entity types correctly!");
         }
@@ -489,6 +550,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }*/
 
+        if (naturally && entity instanceof EntityLiving) {
+            // Adding the default equipment
+            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null);
+        }
+
         if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could
             // choose a random art instead?
@@ -522,8 +588,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public WorldBorder.ChunkPreGenerate newChunkPreGenerate(Vector3d center, double diameter) {
-        return new SpongeChunkPreGenerate(this, center, diameter);
+    public ChunkPreGenerate.Builder newChunkPreGenerate(Vector3d center, double diameter) {
+        return new SpongeChunkPreGenerateTask.Builder(this, center, diameter);
     }
 
 
@@ -543,10 +609,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.empty();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) (((WorldServer) (Object) this).getChunkProvider())).getLoadedChunks());
+        if (this.isRemote) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
+            return Collections.emptyList();
+        }
+        return (List<Chunk>) (List<?>) Lists.newArrayList(((WorldServer) (Object) this).getChunkProvider().getLoadedChunks());
     }
 
     @Override
@@ -562,17 +631,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Context getContext() {
+        if (this.worldContext == null) {
+            WorldInfo worldInfo = getWorldInfo();
+            if (worldInfo == null) {
+                // We still have to consider some mods are making dummy worlds that
+                // override getWorldInfo with a null, or submit a null value.
+                worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
+            }
+            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
+        }
         return this.worldContext;
     }
-
     @Override
     public Optional<TileEntity> getTileEntity(int x, int y, int z) {
         net.minecraft.tileentity.TileEntity tileEntity = getTileEntity(new BlockPos(x, y, z));
         if (tileEntity == null) {
             return Optional.empty();
-        } else {
-            return Optional.of((TileEntity) tileEntity);
         }
+        return Optional.of((TileEntity) tileEntity);
     }
 
     @Override
@@ -671,7 +747,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void triggerExplosion(Explosion explosion, Cause cause) {
+    public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
@@ -694,8 +770,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public MutableBlockVolumeWorker<World> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<World> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
@@ -720,7 +796,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         if (te.isPresent()) {
             final TileEntity tileEntity = te.get();
-            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
+            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
@@ -731,12 +807,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         return snapshot.restore(force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, flag);
     }
@@ -1027,6 +1103,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return result;
     }
 
+    @Override
+    public boolean isFake() {
+        if (this.hasChecked) {
+            return this.isDefinitelyFake;
+        }
+        this.isDefinitelyFake = this.isRemote || this.worldInfo == null || !(this instanceof IMixinWorldServer);
+        this.hasChecked = true;
+        return this.isDefinitelyFake;
+    }
+
     @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     public boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
         EntityPlayer player = (EntityPlayer) object;
@@ -1138,7 +1224,34 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     /**
-     * @reason Avoid loading chunk for getting raw light.
+     * @author blood - February 20th, 2017
+     * @reason Avoids loading unloaded chunk when checking for sky.
+     *
+     * @param pos The position to get the light for
+     * @return Whether block position can see sky
+     */
+    @Overwrite
+    public boolean canSeeSky(BlockPos pos) {
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null || chunk.unloadQueued) {
+            return false;
+        }
+
+        return chunk.canSeeSky(pos);
+    }
+
+    @Override
+    public int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType) {
+        return this.getRawLight(pos, lightType);
+    }
+
+    /**
+     * @author gabizou - July 25th, 2016
+     * @reason Optimizes several blockstate lookups for getting raw light.
+     *
+     * @param pos The position to get the light for
+     * @param enumSkyBlock The light type
+     * @return The raw light
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
@@ -1149,10 +1262,218 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else {
             chunk = this.getChunkFromBlockCoords(pos);
         }
-        if (chunk == null || chunk.unloaded) {
+        if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
         }
     }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return The block state at the desired position
+     */
+    @Overwrite
+    public IBlockState getBlockState(BlockPos pos) {
+        // Sponge - Replace with inlined method
+        // if (this.isOutsideBuildHeight(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+            // Sponge end
+            return Blocks.AIR.getDefaultState();
+        }
+        net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+        return chunk.getBlockState(pos);
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @author bloodmc - May 10th, 2017 - Added async check
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return The tile entity at the desired position, or else null
+     */
+    @Overwrite
+    @Nullable
+    public net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos) {
+        // Sponge - Replace with inlined method
+        //  if (this.isOutsideBuildHeight(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+            return null;
+            // Sponge End
+        } else {
+            net.minecraft.tileentity.TileEntity tileentity = null;
+
+            // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
+            // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
+            if (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+                return this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
+            }
+            // Sponge end
+
+            if (this.processingLoadedTiles) {
+                tileentity = this.getPendingTileEntityAt(pos);
+            }
+
+            if (tileentity == null) {
+                 tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
+            }
+
+            if (tileentity == null) {
+                tileentity = this.getPendingTileEntityAt(pos);
+            }
+
+            return tileentity;
+        }
+    }
+
+
+    /**
+     * @author gabizou
+     * @reason Adds a redirector to use instead of an injector to avoid duplicate chunk area loaded lookups.
+     * This is overridden in MixinWorldServer_Lighting.
+     *
+     * @param thisWorld This world
+     * @param pos The block position to check light for
+     * @param radius The radius, always 17
+     * @param allowEmtpy Whether to allow empty chunks, always false
+     * @param lightType The light type
+     * @param samePosition The block position to check light for, again.
+     * @return True if the area is loaded
+     */
+    @Redirect(method = "checkLightFor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;IZ)Z"))
+    protected boolean spongeIsAreaLoadedForCheckingLight(net.minecraft.world.World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType, BlockPos samePosition) {
+        return isAreaLoaded(pos, radius, allowEmtpy);
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return True if the block position is valid
+     */
+    @Overwrite
+    public boolean isValid(BlockPos pos) { // isValid
+        return ((IMixinBlockPos) pos).isValidPosition();
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return True if the block position is outside build height
+     */
+    @Overwrite
+    public boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
+        return ((IMixinBlockPos) pos).isInvalidYPosition();
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param type The type of sky lighting
+     * @param pos The position
+     * @return The light for the defined sky type and block position
+     */
+    @Overwrite
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        if (pos.getY() < 0) {
+            pos = new BlockPos(pos.getX(), 0, pos.getZ());
+        }
+
+        // Sponge Start - Replace with inlined method to check
+        // if (!this.isValid(pos)) // vanilla
+        if (!((IMixinBlockPos) pos).isValidPosition()) {
+            // Sponge End
+            return type.defaultLightValue;
+        } else {
+            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            return chunk.getLightFor(type, pos);
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Inlines the isValid check to BlockPos.
+     *
+     * @param type The type of sky lighting
+     * @param pos The block position
+     * @param lightValue The light value to set to
+     */
+    @Overwrite
+    public void setLightFor(EnumSkyBlock type, BlockPos pos, int lightValue) {
+        // Sponge Start - Replace with inlined Valid position check
+        // if (this.isValid(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isValidPosition()) { // Sponge - Replace with inlined method to check
+            // Sponge End
+            if (this.isBlockLoaded(pos)) {
+                net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+                chunk.setLightFor(type, pos, lightValue);
+                this.notifyLightSet(pos);
+            }
+        }
+    }
+
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Inlines the isValidXZPosition check to BlockPos.
+     *
+     * @param bbox The AABB to check
+     * @return True if the AABB collides with a block
+     */
+    @Overwrite
+    public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
+        List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();
+        int i = MathHelper.floor(bbox.minX) - 1;
+        int j = MathHelper.ceil(bbox.maxX) + 1;
+        int k = MathHelper.floor(bbox.minY) - 1;
+        int l = MathHelper.ceil(bbox.maxY) + 1;
+        int i1 = MathHelper.floor(bbox.minZ) - 1;
+        int j1 = MathHelper.ceil(bbox.maxZ) + 1;
+        BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+        try {
+            for (int k1 = i; k1 < j; ++k1) {
+                for (int l1 = i1; l1 < j1; ++l1) {
+                    int i2 = (k1 != i && k1 != j - 1 ? 0 : 1) + (l1 != i1 && l1 != j1 - 1 ? 0 : 1);
+
+                    if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(k1, 64, l1))) {
+                        for (int j2 = k; j2 < l; ++j2) {
+                            if (i2 <= 0 || j2 != k && j2 != l - 1) {
+                                blockpos$pooledmutableblockpos.setPos(k1, j2, l1);
+
+                                // Sponge - Replace with inlined method
+                                // if (k1 < -30000000 || k1 >= 30000000 || l1 < -30000000 || l1 >= 30000000) // Vanilla
+                                if (!((IMixinBlockPos) (Object) blockpos$pooledmutableblockpos).isValidXZPosition()) {
+                                    // Sponge End
+                                    boolean flag1 = true;
+                                    return flag1;
+                                }
+
+                                IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
+                                iblockstate.addCollisionBoxToList((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
+
+                                if (!list.isEmpty()) {
+                                    boolean flag = true;
+                                    return flag;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        } finally {
+            blockpos$pooledmutableblockpos.release();
+        }
+    }
+
 
     /*********************** TIMINGS ***********************/
 
@@ -1164,8 +1485,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateEntities() {
-        this.theProfiler.startSection("entities");
-        this.theProfiler.startSection("global");
+        //this.profiler.startSection("entities"); // Sponge - Don't use the profiler
+        //this.profiler.startSection("global"); // Sponge - Don't use the profiler
         this.startEntityGlobalTimings(); // Sponge
 
 
@@ -1186,7 +1507,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     entity.addEntityCrashInfo(crashreportcategory);
                 }
 
-                throw new ReportedException(crashreport);
+                SpongeImplHooks.onEntityError(entity, crashreport);
             }
 
             if (entity.isDead) {
@@ -1195,7 +1516,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
-        this.theProfiler.endStartSection("remove");
+        // this.profiler.endStartSection("remove"); // Sponge - Don't use the profiler
         this.loadedEntityList.removeAll(this.unloadedEntityList);
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
@@ -1215,7 +1536,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.unloadedEntityList.clear();
         this.stopEntityRemovalTiming(); // Sponge
         this.tickPlayers();
-        this.theProfiler.endStartSection("regular");
+        // this.profiler.endStartSection("regular"); // Sponge - Don't use the profiler
+        this.entityActivationCheck();
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
             net.minecraft.entity.Entity entity2 = this.loadedEntityList.get(i1);
@@ -1229,7 +1551,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity2.dismountRidingEntity();
             }
 
-            this.theProfiler.startSection("tick");
+            // this.profiler.startSection("tick"); // Sponge - Don't use the profiler
             this.startEntityTickTiming(); // Sponge
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
@@ -1240,13 +1562,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
                     CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
                     entity2.addEntityCrashInfo(crashreportcategory1);
-                    throw new ReportedException(crashreport1);
+                    SpongeImplHooks.onEntityError(entity2, crashreport1);
                 }
             }
 
             this.stopEntityTickSectionBeforeRemove(); // Sponge
-            this.theProfiler.endSection();
-            this.theProfiler.startSection("remove");
+            // this.profiler.endSection(); // Sponge - Don't use the profiler
+            // this.profiler.startSection("remove"); // Sponge - Don't use the profiler
             this.startEntityRemovalTick(); // Sponge
 
             if (entity2.isDead) {
@@ -1262,10 +1584,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityRemovalTiming(); // Sponge
-            this.theProfiler.endSection();
+            // this.profiler.endSection(); // Sponge - Don't use the profiler
         }
 
-        this.theProfiler.endStartSection("blockEntities");
+        // this.profiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
+        spongeTileEntityActivation();
         this.processingLoadedTiles = true;
         Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
 
@@ -1278,15 +1601,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {
                     try {
-                        //this.theProfiler.startSection(tileentity.getClass().getSimpleName());
+                        //this.profiler.startSection(tileentity.getClass().getSimpleName());
                         ((ITickable) tileentity).update();
-                        //this.theProfiler.endSection();
+                        //this.profiler.endSection();
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                         CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Block entity being ticked");
                         tileentity.addInfoToCrashReport(crashreportcategory2);
-                        throw new ReportedException(crashreport2);
+                        SpongeImplHooks.onTileEntityError(tileentity, crashreport2);
                     }
                 }
             }
@@ -1312,9 +1635,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.stopTileEntityRemovelInWhile(); // Sponge
         }
 
-        this.processingLoadedTiles = false;
-        this.startPendingTileEntityTimings(); // Sponge
-
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
             // Sponge start - use forge hook
             for (Object tile : this.tileEntitiesToBeRemoved) {
@@ -1322,12 +1642,22 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
             // Sponge end
 
-            this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
-            this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
+            // forge: faster "contains" makes this removal much more efficient
+            java.util.Set<net.minecraft.tileentity.TileEntity> remove = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+            remove.addAll(this.tileEntitiesToBeRemoved);
+            this.tickableTileEntities.removeAll(remove);
+            this.loadedTileEntityList.removeAll(remove);
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        this.theProfiler.endStartSection("pendingBlockEntities");
+        if (!this.isRemote) {
+            try (final PhaseContext<?> context = GeneralPhase.State.TILE_ENTITY_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
+                this.startPendingTileEntityTimings(); // Sponge
+            }
+        }
+
+        this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
+        // this.profiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 
         if (!this.addedTileEntityList.isEmpty()) {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
@@ -1351,8 +1681,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.endPendingTileEntities(); // Sponge
-        this.theProfiler.endSection();
-        this.theProfiler.endSection();
+        // this.profiler.endSection(); // Sponge - Don't use the profiler
+        // this.profiler.endSection(); // Sponge - Don't use the profiler
+    }
+
+    /**
+     * Overridden in {@link MixinWorldServer_TileEntityActivation}
+     */
+    public void spongeTileEntityActivation() {
+
+    }
+
+    public void entityActivationCheck() {
+        // Overridden in MixinWorldServer_Activation
+    }
+
+    @Override
+    public int getSeaLevel() {
+        return this.seaLevel;
     }
 
     /**

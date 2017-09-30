@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -42,7 +41,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.ValueProcessor;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -137,7 +136,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
     @Override
     public <E> Optional<I> with(Key<? extends BaseValue<E>> key, E value) {
         // Basic stuff, getting the processor....
-        final Optional<DataProcessor<M, I>> processor = SpongeDataManager.getInstance().getImmutableProcessor(this.immutableClass);
+        final Optional<DataProcessor<M, I>> processor = DataUtil.getImmutableProcessor(this.immutableClass);
         // We actually need to check that the processor is available, otherwise
         // we throw an IllegalArgumentException, because people don't check for
         // support!!
@@ -219,7 +218,7 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion());
     }
 }

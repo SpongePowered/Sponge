@@ -31,8 +31,10 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.InventoryIterator;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.query.Query;
 
@@ -141,6 +143,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
         return this.parent().getProperties(this, property);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
         for (InventoryProperty<?, ?> prop : Adapter.Logic.getProperties(this, child, property)) {
@@ -160,8 +163,20 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     }
 
     @Override
+    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Inventory child, Class<T> property) {
+        Object key = AbstractInventoryProperty.getDefaultKey(property);
+        return this.getProperty(child, property, key);
+    }
+
+    @Override
+    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Class<T> property) {
+        Object key = AbstractInventoryProperty.getDefaultKey(property);
+        return this.getProperty(property, key);
+    }
+
+    @Override
     default Iterator<Inventory> iterator() {
-        return new Adapter.Iter(this);
+        return new InventoryIterator<>(this.getRootLens(), this.getInventory(), this);
     }
 
     @SuppressWarnings("unchecked")
@@ -210,6 +225,22 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     @Override
     default <T extends Inventory> T query(Object... args) {
         return (T) Query.compile(this, args).execute();
+    }
+
+    @Override
+    default Inventory intersect(Inventory inventory) {
+        return Query.intersect(this, inventory).execute();
+    }
+
+    @Override
+    default Inventory union(Inventory inventory) {
+        return Query.union(this, inventory).execute();
+    }
+
+    @Override
+    default boolean containsInventory(Inventory inventory) {
+        Inventory result = Query.compile(this, ((InventoryAdapter) inventory).getRootLens()).execute();
+        return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
     }
 
     @Override

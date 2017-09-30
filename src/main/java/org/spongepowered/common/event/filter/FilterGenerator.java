@@ -53,7 +53,6 @@ import org.spongepowered.api.event.filter.cause.All;
 import org.spongepowered.api.event.filter.cause.Before;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
-import org.spongepowered.api.event.filter.cause.Named;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.filter.data.Has;
 import org.spongepowered.api.event.filter.data.Supports;
@@ -61,7 +60,7 @@ import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.util.generator.event.factory.ClassGenerator;
+import org.spongepowered.api.util.generator.GeneratorUtils;
 import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
@@ -73,7 +72,6 @@ import org.spongepowered.common.event.filter.delegate.GetterFilterSourceDelegate
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.LastCauseFilterSourceDelegate;
-import org.spongepowered.common.event.filter.delegate.NamedCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ParameterFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.ParameterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDelegate;
@@ -215,7 +213,7 @@ public class FilterGenerator {
                 mv.visitIntInsn(BIPUSH, i);
                 Type paramType = Type.getType(params[i].getType());
                 mv.visitVarInsn(paramType.getOpcode(ILOAD), plocals[i - 1]);
-                ClassGenerator.visitBoxingMethod(mv, paramType);
+                GeneratorUtils.visitBoxingMethod(mv, paramType);
                 mv.visitInsn(AASTORE);
             }
             mv.visitInsn(ARETURN);
@@ -318,7 +316,6 @@ public class FilterGenerator {
         CAUSE_AFTER(After.class),
         CAUSE_ALL(All.class),
         CAUSE_ROOT(Root.class),
-        CAUSE_NAMED(Named.class),
         GETTER(Getter.class),
         ;
 
@@ -346,9 +343,6 @@ public class FilterGenerator {
             }
             if (this == CAUSE_ROOT) {
                 return new RootCauseFilterSourceDelegate((Root) anno);
-            }
-            if (this == CAUSE_NAMED) {
-                return new NamedCauseFilterSourceDelegate((Named) anno);
             }
             if (this == GETTER) {
                 return new GetterFilterSourceDelegate((Getter) anno);

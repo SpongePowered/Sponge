@@ -34,29 +34,29 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 @Mixin(MobSpawnerBaseLogic.class)
 public abstract class MixinMobSpawnerBaseLogic {
 
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
     private static final String
             ANVIL_CHUNK_LOADER_READ_ENTITY =
             "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
@@ -65,11 +65,6 @@ public abstract class MixinMobSpawnerBaseLogic {
 
     @Shadow public abstract BlockPos getSpawnerPosition();
     @Shadow public abstract World getSpawnerWorld();
-
-
-    private double posX;
-    private double posY;
-    private double posZ;
 
     /**
      * @author gabizou - January 30th, 2016
@@ -101,18 +96,32 @@ public abstract class MixinMobSpawnerBaseLogic {
      */
     private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
         final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString)));
+        final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
+        if (clazz == null) {
+            final PrettyPrinter printer = new PrettyPrinter(60).add("Unknown Entity for MobSpawners").centre().hr()
+                .addWrapped(60, "Sponge has found a MobSpawner attempting to locate potentially"
+                                + "a foreign entity type for a MobSpawner, unfortunately, there isn't a"
+                                + "way to get around the deserialization process looking up unregistered"
+                                + "entity types. This may be a bug with a mod or sponge.")
+                .add("%s : %s", "Entity Name", entityTypeString)
+                .add();
+            CauseTracker.getInstance().generateVersionInfo(printer);
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.WARN);
+            return null;
+        }
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(clazz);
         if (type == null) {
             return null;
         }
-
-        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>(
-                ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return null;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
+            Transform<org.spongepowered.api.world.World> transform = new Transform<>(
+                    ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return null;
+            }
         }
         Entity entity;
         try {
@@ -143,13 +152,6 @@ public abstract class MixinMobSpawnerBaseLogic {
             }
         }
         return entity;
-    }
-
-    @Inject(method = "updateSpawner", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;resetTimer()V"))
-    private void onReset(CallbackInfo callbackInfo) {
-        this.posX = 0;
-        this.posY = 0;
-        this.posZ = 0;
     }
 
 }

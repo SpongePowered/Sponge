@@ -6,6 +6,10 @@ jdk:
   - openjdk8
   - oraclejdk8
 
+git:
+  submodules: false
+before_install: scripts/travis-initialize-submodules
+
 install: ./gradlew setupDecompWorkspace
 script: ./gradlew build
 

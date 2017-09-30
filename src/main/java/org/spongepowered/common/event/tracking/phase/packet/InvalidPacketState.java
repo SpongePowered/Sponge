@@ -34,4 +34,8 @@ final class InvalidPacketState extends BasicPacketState {
         return true;
     }
 
+    @Override
+    public boolean requiresPost() {
+        return false;
+    }
 }

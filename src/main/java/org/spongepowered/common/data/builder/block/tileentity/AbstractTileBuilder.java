@@ -56,12 +56,10 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Map;
@@ -110,16 +108,15 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         final int y = container.getInt(DataQueries.Y_POS).get();
         final int z = container.getInt(DataQueries.Z_POS).get();
 
-        worldOptional.get().getLocation(x, y, z).setBlockType(type, SpongeImpl.getImplementationCause());
+        worldOptional.get().getLocation(x, y, z).setBlockType(type);
         BlockPos pos = new BlockPos(x, y, z);
         TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);
         if (tileEntity == null) {
             return Optional.empty(); // TODO throw exception maybe?
-        } else {
-            // We really need to validate only after the implementing class deems it ready...
-            tileEntity.invalidate();
-            return Optional.of((T) tileEntity);
         }
+        // We really need to validate only after the implementing class deems it ready...
+        tileEntity.invalidate();
+        return Optional.of((T) tileEntity);
     }
 
     // We need these mappings for rebuilding a tile entity at the proper location.

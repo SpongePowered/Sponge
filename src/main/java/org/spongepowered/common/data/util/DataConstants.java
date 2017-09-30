@@ -25,15 +25,21 @@
 package org.spongepowered.common.data.util;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.*;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -107,10 +113,33 @@ public final class DataConstants {
     public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
     public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
 
+    // Structure block entity
+    public static final String DEFAULT_STRUCTURE_AUTHOR = ""; // intentionally empty, as in vanilla
+    public static final boolean DEFAULT_STRUCTURE_IGNORE_ENTITIES = true;
+    public static final float DEFAULT_STRUCTURE_INTEGRITY = 1.0F;
+    public static final StructureMode DEFAULT_STRUCTURE_MODE = StructureModes.DATA;
+    public static final Vector3i DEFAULT_STRUCTURE_POSITION = Vector3i.ONE;
+    public static final boolean DEFAULT_STRUCTURE_POWERED = false;
+    public static final boolean DEFAULT_STRUCTURE_SHOW_AIR = false;
+    public static final boolean DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX = true;
+    public static final long DEFAULT_STRUCTURE_SEED = 0L;
+    public static final Vector3i DEFAULT_STRUCTURE_SIZE = Vector3i.ONE;
+
+    public static final short MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY = 1;
+    public static final short DEFAULT_SPAWNER_REMAINING_DELAY = 20;
+    public static final short DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY = 200;
+    public static final short DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY = 800;
+    public static final short DEFAULT_SPAWNER_SPAWN_COUNT = 4;
+    public static final short DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES = 6;
+    public static final short DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE = 16;
+    public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
+    public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
+            (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+
     public static final class Catalog {
 
-        public static final SkeletonType DEFAULT_SKELETON = SkeletonTypes.NORMAL;
         public static final DyeColor DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
+        public static final EntityType DEFAULT_SPAWNER_ENTITY = EntityTypes.PIG;
 
         private Catalog() {}
 
@@ -128,10 +157,11 @@ public final class DataConstants {
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
         public static final Art DEFAULT_ART = Arts.KEBAB;
         public static final PickupRule DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
-        public static final ZombieType DEFAULT_ZOMBIE_TYPE = ZombieTypes.NORMAL;
     }
 
     public static final class Entity {
+
+        public static final double DEFAULT_ABSORPTION = 0.0f;
 
         public static final class Item {
 
@@ -149,10 +179,8 @@ public final class DataConstants {
         }
     }
 
-
     public static final class Horse {
 
-        public static final HorseVariant DEFAULT_VARIANT = HorseVariants.HORSE;
         public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;
         public static final HorseColor DEFAULT_COLOR = HorseColors.WHITE;
         private Horse() {

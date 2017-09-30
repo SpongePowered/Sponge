@@ -24,20 +24,95 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 final class CloseWindowState extends BasicPacketState {
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        context
-                .add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer))
-                .addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+        context.openContainer(playerMP.openContainer);
+    }
+
+    @Override
+    public void unwind(BasicPacketContext context) {
+        final EntityPlayerMP player = context.getSource(EntityPlayerMP.class).get();
+        final Container container = context.getOpenContainer();
+        ItemStackSnapshot lastCursor = context.getCursor();
+        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        Sponge.getCauseStackManager().pushCause(player);
+        InteractInventoryEvent.Close event =
+            SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
+        if (event.isCancelled()) {
+            Sponge.getCauseStackManager().popCause();
+            return;
+        }
+        Sponge.getCauseStackManager().popCause();
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);// Non-merged
+            // items
+            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
+                final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom drop =
+                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeImpl.postEvent(drop);
+                    if (!drop.isCancelled()) {
+                        for (Entity droppedItem : drop.getEntities()) {
+                            droppedItem.setCreator(player.getUniqueID());
+                            ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
+                        }
+                    }
+                }
+            });
+            // Pre-merged items
+            context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(stacks -> {
+                final List<EntityItem> items = stacks.stream()
+                    .map(drop -> drop.create(player.getServerWorld()))
+                    .collect(Collectors.toList());
+                final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom drop =
+                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeImpl.postEvent(drop);
+                    if (!drop.isCancelled()) {
+                        for (Entity droppedItem : drop.getEntities()) {
+                            droppedItem.setCreator(player.getUniqueID());
+                            ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
+                        }
+                    }
+                }
+            });
+        }
+        context.getCapturedBlockSupplier()
+            .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+
     }
 }

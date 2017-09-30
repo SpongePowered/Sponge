@@ -24,43 +24,24 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayer;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
-import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibilities;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.common.interfaces.IMixinEnumChatVisibility;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
+@RegisterCatalog(ChatVisibilities.class)
 @RegistrationDependency(ChatTypeRegistryModule.class)
-public final class ChatVisibilityRegistryModule implements CatalogRegistryModule<ChatVisibility> {
-
-    @RegisterCatalog(ChatVisibilities.class)
-    public final Map<String, ChatVisibility> chatVisibilityMap = Maps.newHashMap();
+public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<EntityPlayer.EnumChatVisibility, ChatVisibility>{
 
     @Override
     public void registerDefaults() {
         this.setChatTypes();
-
-        this.chatVisibilityMap.put("full", (ChatVisibility) (Object) EntityPlayer.EnumChatVisibility.FULL);
-        this.chatVisibilityMap.put("system", (ChatVisibility) (Object) EntityPlayer.EnumChatVisibility.SYSTEM);
-        this.chatVisibilityMap.put("hidden", (ChatVisibility) (Object) EntityPlayer.EnumChatVisibility.HIDDEN);
     }
 
     private void setChatTypes() {
@@ -74,23 +55,18 @@ public final class ChatVisibilityRegistryModule implements CatalogRegistryModule
         ((IMixinEnumChatVisibility) (Object) HIDDEN).setChatTypes(ImmutableSet.of());
     }
 
-    @Override
-    public Optional<ChatVisibility> getById(String id) {
-        return Optional.ofNullable(this.chatVisibilityMap.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<ChatVisibility> getAll() {
-        return ImmutableSet.copyOf((ChatVisibility[]) (Object[]) EntityPlayer.EnumChatVisibility.values());
-    }
-
     @AdditionalRegistration
     public void customRegistration() {
         for (EntityPlayer.EnumChatVisibility visibility : EntityPlayer.EnumChatVisibility.values()) {
-            if (!this.chatVisibilityMap.containsKey(visibility.name().toLowerCase(Locale.ENGLISH))) {
-                this.chatVisibilityMap.put(visibility.name().toLowerCase(Locale.ENGLISH), (ChatVisibility) (Object) visibility);
+            if (!this.catalogTypeMap.containsKey(enumAs(visibility).getId())) {
+                this.catalogTypeMap.put(enumAs(visibility).getId(), enumAs(visibility));
             }
         }
+    }
+
+    @Override
+    protected EntityPlayer.EnumChatVisibility[] getValues() {
+        return EntityPlayer.EnumChatVisibility.values();
     }
 
 }

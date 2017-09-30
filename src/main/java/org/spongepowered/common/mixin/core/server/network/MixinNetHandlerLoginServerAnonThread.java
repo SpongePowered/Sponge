@@ -37,16 +37,14 @@ import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
 @Mixin(targets = "net/minecraft/server/network/NetHandlerLoginServer$2")
 public class MixinNetHandlerLoginServerAnonThread extends Thread {
 
-    @Shadow(aliases = "this$0")
+    @Shadow(aliases = {"this$0", "field_180221_a"})
     @Final
-    private NetHandlerLoginServer field_180221_a;
-
-    private IMixinNetHandlerLoginServer outerRef = (IMixinNetHandlerLoginServer) this.field_180221_a;
+    private NetHandlerLoginServer handler;
 
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)
-    public void fireAuthEvent(CallbackInfo ci) {
-        if (this.outerRef.fireAuthEvent()) {
+    private void fireAuthEvent(CallbackInfo ci) {
+        if (((IMixinNetHandlerLoginServer) this.handler).fireAuthEvent()) {
             ci.cancel();
         }
     }

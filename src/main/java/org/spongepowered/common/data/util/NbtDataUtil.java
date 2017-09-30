@@ -58,6 +58,9 @@ public final class NbtDataUtil {
     public static final String ENTITY_ROTATION = "Rotation";
     public static final String CUSTOM_DATA_CLASS = "DataClass";
     public static final String CUSTOM_DATA = "ManipulatorData";
+    public static final String BANNER_BASE = "Base";
+    public static final String BANNER_PATTERNS = "Patterns";
+    public static final String FAILED_CUSTOM_DATA = "FailedData";
 
     private NbtDataUtil() {
     }
@@ -68,6 +71,9 @@ public final class NbtDataUtil {
 
         public static final String IS_FLYING = "flying";
 
+        public static final String INVENTORY = "Inventory";
+
+        public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
     }
 
     // These are the various tag compound id's for getting to various places
@@ -149,6 +155,7 @@ public final class NbtDataUtil {
     public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
     public static final String PORTAL_AGENT_TYPE = "portalAgentType";
     public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
+    public static final String HEALTH_SCALE = "HealthScale";
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA = "ForgeData";
@@ -217,9 +224,8 @@ public final class NbtDataUtil {
     public static Optional<NBTTagCompound> getItemCompound(ItemStack itemStack) {
         if (itemStack.hasTagCompound()) {
             return Optional.of(itemStack.getTagCompound());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     /**

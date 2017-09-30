@@ -47,35 +47,37 @@ import java.util.Optional;
 public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModule<Career> {
 
     public final SpongeCareer LEATHERWORKER =
-            new SpongeCareer(1, "leatherworker", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.leather"));
+            new SpongeCareer(1, "minecraft:leatherworker", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.leather"));
     public final SpongeCareer BUTCHER =
-            new SpongeCareer(0, "butcher", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.butcher"));
+            new SpongeCareer(0, "minecraft:butcher", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.butcher"));
     public final SpongeCareer TOOL_SMITH =
-            new SpongeCareer(2, "tool_smith", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.tool"));
+            new SpongeCareer(2, "minecraft:tool_smith", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.tool"));
     public final SpongeCareer WEAPON_SMITH =
-            new SpongeCareer(1, "weapon_smith", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.weapon"));
+            new SpongeCareer(1, "minecraft:weapon_smith", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.weapon"));
     public final SpongeCareer ARMORER =
-            new SpongeCareer(0, "armorer", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.armor"));
+            new SpongeCareer(0, "minecraft:armorer", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.armor"));
     public final SpongeCareer CLERIC =
-            new SpongeCareer(0, "cleric", ProfessionRegistryModule.PRIEST, new SpongeTranslation("entity.Villager.cleric"));
+            new SpongeCareer(0, "minecraft:cleric", ProfessionRegistryModule.PRIEST, new SpongeTranslation("entity.Villager.cleric"));
+    public final SpongeCareer CARTOGRAPHER =
+            new SpongeCareer(1, "minecraft:cartographer", ProfessionRegistryModule.LIBRARIAN, new SpongeTranslation("entity.Villager.cartographer"));
     public final SpongeCareer LIBRARIAN =
-            new SpongeCareer(0, "librarian", ProfessionRegistryModule.LIBRARIAN, new SpongeTranslation("entity.Villager.librarian"));
+            new SpongeCareer(0, "minecraft:librarian", ProfessionRegistryModule.LIBRARIAN, new SpongeTranslation("entity.Villager.librarian"));
     public final SpongeCareer FLETCHER =
-            new SpongeCareer(3, "fletcher", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fletcher"));
+            new SpongeCareer(3, "minecraft:fletcher", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fletcher"));
     public final SpongeCareer SHEPHERD =
-            new SpongeCareer(2, "shepherd", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.shepherd"));
+            new SpongeCareer(2, "minecraft:shepherd", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.shepherd"));
     public final SpongeCareer FISHERMAN =
-            new SpongeCareer(1, "fisherman", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fisherman"));
+            new SpongeCareer(1, "minecraft:fisherman", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fisherman"));
     public final SpongeCareer FARMER =
-            new SpongeCareer(0, "farmer", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.farmer"));
+            new SpongeCareer(0, "minecraft:farmer", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.farmer"));
     public final SpongeCareer NITWIT =
-            new SpongeCareer(0, "nitwit", ProfessionRegistryModule.NITWIT, new SpongeTranslation("entity.Villager.nitwit"));
+            new SpongeCareer(0, "minecraft:nitwit", ProfessionRegistryModule.NITWIT, new SpongeTranslation("entity.Villager.nitwit"));
 
     public static CareerRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    public static final Comparator<SpongeCareer> CAREER_COMPARATOR = (o1, o2) -> Integer.compare(o1.type, o2.type);
+    public static final Comparator<SpongeCareer> CAREER_COMPARATOR = Comparator.comparingInt(o -> o.type);
 
     @RegisterCatalog(Careers.class)
     private final Map<String, Career> careerMap = new HashMap<>();
@@ -131,6 +133,7 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
         this.careerMap.put("fletcher", registerCareer(this.FLETCHER));
 
         this.careerMap.put("librarian", registerCareer(this.LIBRARIAN));
+        this.careerMap.put("cartographer", registerCareer(this.CARTOGRAPHER));
 
         this.careerMap.put("cleric", registerCareer(this.CLERIC));
 

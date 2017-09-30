@@ -27,7 +27,6 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -36,15 +35,11 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
 import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingData;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.ByteBackingData;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.CharBackingData;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.IntBackingData;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-
-import java.util.Arrays;
 
 public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
@@ -54,12 +49,6 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     private final BlockPalette palette;
     private final BackingData data;
 
-    ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, BackingData data) {
-        super(start, size);
-        this.data = data.copyOf();
-        this.palette = palette;
-    }
-
     /**
      * Does not clone!
      * 
@@ -68,27 +57,15 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      * @param size The block size
      * @param data The backing data
      */
-    private ArrayImmutableBlockBuffer(BlockPalette palette, BackingData data, Vector3i start, Vector3i size) {
+    ArrayImmutableBlockBuffer(BlockPalette palette, BackingData data, Vector3i start, Vector3i size) {
         super(start, size);
         this.data = data;
         this.palette = palette;
     }
 
-    public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, byte[] blocks) {
-        super(start, size);
-        this.data = new ByteBackingData(Arrays.copyOf(blocks, blocks.length));
-        this.palette = palette;
-    }
-
     public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
         super(start, size);
-        this.data = new CharBackingData(Arrays.copyOf(blocks, blocks.length));
-        this.palette = palette;
-    }
-
-    public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, int[] blocks) {
-        super(start, size);
-        this.data = new IntBackingData(Arrays.copyOf(blocks, blocks.length));
+        this.data = new CharBackingData(blocks.clone());
         this.palette = palette;
     }
 
@@ -121,15 +98,15 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     }
 
     @Override
-    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker(Cause cause) {
-        return new SpongeBlockVolumeWorker<>(this, cause);
+    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
+        return new SpongeBlockVolumeWorker<>(this);
     }
 
     @Override
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ArrayMutableBlockBuffer(this.palette, this.start, this.size, this.data);
+                return new ArrayMutableBlockBuffer(this.palette, this.data.copyOf(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -145,33 +122,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, byte[] blocks) {
-        return new ArrayImmutableBlockBuffer(palette, new ByteBackingData(blocks), start, size);
-    }
-
-    /**
-     * This method doesn't clone the array passed into it. INTERNAL USE ONLY.
-     * Make sure your code doesn't leak the reference if you're using it.
-     *
-     * @param blocks The blocks to store
-     * @param start The start of the volume
-     * @param size The size of the volume
-     * @return A new buffer using the same array reference
-     */
     public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
         return new ArrayImmutableBlockBuffer(palette, new CharBackingData(blocks), start, size);
-    }
-
-    /**
-     * This method doesn't clone the array passed into it. INTERNAL USE ONLY.
-     * Make sure your code doesn't leak the reference if you're using it.
-     *
-     * @param blocks The blocks to store
-     * @param start The start of the volume
-     * @param size The size of the volume
-     * @return A new buffer using the same array reference
-     */
-    public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, int[] blocks) {
-        return new ArrayImmutableBlockBuffer(palette, new IntBackingData(blocks), start, size);
     }
 }

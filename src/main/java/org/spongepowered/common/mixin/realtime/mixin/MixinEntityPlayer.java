@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer {
@@ -42,19 +42,19 @@ public abstract class MixinEntityPlayer {
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_PLAYER_XP_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupXpCooldown(EntityPlayer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         this.xpCooldown = Math.max(0, this.xpCooldown - ticks);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_PLAYER_SLEEP_TIMER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupSleepTimer(EntityPlayer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         this.sleepTimer += ticks;
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_PLAYER_SLEEP_TIMER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 2))
     public void fixupWakeTimer(EntityPlayer self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         this.sleepTimer += ticks;
     }
 

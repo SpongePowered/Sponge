@@ -25,19 +25,24 @@
 package org.spongepowered.common.data.processor.value.block;
 
 import com.google.common.collect.Sets;
+import net.minecraft.tileentity.TileEntityChest;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class ConnectedDirectionsValueProcessor extends
-        AbstractBlockOnlyValueProcessor<Set<Direction>, SetValue<Direction>> {
+        AbstractSpongeValueProcessor<TileEntityChest, Set<Direction>, SetValue<Direction>> {
 
     public ConnectedDirectionsValueProcessor() {
-        super(Keys.CONNECTED_DIRECTIONS);   
+        super(TileEntityChest.class, Keys.CONNECTED_DIRECTIONS);
     }
 
     @Override
@@ -45,4 +50,39 @@ public class ConnectedDirectionsValueProcessor extends
         return new SpongeSetValue<>(Keys.CONNECTED_DIRECTIONS, Sets.newHashSet(), defaultValue);
     }
 
+    @Override
+    protected boolean set(TileEntityChest container, Set<Direction> value) {
+        return false;
+    }
+
+    @Override
+    protected Optional<Set<Direction>> getVal(TileEntityChest chest) {
+        chest.checkForAdjacentChests();
+
+        Set<Direction> directions = Sets.newHashSet();
+        if (chest.adjacentChestZNeg != null) {
+            directions.add(Direction.NORTH);
+        }
+        if (chest.adjacentChestXPos != null) {
+            directions.add(Direction.EAST);
+        }
+        if (chest.adjacentChestZPos != null) {
+            directions.add(Direction.SOUTH);
+        }
+        if (chest.adjacentChestXNeg != null) {
+            directions.add(Direction.WEST);
+        }
+
+        return Optional.of(directions);
+    }
+
+    @Override
+    protected ImmutableValue<Set<Direction>> constructImmutableValue(Set<Direction> value) {
+        return constructValue(value).asImmutable();
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 }

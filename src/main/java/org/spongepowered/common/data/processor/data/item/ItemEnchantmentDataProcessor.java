@@ -68,9 +68,8 @@ public class ItemEnchantmentDataProcessor
     protected Optional<List<ItemEnchantment>> getVal(ItemStack itemStack) {
         if (itemStack.isItemEnchanted()) {
             return Optional.of(NbtDataUtil.getItemEnchantments(itemStack));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override

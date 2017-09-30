@@ -32,7 +32,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -45,7 +44,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
@@ -68,6 +67,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -77,17 +77,17 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.persistence.JsonTranslator;
 import org.spongepowered.common.world.WorldManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -119,7 +119,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private int rainTime;
     @Shadow private boolean thundering;
     @Shadow private int thunderTime;
-    @Shadow private GameType theGameType;
+    @Shadow private GameType gameType;
     @Shadow private boolean mapFeaturesEnabled;
     @Shadow private boolean hardcore;
     @Shadow private boolean allowCommands;
@@ -135,7 +135,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private double borderDamagePerBlock;
     @Shadow private int borderWarningDistance;
     @Shadow private int borderWarningTime;
-    @Shadow private GameRules theGameRules;
+    @Shadow private GameRules gameRules;
     // TODO 1.9 Clone is an AWFUL NAME for this, its really fillCompound which takes a playerNbtCompound to use or if null, uses the player one
     // TODO 1.9 already in this info. It then populates a returned compound with the worldInfo's properties.
     @Shadow public abstract NBTTagCompound cloneNBTCompound(NBTTagCompound nbt);
@@ -144,7 +144,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private Integer dimensionId;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
-    private boolean isMod, generateBonusChest, isValid = true;
+    private boolean isMod = false;
+    private boolean generateBonusChest, isValid = true;
     private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound(), spongeNbt = new NBTTagCompound();
     private NBTTagList playerUniqueIdNbt = new NBTTagList();
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
@@ -183,20 +184,22 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         final WorldArchetype archetype = (WorldArchetype) (Object) settings;
         setDimensionType(archetype.getDimensionType());
 
-        boolean configNewlyCreated = createWorldConfig();
+        createWorldConfig();
         setEnabled(archetype.isEnabled());
         setLoadOnStartup(archetype.loadOnStartup());
         setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
         setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
         setDifficulty(archetype.getDifficulty());
-        setGeneratorModifiers(archetype.getGeneratorModifiers());
+        Collection<WorldGeneratorModifier> modifiers = this.getGeneratorModifiers();
+        if (modifiers.isEmpty()) {
+            setGeneratorModifiers(archetype.getGeneratorModifiers());
+        } else {
+            // use config modifiers
+            setGeneratorModifiers(modifiers);
+        }
         setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
         setSerializationBehavior(archetype.getSerializationBehavior());
-        // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
-        if (configNewlyCreated && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
-            this.worldConfig.getConfig().setConfigEnabled(true);
-        }
-        this.worldConfig.save();
+        this.getOrCreateWorldConfig().save();
     }
 
     //     public WorldInfo(WorldInfo worldInformation)
@@ -208,7 +211,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // TODO Zidane needs to fix this
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
         this.portalAgentType = info.portalAgentType;
-        this.dimensionType = info.dimensionType;
+        this.setDimensionType(info.dimensionType);
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
@@ -298,6 +301,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setDimensionType(DimensionType type) {
         this.dimensionType = type;
+        String modId = SpongeImplHooks.getModIdFromClass(this.dimensionType.getDimensionClass());
+        if (!modId.equals("minecraft")) {
+            this.isMod = true;
+        }
     }
 
     @Override
@@ -360,12 +367,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public GameMode getGameMode() {
-        return (GameMode) (Object) this.theGameType;
+        return (GameMode) (Object) this.gameType;
     }
 
     @Override
     public void setGameMode(GameMode gamemode) {
-        this.theGameType = GameModeRegistryModule.toGameType(gamemode);
+        this.gameType = GameModeRegistryModule.toGameType(gamemode);
     }
 
     @Override
@@ -505,8 +512,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Optional<String> getGameRule(String gameRule) {
-        if (this.theGameRules.hasRule(gameRule)) {
-            return Optional.of(this.theGameRules.getString(gameRule));
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        if (this.gameRules.hasRule(gameRule)) {
+            return Optional.of(this.gameRules.getString(gameRule));
         }
         return Optional.empty();
     }
@@ -514,15 +522,23 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public Map<String, String> getGameRules() {
         ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
-        for (String rule : this.theGameRules.getRules()) {
-            ruleMap.put(rule, this.theGameRules.getString(rule));
+        for (String rule : this.gameRules.getRules()) {
+            ruleMap.put(rule, this.gameRules.getString(rule));
         }
         return ruleMap.build();
     }
 
     @Override
     public void setGameRule(String gameRule, String value) {
-        this.theGameRules.setOrCreateGameRule(gameRule, value);
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        checkNotNull(value, "The gamerule value cannot be null!");
+        this.gameRules.setOrCreateGameRule(gameRule, value);
+    }
+
+    @Override
+    public boolean removeGameRule(String gameRule) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        return ((IMixinGameRules) this.gameRules).removeGameRule(gameRule);
     }
 
     @Override
@@ -552,67 +568,114 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isEnabled() {
-        if (!this.worldConfig.getConfig().isConfigEnabled()) {
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
             return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().isWorldEnabled();
         }
-        return this.worldConfig.getConfig().getWorld().isWorldEnabled();
+        return this.getOrCreateWorldConfig().getConfig().getWorld().isWorldEnabled();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        this.worldConfig.getConfig().getWorld().setWorldEnabled(enabled);
+        this.getOrCreateWorldConfig().getConfig().getWorld().setWorldEnabled(enabled);
     }
 
     @Override
     public boolean loadOnStartup() {
-        if (!this.worldConfig.getConfig().isConfigEnabled()) {
-            return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().loadOnStartup();
+        Boolean loadOnStartup = null;
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
+            if (dimConfig.isConfigEnabled()) {
+                loadOnStartup = dimConfig.getWorld().loadOnStartup();
+            } else {
+                loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
+            }
+        } else {
+            loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
         }
-        return this.worldConfig.getConfig().getWorld().loadOnStartup();
+        if (loadOnStartup == null) {
+           loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+           this.setLoadOnStartup(loadOnStartup);
+        } else if (this.isMod && !loadOnStartup) { // If disabled and a mod dimension, validate
+            if (this.dimensionId == ((net.minecraft.world.DimensionType)(Object) this.dimensionType).getId()) {
+                loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+                this.setLoadOnStartup(loadOnStartup);
+            }
+        }
+        return loadOnStartup;
     }
 
     @Override
     public void setLoadOnStartup(boolean state) {
-        this.worldConfig.getConfig().getWorld().setLoadOnStartup(state);
+        this.getOrCreateWorldConfig().getConfig().getWorld().setLoadOnStartup(state);
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            this.getOrCreateWorldConfig().save();
+        }
     }
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        if (!this.worldConfig.getConfig().isConfigEnabled()) {
-            return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().getKeepSpawnLoaded();
+        Boolean keepSpawnLoaded = null;
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
+            if (dimConfig.isConfigEnabled()) {
+                keepSpawnLoaded = dimConfig.getWorld().getKeepSpawnLoaded();
+            } else {
+                keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
+            }
+        } else {
+            keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
         }
-        return this.worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
+        if (keepSpawnLoaded == null) {
+            keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            this.setKeepSpawnLoaded(keepSpawnLoaded);
+        }
+        return keepSpawnLoaded;
     }
 
     @Override
     public void setKeepSpawnLoaded(boolean loaded) {
-        this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(loaded);
+        this.getOrCreateWorldConfig().getConfig().getWorld().setKeepSpawnLoaded(loaded);
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            this.getOrCreateWorldConfig().save();
+        }
     }
 
     @Override
     public boolean doesGenerateSpawnOnLoad() {
-        if (!this.worldConfig.getConfig().isConfigEnabled()) {
+        Boolean shouldGenerateSpawn = null;
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
             DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
             if (dimConfig.isConfigEnabled()) {
-                return dimConfig.getWorld().getGenerateSpawnOnLoad();
+                shouldGenerateSpawn = dimConfig.getWorld().getGenerateSpawnOnLoad();
+            } else {
+                shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
             }
+        } else {
+            shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
         }
-        return this.worldConfig.getConfig().getWorld().getGenerateSpawnOnLoad();
+        if (shouldGenerateSpawn == null) {
+            shouldGenerateSpawn = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            this.setGenerateSpawnOnLoad(shouldGenerateSpawn);
+        }
+        return shouldGenerateSpawn;
     }
 
     @Override
     public void setGenerateSpawnOnLoad(boolean state) {
-        this.worldConfig.getConfig().getWorld().setGenerateSpawnOnLoad(state);
+        this.getOrCreateWorldConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            this.getOrCreateWorldConfig().save();
+        }
     }
 
     @Override
     public boolean isPVPEnabled() {
-        return !this.worldConfig.getConfig().isConfigEnabled() || this.worldConfig.getConfig().getWorld().getPVPEnabled();
+        return !this.getOrCreateWorldConfig().getConfig().isConfigEnabled() || this.getOrCreateWorldConfig().getConfig().getWorld().getPVPEnabled();
     }
 
     @Override
     public void setPVPEnabled(boolean enabled) {
-        this.worldConfig.getConfig().getWorld().setPVPEnabled(enabled);
+        this.getOrCreateWorldConfig().getConfig().getWorld().setPVPEnabled(enabled);
     }
 
     @Override
@@ -636,21 +699,29 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public SpongeConfig<WorldConfig> getOrCreateWorldConfig() {
+        if (this.worldConfig == null) {
+            this.createWorldConfig();
+        }
+        return this.worldConfig;
+    }
+
+    @Override
     public SpongeConfig<WorldConfig> getWorldConfig() {
         return this.worldConfig;
     }
 
     @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        return WorldGeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
+        return WorldGeneratorModifierRegistryModule.getInstance().toModifiers(this.getOrCreateWorldConfig().getConfig().getWorldGenModifiers());
     }
 
     @Override
     public void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers) {
         checkNotNull(modifiers, "modifiers");
 
-        this.worldConfig.getConfig().getWorldGenModifiers().clear();
-        this.worldConfig.getConfig().getWorldGenModifiers().addAll(WorldGeneratorModifierRegistryModule.getInstance().toIds(modifiers));
+        this.getOrCreateWorldConfig().getConfig().getWorldGenModifiers().clear();
+        this.getOrCreateWorldConfig().getConfig().getWorldGenModifiers().addAll(WorldGeneratorModifierRegistryModule.getInstance().toIds(modifiers));
     }
 
     @Override
@@ -658,10 +729,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         try {
-            return JsonTranslator.translateFrom(new JsonParser().parse(this.generatorOptions).getAsJsonObject());
-        } catch (JsonParseException | IllegalStateException ignored) {
+            return DataFormats.JSON.read(this.generatorOptions);
+        } catch (JsonParseException | IOException ignored) {
         }
-        return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
+        return DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override
@@ -679,9 +750,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional
                     .<DataView>of(NbtTranslator.getInstance().translateFrom(this.spongeRootLevelNbt.getCompoundTag(path.toString())));
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -692,13 +762,14 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public int getIndexForUniqueId(UUID uuid) {
-        if (this.playerUniqueIdMap.inverse().get(uuid) == null) {
-            this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
-            this.pendingUniqueIds.add(uuid);
-            return this.trackedUniqueIdCount++;
-        } else {
-            return this.playerUniqueIdMap.inverse().get(uuid);
+        final Integer index = this.playerUniqueIdMap.inverse().get(uuid);
+        if (index != null) {
+            return index;
         }
+
+        this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
+        this.pendingUniqueIds.add(uuid);
+        return this.trackedUniqueIdCount++;
     }
 
     @Override
@@ -735,9 +806,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.uuid = nbtUniqueId;
         this.dimensionId = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
-        this.dimensionType = DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
-                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType by id: " + dimensionTypeId));
-        this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
+        final DimensionType dimensionType = (org.spongepowered.api.world.DimensionType)(Object) WorldManager.getDimensionType(this.dimensionId).orElse(null);
+        this.setDimensionType(dimensionType != null ? dimensionType : DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
+                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType registered for world '" + this.getWorldName() + "' with dim id: " + this.dimensionId)));
         this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
         this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
         this.trackedUniqueIdCount = 0;
@@ -756,7 +827,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
                 final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
-                this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
+                final Integer playerIndex = this.playerUniqueIdMap.inverse().get(playerUuid);
+                if (playerIndex == null) {
+                    this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
+                } else {
+                    playerIdList.removeTag(i);
+                }
             }
 
         }
@@ -769,8 +845,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
             this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
             this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
-
-            this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
             this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
             if (this.portalAgentType == null) {
                 this.portalAgentType = PortalAgentTypes.DEFAULT;
@@ -779,7 +853,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             short saveBehavior = 1;
             if (this.serializationBehavior == SerializationBehaviors.NONE) {
                 saveBehavior = -1;
-            } else if (serializationBehavior == SerializationBehaviors.MANUAL) {
+            } else if (this.serializationBehavior == SerializationBehaviors.MANUAL) {
                 saveBehavior = 0;
             }
             this.spongeNbt.setShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);

@@ -38,13 +38,14 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
+import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.Set;
 
-@RunWith(Parameterized.class)
+@RunWith(LaunchWrapperParameterized.class)
 public class ManipulatorTest {
 
     @Parameterized.Parameters(name = "{index} Data: {0}")
@@ -56,14 +57,12 @@ public class ManipulatorTest {
     private Class<? extends DataManipulator<?, ?>> manipulatorClass;
     private DataManipulatorBuilder<?, ?> builder;
 
-
     public ManipulatorTest(String simpleName, Class<? extends DataManipulator<?, ?>> manipulatorClass, DataManipulatorBuilder<?, ?> builder) {
         this.manipulatorClass = manipulatorClass;
         this.dataName = simpleName;
         this.builder = builder;
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreateData() {
         try {
@@ -194,10 +193,9 @@ public class ManipulatorTest {
                 if (!optional.isPresent()) {
                     throw new IllegalArgumentException("[Serialization]: A builder did not translate the data manipulator: "
                         + this.dataName + "\n[Serialization]: Providing the DataContainer: " + container.toString());
-                } else {
-                    final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
-                    assertThat(manipulator.equals(deserialized), is(true));
                 }
+                final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
+                assertThat(manipulator.equals(deserialized), is(true));
             }
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException e) {
             throw new PEBKACException("Exceptions thrown trying to construct: " + this.dataName, e);

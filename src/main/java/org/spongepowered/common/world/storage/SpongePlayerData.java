@@ -27,11 +27,10 @@ package org.spongepowered.common.world.storage;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Objects;
@@ -49,7 +48,7 @@ public class SpongePlayerData implements DataSerializable {
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
+        return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("uuid", this.uuid)
                 .add("firstJoined", this.firstJoined)
                 .add("lastJoined", this.lastJoined)
@@ -82,7 +81,7 @@ public class SpongePlayerData implements DataSerializable {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.USER_UUID, this.uuid.toString())
                 .set(DataQueries.PLAYER_DATA_JOIN, this.firstJoined)

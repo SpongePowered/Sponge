@@ -41,7 +41,7 @@ public class MixinEntityArrowPickupStatus implements PickupRule {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void construct(CallbackInfo ci) {
-        this.name = ((Enum) (Object) this).name();
+        this.name = ((Enum<?>) (Object) this).name();
         this.id = this.name.toLowerCase(Locale.ENGLISH);
     }
 

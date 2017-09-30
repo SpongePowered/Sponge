@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type;
 
-import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -47,7 +47,7 @@ public class BanTypeRegistryModule implements CatalogRegistryModule<BanType> {
 
     @Override
     public Optional<BanType> getById(String id) {
-        return Optional.of(this.banTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.banTypeMappings.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

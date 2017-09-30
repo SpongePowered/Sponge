@@ -30,7 +30,7 @@ import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
 import org.spongepowered.api.entity.living.Creature;
-import org.spongepowered.common.util.GuavaJavaUtils;
+import org.spongepowered.api.util.Functional;
 
 import java.util.function.Predicate;
 
@@ -70,7 +70,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
 
     @Override
     public AvoidEntityAITask.Builder from(AvoidEntityAITask value) {
-        return targetSelector(value.getTargetSelector())
+        return this.targetSelector(value.getTargetSelector())
             .searchDistance(value.getSearchDistance())
             .closeRangeSpeed(value.getCloseRangeSpeed())
             .farRangeSpeed(value.getFarRangeSpeed());
@@ -85,12 +85,12 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public AvoidEntityAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidEntityAITask) new EntityAIAvoidEntity<>((EntityCreature) owner, net.minecraft.entity.EntityCreature.class,
-                GuavaJavaUtils.asGuavaPredicate((Predicate<net.minecraft.entity.Entity>) (Predicate<?>) this.targetSelector),
+        return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, Entity.class,
+                Functional.java8ToGuava((Predicate) this.targetSelector),
                 this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
     }
 }

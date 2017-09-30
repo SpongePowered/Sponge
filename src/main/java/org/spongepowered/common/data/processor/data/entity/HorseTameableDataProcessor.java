@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.AbstractHorse;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -42,14 +42,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class HorseTameableDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityHorse, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
+        extends AbstractEntitySingleDataProcessor<AbstractHorse, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
 
     public HorseTameableDataProcessor() {
-        super(EntityHorse.class, Keys.TAMED_OWNER);
+        super(AbstractHorse.class, Keys.TAMED_OWNER);
     }
 
     @Override
-    protected Optional<Optional<UUID>> getVal(EntityHorse tameable) {
+    protected Optional<Optional<UUID>> getVal(AbstractHorse tameable) {
         return Optional.of(Optional.ofNullable(tameable.getOwnerUniqueId()));
     }
 
@@ -61,20 +61,15 @@ public class HorseTameableDataProcessor
         final String uuid = container.getString(Keys.TAMED_OWNER.getQuery()).get();
         if (uuid.equals("none")) {
             return Optional.of(tameableData);
-        } else {
-            final UUID ownerUUID = UUID.fromString(uuid);
-            return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUUID)));
         }
+        final UUID ownerUUID = UUID.fromString(uuid);
+        return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUUID)));
     }
 
     @Override
-    protected boolean set(EntityHorse horse, Optional<UUID> uuidOptional) {
+    protected boolean set(AbstractHorse horse, Optional<UUID> uuidOptional) {
         horse.setOwnerUniqueId(uuidOptional.orElse(null));
-        if (uuidOptional.isPresent()) {
-            horse.setHorseTamed(true);
-        } else {
-            horse.setHorseTamed(false);
-        }
+        horse.setHorseTamed(uuidOptional.isPresent());
         return true;
     }
 

@@ -167,7 +167,7 @@ public class SpongeTeamBuilder implements Team.Builder {
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
         Team team = (Team) new ScorePlayerTeam(null, this.name);
-        team.setDisplayName(displayName);
+        team.setDisplayName(this.displayName);
         team.setColor(this.color);
         team.setPrefix(this.prefix);
         team.setSuffix(this.suffix);

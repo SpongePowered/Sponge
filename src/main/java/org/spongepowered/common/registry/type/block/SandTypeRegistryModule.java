@@ -24,37 +24,23 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockSand;
 import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class SandTypeRegistryModule implements CatalogRegistryModule<SandType> {
-
-    @RegisterCatalog(SandTypes.class)
-    private final Map<String, SandType> sandTypeMappings = new ImmutableMap.Builder<String, SandType>()
-        .put("normal", (SandType) (Object) BlockSand.EnumType.SAND)
-        .put("red", (SandType) (Object) BlockSand.EnumType.RED_SAND)
-        .build();
+@RegisterCatalog(SandTypes.class)
+public final class SandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockSand.EnumType, SandType> {
 
     @Override
-    public Optional<SandType> getById(String id) {
-        return Optional.ofNullable(this.sandTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockSand.EnumType[] getValues() {
+        return BlockSand.EnumType.values();
     }
 
     @Override
-    public Collection<SandType> getAll() {
-        return ImmutableList.copyOf(this.sandTypeMappings.values());
+    protected void generateInitialMap() {
+        super.generateInitialMap();
+        this.catalogTypeMap.put("normal", (SandType) (Object) BlockSand.EnumType.SAND);
     }
-
 }

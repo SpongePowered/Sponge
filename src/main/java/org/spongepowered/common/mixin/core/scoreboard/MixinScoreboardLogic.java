@@ -57,7 +57,6 @@ import org.spongepowered.common.scoreboard.SpongeScoreboardConstants;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -91,13 +90,13 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         return objective.getObjectiveFor(this);
     }
 
-    @SuppressWarnings({"unchecked", "RedundantCast", "rawtypes"})
+    @SuppressWarnings({"RedundantCast"})
     public void scoreboard$addObjective(Objective objective) {
         if (this.scoreObjectives.containsKey(objective.getName())) {
             throw new IllegalArgumentException("An objective with the name \'" + objective.getName() + "\' already exists!");
         }
         ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        List<ScoreObjective> objectives = (List) this.scoreObjectiveCriterias.get(objective.getCriterion());
+        List<ScoreObjective> objectives = this.scoreObjectiveCriterias.get(objective.getCriterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
             this.scoreObjectiveCriterias.put((IScoreCriteria) objective.getCriterion(), objectives);
@@ -152,7 +151,6 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     // Get objective by criteria
 
-    @SuppressWarnings("unchecked")
     public Set<Objective> scoreboard$getObjectivesByCriteria(Criterion criterion) {
         if (this.scoreObjectiveCriterias.containsKey(criterion)) {
             return this.scoreObjectiveCriterias.get(criterion).stream()
@@ -163,7 +161,6 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     // Get objectives
 
-    @SuppressWarnings("unchecked")
     public Set<Objective> scoreboard$getObjectives() {
         return this.scoreObjectives.values().stream()
                 .map(objective -> ((IMixinScoreObjective) objective).getSpongeObjective())
@@ -177,7 +174,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         this.scoreboard$removeObjective(((IMixinScoreObjective) objective).getSpongeObjective());
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public void scoreboard$removeObjective(Objective objective) {
         ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
         this.scoreObjectives.remove(scoreObjective.getName());
@@ -192,7 +189,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
         this.sendToPlayers(new SPacketScoreboardObjective(scoreObjective, SpongeScoreboardConstants.OBJECTIVE_PACKET_REMOVE));
 
-        List list = (List)this.scoreObjectiveCriterias.get(scoreObjective.getCriteria());
+        List list = this.scoreObjectiveCriterias.get(scoreObjective.getCriteria());
 
         if (list != null)
         {
@@ -232,7 +229,6 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     // Add team
 
-    @SuppressWarnings("unchecked")
     public void scoreboard$registerTeam(Team spongeTeam) {
         ScorePlayerTeam team = (ScorePlayerTeam) spongeTeam;
 
@@ -240,15 +236,15 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
             throw new IllegalArgumentException("A team with the name \'" +spongeTeam.getName() + "\' already exists!");
         }
 
-        if (team.theScoreboard != null) {
+        if (team.scoreboard != null) {
             throw new IllegalArgumentException("The passed in team is already registered to a scoreboard!");
         }
 
-        team.theScoreboard = this;
-        this.teams.put(team.getRegisteredName(), team);
+        team.scoreboard = this;
+        this.teams.put(team.getName(), team);
 
         for (String entry: team.getMembershipCollection()) {
-            this.addPlayerToTeam(entry, team.getRegisteredName());
+            this.addPlayerToTeam(entry, team.getName());
         }
         this.broadcastTeamCreated(team);
     }
@@ -258,7 +254,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     @Override
     public void removeTeam(ScorePlayerTeam team) {
         super.removeTeam(team);
-        team.theScoreboard = null;
+        team.scoreboard = null;
     }
 
     // Scores
@@ -269,7 +265,6 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
                 .getScoreFor(objective);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void removeObjectiveFromEntity(String name, ScoreObjective objective) {
         if (objective != null) {
@@ -296,7 +291,6 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         return scores;
     }
 
-    @SuppressWarnings("unchecked")
     public Set<org.spongepowered.api.scoreboard.Score> scoreboard$getScores(Text name) {
         Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
         for (ScoreObjective objective: this.scoreObjectives.values()) {

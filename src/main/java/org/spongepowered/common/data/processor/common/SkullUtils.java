@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.common;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -34,9 +33,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
+import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
 
@@ -58,7 +57,12 @@ public class SkullUtils {
     }
 
     public static SkullType getSkullType(int skullType) {
-        return Iterables.get(SpongeImpl.getRegistry().getAllOf(SkullType.class), skullType);
+        for (SkullType type : SpongeImpl.getRegistry().getAllOf(SkullType.class)){
+            if (type instanceof SpongeSkullType && ((SpongeSkullType) type).getByteId() == skullType) {
+                return type;
+            }
+        }
+        return DEFAULT_TYPE;
     }
 
     public static boolean isValidItemStack(Object container) {
@@ -92,9 +96,8 @@ public class SkullUtils {
             tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
                     .getBlockState(tileEntitySkull.getPos()), 3);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public static Optional<GameProfile> getProfile(ItemStack skull) {
@@ -126,25 +129,15 @@ public class SkullUtils {
         if (profile == null) {
             return null;
         }
+        if (profile.getPropertyMap().containsKey("textures")) {
+            return profile;
+        }
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
-        final GameProfileManager resolver = Sponge.getGame().getServer().getGameProfileManager();
-        if (!profile.getName().isPresent() || profile.getName().get().isEmpty()) {
-            final CompletableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
-                return null;
-            }
-        } else if (profile.getUniqueId() == null) {
-            final CompletableFuture<GameProfile> future = resolver.get(profile.getName().get());
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
-                return null;
-            }
-        } else {
+        final CompletableFuture<GameProfile> future = Sponge.getGame().getServer().getGameProfileManager().fill(profile);
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            SpongeImpl.getLogger().debug("Exception while trying to fill skull GameProfile for '" + profile + "'", e);
             return profile;
         }
     }

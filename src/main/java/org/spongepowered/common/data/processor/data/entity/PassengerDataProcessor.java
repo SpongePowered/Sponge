@@ -24,48 +24,38 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import static org.spongepowered.common.data.util.DataUtil.getData;
-
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePassengerData;
-import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.util.GuavaCollectors;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.SpongeEntitySnapshot;
-import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<EntitySnapshot>, ListValue<EntitySnapshot>, PassengerData, ImmutablePassengerData> {
+public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, ListValue<UUID>, PassengerData, ImmutablePassengerData> {
 
     public PassengerDataProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.PASSENGERS);
     }
 
     @Override
-    protected boolean set(net.minecraft.entity.Entity entity, List<EntitySnapshot> snapshots) {
-        final List<net.minecraft.entity.Entity> passengers = snapshots.stream()
-                .map(EntitySnapshot::restore)
+    protected boolean set(net.minecraft.entity.Entity entity, List<UUID> uuids) {
+        final List<net.minecraft.entity.Entity> passengers = uuids.stream()
+                .map((uuid -> ((World) entity.getEntityWorld()).getEntity(uuid)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(EntityUtil::toNative)
@@ -80,25 +70,25 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
     }
 
     @Override
-    protected Optional<List<EntitySnapshot>> getVal(net.minecraft.entity.Entity dataHolder) {
+    protected Optional<List<UUID>> getVal(net.minecraft.entity.Entity dataHolder) {
         if (dataHolder.getPassengers().isEmpty()) {
             return Optional.empty();
         }
-        final List<EntitySnapshot> passengers = dataHolder.getPassengers()
+        final List<UUID> passengers = dataHolder.getPassengers()
                 .stream()
                 .map(EntityUtil::fromNative)
-                .map(Entity::createSnapshot)
+                .map(Entity::getUniqueId)
                 .collect(Collectors.toList());
         return Optional.of(passengers);
     }
 
     @Override
-    protected ImmutableListValue<EntitySnapshot> constructImmutableValue(List<EntitySnapshot> value) {
+    protected ImmutableListValue<UUID> constructImmutableValue(List<UUID> value) {
         return new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.copyOf(value));
     }
 
     @Override
-    protected ListValue<EntitySnapshot> constructValue(List<EntitySnapshot> actualValue) {
+    protected ListValue<UUID> constructValue(List<UUID> actualValue) {
         return new SpongeListValue<>(Keys.PASSENGERS, actualValue);
     }
 
@@ -107,11 +97,11 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
         if (this.supports(container)) {
             net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) container);
             if (entity.getPassengers().isEmpty()) {
-                final ImmutableList<EntitySnapshot> passengers = entity.getPassengers()
+                final ImmutableList<UUID> passengers = entity.getPassengers()
                         .stream()
                         .map(EntityUtil::fromNative)
-                        .map(Entity::createSnapshot)
-                        .collect(GuavaCollectors.toImmutableList());
+                        .map(Entity::getUniqueId)
+                        .collect(ImmutableList.toImmutableList());
                 entity.removePassengers();
                 return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(passengers)).build();
             }
@@ -122,7 +112,7 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
 
     @Override
     public Optional<PassengerData> fill(DataContainer container, PassengerData passengerData) {
-        passengerData.set(Keys.PASSENGERS, container.getSerializableList(Keys.PASSENGERS.getQuery(), EntitySnapshot.class).get());
+        passengerData.set(Keys.PASSENGERS, container.getObjectList(Keys.PASSENGERS.getQuery(), UUID.class).get());
         return Optional.of(passengerData);
     }
 

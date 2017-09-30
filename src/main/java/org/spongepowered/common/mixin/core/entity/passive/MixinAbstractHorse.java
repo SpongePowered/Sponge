@@ -25,49 +25,26 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.AbstractHorse;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
-import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.value.mutable.Value;
+import net.minecraft.inventory.ContainerHorseChest;
 import org.spongepowered.api.entity.living.animal.Horse;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
 
 @Mixin(AbstractHorse.class)
 @Implements(@Interface(iface = Horse.class, prefix = "horse$", unique = true))
 public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Horse {
 
-    @Override
-    public HorseData getHorseData() {
-        printDeprecatedHorseUsage("HorseData is not applicable to Horse, only Rideable Horse!");
-        return new SpongeHorseData(DataConstants.Horse.DEFAULT_COLOR, DataConstants.Horse.DEFAULT_STYLE, DataConstants.Horse.DEFAULT_VARIANT);
-    }
-
-    @Override
-    public Value<HorseVariant> variant() {
-        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
-    }
-
-    @Override
-    public Value<HorseStyle> style() {
-        printDeprecatedHorseUsage("HorseStyle is only applicable to RideableHorses!");
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE);
-    }
-
-    @Override
-    public Value<HorseColor> color() {
-        printDeprecatedHorseUsage("HorseColor is only applicable to RideableHorses!");
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR);
-    }
+    @Shadow protected ContainerHorseChest horseChest;
 
     @Unique
     protected void printDeprecatedHorseUsage(String specificSubHeader) {
@@ -79,5 +56,17 @@ public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Ho
                                + "notify the plugin developer using these methods!")
                 .add(new UnsupportedOperationException("Deprecated Usage Detected"))
                 .trace();
+    }
+
+    @Override
+    public CarriedInventory<? extends Carrier> getInventory() {
+        return ((CarriedInventory) this.horseChest);
+    }
+
+    @Inject(method = "initHorseChest", at = @At("RETURN"))
+    public void onInitHorseChest(CallbackInfo ci) {
+        if (horseChest instanceof IMixinCarriedInventory) {
+            ((IMixinCarriedInventory) horseChest).setCarrier(this);
+        }
     }
 }

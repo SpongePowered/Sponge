@@ -32,18 +32,15 @@ public class TradeOfferUtil {
     public static MerchantRecipe toNative(TradeOffer tradeOffer) {
         if (tradeOffer instanceof MerchantRecipe) {
             return (MerchantRecipe) tradeOffer;
-        } else {
-            throw new NativeTradeOfferException("The supplied trade offer was not native to the current platform");
         }
+        throw new NativeTradeOfferException("The supplied trade offer was not native to the current platform");
     }
 
     public static TradeOffer fromNative(MerchantRecipe merchantRecipe) {
         if (merchantRecipe instanceof TradeOffer || merchantRecipe == null) {
             return (TradeOffer) merchantRecipe;
-        } else {
-            throw new NativeTradeOfferException("The supplied trade offer was not compatible with the target environment!");
-
         }
+        throw new NativeTradeOfferException("The supplied trade offer was not compatible with the target environment!");
     }
 
 }

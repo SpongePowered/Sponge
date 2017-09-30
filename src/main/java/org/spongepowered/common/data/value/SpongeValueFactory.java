@@ -180,9 +180,8 @@ public class SpongeValueFactory implements ValueFactory {
             checkState(this.defaultValue != null);
             if (this.value == null) {
                 return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum);
-            } else {
-                return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum, this.value);
             }
+            return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum, this.value);
         }
     }
 }

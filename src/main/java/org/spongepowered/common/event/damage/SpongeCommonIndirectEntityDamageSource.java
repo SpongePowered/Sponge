@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.damage;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
@@ -65,7 +64,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends EntityDamag
     }
 
     @Override
-    public Entity getEntity() {
+    public Entity getTrueSource() {
         return (Entity) getSource();
     }
 

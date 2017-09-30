@@ -27,7 +27,6 @@ package org.spongepowered.common.text.action;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.stats.StatBase;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
@@ -36,7 +35,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeHoverAction {
@@ -45,9 +43,7 @@ public class SpongeHoverAction {
     }
 
     private static HoverEvent.Action getType(HoverAction<?> action) {
-        if (action instanceof HoverAction.ShowAchievement) {
-            return HoverEvent.Action.SHOW_ACHIEVEMENT;
-        } else if (action instanceof HoverAction.ShowEntity) {
+        if (action instanceof HoverAction.ShowEntity) {
             return HoverEvent.Action.SHOW_ENTITY;
         } else if (action instanceof HoverAction.ShowItem) {
             return HoverEvent.Action.SHOW_ITEM;
@@ -63,9 +59,6 @@ public class SpongeHoverAction {
         ITextComponent component;
 
         switch (type) {
-            case SHOW_ACHIEVEMENT:
-                component = new TextComponentString(((StatBase) action.getResult()).statId);
-                break;
             case SHOW_ENTITY: {
                 HoverAction.ShowEntity.Ref entity = ((HoverAction.ShowEntity) action).getResult();
 

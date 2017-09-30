@@ -30,11 +30,19 @@ import net.minecraft.tileentity.TileEntityLockableLoot;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 @Mixin(TileEntityLockableLoot.class)
-public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable {
+public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable implements IMixinCustomNameable {
 
     @Shadow protected String customName;
+
+    @Shadow public abstract void setCustomName(String p_190575_1_);
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        setCustomName(customName);
+    }
 
     @Override
     public DataContainer toContainer() {

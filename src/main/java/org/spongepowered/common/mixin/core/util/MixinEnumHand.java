@@ -28,17 +28,15 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Locale;
 
 @Mixin(EnumHand.class)
 public abstract class MixinEnumHand implements HandType {
 
-
     @Override
     public String getId() {
-        return ((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        return "minecraft:" + ((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH);
     }
 
     @Override

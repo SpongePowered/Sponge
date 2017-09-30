@@ -25,76 +25,108 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.item.EntityItem;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.ArrayList;
 
-class DimensionTickPhaseState extends TickPhaseState {
+class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     DimensionTickPhaseState() {
     }
 
     @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-        phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> {
-                    TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
-                });
-
-        phaseContext.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    // TODO the entity spawn causes are not likely valid, need to investigate further.
-                    final Cause cause = Cause.source(SpawnCause.builder()
-                            .type(InternalSpawnTypes.PLACEMENT)
-                            .build())
-                            .build();
-                    final SpawnEntityEvent event =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                        }
-                    }
-
-                });
-        phaseContext.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    final Cause cause = Cause.source(SpawnCause.builder()
-                            .type(InternalSpawnTypes.PLACEMENT)
-                            .build())
-                            .build();
-                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                    for (EntityItem entity : entities) {
-                        capturedEntities.add(EntityUtil.fromNative(entity));
-                    }
-                    final SpawnEntityEvent event =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                        }
-                    }
-                });
-    }
-    @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-
+    public DimensionContext createPhaseContext() {
+        return new DimensionContext()
+                .addBlockCaptures()
+                .addEntityCaptures()
+                .addEntityDropCaptures();
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        return context.getCapturedEntities().add(entity);
+    public boolean canSwitchTo(IPhaseState<?> state) {
+        return super.canSwitchTo(state) || state.getPhase() == TrackingPhases.DRAGON;
+    }
+
+    @Override
+    public void unwind(DimensionContext phaseContext) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            phaseContext.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blockSnapshots -> {
+                        TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
+                    });
+    
+            phaseContext.getCapturedEntitySupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        final SpawnEntityEvent event =
+                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                            }
+                        }
+    
+                    });
+            phaseContext.getCapturedItemsSupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                        for (EntityItem entity : entities) {
+                            capturedEntities.add(EntityUtil.fromNative(entity));
+                        }
+                        final SpawnEntityEvent event =
+                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                            }
+                        }
+                    });
+        }
+    }
+
+    /*
+    @author - gabizou
+    non-javadoc
+    This is a stopgap to get dragon respawns working. Since there's 4 classes that interweave themselves
+    between various states including but not withstanding: respawning endercrystals, respawning the dragon,
+    locating the crystals, etc. it's best to not capture the spawns and simply spawn them in directly.
+    This is a todo until the dragon phases are completely configured and correctly managed (should be able to at some point restore
+    traditional ai logic to the dragon without the necessity for the dragon being summoned the manual way).
+
+     */
+    @Override
+    public boolean spawnEntityOrCapture(DimensionContext context, Entity entity, int chunkX, int chunkZ) {
+        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+        if (user != null) {
+            entity.setCreator(user.getUniqueId());
+        }
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled() && event.getEntities().size() > 0) {
+                for (Entity item: event.getEntities()) {
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(item);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

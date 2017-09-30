@@ -182,7 +182,7 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
             // If we are considering other sponge tasks, we can order by
             // their internal tasks
             if (other instanceof SpongeTaskFuture) {
-                ScheduledTask otherTask = ((SpongeTaskFuture) other).task;
+                ScheduledTask otherTask = ((SpongeTaskFuture<?>) other).task;
                 return ComparisonChain.start()
                         .compare(this.task.nextExecutionTimestamp(), otherTask.nextExecutionTimestamp())
                         .compare(this.task.getUniqueId(), otherTask.getUniqueId())

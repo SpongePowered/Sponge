@@ -25,21 +25,19 @@
 package org.spongepowered.common.mixin.realtime.mixin;
 
 import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(WorldServer.class)
-public abstract class MixinWorldServer extends World {
+public abstract class MixinWorldServer extends World implements IMixinRealTimeTicking {
 
     protected MixinWorldServer(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn,
             Profiler profilerIn, boolean client) {
@@ -50,7 +48,7 @@ public abstract class MixinWorldServer extends World {
     public void fixTimeOfDay(CallbackInfo ci) {
         if (this.worldInfo.getGameRulesInstance().getBoolean("doDaylightCycle")) {
             // Subtract the one the original tick method is going to add
-            long diff = ((IMixinMinecraftServer) this.getMinecraftServer()).getRealTimeTicks() - 1;
+            long diff = this.getRealTimeTicks() - 1;
             // Don't set if we're not changing it as other mods might be listening for changes
             if (diff > 0) {
                 this.worldInfo.setWorldTime(this.worldInfo.getWorldTime() + diff);

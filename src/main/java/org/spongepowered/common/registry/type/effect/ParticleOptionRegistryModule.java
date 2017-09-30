@@ -50,19 +50,19 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class ParticleOptionRegistryModule implements CatalogRegistryModule<ParticleOption> {
+public class ParticleOptionRegistryModule implements CatalogRegistryModule<ParticleOption<?>> {
 
     @RegisterCatalog(ParticleOptions.class)
-    private final Map<String, ParticleOption> particleOptionsMappings = new HashMap<>();
-    private final Map<String, ParticleOption> particleOptions = new HashMap<>();
+    private final Map<String, ParticleOption<?>> particleOptionsMappings = new HashMap<>();
+    private final Map<String, ParticleOption<?>> particleOptions = new HashMap<>();
 
     @Override
-    public Optional<ParticleOption> getById(String id) {
+    public Optional<ParticleOption<?>> getById(String id) {
         return Optional.ofNullable(this.particleOptions.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<ParticleOption> getAll() {
+    public Collection<ParticleOption<?>> getAll() {
         return ImmutableList.copyOf(this.particleOptions.values());
     }
 
@@ -92,6 +92,6 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
     private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalArgumentException> valueValidator) {
         SpongeParticleOption<?> option = new SpongeParticleOption<>("minecraft:" + id, id, valueType, valueValidator);
         this.particleOptionsMappings.put(id, option);
-        this.particleOptions.put(id, option);
+        this.particleOptions.put(option.getId(), option);
     }
 }

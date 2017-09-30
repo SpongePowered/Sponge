@@ -25,25 +25,29 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhaseContext;
 
 import java.util.Optional;
 
-final class UnwindingPhaseContext extends PhaseContext {
+public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPhaseContext> {
 
-    static PhaseContext unwind(IPhaseState state, PhaseContext context) {
-        return new UnwindingPhaseContext(state, context);
+    static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
+        return new UnwindingPhaseContext(state, context)
+                .addCaptures()
+                .addEntityDropCaptures()
+                .buildAndSwitch();
     }
 
-    private PhaseContext unwindingContext;
-    private IPhaseState unwindingState;
+    private IPhaseState<?> unwindingState;
 
-    UnwindingPhaseContext(IPhaseState unwindingState, PhaseContext unwindingContext) {
-        add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, unwindingContext));
-        add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_STATE, unwindingState));
-        this.unwindingContext = unwindingContext;
+    private PhaseContext<?> unwindingContext;
+
+    private UnwindingPhaseContext(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext) {
+        super(GeneralPhase.Post.UNWINDING);
         this.unwindingState = unwindingState;
+        this.unwindingContext = unwindingContext;
     }
 
     @Override
@@ -57,28 +61,18 @@ final class UnwindingPhaseContext extends PhaseContext {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <T> Optional<T> first(Class<T> tClass) {
-        if (PhaseContext.class == tClass) {
-            return Optional.of((T) this.unwindingContext);
-        }
-        if (IPhaseState.class == tClass) {
-            return Optional.of((T) this.unwindingState);
-        }
-        return Optional.ofNullable(super.first(tClass).orElseGet(() -> this.unwindingContext.first(tClass).orElse(null)));
+    public <T extends PhaseContext<T>> T getUnwindingContext() {
+        return (T) unwindingContext;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
-        if (PhaseContext.class == tClass) {
-            return Optional.of((T) this.unwindingContext);
-        }
-        if (IPhaseState.class == tClass) {
-            return Optional.of((T) this.unwindingState);
-        }
-        return Optional.ofNullable(super.firstNamed(name, tClass).orElseGet(() -> this.unwindingContext.firstNamed(name, tClass).orElse(null)));
-
+    public IPhaseState<?> getUnwindingState() {
+        return unwindingState;
     }
 
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        return super.printCustom(printer)
+            .add("    - %s: %s", "UnwindingState", this.unwindingState)
+            .add("    - %s: %s", "UnwindingContext", this.unwindingContext);
+    }
 }

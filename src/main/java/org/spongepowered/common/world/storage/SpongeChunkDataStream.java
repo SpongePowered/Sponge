@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.storage;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import net.minecraft.world.chunk.storage.RegionFile;
 import org.spongepowered.api.data.DataContainer;
@@ -113,7 +112,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
         try {
             return WorldStorageUtil.readDataFromRegion(stream);
         } catch (IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

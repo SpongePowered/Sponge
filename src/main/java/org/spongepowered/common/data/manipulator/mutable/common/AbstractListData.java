@@ -48,7 +48,6 @@ import java.util.List;
  * @param <M> The type of {@link DataManipulator}
  * @param <I> The type of {@link ImmutableDataManipulator}
  */
-@SuppressWarnings("unchecked")
 public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends ImmutableListData<E, I, M>>
         extends AbstractSingleData<List<E>, M, I> implements ListData<E, M, I> {
     private final Class<? extends I> immutableClass;

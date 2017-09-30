@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+
+import java.util.List;
 
 // TODO 1.9: Refactor this for boat overhaul
 @Mixin(EntityBoat.class)
@@ -115,6 +114,12 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
             }
         }
     }*/
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(TreeData.class).get());
+    }
 
     @Override
     public boolean isInWater() {

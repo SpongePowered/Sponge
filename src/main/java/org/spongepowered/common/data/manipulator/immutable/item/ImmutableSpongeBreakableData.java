@@ -56,7 +56,6 @@ public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData
                 .collect(Collectors.toList()));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ImmutableSetValue<BlockType> breakable() {
         return getValueGetter();

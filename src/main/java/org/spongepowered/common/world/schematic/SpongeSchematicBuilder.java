@@ -30,9 +30,9 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -41,9 +41,7 @@ import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -133,24 +131,16 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             size = this.view.getBlockSize();
         }
         if (this.metadata == null) {
-            this.metadata = new MemoryDataContainer();
+            this.metadata = DataContainer.createNew();
         }
         for (Map.Entry<String, Object> entry : this.metaValues.entrySet()) {
             this.metadata.set(DataQuery.of(".", entry.getKey()), entry.getValue());
         }
         if (this.volume == null) {
-            BackingDataType dataType;
-            if (this.palette.getHighestId() <= 0xFF) {
-                dataType = BackingDataType.BYTE;
-            } else if (this.palette.getHighestId() <= 0xFFFF) {
-                dataType = BackingDataType.CHAR;
-            } else {
-                dataType = BackingDataType.INT;
-            }
-            final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.palette, min, size, dataType);
+            final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.palette, min, size);
             Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-            this.view.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
-                volume.setBlock(x, y, z, v.getBlock(x, y, z), SpongeImpl.getImplementationCause());
+            this.view.getBlockWorker().iterate((v, x, y, z) -> {
+                volume.setBlock(x, y, z, v.getBlock(x, y, z));
                 Optional<TileEntity> tile = v.getTileEntity(x, y, z);
                 if (tile.isPresent()) {
                     tiles.put(new Vector3i(x, y, z), tile.get().createArchetype());

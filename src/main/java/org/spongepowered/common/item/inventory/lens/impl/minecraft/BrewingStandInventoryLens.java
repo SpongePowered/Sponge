@@ -24,31 +24,40 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
+import static org.spongepowered.api.item.ItemTypes.BLAZE_POWDER;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.slot.OutputSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.FuelSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 
 public class BrewingStandInventoryLens extends OrderedInventoryLensImpl {
 
     private OrderedInventoryLensImpl potions;
     private InputSlotLensImpl ingredient;
+    private InputSlotLensImpl fuel;
 
     public BrewingStandInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
     }
 
+    public BrewingStandInventoryLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
+    }
+
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
 
-        this.potions = new OrderedInventoryLensImpl(0, 3, 1, slots); // TODO ContainerBrewingStand.Potion Adapter / Filter Potion/Bottle
+        this.potions = new OrderedInventoryLensImpl(0, 3, 1, OutputSlot.class, slots);
         this.ingredient = new InputSlotLensImpl(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
-        // TODO 1.9 Fuel slot
+        this.fuel = new FuelSlotLensImpl(4, (i) -> BLAZE_POWDER.equals(i.getType()), BLAZE_POWDER::equals);
 
-        this.addSpanningChild(potions);
-        this.addSpanningChild(ingredient);
+        this.addSpanningChild(this.potions);
+        this.addSpanningChild(this.ingredient);
+        this.addSpanningChild(this.fuel);
     }
 }

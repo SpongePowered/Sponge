@@ -26,7 +26,6 @@ package org.spongepowered.common.effect.particle;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.common.data.util.DataQueries;
@@ -72,9 +71,9 @@ public class SpongeParticleEffect implements ParticleEffect {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer dataContainer = new MemoryDataContainer();
+        DataContainer dataContainer = DataContainer.createNew();
         dataContainer.set(DataQueries.PARTICLE_TYPE, this.type);
-        dataContainer.set(DataQueries.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> new MemoryDataContainer()
+        dataContainer.set(DataQueries.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> DataContainer.createNew()
                 .set(DataQueries.PARTICLE_OPTION_KEY, entry.getKey())
                 .set(DataQueries.PARTICLE_OPTION_VALUE, entry.getValue()))
                 .collect(Collectors.toList()));

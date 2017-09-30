@@ -65,7 +65,6 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public AttackLivingAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         return (AttackLivingAITask) new EntityAIAttackMelee((EntityCreature) owner, this.speed, this.longMemory);

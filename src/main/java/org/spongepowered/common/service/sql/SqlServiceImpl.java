@@ -33,14 +33,12 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.h2.engine.ConnectionInfo;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfigManager;
-import org.spongepowered.common.config.SpongeConfigRoot;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -101,9 +99,8 @@ public class SqlServiceImpl implements SqlService, Closeable {
             Path origPath = Paths.get(orig);
             if (origPath.isAbsolute()) {
                 return origPath.toString();
-            } else {
-                return SpongeConfigManager.getPrivateRoot(plugin).getDirectory().resolve(orig).toAbsolutePath().toString();
             }
+            return SpongeConfigManager.getPrivateRoot(plugin).getDirectory().resolve(orig).toAbsolutePath().toString();
         });
     }
 

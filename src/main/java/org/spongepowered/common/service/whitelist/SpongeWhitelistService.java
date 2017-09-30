@@ -37,7 +37,6 @@ import java.util.List;
 
 public class SpongeWhitelistService implements WhitelistService {
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<GameProfile> getWhitelistedProfiles() {
         List<GameProfile> profiles = new ArrayList<>();

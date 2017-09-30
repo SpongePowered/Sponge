@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
-public class BlockPhaseState implements IPhaseState {
+public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
 
     BlockPhaseState() {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return false;
     }
 
@@ -44,11 +44,23 @@ public class BlockPhaseState implements IPhaseState {
         return TrackingPhases.BLOCK;
     }
 
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    @Override
+    public GeneralizedContext createPhaseContext() {
+        return new GeneralizedContext(this);
+    }
+
+    @Override
+    public void unwind(GeneralizedContext context) {
 
     }
 
-    public boolean allowsSpawns() {
+    @Override
+    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
+    }
+
+    @Override
+    public boolean allowEntitySpawns() {
         return true;
     }
 }

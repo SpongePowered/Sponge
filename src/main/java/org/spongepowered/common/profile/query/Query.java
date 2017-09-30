@@ -30,6 +30,7 @@ import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -88,12 +89,11 @@ public abstract class Query<V> implements Callable<V> {
         if (result.isPresent() && result.get().isFilled()) {
             GameProfile t = result.get();
 
-            this.cache.add(t, true, null);
+            this.cache.add(t, true, (Instant) null);
 
             return t;
-        } else {
-            throw new ProfileNotFoundException("Profile: " + profile);
         }
+        throw new ProfileNotFoundException("Profile: " + profile);
     }
 
     protected List<GameProfile> fromNames(Collection<String> names) throws ProfileNotFoundException {

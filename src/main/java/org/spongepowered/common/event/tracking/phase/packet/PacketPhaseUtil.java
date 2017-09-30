@@ -31,11 +31,10 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
@@ -43,13 +42,7 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions, boolean eventCancelled, Event event) {
-        // We always need to force resync for shift click events, since a previous event cancellation could have caused a desync
-        // (if the event is from a shift double click)c
-        handleSlotRestore(player, slotTransactions, eventCancelled, event instanceof ClickInventoryEvent.Shift);
-    }
-
-    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions, boolean eventCancelled, boolean forceResync) {
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
@@ -60,22 +53,16 @@ public final class PacketPhaseUtil {
             final int slotNumber = slot.slotNumber;
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
-
-            // TODO: fix below
-            /*if (originalStack == null) {
-                slot.clear();
-            } else {
-                slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
-            }*/
-
-            final Slot nmsSlot = player.openContainer.getSlot(slotNumber);
+            final Slot nmsSlot = openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
         }
-        player.openContainer.detectAndSendChanges();
-        if (forceResync) {
-            player.sendContainerToPlayer(player.openContainer);
+        openContainer.detectAndSendChanges();
+        // If event is cancelled, always resync with player
+        // we must also validate the player still has the same container open after the event has been processed
+        if (eventCancelled && player.openContainer == openContainer) {
+            player.sendContainerToPlayer(openContainer);
         }
     }
 
@@ -86,11 +73,11 @@ public final class PacketPhaseUtil {
     }
 
     public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
-        if (capturedTransactions.size() == 0 && slotId >= 0) {
+        if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
                 ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
-                final SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), snapshot, snapshot);
+                final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }
@@ -115,5 +102,20 @@ public final class PacketPhaseUtil {
         player.openContainer.detectAndSendChanges();
         player.isChangingQuantityOnly = false;
         player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, itemStack));
+    }
+
+    // Check if all transactions are invalid
+    public static boolean allTransactionsInvalid(List<SlotTransaction> slotTransactions) {
+        if (slotTransactions.size() == 0) {
+            return false;
+        }
+
+        for (SlotTransaction slotTransaction : slotTransactions) {
+            if (slotTransaction.isValid()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

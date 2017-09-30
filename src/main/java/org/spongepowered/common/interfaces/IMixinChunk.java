@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
@@ -37,10 +38,13 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.common.entity.PlayerTracker;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -53,7 +57,11 @@ public interface IMixinChunk {
 
     Optional<User> getBlockOwner(BlockPos pos);
 
+    Optional<UUID> getBlockOwnerUUID(BlockPos pos);
+
     Optional<User> getBlockNotifier(BlockPos pos);
+
+    Optional<UUID> getBlockNotifierUUID(BlockPos pos);
 
     @Nullable
     IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot);
@@ -92,4 +100,22 @@ public interface IMixinChunk {
     void setPersistedChunk(boolean flag);
 
     void fill(ChunkPrimer primer);
+
+    boolean isSpawning();
+
+    void setIsSpawning(boolean spawning);
+
+    AtomicInteger getPendingLightUpdates();
+
+    long getLightUpdateTime();
+
+    void setLightUpdateTime(long time);
+
+    List<net.minecraft.world.chunk.Chunk> getNeighbors();
+
+    boolean isChunkLoaded();
+
+    boolean isQueuedForUnload();
+
+    CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type);
 }

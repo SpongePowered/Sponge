@@ -26,9 +26,7 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.passive.EntityLlama;
 import net.minecraft.entity.projectile.EntityLlamaSpit;
-import net.minecraft.entity.projectile.EntityPotion;
 import org.spongepowered.api.entity.projectile.LlamaSpit;
-import org.spongepowered.api.entity.projectile.ThrownPotion;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

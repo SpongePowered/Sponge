@@ -26,7 +26,6 @@ package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.api.data.DataHolder;
@@ -48,8 +47,8 @@ public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
     }
 
     @Override
-    public EntityFallingBlock getEntity() {
-        return (EntityFallingBlock) super.getEntity();
+    public EntityFallingBlock getTrueSource() {
+        return (EntityFallingBlock) super.getTrueSource();
     }
 
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -34,7 +35,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -46,14 +46,15 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;
@@ -68,7 +69,7 @@ import javax.annotation.Nullable;
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     private final ItemType itemType;
-    private final int count;
+    private final int quantity;
     private final int damageValue;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
@@ -79,12 +80,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
-        this.itemType = itemStack.getItem();
-        this.count = itemStack.getQuantity();
+        this.itemType = itemStack.getType();
+        this.quantity = itemStack.getQuantity();
         ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (DataManipulator<?, ?> manipulator : itemStack.getContainers()) {
+        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) itemStack).getCustomManipulators()) {
             builder.add(manipulator.asImmutable());
             keyBuilder.addAll(manipulator.getKeys());
             valueBuilder.addAll(manipulator.getValues());
@@ -111,15 +112,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     public SpongeItemStackSnapshot(ItemType itemType,
-                                   int count,
+                                   int quantity,
                                    int damageValue,
                                    ImmutableList<ImmutableDataManipulator<?, ?>> manipulators,
                                    @Nullable NBTTagCompound compound) {
         this.itemType = checkNotNull(itemType);
-        this.count = count;
+        this.quantity = quantity;
         this.manipulators = checkNotNull(manipulators);
         this.damageValue = damageValue;
-        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.count, this.damageValue);
+        this.privateStack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity, this.damageValue);
         ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
@@ -138,8 +139,18 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public int getCount() {
-        return this.count;
+    public int getQuantity() {
+        return this.quantity;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.privateStack.isEmpty();
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return this.privateStack.getTranslation();
     }
 
     @Override
@@ -163,10 +174,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer container = new MemoryDataContainer()
+        final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.ITEM_TYPE, this.itemType.getId())
-            .set(DataQueries.ITEM_COUNT, this.count)
+            .set(DataQueries.ITEM_COUNT, this.quantity)
             .set(DataQueries.ITEM_DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
@@ -182,7 +193,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         checkNotNull(containerClass);
         for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
             if (containerClass.isInstance(manipulator)) {
-                return Optional.of((T) (Object) manipulator);
+                return Optional.of((T) manipulator);
             }
         }
         return Optional.empty();
@@ -194,16 +205,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final Optional<T> optional = get(containerClass);
         if (optional.isPresent()) {
             return optional;
-        } else {
-            Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
-            if (processorOptional.isPresent()) {
-                final Optional<DataManipulator<?, ?>> manipulatorOptional =  processorOptional.get().createFrom(this.privateStack);
-                if (manipulatorOptional.isPresent()) {
-                    return Optional.of((T) manipulatorOptional.get().asImmutable());
-                }
-            }
-            return Optional.empty();
         }
+        Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
+        if (processorOptional.isPresent()) {
+            final Optional<DataManipulator<?, ?>> manipulatorOptional =  processorOptional.get().createFrom(this.privateStack);
+            if (manipulatorOptional.isPresent()) {
+                return Optional.of((T) manipulatorOptional.get().asImmutable());
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -233,7 +243,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Optional<ItemStackSnapshot> with(BaseValue<?> value) {
-        return with((Key<BaseValue<Object>>) (Object) value.getKey(), (Object) value.get());
+        return with((Key<BaseValue<Object>>) value.getKey(), (Object) value.get());
     }
 
     @Override
@@ -260,7 +270,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public Optional<ItemStackSnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         final ItemStack copiedStack = this.privateStack.copy();
-        Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
+        Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
         if (processorOptional.isPresent()) {
             processorOptional.get().remove(copiedStack);
             return Optional.of(copiedStack.createSnapshot());
@@ -277,7 +287,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStackSnapshot merge(ItemStackSnapshot that, MergeFunction function) {
         final ItemStack thisCopy = this.privateStack.copy();
         final ItemStack thatCopy = that.createStack();
-        for (DataManipulator<?, ?> manipulator : thatCopy.getContainers()) {
+        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) thatCopy).getCustomManipulators()) {
             thisCopy.offer(manipulator, function);
         }
         return thisCopy.createSnapshot();
@@ -320,9 +330,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("itemType", this.itemType)
-                .add("count", this.count)
+                .add("quantity", this.quantity)
                 .toString();
     }
 
@@ -343,9 +353,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public Optional<NBTTagCompound> getCompound() {
         if (this.compound != null) {
             return Optional.of(this.compound.copy());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -362,4 +371,26 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             this.creatorUniqueId = Optional.of(uuid);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
+        return this.quantity == that.quantity &&
+               this.damageValue == that.damageValue &&
+               Objects.equal(this.itemType, that.itemType) &&
+               Objects.equal(this.compound, that.compound) &&
+               Objects.equal(this.creatorUniqueId, that.creatorUniqueId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
+    }
+
 }

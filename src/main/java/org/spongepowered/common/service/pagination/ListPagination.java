@@ -34,6 +34,10 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 /**
  * Pagination working with a list of values.
@@ -41,8 +45,8 @@ import java.util.Map;
 class ListPagination extends ActivePagination {
     private final List<List<Text>> pages;
 
-    public ListPagination(MessageReceiver src, PaginationCalculator calc, List<Map.Entry<Text, Integer>> lines,
-            Text title, Text header, Text footer, Text padding) {
+    public ListPagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, List<Map.Entry<Text, Integer>> lines,
+            @Nullable Text title, @Nullable Text header, @Nullable Text footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         List<List<Text>> pages = new ArrayList<>();
         List<Text> currentPage = new ArrayList<>();
@@ -76,12 +80,13 @@ class ListPagination extends ActivePagination {
 
     @Override
     protected Iterable<Text> getLines(int page) throws CommandException {
-        if (this.pages.size() == 0) {
+        final int size = this.pages.size();
+        if (size == 0) {
             return ImmutableList.of();
         } else if (page < 1) {
             throw new CommandException(t("Page %s does not exist!", page));
-        } else if (page > this.pages.size()) {
-            throw new CommandException(t("Page %s is too high", page));
+        } else if (page > size) {
+            throw new CommandException(t("Page %s is greater than the max of %s!", page, size));
         }
         return this.pages.get(page - 1);
     }

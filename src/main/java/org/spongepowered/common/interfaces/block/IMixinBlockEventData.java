@@ -26,11 +26,9 @@ package org.spongepowered.common.interfaces.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.User;
-
-import java.util.Optional;
+import org.spongepowered.api.world.LocatableBlock;
 
 import javax.annotation.Nullable;
 
@@ -44,21 +42,19 @@ public interface IMixinBlockEventData {
 
     int getEventBlockParameter();
 
-    boolean hasSourceUser();
+    boolean getCaptureBlocks();
 
-    boolean hasTickingBlock();
+    @Nullable LocatableBlock getTickBlock();
 
-    boolean hasTickingTileEntity();
+    @Nullable TileEntity getTickTileEntity();
 
-    Optional<BlockSnapshot> getCurrentTickBlock();
+    @Nullable User getSourceUser();
 
-    Optional<TileEntity> getCurrentTickTileEntity();
+    void setTickBlock(@Nullable LocatableBlock tickBlock);
 
-    Optional<User> getSourceUser();
-
-    void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock);
-
-    void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity);
+    void setTickTileEntity(@Nullable TileEntity tickTileEntity);
 
     void setSourceUser(User user);
+
+    void setCaptureBlocks(boolean capture);
 }

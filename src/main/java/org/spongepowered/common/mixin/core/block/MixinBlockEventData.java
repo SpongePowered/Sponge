@@ -27,21 +27,20 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(BlockEventData.class)
 public abstract class MixinBlockEventData implements IMixinBlockEventData {
 
-    @Nullable private BlockSnapshot tickBlock = null;
+    private boolean captureBlocks = true;
+    @Nullable private LocatableBlock tickBlock = null;
     @Nullable private TileEntity tickTileEntity = null;
     @Nullable private User sourceUser = null;
 
@@ -53,6 +52,11 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
     @Override
     public BlockPos getEventBlockPosition() {
         return getPosition();
+    }
+
+    @Override
+    public boolean getCaptureBlocks() {
+        return this.captureBlocks;
     }
 
     @Override
@@ -70,44 +74,32 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
         return getBlock();
     }
 
+    @Nullable
     @Override
-    public boolean hasTickingBlock() {
-        return this.tickBlock != null;
+    public LocatableBlock getTickBlock() {
+        return this.tickBlock;
     }
 
     @Override
-    public Optional<BlockSnapshot> getCurrentTickBlock() {
-        return Optional.ofNullable(this.tickBlock);
-    }
-
-    @Override
-    public void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock) {
+    public void setTickBlock(@Nullable LocatableBlock tickBlock) {
         this.tickBlock = tickBlock;
     }
 
+    @Nullable
     @Override
-    public boolean hasTickingTileEntity() {
-        return this.tickTileEntity != null;
+    public TileEntity getTickTileEntity() {
+        return this.tickTileEntity;
     }
 
     @Override
-    public Optional<TileEntity> getCurrentTickTileEntity() {
-        return Optional.ofNullable(this.tickTileEntity);
-    }
-
-    @Override
-    public void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity) {
+    public void setTickTileEntity(@Nullable TileEntity tickTileEntity) {
         this.tickTileEntity = tickTileEntity;
     }
 
+    @Nullable
     @Override
-    public boolean hasSourceUser() {
-        return this.sourceUser != null;
-    }
-
-    @Override
-    public Optional<User> getSourceUser() {
-        return Optional.ofNullable(this.sourceUser);
+    public User getSourceUser() {
+        return this.sourceUser;
     }
 
     @Override
@@ -115,4 +107,8 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
         this.sourceUser = user;
     }
 
+    @Override
+    public void setCaptureBlocks(boolean capture) {
+        this.captureBlocks = capture;
+    }
 }

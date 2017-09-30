@@ -26,18 +26,20 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.command.CommandException;
 
-import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 /**
  * Holds logic for an active pagination that is occurring.
@@ -47,7 +49,7 @@ abstract class ActivePagination {
     private static final Text SLASH_TEXT = Text.of("/");
     private static final Text DIVIDER_TEXT = Text.of(" ");
     private static final Text CONTINUATION_TEXT = t("...");
-    private final WeakReference<MessageReceiver> src;
+    private final Supplier<Optional<MessageReceiver>> src;
     private final UUID id = UUID.randomUUID();
     private final Text nextPageText;
     private final Text prevPageText;
@@ -62,9 +64,9 @@ abstract class ActivePagination {
     protected final PaginationCalculator calc;
     private final Text padding;
 
-    public ActivePagination(MessageReceiver src, PaginationCalculator calc, Text title,
-            Text header, Text footer, Text padding) {
-        this.src = new WeakReference<>(src);
+    public ActivePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, @Nullable Text title,
+            @Nullable Text header, @Nullable Text footer, Text padding) {
+        this.src = src;
         this.calc = calc;
         this.title = title;
         this.header = header;
@@ -84,7 +86,7 @@ abstract class ActivePagination {
                 .onHover(TextActions.showText(Text.of("/page prev")))
                 .onShiftClick(TextActions.insertText("/page prev"))
                 .build();
-        int maxContentLinesPerPage = calc.getLinesPerPage(src) - 1;
+        int maxContentLinesPerPage = calc.getLinesPerPage(src.get().get()) - 1;
         if (title != null) {
             maxContentLinesPerPage -= calc.getLines(title);
         }
@@ -131,10 +133,8 @@ abstract class ActivePagination {
     }
 
     public void specificPage(int page) throws CommandException {
-        MessageReceiver src = this.src.get();
-        if (src == null) {
-            throw new CommandException(t("Source for pagination %s is no longer active!", getId()));
-        }
+        MessageReceiver src = this.src.get()
+                .orElseThrow(() -> new CommandException(t("Source for pagination %s is no longer active!", getId())));
         this.currentPage = page;
 
         List<Text> toSend = new ArrayList<>();
@@ -151,9 +151,7 @@ abstract class ActivePagination {
         }
 
         Text footer = calculateFooter(page);
-        if (footer != null) {
-            toSend.add(this.calc.center(footer, this.padding));
-        }
+        toSend.add(this.calc.center(footer, this.padding));
         if (this.footer != null) {
             toSend.add(this.footer);
         }
@@ -197,8 +195,9 @@ abstract class ActivePagination {
             }
             ret.append(Text.of("»"));
         }
+
+        ret.color(this.padding.getColor());
         if (this.title != null) {
-            ret.color(this.title.getColor());
             ret.style(this.title.getStyle());
         }
         return ret.build();

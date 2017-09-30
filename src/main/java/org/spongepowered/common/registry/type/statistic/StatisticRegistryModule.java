@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.statistic;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -35,6 +36,7 @@ import org.spongepowered.api.statistic.Statistics;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -74,8 +76,23 @@ public final class StatisticRegistryModule implements SpongeAdditionalCatalogReg
 
     @Override
     public Map<String, Statistic> provideCatalogMap() {
-        return Maps.newHashMap(this.statisticMappings);
+        final HashMap<String, Statistic> map = new HashMap<>();
+        for (Map.Entry<String, Statistic> entry : this.statisticMappings.entrySet()) {
+            final String key = entry.getKey();
+            final String alternateKey = MINECRAFT_SPONGE_ID_MAPPINGS.get(key);
+            if (alternateKey != null) {
+                map.put(alternateKey, entry.getValue());
+            } else {
+                map.put(key, entry.getValue());
+            }
+        }
+        return map;
     }
+
+    private static final ImmutableMap<String, String> MINECRAFT_SPONGE_ID_MAPPINGS = ImmutableMap.<String, String>builder()
+        .put("shulker_box_opened", "open_shulker_box")
+        .put("play_one_minute", "time_played")
+        .build();
 
     private static final class Holder {
 

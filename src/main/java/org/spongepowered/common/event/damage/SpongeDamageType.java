@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.damage;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
@@ -68,7 +69,7 @@ public class SpongeDamageType implements DamageType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.id)
                 .add("name", this.name)
                 .toString();

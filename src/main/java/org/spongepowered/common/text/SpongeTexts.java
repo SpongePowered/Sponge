@@ -97,7 +97,6 @@ public final class SpongeTexts {
         return ((IMixinTextComponent) component).toLegacy(COLOR_CHAR);
     }
 
-    @SuppressWarnings("unchecked")
     public static ITextComponent fixActionBarFormatting(ITextComponent component) {
         if (!component.getSiblings().isEmpty()) {
             List<ITextComponent> children = component.getSiblings();

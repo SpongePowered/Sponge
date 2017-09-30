@@ -52,8 +52,6 @@ import javax.annotation.Nullable;
 @Mixin(EntityArrow.class)
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMixinEntityArrow {
 
-    private EntityArrow mcEntity = (EntityArrow) (Object) this;
-
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
     @Shadow public double damage;
@@ -73,7 +71,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
 
     @Override
     public ProjectileSource getShooter() {
-        if (this.projectileSource instanceof ProjectileSource) {
+        if (this.projectileSource != null) {
             return this.projectileSource;
         } else if (this.shootingEntity instanceof ProjectileSource) {
             return (ProjectileSource) this.shootingEntity;
@@ -115,13 +113,13 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     public void onProjectileHit(RayTraceResult hitResult, CallbackInfo ci) {
         if (!this.world.isRemote) {
-            if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), hitResult)) {
+            if (SpongeCommonEventFactory.handleCollideImpactEvent((EntityArrow) (Object) this, getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;
                 this.motionY *= -0.10000000149011612D;
                 this.motionZ *= -0.10000000149011612D;
                 this.rotationYaw += 180.0F;
-                this.mcEntity.prevRotationYaw += 180.0F;
+                ((EntityArrow) (Object) this).prevRotationYaw += 180.0F;
                 this.ticksInAir = 0;
                 this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
                 // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely

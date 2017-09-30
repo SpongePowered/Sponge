@@ -26,9 +26,12 @@ package org.spongepowered.common.interfaces.world.gen;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 
 public interface IMixinChunkProviderServer {
+
+    boolean getForceChunkRequests();
 
     void setMaxChunkUnloads(int maxUnloads);
 
@@ -39,4 +42,6 @@ public interface IMixinChunkProviderServer {
     @Nullable Chunk getLoadedChunkWithoutMarkingActive(int x, int z);
 
     long getChunkUnloadDelay();
+
+    WorldServer getWorld();
 }

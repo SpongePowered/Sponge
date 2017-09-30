@@ -135,6 +135,32 @@ public final class SpongeUsernameCache {
     }
 
     /**
+     * Get the player's last known {@link java.util.UUID UUID}
+     * <p>
+     * <b>May be <code>null</code></b>
+     *
+     * @param username
+     *            the player's username
+     * @return the player's last known uuid, or <code>null</code> if the
+     *         cache doesn't have a record of the username
+     */
+    @Nullable
+    public static UUID getLastKnownUUID(String username) {
+        checkNotNull(username);
+        if (!loaded) {
+            load();
+        }
+
+        for (Map.Entry<UUID, String> mapEntry : map.entrySet()) {
+            if (mapEntry.getValue().equalsIgnoreCase(username)) {
+                return mapEntry.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Check if the cache contains the given player's username
      *
      * @param uuid

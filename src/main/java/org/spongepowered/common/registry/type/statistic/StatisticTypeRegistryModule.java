@@ -54,13 +54,19 @@ public final class StatisticTypeRegistryModule implements CatalogRegistryModule<
 
     @Override
     public void registerDefaults() {
-        this.statisticTypeMappings.put("mine_block", new SpongeStatisticType("mine_block"));
-        this.statisticTypeMappings.put("craft_item", new SpongeStatisticType("craft_item"));
-        this.statisticTypeMappings.put("use_item", new SpongeStatisticType("use_item"));
-        this.statisticTypeMappings.put("break_item", new SpongeStatisticType("break_item"));
-        this.statisticTypeMappings.put("pickup", new SpongeStatisticType("pickup"));
-        this.statisticTypeMappings.put("drop", new SpongeStatisticType("drop"));
-        this.statisticTypeMappings.put("basic", new SpongeStatisticType("basic"));
+        this.registerDefault("basic");
+        this.registerDefault("blocks_broken");
+        this.registerDefault("entities_killed");
+        this.registerDefault("items_broken");
+        this.registerDefault("items_crafted");
+        this.registerDefault("items_dropped");
+        this.registerDefault("items_picked_up");
+        this.registerDefault("items_used");
+        this.registerDefault("killed_by_entity");
+    }
+
+    private void registerDefault(String id) {
+        this.statisticTypeMappings.put(id, new SpongeStatisticType(id));
     }
 
 }

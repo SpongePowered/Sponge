@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.block;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWireAttachmentData;
 import org.spongepowered.api.data.manipulator.mutable.block.WireAttachmentData;

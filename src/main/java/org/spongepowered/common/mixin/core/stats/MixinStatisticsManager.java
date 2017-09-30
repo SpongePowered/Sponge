@@ -32,7 +32,6 @@ import net.minecraft.util.TupleIntJsonSerializable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Final;
@@ -64,9 +63,11 @@ public abstract class MixinStatisticsManager implements IMixinStatisticsManager 
 
         int prev = readStat(stat);
         // TODO: Better cause here?
+        Sponge.getCauseStackManager().pushCause(player);
         ChangeStatisticEvent.TargetPlayer event = SpongeEventFactory.createChangeStatisticEventTargetPlayer(
-            Cause.source(player).build(), prev, prev + amount, (Statistic) stat, (Player) player);
+                Sponge.getCauseStackManager().getCurrentCause(), prev, prev + amount, (Statistic) stat, (Player) player);
         boolean cancelled = Sponge.getEventManager().post(event);
+        Sponge.getCauseStackManager().popCause();
         this.statCaptured = true;
         ci.cancel();
 

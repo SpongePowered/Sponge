@@ -24,52 +24,24 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
-
-public final class GameModeRegistryModule implements CatalogRegistryModule<GameMode> {
-
-    @RegisterCatalog(GameModes.class)
-    public final BiMap<String, GameMode> gameModeMappings = HashBiMap.create();
+@RegisterCatalog(GameModes.class)
+public final class GameModeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<GameType, GameMode> {
 
     @Override
-    public Optional<GameMode> getById(String id) {
-        return Optional.of(this.gameModeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected GameType[] getValues() {
+        return GameType.values();
     }
 
     @Override
-    public Collection<GameMode> getAll() {
-        return ImmutableList.copyOf((GameMode[]) (Object[]) GameType.values());
-    }
-
-    @Override
-    public void registerDefaults() {
-        this.gameModeMappings.put("survival", (GameMode) (Object) GameType.SURVIVAL);
-        this.gameModeMappings.put("creative", (GameMode) (Object) GameType.CREATIVE);
-        this.gameModeMappings.put("adventure", (GameMode) (Object) GameType.ADVENTURE);
-        this.gameModeMappings.put("spectator", (GameMode) (Object) GameType.SPECTATOR);
-        this.gameModeMappings.put("not_set", (GameMode) (Object) GameType.NOT_SET);
-    }
-
-    @AdditionalRegistration
-    public void registerAdditional() {
-        for (GameType gameType : GameType.values()) {
-            if (!this.gameModeMappings.inverse().containsKey((GameMode) (Object) gameType)) {
-                this.gameModeMappings.put(gameType.getName().toLowerCase(Locale.ENGLISH), (GameMode) (Object) gameType);
-            }
+    protected void generateInitialMap() {
+        for (GameType enumType: getValues()) {
+            this.catalogTypeMap.put(enumAs(enumType).getId(), enumAs(enumType));
         }
     }
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.world.gen.populators;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -38,7 +37,6 @@ import java.util.Random;
 public class SwampLilyPopulator implements GenerationPopulator {
 
     private NoiseGeneratorPerlin noise = new NoiseGeneratorPerlin(new Random(2345L), 1);
-    private final Cause populatorCause = Cause.source(this).build();
 
     public SwampLilyPopulator() {
 
@@ -57,10 +55,10 @@ public class SwampLilyPopulator implements GenerationPopulator {
                     for (int i1 = 255; i1 >= 0; --i1) {
                         if (buffer.getBlock(x, i1, z).getType() != BlockTypes.AIR) {
                             if (i1 == 62 && buffer.getBlock(x, i1, z).getType() != BlockTypes.WATER) {
-                                buffer.setBlock(x, i1, z, BlockTypes.WATER.getDefaultState(), this.populatorCause);
+                                buffer.setBlock(x, i1, z, BlockTypes.WATER.getDefaultState());
 
                                 if (d1 < 0.12D) {
-                                    buffer.setBlock(x, i1 + 1, z, BlockTypes.WATERLILY.getDefaultState(), this.populatorCause);
+                                    buffer.setBlock(x, i1 + 1, z, BlockTypes.WATERLILY.getDefaultState());
                                 }
                             }
                             break;

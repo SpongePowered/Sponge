@@ -57,7 +57,7 @@ public final class ColorUtil {
 
     public static int dyeColorToMojangColor(DyeColor dyeColor) {
         // For the dye
-        final float[] dyeRgbArray = EntitySheep.getDyeRgb(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase()));
+        final float[] dyeRgbArray = EntitySheep.createSheepColor(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase()));
 
         // Convert!
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
@@ -69,7 +69,7 @@ public final class ColorUtil {
     }
 
     public static Color fromDyeColor(DyeColor dyeColor) {
-        final float[] dyeRgbArray = EntitySheep.getDyeRgb(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase()));
+        final float[] dyeRgbArray = EntitySheep.createSheepColor(EnumDyeColor.valueOf(dyeColor.getName().toUpperCase()));
         final int trueRed = (int) (dyeRgbArray[0] * 255.0F);
         final int trueGreen = (int) (dyeRgbArray[1] * 255.0F);
         final int trueBlue = (int) (dyeRgbArray[2] * 255.0F);

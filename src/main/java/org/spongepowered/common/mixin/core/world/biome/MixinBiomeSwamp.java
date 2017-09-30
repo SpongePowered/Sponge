@@ -29,6 +29,7 @@ import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeSwamp;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Forest;
+import org.spongepowered.api.world.gen.populator.Fossil;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
@@ -40,12 +41,13 @@ public abstract class MixinBiomeSwamp extends MixinBiome {
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
 //        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
         super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
         forest.type(BiomeTreeTypes.SWAMP.getPopulatorObject(), 1);
         gensettings.getPopulators().add(0, forest.build());
+        gensettings.getPopulators().add(Fossil.builder().probability(1 / 64.0).build());
     }
 
 }

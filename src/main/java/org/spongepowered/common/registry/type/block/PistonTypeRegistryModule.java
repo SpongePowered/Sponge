@@ -24,38 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockPistonExtension;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PistonTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class PistonTypeRegistryModule implements CatalogRegistryModule<PistonType> {
-
-    @RegisterCatalog(PistonTypes.class)
-    private final Map<String, PistonType> pistonTypeMappings = new ImmutableMap.Builder<String, PistonType>()
-        .put("normal", (PistonType) (Object) BlockPistonExtension.EnumPistonType.DEFAULT)
-        .put("sticky", (PistonType) (Object) BlockPistonExtension.EnumPistonType.STICKY)
-        .build();
-
+@RegisterCatalog(PistonTypes.class)
+public final class PistonTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPistonExtension.EnumPistonType, PistonType> {
 
     @Override
-    public Optional<PistonType> getById(String id) {
-        return Optional.ofNullable(this.pistonTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<PistonType> getAll() {
-        return ImmutableList.copyOf(this.pistonTypeMappings.values());
+    protected BlockPistonExtension.EnumPistonType[] getValues() {
+        return BlockPistonExtension.EnumPistonType.values();
     }
 
 }

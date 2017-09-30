@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.block;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
@@ -34,20 +33,31 @@ import org.spongepowered.api.data.manipulator.mutable.block.TreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeTreeData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Value<TreeType>, TreeData, ImmutableTreeData> {
+
+    private static final Map<ItemType, TreeType> boatMapping = ImmutableMap.<ItemType, TreeType>builder()
+            .put(ItemTypes.BOAT, TreeTypes.OAK)
+            .put(ItemTypes.ACACIA_BOAT, TreeTypes.ACACIA)
+            .put(ItemTypes.BIRCH_BOAT, TreeTypes.BIRCH)
+            .put(ItemTypes.DARK_OAK_BOAT, TreeTypes.DARK_OAK)
+            .put(ItemTypes.JUNGLE_BOAT, TreeTypes.JUNGLE)
+            .put(ItemTypes.SPRUCE_BOAT, TreeTypes.SPRUCE)
+            .build();
 
     public TreeDataProcessor() {
         super(Keys.TREE_TYPE, input -> input.getItem() == ItemTypes.PLANKS || input.getItem() == ItemTypes.LEAVES
                 || input.getItem() == ItemTypes.LEAVES2 || input.getItem() == ItemTypes.LOG
                 || input.getItem() == ItemTypes.LOG2 || input.getItem() == ItemTypes.SAPLING
-                || input.getItem() == ItemTypes.WOODEN_SLAB);
+                || input.getItem() == ItemTypes.WOODEN_SLAB || boatMapping.containsKey((ItemType) input.getItem()));
     }
 
     @Override
@@ -64,6 +74,8 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     protected Optional<TreeType> getVal(ItemStack stack) {
         if (stack.getItem() == ItemTypes.LEAVES2 || stack.getItem() == ItemTypes.LOG2) {
             return Optional.of(getFromMeta(stack.getItemDamage() + 4));
+        } else if (boatMapping.containsKey((ItemType) stack.getItem())) {
+            return Optional.of(boatMapping.get(stack.getItem()));
         } else {
             return Optional.of(getFromMeta(stack.getItemDamage()));
         }
@@ -74,47 +86,28 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
         return new SpongeTreeData();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, TreeType value) {
         // TODO - the API needs to be changed, as its no longer possible to change an ItemStack's type
-        return false;
-        /*
+
         if (stack.getItem() == ItemTypes.LOG || stack.getItem() == ItemTypes.LEAVES) {
-            if (value.equals(TreeTypes.OAK) || value.equals(TreeTypes.BIRCH) ||
-                    value.equals(TreeTypes.SPRUCE) || value.equals(TreeTypes.JUNGLE)) {
-                stack.setItemDamage(this.setToMeta(value));
-                return true;
-            } else {
-                // converting block so we can set new types to the log/leave
-                if (stack.getItem() == ItemTypes.LOG) {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LOG2));
-                    stack.setItemDamage(this.setToMeta(value) - 4);
-                    return true;
-                } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LEAVES2));
-                    stack.setItemDamage(this.setToMeta(value) - 4);
-                    return true;
-                }
+            if (value == TreeTypes.ACACIA || value == TreeTypes.DARK_OAK) {
+                return false; // TODO
             }
-        } else if (stack.getItem() == ItemTypes.LOG2 || stack.getItem() == ItemTypes.LEAVES2) {
-            if (value.equals(TreeTypes.ACACIA) || value.equals(TreeTypes.DARK_OAK)) {
-                stack.setItemDamage(this.setToMeta(value) - 4);
-                return true;
-            } else {
-                // converting block so we can set old types to the log/leave
-                if (stack.getItem() == ItemTypes.LOG2) {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LOG));
-                } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.LEAVES));
-                }
-                stack.setItemDamage(this.setToMeta(value));
-                return true;
-            }
-        } else {
             stack.setItemDamage(this.setToMeta(value));
             return true;
-        }*/
+        }
+        else if (stack.getItem() == ItemTypes.LOG2) {
+            if (value == TreeTypes.OAK || value == TreeTypes.SPRUCE || value == TreeTypes.BIRCH || value == TreeTypes.JUNGLE) {
+                return false; // TODO
+            }
+            stack.setItemDamage(this.setToMeta(value) - 4);
+            return true;
+        }
+        else {
+            stack.setItemDamage(this.setToMeta(value));
+            return true;
+        }
     }
 
     @Override

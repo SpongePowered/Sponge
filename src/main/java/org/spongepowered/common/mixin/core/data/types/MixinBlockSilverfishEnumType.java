@@ -33,17 +33,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockSilverfish.EnumType.class)
-@Implements(@Interface(iface = DisguisedBlockType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = DisguisedBlockType.class, prefix = "silver$"))
 public abstract class MixinBlockSilverfishEnumType {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract String shadow$getUnlocalizedName();
 
-    public String shadow$getId() {
-        return getName();
+    public String silver$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String silver$getName() {
+        return shadow$getUnlocalizedName();
     }
 }

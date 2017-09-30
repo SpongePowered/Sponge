@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.world.border;
 
-import net.minecraft.network.play.server.SPacketWorldBorder;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
+import org.spongepowered.api.entity.living.player.Player;
 
 public final class PlayerBorderListener implements IBorderListener {
 
@@ -42,33 +44,27 @@ public final class PlayerBorderListener implements IBorderListener {
 
     @Override
     public void onSizeChanged(WorldBorder border, double newSize) {
-        this.server.getPlayerList()
-                .sendPacketToAllPlayersInDimension(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_SIZE), this.dimensionId);
+        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_SIZE));
     }
 
     @Override
     public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
-        this.server.getPlayerList()
-                .sendPacketToAllPlayersInDimension(new SPacketWorldBorder(border, SPacketWorldBorder.Action.LERP_SIZE), this.dimensionId);
+        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.LERP_SIZE));
     }
 
     @Override
     public void onCenterChanged(WorldBorder border, double x, double z) {
-        this.server.getPlayerList()
-                .sendPacketToAllPlayersInDimension(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_CENTER), this.dimensionId);
+        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_CENTER));
     }
 
     @Override
     public void onWarningTimeChanged(WorldBorder border, int newTime) {
-        this.server.getPlayerList()
-                .sendPacketToAllPlayersInDimension(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_TIME), this.dimensionId);
+        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_TIME));
     }
 
     @Override
     public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
-        this.server.getPlayerList()
-                .sendPacketToAllPlayersInDimension(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_BLOCKS),
-                        this.dimensionId);
+        sendBorderPacket(new SPacketWorldBorder(border, SPacketWorldBorder.Action.SET_WARNING_BLOCKS));
     }
 
     @Override
@@ -79,4 +75,11 @@ public final class PlayerBorderListener implements IBorderListener {
     public void onDamageBufferChanged(WorldBorder border, double newSize) {
     }
 
+    private void sendBorderPacket(Packet<?> packet) {
+        for (EntityPlayerMP player : this.server.getPlayerList().getPlayers()) {
+            if (player.dimension == this.dimensionId && !((Player) player).getWorldBorder().isPresent()) {
+                player.connection.sendPacket(packet);
+            }
+        }
+    }
 }

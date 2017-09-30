@@ -30,11 +30,10 @@ import org.spongepowered.api.data.property.item.SmeltableProperty;
 import org.spongepowered.common.data.property.store.common.AbstractItemStackPropertyStore;
 
 import java.util.Optional;
-
 public class SmeltablePropertyStore extends AbstractItemStackPropertyStore<SmeltableProperty> {
 
     @Override
     protected Optional<SmeltableProperty> getFor(ItemStack itemStack) {
-        return Optional.of(new SmeltableProperty(FurnaceRecipes.instance().getSmeltingResult(itemStack) != null));
+        return Optional.of(new SmeltableProperty(!FurnaceRecipes.instance().getSmeltingResult(itemStack).isEmpty()));
     }
 }

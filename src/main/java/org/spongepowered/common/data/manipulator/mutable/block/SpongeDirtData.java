@@ -33,9 +33,7 @@ import org.spongepowered.api.data.type.DirtType;
 import org.spongepowered.api.data.type.DirtTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirtData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeDirtData extends AbstractSingleCatalogData<DirtType, DirtData, ImmutableDirtData> implements DirtData {
 
     public SpongeDirtData(DirtType dirtType) {

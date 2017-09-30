@@ -39,31 +39,26 @@ import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
 import java.util.List;
 import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
-@Implements(@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
-public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, IMixinCustomNameable, ILockableContainer {
+public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, ILockableContainer {
 
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
@@ -74,15 +69,15 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Shadow public abstract void checkForAdjacentChests();
 
-    private Fabric<IInventory> fabric;
-    private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
-
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
-        this.slots = new SlotCollection.Builder().add(27).build();
-        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+        ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,
+                ((InventoryAdapter) this),
+                s -> new GridInventoryLensImpl(0, 9, 3, 9, s),
+                () -> new SlotCollection.Builder().add(27).build());
+        this.slots = reusableLens.getSlots();
+        this.lens = reusableLens.getLens();
     }
 
     /**
@@ -112,9 +107,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         this.checkForAdjacentChests();
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null) {
             this.lidAngle = 0.7F;
-            double posX = (double)this.pos.getX() + 0.5D;
-            double posY = (double)this.pos.getY() + 0.5D;
-            double posZ = (double)this.pos.getZ() + 0.5D;
+            double posX = this.pos.getX() + 0.5D;
+            double posY = this.pos.getY() + 0.5D;
+            double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;
@@ -148,9 +143,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
                 this.lidAngle = 0.0f;
             }
 
-            double posX = (double)this.pos.getX() + 0.5D;
-            double posY = (double)this.pos.getY() + 0.5D;
-            double posZ = (double)this.pos.getZ() + 0.5D;
+            double posX = this.pos.getX() + 0.5D;
+            double posY = this.pos.getY() + 0.5D;
+            double posZ = this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;
@@ -174,30 +169,15 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     }
 
     @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityChest) (Object) this).setCustomName(customName);
-    }
-
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return this.slots;
-    }
-
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return this.lens;
-    }
-
-    public Fabric<IInventory> inventory$getInventory() {
-        return this.fabric;
-    }
-
-    @Override
     public Optional<Inventory> getDoubleChestInventory() {
+        // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
             BlockPos blockpos = this.pos.offset(enumfacing);
 
             TileEntity tileentity1 = this.world.getTileEntity(blockpos);
 
-            if (tileentity1 instanceof TileEntityChest) {
+            if (tileentity1 instanceof TileEntityChest && tileentity1.getBlockType() == this.getBlockType()) {
+
                 InventoryLargeChest inventory;
 
                 if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH)

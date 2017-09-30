@@ -58,9 +58,8 @@ public final class LocaleCache {
             final String[] parts = key.split("_");
             if (parts.length == 2) {
                 return parts[0] + '_' + parts[1].toUpperCase();
-            } else {
-                return key;
             }
+            return key;
         }
     };
 

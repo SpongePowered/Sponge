@@ -30,7 +30,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -43,7 +42,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -57,15 +55,12 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableD
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
 
 @Mixin(EntityLightningBolt.class)
 public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning, IMixinEntityLightningBolt {
-
-    public Cause cause = Cause.source(this).build();
 
     private final List<Entity> struckEntities = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
@@ -127,25 +122,26 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
 
     @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
     public void onLivingTimeExpired(CallbackInfo ci) {
-        if (this.isDead) {
+        if (this.isDead || this.world.isRemote) {
             return;
         }
-        World world = (World) this.world;
-        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(this.cause, this.struckEntities, world, this.struckBlocks);
+        Sponge.getCauseStackManager().pushCause(this);
+        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(Sponge.getCauseStackManager().getCurrentCause(), this.struckEntities, this.struckBlocks);
         Sponge.getEventManager().post(strike);
 
         if (!strike.isCancelled()) {
             for (Transaction<BlockSnapshot> bt : strike.getTransactions()) {
                 if (bt.isValid()) {
                     BlockSnapshot bs = bt.getFinal();
-                    ((WorldServer) world).setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(), ((IBlockState) bs.getState()));
+                    this.world.setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(), ((IBlockState) bs.getState()));
                 }
             }
             for (Entity e : strike.getEntities()) {
                 ((net.minecraft.entity.Entity) e).onStruckByLightning((EntityLightningBolt) (Object) this);
             }
-            SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(this.cause));
+            SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(Sponge.getCauseStackManager().getCurrentCause()));
         }
+        Sponge.getCauseStackManager().popCause();
     }
 
     @Override
@@ -160,16 +156,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         compound.setBoolean("effect", this.effect);
-    }
-
-    @Override
-    public Cause getCause() {
-        return this.cause;
-    }
-
-    @Override
-    public void setCause(Cause cause) {
-        this.cause = cause;
     }
 
     // Data delegated methods

@@ -29,15 +29,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFirework;
-import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,8 +53,9 @@ public class MixinItemFirework extends Item {
             target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     private boolean onspawnEntity(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
         ((Firework) firework).setShooter((ProjectileSource) player);
-        this.primeCancelled = !((IMixinEntityFireworkRocket) firework)
-                .shouldPrime(Cause.of(NamedCause.of(NamedCause.IGNITER, player)));
+        Sponge.getCauseStackManager().pushCause(player);
+        this.primeCancelled = !((IMixinEntityFireworkRocket) firework).shouldPrime();
+        Sponge.getCauseStackManager().popCause();
         return !this.primeCancelled && world.spawnEntity(firework);
     }
 

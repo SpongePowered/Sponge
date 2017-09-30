@@ -27,14 +27,13 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
 public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements CraftingInventoryLens<IInventory, ItemStack> {
@@ -43,7 +42,7 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
 
     private final CraftingOutputSlotLens<IInventory, ItemStack> outputSlot;
 
-    private final GridInventoryLens<IInventory, ItemStack> craftingGrid;
+    private final CraftingGridInventoryLens<IInventory, ItemStack> craftingGrid;
 
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
@@ -70,19 +69,19 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
         super(gridBase, width, height, rowStride, xBase, yBase, adapterType, slots);
         this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);
-        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, this.width, slots);
+        this.craftingGrid = new CraftingGridInventoryLensImpl(this.base, this.width, this.height, this.width, slots);
         this.size += 1; // output slot
         // Avoid the init() method in the superclass calling our init() too early
         this.initOther(slots);
     }
 
     private void initOther(SlotProvider<IInventory, ItemStack> slots) {
-        this.addSpanningChild(this.craftingGrid, new InventoryDimension(this.width, this.height));
+        // TODO spanning children already added in GridLens this.addSpanningChild(this.craftingGrid, new InventoryDimension(this.width, this.height));
         this.addSpanningChild(this.outputSlot);
     }
 
     @Override
-    public GridInventoryLens<IInventory, ItemStack> getCraftingGrid() {
+    public CraftingGridInventoryLens<IInventory, ItemStack> getCraftingGrid() {
         return this.craftingGrid;
     }
 

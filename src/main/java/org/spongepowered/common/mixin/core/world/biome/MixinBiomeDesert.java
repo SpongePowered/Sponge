@@ -28,6 +28,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDesert;
 import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.api.world.gen.populator.DesertWell;
+import org.spongepowered.api.world.gen.populator.Fossil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
@@ -42,6 +43,7 @@ public abstract class MixinBiomeDesert extends MixinBiome {
                 .wellObject(PopulatorObjects.DESERT_WELL)
                 .build();
         gensettings.getPopulators().add(well);
+        gensettings.getPopulators().add(Fossil.builder().probability(1 / 64.0).build());
     }
 
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
@@ -95,7 +95,7 @@ public class ScheduledTask implements Task {
         this.name = taskName;
         this.syncType = syncType;
 
-        this.stringRepresentation = Objects.toStringHelper(this)
+        this.stringRepresentation = MoreObjects.toStringHelper(this)
                 .add("name", this.name)
                 .add("delay", this.offset)
                 .add("interval", this.period)
@@ -114,18 +114,16 @@ public class ScheduledTask implements Task {
     public long getDelay() {
         if (this.delayIsTicks) {
             return this.offset;
-        } else {
-            return TimeUnit.NANOSECONDS.toMillis(this.offset);
         }
+        return TimeUnit.NANOSECONDS.toMillis(this.offset);
     }
 
     @Override
     public long getInterval() {
         if (this.intervalIsTicks) {
             return this.period;
-        } else {
-            return TimeUnit.NANOSECONDS.toMillis(this.period);
         }
+        return TimeUnit.NANOSECONDS.toMillis(this.period);
     }
 
     @Override
@@ -172,9 +170,8 @@ public class ScheduledTask implements Task {
     long nextExecutionTimestamp() {
         if (this.state.isActive) {
             return this.timestamp + this.period;
-        } else {
-            return this.timestamp + this.offset;
         }
+        return this.timestamp + this.offset;
     }
 
     void setTimestamp(long timestamp) {

@@ -36,24 +36,18 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CapturedMultiMapSupplier;
-import org.spongepowered.common.event.tracking.CapturedSupplier;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
@@ -67,15 +61,17 @@ import javax.annotation.Nullable;
 public final class GeneralPhase extends TrackingPhase {
 
     public static final class State {
-        public static final IPhaseState COMMAND = new CommandState();
-        public static final IPhaseState EXPLOSION = new ExplosionState();
-        public static final IPhaseState COMPLETE = new CompletePhase();
+        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
+        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
+        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
+        public static final IPhaseState<?> TILE_ENTITY_UNLOAD = new TileEntityUnloadState();
+        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
 
         private State() { }
     }
 
     public static final class Post {
-        public static final IPhaseState UNWINDING = new PostState();
+        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = new PostState();
 
         private Post() { }
     }
@@ -92,48 +88,15 @@ public final class GeneralPhase extends TrackingPhase {
         static final GeneralPhase INSTANCE = new GeneralPhase();
     }
 
-    @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        ((GeneralState) state).unwind(causeTracker, phaseContext);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlockSupplier().orEmptyList();
-        final List<Entity> contextEntities = postContext.getCapturedEntitySupplier().orEmptyList();
-        final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsSupplier().orEmptyList();
-        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
-            return;
-        }
-        if (!contextBlocks.isEmpty()) {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-            contextBlocks.clear();
-            processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingContext);
-        }
-        if (!contextEntities.isEmpty()) {
-            final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
-            contextEntities.clear();
-            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, unwindingContext, entities);
-        }
-        if (!contextItems.isEmpty()) {
-            final ArrayList<Entity> items = new ArrayList<>(contextItems);
-            contextItems.clear();
-            unwindingState.getPhase().processPostItemSpawns(causeTracker, unwindingState, items);
-        }
-
-    }
 
     /**
-     *
-     * @param snapshotsToProcess
-     * @param causeTracker
+     *  @param snapshotsToProcess
      * @param unwindingState
      * @param unwinding
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker,
-            IPhaseState unwindingState, PhaseContext unwinding) {
+    @SuppressWarnings({"unchecked"})
+    public static void processBlockTransactionListsPost(PhaseContext<?> postContext, List<BlockSnapshot> snapshotsToProcess,
+                                                        IPhaseState<?> unwindingState, PhaseContext<?> unwinding) {
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[TrackingUtil.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[TrackingUtil.EVENT_COUNT];
@@ -141,13 +104,12 @@ public final class GeneralPhase extends TrackingPhase {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
-        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
 
         for (BlockSnapshot snapshot : snapshotsToProcess) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
             TrackingUtil.TRANSACTION_PROCESSOR.apply(transactionBuilders)
-                    .accept(TrackingUtil.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
+                    .accept(TrackingUtil.TRANSACTION_CREATION.apply(snapshot));
         }
 
         for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
@@ -157,14 +119,12 @@ public final class GeneralPhase extends TrackingPhase {
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
-        final Cause.Builder builder = Cause.source(unwinding.getSource(Object.class).get());
-        final World world = causeTracker.getWorld();
         // Creates the block events accordingly to the transaction arrays
-        TrackingUtil.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
+        TrackingUtil.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents);
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
         final ChangeBlockEvent.Post
                 postEvent =
-                TrackingUtil.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
+                TrackingUtil.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents);
 
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
@@ -215,15 +175,15 @@ public final class GeneralPhase extends TrackingPhase {
             }
             invalidTransactions.clear();
         }
-        performPostBlockAdditions(causeTracker, postContext, postEvent.getTransactions(), builder, unwindingState, unwinding);
+        performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
 
-    private static void performPostBlockAdditions(CauseTracker causeTracker, PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions,
-            Cause.Builder builder, IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
+    @SuppressWarnings("unchecked")
+    private static void performPostBlockAdditions(PhaseContext<?> postContext, List<Transaction<BlockSnapshot>> transactions,
+                                                  IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
-        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
+        final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
         final CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = postContext.getBlockDropSupplier();
         final CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = postContext.getBlockItemDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
@@ -239,13 +199,17 @@ public final class GeneralPhase extends TrackingPhase {
             final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
 
             // Handle item drops captured
-            final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
+            final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldLocation.getExtent();
+            final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
             capturedBlockDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
+                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, unwindingPhaseContext, unwindingState));
             capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
+                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot,
+                        unwindingPhaseContext, unwindingState));
 
-            SpongeHooks.logBlockAction(builder, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
+            final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
+            SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             final int updateFlag = oldBlockSnapshot.getUpdateFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -254,89 +218,72 @@ public final class GeneralPhase extends TrackingPhase {
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
                     newState)) {
-                newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
+                newState.getBlock().onBlockAdded(worldServer, pos, newState);
                 postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
 
                 });
                 capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
                     final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
                     blocks.clear();
-                    processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
+                    processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingPhaseContext);
                 });
             }
 
             proxyBlockAccess.proceed();
 
-            unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, unwindingPhaseContext);
+            ((IPhaseState) unwindingState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, unwindingPhaseContext);
 
             if (((updateFlag & 2) != 0)) {
                 // Since notifyBlockUpdate is basically to tell clients that the block position has changed,
                 // we need to respect that flag
-                causeTracker.getMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, updateFlag);
+                worldServer.notifyBlockUpdate(pos, originalState, newState, updateFlag);
             }
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
+                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
             } else if ((updateFlag & 16) == 0) {
-                causeTracker.getMinecraftWorld().updateObservingBlocksAt(pos, newState.getBlock());
+                worldServer.updateObservingBlocksAt(pos, newState.getBlock());
             }
 
             capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
                 blocks.clear();
-                processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
+                processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingPhaseContext);
             });
         }
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.state == Post.UNWINDING;
+    public boolean alreadyCapturingEntitySpawns(IPhaseState<?> state) {
+        return state == Post.UNWINDING || state == State.EXPLOSION;
     }
 
     @Override
-    public boolean ignoresBlockEvent(IPhaseState phaseState) {
-        return phaseState == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntitySpawns(IPhaseState state) {
+    public boolean alreadyCapturingEntityTicks(IPhaseState<?> state) {
         return state == Post.UNWINDING;
     }
 
     @Override
-    public boolean alreadyCapturingEntityTicks(IPhaseState state) {
+    public boolean alreadyCapturingTileTicks(IPhaseState<?> state) {
         return state == Post.UNWINDING;
     }
 
     @Override
-    public boolean alreadyCapturingTileTicks(IPhaseState state) {
-        return state == Post.UNWINDING;
+    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
+        return currentState == Post.UNWINDING || currentState == State.EXPLOSION;
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
-        return currentState == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean ignoresItemPreMerging(IPhaseState currentState) {
+    public boolean ignoresItemPreMerging(IPhaseState<?> currentState) {
         return currentState == State.COMMAND || currentState == State.COMPLETE || super.ignoresItemPreMerging(currentState);
     }
 
     @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState != State.COMPLETE;
-    }
-
-    @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
-            final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Intended to be unwinding a phase but no phase unwinding found!", context));
-            final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Intended to be unwinding a phase with a context, but no context found!", context));
+            final IPhaseState<?> unwindingState = ((UnwindingPhaseContext) context).getUnwindingState();
+            final PhaseContext<?> unwindingContext = ((UnwindingPhaseContext) context).getUnwindingContext();
             unwindingState.getPhase()
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {
@@ -347,25 +294,14 @@ public final class GeneralPhase extends TrackingPhase {
         }
     }
 
-    @Override
-    public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
-        return phaseState == Post.UNWINDING;
-    }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
-        return phaseState != State.COMPLETE
-               ? context.getCapturedEntities().add(entity)
-               : super.spawnEntityOrCapture(causeTracker, phaseState, context, entity, chunkX, chunkZ);
-    }
-
-    @Override
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
         if (currentPhaseData.state == Post.UNWINDING) {
             ((PostState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
             return;
         }
         super.appendContextPreExplosion(phaseContext, currentPhaseData);
     }
+
 }

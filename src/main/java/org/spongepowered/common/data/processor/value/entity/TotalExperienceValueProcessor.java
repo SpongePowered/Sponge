@@ -79,7 +79,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
             // Increment level, as we know we are at least that level (in the first instance -1 -> 0)
             // and add the next amount of experience to the variable.
             experienceAtNextLevel += ExperienceHolderUtils.getExpBetweenLevels(++level);
-        } while (experienceAtNextLevel <= value);
+        } while (experienceAtNextLevel <= value && experienceAtNextLevel > 0);
 
         // Once we're here, we have the correct level. The experience is the decimal fraction that we are through the
         // current level. This is why we require the experienceForCurrentLevel variable, we need the difference between

@@ -24,22 +24,31 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-public class BlockWorkerPhaseState extends PluginPhaseState {
+public class BlockWorkerPhaseState extends BasicPluginState {
 
     BlockWorkerPhaseState() {
     }
 
     @Override
-    void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+    public BasicPluginContext createPhaseContext() {
+        return super.createPhaseContext()
+            .addCaptures();
+    }
+
+    @Override
+    public void unwind(BasicPluginContext phaseContext) {
         phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
 
         });
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, causeTracker, this, phaseContext));
+            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
+    }
 
+    @Override
+    public boolean handlesOwnStateCompletion() {
+        return true;
     }
 }

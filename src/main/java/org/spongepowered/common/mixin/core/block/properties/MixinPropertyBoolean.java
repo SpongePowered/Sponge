@@ -27,12 +27,6 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.PropertyBool;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Collection;
 
 @Mixin(value = PropertyBool.class)
 public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> implements BooleanTrait {

@@ -25,31 +25,28 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePassengerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.List;
+import java.util.UUID;
 
-public class ImmutableSpongePassengerData extends AbstractImmutableListData<EntitySnapshot, ImmutablePassengerData, PassengerData> implements ImmutablePassengerData {
+public class ImmutableSpongePassengerData extends AbstractImmutableListData<UUID, ImmutablePassengerData, PassengerData> implements
+        ImmutablePassengerData {
 
 
-    public ImmutableSpongePassengerData(List<EntitySnapshot> passenger) {
+    public ImmutableSpongePassengerData(List<UUID> passenger) {
         super(ImmutablePassengerData.class, checkNotNull(passenger), Keys.PASSENGERS, SpongePassengerData.class);
     }
 
     @Override
-    public ImmutableListValue<EntitySnapshot> passengers() {
+    public ImmutableListValue<UUID> passengers() {
         return this.getValueGetter();
     }
 

@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.config.category;
 
+import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+
+import java.io.IOException;
 
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
@@ -37,24 +40,11 @@ public class OptimizationCategory extends ConfigCategory {
                                                     + "pre-merged and actually spawned, in which case, the items will flow right through\n"
                                                     + "without being merged.";
 
-    @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
-    private boolean ignoreUnloadedChunkLighting = true;
-
-    @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
-    private boolean useCachedChunkMap = true;
-
     @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
-    private boolean preItemDropMerge = true;
+    private boolean preItemDropMerge;
 
     @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
     private boolean cacheTameableOwners = true;
-
-    @Setting(value = "inline-block-position-checks", comment = "Inlines a simple check for whether a BlockPosition is valid\n"
-                                                               + "in a world. By patching the check, the JVM can optimize the\n"
-                                                               + "method further while reducing the number of operations performed\n"
-                                                               + "for such a simple check. This may however break mods that alter\n"
-                                                               + "world heights and can thus be disabled in those cases.")
-    private boolean inlineBlockPositionChecks = true;
 
     @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures can take up large amounts\n"
             + "of disk space for very large maps and the data for these structures is only needed while the world\n"
@@ -62,6 +52,25 @@ public class OptimizationCategory extends ConfigCategory {
             + "saves if your world is already fully generated.\n"
             + "Warning: disabling structure saving will break the vanilla locate command.")
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
+
+    @Setting(value = "async-lighting", comment = "Runs lighting updates async.")
+    private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
+
+    @Setting(value = "panda-redstone", comment = "If enabled, uses Panda4494's Redstone implementation which improves performance.\n"
+            + "See https://bugs.mojang.com/browse/MC-11193 for more information.\n"
+            + "Note: This optimization has a few issues which is explained in the bug report. We are not responsible for any issues this may cause.")
+    private boolean pandaRedstone = false;
+
+    public OptimizationCategory() {  
+        try {  
+            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.  
+            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game  
+            this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;  
+       } catch (IOException e) {  
+          e.printStackTrace();  
+       }  
+    }  
+
 
     public StructureSaveCategory getStructureSaveCategory() {
         return this.structureSaveCategory;
@@ -71,24 +80,23 @@ public class OptimizationCategory extends ConfigCategory {
         return this.structureSaveCategory.isEnabled();
     }
 
-    public boolean useIgnoreUloadedChunkLightingPatch() {
-        return this.ignoreUnloadedChunkLighting;
-    }
-
-    public boolean isUseCachedChunkMap() {
-        return this.useCachedChunkMap;
-    }
-
     public boolean doDropsPreMergeItemDrops() {
         return this.preItemDropMerge;
     }
-
 
     public boolean useCacheTameableOwners() {
         return this.cacheTameableOwners;
     }
 
-    public boolean isInlineBlockPositionChecks() {
-        return this.inlineBlockPositionChecks;
+    public AsyncLightingCategory getAsyncLightingCategory() {
+        return this.asyncLightingCategory;
+    }
+
+    public boolean useAsyncLighting() {
+        return this.asyncLightingCategory.isEnabled();
+    }
+
+    public boolean usePandaRedstone() {
+        return this.pandaRedstone;
     }
 }

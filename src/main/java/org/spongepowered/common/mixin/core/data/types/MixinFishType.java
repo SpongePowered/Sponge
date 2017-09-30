@@ -40,13 +40,13 @@ import java.util.Optional;
 public abstract class MixinFishType implements Fish {
 
     @Shadow @Final private String unlocalizedName;
-    @Shadow private boolean cookable;
+    @Final @Shadow private boolean cookable;
 
     private Translation translation;
 
     @Override
     public String getId() {
-        return "raw." + this.unlocalizedName;
+        return "minecraft:raw." + this.unlocalizedName;
     }
 
     @Override

@@ -31,6 +31,9 @@ import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import java.util.Date;
 
@@ -41,12 +44,23 @@ public abstract class MixinUserBanEntry extends UserListEntryBan<com.mojang.auth
         super(valueIn, startDate, banner, endDate, banReason);
     }
 
+    /**
+     * Fix {@link Ban#getCreationDate()} by passing the correct date to the
+     * super constructor. (Minecraft incorrectly passes endDate as startDate)
+     */
+    @ModifyArgs(method = "<init>(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V",
+        at = @At(value = "INVOKE",
+                target = "Lnet/minecraft/server/management/UserListEntryBan;<init>(Ljava/lang/Object;Ljava/util/Date;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V"))
+    private static void fixCreationDate(Args args, com.mojang.authlib.GameProfile profile, Date startDate, String banner, Date endDate,
+            String banReason) {
+        args.setAll(profile, startDate, banner, endDate, banReason);
+    }
+
     @Override
     public BanType getType() {
         return BanTypes.PROFILE;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public GameProfile getProfile() {
         return (GameProfile) this.getValue();

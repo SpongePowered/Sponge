@@ -31,6 +31,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 
 public final class TrackingPhases {
 
@@ -42,6 +43,7 @@ public final class TrackingPhases {
     public static final PluginPhase PLUGIN = PluginPhase.getInstance();
     public static final GenerationPhase GENERATION = GenerationPhase.getInstance();
     public static final PlayerPhase PLAYER = PlayerPhase.getInstance();
+    public static final DragonPhase DRAGON = DragonPhase.getInstance();
 
     private TrackingPhases() {
     }

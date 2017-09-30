@@ -54,7 +54,6 @@ public class SpongeObjective implements Objective {
     private ObjectiveDisplayMode displayMode;
     private Map<Text, Score> scores = new HashMap<>();
 
-    @SuppressWarnings("deprecation")
     public SpongeObjective(String name, Criterion criterion) {
         this.name = name;
         this.displayName = SpongeTexts.fromLegacy(name);
@@ -78,11 +77,10 @@ public class SpongeObjective implements Objective {
         this.updateDisplayName();
     }
 
-    @SuppressWarnings("deprecation")
     private void updateDisplayName() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.displayName = SpongeTexts.toLegacy(this.displayName);
-            objective.theScoreboard.onObjectiveDisplayNameChanged(objective);
+            objective.scoreboard.onObjectiveDisplayNameChanged(objective);
         }
     }
 
@@ -106,7 +104,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayMode() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.renderType = (IScoreCriteria.EnumRenderType) (Object) this.displayMode;
-            objective.theScoreboard.onObjectiveDisplayNameChanged(objective);
+            objective.scoreboard.onObjectiveDisplayNameChanged(objective);
         }
     }
 
@@ -131,7 +129,7 @@ public class SpongeObjective implements Objective {
 
         SpongeScore spongeScore = (SpongeScore) score;
         for (ScoreObjective objective: this.objectives.values()) {
-            this.addScoreToScoreboard(objective.theScoreboard, spongeScore.getScoreFor(objective));
+            this.addScoreToScoreboard(objective.scoreboard, spongeScore.getScoreFor(objective));
         }
     }
 
@@ -144,10 +142,9 @@ public class SpongeObjective implements Objective {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void addScoreToScoreboard(net.minecraft.scoreboard.Scoreboard scoreboard, net.minecraft.scoreboard.Score score) {
         String name = score.scorePlayerName;
-        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = (Map)scoreboard.entitiesScoreObjectives.get(name);
+        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = scoreboard.entitiesScoreObjectives.get(name);
 
         if (scoreMap == null)
         {
@@ -155,7 +152,7 @@ public class SpongeObjective implements Objective {
             scoreboard.entitiesScoreObjectives.put(name, scoreMap);
         }
 
-        scoreMap.put(score.theScoreObjective, score);
+        scoreMap.put(score.objective, score);
 
         // Trigger refresh
         score.forceUpdate = true;
@@ -187,7 +184,7 @@ public class SpongeObjective implements Objective {
         }
 
         for (ScoreObjective objective: this.objectives.values()) {
-            net.minecraft.scoreboard.Scoreboard scoreboard = objective.theScoreboard;
+            net.minecraft.scoreboard.Scoreboard scoreboard = objective.scoreboard;
 
             Map<?, ?> map = scoreboard.entitiesScoreObjectives.get(name);
 

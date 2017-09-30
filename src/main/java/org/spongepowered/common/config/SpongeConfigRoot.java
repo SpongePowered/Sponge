@@ -65,7 +65,7 @@ public class SpongeConfigRoot implements ConfigRoot {
     public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
         return HoconConfigurationLoader.builder()
                 .setPath(getConfigPath())
-                .setDefaultOptions(ConfigurationOptions.defaults().setObjectMapperFactory(mapperFactory))
+                .setDefaultOptions(ConfigurationOptions.defaults().setObjectMapperFactory(this.mapperFactory))
                 .build();
     }
 

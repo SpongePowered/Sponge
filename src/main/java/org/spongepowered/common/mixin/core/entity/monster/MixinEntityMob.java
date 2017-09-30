@@ -34,23 +34,27 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
+import org.spongepowered.api.event.cause.entity.ModifierFunction;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 @Mixin(EntityMob.class)
 public abstract class MixinEntityMob extends MixinEntityCreature implements Monster {
@@ -74,22 +78,24 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
         final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-        final List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
+        final List<DamageFunction> originalFunctions = new ArrayList<>();
         // Sponge End
         int knockbackModifier = 0;
 
         if (targetEntity instanceof EntityLivingBase) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackModifier((EntityMob) (Object) this);
         }
 
         // Sponge Start - Throw our event and handle appropriately
         final DamageSource damageSource = DamageSource.causeMobDamage((EntityMob) (Object) this);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Cause.source(damageSource).build(), originalFunctions,
+        Sponge.getCauseStackManager().pushCause(damageSource);
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions,
                 EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;
         }
@@ -131,4 +137,41 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         return attackSucceeded;
     }
 
+    /**
+     * @author aikar - February 20th, 2017 - Optimizes light level check.
+     * @author blood - February 20th, 2017 - Avoids checking unloaded chunks and chunks with pending light updates.
+     *
+     * @reason Avoids checking unloaded chunks and chunks with pending light updates.
+     *
+     * @return Whether current position has a valid light level for spawning
+     */
+    @Overwrite
+    protected boolean isValidLightLevel()
+    {
+        final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+        final Chunk chunk = ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+        if (chunk == null || chunk.unloadQueued) {
+            return false;
+        }
+
+        if (this.world.getLightFor(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32))
+        {
+            return false;
+        } 
+        else 
+        {
+            //int i = this.worldObj.getLightFromNeighbors(blockpos);
+            boolean passes; // Sponge
+            if (this.world.isThundering()) {
+                int j = this.world.getSkylightSubtracted();;
+                this.world.setSkylightSubtracted(10);
+                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                this.world.setSkylightSubtracted(j);
+            } else { 
+                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9)); 
+            }
+
+            return passes;
+        }
+    }
 }

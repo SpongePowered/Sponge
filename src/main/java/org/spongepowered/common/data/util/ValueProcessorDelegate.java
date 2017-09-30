@@ -29,7 +29,6 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 
@@ -98,7 +97,6 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
         for (ValueProcessor<E, V> processor : this.processors) {

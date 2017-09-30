@@ -31,9 +31,7 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCookedFishData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeCookedFishData extends AbstractSingleCatalogData<CookedFish, CookedFishData, ImmutableCookedFishData> implements CookedFishData {
 
     public SpongeCookedFishData() {

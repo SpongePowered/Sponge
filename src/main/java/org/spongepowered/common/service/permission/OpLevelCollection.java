@@ -26,12 +26,13 @@ package org.spongepowered.common.service.permission;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
@@ -67,13 +68,13 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public boolean hasRegistered(String identifier) {
+    public boolean isRegistered(String identifier) {
         return this.levels.containsKey(identifier);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterable<Subject> getAllSubjects() {
+    public Collection<Subject> getLoadedSubjects() {
         return (Collection) this.levels.values();
     }
 
@@ -89,14 +90,14 @@ public class OpLevelCollection extends SpongeSubjectCollection {
             this.data = new GlobalMemorySubjectData(service) {
 
                 @Override
-                public List<Subject> getParents(Set<Context> contexts) {
-                    if (!GLOBAL_CONTEXT.equals(contexts)) {
+                public List<SubjectReference> getParents(Set<Context> contexts) {
+                    if (!contexts.isEmpty()) {
                         return Collections.emptyList();
                     }
                     if (level == 0) {
                         return super.getParents(contexts);
                     } else {
-                        return ImmutableList.<Subject>builder().add(service.getGroupForOpLevel(level - 1)).addAll(super.getParents(contexts)).build();
+                        return ImmutableList.<SubjectReference>builder().add(service.getGroupForOpLevel(level - 1).asSubjectReference()).addAll(super.getParents(contexts)).build();
                     }
                 }
             };
@@ -113,6 +114,11 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
+        public Optional<String> getFriendlyIdentifier() {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<CommandSource> getCommandSource() {
             return Optional.empty();
         }
@@ -120,6 +126,16 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         @Override
         public SubjectCollection getContainingCollection() {
             return this.service.getGroupSubjects();
+        }
+
+        @Override
+        public PermissionService getService() {
+            return service;
+        }
+
+        @Override
+        public SubjectReference asSubjectReference() {
+            return this.service.newSubjectReference(getContainingCollection().getIdentifier(), getIdentifier());
         }
 
         @Override

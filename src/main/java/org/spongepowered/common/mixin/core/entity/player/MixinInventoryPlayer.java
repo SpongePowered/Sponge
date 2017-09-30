@@ -30,14 +30,14 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
-import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -49,12 +49,15 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
@@ -74,25 +77,62 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Shadow public abstract int getInventoryStackLimit();
 
+    @Shadow public abstract int getSizeInventory();
+
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
-    protected PlayerInventoryLens lens;
+    protected MinecraftLens lens;
 
     private Player carrier;
     private HotbarAdapter hotbar;
-    private GridInventoryAdapter main;
+    private MainPlayerInventoryAdapter main;
     private EquipmentInventoryAdapter equipment;
     private SlotAdapter offhand;
 
+    private int offhandIndex;
+
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
+        // Find offhand slot
+        for (NonNullList<ItemStack> inventory : this.allInventories) {
+            if (inventory == this.offHandInventory) {
+                break;
+            }
+            this.offhandIndex += inventory.size();
+        }
+
+        // Set Carrier if we got a real Player
         if (playerIn instanceof EntityPlayerMP) {
-            // We only care about Server inventories
-            this.inventory = new DefaultInventoryFabric((IInventory) this);
-            this.slots = new SlotCollection.Builder().add(mainInventory.size()).add(offHandInventory.size()).add(armorInventory.size(),
-                    EquipmentSlotAdapter.class).build();
             this.carrier = (Player) playerIn;
-            this.lens = new PlayerInventoryLens(this, this.slots);
+
+            this.inventory = new DefaultInventoryFabric((IInventory) this);
+            Class clazz = this.getClass();
+            if (clazz == InventoryPlayer.class) { // Build Player Lens
+                // We only care about Server inventories
+                this.slots = new SlotCollection.Builder()
+                        .add(this.mainInventory.size())
+                        .add(this.offHandInventory.size())
+                        .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
+                        // for mods providing bigger inventories
+                        .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
+                        .build();
+                this.lens = new PlayerInventoryLens(this, this.slots);
+            } else if (this.getSizeInventory() != 0) { // Fallback OrderedLens when not 0 sized inventory
+                this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
+                this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+            }
+        }
+    }
+
+    @Override
+    public int getHeldItemIndex(EnumHand hand) {
+        switch (hand) {
+            case MAIN_HAND:
+                return this.currentItem;
+            case OFF_HAND:
+                return this.offhandIndex;
+            default:
+                throw new AssertionError(hand);
         }
     }
 
@@ -117,17 +157,9 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     }
 
     @Override
-    public Hotbar getHotbar() {
-        if (this.hotbar == null) {
-            this.hotbar = (HotbarAdapter) this.lens.getHotbarLens().getAdapter(this.inventory, this);
-        }
-        return this.hotbar;
-    }
-
-    @Override
-    public GridInventory getMain() {
-        if (this.main == null) {
-            this.main = (GridInventoryAdapter) this.lens.getMainLens().getAdapter(this.inventory, this);
+    public MainPlayerInventory getMain() {
+        if (this.main == null && this.lens instanceof PlayerInventoryLens) {
+            this.main = (MainPlayerInventoryAdapter) ((PlayerInventoryLens) this.lens).getMainLens().getAdapter(this.inventory, this);
         }
         return this.main;
     }
@@ -135,15 +167,15 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public EquipmentInventory getEquipment() {
         if (this.equipment == null) {
-            this.equipment = (EquipmentInventoryAdapter) this.lens.getEquipmentLens().getAdapter(this.inventory, this);
+            this.equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.lens).getEquipmentLens().getAdapter(this.inventory, this);
         }
         return this.equipment;
     }
 
     @Override
     public Slot getOffhand() {
-        if (this.offhand == null) {
-            this.offhand = (SlotAdapter) this.lens.getOffhandLens().getAdapter(this.inventory, this);
+        if (this.offhand == null && this.lens instanceof PlayerInventoryLens) {
+            this.offhand = (SlotAdapter) ((PlayerInventoryLens) this.lens).getOffhandLens().getAdapter(this.inventory, this);
         }
         return this.offhand;
     }
@@ -177,7 +209,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         {
             for (int i = 0; i < aitemstack.size(); ++i)
             {
-                if (aitemstack.get(i) != null)
+                if (!aitemstack.get(i).isEmpty())
                 {
                     this.player.dropItem(aitemstack.get(i), true, false);
                     //aitemstack[i] = null; // Sponge - we handle this after calling the death event

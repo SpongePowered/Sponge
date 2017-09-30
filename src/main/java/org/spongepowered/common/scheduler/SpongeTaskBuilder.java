@@ -36,6 +36,7 @@ import java.util.function.Consumer;
 
 public class SpongeTaskBuilder implements Task.Builder {
 
+    private final SpongeScheduler scheduler;
     private Consumer<Task> consumer;
     private ScheduledTask.TaskSynchronicity syncType;
     private String name;
@@ -44,7 +45,8 @@ public class SpongeTaskBuilder implements Task.Builder {
     private boolean delayIsTicks;
     private boolean intervalIsTicks;
 
-    public SpongeTaskBuilder() {
+    public SpongeTaskBuilder(SpongeScheduler scheduler) {
+        this.scheduler = scheduler;
         this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
     }
 
@@ -101,11 +103,11 @@ public class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task submit(Object plugin) {
-        PluginContainer pluginContainer = SpongeScheduler.checkPluginInstance(plugin);
+        PluginContainer pluginContainer = this.scheduler.checkPluginInstance(plugin);
         checkState(this.consumer != null, "Runnable task not set");
         String name;
         if (this.name == null) {
-            name = SpongeScheduler.getInstance().getNameFor(pluginContainer, this.syncType);
+            name = this.scheduler.getNameFor(pluginContainer, this.syncType);
         } else {
             name = this.name;
         }
@@ -119,7 +121,7 @@ public class SpongeTaskBuilder implements Task.Builder {
             delayIsTicks = intervalIsTicks = false;
         }
         ScheduledTask task = new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, pluginContainer);
-        SpongeScheduler.getInstance().submit(task);
+        this.scheduler.submit(task);
         return task;
     }
 

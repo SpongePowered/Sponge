@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.economy;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 
 public class SpongeTransactionType implements TransactionType {
 
     private final String id;
+    private final String name;
 
-    public SpongeTransactionType(String id) {
+    public SpongeTransactionType(String id, String name) {
         this.id = id;
+        this.name = name;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class SpongeTransactionType implements TransactionType {
 
     @Override
     public String getName() {
-        return this.id;
+        return this.name;
     }
 
     @Override
@@ -60,7 +62,7 @@ public class SpongeTransactionType implements TransactionType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.getId())
                 .toString();
     }

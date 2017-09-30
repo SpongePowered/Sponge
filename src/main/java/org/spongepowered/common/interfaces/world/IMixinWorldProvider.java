@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.border.WorldBorder;
 
 public interface IMixinWorldProvider {
@@ -32,7 +31,5 @@ public interface IMixinWorldProvider {
     WorldBorder createServerWorldBorder();
 
     void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
 
 }

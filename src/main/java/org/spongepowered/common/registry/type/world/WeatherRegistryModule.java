@@ -24,40 +24,27 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.weather.SpongeWeather;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(Weathers.class)
+public final class WeatherRegistryModule
+    extends AbstractPrefixAlternateCatalogTypeRegistryModule<Weather>
+        implements AlternateCatalogRegistryModule<Weather> {
 
-public final class WeatherRegistryModule implements CatalogRegistryModule<Weather> {
-
-    @RegisterCatalog(Weathers.class)
-    private final Map<String, Weather> weatherMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<Weather> getById(String id) {
-        return Optional.ofNullable(this.weatherMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Weather> getAll() {
-        return ImmutableList.copyOf(this.weatherMappings.values());
+    public WeatherRegistryModule() {
+        super("minecraft");
     }
 
     @Override
     public void registerDefaults() {
-        this.weatherMappings.put("clear", new SpongeWeather("clear"));
-        this.weatherMappings.put("rain", new SpongeWeather("rain"));
-        this.weatherMappings.put("thunder_storm", new SpongeWeather("thunder_storm"));
+        register(new SpongeWeather("minecraft:clear", "clear"));
+        register(new SpongeWeather("minecraft:rain", "rain"));
+        register(new SpongeWeather("minecraft:thunder_storm", "thunder_storm"));
     }
+
 }

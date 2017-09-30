@@ -33,14 +33,12 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -59,6 +57,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +104,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
             .worldId(location.getExtent().getUniqueId());
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
             final TileEntity tileEntity = location.getTileEntity().get();
-            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
+            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
@@ -154,11 +153,10 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     public <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         if (!supports(checkNotNull(key))) {
             return Optional.empty();
-        } else {
-            E current = this.get(key).get();
-            final E newVal = checkNotNull(function.apply(current));
-            return this.with(key, newVal);
         }
+        E current = this.get(key).get();
+        final E newVal = checkNotNull(function.apply(current));
+        return this.with(key, newVal);
     }
 
     @Override
@@ -175,14 +173,13 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public Optional<BlockState> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        if (supports((Class<ImmutableDataManipulator<?, ?>>) (Class) valueContainer.getClass())) {
+        if (supports((Class<ImmutableDataManipulator<?, ?>>) valueContainer.getClass())) {
             return ((IMixinBlock) this.block).getStateWithData(this, valueContainer);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -208,38 +205,35 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     public BlockState merge(BlockState that) {
         if (!getType().equals(that.getType())) {
             return this;
-        } else {
-            BlockState temp = this;
-            for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                Optional<BlockState> optional = temp.with(manipulator);
-                if (optional.isPresent()) {
-                    temp = optional.get();
-                } else {
-                    return temp;
-                }
-            }
-            return temp;
         }
+        BlockState temp = this;
+        for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
+            Optional<BlockState> optional = temp.with(manipulator);
+            if (optional.isPresent()) {
+                temp = optional.get();
+            } else {
+                return temp;
+            }
+        }
+        return temp;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public BlockState merge(BlockState that, MergeFunction function) {
         if (!getType().equals(that.getType())) {
             return this;
-        } else {
-            BlockState temp = this;
-            for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
-                Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
-                if (optional.isPresent()) {
-                    temp = optional.get();
-                } else {
-                    return temp;
-                }
-            }
-            return temp;
         }
+        BlockState temp = this;
+        for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
+            @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
+            Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
+            if (optional.isPresent()) {
+                temp = optional.get();
+            } else {
+                return temp;
+            }
+        }
+        return temp;
     }
 
     @Override
@@ -320,7 +314,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.BLOCK_STATE, this.getId());
     }

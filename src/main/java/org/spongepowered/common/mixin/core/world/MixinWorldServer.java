@@ -31,14 +31,15 @@ import co.aikar.timings.TimingHistory;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -49,17 +50,23 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.GameType;
+import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
@@ -68,14 +75,16 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import net.minecraft.world.storage.WorldSavedData;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -85,6 +94,8 @@ import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -92,23 +103,22 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
@@ -138,21 +148,23 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -160,9 +172,10 @@ import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
-import org.spongepowered.common.interfaces.world.IMixinExplosion;
+import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
@@ -172,7 +185,6 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -183,8 +195,9 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.type.SpongeWorldType;
 
-import java.io.BufferedWriter;
-import java.io.StringWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -210,19 +223,21 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
 
-    private final CauseTracker causeTracker = new CauseTracker((WorldServer) (Object) this);
+    private static final EnumSet<EnumFacing> NOTIFY_DIRECTIONS = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
+
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
     private SpongeConfig<?> activeConfig;
     protected long weatherStartTime;
     protected Weather prevWeather;
-    protected WorldTimingsHandler timings = new WorldTimingsHandler((WorldServer) (Object) this);
+    protected WorldTimingsHandler timings;
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
     private long chunkUnloadDelay = 30000;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
+    private int dimensionId;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -234,18 +249,40 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int updateEntityTick;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow protected abstract void createBonusChest();
+    @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
-    @Shadow protected abstract void playerCheckLight();
-    @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
-    @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
+    @Shadow public abstract void playerCheckLight();
+    @Shadow public abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
+    @Shadow public boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
         return false; // Shadowed
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;setWorld(Lnet/minecraft/world/World;)V"))
+    public void onSetWorld(WorldProvider worldProvider, World worldIn) {
+        // Guarantees no mod has changed our worldInfo.
+        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
+        // This change is not needed as all worlds in Sponge use separate save handlers.
+        WorldInfo originalWorldInfo = worldIn.getWorldInfo();
+        worldProvider.setWorld(worldIn);
+        this.worldInfo = originalWorldInfo;
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
+        if (info == null) {
+            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
+                    new RuntimeException("Stack trace:"));
+            this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT),
+                    "sponge$dummy_world");
+        }
+        // Checks to make sure no mod has changed our worldInfo and if so, reverts back to original.
+        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
+        // This change is not needed as all worlds use separate save handlers.
+        this.worldInfo = info;
+        this.timings = new WorldTimingsHandler((WorldServer) (Object) this);
+        this.dimensionId = dimensionId;
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
@@ -270,22 +307,49 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.updateEntityTick = 0;
     }
 
-    @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
-    public void onCreateBonusChest(CallbackInfo ci) {
-        if (CauseTracker.ENABLED) {
-            this.getCauseTracker().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(NamedCause.source(this))
-                    .addCaptures()
-                    .complete());
+    @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
+    public MapStorage onCreateMapStorage(ISaveHandler saveHandler) {
+        WorldServer overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
+        // if overworld has loaded, use its mapstorage
+        if (this.dimensionId != 0 && overWorld != null) {
+            return overWorld.getMapStorage();
         }
+
+        // if we are loading overworld, create a new mapstorage
+        return new MapStorage(saveHandler);
+    }
+
+    // The following two redirects work around the fact that 'onCreateMapStorage' causes all worlds to share a single MapStorage.
+    // Worlds other than the Overworld have scoreboard created, but they are never used. Therefore, we need to ensure that these unused scoreboards
+    // are not saved into the global MapStorage when non-Overworld worlds are initialized.
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapStorage;setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
+    public void onMapStorageSetData(MapStorage storage, String name, WorldSavedData data) {
+        if (name.equals("scoreboard") && this.dimensionId != 0) {
+            return;
+        }
+        storage.setData(name, data);
+    }
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V"))
+    public void onSetSaveDataScoreboard(ScoreboardSaveData scoreboardSaveData, Scoreboard scoreboard) {
+        if (this.dimensionId != 0) {
+            return;
+        }
+        scoreboardSaveData.setScoreboard(scoreboard);
+    }
+
+    @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"))
+    public void onCreateBonusChest(CallbackInfo ci) {
+        GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+                .source(this)
+                .buildAndSwitch();
     }
 
 
-    @Inject(method = "createBonusChest", at = @At(value = "RETURN"))
+    @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
-        if (CauseTracker.ENABLED) {
-            this.getCauseTracker().completePhase();
-        }
+        CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -297,7 +361,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.createBonusChest();
         }
 
-        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkProviderEnd)) {
+        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkGeneratorEnd)) {
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
@@ -320,7 +384,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public SpongeConfig<WorldConfig> getWorldConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
+        return ((IMixinWorldInfo) this.worldInfo).getOrCreateWorldConfig();
     }
 
 
@@ -357,6 +421,25 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean isLoaded() {
         return WorldManager.getWorldByDimensionId(getDimensionId()).isPresent();
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return checkNotNull(this.getProperties().getUniqueId(), "World Properties has a null UUID");
+    }
+
+    @Override
+    public Path getDirectory() {
+        final File worldDirectory = this.saveHandler.getWorldDirectory();
+        if (worldDirectory == null) {
+            new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
+                .add("%s : %s", "World Name", this.getName())
+                .add("%s : %s", "Dimension", this.getProperties().getDimensionType())
+                .add("Please report this to sponge developers so they may potentially fix this")
+                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            return null;
+        }
+        return worldDirectory.toPath();
     }
 
     @Override
@@ -410,16 +493,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return this.createWorldGenerator(optCustomSettings.get());
         }
 
-        final StringWriter writer = new StringWriter();
+        String jsonSettings = "";
         try {
-            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
-                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
+            jsonSettings = DataFormats.JSON.write(settings);
         } catch (Exception e) {
             SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings,
                     ((net.minecraft.world.World) (Object) this).getWorldType(), this, e);
         }
 
-        return this.createWorldGenerator(writer.toString());
+        return this.createWorldGenerator(jsonSettings);
     }
 
     @Override
@@ -451,10 +533,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public CauseTracker getCauseTracker() {
-        return this.causeTracker;
+    public WorldServer asMinecraftWorld() {
+        return (WorldServer) (Object) this;
     }
 
+    @Override
+    public org.spongepowered.api.world.World asSpongeWorld() {
+        return this;
+    }
 
     /**
      * @author blood - July 1st, 2016
@@ -462,12 +548,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *
      * @reason Added chunk and block tick optimizations, timings, cause tracking, and pre-construction events.
      */
+    @SuppressWarnings("unchecked")
     @Override
     @Overwrite
     protected void updateBlocks() {
         this.playerCheckLight();
 
-        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD)
+        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES)
         {
             Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.playerChunkMap.getChunkIterator();
 
@@ -483,23 +570,24 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         int i = this.shadow$getGameRules().getInt("randomTickSpeed");
         boolean flag = this.isRaining();
         boolean flag1 = this.isThundering();
-        this.theProfiler.startSection("pollingChunks");
+        // this.profiler.startSection("pollingChunks"); // Sponge - Don't use the profiler
 
-        final CauseTracker causeTracker = this.getCauseTracker(); // Sponge - get the cause tracker
+        final CauseTracker causeTracker = CauseTracker.getInstance(); // Sponge - get the cause tracker
 
         // Sponge: Use SpongeImplHooks for Forge
         for (Iterator<net.minecraft.world.chunk.Chunk> iterator =
-             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); this.theProfiler.endSection())
+             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); ) // this.profiler.endSection()) // Sponge - don't use the profiler
         {
-            this.theProfiler.startSection("getChunk");
+            // this.profiler.startSection("getChunk"); // Sponge - Don't use the profiler
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
-            int j = chunk.xPosition * 16;
-            int k = chunk.zPosition * 16;
-            this.theProfiler.endStartSection("checkNextLight");
+            final net.minecraft.world.World world = chunk.getWorld();
+            int j = chunk.x * 16;
+            int k = chunk.z * 16;
+            // this.profiler.endStartSection("checkNextLight"); // Sponge - Don't use the profiler
             this.timings.updateBlocksCheckNextLight.startTiming(); // Sponge - Timings
             chunk.enqueueRelightChecks();
             this.timings.updateBlocksCheckNextLight.stopTiming(); // Sponge - Timings
-            this.theProfiler.endStartSection("tickChunk");
+            // this.profiler.endStartSection("tickChunk"); // Sponge - Don't use the profiler
             this.timings.updateBlocksChunkTick.startTiming(); // Sponge - Timings
             chunk.onTick(false);
             this.timings.updateBlocksChunkTick.stopTiming(); // Sponge - Timings
@@ -508,121 +596,125 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 continue;
             }
             // Sponge end
-            this.theProfiler.endStartSection("thunder");
+            // this.profiler.endStartSection("thunder"); // Sponge - Don't use the profiler
             // Sponge start
             this.timings.updateBlocksThunder.startTiming();
 
             //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
             if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
             {
-                if (CauseTracker.ENABLED) {
-                    causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
-                            .addCaptures()
-                            .add(NamedCause.source(this))
-                            .complete());
-                }
-                // Sponge end
-                this.updateLCG = this.updateLCG * 3 + 1013904223;
-                int l = this.updateLCG >> 2;
-                BlockPos blockpos = this.adjustPosToNearbyEntity(new BlockPos(j + (l & 15), 0, k + (l >> 8 & 15)));
+                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)
+                    .buildAndSwitch()) {
+                    // Sponge end
+                    this.updateLCG = this.updateLCG * 3 + 1013904223;
+                    int l = this.updateLCG >> 2;
+                    BlockPos blockpos = this.adjustPosToNearbyEntity(new BlockPos(j + (l & 15), 0, k + (l >> 8 & 15)));
 
-                if (this.isRainingAt(blockpos))
-                {
-                    DifficultyInstance difficultyinstance = this.getDifficultyForLocation(blockpos);
+                    if (this.isRainingAt(blockpos)) {
+                        DifficultyInstance difficultyinstance = this.getDifficultyForLocation(blockpos);
 
-                    // Sponge - create a transform to be used for events
-                    final Transform<org.spongepowered.api.world.World> transform = new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
+                        // Sponge - create a transform to be used for events
+                        final Transform<org.spongepowered.api.world.World>
+                            transform =
+                            new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
 
-                    if (this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.05D)
-                    {
-                        // Sponge Start - Throw construction events
-                        SpawnCause horseCause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
-                        ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Cause.source(horseCause).build(), EntityTypes.HORSE, transform);
-                        SpongeImpl.postEvent(constructEntityEvent);
-                        if (!constructEntityEvent.isCancelled()) {
-                            // Sponge End
-                            EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
-                            entityhorse.setTrap(true);
-                            entityhorse.setGrowingAge(0);
-                            entityhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
-                            this.spawnEntity(entityhorse);
-                            // Sponge Start - Throw a construct event for the lightning
+                        if (world.getGameRules().getBoolean("doMobSpawning") && this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
+                            // Sponge Start - Throw construction events
+                            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                                Sponge.getCauseStackManager().pushCause(this.getWeather());
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                ConstructEntityEvent.Pre
+                                    constructEntityEvent =
+                                    SpongeEventFactory
+                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
+                                SpongeImpl.postEvent(constructEntityEvent);
+                                if (!constructEntityEvent.isCancelled()) {
+                                    // Sponge End
+                                    EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
+                                    entityhorse.setTrap(true);
+                                    entityhorse.setGrowingAge(0);
+                                    entityhorse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                                    this.spawnEntity(entityhorse);
+                                    // Sponge Start - Throw a construct event for the lightning
+                                }
+
+                                ConstructEntityEvent.Pre
+                                    lightning =
+                                    SpongeEventFactory
+                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING,
+                                            transform);
+                                SpongeImpl.postEvent(lightning);
+                                if (!lightning.isCancelled()) {
+                                    // Sponge End
+                                    this.addWeatherEffect(
+                                        new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
+                                            (double) blockpos.getZ(), true));
+                                } // Sponge - Brackets.
+                            }
+                        } else {
+                            // Sponge start - Throw construction event for lightningbolts
+                            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                                Sponge.getCauseStackManager().pushCause(this.getWeather());
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                ConstructEntityEvent.Pre
+                                    event =
+                                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                                        EntityTypes.LIGHTNING, transform);
+                                SpongeImpl.postEvent(event);
+                                if (!event.isCancelled()) {
+                                    // Sponge End
+                                    this.addWeatherEffect(
+                                        new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
+                                            (double) blockpos.getZ(), false));
+                                } // Sponge - Brackets.
+                            }
                         }
-
-                        SpawnCause lightiningCause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
-                        ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(Cause.source(lightiningCause).build(), EntityTypes.LIGHTNING, transform);
-                        SpongeImpl.postEvent(lightning);
-                        if (!lightning.isCancelled()) {
-                            // Sponge End
-                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
-                        } // Sponge - Brackets.
                     }
-                    else
-                    {
-                        // Sponge start - Throw construction event for lightningbolts
-
-                        SpawnCause cause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
-                        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)),
-                                EntityTypes.LIGHTNING, transform);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            // Sponge End
-                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
-                        } // Sponge - Brackets.
-                    }
-                }
-                // Sponge Start - Cause tracker unwind
-                if (CauseTracker.ENABLED) {
-                    causeTracker.completePhase();
-                }
+                } // Sponge - brackets
                 // Sponge End
 
             }
 
             this.timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
             this.timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
-            this.theProfiler.endStartSection("iceandsnow");
+            // this.profiler.endStartSection("iceandsnow"); // Sponge - don't use the profiler
 
             // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
             if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
             {
                 // Sponge Start - Enter weather phase for snow and ice and flooding.
-                causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
-                        .addCaptures()
-                        .add(NamedCause.source(this))
-                        .complete());
-                // Sponge End
-                this.updateLCG = this.updateLCG * 3 + 1013904223;
-                int j2 = this.updateLCG >> 2;
-                BlockPos blockpos1 = this.getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
-                BlockPos blockpos2 = blockpos1.down();
+                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext()
+                        .source(this)
+                        .buildAndSwitch()) {
+                    // Sponge End
+                    this.updateLCG = this.updateLCG * 3 + 1013904223;
+                    int j2 = this.updateLCG >> 2;
+                    BlockPos blockpos1 = this.getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
+                    BlockPos blockpos2 = blockpos1.down();
 
-                if (this.canBlockFreezeNoWater(blockpos2))
-                {
-                    this.setBlockState(blockpos2, Blocks.ICE.getDefaultState());
-                }
+                    if (this.canBlockFreezeNoWater(blockpos2)) {
+                        this.setBlockState(blockpos2, Blocks.ICE.getDefaultState());
+                    }
 
-                if (flag && this.canSnowAt(blockpos1, true))
-                {
-                    this.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState());
-                }
+                    if (flag && this.canSnowAt(blockpos1, true)) {
+                        this.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState());
+                    }
 
-                if (flag && this.getBiome(blockpos2).canRain())
-                {
-                    this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
-                }
-                causeTracker.completePhase(); // Sponge - complete weather phase
+                    if (flag && this.getBiome(blockpos2).canRain()) {
+                        this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
+                    }
+                } // Sponge - brackets
             }
 
             this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
             this.timings.updateBlocksRandomTick.startTiming(); // Sponge - Start random block tick timing
-            this.theProfiler.endStartSection("tickBlocks");
+            // this.profiler.endStartSection("tickBlocks"); // Sponge - Don't use the profiler
 
             if (i > 0)
             {
                 for (ExtendedBlockStorage extendedblockstorage : chunk.getBlockStorageArray())
                 {
-                    if (extendedblockstorage != net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE && extendedblockstorage.getNeedsRandomTick())
+                    if (extendedblockstorage != net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE && extendedblockstorage.needsRandomTick())
                     {
                         for (int i1 = 0; i1 < i; ++i1)
                         {
@@ -633,7 +725,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                             int i2 = j1 >> 16 & 15;
                             IBlockState iblockstate = extendedblockstorage.get(k1, i2, l1);
                             Block block = iblockstate.getBlock();
-                            this.theProfiler.startSection("randomTick");
+                            // this.profiler.startSection("randomTick"); // Sponge - Don't use the profiler
 
                             if (block.getTickRandomly())
                             {
@@ -646,16 +738,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 spongeBlock.getTimingsHandler().startTiming();
                                 final PhaseData currentTuple = causeTracker.getCurrentPhaseData();
                                 final IPhaseState phaseState = currentTuple.state;
-                                if (!CauseTracker.ENABLED || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
-                                    block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
+                                if (phaseState.alreadyCapturingBlockTicks(currentTuple.context)) {
+                                    block.randomTick(world, pos, iblockstate, this.rand);
                                 } else {
-                                    TrackingUtil.randomTickBlock(causeTracker, block, pos, iblockstate, this.rand);
+                                    TrackingUtil.randomTickBlock(causeTracker, this, block, pos, iblockstate, this.rand);
                                 }
                                 spongeBlock.getTimingsHandler().stopTiming();
                                 // Sponge end
                             }
 
-                            this.theProfiler.endSection();
+                            // this.profiler.endSection(); // Sponge - Don't use the profiler
                         }
                     }
                 }
@@ -663,7 +755,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         this.timings.updateBlocksRandomTick.stopTiming(); // Sponge - Stop random block timing
-        this.theProfiler.endSection();
+        // this.profiler.endSection(); // Sponge - Don't use the profiler
         // } // Sponge- Remove unecessary else
     }
 
@@ -702,13 +794,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         } else {
             this.resetUpdateEntityTick();
         }*/
-        // Sponge end
 
-        if (CauseTracker.ENABLED) {
-            TrackingUtil.tickWorldProvider(this);
-        } else {
-            this.provider.onWorldUpdateEntities();
-        }
+        TrackingUtil.tickWorldProvider(this);
+        // Sponge end
         super.updateEntities();
     }
 
@@ -718,37 +806,69 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
+    @SuppressWarnings("unchecked")
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData phaseData = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
-        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.context) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
+        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
 
         IMixinBlock spongeBlock = (IMixinBlock) block;
         spongeBlock.getTimingsHandler().startTiming();
-        TrackingUtil.updateTickBlock(causeTracker, block, pos, state, rand);
+        TrackingUtil.updateTickBlock(this, block, pos, state, rand);
         spongeBlock.getTimingsHandler().stopTiming();
+    }
+
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReportCategory;addBlockInfo(Lnet/minecraft/crash/CrashReportCategory;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"))
+    private void onBlockInfo(CrashReportCategory category, BlockPos pos, IBlockState state) {
+        try {
+            CrashReportCategory.addBlockInfo(category, pos, state);
+        } catch (NoClassDefFoundError e) {
+            SpongeImpl.getLogger().error("An error occurred while adding crash report info!", e);
+            SpongeImpl.getLogger().error("Original caught error:", category.crashReport.cause);
+            throw new ReportedException(category.crashReport);
+        }
+
     }
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
-        if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = this.getCauseTracker();
-            final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
-            final IPhaseState phaseState = currentPhase.state;
-            if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
-                return list.add((BlockEventData) obj);
+        final BlockEventData blockEventData = (BlockEventData) obj;
+        IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
+        // We fire a Pre event to make sure our captures do not get stuck in a loop.
+        // This is very common with pistons as they add block events while blocks are being notified.
+        if (blockIn instanceof BlockPistonBase) {
+            // We only fire pre events for pistons
+            if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
+                return false;
             }
-            final BlockEventData blockEventData = (BlockEventData) obj;
-            final PhaseContext context = currentPhase.context;
 
-            IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
-            phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, causeTracker, pos, blockEvent);
+            blockEvent.setCaptureBlocks(false);
+            // TODO BLOCK_EVENT flag
+        } else if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
+            return false;
         }
+
+
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
+        final IPhaseState phaseState = currentPhase.state;
+        if (phaseState.ignoresBlockEvent()) {
+            return list.add((BlockEventData) obj);
+        }
+        final PhaseContext<?> context = currentPhase.context;
+
+        final LocatableBlock locatable = LocatableBlock.builder()
+            .location(new Location<>(this, pos.getX(), pos.getY(), pos.getZ()))
+            .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
+            .build();
+
+        blockEvent.setTickBlock(locatable);
+        phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -756,15 +876,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
-        if (!CauseTracker.ENABLED) {
-            fireBlockEvent(event);
-        }
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
-        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
+        if (phaseState.ignoresBlockEvent()) {
             return fireBlockEvent(event);
         }
-        return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
+        return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
@@ -794,45 +911,58 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
-            if (chunk.unloaded || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.xPosition, chunk.zPosition)) {
+            if (chunk.unloadQueued || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.x, chunk.z)) {
                 continue;
             }
 
             // If a player is currently using the chunk, skip it
-            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.x, chunk.z)) {
                 continue;
             }
 
             // If we reach this point the chunk leaked so queue for unload
-            chunkProviderServer.unload(chunk);
+            chunkProviderServer.queueUnload(chunk);
             SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.world, chunk);
+        }
+    }
+
+    @Override
+    public boolean save() throws IOException {
+        if (!getChunkProvider().canSave()) {
+            return false;
+        }
+
+        // TODO: Expose flush parameter in SpongeAPI?
+        try {
+            WorldManager.saveWorld((WorldServer) (Object) this, true);
+        } catch (MinecraftException e) {
+            throw new RuntimeException(e);
+        }
+        return true;
+    }
+
+    @Inject(method = "saveLevel", at = @At("HEAD"))
+    public void onSaveLevel(CallbackInfo ci) {
+        // Always call the provider's onWorldSave method as we do not use WorldServerMulti
+        for (WorldServer worldServer : this.mcServer.worlds) {
+            worldServer.provider.onWorldSave();
         }
     }
 
     @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
     public boolean canChunkProviderSave(ChunkProviderServer chunkProviderServer) {
         if (chunkProviderServer.canSave()) {
-            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Cause.of(NamedCause.source(SpongeImpl.getServer())), this));
+            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Sponge.getCauseStackManager().getCurrentCause(), this));
             return true;
         }
-
         return false;
     }
 
     @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
     public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
-        Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Cause.of(NamedCause.source(SpongeImpl.getServer())), this));
+        Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Sponge.getCauseStackManager().getCurrentCause(), this));
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
         if (this.chunkGCTickInterval > 0) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "addBlockEvent", at = @At("HEAD"), cancellable = true)
-    public void addBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
-        // We fire a Pre event to make sure our captures do not get stuck in a loop.
-        // This is very common with pistons as they add block events while blocks are being notified.
-        if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos, NamedCause.of(NamedCause.BLOCK_EVENT, this)).isCancelled()) {
             ci.cancel();
         }
     }
@@ -866,21 +996,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "updateBlockTick", // really scheduleUpdate
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
 
-        if (phaseState.getPhase().ignoresScheduledUpdates(phaseState)) {
+        if (phaseState.ignoresScheduledUpdates()) {
             this.tmpScheduledObj = sbu;
             return;
         }
 
         sbu.setPriority(priority);
         ((IMixinNextTickListEntry) sbu).setWorld((WorldServer) (Object) this);
-        if (!((WorldServer) (Object) this).isBlockLoaded(sbu.position)) {
-            this.tmpScheduledObj = sbu;
-            return;
-        }
-
         this.tmpScheduledObj = sbu;
     }
 
@@ -933,38 +1058,21 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag) {
         checkBlockBounds(x, y, z);
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
-        boolean isWorldGen = CauseTracker.ENABLED && peek.state.getPhase().isWorldGeneration(peek.state);
-        boolean handlesOwnCompletion = CauseTracker.ENABLED && peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
+        boolean isWorldGen = peek.state.getPhase().isWorldGeneration(peek.state);
+        boolean handlesOwnCompletion = peek.state.handlesOwnStateCompletion();
         if (!isWorldGen) {
-            checkArgument(cause != null, "Cause cannot be null!");
-            checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
-        if (!isWorldGen && !handlesOwnCompletion) {
-            final PhaseContext context = PhaseContext.start()
-                    .add(NamedCause.of(InternalNamedCauses.General.PLUGIN_CAUSE, cause))
-                    .addCaptures()
-                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_CHANGE, flag))
-                    .add(NamedCause.source(cause.root()));
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                context.add(NamedCause.of(entry.getKey(), entry.getValue()));
-            }
-            context.complete();
-            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
+        try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
+                ? null
+                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()
+                                           .buildAndSwitch()) {
+            return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         }
-        if (handlesOwnCompletion) {
-            peek.context.firstNamed(InternalNamedCauses.General.BLOCK_CHANGE, PhaseContext.CaptureFlag.class)
-                    .ifPresent(captureFlag -> captureFlag.addFlag(flag));
-        }
-        final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
-        if (!isWorldGen && !handlesOwnCompletion) {
-            causeTracker.completePhase();
-        }
-        return state;
     }
 
     private void checkBlockBounds(int x, int y, int z) {
@@ -981,13 +1089,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public boolean spawnEntities(Iterable<? extends Entity> entities, Cause cause) {
-        checkArgument(cause != null, "Cause cannot be null!");
-        checkArgument(cause.root() instanceof SpawnCause, "SpawnCause must be at the ROOT of a cause!");
-        checkArgument(cause.containsType(PluginContainer.class), "PluginContainer must be within the cause!");
+    public boolean spawnEntities(Iterable<? extends Entity> entities) {
         List<Entity> entitiesToSpawn = new ArrayList<>();
         entities.forEach(entitiesToSpawn::add);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, this);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {
@@ -1034,97 +1139,92 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         List<Entity> entityList = new ArrayList<>();
         for (net.minecraft.entity.Entity entity : entities) {
+            // Make sure no entities load in invalid positions
+            if (((IMixinBlockPos) entity.getPosition()).isInvalidYPosition()) {
+                entity.setDead();
+                continue;
+            }
             if (this.canAddEntity(entity)) {
                 entityList.add((Entity) entity);
             }
         }
-        SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
-        List<NamedCause> causes = new ArrayList<>();
-        causes.add(NamedCause.source(cause));
-        causes.add(NamedCause.of("World", this));
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), Lists.newArrayList(entityList), this);
-        SpongeImpl.postEvent(chunkLoad);
-        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
-            for (Entity successful : chunkLoad.getEntities()) {
-                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                this.onEntityAdded((net.minecraft.entity.Entity) successful);
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            Sponge.getCauseStackManager().pushCause(this);
+            SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));
+            SpongeImpl.postEvent(chunkLoad);
+            if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
+                for (Entity successful : chunkLoad.getEntities()) {
+                    this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                    this.onEntityAdded((net.minecraft.entity.Entity) successful);
+                }
             }
-        }
-        // Remove entities from chunk/world that were filtered in event
-        // This prevents invisible entities from loading into the world and blocking the position.
-        for (Entity entity : entityList) {
-            if (!chunkLoad.getEntities().contains(entity)) {
-                ((net.minecraft.world.World)(Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
+            // Remove entities from chunk/world that were filtered in event
+            // This prevents invisible entities from loading into the world and blocking the position.
+            for (Entity entity : entityList) {
+                if (!chunkLoad.getEntities().contains(entity)) {
+                    ((net.minecraft.world.World) (Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
+                }
             }
+            callbackInfo.cancel();
         }
-        callbackInfo.cancel();
     }
 
     @Override
-    public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion, Cause cause) {
+    public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
         checkNotNull(explosion, "explosion");
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
-        checkNotNull(cause, "Cause cannot be null!");
-        checkArgument(cause.containsType(PluginContainer.class), "Cause must contain a PluginContainer!");
-        if (CauseTracker.ENABLED) {
-            final PhaseContext phaseContext = PhaseContext.start()
-                    .add(NamedCause.source(cause))
-                    .explosion()
-                    .addEntityCaptures()
-                    .addEntityDropCaptures()
-                    .addBlockCaptures();
-            phaseContext.getCaptureExplosion().addExplosion(explosion);
-            phaseContext.complete();
-            this.causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
-        }
-        final Explosion mcExplosion;
-        try {
-            // Since we already have the API created implementation Explosion, let's use it.
-            mcExplosion = (Explosion) explosion;
-        } catch (Exception e) {
-            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+
+        try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
+                .explosion(explosion)
+                .buildAndSwitch()) {
+            final Explosion mcExplosion;
+            try {
+                // Since we already have the API created implementation Explosion, let's use it.
+                mcExplosion = (Explosion) explosion;
+            } catch (Exception e) {
+                new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
                     .add("An explosion that was expected to be used for this implementation does not")
                     .add("originate from this implementation.")
                     .add(e)
                     .trace();
-            return;
-        }
-        final double x = mcExplosion.explosionX;
-        final double y = mcExplosion.explosionY;
-        final double z = mcExplosion.explosionZ;
-        final boolean isSmoking = mcExplosion.isSmoking;
-        final float strength = explosion.getRadius();
+                return;
+            }
+            final double x = mcExplosion.x;
+            final double y = mcExplosion.y;
+            final double z = mcExplosion.z;
+            final boolean damagesTerrain = mcExplosion.damagesTerrain;
+            final float strength = explosion.getRadius();
 
-        // Set up the pre event
-        final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(cause, explosion, this);
-        if (SpongeImpl.postEvent(event)) {
+            // Set up the pre event
+            final ExplosionEvent.Pre
+                event =
+                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(), explosion, this);
+            if (SpongeImpl.postEvent(event)) {
+                this.processingExplosion = false;
+                return;
+            }
+            // Sponge End
+
+            mcExplosion.doExplosionA();
+            mcExplosion.doExplosionB(false);
+
+            if (!damagesTerrain) {
+                mcExplosion.clearAffectedBlockPositions();
+            }
+
+            for (EntityPlayer entityplayer : this.playerEntities) {
+                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                    ((EntityPlayerMP) entityplayer).connection
+                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
+                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+                }
+            }
+
+            // Sponge Start - end processing
             this.processingExplosion = false;
-            if (CauseTracker.ENABLED) {
-                this.causeTracker.completePhase();
-            }
-            return;
-        }
-        // Sponge End
-
-        mcExplosion.doExplosionA();
-        mcExplosion.doExplosionB(false);
-
-        if (!isSmoking) {
-            mcExplosion.clearAffectedBlockPositions();
-        }
-
-        for (EntityPlayer entityplayer : this.playerEntities) {
-            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
-                        mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
-            }
-        }
-
-        // Sponge Start - end processing
-        this.processingExplosion = false;
-        if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase();
         }
         // Sponge End
     }
@@ -1148,14 +1248,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * The train of thought for how spawning is handled:
      * 1) This method is called in implementation
      * 2) handleVanillaSpawnEntity is called to associate various contextual SpawnCauses
-     * 3) {@link CauseTracker#spawnEntity(Entity)} is called to check if the entity is to
+     * 3) {@link CauseTracker#spawnEntity(org.spongepowered.api.world.World, Entity)} is called to
+     *    check if the entity is to
      *    be "collected" or "captured" in the current {@link PhaseContext} of the current phase
      * 4) If the entity is forced or is captured, {@code true} is returned, otherwise, the entity is
      *    passed along normal spawning handling.
      */
     @Override
     public boolean spawnEntity(net.minecraft.entity.Entity entity) {
-        return canAddEntity(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
+        return canAddEntity(entity) && CauseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
     }
 
 
@@ -1170,11 +1271,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (!this.isValid(pos)) {
             return false;
-        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
+        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
             return false;
         } else {
             // Sponge - reroute to the CauseTracker
-            return this.getCauseTracker().setBlockState(pos, newState, flags);
+            return CauseTracker.getInstance().setBlockState(this, pos, newState, flags);
         }
     }
 
@@ -1182,11 +1283,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
         if (!this.isValid(pos)) {
             return false;
-        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
+        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
             return false;
         } else {
             // Sponge - reroute to the CauseTracker
-            return this.getCauseTracker().setBlockStateWithFlag(pos, state, flag);
+            return CauseTracker.getInstance().setBlockStateWithFlag(this, pos, state, flag);
         }
     }
 
@@ -1199,8 +1300,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
-        final PhaseData peek = this.causeTracker.getCurrentPhaseData();
-        if (!CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
+        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
+        if (peek.state.ignoresBlockUpdateTick(peek)) {
             state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
             // No seriously, if this is not set back to false, all future updates are processed immediately
@@ -1208,7 +1309,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.scheduledUpdatesAreImmediate = false;
             return;
         }
-        TrackingUtil.updateTickBlock(this.causeTracker, state.getBlock(), pos, state, random);
+        TrackingUtil.updateTickBlock(this, state.getBlock(), pos, state, random);
         // Sponge end
         this.scheduledUpdatesAreImmediate = false;
     }
@@ -1220,7 +1321,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void neighborChanged(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
-        this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, otherPos);
+        CauseTracker.getInstance().notifyBlockOfStateChange(this, pos, blockIn, otherPos);
     }
 
     /**
@@ -1234,11 +1335,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        EnumSet<EnumFacing> directions = EnumSet.allOf(EnumFacing.class);
+        EnumSet<EnumFacing> directions = EnumSet.copyOf(NOTIFY_DIRECTIONS);
         directions.remove(skipSide);
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
         if (event == null || !event.isCancelled()) {
-            final CauseTracker causeTracker = this.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             for (EnumFacing facing : EnumFacing.values()) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
@@ -1247,7 +1348,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
 
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                causeTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
             }
         }
     }
@@ -1263,9 +1364,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class));
+        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
         if (event == null || !event.isCancelled()) {
-            final CauseTracker causeTracker = this.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             for (EnumFacing facing : EnumFacing.values()) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
@@ -1274,7 +1375,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
 
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                causeTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
             }
         }
 
@@ -1286,73 +1387,68 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @SuppressWarnings("Duplicates")
     @Override
-    protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+    public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entityIn.onUpdate();
             return;
         }
-        TrackingUtil.tickEntity(causeTracker, entityIn);
+        TrackingUtil.tickEntity(entityIn);
         updateRotation(entityIn);
     }
 
     @Override
-    protected void onUpdateTileEntities(ITickable tile) {
+    public void onUpdateTileEntities(ITickable tile) {
         this.updateTileEntity(tile);
     }
 
     // separated from onUpdateEntities for TileEntityActivation mixin
     private void updateTileEntity(ITickable tile) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
 
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingTileTicks(state)) {
+        if (state.getPhase().alreadyCapturingTileTicks(state)) {
             tile.update();
             return;
         }
 
-        TrackingUtil.tickTileEntity(causeTracker, tile);
+        TrackingUtil.tickTileEntity(this, tile);
     }
 
     @Override
-    protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+    public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.onUpdate();
             return;
         }
 
-        TrackingUtil.tickEntity(causeTracker, entity);
+        TrackingUtil.tickEntity(entity);
         updateRotation(entity);
     }
 
     @Override
-    protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+    public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.updateRidden();
             return;
         }
 
-        TrackingUtil.tickRidingEntity(causeTracker, entity);
+        TrackingUtil.tickRidingEntity(entity);
         updateRotation(entity);
     }
 
     @Redirect(method = "wakeAllPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;wakeUpPlayer(ZZZ)V"))
     private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
-        if (CauseTracker.ENABLED) {
-            this.causeTracker.switchToPhase(EntityPhase.State.PLAYER_WAKE_UP, PhaseContext.start()
-                    .add(NamedCause.source(player))
-                    .addCaptures()
-                    .complete()
-            );
-        }
-        player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
-        if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase();
+        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
+                .source(player)
+                .addCaptures()
+                .buildAndSwitch()) {
+            player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         }
     }
 
@@ -1390,6 +1486,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
+        ((IMixinEntity) entity).onJoinWorld();
     }
 
     @Override
@@ -1398,19 +1495,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public boolean spawnEntity(Entity entity, Cause cause) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+    public boolean spawnEntity(Entity entity) {
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
-        if (CauseTracker.ENABLED && !state.getPhase().alreadyCapturingEntitySpawns(state)) {
-            causeTracker.switchToPhase(PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
-                .add(NamedCause.source(cause))
+        if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {
+            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
                 .addCaptures()
-                .complete());
-            causeTracker.spawnEntityWithCause(entity, cause);
-            causeTracker.completePhase();
-            return true;
+                .buildAndSwitch()) {
+                causeTracker.spawnEntityWithCause(this, entity);
+                return true;
+            }
         }
-        return causeTracker.spawnEntityWithCause(entity, cause);
+        return causeTracker.spawnEntityWithCause(this, entity);
     }
 
     @Override
@@ -1459,7 +1555,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
             if (te != null) {
                 TileEntity tile = (TileEntity) te;
-                for (DataManipulator<?, ?> manipulator : tile.getContainers()) {
+                for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
                     this.builder.add(manipulator);
                 }
                 NBTTagCompound nbt = new NBTTagCompound();
@@ -1478,8 +1574,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     /**
      * @author gabizou - September 10th, 2016
+     * @author gabizou - September 21st, 2017 - Update for PhaseContext refactor.
      * @reason Due to the amount of changes, and to ensure that Forge's events are being properly
      * thrown, we must overwrite to have our hooks in place where we need them to be and when.
+     * Likewise, since the event context is very ambiguously created, we may have an entity
+     * coming in, or no entity, the explosion must always have a "source" in some context.
      *
      * @param entityIn The entity that caused the explosion
      * @param x The x position
@@ -1494,64 +1593,245 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
-        // Sponge Start - Cause tracking
-        this.processingExplosion = true;
-        if (CauseTracker.ENABLED) {
-            final PhaseContext phaseContext = PhaseContext.start()
-                    .explosion()
-                    .addEntityCaptures()
-                    .addEntityDropCaptures()
-                    .addBlockCaptures();
-            final PhaseData currentPhaseData = this.causeTracker.getCurrentPhaseData();
-            currentPhaseData.state.getPhase().appendContextPreExplosion(phaseContext, currentPhaseData);
-            phaseContext.complete();
-            this.causeTracker.switchToPhase(GeneralPhase.State.EXPLOSION, phaseContext);
-        }
-        // Sponge End
-
         Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
-        // Sponge Start - More cause tracking
-        if (CauseTracker.ENABLED) {
-            try {
-                this.causeTracker.getCurrentContext().getCaptureExplosion().addExplosion(((org.spongepowered.api.world.explosion.Explosion) explosion));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        // Set up the pre event
-        final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(((IMixinExplosion) explosion).createCause(),
+        // Sponge Start - Cause tracking
+        try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
+                .potentialExplosionSource((WorldServer) (Object) this, entityIn)
+                .explosion(explosion)
+                .buildAndSwitch()) {
+            this.processingExplosion = true;
+            // Sponge End
+
+
+            // Sponge Start - More cause tracking
+            // Set up the pre event
+            final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.explosion.Explosion) explosion, this);
-        if (SpongeImpl.postEvent(event)) {
+            if (SpongeImpl.postEvent(event)) {
+                this.processingExplosion = false;
+                return explosion;
+            }
+            // Sponge End
+
+            explosion.doExplosionA();
+            explosion.doExplosionB(false);
+
+            if (!isSmoking) {
+                explosion.clearAffectedBlockPositions();
+            }
+
+            for (EntityPlayer entityplayer : this.playerEntities) {
+                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                    ((EntityPlayerMP) entityplayer).connection
+                        .sendPacket(new SPacketExplosion(x, y, z, strength, explosion.getAffectedBlockPositions(),
+                            explosion.getPlayerKnockbackMap().get(entityplayer)));
+                }
+            }
+
+            // Sponge Start - end processing
             this.processingExplosion = false;
-            if (CauseTracker.ENABLED) {
-                this.causeTracker.completePhase();
-            }
+            // Sponge End
             return explosion;
-        }
-        // Sponge End
+        } // Sponge - brackets
+    }
 
-        explosion.doExplosionA();
-        explosion.doExplosionB(false);
-
-        if (!isSmoking) {
-            explosion.clearAffectedBlockPositions();
-        }
-
-        for (EntityPlayer entityplayer : this.playerEntities) {
-            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, explosion.getAffectedBlockPositions(),
-                        explosion.getPlayerKnockbackMap().get(entityplayer)));
+    /**
+     * @author gabizou - August 4th, 2016
+     * @author blood - May 11th, 2017 - Forces chunk requests if TE is ticking.
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return The block state at the desired position
+     */
+    @Override
+    public IBlockState getBlockState(BlockPos pos) {
+        // Sponge - Replace with inlined method
+        // if (this.isOutsideBuildHeight(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+            // Sponge end
+            return Blocks.AIR.getDefaultState();
+        } else {
+            // ExtraUtilities 2 expects to get the proper chunk while mining or it gets stuck in infinite loop
+            // TODO add TE config to disable/enable chunk loads
+            final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) this.getChunkProvider();
+            final boolean forceChunkRequests = chunkProviderServer.getForceChunkRequests();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
+            final IPhaseState currentState = causeTracker.getCurrentState();
+            if (currentState == TickPhase.Tick.TILE_ENTITY) {
+                ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
             }
+            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            chunkProviderServer.setForceChunkRequests(forceChunkRequests);
+            return chunk.getBlockState(pos);
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Overrides the same method from MixinWorld_Lighting that redirects
+     * {@link #isAreaLoaded(BlockPos, int, boolean)} to simplify the check to
+     * whether the chunk's neighbors are loaded. Since the passed radius is always
+     * 17, the check is simply checking for whether neighboring chunks are loaded
+     * properly.
+     *
+     * @param thisWorld This world
+     * @param pos The block position to check light for
+     * @param radius The radius, always 17
+     * @param allowEmtpy Whether to allow empty chunks, always false
+     * @param lightType The light type
+     * @param samePosition The block position to check light for, again.
+     * @return True if the chunk is loaded and neighbors are loaded
+     */
+    @Override
+    public boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
+            BlockPos samePosition) {
+        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        return !(chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded());
+    }
+
+    /**
+     * @author gabizou - April 8th, 2016
+     *
+     * Instead of providing chunks which has potential chunk loads,
+     * we simply get the chunk directly from the chunk provider, if it is loaded
+     * and return the light value accordingly.
+     *
+     * @param pos The block position
+     * @return The light at the desired block position
+     */
+    @Override
+    public int getLight(BlockPos pos) {
+        if (pos.getY() < 0) {
+            return 0;
+        } else {
+            if (pos.getY() >= 256) {
+                pos = new BlockPos(pos.getX(), 255, pos.getZ());
+            }
+            // Sponge Start - Use our hook to get the chunk only if it is loaded
+            // return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
+            final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
+            // Sponge End
+        }
+    }
+
+    /**
+     * @author gabizou - April 8th, 2016
+     *
+     * @reason Rewrites the chunk accessor to get only a chunk if it is loaded.
+     * This avoids loading chunks from file or generating new chunks
+     * if the chunk didn't exist, when the only function of this method is
+     * to get the light for the given block position.
+     *
+     * @param pos The block position
+     * @param checkNeighbors Whether to check neighboring block lighting
+     * @return The light value at the block position, if the chunk is loaded
+     */
+    @Override
+    public int getLight(BlockPos pos, boolean checkNeighbors) {
+        if (((IMixinBlockPos) pos).isValidXZPosition()) { // Sponge - Replace with inlined method
+            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
+                int i1 = this.getLight(pos.up(), false);
+                int i = this.getLight(pos.east(), false);
+                int j = this.getLight(pos.west(), false);
+                int k = this.getLight(pos.south(), false);
+                int l = this.getLight(pos.north(), false);
+
+                if (i > i1) {
+                    i1 = i;
+                }
+
+                if (j > i1) {
+                    i1 = j;
+                }
+
+                if (k > i1) {
+                    i1 = k;
+                }
+
+                if (l > i1) {
+                    i1 = l;
+                }
+
+                return i1;
+            } else if (pos.getY() < 0) {
+                return 0;
+            } else {
+                if (pos.getY() >= 256) {
+                    pos = new BlockPos(pos.getX(), 255, pos.getZ());
+                }
+
+                // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
+                // Chunk chunk = this.getChunkFromBlockCoords(pos);
+                // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
+                final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+                return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
+                // Sponge End
+            }
+        } else {
+            return 15;
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param type The type of sky lighting
+     * @param pos The position
+     * @return The light for the defined sky type and block position
+     */
+    @Override
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        if (pos.getY() < 0) {
+            pos = new BlockPos(pos.getX(), 0, pos.getZ());
         }
 
-        // Sponge Start - end processing
-        this.processingExplosion = false;
-        if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase();
+        // Sponge Start - Replace with inlined method to check
+        // if (!this.isValid(pos)) // vanilla
+        if (!((IMixinBlockPos) pos).isValidPosition()) {
+            // Sponge End
+            return type.defaultLightValue;
+        } else {
+            Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null) {
+                return type.defaultLightValue;
+            }
+            return chunk.getLightFor(type, pos);
         }
-        // Sponge End
-        return explosion;
+    }
+
+    @Override
+    public boolean isLightLevel(Chunk chunk, BlockPos pos, int level) {
+        if (((IMixinBlockPos) pos).isValidPosition()) {
+            if (this.getBlockState(pos).useNeighborBrightness()) {
+                if (this.getLight(pos.up(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.east(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.west(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.south(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.north(), false) >= level) {
+                    return true;
+                }
+                return false;
+            } else {
+                if (pos.getY() >= 256) {
+                    pos = new BlockPos(pos.getX(), 255, pos.getZ());
+                }
+
+                return chunk.getLightSubtracted(pos, this.getSkylightSubtracted()) >= level;
+            }
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -1618,8 +1898,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
-    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1, remap = false))
-    public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
+    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V", remap = false))
+    public void onCanAddEntityLogWarn(Logger logger, String message, Object param1, Object param2) {
         // don't log anything to avoid useless spam
     }
     /**************************** TIMINGS ***************************************/
@@ -1632,75 +1912,75 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
 
     @Override
-    protected void startEntityGlobalTimings() {
+    public void startEntityGlobalTimings() {
         this.timings.entityTick.startTiming();
         co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
     }
 
     @Override
-    protected void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
+    public void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) {
         EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
     }
 
     @Override
-    protected void stopEntityTickTimingStartEntityRemovalTiming() {
+    public void stopEntityTickTimingStartEntityRemovalTiming() {
         this.timings.entityTick.stopTiming();
         this.timings.entityRemoval.startTiming();
     }
 
     @Override
-    protected void stopEntityRemovalTiming() {
+    public void stopEntityRemovalTiming() {
         this.timings.entityRemoval.stopTiming();
     }
 
     @Override
-    protected void startEntityTickTiming() {
+    public void startEntityTickTiming() {
         this.timings.entityTick.startTiming();
     }
 
     @Override
-    protected void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
+    public void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) {
         EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
     }
 
     @Override
-    protected void stopEntityTickSectionBeforeRemove() {
+    public void stopEntityTickSectionBeforeRemove() {
        this.timings.entityTick.stopTiming();
     }
 
     @Override
-    protected void startEntityRemovalTick() {
+    public void startEntityRemovalTick() {
         this.timings.entityRemoval.startTiming();
     }
 
     @Override
-    protected void startTileTickTimer() {
+    public void startTileTickTimer() {
         this.timings.tileEntityTick.startTiming();
     }
 
     @Override
-    protected void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) {
+    public void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) {
         ((IMixinTileEntity) updatingTileEntity).getTimingsHandler().stopTiming();
     }
 
     @Override
-    protected void stopTileEntityAndStartRemoval() {
+    public void stopTileEntityAndStartRemoval() {
         this.timings.tileEntityTick.stopTiming();
         this.timings.tileEntityRemoval.startTiming();
     }
 
     @Override
-    protected void stopTileEntityRemovelInWhile() {
+    public void stopTileEntityRemovelInWhile() {
         this.timings.tileEntityRemoval.stopTiming();
     }
 
     @Override
-    protected void startPendingTileEntityTimings() {
+    public void startPendingTileEntityTimings() {
         this.timings.tileEntityPending.startTiming();
     }
 
     @Override
-    protected void endPendingTileEntities() {
+    public void endPendingTileEntities() {
         this.timings.tileEntityPending.stopTiming();
         TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
     }
@@ -1834,6 +2114,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @Override
+    public void playRecord(Vector3i position, RecordType recordType) {
+        playRecord0(position, checkNotNull(recordType, "recordType"));
+    }
+
+    @Override
+    public void stopRecord(Vector3i position) {
+        playRecord0(position, null);
+    }
+
+    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
+        this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(
+                SpongeRecordType.createPacket(position, recordType), getDimensionId());
+    }
 
     @Override
     public Weather getWeather() {
@@ -1852,9 +2146,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (weather.equals(Weathers.CLEAR)) {
             if (this.worldInfo.getCleanWeatherTime() > 0) {
                 return this.worldInfo.getCleanWeatherTime();
-            } else {
-                return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
             }
+            return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
         } else if (weather.equals(Weathers.THUNDER_STORM)) {
             return this.worldInfo.getThunderTime();
         } else if (weather.equals(Weathers.RAIN)) {
@@ -1905,13 +2198,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Weather weather = getWeather();
         int duration = (int) getRemainingDuration();
         if (this.prevWeather != weather && duration > 0) {
-            ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(Cause.of(NamedCause.source(this)), duration, duration,
+            Sponge.getCauseStackManager().pushCause(this);
+            ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(Sponge.getCauseStackManager().getCurrentCause(), duration, duration,
                     weather, weather, this.prevWeather, this);
             SpongeImpl.postEvent(event);
+            Sponge.getCauseStackManager().popCause();
             if (event.isCancelled()) {
                 this.setWeather(this.prevWeather);
             } else {
-                this.setWeather(event.getWeather(), event.getDuration());
+                // TODO: Rewrite this correctly so it doesn't rain 24/7
+                //this.setWeather(event.getWeather(), event.getDuration());
                 this.prevWeather = event.getWeather();
                 this.weatherStartTime = this.worldInfo.getWorldTotalTime();
             }
@@ -1940,10 +2236,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("LevelName", this.worldInfo.getWorldName())
                 .add("DimensionId", this.provider.getDimensionType().getId())
-                .add("DimensionType", ((org.spongepowered.api.world.DimensionType)(Object) this.provider.getDimensionType()).getId())
+                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
                 .toString();
     }
 }

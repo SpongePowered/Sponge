@@ -54,7 +54,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
         }
 
         BlockPos pos = new BlockPos(x, y, z);
-        return ((IMixinChunk) chunk).getBlockOwner(pos).map(Identifiable::getUniqueId);
+        // The difference here saves the user lookup check for snapshot creation, very hot when considering
+        // blocks changing with potentially n block notifiers and n block owners.
+        return ((IMixinChunk) chunk).getBlockOwnerUUID(pos);
     }
 
     @Override
@@ -65,7 +67,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
         }
 
         BlockPos pos = new BlockPos(x, y, z);
-        return ((IMixinChunk) chunk).getBlockNotifier(pos).map(Identifiable::getUniqueId);
+        // The difference here saves the user lookup check for snapshot creation, very hot when considering
+        // blocks changing with potentially n block notifiers and n block owners.
+        return ((IMixinChunk) chunk).getBlockNotifierUUID(pos);
     }
 
     @Override

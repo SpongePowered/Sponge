@@ -30,7 +30,6 @@ import static org.spongepowered.api.data.Queries.POSITION_Y;
 import static org.spongepowered.api.data.Queries.POSITION_Z;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;

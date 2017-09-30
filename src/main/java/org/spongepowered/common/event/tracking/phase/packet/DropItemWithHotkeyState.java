@@ -24,24 +24,34 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import com.google.common.collect.Lists;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.util.EnumHand;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 final class DropItemWithHotkeyState extends BasicInventoryPacketState {
@@ -56,32 +66,78 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        super.populateContext(playerMP, packet, context);
-        context
-                .add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+    public void unwind(InventoryPacketContext context) {
+        final EntityPlayerMP player = context.getPacketPlayer();
+        final ItemStack usedStack = context.getItemUsed();
+        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+        final Entity spongePlayer = EntityUtil.fromNative(player);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(spongePlayer);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+
+            context.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            context.getCapturedItemsSupplier()
+                .ifPresentAndNotEmpty(items -> {
+
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add(EntityUtil.fromNative(item));
+                    }
+
+                    final CPacketPlayerDigging packetIn = context.getPacket();
+
+                    CPacketPlayerDigging.Action action = packetIn.getAction();
+
+                    final int usedButton = action == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+
+                    Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                    final IMixinContainer mixinContainer = ContainerUtil.toMixin( player.openContainer);
+                    List<SlotTransaction> slotTrans = mixinContainer.getCapturedTransactions();
+                    ClickInventoryEvent.Drop dropItemEvent = ((DropItemWithHotkeyState) this)
+                        .createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton);
+
+                    SpongeImpl.postEvent(dropItemEvent);
+                    if (!dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
+                        processSpawnedEntities(player, dropItemEvent);
+                    } else {
+                        ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
+                    }
+                    slotTrans.clear();
+                    mixinContainer.setCaptureInventory(false);
+                });
+            context.getCapturedEntityDropSupplier()
+                .ifPresentAndNotEmpty(itemMapping -> {
+
+                });
+            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+            mixinContainer.setCaptureInventory(false);
+            mixinContainer.getCapturedTransactions().clear();
+        }
     }
 
     @Override
-    public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-        final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
-                .entity(EntityUtil.fromNative(playerMP))
-                .type(InternalSpawnTypes.DROPPED_ITEM)
-                .build())
-                .named(NamedCause.of("Container", openContainer))
-                .build();
-
-        for (Entity currentEntity : capturedEntities) {
-            currentEntity.setCreator(playerMP.getUniqueID());
+    public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            Sponge.getCauseStackManager().pushCause(openContainer);
+            Sponge.getCauseStackManager().pushCause(playerMP);
+            for (Entity currentEntity : capturedEntities) {
+                currentEntity.setCreator(playerMP.getUniqueID());   
+            }
+    
+            // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding
+            // 'control')
+            ClickInventoryEvent.Drop event = usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
+                    ? SpongeEventFactory.createClickInventoryEventDropSingle(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                            capturedEntities, openContainer, slotTransactions)
+                    : SpongeEventFactory.createClickInventoryEventDropFull(Sponge.getCauseStackManager().getCurrentCause(), transaction, capturedEntities,
+                            openContainer, slotTransactions);
+            // TODO the nature of how this event is handled prevents the cause information being preserved through
+            // the event call, somehow should not release this frame until after the event is posted
+            return event;
         }
-        final World spongeWorld = (World) playerMP.world;
-
-        // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
-        return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID ?
-               SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions) :
-               SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
-
     }
 
     @Override

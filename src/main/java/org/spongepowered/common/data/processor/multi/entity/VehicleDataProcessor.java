@@ -54,7 +54,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected boolean set(net.minecraft.entity.Entity entity, Map<Key<?>, Object> keyValues) {
-        return ((Entity) entity).setVehicle(((EntitySnapshot) keyValues.get(Keys.VEHICLE)).restore().orElse(null)).isSuccessful();
+        return ((Entity) entity).setVehicle(((EntitySnapshot) keyValues.get(Keys.VEHICLE)).restore().orElse(null));
 
     }
 
@@ -68,11 +68,10 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
     public Optional<VehicleData> fill(DataContainer container, final VehicleData vehicleData) {
         if (!container.contains(Keys.VEHICLE.getQuery(), Keys.BASE_VEHICLE.getQuery())) {
             return Optional.empty();
-        } else {
-            EntitySnapshot vehicle = container.getSerializable(Keys.VEHICLE.getQuery(), EntitySnapshot.class).get();
-            EntitySnapshot baseVehicle = container.getSerializable(Keys.BASE_VEHICLE.getQuery(), EntitySnapshot.class).get();
-            return Optional.of(vehicleData.set(Keys.VEHICLE, vehicle).set(Keys.BASE_VEHICLE, baseVehicle));
         }
+        EntitySnapshot vehicle = container.getSerializable(Keys.VEHICLE.getQuery(), EntitySnapshot.class).get();
+        EntitySnapshot baseVehicle = container.getSerializable(Keys.BASE_VEHICLE.getQuery(), EntitySnapshot.class).get();
+        return Optional.of(vehicleData.set(Keys.VEHICLE, vehicle).set(Keys.BASE_VEHICLE, baseVehicle));
     }
 
     @Override
@@ -85,9 +84,8 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
                 return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicle));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
-        } else {
-            return DataTransactionResult.failNoData();
         }
+        return DataTransactionResult.failNoData();
     }
 
     @Override

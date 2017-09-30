@@ -31,12 +31,12 @@ import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityLiving.class)
 public abstract class MixinEntityLiving extends EntityLivingBase {
 
-    private static final String ENTITY_LIVING_AGE_FIELD = "Lnet/minecraft/entity/EntityLiving;entityAge:I";
+    private static final String ENTITY_LIVING_AGE_FIELD = "Lnet/minecraft/entity/EntityLiving;idleTime:I";
 
     public MixinEntityLiving(World worldIn) {
         super(worldIn);
@@ -44,8 +44,8 @@ public abstract class MixinEntityLiving extends EntityLivingBase {
 
     @Redirect(method = "updateEntityActionState", at = @At(value = "FIELD", target = ENTITY_LIVING_AGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupEntityDespawnAge(EntityLiving self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
-        this.entityAge += ticks;
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
+        this.idleTime += ticks;
     }
 
 }

@@ -78,7 +78,7 @@ public abstract class MixinBlockWoodSlab extends MixinBlock {
             return Optional.of((BlockState) blockState.withProperty(BlockPlanks.VARIANT, treeType));
         }
         if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) (Object) value));
+            return Optional.of((BlockState) blockState.withProperty(BlockSlab.HALF, (BlockSlab.EnumBlockHalf) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }

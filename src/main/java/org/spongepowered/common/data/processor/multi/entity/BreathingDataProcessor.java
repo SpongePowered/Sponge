@@ -60,7 +60,6 @@ public class BreathingDataProcessor extends AbstractEntityDataProcessor<EntityLi
 
     @Override
     protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
-        final int maxAir = (Integer) keyValues.get(Keys.MAX_AIR);
         final int air = (Integer) keyValues.get(Keys.REMAINING_AIR);
         entity.setAir(air);
         return true;

@@ -36,7 +36,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.client.CPacketClickWindow;
-import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.client.CPacketConfirmTransaction;
@@ -63,15 +62,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
@@ -79,6 +73,8 @@ import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventorySt
 import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -92,35 +88,32 @@ public final class PacketPhase extends TrackingPhase {
 
     public static final class General {
 
-        public static final IPacketState UNKNOWN = new UnknownPacketState();
-        public static final IPacketState MOVEMENT = new MovementPacketState();
-        public static final IPacketState INTERACTION = new InteractionPacketState();
-        public static final IPacketState IGNORED = new IgnoredPacketState();
-        public static final IPacketState INTERACT_ENTITY = new InteractEntityPacketState();
-        public static final IPacketState ATTACK_ENTITY = new AttackEntityPacketState();
-        public static final IPacketState INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
-        public static final IPacketState CHAT = new ChatPacketState();
-        public static final IPacketState CREATIVE_INVENTORY = new CreativeInventoryPacketState();
-        public static final IPacketState PLACE_BLOCK = new PlaceBlockPacketState();
-        public static final IPacketState OPEN_INVENTORY = new BasicPacketState();
-        public static final IPacketState REQUEST_RESPAWN = new BasicPacketState();
-        public static final IPacketState USE_ITEM = new UseItemPacketState();
-        public static final IPacketState INVALID = new InvalidPacketState();
-        public static final IPacketState CLIENT_SETTINGS = new BasicPacketState();
-        public static final IPacketState START_RIDING_JUMP = new BasicPacketState();
-        public static final IPacketState ANIMATION = new BasicPacketState();
-        public static final IPacketState START_SNEAKING = new BasicPacketState();
-        public static final IPacketState STOP_SNEAKING = new BasicPacketState();
-        public static final IPacketState START_SPRINTING = new BasicPacketState();
-        public static final IPacketState STOP_SPRINTING = new BasicPacketState();
-        public static final IPacketState STOP_SLEEPING = new StopSleepingPacketState();
-        public static final IPacketState CLOSE_WINDOW = new CloseWindowState();
-        public static final IPacketState UPDATE_SIGN = new UpdateSignState();
-        public static final IPacketState RESOURCE_PACK = new UpdateSignState();
-        public static final IPacketState STOP_RIDING_JUMP = new BasicPacketState();
-        public static final IPacketState HANDLED_EXTERNALLY = new UnknownPacketState();
-        public static final IPacketState START_FALL_FLYING = new BasicPacketState();
-        public static final IPacketState SWAP_HAND_ITEMS = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> UNKNOWN = new UnknownPacketState();
+        public static final IPhaseState<BasicPacketContext> MOVEMENT = new MovementPacketState();
+        public static final IPhaseState<BasicPacketContext> INTERACTION = new InteractionPacketState();
+        public static final IPhaseState<BasicPacketContext> IGNORED = new IgnoredPacketState();
+        public static final IPhaseState<BasicPacketContext> INTERACT_ENTITY = new InteractEntityPacketState();
+        public static final IPhaseState<BasicPacketContext> ATTACK_ENTITY = new AttackEntityPacketState();
+        public static final IPhaseState<BasicPacketContext> INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
+        public static final IPhaseState<BasicPacketContext> CREATIVE_INVENTORY = new CreativeInventoryPacketState();
+        public static final IPhaseState<BasicPacketContext> PLACE_BLOCK = new PlaceBlockPacketState();
+        public static final IPhaseState<BasicPacketContext> REQUEST_RESPAWN = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> USE_ITEM = new UseItemPacketState();
+        public static final IPhaseState<BasicPacketContext> INVALID = new InvalidPacketState();
+        public static final IPhaseState<BasicPacketContext> START_RIDING_JUMP = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> ANIMATION = new AnimationPacketState();
+        public static final IPhaseState<BasicPacketContext> START_SNEAKING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> STOP_SNEAKING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> START_SPRINTING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> STOP_SPRINTING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> STOP_SLEEPING = new StopSleepingPacketState();
+        public static final IPhaseState<BasicPacketContext> CLOSE_WINDOW = new CloseWindowState();
+        public static final IPhaseState<BasicPacketContext> UPDATE_SIGN = new UpdateSignState();
+        public static final IPhaseState<BasicPacketContext> RESOURCE_PACK = new ResourcePackState();
+        public static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
+        public static final IPhaseState<BasicPacketContext> START_FALL_FLYING = new BasicPacketState();
+        public static final IPhaseState<BasicPacketContext> SWAP_HAND_ITEMS = new BasicPacketState();
     }
 
     public static final class Inventory {
@@ -131,7 +124,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState();
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
-        public static final BasicInventoryPacketState DROP_INVENTORY = new BasicInventoryPacketState();
+        public static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
         public static final BasicInventoryPacketState PRIMARY_INVENTORY_SHIFT_CLICK = new PrimaryInventoryShiftClick();
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_SHIFT_CLICK = new SecondaryInventoryShiftClickState();
@@ -147,8 +140,8 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
 
         public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
-        public static final BasicInventoryPacketState OPEN_INVENTORY = new BasicInventoryPacketState();
-        public static final BasicInventoryPacketState ENCHANT_ITEM = new BasicInventoryPacketState();
+        public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
+        public static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
                 .add(INVENTORY)
@@ -233,28 +226,27 @@ public final class PacketPhase extends TrackingPhase {
     public final static int PACKET_BUTTON_SECONDARY_ID = 0;
     public final static int PACKET_BUTTON_MIDDLE_ID = 0;
 
-    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new IdentityHashMap<>();
-    private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
+    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPhaseState<? extends PacketContext<?>>>> packetTranslationMap = new IdentityHashMap<>();
 
     // General use methods
 
-    public boolean isPacketInvalid(Packet<?> packetIn, EntityPlayerMP packetPlayer, IPacketState packetState) {
-        return packetState.isPacketIgnored(packetIn, packetPlayer);
+    public boolean isPacketInvalid(Packet<?> packetIn, EntityPlayerMP packetPlayer, IPhaseState<? extends PacketContext<?>> packetState) {
+        return ((PacketState<?>) packetState).isPacketIgnored(packetIn, packetPlayer);
     }
 
-    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
-    public IPacketState getStateForPacket(Packet<?> packet) {
-        final Function<Packet<?>, IPacketState> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
+    @SuppressWarnings({"SuspiciousMethodCalls"})
+    public IPhaseState<? extends PacketContext<?>> getStateForPacket(Packet<?> packet) {
+        final Function<Packet<?>, IPhaseState<? extends PacketContext<?>>> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
         if (packetStateFunction != null) {
             return packetStateFunction.apply(packet);
         }
         return PacketPhase.General.UNKNOWN;
     }
 
-    public PhaseContext populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext context) {
+    public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState<?> state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
-        ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
+        ((PacketState) state).populateContext(entityPlayerMP, packet, (PacketContext) context);
         return context;
     }
 
@@ -262,19 +254,8 @@ public final class PacketPhase extends TrackingPhase {
     // TrackingPhase specific methods overridden for state specific handling
 
     @Override
-    public boolean populateCauseForNotifyNeighborEvent(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker,
-            IMixinChunk mixinChunk, BlockPos pos) {
-        if (!super.populateCauseForNotifyNeighborEvent(state, context, builder, causeTracker, mixinChunk, pos)) {
-            final Player player = context.getSource(Player.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Processing a Player PAcket, expecting a player, but had none!", context));
-            builder.named(NamedCause.notifier(player));
-        }
-        return true;
-    }
-
-    @Override
-    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         final Player player = context.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be tracking a player, but not!", context));
         ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
@@ -282,66 +263,18 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(IPhaseState currentState) {
-        return ((IPacketState) currentState).doesCaptureEntityDrops();
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
         return currentState == General.INTERACTION;
     }
 
     @Override
-    public boolean ignoresItemPreMerging(IPhaseState currentState) {
-        return ((IPacketState) currentState).ignoresItemPreMerges();
+    public boolean ignoresItemPreMerging(IPhaseState<?> currentState) {
+        return ((PacketState<?>) currentState).ignoresItemPreMerges();
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
-        return ((IPacketState) phaseState).shouldCaptureEntity()
-               ? context.getCapturedEntities().add(entity)
-               : ((IPacketState) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {
-        if (phaseState == General.INVALID) { // Invalid doesn't capture any packets.
-            return;
-        }
-        final Packet<?> packetIn = phaseContext.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class).get();
-        final EntityPlayerMP player = phaseContext.getSource(EntityPlayerMP.class).get();
-        final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
-
-        final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
-        checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
-        if (unwindFunction != null) {
-            unwindFunction.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
-        } else {
-            PacketFunction.UNKNOWN_PACKET.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
-        }
-    }
-
-    @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return !(currentState instanceof BasicInventoryPacketState);
-    }
-
-    @Override
-    public boolean requiresPost(IPhaseState state) {
-        return state != General.INVALID;
-    }
-
-    @Override
-    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
-            ArrayList<Entity> entities) {
-        ((IPacketState) unwindingState).postSpawnEntities(causeTracker, phaseContext, entities);
-    }
-
-    @Override
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
-        ((IPacketState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
+    public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ((PacketState<?>) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }
 
     // Inventory packet specific methods
@@ -381,42 +314,10 @@ public final class PacketPhase extends TrackingPhase {
 
     private PacketPhase() {
         setupPacketToStateMapping();
-        setupPacketToUnwindMapping();
     }
 
     private static final class Holder {
         static final PacketPhase INSTANCE = new PacketPhase();
-    }
-
-    // TODO - move these into the packet state classes for unwinding instead of using packet functions.
-    public void setupPacketToUnwindMapping() {
-        this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketUseEntity.class, PacketFunction.USE_ENTITY);
-        this.packetUnwindMap.put(CPacketPlayer.class, PacketFunction.MOVEMENT);
-        this.packetUnwindMap.put(CPacketPlayer.Position.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
-        this.packetUnwindMap.put(CPacketPlayer.Rotation.class, PacketFunction.MOVEMENT);
-        this.packetUnwindMap.put(CPacketPlayer.PositionRotation.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
-        this.packetUnwindMap.put(CPacketPlayerDigging.class, PacketFunction.ACTION);
-        this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.USE_ITEM);
-        this.packetUnwindMap.put(CPacketPlayerTryUseItemOnBlock.class, PacketFunction.PLACE_BLOCK);
-        this.packetUnwindMap.put(CPacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
-        this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.STOP_SLEEPING);
-        this.packetUnwindMap.put(CPacketEntityAction.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketInput.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketCloseWindow.class, PacketFunction.CLOSE_WINDOW);
-        this.packetUnwindMap.put(CPacketClickWindow.class, PacketFunction.INVENTORY);
-        this.packetUnwindMap.put(CPacketConfirmTransaction.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketCreativeInventoryAction.class, PacketFunction.CREATIVE);
-        this.packetUnwindMap.put(CPacketEnchantItem.class, PacketFunction.ENCHANTMENT);
-        this.packetUnwindMap.put(CPacketUpdateSign.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketPlayerAbilities.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketTabComplete.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketClientSettings.class, PacketFunction.CLIENT_SETTINGS);
-        this.packetUnwindMap.put(CPacketClientStatus.class, PacketFunction.CLIENT_STATUS);
-        this.packetUnwindMap.put(CPacketCustomPayload.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketSpectate.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(CPacketResourcePackStatus.class, PacketFunction.RESOURCE_PACKET);
     }
 
 
@@ -443,7 +344,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketPlayerDigging.class, packet -> {
             final CPacketPlayerDigging playerDigging = (CPacketPlayerDigging) packet;
             final CPacketPlayerDigging.Action action = playerDigging.getAction();
-            final IPacketState state = INTERACTION_ACTION_MAPPINGS.get(action);
+            final IPhaseState<? extends PacketContext<?>> state = INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? General.UNKNOWN : state;
         });
         this.packetTranslationMap.put(CPacketPlayerTryUseItemOnBlock.class, packet -> {
@@ -454,9 +355,8 @@ public final class PacketPhase extends TrackingPhase {
             final MinecraftServer server = SpongeImpl.getServer();
             if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
                 return General.PLACE_BLOCK;
-            } else {
-                return General.INVALID;
             }
+            return General.INVALID;
         });
         this.packetTranslationMap.put(CPacketPlayerTryUseItem.class, packet -> General.USE_ITEM);
         this.packetTranslationMap.put(CPacketHeldItemChange.class, packet -> Inventory.SWITCH_HOTBAR_SCROLL);
@@ -475,24 +375,20 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketUpdateSign.class, packet -> General.UPDATE_SIGN);
         this.packetTranslationMap.put(CPacketPlayerAbilities.class, packet -> General.IGNORED);
         this.packetTranslationMap.put(CPacketTabComplete.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(CPacketClientSettings.class, packet -> General.CLIENT_SETTINGS);
         this.packetTranslationMap.put(CPacketClientStatus.class, packet -> {
             final CPacketClientStatus clientStatus = (CPacketClientStatus) packet;
             final CPacketClientStatus.State status = clientStatus.getStatus();
-            if ( status == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT) {
-                return Inventory.OPEN_INVENTORY;
-            } else if ( status == CPacketClientStatus.State.PERFORM_RESPAWN) {
+            if (status == CPacketClientStatus.State.PERFORM_RESPAWN) {
                 return General.REQUEST_RESPAWN;
-            } else {
-                return General.IGNORED;
             }
+            return General.IGNORED;
         });
         this.packetTranslationMap.put(CPacketCustomPayload.class, packet -> General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketSpectate.class, packet -> General.IGNORED);
         this.packetTranslationMap.put(CPacketResourcePackStatus.class, packet -> General.RESOURCE_PACK);
     }
 
-    public static final ImmutableMap<CPacketEntityAction.Action, IPacketState> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPacketState>builder()
+    private static final ImmutableMap<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>>builder()
             .put(CPacketEntityAction.Action.START_SNEAKING, General.START_SNEAKING)
             .put(CPacketEntityAction.Action.STOP_SNEAKING, General.STOP_SNEAKING)
             .put(CPacketEntityAction.Action.STOP_SLEEPING, General.STOP_SLEEPING)
@@ -503,7 +399,7 @@ public final class PacketPhase extends TrackingPhase {
             .put(CPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
             .put(CPacketEntityAction.Action.START_FALL_FLYING, General.START_FALL_FLYING)
             .build();
-    public static final ImmutableMap<CPacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPacketState>builder()
+    private static final ImmutableMap<CPacketPlayerDigging.Action, IPhaseState<? extends PacketContext<?>>> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPhaseState<? extends PacketContext<?>>>builder()
             .put(CPacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, General.INTERACTION)

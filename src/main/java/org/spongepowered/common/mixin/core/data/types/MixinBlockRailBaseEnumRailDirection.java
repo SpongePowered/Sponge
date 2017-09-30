@@ -33,24 +33,22 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockRailBase.EnumRailDirection.class)
-@Implements(@Interface(iface = RailDirection.class, prefix = "shadow$"))
-public abstract class MixinBlockRailBaseEnumRailDirection {
+@Implements(@Interface(iface = RailDirection.class, prefix = "rail$"))
+public abstract class MixinBlockRailBaseEnumRailDirection implements RailDirection {
 
-    @Shadow
-    public abstract String getName();
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract int getMetadata();
 
-    @Shadow
-    public abstract int getMetadata();
-
-    public String shadow$getId() {
-        return getName();
+    public String rail$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String rail$getName() {
+        return shadow$getName();
     }
 
+    @Override
     public RailDirection cycleNext() {
         int meta = getMetadata();
         if (meta == 9) {

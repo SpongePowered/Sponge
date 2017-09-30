@@ -31,15 +31,22 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 public class SpongeSkullType extends SpongeCatalogType.Translatable implements SkullType {
 
-    private final byte id;
+    private final byte dataId;
+    private final String name;
 
-    public SpongeSkullType(byte dataId, String name) {
-        this(dataId, name, translate(name));
+    public SpongeSkullType(byte dataId, String id, String name) {
+        this(dataId, id, name, translate(name));
     }
 
-    public SpongeSkullType(byte dataId, String name, Translation translation) {
-        super(name, translation);
-        this.id = dataId;
+    public SpongeSkullType(byte dataId, String id, String name, Translation translation) {
+        super(id, translation);
+        this.dataId = dataId;
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     protected static Translation translate(String name) {
@@ -61,7 +68,7 @@ public class SpongeSkullType extends SpongeCatalogType.Translatable implements S
     }
 
     public byte getByteId() {
-        return this.id;
+        return this.dataId;
     }
 
 }

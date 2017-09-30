@@ -27,15 +27,11 @@ package org.spongepowered.common.interfaces.entity.explosive;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public interface IMixinExplosive {
 
@@ -43,9 +39,9 @@ public interface IMixinExplosive {
 
     void setExplosionRadius(Optional<Integer> radius);
 
-    default Optional<net.minecraft.world.Explosion> detonate(@Nullable Cause cause, Explosion.Builder builder) {
+    default Optional<net.minecraft.world.Explosion> detonate(Explosion.Builder builder) {
         DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
-                cause != null ? cause : Cause.source(this).build(), builder, builder.build(), (Explosive) this
+                Sponge.getCauseStackManager().getCurrentCause(), builder, builder.build(), (Explosive) this
         );
         if (!Sponge.getEventManager().post(event)) {
             Explosion explosion = event.getExplosionBuilder().build();

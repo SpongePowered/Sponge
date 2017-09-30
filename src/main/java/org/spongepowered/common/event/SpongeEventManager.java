@@ -35,7 +35,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventManager;
@@ -51,14 +54,18 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -66,7 +73,7 @@ import javax.inject.Singleton;
 public class SpongeEventManager implements EventManager {
 
     private final Object lock = new Object();
-
+    protected final Logger logger;
     private final PluginManager pluginManager;
     private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
@@ -85,7 +92,8 @@ public class SpongeEventManager implements EventManager {
             Caffeine.newBuilder().initialCapacity(150).build((eventClass) -> bakeHandlers(eventClass));
 
     @Inject
-    public SpongeEventManager(PluginManager pluginManager) {
+    public SpongeEventManager(Logger logger, PluginManager pluginManager) {
+        this.logger = logger;
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
 
         // Caffeine offers no control over the concurrency level of the
@@ -107,8 +115,8 @@ public class SpongeEventManager implements EventManager {
             ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData = new ConcurrentHashMap<>(150, 0.75f, 1);
             cacheData.set(innerCacheValue, newBackingData);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            SpongeImpl.getLogger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
-            SpongeImpl.getLogger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
+            this.logger.warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
+            this.logger.warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -128,16 +136,34 @@ public class SpongeEventManager implements EventManager {
         return new RegisteredListener.Cache(handlers);
     }
 
-    private static boolean isValidHandler(Method method) {
+    @Nullable
+    private static String getHandlerErrorOrNull(Method method) {
         int modifiers = method.getModifiers();
-        if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers)
-                || method.getDeclaringClass().isInterface()
-                || method.getReturnType() != void.class) {
-            return false;
+        List<String> errors = new ArrayList<>();
+        if (Modifier.isStatic(modifiers)) {
+            errors.add("method must not be static");
+        }
+        if (!Modifier.isPublic(modifiers)) {
+            errors.add("method must be public");
+        }
+        if (Modifier.isAbstract(modifiers)) {
+            errors.add("method must not be abstract");
+        }
+        if (method.getDeclaringClass().isInterface()) {
+            errors.add("interfaces cannot declare listeners");
+        }
+        if (method.getReturnType() != void.class) {
+            errors.add("method must return void");
+        }
+        Class<?>[] parameters = method.getParameterTypes();
+        if (parameters.length == 0 || !Event.class.isAssignableFrom(parameters[0])) {
+            errors.add("method must have an Event as its first parameter");
         }
 
-        Class<?>[] parameters = method.getParameterTypes();
-        return parameters.length >= 1 && Event.class.isAssignableFrom(parameters[0]);
+        if (errors.isEmpty()) {
+            return null;
+        }
+        return String.join(", ", errors);
     }
 
     private void register(RegisteredListener<? extends Event> handler) {
@@ -145,19 +171,19 @@ public class SpongeEventManager implements EventManager {
     }
 
     private void register(List<RegisteredListener<? extends Event>> handlers) {
-        synchronized (this.lock) {
-            boolean changed = false;
+        boolean changed = false;
 
+        synchronized (this.lock) {
             for (RegisteredListener<?> handler : handlers) {
                 if (this.handlersByEvent.put(handler.getEventClass(), handler)) {
                     changed = true;
                     this.checker.registerListenerFor(handler.getEventClass());
                 }
             }
+        }
 
-            if (changed) {
-                this.handlersCache.invalidateAll();
-            }
+        if (changed) {
+            this.handlersCache.invalidateAll();
         }
     }
 
@@ -186,35 +212,54 @@ public class SpongeEventManager implements EventManager {
         checkNotNull(listenerObject, "listener");
 
         if (this.registeredListeners.contains(listenerObject)) {
-            SpongeImpl.getLogger().warn("Plugin {} attempted to register an already registered listener ({})", plugin.getId(),
+            this.logger.warn("Plugin {} attempted to register an already registered listener ({})", plugin.getId(),
                     listenerObject.getClass().getName());
             Thread.dumpStack();
             return;
         }
 
         List<RegisteredListener<? extends Event>> handlers = Lists.newArrayList();
+        Map<Method, String> methodErrors = new HashMap<>();
 
         Class<?> handle = listenerObject.getClass();
         for (Method method : handle.getMethods()) {
             Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
-                if (isValidHandler(method)) {
+                String error = getHandlerErrorOrNull(method);
+                if (error == null) {
                     @SuppressWarnings("unchecked")
                     Class<? extends Event> eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
                     AnnotatedEventListener handler;
                     try {
                         handler = this.handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
-                        SpongeImpl.getLogger().error("Failed to create handler for {} on {}", method, handle, e);
+                        this.logger.error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
                     }
 
                     handlers.add(createRegistration(plugin, eventClass, listener, handler));
                 } else {
-                    SpongeImpl.getLogger().warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
-                            Listener.class.getName());
+                    methodErrors.put(method, error);
                 }
             }
+        }
+
+        // getMethods() doesn't return private methods. Do another check to warn
+        // about those.
+        for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
+            for (Method method : handleParent.getDeclaredMethods()) {
+                if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
+                    String error = getHandlerErrorOrNull(method);
+                    if (error != null) {
+                        methodErrors.put(method, error);
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Method, String> method : methodErrors.entrySet()) {
+            this.logger.warn("Invalid listener method {} in {}: {}", method.getKey(),
+                    method.getKey().getDeclaringClass().getName(), method.getValue());
         }
 
         this.registeredListeners.add(listenerObject);
@@ -259,9 +304,9 @@ public class SpongeEventManager implements EventManager {
     }
 
     private void unregister(Predicate<RegisteredListener<?>> unregister) {
-        synchronized (this.lock) {
-            boolean changed = false;
+        boolean changed = false;
 
+        synchronized (this.lock) {
             Iterator<RegisteredListener<?>> itr = this.handlersByEvent.values().iterator();
             while (itr.hasNext()) {
                 RegisteredListener<?> handler = itr.next();
@@ -269,12 +314,13 @@ public class SpongeEventManager implements EventManager {
                     itr.remove();
                     changed = true;
                     this.checker.unregisterListenerFor(handler.getEventClass());
+                    this.registeredListeners.remove(handler.getHandle());
                 }
             }
+        }
 
-            if (changed) {
-                this.handlersCache.invalidateAll();
-            }
+        if (changed) {
+            this.handlersCache.invalidateAll();
         }
     }
 
@@ -282,7 +328,6 @@ public class SpongeEventManager implements EventManager {
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
         unregister(handler -> listener.equals(handler.getHandle()));
-        this.registeredListeners.remove(listener);
     }
 
     @Override
@@ -296,21 +341,40 @@ public class SpongeEventManager implements EventManager {
     }
 
     @SuppressWarnings("unchecked")
-    protected static boolean post(Event event, List<RegisteredListener<?>> handlers) {
+    protected boolean post(Event event, List<RegisteredListener<?>> handlers) {
+        if(!Sponge.getServer().isMainThread()) {
+            // If this event is being posted asynchronously then we don't want
+            // to do any timing or cause stack changes
+            for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
+                try {
+                    ((AbstractEvent) event).currentOrder = handler.getOrder();
+                    handler.handle(event);
+                } catch (Throwable e) {
+                    SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                }
+            }
+            ((AbstractEvent) event).currentOrder = null;
+            return event instanceof Cancellable && ((Cancellable) event).isCancelled();
+        }
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
-            try {
+            Sponge.getCauseStackManager().pushCause(handler.getPlugin());
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 handler.getTimingsHandler().startTimingIfSync();
-                ((AbstractEvent) event).currentOrder = handler.getOrder();
+                if (event instanceof AbstractEvent) {
+                    ((AbstractEvent) event).currentOrder = handler.getOrder();
+                }
                 handler.handle(event);
-                handler.getTimingsHandler().stopTimingIfSync();
             } catch (Throwable e) {
+                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+            } finally {
                 handler.getTimingsHandler().stopTimingIfSync();
-                SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
+            Sponge.getCauseStackManager().popCause();
         }
-        TimingsManager.PLUGIN_EVENT_HANDLER.stopTimingIfSync();
-        ((AbstractEvent) event).currentOrder = null;
+        if (event instanceof AbstractEvent) {
+            ((AbstractEvent) event).currentOrder = null;
+        }
 
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }

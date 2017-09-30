@@ -24,40 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockStairs;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StairShapes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class StairShapeRegistryModule implements CatalogRegistryModule<StairShape> {
-
-    @RegisterCatalog(StairShapes.class)
-    private final Map<String, StairShape> stairShapeMappings = ImmutableMap.<String, StairShape>builder()
-        .put("straight", (StairShape) (Object) BlockStairs.EnumShape.STRAIGHT)
-        .put("inner_left", (StairShape) (Object) BlockStairs.EnumShape.INNER_LEFT)
-        .put("inner_right", (StairShape) (Object) BlockStairs.EnumShape.INNER_RIGHT)
-        .put("outer_left", (StairShape) (Object) BlockStairs.EnumShape.OUTER_LEFT)
-        .put("outer_right", (StairShape) (Object) BlockStairs.EnumShape.OUTER_RIGHT)
-        .build();
+@RegisterCatalog(StairShapes.class)
+public final class StairShapeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockStairs.EnumShape, StairShape> {
 
     @Override
-    public Optional<StairShape> getById(String id) {
-        return Optional.ofNullable(this.stairShapeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockStairs.EnumShape[] getValues() {
+        return BlockStairs.EnumShape.values();
     }
-
-    @Override
-    public Collection<StairShape> getAll() {
-        return ImmutableList.copyOf(this.stairShapeMappings.values());
-    }
-
 }

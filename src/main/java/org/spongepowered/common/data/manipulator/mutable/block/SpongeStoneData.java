@@ -33,9 +33,7 @@ import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.StoneTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStoneData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeStoneData extends AbstractSingleCatalogData<StoneType, StoneData, ImmutableStoneData> implements StoneData {
 
     public SpongeStoneData(StoneType variant) {

@@ -24,14 +24,32 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketUseEntity;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -51,24 +69,106 @@ final class InteractAtEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
         if (stack != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+            context.itemUsed(stack);
         }
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
-        if (entity != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-            context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
-        }
-        context.addEntityDropCaptures()
-                .addEntityCaptures()
-                .addBlockCaptures();
     }
 
     @Override
     public boolean doesCaptureEntityDrops() {
         return true;
+    }
+
+    @Override
+    public void unwind(BasicPacketContext context) {
+        final EntityPlayerMP player = context.getPacketPlayer();
+
+        final CPacketUseEntity useEntityPacket = context.getPacket();
+        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        if (entity == null) {
+            // Something happened?
+            return;
+        }
+        final World spongeWorld = EntityUtil.getSpongeWorld(player);
+        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
+
+
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+
+                SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    processSpawnedEntities(player, event);
+                }
+            });
+            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                SpawnEntityEvent event =
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    processSpawnedEntities(player, event);
+                }
+            });
+            context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact At Entity").centre().hr();
+                printer.add("The item stacks captured are: ");
+
+                for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
+                    printer.add("  - Entity with UUID: %s", entry.getKey());
+                    for (ItemDropData stack : entry.getValue()) {
+                        printer.add("    - %s", stack);
+                    }
+                }
+                printer.trace(System.err);
+            });
+            context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    final UUID entityUuid = entry.getKey();
+                    final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
+                    if (entityFromUuid != null) {
+                        final List<Entity> entities = entry.getValue()
+                            .stream()
+                            .map(EntityUtil::fromNative)
+                            .collect(Collectors.toList());
+                        if (!entities.isEmpty()) {
+                            DropItemEvent.Custom event =
+                                SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(),
+                                    entities);
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                processSpawnedEntities(player, event);
+                            }
+                        }
+                    }
+                }
+            });
+            context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
+                final List<EntityItem> items =
+                    drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
+                final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(),
+                        entities);
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
+                        processSpawnedEntities(player, event);
+                    }
+                }
+
+            });
+        }
+        context.getCapturedBlockSupplier()
+            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
     }
 }

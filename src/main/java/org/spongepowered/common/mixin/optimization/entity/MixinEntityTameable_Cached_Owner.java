@@ -52,7 +52,7 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
     @Overwrite
     public UUID getOwnerId() {
         if (this.cachedOwnerId == null) {
-            this.cachedOwnerId = Optional.fromNullable((UUID) ((Optional) this.dataManager.get(OWNER_UNIQUE_ID)).orNull());
+            this.cachedOwnerId = this.dataManager.get(OWNER_UNIQUE_ID);
         }
         return this.cachedOwnerId.orNull();
     }

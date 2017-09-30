@@ -27,11 +27,28 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketUseEntity;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -50,21 +67,16 @@ final class InteractEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
         net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
         if (entity != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-            context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
             final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
             if (stack != null) {
-                context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                context.itemUsed(stack);
             }
         }
 
-        context.addEntityDropCaptures()
-                .addEntityCaptures()
-                .addBlockCaptures();
     }
 
     @Override
@@ -75,5 +87,71 @@ final class InteractEntityPacketState extends BasicPacketState {
     @Override
     public boolean doesCaptureEntityDrops() {
         return true;
+    }
+
+    @Override
+    public void unwind(BasicPacketContext phaseContext) {
+
+        final EntityPlayerMP player = phaseContext.getPacketPlayer();
+        final CPacketUseEntity useEntityPacket = phaseContext.getPacket();
+        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        if (entity == null) {
+            // Something happened?
+            return;
+        }
+        final World spongeWorld = EntityUtil.getSpongeWorld(player);
+        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
+
+        phaseContext.getCapturedBlockSupplier()
+            .ifPresentAndNotEmpty(blocks -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact Entity").centre().hr();
+                printer.add("The blocks captured are:");
+                for (BlockSnapshot blockSnapshot : blocks) {
+                    printer.add("  Block: %s", blockSnapshot);
+                }
+                printer.trace(System.err);
+            });
+        phaseContext.getCapturedEntitySupplier()
+            .ifPresentAndNotEmpty(entities -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact Entity").centre().hr();
+                printer.add("The entities captured are:");
+                for (Entity capturedEntity : entities) {
+                    printer.add("  Entity: %s", capturedEntity);
+                }
+                printer.trace(System.err);
+            });
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                SpawnEntityEvent event =
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    processSpawnedEntities(player, event);
+
+                }
+            });
+        }
+        phaseContext.getCapturedEntityDropSupplier()
+            .ifPresentAndNotEmpty(map -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact Entity").centre().hr();
+                printer.add("The item stacks captured are: ");
+
+                for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
+                    printer.add("  - Entity with UUID: %s", entry.getKey());
+                    for (ItemDropData stack : entry.getValue()) {
+                        printer.add("    - %s", stack);
+                    }
+                }
+                printer.trace(System.err);
+            });
+
+        phaseContext.getCapturedBlockSupplier()
+            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
     }
 }

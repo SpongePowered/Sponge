@@ -30,7 +30,6 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -49,7 +48,6 @@ public class RandomBlockPopulator implements RandomBlock {
     private VariableAmount height;
     private Predicate<Location<World>> check;
     private BlockState state;
-    private final Cause populatorCause = Cause.source(this).build();
 
     public RandomBlockPopulator(BlockState block, VariableAmount count, VariableAmount height) {
         this.count = checkNotNull(count);
@@ -80,7 +78,7 @@ public class RandomBlockPopulator implements RandomBlock {
         for (int i = 0; i < n; i++) {
             Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
             if (this.check.test(pos)) {
-                world.setBlock(pos.getBlockPosition(), this.state, this.populatorCause);
+                world.setBlock(pos.getBlockPosition(), this.state);
                 // Liquids force a block update tick so they may flow during world gen
                 try {
                     ((WorldServer) world).immediateBlockTick(((IMixinLocation) (Object) pos).getBlockPos(), (IBlockState) this.state, random);

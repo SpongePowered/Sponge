@@ -36,7 +36,7 @@ public class MinecraftRconService implements RconService {
 
     @Override
     public boolean isRconEnabled() {
-        return this.server.theRConThreadMain != null;
+        return this.server.rconThread != null;
     }
 
     @Override

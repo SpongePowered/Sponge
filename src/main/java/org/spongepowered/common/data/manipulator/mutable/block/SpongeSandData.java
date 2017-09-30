@@ -33,9 +33,7 @@ import org.spongepowered.api.data.type.SandType;
 import org.spongepowered.api.data.type.SandTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeSandData extends AbstractSingleCatalogData<SandType, SandData, ImmutableSandData> implements SandData {
 
     public SpongeSandData(SandType variant) {

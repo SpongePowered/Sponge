@@ -28,10 +28,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
+import java.io.File;
 import java.io.IOException;
 
 public interface IMixinSaveHandler {
     void loadSpongeDatData(WorldInfo info) throws IOException;
 
     void loadDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound);
+
+    File getSpongeWorldDirectory();
 }

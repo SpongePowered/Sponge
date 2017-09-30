@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
@@ -34,8 +33,6 @@ import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -45,13 +42,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(EntityCreeper.class)
 public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper, IMixinFusedExplosive {
@@ -75,9 +71,6 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Shadow public abstract void setCreeperState(int state);
     @Shadow private void explode() { } // explode
 
-    private Cause primeCause;
-    private Cause detonationCause;
-    private Cause defuseCause;
     private int fuseDuration = 30;
     private boolean interactPrimeCancelled;
     private boolean stateDirty;
@@ -93,7 +86,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Inject(method = "onDeath", at = @At("RETURN"))
     private void onDeath(DamageSource damageSource, CallbackInfo ci) {
         if (!this.world.isRemote && this.tracksEntityDeaths) {
-            ((IMixinWorldServer) this.world).getCauseTracker().completePhase();
+            CauseTracker.getInstance().completePhase(EntityPhase.State.DEATH);
             this.tracksEntityDeaths = false;
         }
     }
@@ -104,16 +97,6 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     // FusedExplosive Impl
-
-    @Nullable
-    private Cause getCause(@Nullable Cause type) {
-        if (type != null) {
-            return type;
-        } else if (getAttackTarget() != null) {
-            return Cause.source(getAttackTarget()).build();
-        }
-        return null;
-    }
 
     @Override
     public Optional<Integer> getExplosionRadius() {
@@ -151,16 +134,14 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Override
-    public void prime(Cause cause) {
+    public void prime() {
         checkState(!isPrimed(), "already primed");
-        this.primeCause = checkNotNull(cause, "cause");
         setCreeperState(STATE_PRIMED);
     }
 
     @Override
-    public void defuse(Cause cause) {
+    public void defuse() {
         checkState(isPrimed(), "not primed");
-        this.defuseCause = checkNotNull(cause, "cause");
         setCreeperState(STATE_IDLE);
     }
 
@@ -170,17 +151,16 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         this.explode();
     }
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     protected void onStateChange(int state, CallbackInfo ci) {
         setFuseDuration(this.fuseDuration);
-        if (!isPrimed() && state == STATE_PRIMED && !shouldPrime(getCause(this.primeCause))) {
+        if (!isPrimed() && state == STATE_PRIMED && !shouldPrime()) {
             ci.cancel();
-        } else if (isPrimed() && state == STATE_IDLE && !shouldDefuse(getCause(this.defuseCause))) {
+        } else if (isPrimed() && state == STATE_IDLE && !shouldDefuse()) {
             ci.cancel();
         } else if (getCreeperState() != state) {
             this.stateDirty = true;
@@ -191,9 +171,9 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     protected void postStateChange(int state, CallbackInfo ci) {
         if (this.stateDirty) {
             if (state == STATE_PRIMED) {
-                postPrime(getCause(this.primeCause));
+                postPrime();
             } else if (state == STATE_IDLE) {
-                postDefuse(getCause(this.defuseCause));
+                postDefuse();
             }
             this.stateDirty = false;
         }
@@ -202,7 +182,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
     protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
             double y, double z, float strength, boolean smoking) {
-        return detonate(getCause(this.detonationCause), Explosion.builder()
+        return detonate(Explosion.builder()
                 .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(strength)
@@ -223,7 +203,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_IGNITE))
     protected void onInteractIgnite(EntityCreeper self) {
-        this.interactPrimeCancelled = !shouldPrime(this.primeCause);
+        this.interactPrimeCancelled = !shouldPrime();
         if (!this.interactPrimeCancelled) {
             ignite();
         }
@@ -233,8 +213,9 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     protected void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
         if (!this.interactPrimeCancelled) {
             fas.damageItem(amount, player);
-            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
-            this.detonationCause = this.primeCause;
+            // TODO put this in the cause somehow?
+//            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
+//            this.detonationCause = this.primeCause;
         }
         this.interactPrimeCancelled = false;
     }

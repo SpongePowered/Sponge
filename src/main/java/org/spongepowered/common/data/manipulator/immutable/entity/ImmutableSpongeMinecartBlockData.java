@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ComparisonChain;
 import net.minecraft.init.Blocks;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -36,8 +35,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-
-import java.util.Map;
 
 public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<ImmutableMinecartBlockData, MinecartBlockData> implements ImmutableMinecartBlockData {
 

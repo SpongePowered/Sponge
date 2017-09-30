@@ -30,10 +30,10 @@ import java.util.Objects;
 
 public final class PhaseData {
 
-    public final PhaseContext context;
-    public final IPhaseState state;
+    public final PhaseContext<?> context;
+    public final IPhaseState<?> state;
 
-    public PhaseData(PhaseContext context, IPhaseState state) {
+    public PhaseData(PhaseContext<?> context, IPhaseState<?> state) {
         this.context = checkNotNull(context, "Context cannot be null!");
         this.state = checkNotNull(state, "State cannot be null!");
     }
@@ -58,7 +58,7 @@ public final class PhaseData {
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
+        return com.google.common.base.MoreObjects.toStringHelper(this)
             .add("context", this.context)
             .add("state", this.state)
             .toString();

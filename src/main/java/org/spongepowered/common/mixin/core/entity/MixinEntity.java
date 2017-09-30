@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -43,8 +42,9 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
@@ -61,9 +61,8 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -78,9 +77,12 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -91,6 +93,7 @@ import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -105,12 +108,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
+import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
@@ -119,6 +121,10 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -131,6 +137,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -138,7 +145,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -152,28 +158,30 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
     @SuppressWarnings("unused")
-	private static final String
+    private static final String
             ENTITY_ITEM_INIT =
             "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
+    private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
     private float origHeight;
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
-    protected Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     @SuppressWarnings("unused")
-	private SpongeProfileManager spongeProfileManager;
+    private SpongeProfileManager spongeProfileManager;
     @SuppressWarnings("unused")
-	private UserStorageService userStorageService;
+    private UserStorageService userStorageService;
     private Timing timing;
 
+    @Shadow public net.minecraft.entity.Entity ridingEntity;
+    @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
@@ -202,6 +210,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
     @Shadow protected EntityDataManager dataManager;
+    @Shadow public int ticksExisted;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
@@ -220,7 +229,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
     @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
-    @Shadow public abstract void dismountRidingEntity();
+    @Shadow public abstract void removePassengers();
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
@@ -232,6 +241,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
+    @Shadow protected abstract void removePassenger(net.minecraft.entity.Entity passenger);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
@@ -239,6 +249,10 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract void setFlag(int flag, boolean set);
 
     // @formatter:on
+
+    @Shadow public float entityCollisionReduction;
+
+    @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
@@ -282,20 +296,58 @@ public abstract class MixinEntity implements IMixinEntity {
             cancellable = true)
     public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> ci) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
-            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Cause.of(NamedCause.source(this)), (Entity) vehicle))) {
+            Sponge.getCauseStackManager().pushCause(this);
+            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (Entity) vehicle))) {
                 ci.cancel();
+            }
+            Sponge.getCauseStackManager().popCause();
+        }
+    }
+
+    /**
+     * @author rexbut - December 16th, 2016
+     *
+     * @reason - adjusted to support {@link DismountTypes}
+     */
+    @Overwrite
+    public void dismountRidingEntity() {
+        if (this.ridingEntity != null) {
+            if (this.getRidingEntity().isDead) {
+                this.dismountRidingEntity(DismountTypes.DEATH);
+            } else {
+                this.dismountRidingEntity(DismountTypes.PLAYER);
             }
         }
     }
 
-    @Inject(method = "dismountRidingEntity()V", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 1), cancellable = true)
-    public void onDismountRidingEntity(CallbackInfo ci) {
+    @Override
+    public boolean dismountRidingEntity(DismountType type) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
-            if (SpongeImpl.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(Cause.of(NamedCause.source(this)), (Entity) this.getRidingEntity()))) {
-                ci.cancel();
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(this);
+                Sponge.getCauseStackManager().addContext(EventContextKeys.DISMOUNT_TYPE, type);
+                if (SpongeImpl.postEvent(SpongeEventFactory.
+                    createRideEntityEventDismount(Sponge.getCauseStackManager().getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
+                    return false;
+                }
             }
         }
+
+        if (this.ridingEntity != null) {
+            MixinEntity entity = (MixinEntity) (Object) this.ridingEntity;
+            this.ridingEntity = null;
+            entity.removePassenger((net.minecraft.entity.Entity) (Object) this);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean removePassengers(DismountType type) {
+        boolean dismount = false;
+        for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
+            dismount = ((IMixinEntity) this.riddenByEntities.get(i)).dismountRidingEntity(type) || dismount;
+        }
+        return dismount;
     }
 
     @Inject(method = "setSize", at = @At("RETURN"))
@@ -313,13 +365,14 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC)) // setOnFireFromLava
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    // setOnFireFromLava
     public void preSetOnFire(CallbackInfo callbackInfo) {
         if (!this.world.isRemote) {
             this.originalLava = DamageSource.LAVA;
-            AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
+            AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.LAVA);
+                    block.getMaterial() == Material.LAVA);
             DamageSource.LAVA = new MinecraftBlockDamageSource("lava", location).setFireDamage();
         }
     }
@@ -342,9 +395,9 @@ public abstract class MixinEntity implements IMixinEntity {
         // Sponge Start - Find the fire block!
         if (!this.world.isRemote) {
             this.originalInFire = DamageSource.IN_FIRE;
-            AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.001D, -0.001D, -0.001D);
+            AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
+                    block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
             DamageSource.IN_FIRE = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
         }
     }
@@ -384,9 +437,8 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "setPosition", at = @At("HEAD"))
     public void onSetPosition(double x, double y, double z, CallbackInfo ci) {
-        net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity)(Object) this;
-        if (entity instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP) entity;
+        if ((Object) this instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP) (Object) this;
             if (player.connection != null) {
                 ((IMixinNetHandlerPlayServer) player.connection).captureCurrentPlayerPosition();
             }
@@ -420,57 +472,92 @@ public abstract class MixinEntity implements IMixinEntity {
             return false;
         }
 
-        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
-        if (event.isCancelled()) {
-            return false;
-        } else {
-            location = event.getToTransform().getLocation();
-            this.rotationPitch = (float) event.getToTransform().getPitch();
-            this.rotationYaw = (float) event.getToTransform().getYaw();
-        }
+        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext().buildAndSwitch()) {
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
-        chunkProviderServer.setForceChunkRequests(true);
-        // detach passengers
-        final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
-        final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
+            // TODO Add a 'Move' plugin phase or just keep it under Teleport?
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();) {
+                if (!Sponge.getCauseStackManager().getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
+                }
 
-        net.minecraft.world.World nmsWorld = null;
-        if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
-            nmsWorld = (net.minecraft.world.World) location.getExtent();
-            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
-                // Close open containers
-                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (net.minecraft.entity.Entity) (Object) this;
-                if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                    entityPlayerMP.closeContainer();
+                // TODO These methods need a Cause (maybe wait till Cause PR)
+                // TODO Need to not fire Teleport in all cases (especially when movement is local)
+                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+                if (event.isCancelled()) {
+                    return false;
+                }
+
+                location = event.getToTransform().getLocation();
+                this.rotationPitch = (float) event.getToTransform().getPitch();
+                this.rotationYaw = (float) event.getToTransform().getYaw();
+            }
+
+            final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
+            chunkProviderServer.setForceChunkRequests(true);
+
+            final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
+            final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
+
+            boolean isTeleporting = true;
+
+            if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
+                final net.minecraft.world.World nmsWorld = (net.minecraft.world.World) location.getExtent();
+                if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
+                    // Close open containers
+                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
+                    if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                        entityPlayerMP.closeContainer();
+                    }
+                }
+                EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
+                    ((IMixinWorldServer) nmsWorld).getDimensionId());
+            } else {
+                double distance = location.getPosition().distance(this.getPosition());
+
+                if (distance <= 4) {
+                    isTeleporting = false;
+                }
+
+                if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
+                    final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) thisEntity;
+
+                    // No reason to attempt to load chunks unless we're teleporting
+                    if (isTeleporting) {
+                        // Close open containers
+                        if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                            entityPlayerMP.closeContainer();
+                        }
+
+                        ((WorldServer) location.getExtent()).getChunkProvider()
+                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                    }
+                    entityPlayerMP.connection
+                        .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                    ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
+                } else {
+                    setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
                 }
             }
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
-        } else {
-            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
-                ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
-                ((EntityPlayerMP) thisEntity).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
-                        thisEntity.rotationYaw, thisEntity.rotationPitch);
-            } else {
-                setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+
+            if (isTeleporting) {
+                // Re-attach passengers
+                for (net.minecraft.entity.Entity passenger : passengers) {
+                    passenger.startRiding(thisEntity, true);
+                }
             }
-        }
 
-        // Re-attach passengers
-        for (net.minecraft.entity.Entity passenger : passengers) {
-            passenger.startRiding(thisEntity, true);
+            chunkProviderServer.setForceChunkRequests(false);
+            return true;
         }
-
-        chunkProviderServer.setForceChunkRequests(false);
-        return true;
     }
+
 
     // always use these methods internally when setting locations from a transform or location
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
     public void setLocationAndAngles(Location<World> location) {
         if (((Entity) this) instanceof EntityPlayerMP) {
-            ((EntityPlayerMP)(Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
+            ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
         }
@@ -484,7 +571,7 @@ public abstract class MixinEntity implements IMixinEntity {
         Vector3d position = transform.getPosition();
         EntityPlayerMP player = null;
         if (((Entity) this) instanceof EntityPlayerMP) {
-            player = ((EntityPlayerMP)(Object) this);
+            player = ((EntityPlayerMP) (Object) this);
         }
         if (player != null && player.connection != null) {
             player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
@@ -698,7 +785,7 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public boolean damage(double damage, org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource, Cause cause) {
+    public boolean damage(double damage, org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
         if (!(damageSource instanceof DamageSource)) {
             SpongeImpl.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
             return false;
@@ -754,42 +841,46 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public DataTransactionResult addPassenger(Entity entity) {
+    public boolean hasPassenger(Entity entity) {
+        checkNotNull(entity);
+        return entity.getPassengers().contains(this);
+    }
+
+    @Override
+    public boolean addPassenger(Entity entity) {
         checkNotNull(entity);
         if (entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
         }
 
-        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
-        passengerSnapshotsBuilder.addAll(getPassengers().stream().map(Entity::createSnapshot).collect(Collectors.toList()));
-
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (!((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true)) {
-            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(entity
-                    .createSnapshot()))).build();
-        }
-
-        passengerSnapshotsBuilder.add(entity.createSnapshot());
-
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
-                .build())).build();
+        return ((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true);
     }
 
     @Override
-    public DataTransactionResult setVehicle(@Nullable Entity entity) {
+    public void removePassenger(Entity entity) {
+        checkNotNull(entity);
+        if (!entity.getPassengers().contains(this)) {
+            throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
+        }
+
+        ((net.minecraft.entity.Entity) entity).dismountRidingEntity();
+    }
+
+    @Override
+    public void clearPassengers() {
+        this.removePassengers();
+    }
+
+    @Override
+    public boolean setVehicle(@Nullable Entity entity) {
         if (getRidingEntity() == null && entity == null) {
-            return DataTransactionResult.successNoData();
+            return false;
         }
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         if (getRidingEntity() != null) {
-            final EntitySnapshot previousVehicleSnapshot = ((Entity) getRidingEntity()).createSnapshot();
             dismountRidingEntity();
-            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
+            return true;
         }
-        if (entity != null) {
-            builder.from(entity.addPassenger(this));
-        }
-        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+        return entity != null && entity.addPassenger(this);
     }
 
 
@@ -862,26 +953,7 @@ public abstract class MixinEntity implements IMixinEntity {
      */
     @Override
     public void readFromNbt(NBTTagCompound compound) {
-        if (this instanceof IMixinCustomDataHolder) {
-            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
-                final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-                if (list != null && list.tagCount() != 0) {
-                    for (int i = 0; i < list.tagCount(); i++) {
-                        final NBTTagCompound internal = list.getCompoundTagAt(i);
-                        builder.add(NbtTranslator.getInstance().translateFrom(internal));
-                    }
-                }
-                try {
-                    final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
-                    for (DataManipulator<?, ?> manipulator : manipulators) {
-                        offer(manipulator);
-                    }
-                } catch (InvalidDataException e) {
-                    SpongeImpl.getLogger().error("Could not translate custom plugin data! ", e);
-                }
-            }
-        }
+        CustomDataNbtUtil.readCustomData(compound, this);
         if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
             ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
         }
@@ -894,17 +966,7 @@ public abstract class MixinEntity implements IMixinEntity {
      */
     @Override
     public void writeToNbt(NBTTagCompound compound) {
-        if (this instanceof IMixinCustomDataHolder) {
-            final List<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
-            if (!manipulators.isEmpty()) {
-                final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(manipulators);
-                final NBTTagList manipulatorTagList = new NBTTagList();
-                for (DataView dataView : manipulatorViews) {
-                    manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
-                }
-                compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
-            }
-        }
+        CustomDataNbtUtil.writeCustomData(compound, this);
         if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer()) {
             compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
         }
@@ -922,7 +984,7 @@ public abstract class MixinEntity implements IMixinEntity {
         writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
-        final DataContainer container = new MemoryDataContainer()
+        final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
             .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
@@ -943,7 +1005,7 @@ public abstract class MixinEntity implements IMixinEntity {
             .getContainer()
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .set(DataQueries.UNSAFE_NBT, unsafeNbt);
-        final Collection<DataManipulator<?, ?>> manipulators = getContainers();
+        final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -959,9 +1021,9 @@ public abstract class MixinEntity implements IMixinEntity {
         }
         return list;
     }
-
+    
     @Override
-    public Entity copy() {
+    public DataHolder copy() {
         if ((Object) this instanceof Player) {
             throw new IllegalArgumentException("Cannot copy player entities!");
         }
@@ -1148,7 +1210,7 @@ public abstract class MixinEntity implements IMixinEntity {
         return entity.noClip || ((IMixinEntity) entity).isVanished();
     }
 
-    @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished) {
@@ -1219,7 +1281,7 @@ public abstract class MixinEntity implements IMixinEntity {
         // Gotta stick with the client side handling things
         if (this.world.isRemote) {
             if (itemStackIn.getCount() != 0 && itemStackIn.getItem() != null) {
-                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
+                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + offsetY, this.posZ, itemStackIn);
                 entityitem.setDefaultPickupDelay();
                 this.world.spawnEntity(entityitem);
                 returnable.setReturnValue(entityitem);
@@ -1270,5 +1332,16 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public Value<Boolean> gravity() {
         return this.getValue(Keys.HAS_GRAVITY).get();
+    }
+
+    @Override
+    @Nullable
+    public IMixinChunk getActiveChunk() {
+        return this.activeChunk.get();
+    }
+
+    @Override
+    public void setActiveChunk(@Nullable IMixinChunk chunk) {
+        this.activeChunk = new WeakReference<IMixinChunk>(chunk);
     }
 }

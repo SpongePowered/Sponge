@@ -41,16 +41,17 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.Iterator;
 import java.util.List;
@@ -117,8 +118,11 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if (this.blockState.getType() instanceof ITileEntityProvider) {
             if (location.hasTileEntity()) {
                 this.compound = new NBTTagCompound();
-                ((TileEntity) location.getTileEntity().get()).writeToNBT(this.compound);
-                this.manipulators = location.getContainers().stream().map(DataManipulator::asImmutable).collect(Collectors.toList());
+                org.spongepowered.api.block.tileentity.TileEntity te = location.getTileEntity().get();
+                ((TileEntity) te).writeToNBT(this.compound);
+                this.manipulators = ((IMixinCustomDataHolder) te).getCustomManipulators().stream()
+                        .map(DataManipulator::asImmutable)
+                        .collect(Collectors.toList());
             }
         }
         return this;
@@ -143,7 +147,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder add(DataManipulator<?, ?> manipulator) {
-        return add((ImmutableDataManipulator<?, ?>) checkNotNull(manipulator, "manipulator").asImmutable());
+        return add(checkNotNull(manipulator, "manipulator").asImmutable());
     }
 
     @Override

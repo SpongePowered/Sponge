@@ -33,10 +33,10 @@ import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFile;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -56,7 +56,7 @@ public class WorldStorageUtil {
         if (!(chunkLoader instanceof IMixinAnvilChunkLoader) || !SpongeChunkLayout.instance.isValidChunk(x, chunkCoords.getY(), z)) {
             return CompletableFuture.completedFuture(false);
         }
-        return SpongeScheduler.getInstance().submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
+        return SpongeImpl.getScheduler().submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
     }
 
     public static CompletableFuture<Optional<DataContainer>> getChunkData(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
@@ -67,7 +67,7 @@ public class WorldStorageUtil {
             return CompletableFuture.completedFuture(Optional.empty());
         }
         File worldDir = ((IMixinAnvilChunkLoader) chunkLoader).getWorldDir().toFile();
-        return SpongeScheduler.getInstance().submitAsyncTask(() -> {
+        return SpongeImpl.getScheduler().submitAsyncTask(() -> {
             DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));
         });

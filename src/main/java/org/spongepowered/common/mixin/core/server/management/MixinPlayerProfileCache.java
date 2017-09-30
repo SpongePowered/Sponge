@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server.management;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -39,7 +40,6 @@ import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,6 +54,7 @@ import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -158,7 +159,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     }
 
     @Override
-    public boolean add(GameProfile profile, boolean overwrite, @Nullable Date expiry) {
+    public boolean add(GameProfile profile, boolean overwrite, @Nullable Instant expiry) {
         checkNotNull(profile, "profile");
 
         // Don't attempt to overwrite entries if we aren't requested to do so
@@ -166,7 +167,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
             return false;
         }
 
-        this.addEntry((com.mojang.authlib.GameProfile) profile, expiry);
+        this.addEntry((com.mojang.authlib.GameProfile) profile, expiry == null ? null : new Date(expiry.toEpochMilli()));
 
         return true;
     }
@@ -241,9 +242,8 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
         if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
             this.addEntry(profile, null);
             return Optional.of((GameProfile) profile);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -274,9 +274,8 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
         Optional<GameProfile> profile = this.getById(uniqueId);
         if (profile.isPresent()) {
             return profile;
-        } else {
-            return this.lookupById(uniqueId);
         }
+        return this.lookupById(uniqueId);
     }
 
     @Override
@@ -345,9 +344,8 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
                 }
             }
             return ImmutableMap.copyOf(result);
-        } else {
-            return ImmutableMap.of();
         }
+        return ImmutableMap.of();
     }
 
     @Override
@@ -355,9 +353,8 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
         Optional<GameProfile> profile = this.getByName(name);
         if (profile.isPresent()) {
             return profile;
-        } else {
-            return this.lookupByName(name);
         }
+        return this.lookupByName(name);
     }
 
     @Override
@@ -393,7 +390,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     public Collection<GameProfile> getProfiles() {
         return this.usernameToProfileEntryMap.values().stream()
                 .map(entry -> (GameProfile) entry.getGameProfile())
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
@@ -403,7 +400,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
         return this.getProfiles().stream()
                 .filter(profile -> profile.getName().isPresent())
                 .filter(profile -> profile.getName().get().toLowerCase(Locale.ROOT).startsWith(search))
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Nullable

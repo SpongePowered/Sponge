@@ -116,8 +116,7 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
         tagCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, new NBTTagList());
         if (currentEffects.isPresent()) {
             return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
-        } else {
-            return DataTransactionResult.successNoData();
         }
+        return DataTransactionResult.successNoData();
     }
 }

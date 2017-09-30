@@ -45,17 +45,4 @@ public abstract class SpongeTargetAIBuilder<A extends TargetAITask<A>, B extends
         return (B) this;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public B searchDelay(int delayTicks) {
-        this.searchDelay = delayTicks;
-        return (B) this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public B interruptTargetUnseenTicks(int unseenTicks) {
-        this.interruptTargetUnseenTicks = unseenTicks;
-        return (B) this;
-    }
 }

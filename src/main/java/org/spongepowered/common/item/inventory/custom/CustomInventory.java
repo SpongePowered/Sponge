@@ -37,13 +37,19 @@ import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
+import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.api.item.inventory.property.GuiIdProperty;
+import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.common.data.type.SpongeGuiId;
+import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
 
 import java.util.HashSet;
 import java.util.List;
@@ -61,13 +67,14 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     private InventoryBasic inv;
     protected InventoryArchetype archetype;
-    private Map<String, InventoryProperty> properties;
+    private Map<String, InventoryProperty<?, ?>> properties;
     private Carrier carrier;
 
     private Set<EntityPlayer> viewers = new HashSet<>();
 
-    public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty> properties, Carrier carrier,
-            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, Object plugin) {
+    @SuppressWarnings("deprecation")
+    public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
+            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin) {
         this.archetype = archetype;
         this.properties = properties;
         this.carrier = carrier;
@@ -138,36 +145,30 @@ public class CustomInventory implements IInventory, IInteractionObject {
         // TODO custom container including filters and other slot stuff
         this.viewers.add(playerIn);
 
+        if (this.archetype instanceof CompositeInventoryArchetype) {
+            CompositeInventoryArchetype.ContainerProvider provider = ((CompositeInventoryArchetype) this.archetype).getContainerProvider();
+            if (provider != null) {
+                return provider.provide(this, playerIn);
+            }
+        }
         return new CustomContainer(playerIn, this);
     }
 
     @Override
     public String getGuiID() {
-        if (this.archetype == InventoryArchetypes.CHEST || this.archetype == InventoryArchetypes.DOUBLE_CHEST) {
-            return "minecraft:chest";
-        } else if (this.archetype == InventoryArchetypes.HOPPER) {
-            return "minecraft:hopper";
-        } else if (this.archetype == InventoryArchetypes.DISPENSER) {
-            return "minecraft:dispenser";
-        } else if (this.archetype == InventoryArchetypes.WORKBENCH) {
-            return "minecraft:crafting_table";
-        } else if (this.archetype == InventoryArchetypes.FURNACE) {
-            return "minecraft:furnace";
-        } else if (this.archetype == InventoryArchetypes.ENCHANTING_TABLE) {
-            return "minecraft:enchanting_table";
-        } else if (this.archetype == InventoryArchetypes.ANVIL) {
-            return "minecraft:anvil";
-        } else if (this.archetype == InventoryArchetypes.BREWING_STAND) {
-            return "minecraft:brewing_stand";
-        } else if (this.archetype == InventoryArchetypes.BEACON) {
-            return "minecraft:beacon";
-        } else if (this.archetype == InventoryArchetypes.HORSE || this.archetype == InventoryArchetypes.HORSE_WITH_CHEST) {
-            return "EntityHorse";
-        } else if (this.archetype == InventoryArchetypes.VILLAGER) {
-            return "minecraft:villager";
-        } else {
-            return "minecraft:chest";
+        String key = AbstractInventoryProperty.getDefaultKey(GuiIdProperty.class).toString();
+        InventoryProperty<?, ?> property = this.properties.get(key);
+        if (property instanceof GuiIdProperty) {
+            if (property.getValue() instanceof SpongeGuiId) {
+                return ((SpongeGuiId) property.getValue()).getInternalId(); // Handle Vanilla EntityHorse GuiId
+            }
+            return ((GuiIdProperty) property).getValue().getId();
         }
+        GuiId guiId = this.archetype.getProperty(GuiIdProperty.class, key).map(GuiIdProperty::getValue).orElse(GuiIds.CHEST);
+        if (guiId instanceof SpongeGuiId) {
+            return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
+        }
+        return guiId.getId();
     }
 
     // IInventory delegation
@@ -269,7 +270,11 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv.clear();
     }
 
-    public Map<String, InventoryProperty> getProperties() {
+    public Map<String, InventoryProperty<?, ?>> getProperties() {
         return this.properties;
+    }
+
+    public Carrier getCarrier() {
+        return this.carrier;
     }
 }

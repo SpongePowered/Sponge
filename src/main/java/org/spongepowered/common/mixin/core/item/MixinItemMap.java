@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemMapBase;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -43,7 +43,7 @@ public class MixinItemMap extends ItemMapBase {
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/WorldSavedData;"))
+            + "loadData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/storage/WorldSavedData;"))
     private WorldSavedData loadOverworldMapData(World worldIn, Class<? extends WorldSavedData> clazz, String dataId) {
         if (worldIn.isRemote) {
             return worldIn.loadData(clazz, dataId);
@@ -57,7 +57,7 @@ public class MixinItemMap extends ItemMapBase {
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "setData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
+            + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
     private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
         WorldManager.getWorldByDimensionId(0).get().setData(dataId, data);
     }
@@ -78,7 +78,7 @@ public class MixinItemMap extends ItemMapBase {
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "setData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
+            + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
     private static void onCreatedSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
         if (worldIn.isRemote) {
             worldIn.setData(dataId, data);

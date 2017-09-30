@@ -26,68 +26,78 @@ package org.spongepowered.common.service.permission.base;
 
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.service.permission.OpLevelCollection;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
+import javax.annotation.Nullable;
 
 public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
-    private Subject parent;
+    private SubjectReference parent;
 
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      *
 
-     * @param service The service to request subjects from
+     * @param service The service to request subject references from
      */
     public SingleParentMemorySubjectData(PermissionService service) {
         super(service);
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> contexts) {
-        final Subject parent = getParent();
-        return GLOBAL_CONTEXT.equals(contexts) && parent != null ? Collections.singletonList(parent) : Collections.<Subject>emptyList();
+    public List<SubjectReference> getParents(Set<Context> contexts) {
+        final SubjectReference parent = getParent();
+        return contexts.isEmpty() && parent != null ? Collections.singletonList(parent) : Collections.emptyList();
     }
 
     @Override
-    public boolean addParent(Set<Context> contexts, Subject parent) {
+    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
         if (!(parent instanceof OpLevelCollection.OpLevelSubject)) {
-            return false;
+            return CompletableFuture.completedFuture(false);
+        }
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
         }
 
-        if (!GLOBAL_CONTEXT.equals(contexts)) {
-            return false;
-        }
-        return setParent(parent);
+        setParent(parent);
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
-    public boolean removeParent(Set<Context> contexts, Subject parent) {
+    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
         if (parent == this.parent) {
-            return setParent(null);
+            setParent(null);
+            return CompletableFuture.completedFuture(true);
         }
-        return false;
+
+        return CompletableFuture.completedFuture(false);
     }
 
     @Override
-    public boolean clearParents() {
+    public CompletableFuture<Boolean> clearParents() {
         return removeParent(GLOBAL_CONTEXT, this.parent);
     }
 
     @Override
-    public boolean clearParents(Set<Context> contexts) {
-        return GLOBAL_CONTEXT.equals(contexts) && clearParents();
+    public CompletableFuture<Boolean> clearParents(Set<Context> contexts) {
+        if (!contexts.isEmpty()) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return clearParents();
     }
 
-    public boolean setParent(Subject parent) {
+    public void setParent(@Nullable SubjectReference parent) {
         this.parent = parent;
-        return true;
     }
 
-    public Subject getParent() {
+    @Nullable
+    public SubjectReference getParent() {
         return this.parent;
     }
 }

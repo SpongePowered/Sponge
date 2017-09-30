@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -43,7 +44,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.util.GuavaJavaUtils;
 
 import java.util.Random;
 
@@ -125,21 +125,21 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
         this.height = height;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public java.util.function.Predicate<BlockState> getPlacementCondition() {
-        return (java.util.function.Predicate<BlockState>)(Object)GuavaJavaUtils.asJavaPredicate(this.predicate);
+        return (Predicate) this.predicate;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setPlacementCondition(java.util.function.Predicate<BlockState> condition) {
-        this.predicate = (Predicate<IBlockState>)(Object)GuavaJavaUtils.asGuavaPredicate(condition);
+        this.predicate = (Predicate) Functional.java8ToGuava(condition);
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "Ore")
                 .add("OreBlock", this.oreBlock)
                 .add("Size", this.size)

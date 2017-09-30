@@ -31,9 +31,7 @@ import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePickupRuleData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public final class SpongePickupRuleData extends AbstractSingleCatalogData<PickupRule, PickupRuleData, ImmutablePickupRuleData>
         implements PickupRuleData {
 

@@ -26,11 +26,10 @@ package org.spongepowered.common.data.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.SpongeImplHooks;
 
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
@@ -39,12 +38,12 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     private final Class<? extends TileEntity> clazz;
     private final boolean canTick;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick) {
+    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
         super(id);
         this.name = checkNotNull(name, "name");
         this.clazz = checkNotNull(clazz, "clazz");
         this.canTick = canTick;
-        this.modId = SpongeImplHooks.getModIdFromClass(clazz);
+        this.modId = modId;
     }
 
     @Override
@@ -66,7 +65,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("TileEntityClass", this.clazz);
     }

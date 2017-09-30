@@ -31,7 +31,7 @@ import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityPlayerMP.class)
 public abstract class MixinEntityPlayerMP extends Entity {
@@ -44,7 +44,7 @@ public abstract class MixinEntityPlayerMP extends Entity {
 
     @Redirect(method = "decrementTimeUntilPortal", at = @At(value = "FIELD", target = ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupPortalCooldown(EntityPlayerMP self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         this.timeUntilPortal = Math.max(0, this.timeUntilPortal - ticks);
     }
 

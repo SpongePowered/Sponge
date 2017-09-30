@@ -26,8 +26,6 @@ package org.spongepowered.common.interfaces.text;
 
 import net.minecraft.util.text.ITextComponent;
 
-import java.util.Locale;
-
 public interface IMixinText {
 
     ITextComponent toComponent();

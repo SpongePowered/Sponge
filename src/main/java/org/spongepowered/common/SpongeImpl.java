@@ -24,42 +24,42 @@
  */
 package org.spongepowered.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.datafix.DataFixer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.SpongeEventFactoryUtils;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameStateEvent;
-import org.spongepowered.api.event.game.state.GameStoppedEvent;
-import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 @Singleton
 public final class SpongeImpl {
@@ -73,83 +73,83 @@ public final class SpongeImpl {
     public static final String ECOSYSTEM_NAME = "Sponge";
 
     // TODO: Keep up to date
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.11.2", 316);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.12.2", 340);
 
     private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
-    private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);
-
-    @Nullable
-    private static SpongeImpl instance;
-
-    @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
-
-    @Nullable private static PluginContainer minecraftPlugin;
-
-
     public static final Random random = new Random();
 
-    private final Injector injector;
-    private final Game game;
-    private final Cause implementationCause;
+    // Can't @Inject these because they are referenced before everything is initialized
+    @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
+    @Nullable private static PluginContainer minecraftPlugin;
 
-    private final List<PluginContainer> internalPlugins = new ArrayList<>();
+    @Inject private static SpongeGame game;
+
+    @Inject private static SpongeGameRegistry registry;
+    @Inject private static SpongeDataManager dataManager;
+    @Inject private static SpongePropertyRegistry propertyRegistry;
+
+    @Inject private static SpongeScheduler scheduler;
+    @Inject private static SpongeCauseStackManager causeStackManager;
+
+    private static final List<PluginContainer> internalPlugins = new ArrayList<>();
+
+    private SpongeImpl() {
+    }
 
     @Inject
-    public SpongeImpl(Injector injector, Game game, PluginManager manager) {
-        checkState(instance == null, "SpongeImpl was already initialized");
-        instance = this;
-
-        this.injector = checkNotNull(injector, "injector");
-        this.game = checkNotNull(game, "game");
-
-        Platform platform = game.getPlatform();
-
+    private static void initialize(Platform platform) {
         if (minecraftPlugin == null) {
-            minecraftPlugin = manager.getPlugin(GAME_ID).get();
+            minecraftPlugin = platform.getContainer(Platform.Component.GAME);
         }
 
         for (Platform.Component component : Platform.Component.values()) {
             internalPlugins.add(platform.getContainer(component));
         }
-
-        this.implementationCause = Cause.source(platform.getContainer(IMPLEMENTATION)).build();
     }
 
-    public static SpongeImpl getInstance() {
-        checkState(instance != null, "SpongeImpl was not initialized");
+    private static <T> T check(@Nullable T instance) {
+        checkState(instance != null, "SpongeImpl has not been initialized!");
         return instance;
-    }
-
-    public static boolean isInitialized() {
-        return instance != null;
-    }
-
-    public static Injector getInjector() {
-        return getInstance().injector;
-    }
-
-    public static SpongeGame getGame() {
-        return (SpongeGame) getInstance().game;
-    }
-
-    public static MinecraftServer getServer() {
-        return (MinecraftServer) getGame().getServer();
-    }
-
-    public static SpongeGameRegistry getRegistry() {
-        return getGame().getRegistry();
-    }
-
-    public static boolean postEvent(Event event) {
-        return getGame().getEventManager().post(event);
     }
 
     public static Logger getLogger() {
         return logger;
     }
 
-    public static org.slf4j.Logger getSlf4jLogger() {
-        return slf4jLogger;
+    public static boolean isInitialized() {
+        return game != null;
+    }
+
+    public static SpongeGame getGame() {
+        return check(game);
+    }
+
+    public static MinecraftServer getServer() {
+        return (MinecraftServer) Sponge.getServer();
+    }
+
+    public static DataFixer getDataFixer() {
+        return ((IMixinMinecraftServer) Sponge.getServer()).getDataFixer();
+    }
+
+    public static SpongeGameRegistry getRegistry() {
+        return check(registry);
+    }
+
+    public static SpongeDataManager getDataManager() {
+        return check(dataManager);
+    }
+
+    public static SpongePropertyRegistry getPropertyRegistry() {
+        return check(propertyRegistry);
+    }
+
+    public static SpongeScheduler getScheduler() {
+        return check(scheduler);
+    }
+
+    public static SpongeCauseStackManager getCauseStackManager() {
+        return check(causeStackManager);
     }
 
     public static PluginContainer getPlugin() {
@@ -191,21 +191,41 @@ public final class SpongeImpl {
     }
 
     public static List<PluginContainer> getInternalPlugins() {
-        return getInstance().internalPlugins;
+        return internalPlugins;
     }
 
-    public static void postState(Class<? extends GameStateEvent> type, GameState state) {
-        getGame().setState(state);
-        ((SpongeEventManager) getGame().getEventManager()).post(SpongeEventFactoryUtils.createState(type, getGame()), true);
+    public static boolean postEvent(Event event) {
+        return Sponge.getEventManager().post(event);
+    }
+
+    public static void postState(GameState state, GameStateEvent event) {
+        check(game);
+        game.setState(state);
+        ((SpongeEventManager) game.getEventManager()).post(event, true);
     }
 
     public static void postShutdownEvents() {
-        postState(GameStoppingEvent.class, GameState.GAME_STOPPING);
-        postState(GameStoppedEvent.class, GameState.GAME_STOPPED);
+        check(game);
+        postState(GameState.GAME_STOPPING, SpongeEventFactory.createGameStoppingEvent(Sponge.getCauseStackManager().getCurrentCause()));
+        postState(GameState.GAME_STOPPED, SpongeEventFactory.createGameStoppedEvent(Sponge.getCauseStackManager().getCurrentCause()));
     }
 
-    public static Cause getImplementationCause() {
-        return getInstance().implementationCause;
-    }
+    // TODO this code is used a BUNCH of times
+    /**
+     * Gets the {@link PluginContainer} for given plugin object.
+     *
+     * @param plugin The Plugin Object
+     * @return The associated plugin container
+     * @throws IllegalArgumentException when the argument has no associated plugin container (usually because it is not a plugin)
+     */
+    public static PluginContainer getPluginContainer(Object plugin) throws IllegalArgumentException {
+        Optional<PluginContainer> containerOptional = Sponge.getGame().getPluginManager().fromInstance(plugin);
+        if (!containerOptional.isPresent()) {
+            throw new IllegalArgumentException(
+                    "The provided plugin object does not have an associated plugin container "
+                            + "(in other words, is 'plugin' actually your plugin object?");
+        }
 
+        return containerOptional.get();
+    }
 }

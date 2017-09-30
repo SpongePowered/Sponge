@@ -28,26 +28,26 @@ import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.integer;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
-import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.StartsWithPredicate;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -57,8 +57,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -66,9 +66,9 @@ public class SpongePaginationService implements PaginationService {
 
     static class SourcePaginations {
         private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<>();
-        private volatile UUID lastUuid;
+        @Nullable private volatile UUID lastUuid;
 
-        public ActivePagination get(UUID uuid) {
+        @Nullable public ActivePagination get(UUID uuid) {
             return this.paginations.get(uuid);
         }
 
@@ -83,11 +83,20 @@ public class SpongePaginationService implements PaginationService {
             return this.paginations.keySet();
         }
 
+        @Nullable
         public UUID getLastUuid() {
             return this.lastUuid;
         }
     }
-    final ConcurrentMap<MessageReceiver, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
+    private final ConcurrentMap<MessageReceiver, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
+
+    // We have a second active pagination system because of the way Players are handled by the server.
+    // As Players are recreated every time they die in game, just storing the player in a weak map will
+    // cause the player to be removed form the map upon death. Thus, player paginations get redirected
+    // through to this cache instead, which last for 10 minutes from last access.
+    private final Cache<UUID, SourcePaginations> playerActivePaginations = Caffeine.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
+            .build();
+
     private final AtomicBoolean commandRegistered = new AtomicBoolean();
 
     void registerCommandOnce() {
@@ -106,7 +115,17 @@ public class SpongePaginationService implements PaginationService {
         return new SpongePaginationBuilder(this);
     }
 
+    @Nullable
     SourcePaginations getPaginationState(MessageReceiver source, boolean create) {
+        if (source instanceof Player) {
+            return getPaginationStateForPlayer((Player) source, create);
+        }
+
+        return getPaginationStateForNonPlayer(source, create);
+    }
+
+    @Nullable
+    private SourcePaginations getPaginationStateForNonPlayer(MessageReceiver source, boolean create) {
         SourcePaginations ret = this.activePaginations.get(source);
         if (ret == null && create) {
             ret = new SourcePaginations();
@@ -118,6 +137,10 @@ public class SpongePaginationService implements PaginationService {
         return ret;
     }
 
+    @Nullable
+    private SourcePaginations getPaginationStateForPlayer(Player source, boolean create) {
+        return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
+    }
 
     private CommandSpec buildPaginationCommand(){
 
@@ -162,7 +185,7 @@ public class SpongePaginationService implements PaginationService {
                 .description(t("Helper command for paginations occurring"))
                 .build();
     }
-    
+
     private class ActivePaginationCommandElement extends CommandElement {
 
         protected ActivePaginationCommandElement(@Nullable Text key) {
@@ -173,9 +196,10 @@ public class SpongePaginationService implements PaginationService {
         @Override
         protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             UUID id;
+
             SourcePaginations paginations = getPaginationState(source, false);
             if (paginations == null) {
-                throw args.createError(t("Source %s has no paginations!", source));
+                throw args.createError(t("Source %s has no paginations!", source.getName()));
             }
 
             Object state = args.getState();
@@ -185,9 +209,8 @@ public class SpongePaginationService implements PaginationService {
                 if (paginations.getLastUuid() != null) {
                     args.setState(state);
                     return paginations.get(paginations.getLastUuid());
-                } else {
-                    throw args.createError(t("Input was not a valid UUID!"));
                 }
+                throw args.createError(t("Input was not a valid UUID!"));
             }
             ActivePagination pagination = paginations.get(id);
             if (pagination == null) {
@@ -208,12 +231,11 @@ public class SpongePaginationService implements PaginationService {
                 return paginations.keys().stream()
                     .map(Object::toString)
                     .filter(new StartsWithPredicate(optNext.get()))
-                    .collect(GuavaCollectors.toImmutableList());
-            } else {
-                return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
+                    .collect(ImmutableList.toImmutableList());
             }
+            return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
         }
-        
+
         @Override
         public Text getUsage(CommandSource src) {
             return getKey() == null ? Text.of() : Text.of("[", getKey(), "]");

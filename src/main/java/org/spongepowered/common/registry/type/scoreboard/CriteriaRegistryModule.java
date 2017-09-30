@@ -24,43 +24,27 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.IScoreCriteria;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(Criteria.class)
+public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Criterion> {
 
-public final class CriteriaRegistryModule implements CatalogRegistryModule<Criterion> {
-
-    @RegisterCatalog(Criteria.class)
-    public final Map<String, Criterion> criteriaMap = Maps.newHashMap();
-
-    @Override
-    public Optional<Criterion> getById(String id) {
-        return Optional.ofNullable(this.criteriaMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Criterion> getAll() {
-        return ImmutableList.copyOf(this.criteriaMap.values());
+    public CriteriaRegistryModule() {
+        super("minecraft", new String[] {"minecraft"}, id -> id.replace("_count", "s"));
     }
 
     @Override
     public void registerDefaults() {
-        this.criteriaMap.put("dummy", (Criterion) IScoreCriteria.DUMMY);
-        this.criteriaMap.put("trigger", (Criterion) IScoreCriteria.TRIGGER);
-        this.criteriaMap.put("health", (Criterion) IScoreCriteria.HEALTH);
-        this.criteriaMap.put("player_kills", (Criterion) IScoreCriteria.PLAYER_KILL_COUNT);
-        this.criteriaMap.put("total_kills", (Criterion) IScoreCriteria.TOTAL_KILL_COUNT);
-        this.criteriaMap.put("deaths", (Criterion) IScoreCriteria.DEATH_COUNT);
+        register((Criterion) IScoreCriteria.DUMMY);
+        register((Criterion) IScoreCriteria.TRIGGER);
+        register((Criterion) IScoreCriteria.HEALTH);
+        register((Criterion) IScoreCriteria.PLAYER_KILL_COUNT);
+        register((Criterion) IScoreCriteria.TOTAL_KILL_COUNT);
+        register((Criterion) IScoreCriteria.DEATH_COUNT);
     }
+
 }

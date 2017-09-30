@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.interfaces.IMixinTileEntityBeacon;
 
 import java.util.Optional;
 
@@ -54,11 +55,7 @@ public class BeaconSecondaryEffectValueProcessor
         if (container.getField(0) != 4) {
             return false;
         }
-        if (value.isPresent()) {
-            container.setField(2, Potion.getIdFromPotion((Potion) value.get()));
-        } else {
-            container.setField(2, 0);
-        }
+        ((IMixinTileEntityBeacon) container).forceSetSecondaryEffect((Potion) value.orElse(null));
         container.markDirty();
         return true;
     }

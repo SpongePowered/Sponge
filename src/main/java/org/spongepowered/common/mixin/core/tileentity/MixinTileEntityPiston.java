@@ -43,32 +43,27 @@ public abstract class MixinTileEntityPiston extends MixinTileEntity implements P
     @Shadow private IBlockState pistonState;
     @Shadow private EnumFacing pistonFacing;
 
-    @Inject(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", shift = At.Shift.AFTER), cancellable = true)
-    public void onUpdate(CallbackInfo ci) {
-        if (this.world.isRemote) {
-            this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
-            ci.cancel();
-            return;
-        }
+    private static final String NEIGHBOR_CHANGED = "Lnet/minecraft/world/World;neighborChanged(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;)V";
 
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) this.world, this.pos, java.util.EnumSet.of(this.pistonFacing.getOpposite()));
-        if (!event.isCancelled() && !event.getNeighbors().isEmpty()) {
-            this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
-        }
-        // We cancel here to avoid Forge event call in SF
-        ci.cancel();
+    @Inject(method = "update", at = @At(value = "INVOKE", target = NEIGHBOR_CHANGED), cancellable = true)
+    public void onUpdate(CallbackInfo ci) {
+        this.fireEvent(ci);
     }
 
-    @Inject(method = "clearPistonTileEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "clearPistonTileEntity", at = @At(value = "INVOKE", target = NEIGHBOR_CHANGED), cancellable = true)
     public void onClearPistonTileEntity(CallbackInfo ci) {
+        this.fireEvent(ci);
+    }
+
+    private void fireEvent(CallbackInfo ci) {
         if (this.world.isRemote) {
-            this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos); 
+            this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
             ci.cancel();
             return;
         }
 
         NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) this.world, this.pos, java.util.EnumSet.of(this.pistonFacing.getOpposite()));
-        if (!event.isCancelled() && !event.getNeighbors().isEmpty()) {
+        if (event == null || !event.isCancelled() && !event.getNeighbors().isEmpty()) {
             this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
         }
         // We cancel here to avoid Forge event call in SF

@@ -25,11 +25,17 @@
 package org.spongepowered.common.interfaces.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.border.PlayerOwnBorderListener;
+
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
@@ -42,6 +48,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     User getUserObject();
 
     void setVelocityOverride(@Nullable Vector3d velocity);
+
+    void sendBlockChange(BlockPos pos, IBlockState state);
 
     MessageChannel getDeathMessageChannel();
 
@@ -56,4 +64,22 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     void setPacketItem(ItemStack itemstack);
 
     void refreshExp();
+
+    PlayerOwnBorderListener getWorldBorderListener();
+
+    void setHealthScale(double scale);
+
+    double getHealthScale();
+
+    float getInternalScaledHealth();
+
+    boolean isHealthScaled();
+
+    void setHealthScaled(boolean scaled);
+
+    void refreshScaledHealth();
+
+    void injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
+
+    void updateDataManagerForScaledHealth();
 }

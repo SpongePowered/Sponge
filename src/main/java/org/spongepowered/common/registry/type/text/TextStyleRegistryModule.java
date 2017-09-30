@@ -28,34 +28,49 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-public final class TextStyleRegistryModule implements CatalogRegistryModule<TextStyle.Base> {
+public final class TextStyleRegistryModule implements AlternateCatalogRegistryModule<TextStyle.Base> {
 
     @RegisterCatalog(value = TextStyles.class, ignoredFields = "NONE")
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = ImmutableMap.<String, TextStyle.Base>builder()
-        .put("bold", SpongeTextStyle.of(TextFormatting.BOLD))
-        .put("italic", SpongeTextStyle.of(TextFormatting.ITALIC))
-        .put("underline", SpongeTextStyle.of(TextFormatting.UNDERLINE))
-        .put("strikethrough", SpongeTextStyle.of(TextFormatting.STRIKETHROUGH))
-        .put("obfuscated", SpongeTextStyle.of(TextFormatting.OBFUSCATED))
-        .put("reset", SpongeTextStyle.of(TextFormatting.RESET))
+        .put("minecraft:bold", SpongeTextStyle.of(TextFormatting.BOLD))
+        .put("minecraft:italic", SpongeTextStyle.of(TextFormatting.ITALIC))
+        .put("minecraft:underline", SpongeTextStyle.of(TextFormatting.UNDERLINE))
+        .put("minecraft:strikethrough", SpongeTextStyle.of(TextFormatting.STRIKETHROUGH))
+        .put("minecraft:obfuscated", SpongeTextStyle.of(TextFormatting.OBFUSCATED))
+        .put("minecraft:reset", SpongeTextStyle.of(TextFormatting.RESET))
+        .put("none", (TextStyle.Base) TextStyles.NONE)
         .build();
 
     @Override
     public Optional<TextStyle.Base> getById(String id) {
+        if (id.equals("NONE")) {
+            return Optional.of((TextStyle.Base) TextStyles.NONE);
+        }
         return Optional.ofNullable(textStyleMappings.get(Preconditions.checkNotNull(id)));
     }
 
     @Override
     public Collection<TextStyle.Base> getAll() {
         return ImmutableList.copyOf(textStyleMappings.values());
+    }
+
+    @Override
+    public Map<String, TextStyle.Base> provideCatalogMap() {
+        final HashMap<String, TextStyle.Base> map = new HashMap<>();
+        for (Map.Entry<String, TextStyle.Base> entry : textStyleMappings.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return map;
     }
 }

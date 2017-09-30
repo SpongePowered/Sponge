@@ -41,34 +41,28 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
     private List<InventoryArchetype> types = new ArrayList<>();
     private Map<String, InventoryProperty<String, ?>> properties = new HashMap<>();
     private Set<Class<? extends InteractInventoryEvent>> events = new HashSet<>();
+    private CompositeInventoryArchetype.ContainerProvider containerProvider;
 
     @Override
-    public InventoryArchetype.Builder property(InventoryProperty<String, ?> property) {
+    public SpongeInventoryArchetypeBuilder property(InventoryProperty<String, ?> property) {
         this.properties.put(property.getKey(), property);
         return this;
     }
 
     @Override
-    public InventoryArchetype.Builder with(InventoryArchetype archetype) {
+    public SpongeInventoryArchetypeBuilder with(InventoryArchetype archetype) {
         this.types.add(archetype);
         return this;
     }
 
     @Override
-    public InventoryArchetype.Builder with(InventoryArchetype... archetypes) {
+    public SpongeInventoryArchetypeBuilder with(InventoryArchetype... archetypes) {
         Collections.addAll(this.types, archetypes);
         return this;
     }
 
     @Override
-    public InventoryArchetype build(String id, String name) {
-        // TODO register archetype
-        // TODO events
-        return new CompositeInventoryArchetype(id, name, types, properties);
-    }
-
-    @Override
-    public InventoryArchetype.Builder from(InventoryArchetype value) {
+    public SpongeInventoryArchetypeBuilder from(InventoryArchetype value) {
         if (value instanceof CompositeInventoryArchetype) {
             this.types.addAll(value.getChildArchetypes());
             this.properties.putAll(value.getProperties());
@@ -76,12 +70,23 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
         return this;
     }
 
+    public SpongeInventoryArchetypeBuilder container(CompositeInventoryArchetype.ContainerProvider containerProvider) {
+        this.containerProvider = containerProvider;
+        return this;
+    }
+
     @Override
-    public InventoryArchetype.Builder reset() {
+    public SpongeInventoryArchetypeBuilder reset() {
         this.types.clear();
         this.properties.clear();
         this.events.clear();
         return this;
     }
 
+    @Override
+    public InventoryArchetype build(String id, String name) {
+        // TODO register archetype
+        // TODO events
+        return new CompositeInventoryArchetype(id, name, this.types, this.properties, this.containerProvider);
+    }
 }

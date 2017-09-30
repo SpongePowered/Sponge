@@ -25,15 +25,8 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.entity.passive.EntityDonkey;
-import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.EntityMule;
-import net.minecraft.entity.passive.EntitySkeletonHorse;
-import net.minecraft.entity.passive.EntityZombieHorse;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
 
@@ -49,8 +42,6 @@ public class SpongeEntityConstants {
     public static final Map<Integer, HorseColor> HORSE_COLOR_IDMAP = Maps.newHashMap();
     public static final Map<String, HorseStyle> HORSE_STYLES = Maps.newHashMap();
     public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
-    public static final Map<String, HorseVariant> HORSE_VARIANTS = Maps.newHashMap();
-    public static final Map<Class<? extends AbstractHorse>, HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
 
     // ocelot types
     public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");
@@ -83,12 +74,6 @@ public class SpongeEntityConstants {
     public static final SpongeHorseStyle WHITE_DOTS = new SpongeHorseStyle(3, "WHITE_DOTS");
     public static final SpongeHorseStyle BLACK_DOTS = new SpongeHorseStyle(4, "BLACK_DOTS");
 
-    // horse variants
-    public static final SpongeHorseVariant HORSE = new SpongeHorseVariant(0, EntityHorse.class, "HORSE");
-    public static final SpongeHorseVariant DONKEY = new SpongeHorseVariant(1, EntityDonkey.class, "DONKEY");
-    public static final SpongeHorseVariant MULE = new SpongeHorseVariant(2, EntityMule.class, "MULE");
-    public static final SpongeHorseVariant UNDEAD_HORSE = new SpongeHorseVariant(3, EntityZombieHorse.class, "UNDEAD_HORSE");
-    public static final SpongeHorseVariant SKELETON_HORSE = new SpongeHorseVariant(4, EntitySkeletonHorse.class, "SKELETON_HORSE");
 
     static {
         OCELOT_TYPES.put("wild_ocelot", WILD_OCELOT);
@@ -145,16 +130,5 @@ public class SpongeEntityConstants {
         HORSE_STYLE_IDMAP.put(3, WHITE_DOTS);
         HORSE_STYLE_IDMAP.put(4, BLACK_DOTS);
 
-        HORSE_VARIANTS.put("horse", HORSE);
-        HORSE_VARIANTS.put("donkey", DONKEY);
-        HORSE_VARIANTS.put("mule", MULE);
-        HORSE_VARIANTS.put("undead_horse", UNDEAD_HORSE);
-        HORSE_VARIANTS.put("skeleton_horse", SKELETON_HORSE);
-
-        HORSE_VARIANT_IDMAP.put(EntityHorse.class, HORSE);
-        HORSE_VARIANT_IDMAP.put(EntityDonkey.class, DONKEY);
-        HORSE_VARIANT_IDMAP.put(EntityMule.class, MULE);
-        HORSE_VARIANT_IDMAP.put(EntityZombieHorse.class, UNDEAD_HORSE);
-        HORSE_VARIANT_IDMAP.put(EntitySkeletonHorse.class, SKELETON_HORSE);
     }
 }

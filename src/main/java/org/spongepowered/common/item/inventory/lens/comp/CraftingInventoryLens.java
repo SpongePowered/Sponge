@@ -29,7 +29,7 @@ import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens
 
 public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
 
-    GridInventoryLens<TInventory, TStack> getCraftingGrid();
+    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
 
     CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
 

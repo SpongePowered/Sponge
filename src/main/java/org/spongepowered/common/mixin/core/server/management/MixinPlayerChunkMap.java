@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.world.WorldServer;
@@ -37,6 +38,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -54,7 +57,7 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
     }
 
     @Redirect(method = "removeEntry", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;"
-            + "unload(Lnet/minecraft/world/chunk/Chunk;)V"))
+            + "queueUnload(Lnet/minecraft/world/chunk/Chunk;)V"))
     private void onUnloadChunk(ChunkProviderServer chunkProvider, Chunk chunk) {
         // We remove the ability for a PlayerChunkMap to queue chunks for unload to prevent chunk thrashing
         // where the same chunks repeatedly unload and load. This is caused by a player moving in and out of the same chunks.
@@ -65,10 +68,16 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
 
         if (((IMixinWorldServer) this.world).getChunkGCTickInterval() <= 0
                 || ((IMixinWorldServer) this.world).getChunkUnloadDelay() <= 0) {
-            chunkProvider.unload(chunk);
+            chunkProvider.queueUnload(chunk);
         } else {
             ((IMixinChunk) chunk).setScheduledForUnload(System.currentTimeMillis());
         }
     }
 
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z", ordinal = 2, remap = false))
+    private boolean onChunkUnloadCheck(List<EntityPlayerMP> playerList) {
+        // Queuing all chunks for unload when there are no players has been moved to start of tick in MixinMinecraftServer.
+        // This avoids chunks from reloading when any request to load a chunk is done before this call such as a mod requesting a TE.
+        return false;
+    }
 }

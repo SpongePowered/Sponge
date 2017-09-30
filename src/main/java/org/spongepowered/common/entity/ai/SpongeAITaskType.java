@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
@@ -41,25 +41,25 @@ public final class SpongeAITaskType implements AITaskType {
 
     @Override
     public Class<? extends AITask<? extends Agent>> getAIClass() {
-        return aiClass;
+        return this.aiClass;
     }
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .addValue(id)
-                .addValue(name)
-                .add("aiClass", aiClass)
+        return MoreObjects.toStringHelper(this)
+                .addValue(this.id)
+                .addValue(this.name)
+                .add("aiClass", this.aiClass)
                 .toString();
     }
 }

@@ -67,4 +67,6 @@ public interface IMixinWorldSettings {
     void setPortalAgentType(PortalAgentType type);
 
     void fromBuilder(boolean state);
+
+    void setRandomSeed(boolean state);
 }

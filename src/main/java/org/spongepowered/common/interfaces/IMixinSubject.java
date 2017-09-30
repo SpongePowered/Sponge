@@ -25,14 +25,19 @@
 package org.spongepowered.common.interfaces;
 
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface going with IMixinSubject-shared mixins (what am I even saying?).
  */
 public interface IMixinSubject {
 
-    void setSubject(Subject subj);
+    void setSubject(SubjectReference subj);
+
+    CompletableFuture<Subject> loadInternalSubject();
 
     String getSubjectCollectionIdentifier();
 

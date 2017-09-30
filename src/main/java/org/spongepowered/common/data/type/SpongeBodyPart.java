@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.data.type.BodyPart;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeBodyPart extends SpongeCatalogType implements BodyPart {

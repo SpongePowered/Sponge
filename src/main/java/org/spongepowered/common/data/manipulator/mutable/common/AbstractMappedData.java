@@ -69,7 +69,6 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
         this.immutableClass = immutableClass;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public M copy() {
         return (M) ReflectionUtil.createInstance(this.getClass(), getValue());

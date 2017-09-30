@@ -27,6 +27,7 @@ package org.spongepowered.common.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -45,7 +46,6 @@ import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -53,7 +53,6 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -62,11 +61,10 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
@@ -181,38 +179,33 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
-        CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
-        final IPhaseState currentState = causeTracker.getCurrentState();
-        if (!currentState.tracksBlockRestores()) {
-            causeTracker.switchToPhase(BlockPhase.State.RESTORING_BLOCKS,
-                    PhaseContext.start()
-                            .add(NamedCause.of(InternalNamedCauses.General.RESTORING_BLOCK, this))
-                            .complete());
-        }
+        CauseTracker causeTracker = CauseTracker.getInstance();
+        final IPhaseState<?> currentState = causeTracker.getCurrentState();
+        // We need to deterministically define the context as nullable if we don't need to enter.
+        // this way we guarantee an exit.
+        try (PhaseContext<?> context = !currentState.tracksBlockRestores()
+            ? null
+            : BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch()) {
 
-        BlockPos pos = VecHelper.toBlockPos(this.pos);
-        IBlockState current = world.getBlockState(pos);
-        IBlockState replaced = (IBlockState) this.blockState;
-        if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
-            if (currentState.tracksBlockRestores()) {
-                causeTracker.completePhase();
+            BlockPos pos = VecHelper.toBlockPos(this.pos);
+            IBlockState current = world.getBlockState(pos);
+            IBlockState replaced = (IBlockState) this.blockState;
+            if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock()
+                .getMetaFromState(replaced))) {
+                return false;
             }
-            return false;
-        }
 
-        mixinWorldServer.setBlockState(pos, replaced, flag);
-        world.getPlayerChunkMap().markBlockForUpdate(pos);
-        if (this.compound != null) {
-            final TileEntity te = world.getTileEntity(pos);
-            if (te != null) {
-                te.readFromNBT(this.compound);
-                te.markDirty();
+            mixinWorldServer.setBlockState(pos, replaced, flag);
+            world.getPlayerChunkMap().markBlockForUpdate(pos);
+            if (this.compound != null) {
+                final TileEntity te = world.getTileEntity(pos);
+                if (te != null) {
+                    te.readFromNBT(this.compound);
+                    te.markDirty();
+                }
             }
+            return true;
         }
-        if (!currentState.tracksBlockRestores()) {
-            causeTracker.completePhase();
-        }
-        return true;
     }
 
     @Override
@@ -246,7 +239,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer container = new MemoryDataContainer()
+        final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(Queries.WORLD_ID, this.worldUniqueId.toString())
             .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
@@ -274,11 +267,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         Optional<T> optional = this.blockState.get(containerClass);
         if (optional.isPresent()) {
             return optional;
-        } else {
-            for (ImmutableDataManipulator<?, ?> dataManipulator : this.extraData) {
-                if (containerClass.isInstance(dataManipulator)) {
-                    return Optional.of(((T) dataManipulator));
-                }
+        }
+        for (ImmutableDataManipulator<?, ?> dataManipulator : this.extraData) {
+            if (containerClass.isInstance(dataManipulator)) {
+                return Optional.of(((T) dataManipulator));
             }
         }
         return Optional.empty();
@@ -327,11 +319,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
             if (changeState) {
                 return Optional.of(createBuilder().blockState(newState).build());
-            } else {
-                final SpongeBlockSnapshotBuilder builder = createBuilder();
-                builder.add(valueContainer);
-                return Optional.of(builder.build());
             }
+            final SpongeBlockSnapshotBuilder builder = createBuilder();
+            builder.add(valueContainer);
+            return Optional.of(builder.build());
         }
         return Optional.of(createBuilder().add(valueContainer).build());
     }
@@ -476,7 +467,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of(this.compound.copy());
     }
 
-    @SuppressWarnings("rawtypes")
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState(this.blockState)
@@ -484,7 +474,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             .position(this.pos)
             .worldId(this.worldUniqueId);
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
-            builder.add((ImmutableDataManipulator) manipulator);
+            builder.add(manipulator);
         }
         if (this.compound != null) {
             builder.unsafeNbt(this.compound);
@@ -508,7 +498,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("worldUniqueId", this.worldUniqueId)
                 .add("position", this.pos)
                 .add("blockState", this.blockState)

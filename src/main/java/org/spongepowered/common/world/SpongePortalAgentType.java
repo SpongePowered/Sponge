@@ -26,7 +26,7 @@ package org.spongepowered.common.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.world.Teleporter;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
@@ -61,7 +61,7 @@ public class SpongePortalAgentType implements PortalAgentType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("name", this.name)
                 .add("class", this.portalAgentClass.getName())
                 .toString();

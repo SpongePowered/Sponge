@@ -95,6 +95,10 @@ public final class RegistryModuleLoader {
     }
 
     private static boolean hasCatalogRegistration(RegistryModule module) {
+        final RegisterCatalog catalog = module.getClass().getAnnotation(RegisterCatalog.class);
+        if (catalog != null) {
+            return true;
+        }
         for (Field field : module.getClass().getDeclaredFields()) {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {
@@ -110,9 +114,8 @@ public final class RegistryModuleLoader {
             DelayedRegistration delay = method.getDeclaredAnnotation(DelayedRegistration.class);
             if (delay == null) {
                 return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
-            } else {
-                return SpongeImpl.getRegistry().getPhase() == delay.value();
             }
+            return SpongeImpl.getRegistry().getPhase() == delay.value();
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
@@ -126,9 +129,8 @@ public final class RegistryModuleLoader {
             if (registration != null) {
                 if (delay == null) {
                     return SpongeImpl.getRegistry().getPhase() == RegistrationPhase.PRE_REGISTRY;
-                } else {
-                    return SpongeImpl.getRegistry().getPhase() == delay.value();
                 }
+                return SpongeImpl.getRegistry().getPhase() == delay.value();
             }
         }
         return false;
@@ -157,6 +159,10 @@ public final class RegistryModuleLoader {
     }
 
     private static RegisterCatalog getRegisterCatalogAnnot(RegistryModule module) {
+        final RegisterCatalog catalog = module.getClass().getAnnotation(RegisterCatalog.class);
+        if (catalog != null) {
+            return catalog;
+        }
         for (Field field : module.getClass().getDeclaredFields()) {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -131,7 +131,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
             BlockPos next = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4),
                     rand.nextInt(8) - rand.nextInt(8));
 
-            if (worldIn.isAirBlock(next) && (!worldIn.provider.hasNoSky() || next.getY() < 254)
+            if (worldIn.isAirBlock(next) && (!worldIn.provider.isNether() || next.getY() < 254)
                     && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, next)) {
                 DoublePlantType type = getType(VecHelper.toVector3i(next), rand);
                 Blocks.DOUBLE_PLANT.placeAt(worldIn, next,
@@ -170,7 +170,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "DoublePlant")
                 .add("PerChunk", this.count)
                 .toString();

@@ -29,10 +29,9 @@ import com.google.common.base.Predicates;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.GuavaJavaUtils;
 
 @SuppressWarnings("rawtypes")
 @Mixin(EntityAINearestAttackableTarget.class)
@@ -68,14 +67,14 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
 
     @Override
     public FindNearestAttackableTargetAITask filter(java.util.function.Predicate<Living> predicate) {
-        this.targetEntitySelector = predicate == null ? null : GuavaJavaUtils.asGuavaPredicate(predicate);
+        this.targetEntitySelector = predicate == null ? null : Functional.java8ToGuava(predicate);
         return this;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public java.util.function.Predicate<Living> getFilter() {
-        return this.targetEntitySelector == null ? GuavaJavaUtils.asJavaPredicate(Predicates.alwaysTrue()) : GuavaJavaUtils.<Living>asJavaPredicate(this.targetEntitySelector);
+        return this.targetEntitySelector == null ? Predicates.alwaysTrue() : this.targetEntitySelector;
     }
 
 }

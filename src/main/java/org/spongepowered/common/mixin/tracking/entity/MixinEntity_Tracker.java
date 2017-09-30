@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracking.entity;
 
+import net.minecraft.entity.IEntityOwnable;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -85,9 +87,8 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -98,9 +99,8 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     @Override
@@ -117,6 +117,13 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
     private UUID getTrackedUniqueId(String nbtKey) {
         if (this.creator != null && NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
             return this.creator;
+        } else if (this instanceof IEntityOwnable) {
+            IEntityOwnable ownable = (IEntityOwnable) this;
+            final net.minecraft.entity.Entity owner = ownable.getOwner();
+            if (owner != null && owner instanceof EntityPlayer) {
+                this.setCreator(owner.getUniqueID());
+                return owner.getUniqueID();
+            }
         } else if (this.notifier != null && NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
             return this.notifier;
         }
@@ -148,6 +155,14 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         if (this.creator != null) {
             return getUserForUuid(this.creator);
         }
+        if (this instanceof IEntityOwnable) {
+            IEntityOwnable ownable = (IEntityOwnable) this;
+            final net.minecraft.entity.Entity owner = ownable.getOwner();
+            if (owner != null && owner instanceof EntityPlayer) {
+                this.setCreator(owner.getUniqueID());
+                return Optional.of((User) owner);
+            }
+        }
         return getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
     }
 
@@ -159,7 +174,6 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         return getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
         final UUID uuid = this.getTrackedUniqueId(nbtKey);

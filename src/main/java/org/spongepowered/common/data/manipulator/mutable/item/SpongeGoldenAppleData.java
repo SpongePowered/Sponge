@@ -31,9 +31,7 @@ import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeGoldenAppleData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeGoldenAppleData extends AbstractSingleCatalogData<GoldenApple, GoldenAppleData, ImmutableGoldenAppleData> implements GoldenAppleData {
 
     public SpongeGoldenAppleData() {

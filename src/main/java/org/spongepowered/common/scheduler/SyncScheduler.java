@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.scheduler;
 
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+
 public class SyncScheduler extends SchedulerBase {
 
     // The number of ticks elapsed since this scheduler began.
@@ -47,23 +52,25 @@ public class SyncScheduler extends SchedulerBase {
             // The timestamp is based on the initial offset
             if (task.delayIsTicks) {
                 return this.counter;
-            } else {
-                return super.getTimestamp(task);
             }
+            return super.getTimestamp(task);
         } else if (task.getState().isActive) {
             // The timestamp is based on the period
             if (task.intervalIsTicks) {
                 return this.counter;
-            } else {
-                return super.getTimestamp(task);
             }
+            return super.getTimestamp(task);
         }
         return 0L;
     }
 
     @Override
-    protected void executeTaskRunnable(Runnable runnable) {
-        runnable.run();
+    protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
+        try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+                .source(task)
+                .buildAndSwitch()) {
+            runnable.run();
+        }
     }
 
 }

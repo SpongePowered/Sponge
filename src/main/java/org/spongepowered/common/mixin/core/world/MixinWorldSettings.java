@@ -28,25 +28,24 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -62,8 +61,8 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
-import org.spongepowered.common.util.persistence.JsonTranslator;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @NonnullByDefault
@@ -84,7 +83,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
-    private DataContainer generatorSettings = new MemoryDataContainer();
+    private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
     private boolean keepSpawnLoaded = true;
@@ -94,6 +93,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private boolean fromBuilder = false;
     private PortalAgentType portalAgentType;
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
+    private boolean seedRandomized = false;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     public void onConstruct(WorldInfo info, CallbackInfo ci) {
@@ -121,18 +121,28 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         return this.shadow$getSeed();
     }
 
+    @Override
+    public boolean isSeedRandomized() {
+        return this.seedRandomized;
+    }
+
+    @Override
+    public void setRandomSeed(boolean state) {
+        this.seedRandomized = state;
+    }
+
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
     public void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         DataContainer settings = null;
         try {
-            settings = JsonTranslator.translateFrom(new JsonParser().parse(generatorOptions).getAsJsonObject());
-        } catch (JsonParseException | IllegalStateException ignored) {
+            settings = DataFormats.JSON.read(generatorOptions);
+        } catch (JsonParseException | IOException ignored) {
         }
         // If null, assume custom
         if (settings == null) {
-            settings = new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
+            settings = DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
         }
         this.generatorSettings = settings;
     }

@@ -26,9 +26,12 @@ package org.spongepowered.common.text.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+
+import java.util.Locale;
 
 import javax.annotation.Nullable;
 
@@ -37,7 +40,7 @@ public class SpongeTextStyle extends TextStyle.Base {
 
     private final TextFormatting handle;
 
-    SpongeTextStyle(TextFormatting handle, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable Boolean underline,
+    private SpongeTextStyle(TextFormatting handle, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable Boolean underline,
             @Nullable Boolean strikethrough, @Nullable Boolean obfuscated) {
         super(bold, italic, underline, strikethrough, obfuscated);
         this.handle = checkNotNull(handle, "handle");
@@ -45,12 +48,12 @@ public class SpongeTextStyle extends TextStyle.Base {
 
     @Override
     public String getName() {
-        return this.handle.name();
+        return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, this.handle.name());
     }
 
     @Override
     public String getId() {
-        return this.handle.name();
+        return "minecraft:" + this.handle.name().toLowerCase(Locale.ENGLISH);
     }
 
     public static SpongeTextStyle of(TextFormatting handle) {

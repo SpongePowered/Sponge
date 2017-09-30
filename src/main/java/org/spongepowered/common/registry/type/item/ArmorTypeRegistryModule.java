@@ -24,49 +24,30 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.ItemArmor;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.data.type.ArmorTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(ArmorTypes.class)
+public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ItemArmor.ArmorMaterial, ArmorType> {
 
-public class ArmorTypeRegistryModule implements CatalogRegistryModule<ArmorType> {
-
-    @RegisterCatalog(ArmorTypes.class)
-    private final Map<String, ArmorType> armorTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<ArmorType> getById(String id) {
-        return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public ArmorTypeRegistryModule() {
+        super(new String[] {"minecraft"}, id -> id.equals("chainmail") ? "chain" : id);
     }
 
     @Override
-    public Collection<ArmorType> getAll() {
-        return ImmutableSet.copyOf(this.armorTypeMap.values());
-    }
-
-    @Override
-    public void registerDefaults() {
-        for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
-            this.armorTypeMap.put(armorMaterial.name().toLowerCase(Locale.ENGLISH), (ArmorType) (Object) armorMaterial);
-        }
+    protected ItemArmor.ArmorMaterial[] getValues() {
+        return ItemArmor.ArmorMaterial.values();
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
-            if (!this.armorTypeMap.containsKey(armorMaterial.name().toLowerCase(Locale.ENGLISH))) {
-                this.armorTypeMap.put(armorMaterial.name().toLowerCase(Locale.ENGLISH), (ArmorType) (Object) armorMaterial);
+            if (!this.catalogTypeMap.containsKey(enumAs(armorMaterial).getId())) {
+                this.catalogTypeMap.put(enumAs(armorMaterial).getId(), enumAs(armorMaterial));
             }
         }
     }

@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.core.world.gen.MixinMapGenBase;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
@@ -49,7 +50,7 @@ import java.util.Random;
  * phase and the population phase of chunk creation.
  */
 @Mixin(MapGenStructure.class)
-public abstract class MixinMapGenStructure implements Populator {
+public abstract class MixinMapGenStructure extends MixinMapGenBase implements Populator {
 
     private static boolean generatingStructures = false;
 
@@ -72,7 +73,7 @@ public abstract class MixinMapGenStructure implements Populator {
     /**
      * @author blood - October 22nd, 2016
      * @reason Prevents CME's by avoiding recursive calls while generating structures
-     * 
+     *
      * @param worldIn The world
      * @param randomIn The rand
      * @Param chunkCoord The chunk position
@@ -84,14 +85,14 @@ public abstract class MixinMapGenStructure implements Populator {
         if (generatingStructures) {
             return false;
         }
-        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.x, chunkCoord.z);
         if (chunk == null) {
             return false;
         }
 
         this.initializeStructureData(worldIn);
-        int i = (chunkCoord.chunkXPos << 4) + 8;
-        int j = (chunkCoord.chunkZPos << 4) + 8;
+        int i = (chunkCoord.x << 4) + 8;
+        int j = (chunkCoord.z << 4) + 8;
         boolean flag = false;
 
         generatingStructures = true;

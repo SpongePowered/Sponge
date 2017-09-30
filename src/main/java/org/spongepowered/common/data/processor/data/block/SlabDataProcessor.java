@@ -25,9 +25,6 @@
 package org.spongepowered.common.data.processor.data.block;
 
 import net.minecraft.block.BlockStoneSlab;
-import net.minecraft.block.BlockStoneSlabNew;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
@@ -61,21 +58,20 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
         return new SpongeSlabData();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, SlabType value) {
         // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
         return false;
         /*
-        if (stack.getItem() == ItemTypes.STONE_SLAB) {
+        if (stack.getType() == ItemTypes.STONE_SLAB) {
             if (!value.equals(SlabTypes.RED_SAND)) {
                 stack.setItemDamage(((BlockStoneSlab.EnumType) (Object) value).getMetadata());
             } else {
                 stack.setItem(Item.getItemFromBlock(Blocks.STONE_SLAB2));
                 stack.setItemDamage(((BlockStoneSlabNew.EnumType) (Object) value).getMetadata());
             }
-        } else if (stack.getItem() == ItemTypes.STONE_SLAB2) {
-            if (stack.getItem() == ItemTypes.STONE_SLAB2) {
+        } else if (stack.getType() == ItemTypes.STONE_SLAB2) {
+            if (stack.getType() == ItemTypes.STONE_SLAB2) {
                 if (value.equals(SlabTypes.RED_SAND)) {
                     stack.setItemDamage(((BlockStoneSlabNew.EnumType) (Object) value).getMetadata());
                 } else {

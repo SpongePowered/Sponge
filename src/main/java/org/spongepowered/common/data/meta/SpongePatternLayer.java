@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.meta;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -59,7 +58,7 @@ public class SpongePatternLayer implements PatternLayer {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(DataQueries.BANNER_SHAPE_ID, this.id.getId())
             .set(DataQueries.BANNER_COLOR, this.color.getName());

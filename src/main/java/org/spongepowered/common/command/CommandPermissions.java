@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.command;
 
+import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
@@ -58,9 +60,8 @@ public final class CommandPermissions {
             CommandCallable callable = mapping.get().getCallable();
             if (callable instanceof MinecraftCommandWrapper) {
                 return source.hasPermission(((MinecraftCommandWrapper) callable).getCommandPermission());
-            } else {
-                return callable.testPermission(source);
             }
+            return callable.testPermission(source);
         }
         return source.hasPermission(commandName);
     }
@@ -71,6 +72,19 @@ public final class CommandPermissions {
         }
         if (testPermission.apply(CommandPermissions.SELECTOR_LEVEL, CommandPermissions.SELECTOR_COMMAND)) {
             data.setPermission(SubjectData.GLOBAL_CONTEXT, COMMAND_BLOCK_COMMAND, Tristate.TRUE);
+        }
+    }
+
+    public static void populateMinecraftPermissions(ICommandSender sender, MemorySubjectData data) {
+        // ICommandSenders have a *very* basic understanding of permissions, so
+        // get what we can.
+        populateNonCommandPermissions(data, sender::canUseCommand);
+        for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
+            if (command.getCallable() instanceof MinecraftCommandWrapper) {
+                MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
+                data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
+                        Tristate.fromBoolean(wrapper.command.checkPermission(sender.getServer(), sender)));
+            }
         }
     }
 }

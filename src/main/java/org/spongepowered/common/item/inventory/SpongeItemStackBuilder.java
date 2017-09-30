@@ -35,21 +35,27 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -64,7 +70,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class SpongeItemStackBuilder implements ItemStack.Builder {
+public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     @Nullable private Set<DataManipulator<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
@@ -73,6 +79,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     @Nullable private NBTTagCompound compound;
 
     public SpongeItemStackBuilder() {
+        super(ItemStack.class, 1);
         reset();
     }
 
@@ -90,7 +97,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
 
     @Override
     public ItemStack.Builder quantity(int quantity) throws IllegalArgumentException {
-        checkArgument(quantity > 0, "Quantity must be greater than 0");
+        checkArgument(quantity >= 0, "Quantity must not be smaller than 0");
         this.quantity = quantity;
         return this;
     }
@@ -123,13 +130,12 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         DataTransactionResult result = validateData(this.type, itemData);
         if (result.getType() != DataTransactionResult.Type.SUCCESS) {
             throw new IllegalArgumentException("The item data is not compatible with the current item type!");
-        } else {
-            if (this.itemDataSet == null) {
-                this.itemDataSet = new HashSet<>();
-            }
-            this.itemDataSet.add(itemData);
-            return this;
         }
+        if (this.itemDataSet == null) {
+            this.itemDataSet = new HashSet<>();
+        }
+        this.itemDataSet.add(itemData);
+        return this;
     }
 
     @Override
@@ -137,7 +143,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         checkNotNull(itemStack, "Item stack cannot be null");
         this.itemDataSet = new HashSet<>();
         // Assumes the item stack's values don't need to be validated
-        this.type = itemStack.getItem();
+        this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
             final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
@@ -178,7 +184,8 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         }
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
-            final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
+            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
+            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             this.itemDataSet = new HashSet<>();
             manipulators.forEach(this.itemDataSet::add);
         }
@@ -189,8 +196,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     public ItemStack.Builder fromSnapshot(ItemStackSnapshot snapshot) {
         checkNotNull(snapshot, "The snapshot was null!");
         itemType(snapshot.getType());
-        quantity(snapshot.getCount());
-        quantity(snapshot.getCount());
+        quantity(snapshot.getQuantity());
         for (ImmutableDataManipulator<?, ?> manipulator : snapshot.getContainers()) {
             itemData(manipulator);
         }
@@ -231,6 +237,24 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     }
 
     @Override
+    public ItemStack.Builder fromBlockState(BlockState blockState) {
+        final IBlockState minecraftState = BlockUtil.toNative(blockState);
+        final Optional<ItemType> item = blockState.getType().getItem();
+        if (!item.isPresent()) {
+            new PrettyPrinter(60).add("Invalid BlockState").centre().hr()
+                .add("Someone attempted to create an ItemStack from a BlockState that does not have a valid item!")
+                .add("%s : %s", "BlockState", blockState)
+                .add("%s : %s", "BlockType", blockState.getType())
+                .add(new Exception("Stacktrace"))
+                .trace();
+            return this;
+        }
+        itemType(item.get());
+        this.damageValue = minecraftState.getBlock().damageDropped(minecraftState);
+        return this;
+    }
+
+    @Override
     public ItemStack.Builder remove(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
         if (this.itemDataSet != null) {
             for (final Iterator<DataManipulator<?, ?>> iterator = this.itemDataSet.iterator(); iterator.hasNext(); ) {
@@ -250,36 +274,33 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     }
 
     @Override
-    public Optional<ItemStack> build(DataView container) throws InvalidDataException {
+    protected Optional<ItemStack> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)
-            || !container.contains(DataQueries.ITEM_DAMAGE_VALUE)) {
+        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT) || !container.contains(
+            DataQueries.ITEM_DAMAGE_VALUE)) {
             return Optional.empty();
         }
-        reset();
-
-        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
-        quantity(count);
-
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
+        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
         final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
-        itemType(itemType);
-
-        this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
+        final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
+        final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-                compound.removeTag(NbtDataUtil.SPONGE_DATA);
-            }
-            this.compound = compound;
+            itemStack.setTagCompound(compound);
         }
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
-            final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
-            this.itemDataSet = new HashSet<>();
-            manipulators.forEach(this.itemDataSet::add);
+            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
+            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
+            for (DataManipulator<?, ?> manipulator : manipulators) {
+                ((IMixinCustomDataHolder) itemStack).offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+            }
+            if (!transaction.failedData.isEmpty()) {
+                ((IMixinCustomDataHolder) itemStack).addFailedData(transaction.failedData);
+            }
         }
-        return Optional.of(this.build());
+        return Optional.of((ItemStack) itemStack);
     }
 
     @Override
@@ -296,9 +317,12 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     @Override
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");
-        int max = this.type.getMaxStackQuantity();
-        // This should be enabled, but for some reason, people are getting this in some forge environments.
-//        checkState(this.quantity <= max, "Quantity cannot be greater than the max quantity (%s)", max);
+
+        if (this.type == ItemTypes.NONE || this.quantity <= 0) {
+            // If either type is none(air) or quantity is 0 return the vanilla EMPTY item
+            return ((ItemStack) net.minecraft.item.ItemStack.EMPTY);
+        }
+
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
             ((net.minecraft.item.ItemStack) stack).setTagCompound(this.compound.copy());

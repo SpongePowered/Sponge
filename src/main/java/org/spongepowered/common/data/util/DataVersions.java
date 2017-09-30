@@ -98,6 +98,10 @@ public final class DataVersions {
         public static final int INVISIBILITY_DATA_PRE_1_9 = 1;
         public static final int INVISIBILITY_DATA_WITH_VANISH = 2;
 
+        public static final int CLASS_BASED_CUSTOM_DATA = 1;
+        public static final int CUSTOM_DATA_WITH_DATA_IDS = 2;
+        public static final int CURRENT_CUSTOM_DATA = CUSTOM_DATA_WITH_DATA_IDS;
+
     }
 
 }

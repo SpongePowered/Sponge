@@ -29,17 +29,22 @@ import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
@@ -48,7 +53,6 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -57,8 +61,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -89,11 +91,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -107,7 +113,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -116,7 +121,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -124,14 +132,15 @@ import javax.annotation.Nullable;
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
-    @Shadow @Final private static Logger LOG;
-    @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final private static Logger LOGGER;
+    @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worlds;
     @Shadow private Thread serverThread;
+    @Shadow @Final private DataFixer dataFixer;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void sendMessage(ITextComponent message);
@@ -151,7 +160,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
-    @Shadow public abstract DataFixer getDataFixer();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
@@ -310,6 +318,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Inject(method = "stopServer()V", at = @At("HEAD"))
     public void onServerStopping(CallbackInfo ci) {
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
+
+        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
+                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+            for (WorldServer world : this.worlds) {
+                ((IMixinWorldServer) world).getLightingExecutor().shutdown();
+            }
+
+            for (WorldServer world : this.worlds) {
+                try {
+                    ((IMixinWorldServer) world).getLightingExecutor().awaitTermination(1, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    ((IMixinWorldServer) world).getLightingExecutor().shutdownNow();
+                }
+            }
+        }
     }
 
     /**
@@ -321,7 +346,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @reason Add multiworld support
      */
     @Overwrite
-    protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
+    public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
         SpongeCommonEventFactory.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
         SpongeCommonEventFactory.convertingMapFormat = false;
@@ -329,7 +354,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         WorldManager.loadAllWorlds(worldName, seed, type, generatorOptions);
 
-        this.getPlayerList().setPlayerManager(new WorldServer[]{WorldManager.getWorldByDimensionId(0).get()});
+        this.getPlayerList().setPlayerManager(this.worlds);
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
     }
@@ -341,7 +366,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * generate spawn on server start. I enforce that here.
      */
     @Overwrite
-    protected void initialWorldChunkLoad() {
+    public void initialWorldChunkLoad() {
         for (WorldServer worldServer: this.worlds) {
             this.prepareSpawnArea(worldServer);
         }
@@ -356,34 +381,31 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
-        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-        if (CauseTracker.ENABLED) {
-            causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(NamedCause.source(worldServer))
-                    .addCaptures()
-                    .complete());
-        }
-        int i = 0;
-        this.setUserMessage("menu.generatingTerrain");
-        LOG.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
-        BlockPos blockpos = worldServer.getSpawnPoint();
-        long j = MinecraftServer.getCurrentTimeMillis();
-        for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
-            for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
-                long i1 = MinecraftServer.getCurrentTimeMillis();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
 
-                if (i1 - j > 1000L) {
-                    this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
-                    j = i1;
+        try (GenerationContext context =GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+            .source(worldServer)
+            .world( worldServer)
+            .buildAndSwitch()) {
+            int i = 0;
+            this.setUserMessage("menu.generatingTerrain");
+            LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
+            BlockPos blockpos = worldServer.getSpawnPoint();
+            long j = MinecraftServer.getCurrentTimeMillis();
+            for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
+                for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
+                    long i1 = MinecraftServer.getCurrentTimeMillis();
+
+                    if (i1 - j > 1000L) {
+                        this.outputPercentRemaining("Preparing spawn area", i * 100 / 625);
+                        j = i1;
+                    }
+
+                    ++i;
+                    worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
                 }
-
-                ++i;
-                worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
             }
-        }
-        this.clearCurrentTask();
-        if (CauseTracker.ENABLED) {
-            causeTracker.completePhase();
+            this.clearCurrentTask();
         }
         chunkProviderServer.setForceChunkRequests(false);
     }
@@ -445,11 +467,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Collection<WorldProperties> getUnloadedWorlds() {
-        try {
-            return WorldManager.getUnloadedWorlds();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return WorldManager.getAllWorldProperties().stream()
+                .filter(props -> !this.getWorld(props.getUniqueId()).isPresent())
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
@@ -540,10 +560,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
         this.currentTabCompletionOptions = null;
 
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
+        Sponge.getCauseStackManager().pushCause(sender);
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Sponge.getCauseStackManager().getCurrentCause(),
                 ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), usingBlock);
         Sponge.getEventManager().post(event);
-
+        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             completions.clear();
         }
@@ -552,7 +573,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletions"
             + "(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
     public List<String> onGetTabCompletionOptions(ICommandManager manager, ICommandSender sender, String input, @Nullable BlockPos pos, ICommandSender sender_, String input_, BlockPos pos_, boolean hasTargetBlock) {
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, this.getTarget(sender, pos), hasTargetBlock);
+        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
     }
 
     @Nullable
@@ -569,16 +590,31 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return getClass().getSimpleName();
     }
 
-    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
-    public WorldInfo onUpdateTimeLightAndEntitiesGetWorld(WorldServer worldServer) {
-        // ChunkGC needs to be processed before a world tick in order to guarantee any chunk  queued for unload
-        // can still be marked active and avoid unload if accessed during the same tick.
-        // Note: This injection must come before Forge's pre world tick event or it will cause issues with mods.
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
-        if (spongeWorld.getChunkGCTickInterval() > 0) {
-            spongeWorld.doChunkGC();
+    // All chunk unload queuing needs to be processed BEFORE the future tasks are run as mods/plugins may have tasks that request chunks.
+    // This prevents a situation where a chunk is requested to load then unloads at end of tick.
+    @Inject(method = "updateTimeLightAndEntities", at = @At("HEAD"))
+    public void onUpdateTimeLightAndEntitiesHead(CallbackInfo ci) {
+        for (int i = 0; i < this.worlds.length; ++i)
+        {
+            WorldServer worldServer = this.worlds[i];
+            // ChunkGC needs to be processed before a world tick in order to guarantee any chunk  queued for unload
+            // can still be marked active and avoid unload if accessed during the same tick.
+            // Note: This injection must come before Forge's pre world tick event or it will cause issues with mods.
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
+            if (spongeWorld.getChunkGCTickInterval() > 0) {
+                spongeWorld.doChunkGC();
+            }
+            // Moved from PlayerChunkMap to avoid chunks from unloading after being requested in same tick
+            if (worldServer.getPlayerChunkMap().players.isEmpty())
+            {
+                WorldProvider worldprovider = worldServer.provider;
+
+                if (!worldprovider.canRespawnHere())
+                {
+                    worldServer.getChunkProvider().queueUnloadAll();
+                }
+            }
         }
-        return worldServer.getWorldInfo();
     }
 
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getEntityTracker()Lnet/minecraft/entity/EntityTracker;"))
@@ -606,14 +642,33 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
             EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
             if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+                BlockSnapshot blockSnapshot = BlockSnapshot.NONE;
+                EnumFacing side = null;
+                final double distance = SpongeImplHooks.getBlockReachDistance((EntityPlayerMP) player) + 1;
+                final Vec3d startPos = new Vec3d(player.posX, player.posY + player.getEyeHeight(), player.posZ);
+                final Vec3d endPos = startPos.add(new Vec3d(player.getLookVec().x * distance, player.getLookVec().y * distance, player.getLookVec().z * distance));
+                final RayTraceResult rayTraceResult = player.world.rayTraceBlocks(startPos, endPos);
+                // Hit non-air block
+                if (rayTraceResult != null && rayTraceResult.getBlockPos() != null) {
+                    blockSnapshot = new Location<>((World) player.world, VecHelper.toVector3d(rayTraceResult.getBlockPos())).createSnapshot();
+                    side = rayTraceResult.sideHit;
+                }
+
+                Sponge.getCauseStackManager().pushCause(player);
                 if (player.getHeldItemMainhand() != null) {
-                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, Optional.empty(), BlockSnapshot.NONE).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, Optional.empty(), blockSnapshot).isCancelled()) {
                         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+                        Sponge.getCauseStackManager().popCause();
                         return;
                     }
                 }
 
-                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, EnumHand.MAIN_HAND);
+                if (side != null) {
+                    SpongeCommonEventFactory.callInteractBlockEventPrimary(player, blockSnapshot, EnumHand.MAIN_HAND, side);
+                } else {
+                    SpongeCommonEventFactory.callInteractBlockEventPrimary(player, EnumHand.MAIN_HAND);
+                }
+                Sponge.getCauseStackManager().popCause();
             }
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
@@ -660,22 +715,21 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @param dontLog Whether to log during saving
      */
     @Overwrite
-    protected void saveAllWorlds(boolean dontLog)
-    {
-        for (WorldServer worldserver : this.worlds)
-        {
-            if (worldserver != null)
-            {
+    public void saveAllWorlds(boolean dontLog) {
+        for (WorldServer worldserver : this.worlds) {
+            if (worldserver != null) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
                     final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
                     final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
-                    if (autoSaveInterval <= 0 || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
+                    if (autoSaveInterval <= 0
+                            || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {
-                            LOG.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                            LOGGER.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                     + worldserver.provider.getDimensionType().getName() + ". "
-                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than zero in the corresponding world config.");
+                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
+                                    + " zero in the corresponding world config.");
                         }
                         continue;
                     }
@@ -683,11 +737,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         continue;
                     }
                     if (logAutoSave) {
-                        LOG.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                        LOGGER.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                 + worldserver.provider.getDimensionType().getName());
                     }
                 } else if (!dontLog) {
-                    LOG.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                    LOGGER.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                             + worldserver.provider.getDimensionType().getName());
                 }
                 // Sponge end
@@ -720,7 +774,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @return The world server, or else the overworld.
      */
     @Overwrite
-    public WorldServer worldServerForDimension(int dimensionId) {
+    public WorldServer getWorld(int dimensionId) {
         return WorldManager.getWorldByDimensionId(dimensionId)
                 .orElse(WorldManager.getWorldByDimensionId(0)
                         .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
@@ -731,5 +785,34 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean isMainThread() {
         return this.serverThread == Thread.currentThread();
+    }
+
+    @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
+    public Object onCall(Callable<?> callable) throws Exception {
+        Object value;
+        try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
+                .source(callable)
+                .buildAndSwitch()) {
+            value = callable.call();
+        } catch (Exception e) {
+            throw e;
+        }
+        return value;
+    }
+
+    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
+    private Object onRun(FutureTask<?> task, Logger logger) {
+        return SpongeImplHooks.onUtilRunTask(task, logger);
+    }
+
+    @Override
+    public DataFixer getDataFixer() {
+        return this.dataFixer;
+    }
+
+    @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
+    private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
+        report.makeCategory("Sponge CauseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
+        cir.setReturnValue(report);
     }
 }

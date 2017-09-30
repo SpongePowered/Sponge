@@ -24,36 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockRedstoneComparator;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.type.ComparatorTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class ComparatorTypeRegistryModule implements CatalogRegistryModule<ComparatorType> {
-
-    @RegisterCatalog(ComparatorTypes.class)
-    private final Map<String, ComparatorType> comparatorTypeMap = ImmutableMap.<String, ComparatorType>builder()
-        .put("compare", (ComparatorType) (Object) BlockRedstoneComparator.Mode.COMPARE)
-        .put("subtract", (ComparatorType) (Object) BlockRedstoneComparator.Mode.SUBTRACT)
-        .build();
+@RegisterCatalog(ComparatorTypes.class)
+public class ComparatorTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockRedstoneComparator.Mode, ComparatorType> {
 
     @Override
-    public Optional<ComparatorType> getById(String id) {
-        return Optional.ofNullable(this.comparatorTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<ComparatorType> getAll() {
-        return ImmutableList.copyOf(this.comparatorTypeMap.values());
+    protected BlockRedstoneComparator.Mode[] getValues() {
+        return BlockRedstoneComparator.Mode.values();
     }
 }

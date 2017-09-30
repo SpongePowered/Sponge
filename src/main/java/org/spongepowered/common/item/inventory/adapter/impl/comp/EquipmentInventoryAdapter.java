@@ -34,26 +34,25 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
+import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 
 import java.util.Optional;
-
-// TODO Inventory - Implement EquipmentInventory
 
 public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implements EquipmentInventory {
 
     private final ArmorEquipable carrier;
+    private final EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> lens;
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack>
-            root) {
+    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
         super(inventory, root);
         this.carrier = carrier;
+        this.lens = root;
     }
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack>
-            root, Inventory parent) {
+    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
         super(inventory, root, parent);
         this.carrier = carrier;
+        this.lens = root;
     }
 
     @Override
@@ -63,61 +62,65 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public Optional<ItemStack> poll(EquipmentSlotType equipmentType) {
-        return null;
+        return this.query(equipmentType).poll();
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentSlotType equipmentType, int limit) {
-        return null;
+        return this.query(equipmentType).poll(limit);
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType) {
-        return null;
+        return this.poll(new EquipmentSlotType(equipmentType));
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType, int limit) {
-        return null;
+        return this.poll(new EquipmentSlotType(equipmentType), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentSlotType equipmentType) {
-        return null;
+        return this.query(equipmentType).peek();
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentSlotType equipmentType, int limit) {
-        return null;
+        return this.query(equipmentType).peek(limit);
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType) {
-        return null;
+        return this.peek(new EquipmentSlotType(equipmentType));
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType, int limit) {
-        return null;
+        return this.peek(new EquipmentSlotType(equipmentType), limit);
     }
 
     @Override
     public InventoryTransactionResult set(EquipmentSlotType equipmentType, ItemStack stack) {
-        return null;
+        return this.query(equipmentType).set(stack);
     }
 
     @Override
     public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
-        return null;
+        return this.set(new EquipmentSlotType(equipmentType), stack);
     }
 
     @Override
     public Optional<Slot> getSlot(EquipmentSlotType equipmentType) {
-        return null;
+        Inventory slot = this.query(equipmentType);
+        if (slot instanceof Slot) {
+            return Optional.of(((Slot) slot));
+        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<Slot> getSlot(EquipmentType equipmentType) {
-        return null;
+        return this.getSlot(new EquipmentSlotType(equipmentType));
     }
 }

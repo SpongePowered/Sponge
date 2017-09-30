@@ -29,13 +29,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
@@ -46,7 +50,8 @@ import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
+import org.spongepowered.api.item.recipe.smelting.SmeltingRecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -73,15 +78,18 @@ import org.spongepowered.api.text.serializer.TextSerializerFactory;
 import org.spongepowered.api.text.serializer.TextTemplateConfigSerializer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
@@ -104,6 +112,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -115,9 +124,10 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("deprecation")
 @Singleton
 public class SpongeGameRegistry implements GameRegistry {
+
+    public static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
 
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
@@ -126,9 +136,7 @@ public class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
     }
 
-    public final RegistrationPhase getPhase() {
-        return this.phase;
-    }
+    private final SpongePropertyRegistry propertyRegistry;
 
     private RegistrationPhase phase = RegistrationPhase.PRE_REGISTRY; // Needed for module phase registrations
 
@@ -138,7 +146,13 @@ public class SpongeGameRegistry implements GameRegistry {
     private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
     private final Set<RegistryModule> registryModules = new HashSet<>();
 
-    public SpongeGameRegistry() {
+    @Inject
+    public SpongeGameRegistry(SpongePropertyRegistry propertyRegistry) {
+        this.propertyRegistry = propertyRegistry;
+    }
+
+    public final RegistrationPhase getPhase() {
+        return this.phase;
     }
 
     public void preRegistryInit() {
@@ -158,10 +172,36 @@ public class SpongeGameRegistry implements GameRegistry {
 
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
-        DataRegistrar.setupSerialization(SpongeImpl.getGame());
+        DataRegistrar.setupSerialization();
+        final List<Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>>> modules = new ArrayList<>();
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
+            modules.add(new Tuple<>(entry.getKey(), entry.getValue()));
+        }
+        modules.sort(Comparator.comparing(tuple -> tuple.getFirst().getSimpleName()));
+        if (PRINT_CATALOG_TYPES) { // Lol... this gets spammy really fast.... Probably at some point should be put to file.
+            final PrettyPrinter printer = new PrettyPrinter(100).add("Printing all Catalogs and their ID's").centre().hr()
+                .addWrapped(
+                    "This is a test to print out all registered catalogs during initialization for their mapping, id's, and objects themselves.");
+            for (Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>> module : modules) {
+                printer.add(" %s : %s", "CatalogType", module.getFirst().getSimpleName());
+
+                final Collection<? extends CatalogType> all = module.getSecond().getAll();
+                final List<CatalogType> catalogTypes = new ArrayList<>();
+                for (CatalogType o : all) {
+                    catalogTypes.add(o);
+                }
+                catalogTypes.sort(Comparator.comparing(CatalogType::getId));
+                for (CatalogType catalogType : catalogTypes) {
+                    printer.add("  -%s", catalogType.getId());
+                }
+                printer.hr();
+            }
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+        }
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> SpongeGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
         @Nullable final CatalogRegistryModule<T> existingModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass);
@@ -236,26 +276,22 @@ public class SpongeGameRegistry implements GameRegistry {
         return classModule.getForClass(clazz);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Optional.empty();
-        } else {
-            return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
         }
+        return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Collections.emptyList();
-        } else {
-            return registryModule.getAll();
         }
+        return registryModule.getAll();
     }
 
     @Override
@@ -264,15 +300,14 @@ public class SpongeGameRegistry implements GameRegistry {
         final CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
         if (registryModule == null) {
             return Collections.emptyList();
-        } else {
-            ImmutableList.Builder<T> builder = ImmutableList.builder();
-            registryModule.getAll()
-                    .stream()
-                    .filter(type -> pluginId.equals(type.getId().split(":")[0]))
-                    .forEach(builder::add);
-
-            return builder.build();
         }
+        ImmutableList.Builder<T> builder = ImmutableList.builder();
+        registryModule.getAll()
+                .stream()
+                .filter(type -> pluginId.equals(type.getId().split(":")[0]))
+                .forEach(builder::add);
+
+        return builder.build();
     }
 
     @SuppressWarnings("unchecked")
@@ -286,24 +321,22 @@ public class SpongeGameRegistry implements GameRegistry {
         return (T) supplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
             throw new UnsupportedOperationException("Failed to find a RegistryModule for that type");
-        } else {
-            if (registryModule instanceof SpongeAdditionalCatalogRegistryModule) {
-                if(((SpongeAdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
-                    ((SpongeAdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
-                    return obj;
-                }
-            } else if (registryModule instanceof AdditionalCatalogRegistryModule) {
-                ((AdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
+        }
+        if (registryModule instanceof SpongeAdditionalCatalogRegistryModule) {
+            if(((SpongeAdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
+                ((SpongeAdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
                 return obj;
             }
-            throw new UnsupportedOperationException("This catalog type does not support additional registration");
+        } else if (registryModule instanceof AdditionalCatalogRegistryModule) {
+            ((AdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
+            return obj;
         }
+        throw new UnsupportedOperationException("This catalog type does not support additional registration");
     }
 
     @Override
@@ -370,12 +403,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<Rotation> getRotationFromDegree(int degrees) {
-        for (Rotation rotation : RotationRegistryModule.rotationMap.values()) {
-            if (rotation.getAngle() == degrees) {
-                return Optional.of(rotation);
-            }
-        }
-        return Optional.empty();
+        return RotationRegistryModule.getInstance().getRotationFromDegree(degrees);
     }
 
     @Override
@@ -403,9 +431,15 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeFavicon.load(image);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        throw new UnsupportedOperationException(); // TODO
+    public CraftingRecipeRegistry getCraftingRecipeRegistry() {
+        return SpongeCraftingRecipeRegistry.getInstance();
+    }
+
+    @Override
+    public SmeltingRecipeRegistry getSmeltingRecipeRegistry() {
+        return (SmeltingRecipeRegistry) FurnaceRecipes.instance();
     }
 
     @Override
@@ -444,6 +478,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeTextSerializerFactory.INSTANCE;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public SpongeSelectorFactory getSelectorFactory() {
         return SpongeSelectorFactory.INSTANCE;
@@ -495,7 +530,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public void postInit() {
         this.phase = RegistrationPhase.POST_INIT;
         registerModulePhase();
-        SpongePropertyRegistry.completeRegistration();
+        this.propertyRegistry.completeRegistration();
         SpongeDataManager.finalizeRegistration();
         this.phase = RegistrationPhase.LOADED;
     }

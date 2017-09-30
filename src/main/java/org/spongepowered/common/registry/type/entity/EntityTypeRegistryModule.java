@@ -27,10 +27,10 @@ package org.spongepowered.common.registry.type.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -39,7 +39,6 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.entity.EntityType;
@@ -58,9 +57,11 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
@@ -68,6 +69,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();
 
     public final Map<Class<? extends Entity>, EntityType> entityClassToTypeMappings = Maps.newHashMap();
+    private final Set<FutureRegistration> customEntities = new HashSet<>();
 
     public static EntityTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -82,6 +84,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     public Optional<EntityType> getById(String id) {
         if (!checkNotNull(id).contains(":")) {
             id = "minecraft:" + id;
+        }
+        if ("unknown:unknown".equalsIgnoreCase(id)) {
+            return Optional.of(SpongeEntityType.UNKNOWN);
         }
         return Optional.ofNullable(this.entityTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
@@ -180,18 +185,22 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "lightning", EntityLightningBolt.class, null));
         this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
         this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
-        this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class, null));
+        this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", MultiPartEntityPart.class, null));
         this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
+
+        this.entityTypeMappings.put("parrot", newEntityTypeFromName("parrot"));
+        this.entityTypeMappings.put("illusion_illager", newEntityTypeFromName("illusion_illager"));
     }
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(new ResourceLocation(mcName));
+        ResourceLocation resourceLoc = new ResourceLocation(mcName);
+        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(resourceLoc);
         if (cls == null) {
             throw new IllegalArgumentException("No class mapping for entity name " + mcName);
         }
         return new SpongeEntityType(SpongeImplHooks.getEntityId(cls), spongeName, cls,
-                new SpongeTranslation("entity." + mcName + ".name"));
+                new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(resourceLoc) + ".name"));
     }
 
     private SpongeEntityType newEntityTypeFromName(String name) {
@@ -199,7 +208,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, String oldName, int entityId, Translation translation) {
-        EntityList.register(entityId, SpongeImpl.ECOSYSTEM_ID + ':' + entityName, entityClass, oldName);
+        this.customEntities.add(new FutureRegistration(entityId, new ResourceLocation(SpongeImpl.ECOSYSTEM_ID, entityName), entityClass, oldName));
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 
@@ -221,7 +230,6 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
 
         RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);
-        RegistryHelper.mapFields(HorseVariants.class, SpongeEntityConstants.HORSE_VARIANTS);
         RegistryHelper.mapFields(HorseStyles.class, SpongeEntityConstants.HORSE_STYLES);
         RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
         RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);
@@ -247,7 +255,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     public EntityType getForClass(Class<? extends Entity> clazz) {
         EntityType type = this.entityClassToTypeMappings.get(clazz);
         if (type == null) {
-            SpongeImpl.getLogger().error(String.format("No entity type is registered for class %s", clazz.getName()));
+            SpongeImpl.getLogger().warn(String.format("No entity type is registered for class %s", clazz.getName()));
 
             type = EntityTypes.UNKNOWN;
             this.entityClassToTypeMappings.put(clazz, type);
@@ -270,6 +278,25 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             }
         }
         return Optional.empty();
+    }
+
+    public Set<FutureRegistration> getCustomEntities() {
+        return ImmutableSet.copyOf(this.customEntities);
+    }
+
+    public static final class FutureRegistration {
+
+        public final int id;
+        public final ResourceLocation name;
+        public final Class<? extends Entity> type;
+        public final String oldName;
+
+        FutureRegistration(int id, ResourceLocation name, Class<? extends Entity> type, String oldName) {
+            this.id = id;
+            this.name = name;
+            this.type = type;
+            this.oldName = oldName;
+        }
     }
 
 }

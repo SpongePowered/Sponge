@@ -24,16 +24,13 @@
  */
 package org.spongepowered.common.network.message;
 
-import io.netty.buffer.ByteBuf;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.Message;
 
-import javax.annotation.Nullable;
-
 public final class MessageTrackerDataResponse implements Message {
 
-    @Nullable public String owner;
-    @Nullable public String notifier;
+    public String owner;
+    public String notifier;
 
     public MessageTrackerDataResponse() {
     }
@@ -45,20 +42,14 @@ public final class MessageTrackerDataResponse implements Message {
 
     @Override
     public void readFrom(ChannelBuf buf) {
-        ByteBuf buffer = (ByteBuf) buf;
-        int ownerLength = buffer.readInt();
-        this.owner = new String(buffer.readBytes(ownerLength).array());
-        int notifierLength = buffer.readInt();
-        this.notifier = new String(buffer.readBytes(notifierLength).array());
+        this.owner = buf.readString();
+        this.notifier = buf.readString();
     }
 
     @Override
     public void writeTo(ChannelBuf buf) {
-        ByteBuf buffer = (ByteBuf) buf;
-        buffer.writeInt(this.owner.length());
-        buffer.writeBytes(this.owner.getBytes());
-        buffer.writeInt(this.notifier.length());
-        buffer.writeBytes(this.notifier.getBytes());
+        buf.writeString(this.owner);
+        buf.writeString(this.notifier);
     }
 
     @Override

@@ -28,7 +28,6 @@ import org.spongepowered.api.command.CommandSource;
 
 public interface IMixinCommandSender {
 
-    String EXECUTE_COMMAND_SENDER = "net/minecraft/command/CommandExecuteAt$1";
     String COMMAND_BLOCK_SENDER = "net/minecraft/tileentity/TileEntityCommandBlock$1";
     String COMMAND_MINECART_SENDER = "net.minecraft.entity.item.EntityMinecartCommandBlock$1";
     String SIGN_CLICK_SENDER = "net/minecraft/tileentity/TileEntitySign$1";

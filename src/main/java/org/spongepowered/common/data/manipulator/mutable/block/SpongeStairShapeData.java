@@ -33,9 +33,7 @@ import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeStairShapeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeStairShapeData extends AbstractSingleCatalogData<StairShape, StairShapeData, ImmutableStairShapeData> implements StairShapeData {
 
     public SpongeStairShapeData(StairShape variant) {

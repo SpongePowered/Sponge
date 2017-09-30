@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
@@ -61,7 +61,7 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .omitNullValues()
                 .add("internalType", this.internalType);

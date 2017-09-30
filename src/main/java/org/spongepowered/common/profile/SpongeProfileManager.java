@@ -36,7 +36,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Collection;
@@ -60,7 +59,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     public void lookupUserAsync(UUID uuid) {
-        this.gameLookupExecutorService.execute(() -> { 
+        this.gameLookupExecutorService.execute(() -> {
             if (SpongeUsernameCache.getLastKnownUsername(uuid) != null) {
                 return;
             }
@@ -133,7 +132,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     private <T> CompletableFuture<T> submitTask(Callable<T> callable) {
-        return SpongeScheduler.getInstance().submitAsyncTask(callable);
+        return SpongeImpl.getScheduler().submitAsyncTask(callable);
     }
 
 }

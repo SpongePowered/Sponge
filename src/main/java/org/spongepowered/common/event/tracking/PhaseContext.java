@@ -28,46 +28,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Multimap;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
 /**
- * Similar to {@link Cause} except it can be built continuously
- * and retains no real side effects. Strictly speaking this object
- * exists to avoid confusion between what is suggested to be a
- * {@link Cause} for an {@link Event} versus the context of which
- * a {@link IPhaseState} is being completed with.
+ * Similar to {@link Cause} except it can be built continuously and retains no
+ * real side effects. Strictly speaking this object exists to avoid confusion
+ * between what is suggested to be a {@link Cause} for an {@link Event} versus
+ * the context of which a {@link IPhaseState} is being completed with.
  */
-public class PhaseContext {
+@SuppressWarnings("unchecked")
+public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    private boolean isCompleted = false;
-    private final ArrayList<NamedCause> contextObjects = new ArrayList<>(10);
-    @Nullable private Cause cause = null;
+    private final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
+    protected boolean isCompleted = false;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;
     @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
@@ -77,26 +72,23 @@ public class PhaseContext {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
-    @Nullable private CaptureBlockSnapshotForTile captureBlockSnapshotForTile;
+    @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
+    @Nullable private CaptureBlockPos captureBlockPos;
     @Nullable protected User owner;
     @Nullable protected User notifier;
+    private boolean processImmediately;
 
     private Object source;
 
-    public static PhaseContext start() {
-        return new PhaseContext();
+    public P source(Object owner) {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.source = owner;
+        return (P) this;
     }
 
-    public PhaseContext add(@Nullable NamedCause namedCause) {
-        if (namedCause == null) {
-            return this;
-        }
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(namedCause);
-        if (namedCause.getName().equals(NamedCause.SOURCE)) {
-            this.source = namedCause.getCauseObject();
-        }
-        return this;
+    public P owner(Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::owner);
+        return (P) this;
     }
 
     public PhaseContext addCause(Cause cause) {
@@ -106,49 +98,56 @@ public class PhaseContext {
         return this;
     }
 
-    public PhaseContext owner(User owner) {
+    public P owner(User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.owner != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
         }
         this.owner = checkNotNull(owner, "Owner cannot be null!");
-        this.contextObjects.add(NamedCause.owner(owner));
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext notifier(User notifier) {
+    public P notifier(Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::notifier);
+        return (P) this;
+    }
+
+    public P notifier(User notifier) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.notifier != null) {
             throw new IllegalStateException("Notifier for this phase context is already set!");
         }
         this.notifier = checkNotNull(notifier, "Notifier cannot be null!");
-        this.contextObjects.add(NamedCause.notifier(notifier));
-        return this;
+        return (P) this;
     }
 
     private void checkBlockSuppliers() {
         checkState(this.blocksSupplier == null, "BlocksSuppler is already set!");
         checkState(this.blockItemEntityDropsSupplier == null, "BlockItemEntityDropsSupplier is already set!");
         checkState(this.blockItemDropsSupplier == null, "BlockItemDropsSupplier is already set!");
+        checkState(this.blockEntitySpawnSupplier == null, "BlockEntitySpawnSupplier is already set!");
+        checkState(this.captureBlockPos == null, "CaptureBlockPos is already set!");
     }
 
-    public PhaseContext addBlockCaptures() {
+    public P addBlockCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
         CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
         BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
         this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
         BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
-        return this;
+        CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
+
+        CaptureBlockPos blockPos = new CaptureBlockPos();
+        this.captureBlockPos = blockPos;
+        return (P) this;
     }
 
-    public PhaseContext addCaptures() {
+    public P addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
@@ -156,140 +155,88 @@ public class PhaseContext {
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
         CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
         BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
         this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
         BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
         CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
-        return this;
+
+        CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
+        return (P) this;
     }
 
-    public PhaseContext addEntityCaptures() {
+    public P addEntityCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
         CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext addEntityDropCaptures() {
+    public P addEntityDropCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.entityItemDropsSupplier == null, "EntityItemDropsSupplier is already set!");
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
 
         EntityItemDropsSupplier entityItemDropsSupplier = new EntityItemDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, entityItemDropsSupplier));
         this.entityItemDropsSupplier = entityItemDropsSupplier;
         EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, entityItemEntityDropsSupplier));
         this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
-        return this;
+        return (P) this;
     }
 
-    public PhaseContext player() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer()));
-        return this;
-    }
+    // TODO to be moved to listener based phase contexts when gabizou gets to restructuring PhaseContexts...
 
-    public PhaseContext player(@Nullable Player player) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer(player)));
-        return this;
-    }
 
-    public PhaseContext explosion() {
-        checkState(!this.isCompleted, "CAnnot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, new CaptureExplosion()));
-        return this;
-    }
-
-    public PhaseContext explosion(@Nullable Explosion explosion) {
-        checkState(!this.isCompleted, "CAnnot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, new CaptureExplosion(explosion)));
-        return this;
-    }
-
-    public CaptureExplosion getCaptureExplosion() {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, CaptureExplosion.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing an Explosion, but we're not capturing them!", this));
-    }
-
-    public Optional<Explosion> getExplosion() {
-        return getCaptureExplosion().getExplosion();
-    }
-
-    public PhaseContext complete() {
+    public P buildAndSwitch() {
         this.isCompleted = true;
-        return this;
+        CauseTracker.getInstance().switchToPhase(this.state, this);
+        return (P) this;
     }
 
     public boolean isComplete() {
         return this.isCompleted;
     }
 
-    @Nullable private Class<?> cachedClass;
-    @Nullable private Object cachedObject;
-    @Nullable private String cachedName;
-
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> first(Class<T> tClass) {
-        if (this.cachedClass != null && this.cachedClass == tClass) {
-            if (this.cachedObject != null) {
-                return Optional.of((T) this.cachedObject);
-            }
-        }
-        for (NamedCause cause : this.contextObjects) {
-            if (tClass.isInstance(cause.getCauseObject())) {
-                Object causeObject = cause.getCauseObject();
-                this.cachedClass = tClass;
-                this.cachedObject = causeObject;
-                this.cachedName = cause.getName();
-                return Optional.of((T) causeObject);
-            }
-        }
-        return Optional.empty();
+    public PrettyPrinter printCustom(PrettyPrinter printer) {
+        printer
+            .add("    - %s: %s", "Owner", this.owner)
+            .add("    - %s: %s", "Notifier", this.notifier)
+            .add("    - %s: %s", "Source", this.source)
+            .add("    - %s: %s", "CapturedBlocks", this.blocksSupplier)
+            .add("    - %s: %s", "BlockItemDrops", this.blockItemDropsSupplier)
+            .add("    - %s: %s", "BlockItemEntityDrops", this.blockItemEntityDropsSupplier)
+            .add("    - %s: %s", "CapturedItems", this.capturedItemsSupplier)
+            .add("    - %s: %s", "CapturedEntities", this.capturedEntitiesSupplier)
+            .add("    - %s: %s", "CapturedItemStack", this.capturedItemStackSupplier)
+            .add("    - %s: %s", "EntityItemDrops", this.entityItemDropsSupplier)
+            .add("    - %s: %s", "EntityItemEntityDrops", this.entityItemEntityDropsSupplier)
+            .add("    - %s: %s", "BlockEntitySpawns", this.blockEntitySpawnSupplier)
+            .add("    - %s: %s", "CapturedBlockPosition", this.captureBlockPos);
+        return printer;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
-        if (name.equals(this.cachedName) && tClass == this.cachedClass) {
-            if (this.cachedObject != null) {
-                return Optional.of((T) this.cachedObject);
-            }
-        }
-        for (NamedCause cause : this.contextObjects) {
-            if (cause.getName().equalsIgnoreCase(name) && tClass.isInstance(cause.getCauseObject())) {
-                this.cachedObject = cause.getCauseObject();
-                this.cachedClass = tClass;
-                this.cachedName = name;
-                return Optional.of((T) cause.getCauseObject());
-            }
-        }
-        return Optional.empty();
+
+    public boolean shouldProcessImmediately() {
+        return this.processImmediately;
+    }
+
+    public void setProcessImmediately(boolean state) {
+        this.processImmediately = state;
     }
 
     @SuppressWarnings("unchecked")
@@ -311,6 +258,11 @@ public class PhaseContext {
         return b.build();
     }
 
+    public <T> T requireSource(Class<T> targetClass) {
+        return getSource(targetClass)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
+    }
+
     public Optional<User> getOwner() {
         return Optional.ofNullable(this.owner);
     }
@@ -319,14 +271,10 @@ public class PhaseContext {
         return Optional.ofNullable(this.notifier);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<Entity> getCapturedEntities() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class)
-                .map(CapturedEntitiesSupplier::get)
-                .orElseThrow(TrackingUtil.throwWithContext("Intended to capture entity spawns!", this));
+        return this.capturedEntitiesSupplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<Entity> getCapturedEntitySupplier() throws IllegalStateException {
         if (this.capturedEntitiesSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity spawns!", this).get();
@@ -334,7 +282,6 @@ public class PhaseContext {
         return this.capturedEntitiesSupplier;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<EntityItem> getCapturedItems() throws IllegalStateException {
         if (this.capturedItemsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
@@ -342,7 +289,6 @@ public class PhaseContext {
         return this.capturedItemsSupplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<EntityItem> getCapturedItemsSupplier() throws IllegalStateException {
         if (this.capturedItemsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
@@ -350,14 +296,10 @@ public class PhaseContext {
         return this.capturedItemsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class)
-                .map(CapturedBlocksSupplier::get)
-                .orElseThrow(TrackingUtil.throwWithContext("Intended to capture block changes, but there is no list available!", this));
+        return this.blocksSupplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<BlockSnapshot> getCapturedBlockSupplier() throws IllegalStateException {
         if (this.blocksSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
@@ -372,7 +314,6 @@ public class PhaseContext {
         return this.blockItemDropsSupplier.get();
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {
         if (this.blockItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing block drops!", this).get();
@@ -380,7 +321,6 @@ public class PhaseContext {
         return this.blockItemDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, EntityItem> getBlockItemDropSupplier() throws IllegalStateException {
         if (this.blockItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to track block item drops!", this).get();
@@ -388,7 +328,6 @@ public class PhaseContext {
         return this.blockItemEntityDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, ItemDropData> getCapturedEntityDropSupplier() throws IllegalStateException {
         if (this.entityItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
@@ -396,7 +335,6 @@ public class PhaseContext {
         return this.entityItemDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
         if (this.entityItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
@@ -404,7 +342,6 @@ public class PhaseContext {
         return this.entityItemEntityDropsSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public CapturedSupplier<ItemDropData> getCapturedItemStackSupplier() throws IllegalStateException {
         if (this.capturedItemStackSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing ItemStack drops from entities!", this).get();
@@ -412,47 +349,41 @@ public class PhaseContext {
         return this.capturedItemStackSupplier;
     }
 
-    public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
-    }
-
-    public Optional<Player> getCapturedPlayer() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
-                .getPlayer();
-    }
-
-    public PhaseContext addTileSnapshotCapture(TileEntity tileEntity, WorldServer worldServer) {
-        this.captureBlockSnapshotForTile = new CaptureBlockSnapshotForTile(tileEntity, worldServer);
-        this.add(NamedCause.of(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, this.captureBlockSnapshotForTile));
-        return this;
-    }
-
-    public CaptureBlockSnapshotForTile getTileSnapshot() throws IllegalStateException {
-        if (this.captureBlockSnapshotForTile == null) {
-            final CaptureBlockSnapshotForTile
-                    capture =
-                    this.firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, CaptureBlockSnapshotForTile.class)
-                            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a TileEntity's block snapshot!", this));
-            this.captureBlockSnapshotForTile = capture;
-            return capture;
+    public CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> getBlockEntitySpawnSupplier() throws IllegalStateException {
+        if (this.blockEntitySpawnSupplier == null) {
+            throw TrackingUtil.throwWithContext("Intended to track block entity spawns!", this).get();
         }
-        return this.captureBlockSnapshotForTile;
+        return this.blockEntitySpawnSupplier;
     }
 
-    public void forEach(Consumer<NamedCause> consumer) {
-        this.contextObjects.forEach(consumer);
+    public CaptureBlockPos getCaptureBlockPos() throws IllegalStateException {
+        if (this.captureBlockPos == null) {
+            throw TrackingUtil.throwWithContext("Intended to capture a block position!", this).get();
+        }
+        return this.captureBlockPos;
     }
 
-    PhaseContext() {
+    public Optional<BlockPos> getBlockPosition() {
+        return getCaptureBlockPos()
+                .getPos();
+    }
+
+    public void addNotifierAndOwnerToCauseStack() {
+        if (this.owner != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, this.owner);
+        }
+        if (this.notifier != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, this.notifier);
+        }
+    }
+
+    protected PhaseContext(IPhaseState<? extends P> state) {
+        this.state = state;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.isCompleted, this.contextObjects, this.cause);
+        return Objects.hash(this.isCompleted);
     }
 
     @Override
@@ -463,19 +394,38 @@ public class PhaseContext {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final PhaseContext other = (PhaseContext) obj;
-        return Objects.equals(this.isCompleted, other.isCompleted)
-               && Objects.equals(this.contextObjects, other.contextObjects)
-               && Objects.equals(this.cause, other.cause);
+        final PhaseContext<?> other = (PhaseContext<?>) obj;
+        return Objects.equals(this.isCompleted, other.isCompleted);
     }
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
+        return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("isCompleted", this.isCompleted)
-                .add("contextObjects", this.contextObjects)
-                .add("cause", this.cause)
                 .toString();
+    }
+
+    public P markEmpty() {
+        this.isCompleted = true;
+        return (P) this;
+    }
+
+    @Override
+    public void close() { // Should never throw an exception
+        CauseTracker.getInstance().completePhase(this.state);
+    }
+
+
+    public List<BlockSnapshot> getCapturedBlocksOrEmptyList() {
+        return this.blocksSupplier != null ? this.blocksSupplier.orEmptyList() : Collections.emptyList();
+    }
+
+    public List<Entity> getCapturedEntitiesOrEmptyList() {
+        return this.capturedEntitiesSupplier != null ? this.capturedEntitiesSupplier.orEmptyList() : Collections.emptyList();
+    }
+
+    public List<EntityItem> getCapturedItemsOrEmptyList() {
+        return this.capturedItemsSupplier != null ? this.capturedItemsSupplier.orEmptyList() : Collections.emptyList();
     }
 
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {
@@ -522,69 +472,55 @@ public class PhaseContext {
     }
 
     static final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
+
         BlockItemEntityDropsSupplier() {
         }
     }
 
-    public static final class CapturePlayer {
+    static final class CapturedBlockEntitySpawnSupplier extends CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> {
 
-        @Nullable private Player player;
-
-        CapturePlayer() {
-
-        }
-
-        CapturePlayer(@Nullable Player player) {
-            this.player = player;
-        }
-
-        public Optional<Player> getPlayer() {
-            return Optional.ofNullable(this.player);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CapturePlayer that = (CapturePlayer) o;
-            return com.google.common.base.Objects.equal(this.player, that.player);
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.player);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
-                    .add("player", this.player)
-                    .toString();
-        }
-
-        public void addPlayer(EntityPlayerMP playerMP) {
-            this.player = ((Player) playerMP);
+        CapturedBlockEntitySpawnSupplier() {
         }
     }
 
-    public static final class CaptureExplosion {
+    public static final class CaptureBlockPos {
 
-        @Nullable private Explosion explosion;
+        @Nullable private BlockPos pos;
+        @Nullable private WeakReference<IMixinWorldServer> mixinWorldReference;
 
-        CaptureExplosion() {
-
+        public CaptureBlockPos() {
         }
 
-        CaptureExplosion(@Nullable Explosion explosion) {
-            this.explosion = explosion;
+        public CaptureBlockPos(@Nullable BlockPos pos) {
+            this.pos = pos;
         }
 
-        public Optional<Explosion> getExplosion() {
-            return Optional.ofNullable(this.explosion);
+        public Optional<BlockPos> getPos() {
+            return Optional.ofNullable(this.pos);
+        }
+
+        public void setPos(@Nullable BlockPos pos) {
+            this.pos = pos;
+        }
+
+        public void setWorld(@Nullable IMixinWorldServer world) {
+            if (world == null) {
+                this.mixinWorldReference = null;
+            } else {
+                this.mixinWorldReference = new WeakReference<>(world);
+            }
+        }
+
+        public void setWorld(@Nullable WorldServer world) {
+            if (world == null) {
+                this.mixinWorldReference = null;
+            } else {
+                this.mixinWorldReference = new WeakReference<>((IMixinWorldServer) world);
+            }
+        }
+
+        public Optional<IMixinWorldServer> getMixinWorld() {
+            return this.mixinWorldReference == null ? Optional.empty() : Optional.ofNullable(this.mixinWorldReference.get());
         }
 
         @Override
@@ -595,116 +531,13 @@ public class PhaseContext {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            CaptureExplosion that = (CaptureExplosion) o;
-            return com.google.common.base.Objects.equal(this.explosion, that.explosion);
+            CaptureBlockPos that = (CaptureBlockPos) o;
+            return com.google.common.base.Objects.equal(this.pos, that.pos);
         }
 
         @Override
         public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.explosion);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
-                    .add("explosion", this.explosion)
-                    .toString();
-        }
-
-        public void addExplosion(Explosion explosion) {
-            this.explosion = explosion;
-        }
-    }
-
-    public static final class CaptureFlag {
-
-        @Nullable private BlockChangeFlag flag;
-
-        public CaptureFlag() {
-
-        }
-
-        public CaptureFlag(@Nullable BlockChangeFlag flag) {
-
-        }
-
-        public Optional<BlockChangeFlag> getFlag() {
-            return Optional.ofNullable(this.flag);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CaptureFlag that = (CaptureFlag) o;
-            return this.flag == that.flag;
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.flag);
-        }
-
-        public void addFlag(BlockChangeFlag flag) {
-            this.flag = flag;
-        }
-    }
-
-    public static final class CaptureBlockSnapshotForTile {
-
-        @Nullable private BlockSnapshot snapshot;
-        private IBlockState tileState;
-        private BlockPos tilePosition;
-        private TileEntity owningEntity;
-        private WorldServer worldServer;
-
-        public CaptureBlockSnapshotForTile(TileEntity tileEntity, WorldServer worldServer) {
-            this.owningEntity = tileEntity;
-            this.worldServer = worldServer;
-            this.tilePosition = tileEntity.getPos();
-            this.tileState = worldServer.getBlockState(tileEntity.getPos());
-        }
-
-        public BlockSnapshot getSnapshot() {
-            if (this.snapshot == null) {
-                this.snapshot = ((IMixinWorldServer) this.worldServer).createSpongeBlockSnapshot(this.tileState, this.tileState, this.tilePosition, 0);
-            }
-            return this.snapshot;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CaptureBlockSnapshotForTile that = (CaptureBlockSnapshotForTile) o;
-            return com.google.common.base.Objects.equal(this.snapshot, that.snapshot) &&
-                   com.google.common.base.Objects.equal(this.tileState, that.tileState) &&
-                   com.google.common.base.Objects.equal(this.tilePosition, that.tilePosition) &&
-                   com.google.common.base.Objects.equal(this.owningEntity, that.owningEntity) &&
-                   com.google.common.base.Objects.equal(this.worldServer, that.worldServer);
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.snapshot, this.tileState, this.tilePosition, this.owningEntity, this.worldServer);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
-                    .add("tileState", this.tileState)
-                    .add("tilePosition", this.tilePosition)
-                    .add("owningEntity", this.owningEntity)
-                    .add("worldServer", this.worldServer)
-                    .toString();
+            return com.google.common.base.Objects.hashCode(this.pos);
         }
     }
 }

@@ -33,6 +33,7 @@ import org.spongepowered.common.config.category.EntityCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.config.category.GeneralCategory;
 import org.spongepowered.common.config.category.LoggingCategory;
+import org.spongepowered.common.config.category.SpawnerCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.config.category.TimingsCategory;
 import org.spongepowered.common.config.category.WorldCategory;
@@ -55,6 +56,9 @@ public abstract class ConfigBase {
     private GeneralCategory general = new GeneralCategory();
     @Setting
     private LoggingCategory logging = new LoggingCategory();
+    @Setting(value = "spawner", comment = "Used to control spawn limits around players.\n"
+            + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
+    private SpawnerCategory spawner = new SpawnerCategory();
     @Setting
     protected WorldCategory world = new WorldCategory();
     @Setting(value = "tileentity-activation")
@@ -99,6 +103,10 @@ public abstract class ConfigBase {
 
     public LoggingCategory getLogging() {
         return this.logging;
+    }
+
+    public SpawnerCategory getSpawner() {
+        return this.spawner;
     }
 
     public WorldCategory getWorld() {

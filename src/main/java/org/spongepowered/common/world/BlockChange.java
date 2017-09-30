@@ -31,7 +31,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.config.category.LoggingCategory;
 
 import javax.annotation.Nullable;
@@ -40,14 +39,14 @@ public enum BlockChange {
 
     BREAK("BreakEvent") {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventBreak(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("BreakEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("BreakEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -57,20 +56,20 @@ public enum BlockChange {
     DECAY() {
         @Nullable
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventDecay(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventDecay(cause, transactions);
         }
     },
     MODIFY("ModifyEvent") {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventModify(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("ModifyEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("ModifyEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -79,14 +78,14 @@ public enum BlockChange {
     },
     PLACE("PlaceEvent") {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventPlace(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("PlaceEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("PlaceEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -127,11 +126,8 @@ public enum BlockChange {
     }
 
     @Nullable
-    public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+    public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
         return null;
     }
 
-    public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-
-    }
 }

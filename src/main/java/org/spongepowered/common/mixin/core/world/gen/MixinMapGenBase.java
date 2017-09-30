@@ -38,6 +38,8 @@ import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 @Mixin(MapGenBase.class)
 public abstract class MixinMapGenBase implements GenerationPopulator {
 
+    @Shadow public net.minecraft.world.World world;
+
     @Shadow public abstract void generate(net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
 
     @Override

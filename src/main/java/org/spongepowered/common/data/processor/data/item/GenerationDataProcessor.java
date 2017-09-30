@@ -38,7 +38,7 @@ import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProc
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
@@ -77,7 +77,7 @@ public final class GenerationDataProcessor
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return ImmutableSpongeBoundedValue.cachedOf(Keys.GENERATION, 0, value);
+        return ImmutableSpongeValue.cachedOf(Keys.GENERATION, 0, value);
     }
 
     @Override

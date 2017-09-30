@@ -28,14 +28,12 @@ import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketDisconnect;
 import net.minecraft.network.play.server.SPacketEntityEffect;
@@ -67,20 +65,16 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
-import net.minecraft.world.demo.DemoWorldManager;
+import net.minecraft.server.management.DemoPlayerInteractionManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -93,7 +87,6 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -111,23 +104,20 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.PlayerPhase;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayer;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
 import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -150,15 +140,14 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     private static final String
             SERVER_SEND_PACKET_TO_ALL_PLAYERS =
             "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
-    @Shadow @Final private static Logger LOG;
+    @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
-    @Shadow private IPlayerFileData playerNBTManagerObj;
+    @Shadow private IPlayerFileData playerDataManager;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
-    @Shadow public abstract void sendMessage(ITextComponent component);
     @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
     @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, @Nullable WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
@@ -223,11 +212,11 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         try {
-            LOG.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
+            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
             netManager.sendPacket(new SPacketDisconnect(reason));
             netManager.closeChannel(reason);
         } catch (Exception exception) {
-            LOG.error("Error whilst disconnecting player", exception);
+            LOGGER.error("Error whilst disconnecting player", exception);
         }
     }
 
@@ -246,7 +235,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge end
 
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = this.mcServer.worldServerForDimension(playerIn.dimension);
+        WorldServer worldServer = this.mcServer.getWorld(playerIn.dimension);
         int actualDimensionId = ((IMixinWorldServer) worldServer).getDimensionId();
         BlockPos spawnPos = null;
         // Join data
@@ -278,8 +267,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         Player player = (Player) playerIn;
         Transform<World> fromTransform = player.getTransform().setExtent((World) worldServer);
 
+        Sponge.getCauseStackManager().pushCause(player);
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
-                Cause.of(NamedCause.source(player)), fromTransform, fromTransform, (RemoteConnection) netManager,
+                Sponge.getCauseStackManager().getCurrentCause(), fromTransform, fromTransform, (RemoteConnection) netManager,
                 new MessageEvent.MessageFormatter(disconnectMessage), (org.spongepowered.api.profile.GameProfile) gameprofile, player, false
         );
 
@@ -288,9 +278,11 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         if (SpongeImpl.postEvent(loginEvent)) {
+            Sponge.getCauseStackManager().popCause();
             disconnectClient(netManager, loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage()), gameprofile);
             return;
         }
+        Sponge.getCauseStackManager().popCause();
 
         // Sponge end
 
@@ -344,14 +336,14 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         this.updatePermissionLevel(playerIn);
         playerIn.getStatFile().markAllDirty();
-        playerIn.getStatFile().sendAchievements(playerIn);
+        playerIn.getRecipeBook().init(playerIn);
         this.mcServer.refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);
         this.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        LOG.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
+        LOGGER.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
                 + worldServer.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) worldServer).getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         // Sponge end
@@ -399,7 +391,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                     }
 
                     if (!playerIn.isRiding()) {
-                        LOG.warn("Couldn\'t reattach entity to player");
+                        LOGGER.warn("Couldn\'t reattach entity to player");
                         worldServer.removeEntityDangerously(entity2);
 
                         for (Entity entity3 : entity2.getRecursivePassengers()) {
@@ -434,11 +426,13 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Fire PlayerJoinEvent
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         MessageChannel originalChannel = player.getMessageChannel();
+        Sponge.getCauseStackManager().pushCause(player);
         final ClientConnectionEvent.Join event = SpongeEventFactory.createClientConnectionEventJoin(
-                Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel),
+                Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel),
                 new MessageEvent.MessageFormatter(originalMessage), player, false
         );
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
         // Send to the channel
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
@@ -480,7 +474,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
-        WorldServer worldServer = this.mcServer.worldServerForDimension(targetDimension);
+        WorldServer worldServer = this.mcServer.getWorld(targetDimension);
         targetDimension = ((IMixinWorldServer) worldServer).getDimensionId();
         Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
@@ -490,7 +484,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
             MoveEntityEvent.Teleport teleportEvent = EntityUtil.handleDisplaceEntityTeleportEvent(playerIn, location);
             if (teleportEvent.isCancelled()) {
-                playerIn.playerConqueredTheEnd = false;
+                playerIn.queuedEndExit = false;
                 return playerIn;
             }
 
@@ -511,21 +505,21 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.getServerWorld().getEntityTracker().untrack(playerIn);
         playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
-        this.mcServer.worldServerForDimension(playerIn.dimension).removeEntityDangerously(playerIn);
+        this.mcServer.getWorld(playerIn.dimension).removeEntityDangerously(playerIn);
 
         // ### PHASE 3 ### Reset player (if applicable)
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
         PlayerInteractionManager playerinteractionmanager;
 
         if (this.mcServer.isDemo()) {
-            playerinteractionmanager = new DemoWorldManager(this.mcServer.worldServerForDimension(targetDimension));
+            playerinteractionmanager = new DemoPlayerInteractionManager(this.mcServer.getWorld(targetDimension));
         } else {
-            playerinteractionmanager = new PlayerInteractionManager(this.mcServer.worldServerForDimension(targetDimension));
+            playerinteractionmanager = new PlayerInteractionManager(this.mcServer.getWorld(targetDimension));
         }
 
         EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
         newPlayer.connection = playerIn.connection;
-        newPlayer.clonePlayer(playerIn, conqueredEnd);
+        newPlayer.copyFrom(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
         newPlayer.setEntityId(playerIn.getEntityId());
@@ -548,11 +542,13 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         toTransform = toTransform.setLocation(location);
 
         // ### PHASE 4 ### Fire event and set new location on the player
-        final RespawnPlayerEvent event = SpongeEventFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(newPlayer)), fromTransform,
+        Sponge.getCauseStackManager().pushCause(newPlayer);
+        final RespawnPlayerEvent event = SpongeEventFactory.createRespawnPlayerEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform,
                 toTransform, (Player) playerIn, (Player) newPlayer, EntityUtil.tempIsBedSpawn, !conqueredEnd);
         EntityUtil.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
-        ((IMixinEntity) (Object) player).setLocationAndAngles(event.getToTransform());
+        Sponge.getCauseStackManager().popCause();
+        ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
         toTransform = event.getToTransform();
         location = toTransform.getLocation();
 
@@ -598,11 +594,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.updatePermissionLevel(newPlayer);
         worldServer.getPlayerChunkMap().addPlayer(newPlayer);
         org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) newPlayer;
-        SpawnCause spawnCause = EntitySpawnCause.builder()
-                .entity(spongeEntity)
-                .type(SpawnTypes.PLACEMENT)
-                .build();
-        ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity, Cause.of(NamedCause.source(spawnCause)));
+        ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
         this.playerEntityList.add(newPlayer);
         this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
         newPlayer.addSelfToInternalCraftingInventory();
@@ -614,6 +606,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         for (PotionEffect potioneffect : newPlayer.getActivePotionEffects()) {
             newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
+        ((IMixinEntityPlayerMP) newPlayer).refreshScaledHealth();
 
         return newPlayer;
     }
@@ -635,52 +628,13 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             return;
         }
 
-        WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
-        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
-        toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
-        // Support vanilla clients teleporting to custom dimensions
-        final int dimensionId = playerIn.dimension;
-
-        // Send dimension registration
-        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
-        } else {
-            // Force vanilla client to refresh its chunk cache if same dimension type
-            if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
-                playerIn.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
-            }
-        }
-        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
-        fromWorld.removeEntityDangerously(playerIn);
-        playerIn.isDead = false;
-        // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
-        ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
-        playerIn.setWorld(toWorld);
-        toWorld.spawnEntity(playerIn);
-        toWorld.updateEntityWithOptionalForce(playerIn, false);
-        this.preparePlayer(playerIn, fromWorld);
-        playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
-        playerIn.interactionManager.setWorld(toWorld);
-        this.updateTimeAndWeatherForPlayer(playerIn, toWorld);
-        this.syncPlayerInventory(playerIn);
-
-        // Update reducedDebugInfo game rule
-        playerIn.connection.sendPacket(new SPacketEntityStatus(playerIn,
-                toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
-
-        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-            playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
-        }
-        ((IMixinEntityPlayerMP) playerIn).refreshXpHealthAndFood();
-
-        SpongeImplHooks.handlePostChangeDimensionEvent(playerIn, fromWorld, toWorld);
+        EntityUtil.transferPlayerToDimension(event, playerIn);
     }
 
     // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
     @Override
     public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        oldWorldIn.theProfiler.startSection("moving");
+        oldWorldIn.profiler.startSection("moving");
         WorldProvider pOld = oldWorldIn.provider;
         WorldProvider pNew = toWorldIn.provider;
         double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
@@ -703,28 +657,28 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 blockpos = toWorldIn.getSpawnCoordinate();
             }
 
-            x = (double)blockpos.getX();
-            y = (double)blockpos.getY();
-            z = (double)blockpos.getZ();
+            x = blockpos.getX();
+            y = blockpos.getY();
+            z = blockpos.getZ();
             entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
-            oldWorldIn.theProfiler.startSection("placing");
-            x = (double)MathHelper.clamp((int)x, -29999872, 29999872);
-            z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
+            oldWorldIn.profiler.startSection("placing");
+            x = MathHelper.clamp((int)x, -29999872, 29999872);
+            z = MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entityIn.isEntityAlive()) {
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
             }
-            oldWorldIn.theProfiler.endSection();
+            oldWorldIn.profiler.endSection();
         }
 
         if (entityIn.isEntityAlive()) {
             oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
         }
 
-        oldWorldIn.theProfiler.endSection();
+        oldWorldIn.profiler.endSection();
     }
 
     /**
@@ -774,8 +728,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
     private void onSetPlayerManager(WorldServer[] worlds, CallbackInfo callbackInfo) {
-        if (this.playerNBTManagerObj == null) {
-            this.playerNBTManagerObj = worlds[0].getSaveHandler().getPlayerNBTManager();
+        if (this.playerDataManager == null) {
+            this.playerDataManager = worlds[0].getSaveHandler().getPlayerNBTManager();
             // This is already added in our world constructor
             //worlds[0].getWorldBorder().addListener(new PlayerBorderListener(0));
         }
@@ -810,14 +764,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))
     private void onPlayerRemoveFromWorldFromDisconnect(WorldServer world, Entity player, EntityPlayerMP playerMP) {
-        final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
-        causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PhaseContext.start()
-                .add(NamedCause.source(playerMP))
-                .addCaptures()
-                .complete()
-        );
-        world.removeEntity(player);
-        causeTracker.completePhase();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT.createPhaseContext().source(playerMP).addCaptures().buildAndSwitch()) {
+            world.removeEntity(player);
+        }
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))
@@ -843,7 +793,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         // Spawn player into level
-        WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
+        WorldServer level = this.mcServer.getWorld(player.dimension);
         // TODO direct this appropriately
         level.spawnEntity(player);
         this.preparePlayer(player, null);
@@ -868,7 +818,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     @Redirect(method = "updatePermissionLevel", at = @At(value = "INVOKE",
-            target = "net/minecraft/world/WorldServer.getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
+            target = "Lnet/minecraft/world/WorldServer;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
     private WorldInfo onGetWorldInfo(WorldServer overworld, EntityPlayerMP player) {
         // TODO: This applies only to singleplayer, on the server canSendCommands is called with the game profile
         // We can't get the world from the game profile
@@ -876,4 +826,19 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Check the world info of the current world instead of overworld world info
         return player.world.getWorldInfo();
     }
+
+    /**
+     * @author simon816 - 14th November, 2016
+     *
+     * @reason Redirect chat broadcasts to fire an event for the message. Each receiver
+     * (typically a player) will handle the actual sending of the message.
+     *
+     * @param component The message
+     * @param isSystem Whether this is a system message
+     */
+    @Overwrite
+    public void sendMessage(ITextComponent component, boolean isSystem) {
+        ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.mcServer, !isSystem);
+    }
+
 }

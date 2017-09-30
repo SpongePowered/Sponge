@@ -31,7 +31,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -40,7 +39,6 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -136,17 +134,7 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
-    public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value, Cause cause) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function, Cause cause) {
         return DataTransactionResult.failNoData();
     }
 
@@ -182,7 +170,7 @@ public class SpongeFluidStack implements FluidStack {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer()
+        DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(DataQueries.FLUID_TYPE, this.fluidType.getId())
             .set(DataQueries.FLUID_VOLUME, this.volume);

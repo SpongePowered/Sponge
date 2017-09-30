@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.entity.living.human;
 
+import static net.minecraft.entity.player.EntityPlayer.ABSORPTION;
+import static net.minecraft.entity.player.EntityPlayer.MAIN_HAND;
+import static net.minecraft.entity.player.EntityPlayer.PLAYER_MODEL_FLAG;
+import static net.minecraft.entity.player.EntityPlayer.PLAYER_SCORE;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -36,7 +41,6 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.init.Enchantments;
@@ -99,7 +103,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     private GameProfile fakeProfile;
     @Nullable private UUID skinUuid;
-    private boolean aiDisabled = false;
+    private boolean aiDisabled = false, leftHanded = false;
 
     public EntityHuman(World worldIn) {
         super(worldIn);
@@ -116,20 +120,22 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(EntityLivingBase.HAND_STATES, Byte.valueOf((byte)0));
-        this.dataManager.register(EntityLivingBase.POTION_EFFECTS, Integer.valueOf(0));
-        this.dataManager.register(EntityLivingBase.HIDE_PARTICLES, Boolean.valueOf(false));
-        this.dataManager.register(EntityLivingBase.ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
-        this.dataManager.register(EntityLivingBase.HEALTH, Float.valueOf(1.0F));
-        this.dataManager.register(EntityPlayer.ABSORPTION, 0.0F);
-        this.dataManager.register(EntityPlayer.PLAYER_SCORE, 0);
-        this.dataManager.register(EntityPlayer.MAIN_HAND, (byte) 1);
-        this.dataManager.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
+        // EntityLivingBase
+        this.dataManager.register(HAND_STATES, Byte.valueOf((byte)0));
+        this.dataManager.register(POTION_EFFECTS, Integer.valueOf(0));
+        this.dataManager.register(HIDE_PARTICLES, Boolean.valueOf(false));
+        this.dataManager.register(ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
+        this.dataManager.register(HEALTH, Float.valueOf(1.0F));
+        // EntityPlayer
+        this.dataManager.register(ABSORPTION, Float.valueOf(0.0F));
+        this.dataManager.register(PLAYER_SCORE, Integer.valueOf(0));
+        this.dataManager.register(PLAYER_MODEL_FLAG, Byte.valueOf((byte)0));
+        this.dataManager.register(MAIN_HAND, Byte.valueOf((byte)1));
     }
 
     @Override
     public boolean isLeftHanded() {
-        return this.dataManager.get(EntityPlayer.MAIN_HAND) == 0;
+        return this.leftHanded;
     }
 
     @Override
@@ -190,6 +196,16 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
+    public void setNoAI(boolean disable) {
+        this.aiDisabled = disable;
+    }
+
+    @Override
+    public void setLeftHanded(boolean leftHanded) {
+        this.leftHanded = leftHanded;
+    }
+
+    @Override
     public int getMaxInPortalTime() {
         return 80;
     }
@@ -216,15 +232,15 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         this.setPosition(this.posX, this.posY, this.posZ);
         this.motionY = 0.1D;
         if (cause != null) {
-            this.motionX = (double) (-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F);
-            this.motionZ = (double) (-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F);
+            this.motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
+            this.motionZ = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
         } else {
             this.motionX = this.motionZ = 0.0D;
         }
     }
 
     @Override
-    protected SoundEvent getHurtSound() {
+    protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.ENTITY_PLAYER_HURT;
     }
 
@@ -254,7 +270,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataManager().get(EntityPlayer.ABSORPTION);
+        return this.getDataManager().get(ABSORPTION);
     }
 
     @Override
@@ -262,7 +278,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataManager().set(EntityPlayer.ABSORPTION, amount);
+        this.getDataManager().set(ABSORPTION, amount);
     }
 
     @Override
@@ -289,8 +305,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
         if (flag) {
             if (i > 0) {
-                entityIn.addVelocity((double) (-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * (float) i * 0.5F), 0.1D,
-                        (double) (MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * (float) i * 0.5F));
+                entityIn.addVelocity(-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
+                        MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
                 this.motionX *= 0.6D;
                 this.motionZ *= 0.6D;
             }
@@ -488,17 +504,17 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         // TODO Figure out how to API this out
         final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
         double d0 = target.posX - this.posX;
-        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - entitytippedarrow.posY;
+        double d1 = target.getEntityBoundingBox().minY + target.height / 3.0F - entitytippedarrow.posY;
         double d2 = target.posZ - this.posZ;
-        double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
-        entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
+        double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
+        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getDifficultyId() * 4);
         // These names are wrong
         int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
         int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
-        entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
+        entitytippedarrow.setDamage(p_82196_2_ * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getDifficultyId() * 0.11F);
 
         if (i > 0) {
-            entitytippedarrow.setDamage(entitytippedarrow.getDamage() + (double)i * 0.5D + 0.5D);
+            entitytippedarrow.setDamage(entitytippedarrow.getDamage() + i * 0.5D + 0.5D);
         }
 
         if (j > 0) {
@@ -513,5 +529,10 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
         this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.world.spawnEntity(entitytippedarrow);
+    }
+
+    @Override
+    public void setSwingingArms(boolean var1) {
+        // TODO 1.12-pre2 Can we support this
     }
 }

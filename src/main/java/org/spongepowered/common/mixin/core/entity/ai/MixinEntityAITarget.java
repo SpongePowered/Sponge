@@ -64,39 +64,4 @@ public abstract class MixinEntityAITarget<A extends TargetAITask<A>> extends Mix
         return (A) this;
     }
 
-    @Override
-    public int getSearchStatus() {
-        return this.targetSearchStatus;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public A setSearchStatus(int status) {
-        this.targetSearchStatus = status;
-        return (A) this;
-    }
-
-    @Override
-    public int getSearchDelay() {
-        return this.targetSearchDelay;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public A setSearchDelay(int delay) {
-        this.targetSearchDelay = delay;
-        return (A) this;
-    }
-
-    @Override
-    public int getInterruptIfTargetUnseenTicks() {
-        return this.targetUnseenTicks;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public A setInterruptIfTargetUnseenTicks(int ticks) {
-        this.targetUnseenTicks = ticks;
-        return (A) this;
-    }
 }

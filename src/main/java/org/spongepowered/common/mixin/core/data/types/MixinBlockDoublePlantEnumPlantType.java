@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.block.BlockDoublePlant;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -35,28 +34,30 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockDoublePlant.EnumPlantType.class)
-@Implements(@Interface(iface = DoublePlantType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = DoublePlantType.class, prefix = "plant$"))
 public abstract class MixinBlockDoublePlantEnumPlantType implements DoublePlantType {
 
-    @Shadow @Final private String name;
-    @Shadow @Final private String unlocalizedName;
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract String shadow$getUnlocalizedName();
 
-    private Translation translation;
+    @Nullable private Translation translation;
 
-    public String shadow$getId() {
-        return this.name;
+    public String plant$getId() {
+        return "minecraft:" + this.shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return this.name;
+    public String plant$getName() {
+        return this.shadow$getUnlocalizedName();
     }
 
-    public Translation shadow$getTranslation() {
+    public Translation plant$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.doublePlant." + this.unlocalizedName + ".name");
+            this.translation = new SpongeTranslation("tile.doublePlant." + this.shadow$getUnlocalizedName() + ".name");
         }
         return this.translation;
     }

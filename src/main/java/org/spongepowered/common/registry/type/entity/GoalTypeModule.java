@@ -78,8 +78,15 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
 
     @Override
     public void registerDefaults() {
-        createGoalType(SpongeImpl.getMinecraftPlugin(), "normal", "Normal");
-        createGoalType(SpongeImpl.getMinecraftPlugin(), "target", "Target");
+        createGoalType("minecraft:normal", "Normal");
+        createGoalType("minecraft:target", "Target");
+    }
+
+    private GoalType createGoalType(String combinedId, String name) {
+        @SuppressWarnings("unchecked")
+        final SpongeGoalType newType = new SpongeGoalType(combinedId, name, (Class<Goal<?>>) (Class<?>) EntityAITasks.class);
+        this.goalTypes.put(combinedId, newType);
+        return newType;
     }
 
     public GoalType createGoalType(Object plugin, String id, String name) {
@@ -88,10 +95,7 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         final PluginContainer pluginContainer = optPluginContainer.get();
         final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ":" + id;
 
-        @SuppressWarnings("unchecked")
-        final SpongeGoalType newType = new SpongeGoalType(combinedId, name, (Class<Goal<?>>) (Class<?>) EntityAITasks.class);
-        this.goalTypes.put(combinedId, newType);
-        return newType;
+        return createGoalType(combinedId, name);
     }
 
     GoalTypeModule() {

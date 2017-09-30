@@ -28,10 +28,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
-import org.spongepowered.common.data.util.ComparatorUtil;
 
 public class ImmutableSpongeCooldownData extends AbstractImmutableIntData<ImmutableCooldownData, CooldownData>
         implements ImmutableCooldownData {

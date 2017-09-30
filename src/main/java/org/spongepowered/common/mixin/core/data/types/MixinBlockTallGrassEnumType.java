@@ -36,15 +36,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockTallGrass.EnumType.class)
-@Implements(@Interface(iface = ShrubType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = ShrubType.class, prefix = "shrub$"))
 public abstract class MixinBlockTallGrassEnumType implements ShrubType {
 
     @Shadow @Final private String name;
 
     private Translation translation;
 
-    public String shadow$getId() {
-        return this.name;
+    public String shrub$getId() {
+        return "minecraft:" + this.name;
     }
 
     @Intrinsic
@@ -65,7 +65,7 @@ public abstract class MixinBlockTallGrassEnumType implements ShrubType {
         }
     }
 
-    public Translation shadow$getTranslation() {
+    public Translation shrub$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = resolveTranslation();

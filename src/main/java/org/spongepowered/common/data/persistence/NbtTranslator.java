@@ -47,7 +47,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -167,12 +166,8 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     private static DataContainer getViewFromCompound(NBTTagCompound compound) {
         checkNotNull(compound);
-        DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
-        for (String key : compound.getKeySet()) {
-            NBTBase base = compound.getTag(key);
-            byte type = base.getId();
-            setInternal(base, type, container, key); // gotta love recursion
-        }
+        DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        NbtTranslator.getInstance().addTo(compound, container);
         return container;
     }
 
@@ -305,6 +300,16 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     @Override
     public DataContainer translate(NBTTagCompound obj) throws InvalidDataException {
         return getViewFromCompound(obj);
+    }
+
+    @Override
+    public DataView addTo(NBTTagCompound compound, DataView container) {
+        for (String key : compound.getKeySet()) {
+            NBTBase base = compound.getTag(key);
+            byte type = base.getId();
+            setInternal(base, type, container, key); // gotta love recursion
+        }
+        return container;
     }
 
     @Override

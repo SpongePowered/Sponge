@@ -45,11 +45,12 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.gen.ChunkProviderOverworld;
-import net.minecraft.world.gen.MapGenBase;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.structure.MapGenEndCity;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
+import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -57,9 +58,8 @@ import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -73,9 +73,9 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -98,7 +98,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
- * Similar class to {@link ChunkProviderOverworld}, but instead gets its blocks
+ * Similar class to {@link ChunkGeneratorOverworld}, but instead gets its blocks
  * from a custom chunk generator.
  */
 public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
@@ -235,7 +235,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public Chunk provideChunk(int chunkX, int chunkZ) {
+    public Chunk generateChunk(int chunkX, int chunkZ) {
         this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
         this.cachedBiomes.reuse(new Vector3i(chunkX * 16, 0, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
@@ -293,8 +293,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         IMixinWorldServer world = (IMixinWorldServer) this.world;
         world.getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
-        final CauseTracker causeTracker = world.getCauseTracker();
-        final Cause populateCause = Cause.of(NamedCause.source(this));
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -332,7 +331,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             populators.add(snowPopulator);
         }
 
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(populateCause, populators, chunk));
+        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(Sponge.getCauseStackManager().getCurrentCause(), populators, chunk));
         List<String> flags = Lists.newArrayList();
         Vector3i min = new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
         org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) this.world;
@@ -342,35 +341,34 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             if (type == null) {
                 System.err.printf("Found a populator with a null type: %s populator%n", populator);
             }
-            if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
+            if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(Sponge.getCauseStackManager().getCurrentCause(), populator, chunk))) {
                 continue;
             }
-            Timing timing = null;
-            if (Timings.isTimingsEnabled()) {
-                timing = this.populatorTimings.get(populator.getType().getId());
-                if (timing == null) {
-                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
-                                                                                                      // this.chunkGeneratorTiming);
-                    this.populatorTimings.put(populator.getType().getId(), timing);
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                Timing timing = null;
+                if (Timings.isTimingsEnabled()) {
+                    timing = this.populatorTimings.get(populator.getType().getId());
+                    if (timing == null) {
+                        timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
+                                                                                                          // this.chunkGeneratorTiming);
+                        this.populatorTimings.put(populator.getType().getId(), timing);
+                    }
+                    timing.startTimingIfSync();
                 }
-                timing.startTimingIfSync();
-            }
-            if (CauseTracker.ENABLED) {
-                causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                        .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
-                        .addEntityCaptures()
-                        .complete());
-            }
-            if (populator instanceof IFlaggedPopulator) {
-                ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
-            } else {
-                populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
-            }
-            if (Timings.isTimingsEnabled()) {
-                timing.stopTimingIfSync();
-            }
-            if (CauseTracker.ENABLED) {
-                causeTracker.completePhase();
+                try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                    .world(world)
+                    .populator(type)
+                    .buildAndSwitch()) {
+
+                    if (populator instanceof IFlaggedPopulator) {
+                        ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
+                    } else {
+                        populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
+                    }
+                    if (Timings.isTimingsEnabled()) {
+                        timing.stopTimingIfSync();
+                    }
+                }
             }
         }
 
@@ -389,7 +387,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
         }
 
-        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
+        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.copyOf(populators), chunk);
         SpongeImpl.postEvent(event);
 
         BlockFalling.fallInstantly = false;
@@ -403,16 +401,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
-                    if (CauseTracker.ENABLED) {
-                        causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                                .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
-                                .addEntityCaptures()
-                                .complete());
-                    }
-                    flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
-                    if (CauseTracker.ENABLED) {
-                        causeTracker.completePhase();
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+                         GenerationContext context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                             .world(this.world)
+                             .populator(populator.getType())
+                            .buildAndSwitch()) {
+                        flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
                     }
                 }
             }
@@ -432,7 +426,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
+    public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
         Class<? extends MapGenStructure> target = null;
         if("Stronghold".equals(structureName)) {
             target = MapGenStronghold.class;
@@ -446,21 +440,59 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             target = MapGenMineshaft.class;
         } else if("Temple".equals(structureName)) {
             target = MapGenScatteredFeature.class;
+        } else if ("Fortress".equals(structureName)) {
+            target = MapGenNetherBridge.class;
+        } else if ("EndCity".equals(structureName)) {
+            target = MapGenEndCity.class;
         }
         if (target == null) {
             return null;
         }
         for (GenerationPopulator gen : this.genpop) {
             if (target.isInstance(gen)) {
-                return ((MapGenStructure) gen).getClosestStrongholdPos(worldIn, position, p_180513_4_);
+                return ((MapGenStructure) gen).getNearestStructurePos(worldIn, position, p_180513_4_);
             }
         }
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position,
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getNearestStructurePos(worldIn, structureName, position,
                     p_180513_4_);
         }
         return null;
     }
+
+    @Override
+    public boolean isInsideStructure(World worldIn, String structureName, BlockPos position) {
+        Class<? extends MapGenStructure> target = null;
+        if ("Stronghold".equals(structureName)) {
+            target = MapGenStronghold.class;
+        } else if ("Mansion".equals(structureName)) {
+            target = WoodlandMansion.class;
+        } else if ("Monument".equals(structureName)) {
+            target = StructureOceanMonument.class;
+        } else if ("Village".equals(structureName)) {
+            target = MapGenVillage.class;
+        } else if ("Mineshaft".equals(structureName)) {
+            target = MapGenMineshaft.class;
+        } else if ("Temple".equals(structureName)) {
+            target = MapGenScatteredFeature.class;
+        } else if ("Fortress".equals(structureName)) {
+            target = MapGenNetherBridge.class;
+        } else if ("EndCity".equals(structureName)) {
+            target = MapGenEndCity.class;
+        }
+        if (target == null) {
+            return false;
+        }
+        for (GenerationPopulator gen : this.genpop) {
+            if (target.isInstance(gen)) {
+                return ((MapGenStructure) gen).isInsideStructure(position);
+            }
+        }
+        if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).isInsideStructure(worldIn, structureName, position);
+        }
+        return false;
+}
 
     @Override
     public void recreateStructures(Chunk chunkIn, int x, int z) {

@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -47,55 +46,47 @@ import net.minecraft.world.gen.feature.WorldGenSwamp;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(PopulatorObjects.class)
+public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<PopulatorObject>
+    implements AlternateCatalogRegistryModule<PopulatorObject>, AdditionalCatalogRegistryModule<PopulatorObject> {
 
-public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryModule<PopulatorObject> {
 
-    @RegisterCatalog(PopulatorObjects.class) private final Map<String, PopulatorObject> populatorObjectMappings = new HashMap<>();
-
-    @Override
-    public Optional<PopulatorObject> getById(String id) {
-        return Optional.ofNullable(this.populatorObjectMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<PopulatorObject> getAll() {
-        return ImmutableList.copyOf(this.populatorObjectMappings.values());
+    public PopulatorObjectRegistryModule() {
+        super("minecraft");
     }
 
     @Override
     public void registerAdditionalCatalog(PopulatorObject extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.populatorObjectMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
-        this.populatorObjectMappings.put(extraCatalog.getId(), extraCatalog);
+        checkArgument(!this.catalogTypeMap.containsKey(extraCatalog.getId()), "Duplicate Id");
+        this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
         // Populators
-        this.populatorObjectMappings.put("desert_well", (PopulatorObject) new WorldGenDesertWells());
+        register(new WorldGenDesertWells());
 
         // Trees
-        this.populatorObjectMappings.put("oak", (PopulatorObject) new WorldGenTrees(false));
-        this.populatorObjectMappings.put("mega_oak", (PopulatorObject) new WorldGenBigTree(false));
-        this.populatorObjectMappings.put("birch", (PopulatorObject) new WorldGenBirchTree(false, false));
-        this.populatorObjectMappings.put("mega_birch", (PopulatorObject) new WorldGenBirchTree(false, true));
-        this.populatorObjectMappings.put("tall_taiga", (PopulatorObject) new WorldGenTaiga2(false));
-        this.populatorObjectMappings.put("pointy_taiga", (PopulatorObject) new WorldGenTaiga1());
-        this.populatorObjectMappings.put("mega_tall_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, true));
-        this.populatorObjectMappings.put("mega_pointy_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, false));
+        register(new WorldGenTrees(false));
+        register(new WorldGenBigTree(false));
+        register(new WorldGenBirchTree(false, false));
+        register(new WorldGenBirchTree(false, true));
+        register(new WorldGenTaiga2(false));
+        register(new WorldGenTaiga1());
+        register(new WorldGenMegaPineTree(false, true));
+        register(new WorldGenMegaPineTree(false, false));
         IBlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
         IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
@@ -103,16 +94,21 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
         trees.setId("minecraft:jungle");
         trees.setName("Jungle tree");
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
-        this.populatorObjectMappings.put("jungle", (PopulatorObject) trees);
-        this.populatorObjectMappings.put("mega_jungle", (PopulatorObject) new WorldGenMegaJungle(false, 10, 20, jlog, jleaf));
+        register((WorldGenTrees) trees);
+        register(new WorldGenMegaJungle(false, 10, 20, jlog, jleaf));
         WorldGenShrub bush = new WorldGenShrub(jlog, leaf);
-        this.populatorObjectMappings.put("jungle_bush", (PopulatorObject) bush);
-        this.populatorObjectMappings.put("savanna", (PopulatorObject) new WorldGenSavannaTree(false));
-        this.populatorObjectMappings.put("canopy", (PopulatorObject) new WorldGenCanopyTree(false));
-        this.populatorObjectMappings.put("swamp", (PopulatorObject) new WorldGenSwamp());
+        register(bush);
+        register( new WorldGenSavannaTree(false));
+        register(new WorldGenCanopyTree(false));
+        register(new WorldGenSwamp());
 
         // Mushrooms
-        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK));
-        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK));
+        register(new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK));
+        register(new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK));
     }
+
+    private void register(WorldGenerator worldGenerator) {
+        register((PopulatorObject) worldGenerator);
+    }
+
 }

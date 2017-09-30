@@ -61,15 +61,15 @@ public class TameableDataProcessor
         final String uuid = container.getString(Keys.TAMED_OWNER.getQuery()).get();
         if (uuid.equals("none")) {
             return Optional.of(tameableData);
-        } else {
-            final UUID ownerUUID = UUID.fromString(uuid);
-            return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUUID)));
         }
+        final UUID ownerUUID = UUID.fromString(uuid);
+        return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUUID)));
     }
 
     @Override
     protected boolean set(EntityTameable tameable, Optional<UUID> uuidOptional) {
         tameable.setOwnerId(uuidOptional.orElse(null));
+        tameable.setTamed(uuidOptional.isPresent());
         return true;
     }
 

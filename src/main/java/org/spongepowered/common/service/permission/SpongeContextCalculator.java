@@ -24,19 +24,17 @@
  */
 package org.spongepowered.common.service.permission;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.command.source.RemoteSource;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
@@ -44,6 +42,8 @@ import java.net.InetAddress;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A context calculator handling world contexts.

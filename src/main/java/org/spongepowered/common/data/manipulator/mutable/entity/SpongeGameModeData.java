@@ -31,9 +31,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeGameModeData extends AbstractSingleCatalogData<GameMode, GameModeData, ImmutableGameModeData> implements GameModeData {
 
     public SpongeGameModeData(GameMode mode) {

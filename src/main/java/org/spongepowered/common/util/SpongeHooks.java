@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
@@ -62,6 +63,7 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModDat
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -130,7 +132,7 @@ public class SpongeHooks {
 
         String spawnName = entity.getName();
         if (entity instanceof EntityItem) {
-            spawnName = ((EntityItem) entity).getEntityItem().getDisplayName();
+            spawnName = ((EntityItem) entity).getItem().getDisplayName();
         }
 
         Optional<User> user = cause.first(User.class);
@@ -168,18 +170,17 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(Cause.Builder builder, World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }
 
         SpongeConfig<?> config = getActiveConfig((WorldServer) world);
-        Cause cause = builder.build();
-        Optional<User> user = cause.first(User.class);
+        Optional<User> user = Sponge.getCauseStackManager().getCurrentCause().first(User.class);
         LoggingCategory logging = config.getConfig().getLogging();
         if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
-                    getFriendlyCauseName(cause),
+                    getFriendlyCauseName(Sponge.getCauseStackManager().getCurrentCause()),
                     user.isPresent() ? user.get().getName() : "None",
                     world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) world).getDimensionId(),
@@ -222,8 +223,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.xPosition,
-                    chunk.zPosition);
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.x, chunk.z);
             logStack(config);
         }
     }
@@ -505,6 +505,11 @@ public class SpongeHooks {
                     ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
             }
+            for (TileEntity tileEntity : world.loadedTileEntityList) {
+                if (tileEntity instanceof IModData_Activation) {
+                    ((IModData_Activation) tileEntity).requiresActivationCacheRefresh(true);
+                }
+            }
         }
         for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
             if (blockType instanceof IModData_Collisions) {
@@ -514,6 +519,7 @@ public class SpongeHooks {
                 ((IModData_BlockCapturing) blockType).requiresBlockCapturingRefresh(true);
             }
         }
+        ConfigTeleportHelperFilter.invalidateCache();
     }
 
 
@@ -525,7 +531,7 @@ public class SpongeHooks {
             causedBy = user.getName();
         } else if (rootCause instanceof EntityItem) {
             EntityItem item = (EntityItem) rootCause;
-            causedBy = item.getEntityItem().getDisplayName();
+            causedBy = item.getItem().getDisplayName();
         }
         else if (rootCause instanceof Entity) {
             Entity causeEntity = (Entity) rootCause;

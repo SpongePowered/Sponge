@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.damage;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 
@@ -56,20 +57,20 @@ public class SpongeDamageModifierType implements DamageModifierType {
             return false;
         }
         SpongeDamageModifierType that = (SpongeDamageModifierType) o;
-        return Objects.equal(id, that.id) &&
-               Objects.equal(name, that.name);
+        return Objects.equal(this.id, that.id) &&
+               Objects.equal(this.name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, name);
+        return Objects.hashCode(this.id, this.name);
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-            .add("id", id)
-            .add("name", name)
+        return MoreObjects.toStringHelper(this)
+            .add("id", this.id)
+            .add("name", this.name)
             .toString();
     }
 

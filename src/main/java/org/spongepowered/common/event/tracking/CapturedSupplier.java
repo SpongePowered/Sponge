@@ -55,6 +55,8 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     public final void ifPresentAndNotEmpty(Consumer<List<T>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             consumer.accept(this.captured);
+            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
+            // with recycling the captured object.
         }
     }
 
@@ -64,7 +66,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
 
     @SuppressWarnings("unchecked")
 	public final List<T> orEmptyList() {
-        return this.captured == null ? Collections.EMPTY_LIST : this.captured;
+        return this.captured == null ? Collections.emptyList() : this.captured;
     }
 
     public final Stream<T> stream() {
@@ -91,7 +93,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
+        return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("Captured", this.captured == null ? 0 : this.captured.size())
                 .toString();
     }

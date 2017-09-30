@@ -34,7 +34,6 @@ import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -63,7 +62,6 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     @Shadow public abstract void setInvulTime(int ticks);
     @Shadow public abstract int getInvulTime();
 
-    private Cause detonationCause;
     private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
     private int fuseDuration = 220;
 
@@ -133,26 +131,25 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     }
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         setFuseTicksRemaining(1);
     }
 
     @Override
-    public void prime(Cause cause) {
+    public void prime() {
         checkState(!isPrimed(), "already primed");
-        if (shouldPrime(checkNotNull(cause, "cause"))) {
+        if (shouldPrime()) {
             setFuseTicksRemaining(this.fuseDuration);
-            postPrime(cause);
+            postPrime();
         }
     }
 
     @Override
-    public void defuse(Cause cause) {
+    public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (shouldDefuse(checkNotNull(cause, "cause"))) {
+        if (shouldDefuse()) {
             setInvulTime(0);
-            postDefuse(cause);
+            postDefuse();
         }
     }
 
@@ -170,14 +167,14 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     @Redirect(method = "ignite", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/entity/boss/EntityWither;setInvulTime(I)V"))
     protected void onSpawnPrime(EntityWither self, int fuseTicks) {
-        prime(Cause.source(this).build());
+        prime();
     }
 
     @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
     protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
                                                       double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
-        return detonate(this.detonationCause, Explosion.builder()
+        return detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .radius(this.explosionRadius)

@@ -28,8 +28,6 @@
  * <dl>
  * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSource}
- * <dt>{@link org.spongepowered.api.world.Locatable}</dt>
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinLocatedSource}
  * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandBlockSource}
  * <dt>{@link org.spongepowered.api.command.source.RconSource}</dt>
@@ -37,7 +35,8 @@
  * <dt>{@link org.spongepowered.api.command.source.SignSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinSignCommandSender}
  * <dt>{@link org.spongepowered.api.command.source.ProxySource} via /execute
- * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandExecuteAtSender}
+ * and /function
+ * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSenderWrapper}
  * </dl>
  *
  * In addition, {@link org.spongepowered.common.mixin.core.command.MixinBlockCommandBlockSender} and

@@ -65,9 +65,14 @@ import javax.annotation.Nullable;
         ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class, FireworkShapeRegistryModule.class })
 public final class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
 
+    public static ParticleRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
     @RegisterCatalog(ParticleTypes.class)
     private final Map<String, SpongeParticleType> particleMappings = Maps.newHashMap();
     private final Map<String, ParticleType> particleByName = Maps.newHashMap();
+    private final Map<EnumParticleTypes, SpongeParticleType> particleTypeMapping = Maps.newHashMap();
 
     @Override
     public Optional<ParticleType> getById(String id) {
@@ -132,7 +137,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("lava", EnumParticleTypes.LAVA, false);
         this.addParticleType("magic_critical_hit", EnumParticleTypes.CRIT_MAGIC, true);
         this.addEffectType("mobspawner_flames", null, ImmutableMap.of());
-        this.addParticleType("mob_spell", EnumParticleTypes.END_ROD, false, ImmutableMap.of(
+        this.addParticleType("mob_spell", EnumParticleTypes.SPELL_MOB, false, ImmutableMap.of(
                 ParticleOptions.COLOR, Color.BLACK));
         this.addParticleType("note", EnumParticleTypes.NOTE, false, ImmutableMap.of(
                 ParticleOptions.NOTE, NotePitches.F_SHARP0));
@@ -182,5 +187,12 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         SpongeParticleType particleType = new SpongeParticleType("minecraft:" + id, id, internalType, options);
         this.particleMappings.put(id, particleType);
         this.particleByName.put(particleType.getId().toLowerCase(Locale.ENGLISH), particleType);
+    }
+
+    private ParticleRegistryModule() {
+    }
+
+    private static class Holder {
+        static final ParticleRegistryModule INSTANCE = new ParticleRegistryModule();
     }
 }

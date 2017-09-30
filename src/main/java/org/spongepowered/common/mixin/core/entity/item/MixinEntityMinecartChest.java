@@ -61,7 +61,7 @@ public abstract class MixinEntityMinecartChest extends MixinEntityMinecartContai
 
     @SuppressWarnings("unchecked")
     public CarriedInventory<ChestMinecart> minecart$getInventory() {
-        return (CarriedInventory<ChestMinecart>) (Object) this;
+        return (CarriedInventory<ChestMinecart>) this;
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {

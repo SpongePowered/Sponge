@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -40,12 +40,13 @@ import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 @RegistrationDependency(TextColorRegistryModule.class)
-public final class DisplaySlotRegistryModule implements CatalogRegistryModule<DisplaySlot> {
+public final class DisplaySlotRegistryModule implements AlternateCatalogRegistryModule<DisplaySlot> {
 
     public static DisplaySlotRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -70,17 +71,29 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
 
     @Override
     public void registerDefaults() {
-        this.displaySlotMappings.put("list", new SpongeDisplaySlot("list", null, 0));
-        this.displaySlotMappings.put("sidebar", new SpongeDisplaySlot("sidebar", null, 1));
-        this.displaySlotMappings.put("below_name", new SpongeDisplaySlot("below_name", null, 2));
+        this.displaySlotMappings.put("minecraft:list", new SpongeDisplaySlot("list", null, 0));
+        this.displaySlotMappings.put("minecraft:sidebar", new SpongeDisplaySlot("sidebar", null, 1));
+        this.displaySlotMappings.put("minecraft:below_name", new SpongeDisplaySlot("below_name", null, 2));
 
         for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
-            this.displaySlotMappings.put(entry.getValue().getId(),
-                                         new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
+            final String id = entry.getValue().getId().toLowerCase(Locale.ENGLISH);
+            final SpongeDisplaySlot value = new SpongeDisplaySlot(id, entry.getValue(), entry.getKey().getColorIndex() + 3);
+            this.displaySlotMappings.put("minecraft:" + id, value);
         }
     }
 
+
+
     DisplaySlotRegistryModule() {
+    }
+
+    @Override
+    public Map<String, DisplaySlot> provideCatalogMap() {
+        final HashMap<String, DisplaySlot> map = new HashMap<>();
+        for (Map.Entry<String, SpongeDisplaySlot> entry : this.displaySlotMappings.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return map;
     }
 
     private static final class Holder {

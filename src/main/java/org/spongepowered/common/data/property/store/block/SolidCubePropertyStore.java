@@ -48,11 +48,13 @@ public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCube
         return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Optional<SolidCubeProperty> getForDirection(World world, int x, int y, int z, EnumFacing facing) {
         BlockPos pos = new BlockPos(x, y, z);
-        Block block = world.getBlockState(pos).getBlock();
-        return Optional.of(block.isBlockSolid(world, pos, facing) ? TRUE : FALSE);
+        IBlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+        return Optional.of(block.getMaterial(state).isSolid() ? TRUE : FALSE);
     }
 
 }

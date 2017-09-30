@@ -32,7 +32,6 @@ import net.minecraft.world.LockCode;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
@@ -44,17 +43,39 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(TileEntityLockable.class)
-@Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
+@Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$"),
+             @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),})
 public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory {
 
     @Shadow private LockCode code;
+
+    protected Fabric<IInventory> fabric; // is set when constructed
+    protected SlotCollection slots; // is set by Mixin further down the line OR fallback in getter
+    @Nullable protected Lens<IInventory, ItemStack> lens = null; // is set by Mixin further down the line OR fallback in getter
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onConstructed(CallbackInfo ci) {
+        this.fabric = new DefaultInventoryFabric(this);
+    }
 
     @Override
     public DataContainer toContainer() {
@@ -67,7 +88,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
             ItemStack stack = getStackInSlot(i);
             if (!stack.isEmpty()) {
                 // todo make a helper object for this
-                DataContainer stackView = new MemoryDataContainer()
+                DataContainer stackView = DataContainer.createNew()
                     .set(Queries.CONTENT_VERSION, 1)
                     .set(DataQueries.BLOCK_ENTITY_SLOT, i)
                     .set(DataQueries.BLOCK_ENTITY_SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());
@@ -94,6 +115,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TileEntityInventory<TileEntityCarrier> getInventory() {
         return (TileEntityInventory<TileEntityCarrier>) this;
@@ -105,5 +127,23 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
 
     public Optional<? extends TileEntityCarrier> tileentityinventory$getCarrier() {
         return Optional.of(this);
+    }
+
+    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+        if (this.slots == null) {
+            this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build(); // Fallback
+        }
+        return this.slots;
+    }
+
+    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+        if (this.lens == null) {
+            this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, inventory$getSlotProvider());
+        }
+        return this.lens;
+    }
+
+    public Fabric<IInventory> inventory$getInventory() {
+        return this.fabric;
     }
 }

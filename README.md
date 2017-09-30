@@ -23,17 +23,17 @@ The following steps will ensure your project is cloned properly.
 3. `cp scripts/pre-commit .git/hooks`
 
 ## Setup
-__Note:__ If you do not have [Gradle] installed then use `./gradlew` for Unix systems or Git Bash and `gradlew.bat` for Windows systems in place of any `gradle` command.
+**Note**: SpongeCommon uses [Gradle] as its build system. The repo includes the Gradle wrapper that will automatically download the correct Gradle 
+version. Local installations of Gradle may work but are untested. To execute the Gradle wrapper, run the `./gradlew` script on Unix systems or only
+`gradlew` on Windows systems.
 
 Before you are able to build SpongeCommon, you must first prepare the environment:
 
-  - Run `gradle setupDecompWorkspace --refresh-dependencies`
-
-**Note**: You may substitute `setupDecompWorkspace` for `setupCIWorkspace` when building on a CI such as [Jenkins].
+  - Run `./gradlew setupDecompWorkspace --refresh-dependencies`
 
 ### IDE Setup
 __For [Eclipse]__
-  1. Run `gradle eclipse`
+  1. Run `./gradlew eclipse`
   2. Import SpongeCommon as an existing project (File > Import > General)
   3. Select the root folder for SpongeCommon and make sure `Search for nested projects` is enabled
   4. Check SpongeCommon when it finishes building and click **Finish**
@@ -41,25 +41,24 @@ __For [Eclipse]__
 __For [IntelliJ]__
   1. Make sure you have the Gradle plugin enabled (File > Settings > Plugins).  
   2. Click File > New > Project from Existing Sources > Gradle and select the root folder for SpongeCommon.
-  3. Select _Use customizable gradle wrapper_ if you do not have Gradle installed.
+  3. Make sure _Use default gradle wrapper_ is selected. Older/newer Gradle versions may work but we only test using the wrapper.
 
 ## Building
-__Note:__ If you do not have [Gradle] installed then use ./gradlew for Unix systems or Git Bash and gradlew.bat for Windows systems in place of any 'gradle' command.
-
 __Note:__ You must [Setup the environment](#setup) before you can build SpongeCommon.
 
-In order to build SpongeCommon you simply need to run the `gradle` command. You can find the compiled JAR files in `./build/libs`.
+In order to build SpongeCommon you simply need to run the `gradlew` command. On Windows systems you should run `gradlew` instead of `./gradlew` to
+invoke the Gradle wrapper. You can find the compiled JAR files in `./build/libs`.
 
 ## Updating your Clone
 The following steps will update your clone with the official repo.
 
 1. `git pull`
 2. `git submodule update --recursive`
-3. `gradle setupDecompWorkspace --refresh-dependencies`
+3. `./gradlew setupDecompWorkspace --refresh-dependencies`
 
 ## Contributing
 Are you a talented programmer looking to contribute some code? We'd love the help!
-* Open a pull request with your changes, following our [guidelines](CONTRIBUTING.md).
+* Open a pull request with your changes, following our [guidelines](.github/CONTRIBUTING.md).
 * Please follow the above guidelines for your pull request(s) to be accepted.
 
 [Eclipse]: https://eclipse.org/

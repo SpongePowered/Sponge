@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -36,8 +36,6 @@ import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -48,6 +46,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -67,6 +66,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     private EntityLiving owner;
     private GoalType type;
+    private boolean initialized;
 
     public Agent goal$getOwner() {
         return (Agent) this.owner;
@@ -149,19 +149,18 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(Set<EntityAITasks.EntityAITaskEntry> set, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
-        if (this.owner == null || ((IMixinEntity) this.owner).isInConstructPhase()) {
+        if (!ShouldFire.AI_TASK_EVENT_ADD || this.owner == null || ((IMixinEntity) this.owner).isInConstructPhase()) {
             // Event is fired in firePostConstructEvents
             return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }
-        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.source(Sponge.getGame()).build(), priority, priority,
+        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(), priority, priority,
                 (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ((IMixinEntityAIBase) base).setGoal(null);
             return false;
-        } else {
-            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
         }
+        return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
     }
 
     @Override
@@ -194,7 +193,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      *
      * @param aiBase
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Overwrite
     public void removeTask(EntityAIBase aiBase) {
         final Iterator iterator = this.taskEntries.iterator();
@@ -205,10 +204,13 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
-                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
-                    (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
+                AITaskEvent.Remove event = null;
+                if (ShouldFire.AI_TASK_EVENT_REMOVE && this.owner != null && !((IMixinEntity) this.owner).isInConstructPhase()) {
+                    event = SpongeEventFactory.createAITaskEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
+                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
+                    SpongeImpl.postEvent(event);
+                }
+                if (event == null || !event.isCancelled()) {
 
                     if (entityaitaskentry.using) {
                         entityaitaskentry.using = false;
@@ -239,8 +241,18 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     @Override
+    public boolean initialized() {
+        return this.initialized;
+    }
+
+    @Override
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
+    @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(getOwner())
                 .addValue(getType())
                 .toString();

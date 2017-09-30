@@ -30,8 +30,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -52,9 +52,11 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot> implements EntityArchetype {
+public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype {
 
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
         super(builder.entityType, NbtTranslator.getInstance().translateData(builder.entityData));
@@ -72,7 +74,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean apply(Location<World> location, Cause cause) {
+    public Optional<org.spongepowered.api.entity.Entity> apply(Location<World> location) {
         final Vector3d position = location.getPosition();
         final double x = position.getX();
         final double y = position.getY();
@@ -93,7 +95,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         if (entity == null) {
-            return false;
+            return Optional.empty();
         }
 
         this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
@@ -103,7 +105,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         this.data.removeTag("Dimension");
 
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity), world);
+        final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
+        entities.add(spongeEntity);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
         if (!event.isCancelled()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
@@ -114,9 +118,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             } else {
                 mixinWorldServer.forceSpawnEntity(entity);
             }
-            return true;
+            return Optional.of(spongeEntity);
         }
-        return false;
+        return Optional.empty();
     }
 
     @Override
@@ -140,7 +144,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
                 .set(DataQueries.EntityArchetype.ENTITY_TYPE, this.type)
                 .set(DataQueries.EntityArchetype.ENTITY_DATA, getEntityData())
                 ;

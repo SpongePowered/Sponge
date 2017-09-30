@@ -28,37 +28,47 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.attributes.AttributeMap;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.network.play.server.SPacketEntityProperties;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
+import net.minecraft.network.play.server.SPacketUpdateHealth;
+import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.stats.Achievement;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -67,9 +77,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -82,19 +94,26 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.event.message.MessageChannelEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -109,6 +128,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -117,19 +137,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
+import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -143,24 +165,31 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
+import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
@@ -174,27 +203,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
-    @Shadow public boolean playerConqueredTheEnd;
+    @Shadow public boolean queuedEndExit;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
 
-    @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
+    @Shadow public abstract Entity getSpectatingEntity();
+    @Shadow public abstract void setSpectatingEntity(Entity entity);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
-    @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
     @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
-    @Shadow public abstract void sendMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
-
-    private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;
 
     public int newExperience = 0;
     public int newLevel = 0;
@@ -215,6 +241,28 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Nullable private Vector3d velocityOverride = null;
+    private boolean healthScaling = false;
+    private double healthScale = 20;
+
+    @Override
+    public void writeToNbt(NBTTagCompound compound) {
+        super.writeToNbt(compound);
+        if (this.healthScaling) {
+            compound.setDouble(NbtDataUtil.HEALTH_SCALE, this.healthScale);
+        }
+    }
+
+    @Override
+    public void readFromNbt(NBTTagCompound compound) {
+        super.readFromNbt(compound);
+        if (compound.hasKey(NbtDataUtil.HEALTH_SCALE, NbtDataUtil.TAG_DOUBLE)) {
+            this.healthScaling = true;
+            this.healthScale = compound.getDouble(NbtDataUtil.HEALTH_SCALE);
+        }
+    }
+
+    @Nullable private WorldBorder worldBorder;
+    private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -242,75 +290,82 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final CauseTracker causeTracker;
         final boolean tracksEntityDeaths;
         if (!this.world.isRemote) {
-            causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+            causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getCurrentState().tracksEntityDeaths();
-            if (state != EntityPhase.State.DEATH && !state.tracksEntityDeaths()) {
-                if (!tracksEntityDeaths) {
-                    causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()
-                            .add(NamedCause.source(this))
-                            .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, cause))
-                            .addCaptures()
-                            .addEntityDropCaptures()
-                            .complete());
-                }
+            tracksEntityDeaths = state.tracksEntityDeaths();
+            if (!tracksEntityDeaths) {
+                ;
             }
         } else {
             causeTracker = null;
             tracksEntityDeaths = false;
         }
-        // Sponge end
+        try (PhaseContext<?> context = tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()
+            .source(this)
+            .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
+            .buildAndSwitch() : null) {
+            // Sponge end
 
-        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
-        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+            boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
+            this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 
-        if (flag) {
-            Team team = this.getTeam();
+            if (flag) {
+                Team team = this.getTeam();
 
-            if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
-                if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                    this.mcServer.getPlayerList().sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
-                } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                    this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
+                    if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                        this.mcServer.getPlayerList()
+                            .sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                    } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                        this.mcServer.getPlayerList()
+                            .sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                    }
+                } else {
+                    this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
                 }
-            } else {
-                this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
-            }
-        }
-
-        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.destroyVanishingCursedItems();
-            this.inventory.dropAllItems();
-        }
-
-        for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
-            Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
-            score.incrementScore();
-        }
-
-        EntityLivingBase entitylivingbase = this.getAttackingEntity();
-
-        if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
-
-            if (entitylist$entityegginfo != null) {
-                this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.addToPlayerScore((EntityPlayerMP) (Object) this, this.scoreValue);
-        }
+            if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+                this.destroyVanishingCursedItems();
+                this.inventory.dropAllItems();
+            }
 
-        this.addStat(StatList.DEATHS);
-        this.takeStat(StatList.TIME_SINCE_DEATH);
-        this.extinguish();
-        this.setFlag(0, false);
-        this.getCombatTracker().reset();
-        // Sponge Start - Finish cause tracker
-        if (causeTracker != null && tracksEntityDeaths) {
-            causeTracker.completePhase();
+            for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
+                Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
+                score.incrementScore();
+            }
+
+            EntityLivingBase entitylivingbase = this.getAttackingEntity();
+
+            if (entitylivingbase != null) {
+                EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
+
+                if (entitylist$entityegginfo != null) {
+                    this.addStat(entitylist$entityegginfo.entityKilledByStat);
+                }
+
+                entitylivingbase.awardKillScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
+            }
+
+            this.addStat(StatList.DEATHS);
+            this.takeStat(StatList.TIME_SINCE_DEATH);
+            this.extinguish();
+            this.setFlag(0, false);
+            this.getCombatTracker().reset();
+        } // Sponge - brackets
+    }
+
+    @Inject(method = "copyFrom", at = @At("HEAD"))
+    public void onClonePlayer(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
+        // Copy over sponge data from the old player.
+        // Allows plugins to specify data that persists after players respawn.
+        IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
+        NBTTagCompound old = oldEntity.getEntityData();
+        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
+            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            this.readFromNbt(this.getSpongeData());
         }
-        // Sponge end
     }
 
     @Override
@@ -330,7 +385,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     @Overwrite
     public Entity changeDimension(int dimensionId) {
-        return EntityUtil.teleportPlayerToDimension(this, dimensionId);
+        return EntityUtil.teleportPlayerToDimension((EntityPlayerMP)(Object) this, dimensionId);
     }
 
     @Override
@@ -351,6 +406,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public User getUserObject() {
         return this.user;
+    }
+
+    // Post before the player values are updated
+    @Inject(method = "handleClientSettings", at = @At("HEAD"))
+    public void postClientSettingsEvent(CPacketClientSettings packet, CallbackInfo ci) {
+        // TODO: add HandPreference to PlayerChangeClientSettingsEvent once DominantHandData is implemented
+        Sponge.getCauseStackManager().pushCause(this);
+        final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
+                LocaleCache.getLocale(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+    }
+
+    @Inject(method = "handleClientSettings", at = @At("RETURN"))
+    public void captureClientSettings(CPacketClientSettings packet, CallbackInfo ci) {
+        this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
+        this.viewDistance = packet.view;
     }
 
     @Override
@@ -388,7 +461,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.connection.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+        this.connection.sendPacket(new SPacketChat(component, (net.minecraft.util.text.ChatType) (Object) type));
+    }
+
+    /**
+     * @author simon816 - 14th November, 2016
+     *
+     * @reason Redirect messages sent to the player to fire a message event. Once the
+     * event is handled, it will send the message to
+     * {@link #sendMessage(ChatType, Text)}.
+     *
+     * @param component The message
+     */
+    @Overwrite
+    public void sendMessage(ITextComponent component) {
+        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, false);
     }
 
     @Override
@@ -465,6 +552,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.lastExperience = -1;
         this.lastHealth = -1.0F;
         this.lastFoodLevel = -1;
+        refreshScaledHealth();
     }
 
     @Override
@@ -479,7 +567,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void restorePacketItem(EnumHand hand) {
-        if (this.packetItem == null) {
+        if (this.packetItem.isEmpty()) {
             return;
         }
 
@@ -498,15 +586,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public Optional<Container> openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, this$,
+    public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this,
                 inventory));
     }
 
     @Override
-    public boolean closeInventory(Cause cause) throws IllegalArgumentException {
+    public boolean closeInventory() throws IllegalArgumentException {
         ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this.this$, cursor, cursor, false).isCancelled();
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
     }
 
     @Override
@@ -598,10 +686,29 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void playRecord(Vector3i position, RecordType recordType) {
+        playRecord0(position, checkNotNull(recordType, "recordType"));
+    }
+
+    @Override
+    public void stopRecord(Vector3i position) {
+        playRecord0(position, null);
+    }
+
+    private void playRecord0(Vector3i position, @Nullable RecordType recordType) {
+        this.connection.sendPacket(SpongeRecordType.createPacket(position, recordType));
+    }
+
+    @Override
     public void sendResourcePack(ResourcePack pack) {
         SPacketResourcePackSend packet = new SPacketResourcePackSend();
         ((IMixinPacketResourcePackSend) packet).setResourcePack(pack);
         this.connection.sendPacket(packet);
+    }
+
+    @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
+    private void onPlayerActive(CallbackInfo ci) {
+        ((IMixinNetHandlerPlayServer) this.connection).resendLatestResourcePackRequest();
     }
 
     @Override
@@ -651,13 +758,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
-        ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
-                (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            ci.cancel();
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(this);
+            ChangeGameModeEvent.TargetPlayer event =
+                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
+                            (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                ci.cancel();
+            }
+            this.pendingGameType = (GameType) (Object) event.getGameMode();
         }
-        this.pendingGameType = (GameType) (Object) event.getGameMode();
     }
 
     /**
@@ -739,12 +850,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void sendBlockChange(BlockPos pos, IBlockState state) {
+        final SPacketBlockChange packet = new SPacketBlockChange();
+        packet.blockPosition = pos;
+        packet.blockState = state;
+        this.connection.sendPacket(packet);
+    }
+
+    @Override
     public void sendBlockChange(int x, int y, int z, BlockState state) {
         checkNotNull(state, "state");
-        SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = (IBlockState) state;
-        this.connection.sendPacket(packet);
+        this.sendBlockChange(new BlockPos(x, y, z), (IBlockState) state);
     }
 
     @Override
@@ -764,14 +880,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Nullable
     public EntityItem dropItem(boolean dropAll) {
         final ItemStack currentItem = this.inventory.getCurrentItem();
-        if (currentItem == null) {
+        if (currentItem.isEmpty()) {
             return null;
         }
-        //final int amount = dropAll ? currentItem.stackSize : 1;
-        //final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
-        // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.getCount() : 1), false, true);
+        // Add SlotTransaction to PlayerContainer
+        org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer).query(Hotbar.class).query(SlotIndex.of(this.inventory.currentItem));
+        ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
+        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(currentItem), ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
+
+        return this.dropItem(itemToDrop, false, true);
     }
 
     @Override
@@ -780,14 +898,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack.isEmpty()) {
-            this$.sendContainerToPlayer(this$.inventoryContainer);
+            ((EntityPlayerMP) (Object) this).sendContainerToPlayer(((EntityPlayerMP) (Object) this).inventoryContainer);
         }
         super.stopActiveHand();
     }
 
     @Override
     public Inventory getEnderChestInventory() {
-        return (Inventory) this.theInventoryEnderChest;
+        return (Inventory) this.enderChest;
     }
 
     @Override
@@ -795,7 +913,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.mcServer.getPlayerList().recreatePlayerEntity(this$, this$.dimension, false);
+        this.connection.player = this.mcServer.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
         return true;
     }
 
@@ -807,5 +925,203 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             mixinContainer.setCaptureInventory(false);
             mixinContainer.getCapturedTransactions().clear();
         }
+    }
+
+    @Inject(method = "displayGUIChest", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;openContainer:Lnet/minecraft/inventory/Container;", opcode = Opcodes.PUTFIELD, ordinal = 1, shift = At.Shift.AFTER))
+    public void onSetContainer(IInventory chestInventory, CallbackInfo ci) {
+        if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest && this.isSpectator()) {
+            SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
+            ((IMixinContainer) this.openContainer).setSpectatorChest(true);
+        }
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> getSpectatorTarget() {
+        // For the API, return empty if we're spectating ourself.
+        @Nonnull final Entity entity = this.getSpectatingEntity();
+        return entity == (Object) this ? Optional.empty() : Optional.of((org.spongepowered.api.entity.Entity) entity);
+    }
+
+    @Override
+    public void setSpectatorTarget(@Nullable org.spongepowered.api.entity.Entity entity) {
+        this.setSpectatingEntity((Entity) entity);
+    }
+
+    @Override
+    public MessageChannelEvent.Chat simulateChat(Text message, Cause cause) {
+        checkNotNull(message, "message");
+
+        TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(this.getDisplayNameText()),
+                SpongeTexts.toComponent(message));
+        final Text[] messages = SpongeTexts.splitChatMessage(component);
+
+        final MessageChannel originalChannel = this.getMessageChannel();
+        final MessageChannelEvent.Chat event = SpongeEventFactory.createMessageChannelEventChat(
+                cause, originalChannel, Optional.of(originalChannel),
+                new MessageEvent.MessageFormatter(messages[0], messages[1]), message, false
+        );
+        if (!SpongeImpl.postEvent(event) && !event.isMessageCancelled()) {
+            event.getChannel().ifPresent(channel -> channel.send(this, event.getMessage(), ChatTypes.CHAT));
+        }
+        return event;
+    }
+
+    @Override
+    public Optional<WorldBorder> getWorldBorder() {
+        return Optional.ofNullable(this.worldBorder);
+    }
+
+    @Override
+    public void setWorldBorder(@Nullable WorldBorder border, Cause cause) {
+        if (this.worldBorder == border) {
+            return; //do not fire an event since nothing would have changed
+        }
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
+            if (this.worldBorder != null) { //is the world border about to be unset?
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(this.borderListener); //remove the listener, if so
+            }
+            this.worldBorder = border;
+            if (this.worldBorder != null) {
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(this.borderListener);
+                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
+            } else { //unset the border if null
+                this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
+            }
+        }
+    }
+
+    @Override
+    public PlayerOwnBorderListener getWorldBorderListener() {
+        return this.borderListener;
+    }
+
+
+    /**
+     * @author Faithcaio - 31. 12. 2016
+     * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
+     */
+    @Overwrite
+    public void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack) {
+        if (!this.isChangingQuantityOnly) {
+            this.connection.sendPacket(new SPacketSetSlot(containerToSend.windowId, slotInd, stack));
+        }
+    }
+
+    @Redirect(method = "onUpdateEntity",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/player/EntityPlayerMP;getHealth()F"
+            ),
+            slice =  @Slice(
+                    from = @At(
+                            value = "FIELD",
+                            target = "Lnet/minecraft/entity/player/EntityPlayerMP;lastHealth:F"
+                    ),
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/network/play/server/SPacketUpdateHealth;<init>(FIF)V"
+                    )
+            )
+    )
+    private float spongeGetScaledHealthForPacket(EntityPlayerMP entityPlayerMP) {
+        return getInternalScaledHealth();
+    }
+
+    @Inject(method = "onUpdateEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getTotalArmorValue()I", ordinal = 0))
+    private void updateHealthPriorToArmor(CallbackInfo ci) {
+        refreshScaledHealth();
+    }
+
+    @Override
+    public void setHealthScale(double scale) {
+        checkArgument(scale > 0, "Health scale must be greater than 0!");
+        checkArgument(scale < Float.MAX_VALUE, "Health scale cannot exceed Float.MAX_VALUE!");
+        this.healthScale = scale;
+        this.healthScaling = true;
+        refreshScaledHealth();
+    }
+
+    @Override
+    public void refreshScaledHealth() {
+        // We need to use the dirty instances to signify that the player needs to ahve it updated, instead
+        // of modifying the attribute instances themselves, we bypass other potentially detrimental logi
+        // that would otherwise break the actual health scaling.
+        final Set<IAttributeInstance> dirtyInstances = ((AttributeMap) this.getAttributeMap()).getDirtyInstances();
+        injectScaledHealth(dirtyInstances, true);
+
+        // Send the new information to the client.
+        sendHealthUpdate();
+        this.connection.sendPacket(new SPacketEntityProperties(this.getEntityId(), dirtyInstances));
+        // Reset the dirty instances since they've now been manually updated on the client.
+        dirtyInstances.clear();
+
+    }
+
+    public void sendHealthUpdate() {
+        this.connection.sendPacket(new SPacketUpdateHealth(getInternalScaledHealth(), getFoodStats().getFoodLevel(), getFoodStats().getSaturationLevel()));
+    }
+
+    @Override
+    public void injectScaledHealth(Collection<IAttributeInstance> set, boolean force) {
+        if (!this.healthScaling && !force) {
+            return;
+        }
+        // We need to remove the existing attribute instance for max health, since it's not always going to be the
+        // same as SharedMonsterAttributes.MAX_HEALTH
+        for (final Iterator<IAttributeInstance> iter = set.iterator(); iter.hasNext(); ) {
+            final IAttributeInstance dirtyInstance = iter.next();
+            if (dirtyInstance.getAttribute().getName().equals("generic.maxHealth")) {
+                iter.remove();
+                break;
+            }
+        }
+
+        // We now re-create a new ranged attribute for our desired health
+        final RangedAttribute maxHealth =
+            new RangedAttribute(null, "generic.maxHealth", this.healthScaling ? this.healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE);
+        maxHealth.setDescription("Max Health");
+        maxHealth.setShouldWatch(true); // needs to be watched
+
+        set.add(new ModifiableAttributeInstance(this.getAttributeMap(), maxHealth));
+
+    }
+
+    @Override
+    public double getHealthScale() {
+        return this.healthScale;
+    }
+
+    float cachedHealth = -1;
+    float cachedScaledHealth = -1;
+
+    @Override
+    public float getInternalScaledHealth() {
+        if (this.healthScaling) {
+            // Micro-optimization so we don't have to recalculate it all the time
+            if (this.cachedHealth != -1 && this.getHealth() == this.cachedHealth) {
+                if (this.cachedScaledHealth != -1) {
+                    return this.cachedScaledHealth;
+                }
+            }
+            this.cachedHealth = this.getHealth();
+            this.cachedScaledHealth = (float) ((this.cachedHealth / getMaxHealth()) * this.healthScale);
+            return this.cachedScaledHealth;
+        }
+        return getHealth();
+    }
+
+    @Override
+    public boolean isHealthScaled() {
+        return this.healthScaling;
+    }
+
+    @Override
+    public void setHealthScaled(boolean scaled) {
+        this.healthScaling = scaled;
+    }
+
+    @Override
+    public void updateDataManagerForScaledHealth() {
+        this.dataManager.set(EntityLivingBase.HEALTH, getInternalScaledHealth());
     }
 }

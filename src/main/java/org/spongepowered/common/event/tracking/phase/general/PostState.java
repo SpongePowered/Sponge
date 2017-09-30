@@ -24,42 +24,98 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 
-final class PostState extends GeneralState {
+import java.util.ArrayList;
+import java.util.List;
+
+final class PostState extends GeneralState<UnwindingPhaseContext> {
+
+    @Override
+    public UnwindingPhaseContext createPhaseContext() {
+        return null;
+    }
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
-        return state.getPhase() == TrackingPhases.GENERATION || state == BlockPhase.State.RESTORING_BLOCKS;
+        return state.getPhase() == TrackingPhases.GENERATION
+                || state.getPhase() == TrackingPhases.PLUGIN
+                || state == BlockPhase.State.RESTORING_BLOCKS;
     }
 
     @Override
     public boolean tracksBlockRestores() {
         return false; // TODO - check that this really is needed.
     }
+
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
-        final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", context));
-        final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", context));
-        this.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, context);
+    public boolean requiresPost() {
+        return false;
     }
 
-    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
-        final PhaseContext unwinding = currentPhaseData.context.first(PhaseContext.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding with a PhaseContext, but couldn't!", currentPhaseData.context));
-        final IPhaseState phaseState = currentPhaseData.context.first(IPhaseState.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding with an IPhaseState, but couldn't!", currentPhaseData.context));
+    @Override
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return true;
+    }
+
+    @Override
+    public boolean ignoresScheduledUpdates() {
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void unwind(UnwindingPhaseContext context) {
+        final IPhaseState unwindingState = context.getUnwindingState();
+        final PhaseContext<?> unwindingContext = context.getUnwindingContext();
+        this.postDispatch(unwindingState, unwindingContext, context);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void postDispatch(IPhaseState<?> unwindingState, PhaseContext<?> unwindingContext, UnwindingPhaseContext postContext) {
+        final List<BlockSnapshot> contextBlocks = unwindingContext.getCapturedBlocksOrEmptyList();
+        final List<Entity> contextEntities = unwindingContext.getCapturedEntitiesOrEmptyList();
+        final List<Entity> contextItems = (List<Entity>) (List<?>) unwindingContext.getCapturedItemsOrEmptyList();
+        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
+            return;
+        }
+        if (!contextBlocks.isEmpty()) {
+            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
+            contextBlocks.clear();
+            GeneralPhase.processBlockTransactionListsPost(postContext, blockSnapshots, this, unwindingContext);
+        }
+        if (!contextEntities.isEmpty()) {
+            final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
+            contextEntities.clear();
+            ((IPhaseState) unwindingState).postProcessSpawns(unwindingContext, entities);
+        }
+        if (!contextItems.isEmpty()) {
+            final ArrayList<Entity> items = new ArrayList<>(contextItems);
+            contextItems.clear();
+            TrackingUtil.splitAndSpawnEntities(items);
+        }
+    }
+
+    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
+        final IPhaseState phaseState = ((UnwindingPhaseContext) currentPhaseData.context).getUnwindingState();
+        final PhaseContext<?> unwinding = ((UnwindingPhaseContext) currentPhaseData.context).getUnwindingContext();
         final PhaseData phaseData = new PhaseData(unwinding, phaseState);
         phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
 
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(UnwindingPhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
     }
 }

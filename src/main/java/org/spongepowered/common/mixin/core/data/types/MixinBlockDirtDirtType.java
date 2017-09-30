@@ -31,19 +31,22 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(BlockDirt.DirtType.class)
-@Implements(@Interface(iface = DirtType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = DirtType.class, prefix = "dirt$"))
 public abstract class MixinBlockDirtDirtType {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract String shadow$getUnlocalizedName();
 
-    public String shadow$getId() {
-        return getName();
+    @Unique
+    public String dirt$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String dirt$getName() {
+        return shadow$getUnlocalizedName();
     }
 }

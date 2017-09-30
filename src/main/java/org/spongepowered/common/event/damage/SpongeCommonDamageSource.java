@@ -25,9 +25,7 @@
 package org.spongepowered.common.event.damage;
 
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
-import org.spongepowered.api.world.difficulty.Difficulty;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but

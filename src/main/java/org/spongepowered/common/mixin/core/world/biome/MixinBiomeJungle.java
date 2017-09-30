@@ -53,7 +53,7 @@ public abstract class MixinBiomeJungle extends MixinBiome {
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         for (Iterator<Populator> it = gensettings.getPopulators().iterator(); it.hasNext();) {
             Populator next = it.next();
             if (next instanceof Shrub) {

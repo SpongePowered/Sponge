@@ -24,20 +24,26 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,9 +51,9 @@ import java.util.Set;
 /**
  * A generalized
  */
-class GeneralGenerationPhaseState implements IPhaseState {
+abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
 
-    private Set<IPhaseState> compatibleStates = new HashSet<>();
+    private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
     private boolean isBaked = false;
     private final String id;
 
@@ -55,7 +61,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
         this.id = id;
     }
 
-    final GeneralGenerationPhaseState addCompatibleState(IPhaseState state) {
+    final GeneralGenerationPhaseState addCompatibleState(IPhaseState<?> state) {
         if (this.isBaked) {
             throw new IllegalStateException("This state is already baked! " + this.id);
         }
@@ -77,8 +83,9 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return TrackingPhases.GENERATION;
     }
 
+
     @Override
-    public final boolean canSwitchTo(IPhaseState state) {
+    public final boolean canSwitchTo(IPhaseState<?> state) {
         return this.compatibleStates.contains(state);
     }
 
@@ -87,29 +94,56 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return true;
     }
 
-
-    Cause provideSpawnCause(CauseTracker causeTracker, PhaseContext context) {
-        return Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
+    @Override
+    public boolean ignoresBlockEvent() {
+        return true;
     }
 
-    @SuppressWarnings("unchecked")
-    public final void unwind(CauseTracker causeTracker, PhaseContext context) {
+    @Override
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return true;
+    }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
+
+    @Override
+    public final void unwind(G context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;
         }
-        final Cause cause = provideSpawnCause(causeTracker, context);
-
-        final SpawnEntityEvent.Spawner
-                event =
-                SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, causeTracker.getWorld());
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
+    
+            final SpawnEntityEvent.Spawner
+                    event =
+                    SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(), spawnedEntities);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                }
             }
         }
+    }
 
+    @Override
+    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
+            entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            for (Entity item : event.getEntities()) {
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -131,7 +165,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.id)
                 .toString();
     }

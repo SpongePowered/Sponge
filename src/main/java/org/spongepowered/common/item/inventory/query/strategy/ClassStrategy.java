@@ -36,8 +36,8 @@ public class ClassStrategy<TInventory, TStack> extends QueryStrategy<TInventory,
     private Set<Class<?>> classes;
 
     @Override
-    public QueryStrategy<TInventory, TStack, Class<?>> with(Class<?>[] args) {
-        this.classes = ImmutableSet.<Class<?>>copyOf(args);
+    public QueryStrategy<TInventory, TStack, Class<?>> with(ImmutableSet<Class<?>> args) {
+        this.classes = args;
         return this;
     }
     
@@ -47,7 +47,8 @@ public class ClassStrategy<TInventory, TStack> extends QueryStrategy<TInventory,
             return true;
         }
         for (Class<?> candidate : this.classes) {
-            if (candidate.isAssignableFrom(lens.getAdapterType())) {
+            // Check for null first because there are inventories without lens (e.g. InventoryCrafting in EntitySheep)
+            if (candidate != null && candidate.isAssignableFrom(lens.getAdapterType())) {
                 return true;
             }
         }

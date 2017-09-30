@@ -24,41 +24,23 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockSilverfish;
 import org.spongepowered.api.data.type.DisguisedBlockType;
 import org.spongepowered.api.data.type.DisguisedBlockTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(DisguisedBlockTypes.class)
+public final class DisguisedBlockTypeRegistryModule
+    extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockSilverfish.EnumType, DisguisedBlockType> {
 
-public final class DisguisedBlockTypeRegistryModule implements CatalogRegistryModule<DisguisedBlockType> {
-
-    @RegisterCatalog(DisguisedBlockTypes.class)
-    private final Map<String, DisguisedBlockType> disguisedBlockTypeMappings = new ImmutableMap.Builder<String, DisguisedBlockType>()
-        .put("stone", (DisguisedBlockType) (Object) BlockSilverfish.EnumType.STONE)
-        .put("cobblestone", (DisguisedBlockType) (Object) BlockSilverfish.EnumType.COBBLESTONE)
-        .put("stonebrick", (DisguisedBlockType) (Object) BlockSilverfish.EnumType.STONEBRICK)
-        .put("mossy_stonebrick", (DisguisedBlockType) (Object) BlockSilverfish.EnumType.MOSSY_STONEBRICK)
-        .put("cracked_stonebrick", (DisguisedBlockType) (Object) BlockSilverfish.EnumType.CRACKED_STONEBRICK)
-        .put("chiseled_stonebrick", (DisguisedBlockType) (Object) BlockSilverfish.EnumType.CHISELED_STONEBRICK)
-        .build();
-
-    @Override
-    public Optional<DisguisedBlockType> getById(String id) {
-        return Optional.ofNullable(this.disguisedBlockTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public DisguisedBlockTypeRegistryModule() {
+        super(new String[] {"minecraft"},
+            id -> id.replace("_brick", "_stonebrick").replace("stone_stonebrick", "stonebrick"));
     }
 
     @Override
-    public Collection<DisguisedBlockType> getAll() {
-        return ImmutableList.copyOf(this.disguisedBlockTypeMappings.values());
+    protected BlockSilverfish.EnumType[] getValues() {
+        return BlockSilverfish.EnumType.values();
     }
-
 }

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -39,16 +37,17 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.interfaces.item.IMixinItem;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(Item.class)
 public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry {
@@ -60,11 +59,11 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Shadow public abstract int getItemStackLimit();
     @Shadow public abstract String getUnlocalizedName();
 
+    // A item stack used to retrieve properties
+    @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
+
     @Override
     public String getId() {
-        if ((Object) this == ItemTypeRegistryModule.NONE_ITEM) {
-            return "NONE";
-        }
         return Item.REGISTRY.getNameForObject((Item) (Object) this).toString();
     }
 
@@ -75,7 +74,10 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getDefaultProperty(Class<T> propertyClass) {
-        return Optional.empty(); // TODO
+        if (this.propertyItemStack == null) {
+            this.propertyItemStack = ItemStackUtil.fromNative(new ItemStack((Item) (Object) this));
+        }
+        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(store -> store.getFor(this.propertyItemStack));
     }
 
     @Override
@@ -118,7 +120,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Name", this.unlocalizedName)
                 .toString();
     }

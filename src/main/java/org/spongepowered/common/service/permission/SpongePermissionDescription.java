@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.service.permission;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -35,13 +32,21 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Basic implementation of {@link PermissionDescription}. Can only be used in
@@ -49,16 +54,16 @@ import java.util.Optional;
  */
 class SpongePermissionDescription implements PermissionDescription {
 
-    private final PermissionService permissionService;
+    private final SpongePermissionService permissionService;
     private final String id;
-    private final Text description;
+    @Nullable private final Text description;
     private final PluginContainer owner;
 
-    SpongePermissionDescription(PermissionService permissionService, String id, Text description, PluginContainer owner) {
+    SpongePermissionDescription(SpongePermissionService permissionService, String id, @Nullable Text description, PluginContainer owner) {
         super();
         this.permissionService = checkNotNull(permissionService, "permissionService");
         this.id = checkNotNull(id, "id");
-        this.description = checkNotNull(description, "description");
+        this.description = description;
         this.owner = checkNotNull(owner, "owner");
     }
 
@@ -68,19 +73,25 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public Text getDescription() {
-        return this.description;
+    public Optional<Text> getDescription() {
+        return Optional.ofNullable(this.description);
     }
 
     @Override
     public Map<Subject, Boolean> getAssignedSubjects(String identifier) {
-        SubjectCollection subjects = this.permissionService.getSubjects(identifier);
+        SubjectCollection subjects = this.permissionService.get(identifier);
+        return subjects.getLoadedWithPermission(this.id);
+    }
+
+    @Override
+    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String type) {
+        SubjectCollection subjects = this.permissionService.get(type);
         return subjects.getAllWithPermission(this.id);
     }
 
     @Override
-    public PluginContainer getOwner() {
-        return this.owner;
+    public Optional<PluginContainer> getOwner() {
+        return Optional.of(this.owner);
     }
 
     @Override
@@ -105,7 +116,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("owner", this.owner)
                 .add("id", this.id)
                 .toString();
@@ -116,8 +127,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private final SpongePermissionService permissionService;
         private final PluginContainer owner;
         private String id;
-        private Text description;
-        private Optional<String> suggestedRank = Optional.empty();
+        @Nullable private Text description;
         private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {
@@ -133,8 +143,8 @@ class SpongePermissionDescription implements PermissionDescription {
         }
 
         @Override
-        public Builder description(Text description) {
-            this.description = checkNotNull(description, "description");
+        public Builder description(@Nullable Text description) {
+            this.description = description;
             return this;
         }
 
@@ -148,13 +158,12 @@ class SpongePermissionDescription implements PermissionDescription {
         @Override
         public SpongePermissionDescription register() throws IllegalStateException {
             checkState(this.id != null, "No id set");
-            checkState(this.description != null, "No description set");
             SpongePermissionDescription description =
                     new SpongePermissionDescription(this.permissionService, this.id, this.description, this.owner);
             this.permissionService.addDescription(description);
 
             // Set role-templates
-            SubjectCollection subjects = this.permissionService.getSubjects(PermissionService.SUBJECTS_ROLE_TEMPLATE);
+            SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
             for (Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
                 Subject subject = subjects.get(assignment.getKey());
                 subject.getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, this.id, assignment.getValue());

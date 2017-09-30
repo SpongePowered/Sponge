@@ -28,7 +28,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -45,8 +44,6 @@ import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
@@ -64,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -87,28 +85,35 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Nullable private EntityLivingBase attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
-    @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashedToEntity();
+    @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashHolder();
     @Shadow protected abstract void initEntityAI();
-
-    boolean initAI = false;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
-        if (!this.initAI) {
+        this.initSpongeAI();
+        this.initEntityAI();
+    }
+
+    private void initSpongeAI() {
+        if (!((IMixinEntityAITasks) this.tasks).initialized()) {
             ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
+            ((IMixinEntityAITasks) this.tasks).setInitialized(true);
+        }
+        if (!((IMixinEntityAITasks) this.targetTasks).initialized()) {
             ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
-            this.initEntityAI();
-            this.initAI = true;
+            ((IMixinEntityAITasks) this.targetTasks).setInitialized(true);
         }
     }
 
     @Override
     public void firePostConstructEvents() {
         super.firePostConstructEvents();
-        handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
-        handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
+        if (ShouldFire.AI_TASK_EVENT_ADD) {
+            handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
+            handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -116,7 +121,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
             EntityAITasks.EntityAITaskEntry task = taskItr.next();
-            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(NamedCause.source(Sponge.getGame())),
+            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -126,11 +131,14 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
+    @Inject(method = "processInitialInteract", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashHolder(Lnet/minecraft/entity/Entity;Z)V"))
     public void callLeashEvent(EntityPlayer playerIn, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.world.isRemote) {
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);
+            Sponge.getCauseStackManager().pushCause(playerIn);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
             SpongeImpl.postEvent(event);
+            Sponge.getCauseStackManager().popCause();
             if(event.isCancelled()) {
                 ci.setReturnValue(false);
             }
@@ -139,11 +147,16 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
-        net.minecraft.entity.Entity entity = getLeashedToEntity();
+        net.minecraft.entity.Entity entity = getLeashHolder();
         if (!this.world.isRemote) {
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", this))
-                : Cause.of(NamedCause.source(entity)), this);
+            if(entity == null) {
+                Sponge.getCauseStackManager().pushCause(this);
+            } else {
+                Sponge.getCauseStackManager().pushCause(entity);
+            }
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
             SpongeImpl.postEvent(event);
+            Sponge.getCauseStackManager().popCause();
             if(event.isCancelled()) {
                 ci.cancel();
             }
@@ -263,6 +276,11 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getAgentData());
+    }
+
+    @Override
+    public void onJoinWorld() {
+        this.initSpongeAI();
     }
 
 }

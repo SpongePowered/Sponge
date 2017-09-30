@@ -61,10 +61,10 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         ParticleType particleType = container.getCatalogType(DataQueries.PARTICLE_TYPE, ParticleType.class).get();
         Map<ParticleOption<?>, Object> options = new HashMap<>();
         container.getViewList(DataQueries.PARTICLE_OPTIONS).get().forEach(view -> {
-            ParticleOption option = view.getCatalogType(DataQueries.PARTICLE_OPTION_KEY, ParticleOption.class).get();
+            ParticleOption<?> option = view.getCatalogType(DataQueries.PARTICLE_OPTION_KEY, ParticleOption.class).get();
             Object value;
             if (option.getValueType().isAssignableFrom(DataSerializable.class)) {
-                value = view.getSerializable(DataQueries.PARTICLE_OPTION_VALUE, option.getValueType()).get();
+                value = view.getSerializable(DataQueries.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();
             } else {
                 value = view.getObject(DataQueries.PARTICLE_OPTION_VALUE, option.getValueType()).get();
             }
@@ -94,6 +94,7 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         return this;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <V> ParticleEffect.Builder option(ParticleOption<V> option, V value) throws IllegalArgumentException {
         checkNotNull(option, "option");

@@ -162,7 +162,6 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
      * We redirect this method in MinecraftServer, to provide the real value of 'usingBlock'. This override is just for mods
      */
     @Override
-    @SuppressWarnings("rawtypes")
     public List<String> getTabCompletions(ICommandSender sender, String input, @Nullable BlockPos pos) {
         @Nullable Location<org.spongepowered.api.world.World> targetPos = null;
         if (pos != null) {

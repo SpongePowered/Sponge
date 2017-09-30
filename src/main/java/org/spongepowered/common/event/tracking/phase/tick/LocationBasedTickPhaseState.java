@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -39,46 +40,50 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
 
-abstract class LocationBasedTickPhaseState extends TickPhaseState {
+abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
     LocationBasedTickPhaseState() {
     }
 
+    abstract Location<World> getLocationSourceFromContext(PhaseContext<?> context);
 
-    abstract Location<World> getLocationSourceFromContext(PhaseContext context);
+    abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
 
     @Override
-    public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        final Location<World> location = getLocationSourceFromContext(context);
-        TrackingUtil.getNotifierOrOwnerFromBlock(location)
-                .ifPresent(user -> {
-                    final BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
-                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
-                    mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
-                });
+    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        if (sourcePos == null) {
+            LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
+            sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
+        }
+        User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(minecraftWorld, sourcePos));
+        if (user != null) {
+            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
+            mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+        }
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
-        final Location<World> location = getLocationSourceFromContext(context);
+    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
+        Transaction<BlockSnapshot> snapshotTransaction, T context) {
+        final Location<World> location = getLocatableBlockSourceFromContext(context).getLocation();
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
-        final Vector3d changedPosition = changedLocation.getPosition();
-        final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
+        final BlockPos changedBlockPos = ((IMixinLocation)(Object) changedLocation).getBlockPos();
         final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
-        TrackingUtil.getNotifierOrOwnerFromBlock(location)
-                .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+        final User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(location));
+        if (user != null) {
+            changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
+        }
     }
 
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return super.canSwitchTo(state) || state == GenerationPhase.State.CHUNK_LOADING;
     }
 

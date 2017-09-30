@@ -26,7 +26,7 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.Archetype;
@@ -42,19 +42,19 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>> implements Archetype<S> {
+public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>, E> implements Archetype<S, E> {
 
     protected final C type;
     protected NBTTagCompound data;
@@ -70,39 +70,39 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public boolean validateRawData(DataView container) {
-        return SpongeDataManager.getInstance().getValidators(this.getValidationType()).validate(container);
+        return DataUtil.getValidators(this.getValidationType()).validate(container);
     }
 
     @Override
     public void setRawData(DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
         final NBTTagCompound copy = NbtTranslator.getInstance().translateData(container);
-        SpongeDataManager.getInstance().getValidators(this.getValidationType()).validate(copy);
+        DataUtil.getValidators(this.getValidationType()).validate(copy);
         this.data = copy;
     }
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return SpongePropertyRegistry.getInstance().getStore(propertyClass)
+        return SpongeImpl.getPropertyRegistry().getStore(propertyClass)
                 .flatMap(store -> store.getFor(this));
     }
 
     @Override
     public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongePropertyRegistry.getInstance().getPropertiesFor(this);
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), containerClass)
+        return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), containerClass)
+        return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
@@ -110,27 +110,22 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
         // By default, if there is a processor, we can check compatibilty with that
         // Otherwise, it's true because of custom data.
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), holderClass)
+        return DataUtil.getRawNbtProcessor(this.getDataType(), holderClass)
                 .map(processor -> processor.isCompatible(this.data))
                 .orElse(true);
     }
 
     @Override
-    public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
-        return SpongeDataManager.getInstance().getNbtProcessor(this.getDataType(), key)
+    public <R> DataTransactionResult offer(Key<? extends BaseValue<R>> key, R value) {
+        return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.offer(this.data, value))
                 .orElseGet(DataTransactionResult::failNoData);
-    }
-
-    @Override
-    public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value, Cause cause) {
-        return offer(key, value);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), valueContainer.getClass())
+        return DataUtil.getRawNbtProcessor(this.getDataType(), valueContainer.getClass())
                 .map(processor -> {
                     Optional<DataManipulator<?, ?>> optionalManipulator = processor.readFrom(this.data);
 
@@ -149,21 +144,15 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
-    public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function, Cause cause) {
-        return offer(valueContainer, function);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), containerClass)
+        return DataUtil.getRawNbtProcessor(this.getDataType(), containerClass)
                 .map(processor -> processor.remove(this.data))
                 .orElseGet(() -> CustomDataNbtUtil.remove(this.data, containerClass));
     }
 
     @Override
     public DataTransactionResult remove(Key<?> key) {
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), key)
+        return DataUtil.getRawNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.remove(this.data))
                 .orElseGet(DataTransactionResult::failNoData);
     }
@@ -190,37 +179,35 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return SpongeDataManager.getInstance().getNbtProcessors(this.getDataType()).stream()
+        return DataUtil.getNbtProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        return SpongeDataManager.getInstance().getNbtProcessor(this.getDataType(), key)
+    public <R> Optional<R> get(Key<? extends BaseValue<R>> key) {
+        return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readValue(this.data));
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
-        return SpongeDataManager.getInstance().getNbtProcessor(this.getDataType(), key)
+    public <R, V extends BaseValue<R>> Optional<V> getValue(Key<V> key) {
+        return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @Override
     public boolean supports(Key<?> key) {
-        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), key)
+        return DataUtil.getRawNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.isCompatible(this.getDataType()))
                 .orElse(true); // we want to say we automatically support custom data
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Set<Key<?>> getKeys() {
-        return SpongeDataManager.getInstance().getNbtValueProcessors(this.getDataType()).stream()
+        return DataUtil.getNbtValueProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -230,7 +217,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public Set<ImmutableValue<?>> getValues() {
-        return SpongeDataManager.getInstance().getNbtValueProcessors(this.getDataType()).stream()
+        return DataUtil.getNbtValueProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -242,6 +229,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
     }
 }

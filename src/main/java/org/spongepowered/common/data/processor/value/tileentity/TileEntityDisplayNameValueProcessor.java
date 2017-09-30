@@ -31,10 +31,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
@@ -53,7 +51,6 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
         return new SpongeValue<>(Keys.DISPLAY_NAME, Text.of(), defaultValue);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(IWorldNameable container, Text value) {
         if (container instanceof IMixinCustomNameable) {
@@ -67,7 +64,6 @@ public class TileEntityDisplayNameValueProcessor extends AbstractSpongeValueProc
         return true;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Optional<Text> getVal(IWorldNameable container) {
         if (container.hasCustomName()) {

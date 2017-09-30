@@ -24,41 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockPlanks;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class TreeTypeRegistryModule implements CatalogRegistryModule<TreeType> {
-
-    @RegisterCatalog(TreeTypes.class)
-    private final Map<String, TreeType> treeTypeMap = new ImmutableMap.Builder<String, TreeType>()
-        .put("oak", (TreeType) (Object) BlockPlanks.EnumType.OAK)
-        .put("birch", (TreeType) (Object) BlockPlanks.EnumType.BIRCH)
-        .put("acacia", (TreeType) (Object) BlockPlanks.EnumType.ACACIA)
-        .put("dark_oak", (TreeType) (Object) BlockPlanks.EnumType.DARK_OAK)
-        .put("jungle", (TreeType) (Object) BlockPlanks.EnumType.JUNGLE)
-        .put("spruce", (TreeType) (Object) BlockPlanks.EnumType.SPRUCE)
-        .build();
+@RegisterCatalog(TreeTypes.class)
+public final class TreeTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockPlanks.EnumType, TreeType> {
 
     @Override
-    public Optional<TreeType> getById(String id) {
-        return Optional.ofNullable(this.treeTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockPlanks.EnumType[] getValues() {
+        return BlockPlanks.EnumType.values();
     }
-
-    @Override
-    public Collection<TreeType> getAll() {
-        return ImmutableList.copyOf(this.treeTypeMap.values());
-    }
-
 }

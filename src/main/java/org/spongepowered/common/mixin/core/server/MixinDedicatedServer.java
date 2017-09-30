@@ -28,9 +28,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,7 +47,7 @@ import java.net.InetSocketAddress;
 import java.util.Optional;
 
 @Mixin(DedicatedServer.class)
-public abstract class MixinDedicatedServer extends MinecraftServer {
+public abstract class MixinDedicatedServer extends MinecraftServer implements Server {
 
     @Shadow public abstract String getHostname();
     @Shadow public abstract int getPort();
@@ -59,7 +58,12 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         super(null, null, null, null, null, null, null);
     }
 
+    @Override
     public Optional<InetSocketAddress> getBoundAddress() {
+        //noinspection ConstantConditions
+        if (getHostname() == null) {
+            return Optional.empty();
+        }
         return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
     }
 
@@ -91,13 +95,13 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     @Overwrite
     @Override
     public boolean isBlockProtected(net.minecraft.world.World worldIn, BlockPos pos, EntityPlayer playerIn) {
-        final WorldServer worldServer = (WorldServer) worldIn;
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
-        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
         if (phaseState == null || !phaseState.isInteraction()) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, NamedCause.of(NamedCause.BLOCK_PROTECTED, worldIn), playerIn).isCancelled()) {
+            // TODO BLOCK_PROTECTED flag
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }

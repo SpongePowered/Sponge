@@ -63,7 +63,7 @@ public abstract class MixinCommandGameRule {
     @Redirect(method = "notifyGameRuleChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;"
             + "sendPacket(Lnet/minecraft/network/Packet;)V"))
     private static void onSendPacket(NetHandlerPlayServer connection, Packet<?> packet) {
-        if (connection.playerEntity.dimension == currentDimension) {
+        if (connection.player.dimension == currentDimension) {
             connection.sendPacket(packet);
         }
     }

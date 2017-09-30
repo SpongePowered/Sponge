@@ -24,22 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.boss.EntityWither;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntitySnowman;
-import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.IRangedAttackMob;
 import org.spongepowered.api.entity.living.Ranger;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.living.human.EntityHuman;
 
-@Mixin({
-        EntityHuman.class,
-        EntitySkeleton.class,
-        EntitySnowman.class,
-        EntityWitch.class,
-        EntityWither.class
-})
-// TODO Remove when we can mix into implementors of an interface
-public abstract class MixinRanger implements Ranger {
+@Mixin(IRangedAttackMob.class)
+public interface MixinRanger extends Ranger {
 
 }

@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -36,28 +31,22 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.world.gen.type.SpongeMushroomType;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(MushroomTypes.class)
+public class MushroomTypeRegistryModule
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<MushroomType>
+        implements CatalogRegistryModule<MushroomType> {
 
-public class MushroomTypeRegistryModule implements CatalogRegistryModule<MushroomType> {
-
-    @RegisterCatalog(MushroomTypes.class)
-    private final Map<String, MushroomType> mushroomTypeMap = ImmutableMap.<String, MushroomType>builder()
-        .put("brown", new SpongeMushroomType("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK)))
-        .put("red", new SpongeMushroomType("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK)))
-        .build();
-
-    @Override
-    public Optional<MushroomType> getById(String id) {
-        return Optional.ofNullable(this.mushroomTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public MushroomTypeRegistryModule() {
+        super("minecraft");
     }
 
     @Override
-    public Collection<MushroomType> getAll() {
-        return ImmutableList.copyOf(this.mushroomTypeMap.values());
+    public void registerDefaults() {
+        register(new SpongeMushroomType("minecraft:brown", "brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK)));
+        register(new SpongeMushroomType("minecraft:red", "red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK)));
     }
+
 }

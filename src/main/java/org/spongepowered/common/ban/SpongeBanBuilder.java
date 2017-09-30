@@ -125,14 +125,13 @@ public class SpongeBanBuilder implements Ban.Builder {
             checkState(this.profile != null, "User cannot be null!");
             return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end),
                     this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
-        } else {
-            checkState(this.address != null, "Address cannot be null!");
-
-            // This *should* be a static method, but apparently not...
-            UserListIPBans ipBans = SpongeImpl.getServer().getPlayerList().getBannedIPs();
-            return (Ban) new UserListIPBansEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
-                    this.toDate(this.end), this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
         }
+        checkState(this.address != null, "Address cannot be null!");
+
+        // This *should* be a static method, but apparently not...
+        UserListIPBans ipBans = SpongeImpl.getServer().getPlayerList().getBannedIPs();
+        return (Ban) new UserListIPBansEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
+                this.toDate(this.end), this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
     }
 
     private Date toDate(Instant instant) {

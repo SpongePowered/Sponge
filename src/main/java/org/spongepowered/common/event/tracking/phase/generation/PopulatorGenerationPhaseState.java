@@ -24,15 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.world.gen.InternalPopulatorTypes;
-
 final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
 
     PopulatorGenerationPhaseState(String id) {
@@ -40,21 +31,10 @@ final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
     }
 
     @Override
-    Cause provideSpawnCause(CauseTracker causeTracker, PhaseContext context) {
-        final PopulatorType runningGenerator = context.firstNamed(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, PopulatorType.class)
-                .orElse(null);
-        final Cause.Builder causeBuilder = Cause.builder();
-        Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
-        if (InternalPopulatorTypes.ANIMAL.equals(runningGenerator)) {
-            causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE))
-                    .named(NamedCause.of(InternalNamedCauses.General.ANIMAL_SPAWNER, runningGenerator));
-        } else if (runningGenerator != null) {
-            causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.STRUCTURE_SPAWNING))
-                    .named(NamedCause.of(InternalNamedCauses.WorldGeneration.STRUCTURE, runningGenerator));
-        } else {
-            causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.STRUCTURE_SPAWNING));
-        }
-        return causeBuilder.build();
+    public GenerationContext createPhaseContext() {
+        return new PopulatorPhaseContext(this)
+            .addEntityCaptures();
     }
+
 
 }

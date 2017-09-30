@@ -25,15 +25,15 @@
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.phase.packet.BasicInventoryPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 
 import java.util.List;
@@ -45,9 +45,9 @@ public final class SecondaryDragInventoryStopState extends DragInventoryStopStat
     }
 
     @Override
-    public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventDragSecondary(cause, transaction, openContainer, slotTransactions);
+    public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
+        return SpongeEventFactory.createClickInventoryEventDragSecondary(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
     }
 
 }

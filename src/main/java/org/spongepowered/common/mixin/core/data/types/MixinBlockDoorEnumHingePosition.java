@@ -34,26 +34,25 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockDoor.EnumHingePosition.class)
-@Implements(@Interface(iface = Hinge.class, prefix = "shadow$"))
-public abstract class MixinBlockDoorEnumHingePosition {
+@Implements(@Interface(iface = Hinge.class, prefix = "hinge$"))
+public abstract class MixinBlockDoorEnumHingePosition implements Hinge {
 
-    @Shadow
-    public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
-    public String shadow$getId() {
-        return getName();
+    public String hinge$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String hinge$getName() {
+        return shadow$getName();
     }
 
+    @Override
     public Hinge cycleNext() {
         if (this.equals(Hinges.LEFT)) {
             return Hinges.RIGHT;
-        } else {
-            return Hinges.LEFT;
         }
+        return Hinges.LEFT;
     }
 }

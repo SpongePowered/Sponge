@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.scoreboard;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.common.SpongeCatalogType;
@@ -37,7 +37,7 @@ public class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot 
     private int id;
 
     public SpongeDisplaySlot(String name, TextColor textColor, int id) {
-        super(name);
+        super("minecraft:" + name);
         this.textColor = Optional.ofNullable(textColor);
         this.id = id;
     }
@@ -52,7 +52,7 @@ public class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot 
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("color", this.textColor);
     }

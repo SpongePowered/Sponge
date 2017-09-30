@@ -26,6 +26,8 @@ package org.spongepowered.common.weather;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.weather.Weather;
 
@@ -33,18 +35,46 @@ import org.spongepowered.api.world.weather.Weather;
 public class SpongeWeather implements Weather {
 
     private final String id;
+    private final String name;
 
-    public SpongeWeather(String id) {
+    public SpongeWeather(String id, String name) {
         this.id = checkNotNull(id);
+        this.name = checkNotNull(name);
     }
 
     @Override
     public String getId() {
-        return "weather." + this.id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return this.id;
+        return this.name;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeWeather that = (SpongeWeather) o;
+        return Objects.equal(this.id, that.id) &&
+               Objects.equal(this.name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
     }
 }

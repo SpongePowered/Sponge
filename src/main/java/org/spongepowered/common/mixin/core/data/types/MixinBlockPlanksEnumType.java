@@ -35,25 +35,27 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockPlanks.EnumType.class)
-@Implements(@Interface(iface = TreeType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = TreeType.class, prefix = "tree$"))
 public abstract class MixinBlockPlanksEnumType implements TreeType {
 
     @Shadow @Final private String name;
     @Shadow @Final private String unlocalizedName;
 
-    private Translation translation;
+    @Nullable private Translation translation;
 
-    public String shadow$getId() {
-        return this.name;
+    public String tree$getId() {
+        return "minecraft:" + this.name;
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return this.name;
+    public String tree$getName() {
+        return this.unlocalizedName;
     }
 
-    public Translation shadow$getTranslation() {
+    public Translation tree$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation("tile.wood." + this.unlocalizedName + "name");

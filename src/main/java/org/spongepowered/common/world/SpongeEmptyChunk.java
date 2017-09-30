@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -52,7 +52,7 @@ public class SpongeEmptyChunk extends Chunk {
 
     @Override
     public boolean isAtLocation(int x, int z) {
-        return x == this.xPosition && z == this.zPosition;
+        return x == this.x && z == this.z;
     }
 
     @Override
@@ -124,15 +124,15 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public void onChunkLoad() {
+    public void onLoad() {
     }
 
     @Override
-    public void onChunkUnload() {
+    public void onUnload() {
     }
 
     @Override
-    public void setChunkModified() {
+    public void markDirty() {
     }
 
     @Override
@@ -141,7 +141,7 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
+    public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
             Predicate<? super T> p_177430_4_) {
     }
 
@@ -152,8 +152,8 @@ public class SpongeEmptyChunk extends Chunk {
 
     @Override
     public Random getRandomWithSeed(long seed) {
-        return new Random(this.getWorld().getSeed() + (long) (this.xPosition * this.xPosition * 4987142) + (long) (this.xPosition * 5947611)
-                + (long) (this.zPosition * this.zPosition) * 4392871L + (long) (this.zPosition * 389711) ^ seed);
+        return new Random(this.getWorld().getSeed() + (long) (this.x * this.x * 4987142) + (long) (this.x * 5947611)
+                + (long) (this.z * this.z) * 4392871L + (long) (this.z * 389711) ^ seed);
     }
 
     @Override
@@ -162,16 +162,16 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public boolean getAreLevelsEmpty(int startY, int endY) {
+    public boolean isEmptyBetween(int startY, int endY) {
         return true;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("empty", true)
-                .add("x", this.xPosition)
-                .add("z", this.zPosition)
+                .add("x", this.x)
+                .add("z", this.z)
                 .toString();
     }
 }

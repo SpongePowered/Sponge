@@ -27,7 +27,6 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -35,7 +34,6 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 
 import java.util.ArrayList;
@@ -73,7 +71,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        super.init(slots);
+        super.init(slots, false);
+
         this.rows = new ArrayList<>();
         this.cols = new ArrayList<>();
 

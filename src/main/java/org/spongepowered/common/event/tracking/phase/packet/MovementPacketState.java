@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 final class MovementPacketState extends BasicPacketState {
 
     @Override
-    public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        context.addBlockCaptures().addEntityCaptures();
+    public void unwind(BasicPacketContext context) {
+        context.getCapturedBlockSupplier()
+            .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
     }
-
 }

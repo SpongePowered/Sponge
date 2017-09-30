@@ -32,9 +32,7 @@ import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.ArrayList;
@@ -44,6 +42,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public final class LegacyTexts {
+
+    private static final int FORMATTING_CODE_LENGTH = 2;
 
     private static final TextFormatting[] formatting = TextFormatting.values();
     private static final String LOOKUP;
@@ -79,56 +79,101 @@ public final class LegacyTexts {
     }
 
     @Nullable
-    public static TextFormatting getFormat(char format) {
+    public static TextFormatting parseFormat(char format) {
         int pos = findFormat(format);
         return pos != -1 ? formatting[pos] : null;
     }
 
+    /**
+     * This method parses an input string with formatting codes into a
+     * {@link Text} object.
+     *
+     * <p>This implementation parses the input string in reverse direction
+     * to avoid recursion. It returns a {@link Text} which is equivalent
+     * to the input string when rendered on the client.</p>
+     *
+     * <p>Note: The implementation does not attempt to preserve redundant
+     * formatting codes (e.g. two consecutive color codes). Only relevant
+     * formatting codes are represented in the output.</p>
+     *
+     * @param input The input string
+     * @param code The formatting sign (e.g. {@code &})
+     * @return The parsed text
+     */
     public static Text parse(String input, char code) {
-        int next = input.lastIndexOf(code, input.length() - 2);
-        if (next == -1) {
+        int pos = input.length();
+        if (pos < FORMATTING_CODE_LENGTH) {
+            // Not enough characters to form a formatting code => plain text
             return Text.of(input);
         }
 
-        List<Text> parts = Lists.newArrayList();
+        // Find the first (potential) formatting code
+        int next = input.lastIndexOf(code, pos - FORMATTING_CODE_LENGTH);
+        if (next == -1) {
+            // No potential formatting code found => plain text
+            return Text.of(input);
+        }
 
         LiteralText.Builder current = null;
         boolean reset = false;
+        List<Text> parts = Lists.newArrayList();
 
-        int pos = input.length();
         do {
-            TextFormatting format = getFormat(input.charAt(next + 1));
+            // Parse the formatting code
+            final TextFormatting format = parseFormat(input.charAt(next + 1));
             if (format != null) {
-                int from = next + 2;
+                final int from = next + FORMATTING_CODE_LENGTH;
                 if (from != pos) {
+                    // The plain text between the current and last formatting code
+                    final String content = input.substring(from, pos);
+
                     if (current != null) {
                         if (reset) {
+                            // Color codes reset the text style so we avoid inheritance
+                            // by adding directly to the root text
                             parts.add(current.build());
                             reset = false;
-                            current = Text.builder("");
+                            current = Text.builder(content);
                         } else {
-                            current = Text.builder("").append(current.build());
+                            // Inherit color/style
+                            current = Text.builder(content).append(current.build());
                         }
                     } else {
-                        current = Text.builder("");
+                        current = Text.builder(content);
                     }
-
-                    current.content(input.substring(from, pos));
-                } else if (current == null) {
-                    current = Text.builder("");
                 }
 
-                reset |= applyStyle(current, format);
+                // current == null => style does not apply to any content
+                if (current != null) {
+                    reset |= applyStyle(current, format);
+                }
+
+                // Mark the current position
                 pos = next;
             }
 
+            // Search for next formatting code
             next = input.lastIndexOf(code, next - 1);
         } while (next != -1);
 
-        if (current != null) {
-            parts.add(current.build());
+        if (current == null) {
+            // No formatted text found
+            if (pos == 0) {
+                // Text contains only (redundant) formatting codes => empty text
+                return Text.EMPTY;
+            } else {
+                // No valid formatting code found => plain text
+                return Text.of(input);
+            }
         }
 
+        // Return simple text if there is only one text style in the input string
+        if (pos == 0 && parts.isEmpty()) {
+            return current.build();
+        }
+
+        // Build the resulting text
+        parts.add(current.build());
         Collections.reverse(parts);
         return Text.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
     }
@@ -173,7 +218,7 @@ public final class LegacyTexts {
 
             int pos = text.length();
             do {
-                TextFormatting format = getFormat(text.charAt(next + 1));
+                TextFormatting format = parseFormat(text.charAt(next + 1));
                 if (format != null) {
                     int from = next + 2;
                     if (from != pos) {

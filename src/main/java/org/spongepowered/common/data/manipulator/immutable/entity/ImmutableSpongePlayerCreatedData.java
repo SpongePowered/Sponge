@@ -29,11 +29,12 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayerCr
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayerCreatedData;
 
 public class ImmutableSpongePlayerCreatedData extends AbstractImmutableBooleanData<ImmutablePlayerCreatedData, PlayerCreatedData> implements ImmutablePlayerCreatedData {
 
     public ImmutableSpongePlayerCreatedData(boolean value) {
-        super(ImmutablePlayerCreatedData.class, value, Keys.PLAYER_CREATED, PlayerCreatedData.class, false);
+        super(ImmutablePlayerCreatedData.class, value, Keys.PLAYER_CREATED, SpongePlayerCreatedData.class, false);
     }
 
     @Override

@@ -30,25 +30,25 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.mixin.realtime.IMixinRealTimeTicking;
 
 @Mixin(EntityItem.class)
 public abstract class MixinEntityItem {
 
-    private static final String ENTITY_ITEM_DELAY_PICKUP_FIELD = "Lnet/minecraft/entity/item/EntityItem;delayBeforeCanPickup:I";
+    private static final String ENTITY_ITEM_DELAY_PICKUP_FIELD = "Lnet/minecraft/entity/item/EntityItem;pickupDelay:I";
     private static final String ENTITY_ITEM_AGE_FIELD = "Lnet/minecraft/entity/item/EntityItem;age:I";
-    @Shadow private int delayBeforeCanPickup;
+    @Shadow private int pickupDelay;
     @Shadow public int age;
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_ITEM_DELAY_PICKUP_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupPickupDelay(EntityItem self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
-        this.delayBeforeCanPickup = Math.max(0, this.delayBeforeCanPickup - ticks);
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
+        this.pickupDelay = Math.max(0, this.pickupDelay - ticks);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "FIELD", target = ENTITY_ITEM_AGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupAge(EntityItem self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
         this.age += ticks;
     }
 

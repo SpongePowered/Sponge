@@ -25,11 +25,46 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.item.EntityMinecartMobSpawner;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.vehicle.minecart.MobSpawnerMinecart;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
+import org.spongepowered.common.data.processor.common.SpawnerUtils;
+import org.spongepowered.common.interfaces.IMixinMobSpawner;
 import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;
+import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.List;
 
 @Mixin(EntityMinecartMobSpawner.class)
-public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart implements MobSpawnerMinecart {
+public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart implements MobSpawnerMinecart, IMixinMobSpawner {
 
+    @Shadow private MobSpawnerBaseLogic mobSpawnerLogic;
+
+    @Override
+    public MobSpawnerBaseLogic getLogic() {
+        return this.mobSpawnerLogic;
+    }
+
+    @Override
+    public MobSpawnerData getSpawnerData() {
+        return new SpongeMobSpawnerData(
+                (short) getLogic().spawnDelay,
+                (short) getLogic().minSpawnDelay,
+                (short) getLogic().maxSpawnDelay,
+                (short) getLogic().spawnCount,
+                (short) getLogic().maxNearbyEntities,
+                (short) getLogic().activatingRangeFromPlayer,
+                (short) getLogic().spawnRange,
+                SpawnerUtils.getNextEntity(getLogic()),
+                SpawnerUtils.getEntities(getLogic()));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getSpawnerData());
+    }
 }

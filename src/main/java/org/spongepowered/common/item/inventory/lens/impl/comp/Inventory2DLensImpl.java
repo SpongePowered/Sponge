@@ -91,7 +91,7 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
      * rectangular array of slots {@link #width} by {@link #height} assuming
      * that the target inventory is {@link #stride} slots wide.
      *
-     * @param slots the ptrovider of the slos
+     * @param slots the provider of the slots
      * @param spanning Set to true to create spanning slots, false to create
      *      normal child slots
      */

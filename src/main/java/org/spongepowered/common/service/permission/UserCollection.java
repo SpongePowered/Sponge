@@ -32,6 +32,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -66,7 +67,7 @@ public class UserCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public boolean hasRegistered(String identifier) {
+    public boolean isRegistered(String identifier) {
         UUID uid = identToUuid(identifier);
         if (uid == null) {
             return false;
@@ -84,9 +85,9 @@ public class UserCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Iterable<Subject> getAllSubjects() {
-        return (Iterable) SpongeImpl.getGame().getServer().getOnlinePlayers();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Collection<Subject> getLoadedSubjects() {
+        return (Collection) SpongeImpl.getGame().getServer().getOnlinePlayers();
         /*return ImmutableSet.copyOf(Iterables.concat(
                 Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
                         new Function<Object, Subject>() {

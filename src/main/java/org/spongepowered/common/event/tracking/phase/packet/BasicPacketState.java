@@ -24,23 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-
-public class BasicPacketState implements IPhaseState, IPacketState {
-
-    BasicPacketState() {
-
-    }
+public class BasicPacketState extends PacketState<BasicPacketContext> {
 
     @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.PACKET;
-    }
-
-    @Override
-    public boolean matches(int packetState) {
-        return false;
+    public BasicPacketContext createPhaseContext() {
+        return new BasicPacketContext(this)
+            .addCaptures()
+            .addEntityDropCaptures();
     }
 }

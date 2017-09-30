@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.block.BlockBanner;
 import net.minecraft.block.BlockBanner.BlockBannerStanding;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
@@ -44,7 +45,7 @@ import java.util.Optional;
 public abstract class MixinBlockBannerStanding extends MixinBlockBanner {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final int intDir = (Integer) (Object) blockState.getValue(BlockBannerStanding.ROTATION);
+        final int intDir = blockState.getValue(BlockBanner.ROTATION);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Direction.values()[(intDir + 8) % 16]);
     }
 
@@ -58,7 +59,7 @@ public abstract class MixinBlockBannerStanding extends MixinBlockBanner {
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction direction = ((ImmutableDirectionalData) manipulator).direction().get();
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.withProperty(BlockBannerStanding.ROTATION, intDirection));
+            return Optional.of((BlockState) blockState.withProperty(BlockBanner.ROTATION, intDirection));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -68,7 +69,7 @@ public abstract class MixinBlockBannerStanding extends MixinBlockBanner {
         if (key.equals(Keys.DIRECTION)) {
             final Direction direction = (Direction) value;
             final int intDirection = (direction.ordinal() + 8) % 16;
-            return Optional.of((BlockState) blockState.withProperty(BlockBannerStanding.ROTATION, intDirection));
+            return Optional.of((BlockState) blockState.withProperty(BlockBanner.ROTATION, intDirection));
         }
         return super.getStateWithValue(blockState, key, value);
     }

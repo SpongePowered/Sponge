@@ -26,16 +26,19 @@ package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.Iterator;
@@ -45,10 +48,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-@Mixin({TileEntity.class, Entity.class})
+@Mixin({TileEntity.class, Entity.class, SpongeUser.class})
 public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
+    private List<DataView> failedData = Lists.newArrayList();
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -95,9 +99,8 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
             this.manipulators.remove(manipulator);
             this.removeCustomFromNbt(manipulator);
             return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
-        } else {
-            return DataTransactionResult.failNoData();
         }
+        return DataTransactionResult.failNoData();
     }
 
     @Override
@@ -166,4 +169,13 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
         return DataTransactionResult.failNoData();
     }
 
+    @Override
+    public void addFailedData(ImmutableList<DataView> failedData) {
+        this.failedData.addAll(failedData);
+    }
+
+    @Override
+    public List<DataView> getFailedData() {
+        return this.failedData;
+    }
 }

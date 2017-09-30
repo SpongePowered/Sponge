@@ -44,7 +44,7 @@ import java.util.Optional;
 public abstract class MixinBlockStandingSign extends MixinBlockSign {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final int intDir = (Integer) (Object) blockState.getValue(BlockStandingSign.ROTATION);
+        final int intDir = blockState.getValue(BlockStandingSign.ROTATION);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, Direction.values()[(intDir + 8) % 16]);
     }
 

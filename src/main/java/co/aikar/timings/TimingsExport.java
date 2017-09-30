@@ -263,9 +263,15 @@ class TimingsExport extends Thread {
 
         String response = null;
         try {
+            String hostname = "localhost";
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            } catch (IOException e) {
+                SpongeImpl.getLogger().warn("Could not get own server hostname when uploading timings - falling back to 'localhost'", e);
+            }
             HttpURLConnection con = (HttpURLConnection) new URL("http://timings.aikar.co/post").openConnection();
             con.setDoOutput(true);
-            con.setRequestProperty("User-Agent", "Sponge/" + getServerName() + "/" + InetAddress.getLocalHost().getHostName());
+            con.setRequestProperty("User-Agent", "Sponge/" + getServerName() + "/" + hostname);
             con.setRequestMethod("POST");
             con.setInstanceFollowRedirects(false);
 

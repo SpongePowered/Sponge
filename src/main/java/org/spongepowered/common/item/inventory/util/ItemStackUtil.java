@@ -28,7 +28,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -37,6 +40,13 @@ public abstract class ItemStackUtil {
     private ItemStackUtil() {
     }
 
+    /**
+     * Gets the {@link NBTTagCompound} for the provided {@link net.minecraft.item.ItemStack}
+     * such that if the stack does not have an existing tag, the tag will be created and set.
+     *
+     * @param itemStack The itemstack to get the tag compound from
+     * @return The non-null compound
+     */
     public static NBTTagCompound getTagCompound(net.minecraft.item.ItemStack itemStack) {
         NBTTagCompound compound = itemStack.getTagCompound();
         if (compound == null) {
@@ -48,9 +58,29 @@ public abstract class ItemStackUtil {
 
     public static net.minecraft.item.ItemStack toNative(@Nullable ItemStack stack) {
         if (stack instanceof net.minecraft.item.ItemStack || stack == null) {
-            return stack == null ? net.minecraft.item.ItemStack.EMPTY : (net.minecraft.item.ItemStack) stack;
+            return stack == null ? emptyNative() : (net.minecraft.item.ItemStack) stack;
         }
         throw new NativeStackException("The supplied item stack was not native to the current platform");
+    }
+
+    /**
+     * Converts a List of SpongeAPI ItemStacks to an Array of native ItemStacks
+     *
+     * @param items the list of items
+     * @return the array of native items
+     */
+    public static net.minecraft.item.ItemStack[] toNative(List<ItemStack> items) {
+        return items.stream().map(ItemStackUtil::toNative).toArray(net.minecraft.item.ItemStack[]::new);
+    }
+
+    /**
+     * Converts a List of SpongeAPI ItemStacks to an Array of native ItemStacks
+     *
+     * @param items the list of items
+     * @return the array of native items
+     */
+    public static net.minecraft.item.ItemStack[] fromSnapshotToNative(List<ItemStackSnapshot> items) {
+        return items.stream().map(ItemStackUtil::fromSnapshotToNative).toArray(net.minecraft.item.ItemStack[]::new);
     }
 
     public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
@@ -58,6 +88,16 @@ public abstract class ItemStackUtil {
             return (ItemStack) stack;
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
+    }
+
+    /**
+     * Converts an Array of native ItemStacks to a List of SpongeAPI ItemStacks
+     *
+     * @param items the array of native items
+     * @return the list of items
+     */
+    public static List<ItemStack> fromNative(net.minecraft.item.ItemStack[] items) {
+        return Arrays.stream(items).map(ItemStackUtil::fromNative).collect(Collectors.toList());
     }
 
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {
@@ -89,11 +129,11 @@ public abstract class ItemStackUtil {
     }
 
     public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack) {
-        return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
+        return Optional.<ItemStack>of(ItemStackUtil.cloneDefensive(stack));
     }
 
     public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack, int withdraw) {
-        return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
+        return Optional.<ItemStack>of(ItemStackUtil.cloneDefensive(stack));
     }
 
     public static boolean compareIgnoreQuantity(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
@@ -112,25 +152,27 @@ public abstract class ItemStackUtil {
         return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.toNative(stack1), stack2);
     }
 
-    public static ItemStackSnapshot createSnapshot(net.minecraft.item.ItemStack item) {
-        return ItemStackUtil.fromNative(item).createSnapshot();
-    }
-
     public static ItemStackSnapshot snapshotOf(net.minecraft.item.ItemStack itemStack) {
         return itemStack.isEmpty() ? ItemStackSnapshot.NONE : fromNative(itemStack).createSnapshot();
     }
 
     public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
-        return itemStack == null ? ItemStackSnapshot.NONE : itemStack.createSnapshot();
+        return itemStack == null ? ItemStackSnapshot.NONE : itemStack.isEmpty() ? ItemStackSnapshot.NONE : itemStack.createSnapshot();
     }
 
-    @Nullable
     public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? net.minecraft.item.ItemStack.EMPTY : snapshot == ItemStackSnapshot.NONE ? net.minecraft.item.ItemStack.EMPTY: toNative(snapshot.createStack());
+        return snapshot == null ? emptyNative() : snapshot == ItemStackSnapshot.NONE ? emptyNative() : toNative(snapshot.createStack());
     }
 
-    @Nullable
     public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? null : snapshot == ItemStackSnapshot.NONE ? null : snapshot.createStack();
+        return snapshot == null ? empty() : snapshot.isEmpty() ? empty() : snapshot.createStack();
+    }
+
+    public static ItemStack empty() {
+        return fromNative(net.minecraft.item.ItemStack.EMPTY);
+    }
+
+    public static net.minecraft.item.ItemStack emptyNative() {
+        return net.minecraft.item.ItemStack.EMPTY;
     }
 }

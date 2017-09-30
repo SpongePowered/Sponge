@@ -27,7 +27,6 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
@@ -65,35 +64,36 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
 
     @Override
     public Value<EntitySnapshot> vehicle() {
-        checkState(this.vehicle != null);
+        checkState(this.vehicle != null, "Vehicle cannot be null!");
+        checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return new SpongeValue<>(Keys.VEHICLE, this.vehicle);
     }
 
     @Override
     public Value<EntitySnapshot> baseVehicle() {
-        checkState(this.vehicle != null);
-        checkState(this.baseVehicle != null);
+        checkState(this.vehicle != null, "Vehicle cannot be null!");
+        checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return new SpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
     }
 
     @Override
     public VehicleData copy() {
-        checkState(this.vehicle != null);
-        checkState(this.baseVehicle != null);
+        checkState(this.vehicle != null, "Vehicle cannot be null!");
+        checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return new SpongeVehicleData(this.vehicle, this.baseVehicle);
     }
 
     @Override
     public ImmutableVehicleData asImmutable() {
-        checkState(this.vehicle != null);
-        checkState(this.baseVehicle != null);
+        checkState(this.vehicle != null, "Vehicle cannot be null!");
+        checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return new ImmutableSpongeVehicleData(this.vehicle, this.baseVehicle);
     }
 
     @Override
     public DataContainer toContainer() {
-        checkState(this.vehicle != null);
-        checkState(this.baseVehicle != null);
+        checkState(this.vehicle != null, "Vehicle cannot be null!");
+        checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return super.toContainer()
             .set(Keys.VEHICLE, this.vehicle)
             .set(Keys.BASE_VEHICLE, this.baseVehicle);
@@ -104,17 +104,17 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
     }
 
     public SpongeVehicleData setVehicle(EntitySnapshot value) {
-        this.vehicle = checkNotNull(value);
+        this.vehicle = checkNotNull(value, "Vehicle cannot be null!");
         return this;
     }
 
     public EntitySnapshot getBaseVehicle() {
-        checkState(this.baseVehicle != null);
+        checkState(this.baseVehicle != null, "Base Vehicle cannot be null!");
         return this.baseVehicle;
     }
 
     public SpongeVehicleData setBaseVehicle(EntitySnapshot value) {
-        this.baseVehicle = checkNotNull(value);
+        this.baseVehicle = checkNotNull(value, "Vehicle cannot be null!");
         return this;
     }
 

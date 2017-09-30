@@ -37,19 +37,16 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematic;
@@ -132,16 +129,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             palette = GlobalPalette.instance;
         }
 
-        BackingDataType dataType;
-        if (palette_max <= 0xFF) {
-            dataType = BackingDataType.BYTE;
-        } else if (palette_max <= 0xFF) {
-            dataType = BackingDataType.CHAR;
-        } else {
-            dataType = BackingDataType.INT;
-        }
         MutableBlockVolume buffer =
-                new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length), dataType);
+                new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
 
         byte[] blockdata = (byte[]) view.get(DataQueries.Schematic.BLOCK_DATA).get();
         int index = 0;
@@ -168,7 +157,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             int z = (index % (width * length)) / width;
             int x = (index % (width * length)) % width;
             BlockState state = palette.get(value).get();
-            buffer.setBlock(x - offset[0], y - offset[1], z - offset[2], state, SpongeImpl.getImplementationCause());
+            buffer.setBlock(x - offset[0], y - offset[1], z - offset[2], state);
 
             index++;
         }
@@ -197,7 +186,13 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
     @Override
     public DataContainer translate(Schematic schematic) throws InvalidDataException {
-        DataContainer data = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        addTo(schematic, data);
+        return data;
+    }
+
+    @Override
+    public DataView addTo(Schematic schematic, DataView data) {
         final int xMin = schematic.getBlockMin().getX();
         final int yMin = schematic.getBlockMin().getY();
         final int zMin = schematic.getBlockMin().getZ();
@@ -206,7 +201,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final int length = schematic.getBlockSize().getZ();
         if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
             throw new IllegalArgumentException(String.format(
-                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
+                "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
         }
         data.set(DataQueries.Schematic.WIDTH, width);
         data.set(DataQueries.Schematic.HEIGHT, height);

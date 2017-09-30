@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -42,7 +43,7 @@ import java.util.function.Consumer;
 
 public class SpongeInventoryBuilder implements Inventory.Builder {
 
-    private final static Map<Class, InventoryArchetype> inventoryTypes = new HashMap<>();
+    private final static Map<Class<?>, InventoryArchetype> inventoryTypes = new HashMap<>();
 
     public static void registerInventory(Class<? extends IInventory> inventory, InventoryArchetype archetype) {
         inventoryTypes.put(inventory, archetype);
@@ -53,7 +54,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     }
 
     private InventoryArchetype archetype;
-    private Map<String, InventoryProperty> properties = new HashMap<>();
+    private Map<String, InventoryProperty<?, ?>> properties = new HashMap<>();
     private Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners = new HashMap<>();
     private Carrier carrier;
 
@@ -68,7 +69,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     }
 
     @Override
-    public Inventory.Builder property(String name, InventoryProperty property) {
+    public Inventory.Builder property(String name, InventoryProperty<?, ?> property) {
         this.properties.put(name, property);
         return this;
     }
@@ -81,7 +82,8 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory build(Object plugin) {
-        return (Inventory) new CustomInventory(archetype, properties, carrier, listeners, plugin);
+        return (Inventory) new CustomInventory(this.archetype, this.properties, this.carrier, this.listeners,
+                Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> new IllegalArgumentException(plugin + " is not a plugin")));
     }
 
     @Override
@@ -107,9 +109,9 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory.Builder forCarrier(Class<? extends Carrier> carrier) {
-        if (true) throw new UnsupportedOperationException();
-        this.archetype = null; // TODO get Archetype for Carrier
-        return null;
+        throw new UnsupportedOperationException();
+//        this.archetype = null; // TODO get Archetype for Carrier
+//        return null;
     }
 
     @Override

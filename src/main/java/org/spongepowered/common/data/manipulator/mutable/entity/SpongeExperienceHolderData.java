@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
@@ -138,14 +136,16 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     public void setTotalExp(int totalExp) {
         this.totalExp = totalExp;
         int level = 0;
-        for (int i = totalExp; i > 0; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
-            level ++;
-            if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
-                this.expSinceLevel = i;
-                this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
+        while (true) {
+            int expToNextLevel = ExperienceHolderUtils.getExpBetweenLevels(level);
+            if (totalExp < expToNextLevel) {
+                this.expSinceLevel = totalExp;
+                this.expBetweenLevels = expToNextLevel;
                 this.level = level;
                 break;
             }
+            totalExp -= expToNextLevel;
+            level++;
         }
     }
 

@@ -64,15 +64,4 @@ public abstract class MixinSPacketResourcePackSend implements IMixinPacketResour
         return this.pack;
     }
 
-    @Override
-    public String setFakeHash() {
-        if (this.hash.length() == 0) {
-            this.hash = this.pack.getId();
-            if (this.hash.length() == SpongeResourcePack.HASH_SIZE) {
-                this.hash += " ";
-            }
-        }
-        return this.hash.trim();
-    }
-
 }

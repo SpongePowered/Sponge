@@ -227,4 +227,12 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         SpongePlayerDataHandler.savePlayer(player.getUniqueID());
     }
 
+    // SF overrides getWorldDirectory for mod compatibility.
+    // In order to avoid conflicts, we simply use another method to guarantee
+    // the sponge world directory is returned for the corresponding save handler.
+    // MixinAnvilSaveHandler#getChunkLoader is one example where we must use this method.
+    @Override
+    public File getSpongeWorldDirectory() {
+        return this.worldDirectory;
+    }
 }

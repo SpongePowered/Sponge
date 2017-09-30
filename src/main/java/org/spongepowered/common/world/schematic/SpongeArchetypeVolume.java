@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
@@ -72,25 +71,24 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
         return this.tiles;
     }
     @Override
-    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
-    public void apply(Location<World> location, BlockChangeFlag changeFlag, Cause cause) {
-        this.backing.getBlockWorker(cause).iterate((v, x, y, z) -> {
-            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag,
-                    cause);
+    public void apply(Location<World> location, BlockChangeFlag changeFlag) {
+        this.backing.getBlockWorker().iterate((v, x, y, z) -> {
+            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag);
         });
         for (Vector3i pos : this.tiles.keySet()) {
             TileEntityArchetype archetype = this.tiles.get(pos);
-            archetype.apply(location.add(pos), cause);
+            archetype.apply(location.add(pos));
         }
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
-        this.backing.setBlock(x, y, z, block, cause);
+    public boolean setBlock(int x, int y, int z, BlockState block) {
+        this.backing.setBlock(x, y, z, block);
         return true;
     }
 

@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.registry.type.world.gen;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -45,63 +41,62 @@ import net.minecraft.world.gen.feature.WorldGenSwamp;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 import org.spongepowered.common.world.gen.type.SpongeBiomeTreeType;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import javax.annotation.Nullable;
 
-public class BiomeTreeTypeRegistryModule implements CatalogRegistryModule<BiomeTreeType> {
+@RegisterCatalog(BiomeTreeTypes.class)
+public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<BiomeTreeType> {
 
-    @RegisterCatalog(BiomeTreeTypes.class)
-    private final Map<String, BiomeTreeType> biomeTreeTypeMappings = new HashMap<>();
-
-    @Override
-    public Optional<BiomeTreeType> getById(String id) {
-        return Optional.ofNullable(this.biomeTreeTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BiomeTreeType> getAll() {
-        return ImmutableList.copyOf(this.biomeTreeTypeMappings.values());
+    public BiomeTreeTypeRegistryModule() {
+        super("minecraft");
     }
 
     @Override
     public void registerDefaults() {
-        this.biomeTreeTypeMappings.put("oak", new SpongeBiomeTreeType("oak", (PopulatorObject) new WorldGenTrees(false), (PopulatorObject) new WorldGenBigTree(false)));
-        this.biomeTreeTypeMappings.put("birch", new SpongeBiomeTreeType("birch", (PopulatorObject) new WorldGenBirchTree(false, false), (PopulatorObject)
-                new WorldGenBirchTree(false, true)));
+        register(create("oak", new WorldGenTrees(false), new WorldGenBigTree(false)));
+        register(create("birch", new WorldGenBirchTree(false, false), new WorldGenBirchTree(false, true)));
 
         WorldGenMegaPineTree tall_megapine = new WorldGenMegaPineTree(false, true);
         WorldGenMegaPineTree megapine = new WorldGenMegaPineTree(false, false);
 
-        this.biomeTreeTypeMappings.put("tall_taiga", new SpongeBiomeTreeType("tall_taiga", (PopulatorObject) new WorldGenTaiga2(false), (PopulatorObject) tall_megapine));
-        this.biomeTreeTypeMappings.put("pointy_taiga",
-                                       new SpongeBiomeTreeType("pointy_taiga", (PopulatorObject) new WorldGenTaiga1(), (PopulatorObject) megapine));
+        register(create("tall_taiga", new WorldGenTaiga2(false), tall_megapine));
+        register(create("pointy_taiga", new WorldGenTaiga1(), megapine));
 
-        IBlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
-        IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-        IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState jlog = Blocks.LOG.getDefaultState()
+            .withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+
+        IBlockState jleaf = Blocks.LEAVES.getDefaultState()
+            .withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
+            .withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+
+        IBlockState leaf = Blocks.LEAVES.getDefaultState()
+            .withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
+            .withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+
         IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         WorldGenMegaJungle mega = new WorldGenMegaJungle(false, 10, 20, jlog, jleaf);
 
-        this.biomeTreeTypeMappings.put("jungle", new SpongeBiomeTreeType("jungle", (PopulatorObject) trees, (PopulatorObject) mega));
+        register(create("jungle", (WorldGenTrees) trees, mega));
 
         WorldGenShrub bush = new WorldGenShrub(jlog, leaf);
 
-        this.biomeTreeTypeMappings.put("jungle_bush", new SpongeBiomeTreeType("jungle_bush", (PopulatorObject) bush, null));
-        this.biomeTreeTypeMappings.put("savanna", new SpongeBiomeTreeType("savanna", (PopulatorObject) new WorldGenSavannaTree(false), null));
-        this.biomeTreeTypeMappings.put("canopy", new SpongeBiomeTreeType("canopy", (PopulatorObject) new WorldGenCanopyTree(false), null));
-        this.biomeTreeTypeMappings.put("swamp", new SpongeBiomeTreeType("swamp", (PopulatorObject) new WorldGenSwamp(), null));
+        register(create("jungle_bush", bush, null));
+        register(create("savanna", new WorldGenSavannaTree(false), null));
+        register(create("canopy", new WorldGenCanopyTree(false), null));
+        register(create("swamp", new WorldGenSwamp(), null));
+    }
+
+    private SpongeBiomeTreeType create(String name, WorldGenerator small, @Nullable WorldGenerator large) {
+        return new SpongeBiomeTreeType("minecraft:" + name, name, (PopulatorObject) small, (PopulatorObject) large);
     }
 }

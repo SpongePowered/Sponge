@@ -24,45 +24,42 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockStoneSlab;
 import net.minecraft.block.BlockStoneSlabNew;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(SlabTypes.class)
+public final class SlabTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockStoneSlab.EnumType, SlabType> {
 
-public final class SlabTypeRegistryModule implements CatalogRegistryModule<SlabType> {
-
-    @RegisterCatalog(SlabTypes.class)
-    private final Map<String, SlabType> slabTypeMappings = new ImmutableMap.Builder<String, SlabType>()
-        .put("brick", (SlabType) (Object) BlockStoneSlab.EnumType.BRICK)
-        .put("cobblestone", (SlabType) (Object) BlockStoneSlab.EnumType.COBBLESTONE)
-        .put("netherbrick", (SlabType) (Object) BlockStoneSlab.EnumType.NETHERBRICK)
-        .put("quartz", (SlabType) (Object) BlockStoneSlab.EnumType.QUARTZ)
-        .put("sand", (SlabType) (Object) BlockStoneSlab.EnumType.SAND)
-        .put("smooth_brick", (SlabType) (Object) BlockStoneSlab.EnumType.SMOOTHBRICK)
-        .put("stone", (SlabType) (Object) BlockStoneSlab.EnumType.STONE)
-        .put("wood", (SlabType) (Object) BlockStoneSlab.EnumType.WOOD)
-        .put("red_sand", (SlabType) (Object) BlockStoneSlabNew.EnumType.RED_SANDSTONE)
-        .build();
-
-    @Override
-    public Optional<SlabType> getById(String id) {
-        return Optional.ofNullable(this.slabTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public SlabTypeRegistryModule() {
+        super(new String[] {"minecraft"}, // TODO - This needs to play into our alias system.
+                id -> id.equals("nether_brick")
+                      ? "netherbrick"
+                      : id.equals("sandstone")
+                        ? "sand"
+                        : id.equals("stone_brick")
+                          ? "smooth_brick"
+                          : id.equals("wood_old")
+                            ? "wood"
+                            : id.equals("red_sandstone")
+                                ? "red_sand"
+                                : id);
     }
 
     @Override
-    public Collection<SlabType> getAll() {
-        return ImmutableList.copyOf(this.slabTypeMappings.values());
+    protected void generateInitialMap() {
+        super.generateInitialMap();
+        final SlabType redSandstone = (SlabType) (Object) BlockStoneSlabNew.EnumType.RED_SANDSTONE;
+
+        this.catalogTypeMap.put(redSandstone.getId(), redSandstone);
+    }
+
+    @Override
+    protected BlockStoneSlab.EnumType[] getValues() {
+        return BlockStoneSlab.EnumType.values();
     }
 
 }

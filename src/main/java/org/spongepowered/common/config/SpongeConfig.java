@@ -65,7 +65,7 @@ public class SpongeConfig<T extends ConfigBase> {
             + "# If you need help with the configuration or have any questions related to Sponge,\n"
             + "# join us at the IRC or drop by our forums and leave a post.\n"
             + "\n"
-            + "# IRC: #sponge @ irc.esper.net ( http://webchat.esper.net/?channel=sponge )\n"
+            + "# IRC: #sponge @ irc.esper.net ( https://webchat.esper.net/?channel=sponge )\n"
             + "# Forums: https://forums.spongepowered.org/\n";
 
     private Type type;

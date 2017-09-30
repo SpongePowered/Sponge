@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EntityDamageSourceIndirect;
@@ -33,7 +33,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.Explosion;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,7 +68,6 @@ public abstract class MixinDamageSource implements DamageSource {
 
     @Inject(method = "getDeathMessage(Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/text/ITextComponent;", cancellable = true,
             at = @At(value = "RETURN"))
-    @SuppressWarnings("deprecation")
     public void beforeGetDeathMessageReturn(EntityLivingBase entityLivingBaseIn, CallbackInfoReturnable<ITextComponent> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
         if (cir.getReturnValue().getUnformattedText().equals("death.attack." + this.damageType)) {
@@ -135,7 +133,7 @@ public abstract class MixinDamageSource implements DamageSource {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("DamageSource")
+        return MoreObjects.toStringHelper("DamageSource")
                 .add("Name", this.damageType)
                 .add("Type", this.apiDamageType.getId())
                 .toString();

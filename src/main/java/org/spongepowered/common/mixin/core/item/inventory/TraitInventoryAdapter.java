@@ -28,18 +28,26 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.TileEntityLockable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.player.SpongeUserInventory;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomContainer;
@@ -49,19 +57,19 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Mixin({
+@Mixin(value = {
         net.minecraft.inventory.Slot.class,
         InventoryPlayer.class,
-        TileEntityChest.class,
-        TileEntityFurnace.class,
-        TileEntityHopper.class,
         EntityVillager.class,
         Container.class,
         InventoryLargeChest.class,
-        InventoryEnderChest.class,
-        CustomInventory.class
-})
+        TileEntityLockable.class,
+        CustomInventory.class,
+        InventoryBasic.class,
+        SpongeUserInventory.class
+}, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {
 
@@ -71,6 +79,8 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     protected SlotCollection slots;
     protected List<Inventory> children = new ArrayList<Inventory>();
     protected Iterable<Slot> slotIterator;
+
+    private PluginContainer plugin = null;
 
     @Override
     public Inventory parent() {
@@ -86,7 +96,7 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T next() {
-        return (T) this.emptyInventory();
+        return (T) this.emptyInventory(); // TODO implement me
     }
 
     @Override
@@ -110,6 +120,8 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
         return child;
     }
 
+    // TODO getChild with lens not implemented
+
     protected final EmptyInventory emptyInventory() {
         if (this.empty == null) {
             this.empty = new EmptyInventoryImpl(this);
@@ -131,4 +143,43 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
         this.getInventory().clear();
     }
 
+    @Override
+    public PluginContainer getPlugin() {
+
+        if (this.plugin == null) {
+            Object base = this;
+            PluginContainer container;
+
+            if (base instanceof CarriedInventory) {
+                final Optional<?> carrier = ((CarriedInventory<?>) base).getCarrier();
+                if (carrier.isPresent()) {
+                    base = carrier.get();
+                }
+            }
+
+            if (base instanceof TileEntity) {
+                final String id = ((TileEntity) base).getBlock().getType().getId();
+                final String pluginId = id.substring(0, id.indexOf(":"));
+                container = Sponge.getPluginManager().getPlugin(pluginId)
+                        .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
+            } else if (base instanceof Entity) {
+                final String id = ((Entity) base).getType().getId();
+                final String pluginId = id.substring(0, id.indexOf(":"));
+                container = Sponge.getPluginManager().getPlugin(pluginId)
+                        .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + this.getClass().getName() +
+                                ")"));
+            } else if (base instanceof SpongeUser) {
+                container = SpongeImpl.getMinecraftPlugin();
+            } else {
+                container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(this.getClass())).orElseGet(() -> {
+                    SpongeImpl.getLogger().warn("Unknown plugin for " + this);
+                    return SpongeImpl.getMinecraftPlugin();
+                });
+            }
+
+            this.plugin = container;
+        }
+
+        return this.plugin;
+    }
 }

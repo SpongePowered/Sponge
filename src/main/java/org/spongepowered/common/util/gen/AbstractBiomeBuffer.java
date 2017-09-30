@@ -27,7 +27,7 @@ package org.spongepowered.common.util.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.extent.BiomeVolume;
 import org.spongepowered.common.util.VecHelper;
@@ -85,7 +85,7 @@ public abstract class AbstractBiomeBuffer implements BiomeVolume {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
             .add("min", this.getBiomeMin())
             .add("max", this.getBiomeMax())
             .toString();

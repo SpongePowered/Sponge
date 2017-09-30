@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
@@ -72,6 +72,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public final Class<? extends Entity> entityClass;
     private EnumCreatureType creatureType;
     private final Translation translation;
+    private boolean activationRangeInitialized = false;
     // currently not used
     public int trackingRange;
     public int updateFrequency;
@@ -101,9 +102,8 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     private static Translation check(@Nullable Translation translation) {
         if (translation == null) {
             return UNKNOWN.getTranslation();
-        } else {
-            return translation;
         }
+        return translation;
     }
 
     @Override
@@ -123,6 +123,14 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.creatureType = type;
     }
 
+    public boolean isActivationRangeInitialized() {
+        return this.activationRangeInitialized;
+    }
+
+    public void setActivationRangeInitialized(boolean flag) {
+        this.activationRangeInitialized = flag;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Class<? extends org.spongepowered.api.entity.Entity> getEntityClass() {
@@ -130,7 +138,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("modid", this.modId)
                 .add("class", this.entityClass.getName());

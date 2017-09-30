@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.block;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -34,22 +34,22 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.AbstractArchetype;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
+import org.spongepowered.common.data.nbt.validation.ValidationType;
+import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.util.VecHelper;
 
-public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot> implements TileEntityArchetype {
+import java.util.Optional;
+
+public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity> implements TileEntityArchetype {
 
     final BlockState blockState;
 
@@ -74,7 +74,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public boolean apply(Location<World> location, Cause cause) {
+    public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = BlockUtil.toBlock(currentState);
         final Block newBlock = BlockUtil.toBlock(this.blockState);
@@ -82,20 +82,20 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
-            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, BlockChangeFlag.ALL, cause);
+            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, BlockChangeFlag.ALL);
         }
         final NBTTagCompound compound = this.data.copy();
 
         TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
         if (tileEntity == null) {
-            throw new IllegalStateException("Could not create a tile entity for this archetype, possibly there's some issues with deserialization?");
+            return Optional.empty();
         }
         compound.setInteger("x", blockpos.getX());
         compound.setInteger("y", blockpos.getY());
         compound.setInteger("z", blockpos.getZ());
         tileEntity.readFromNBT(compound);
         tileEntity.markDirty();
-        return true;
+        return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
                 .set(DataQueries.TileEntityArchetype.TILE_TYPE, this.type)
                 .set(DataQueries.TileEntityArchetype.BLOCK_STATE, this.blockState)
                 .set(DataQueries.TileEntityArchetype.TILE_DATA, getTileData())
@@ -143,6 +143,6 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
     }
 }

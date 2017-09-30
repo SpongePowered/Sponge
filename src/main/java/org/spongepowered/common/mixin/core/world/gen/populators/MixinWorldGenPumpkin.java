@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
-import net.minecraft.block.BlockPumpkin;
+import com.google.common.base.MoreObjects;
+import net.minecraft.block.BlockHorizontal;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -91,7 +91,7 @@ public class MixinWorldGenPumpkin implements Pumpkin {
             if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS
                     && Blocks.PUMPKIN.canPlaceBlockAt(worldIn, blockpos1)) {
                 worldIn.setBlockState(blockpos1,
-                        Blocks.PUMPKIN.getDefaultState().withProperty(BlockPumpkin.FACING, EnumFacing.Plane.HORIZONTAL.random(rand)), 2);
+                        Blocks.PUMPKIN.getDefaultState().withProperty(BlockHorizontal.FACING, EnumFacing.Plane.HORIZONTAL.random(rand)), 2);
             }
         }
 
@@ -120,7 +120,7 @@ public class MixinWorldGenPumpkin implements Pumpkin {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "Pumpkin")
                 .add("PerChunk", this.count)
                 .add("Chance", this.chance)

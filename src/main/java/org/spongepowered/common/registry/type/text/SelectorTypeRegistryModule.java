@@ -28,18 +28,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.selector.SelectorTypes;
 import org.spongepowered.common.text.selector.SpongeSelectorType;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class SelectorTypeRegistryModule implements CatalogRegistryModule<SelectorType> {
+public final class SelectorTypeRegistryModule implements AlternateCatalogRegistryModule<SelectorType> {
 
     @RegisterCatalog(SelectorTypes.class)
     private final Map<String, SelectorType> selectorMappings = Maps.newHashMap();
@@ -56,9 +57,18 @@ public final class SelectorTypeRegistryModule implements CatalogRegistryModule<S
 
     @Override
     public void registerDefaults() {
-        this.selectorMappings.put("all_players", new SpongeSelectorType("a"));
-        this.selectorMappings.put("all_entities", new SpongeSelectorType("e"));
-        this.selectorMappings.put("nearest_player", new SpongeSelectorType("p"));
-        this.selectorMappings.put("random", new SpongeSelectorType("r"));
+        this.selectorMappings.put("minecraft:all_players", new SpongeSelectorType("minecraft:all_players", "a"));
+        this.selectorMappings.put("minecraft:all_entities", new SpongeSelectorType("minecraft:all_entities", "e"));
+        this.selectorMappings.put("minecraft:nearest_player", new SpongeSelectorType("minecraft:nearest_player", "p"));
+        this.selectorMappings.put("minecraft:random", new SpongeSelectorType("minecraft:random", "r"));
+    }
+
+    @Override
+    public Map<String, SelectorType> provideCatalogMap() {
+        final HashMap<String, SelectorType> map = new HashMap<>();
+        for (Map.Entry<String, SelectorType> entry : this.selectorMappings.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return map;
     }
 }

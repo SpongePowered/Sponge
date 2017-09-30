@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.passive.EntityHorse;
-import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -34,18 +33,15 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
-import org.spongepowered.common.entity.SpongeHorseVariant;
 
 import java.util.Map;
 import java.util.Optional;
 
-@SuppressWarnings("deprecation")
 public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse, HorseData, ImmutableHorseData> {
 
     public HorseDataProcessor() {
@@ -66,11 +62,9 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
     protected boolean set(EntityHorse entity, Map<Key<?>, Object> keyValues) {
         SpongeHorseColor horseColor = (SpongeHorseColor) keyValues.get(Keys.HORSE_COLOR);
         SpongeHorseStyle horseStyle = (SpongeHorseStyle) keyValues.get(Keys.HORSE_STYLE);
-        SpongeHorseVariant horseVariant = (SpongeHorseVariant) keyValues.get(Keys.HORSE_VARIANT);
 
         int variant = HorseUtils.getInternalVariant(horseColor, horseStyle);
 
-        //entity.setType(horseVariant.getType());
         entity.setHorseVariant(variant);
 
         return true;
@@ -80,18 +74,15 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
     protected Map<Key<?>, ?> getValues(EntityHorse entity) {
         return ImmutableMap.<Key<?>, Object>of(
                 Keys.HORSE_COLOR, HorseUtils.getHorseColor(entity),
-                Keys.HORSE_STYLE, HorseUtils.getHorseStyle(entity),
-                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.getClass())
+                Keys.HORSE_STYLE, HorseUtils.getHorseStyle(entity)
         );
     }
 
     @Override
     public Optional<HorseData> fill(DataContainer container, HorseData horseData) {
-        GameRegistry registry = SpongeImpl.getRegistry();
 
         horseData.set(Keys.HORSE_COLOR, HorseUtils.getHorseColor(container));
         horseData.set(Keys.HORSE_STYLE, HorseUtils.getHorseStyle(container));
-        horseData.set(Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(container));
 
         return Optional.of(horseData);
     }

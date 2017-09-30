@@ -45,7 +45,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -106,9 +105,16 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(UUID obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(Queries.UUID_MOST, obj.getMostSignificantBits())
                         .set(Queries.UUID_LEAST, obj.getLeastSignificantBits());
+            }
+
+            @Override
+            public DataView addTo(UUID obj, DataView dataView) {
+                return dataView
+                    .set(Queries.UUID_LEAST, obj.getLeastSignificantBits())
+                    .set(Queries.UUID_MOST, obj.getMostSignificantBits());
             }
 
             @Override
@@ -139,9 +145,15 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector2d obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY());
+            }
+
+            @Override
+            public DataView addTo(Vector2d obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY());
             }
 
             @Override
@@ -172,9 +184,15 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector2f obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY());
+            }
+
+            @Override
+            public DataView addTo(Vector2f obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY());
             }
 
             @Override
@@ -205,9 +223,16 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector2i obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY());
+            }
+
+            @Override
+            public DataView addTo(Vector2i obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    ;
             }
 
             @Override
@@ -238,9 +263,15 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector2l obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY());
+            }
+
+            @Override
+            public DataView addTo(Vector2l obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY());
             }
 
             @Override
@@ -272,10 +303,18 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector3d obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ());
+            }
+
+            @Override
+            public DataView addTo(Vector3d obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    ;
             }
 
             @Override
@@ -307,10 +346,18 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector3f obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ());
+            }
+
+            @Override
+            public DataView addTo(Vector3f obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    ;
             }
 
             @Override
@@ -342,10 +389,18 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector3i obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ());
+            }
+
+            @Override
+            public DataView addTo(Vector3i obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    ;
             }
 
             @Override
@@ -377,10 +432,18 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector3l obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ());
+            }
+
+            @Override
+            public DataView addTo(Vector3l obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    ;
             }
 
             @Override
@@ -413,11 +476,20 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector4f obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ())
                         .set(DataQueries.W_POS, obj.getW());
+            }
+
+            @Override
+            public DataView addTo(Vector4f obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    .set(DataQueries.W_POS, obj.getW())
+                    ;
             }
 
             @Override
@@ -450,11 +522,20 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector4i obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ())
                         .set(DataQueries.W_POS, obj.getW());
+            }
+
+            @Override
+            public DataView addTo(Vector4i obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    .set(DataQueries.W_POS, obj.getW())
+                    ;
             }
 
             @Override
@@ -487,11 +568,20 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector4l obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ())
                         .set(DataQueries.W_POS, obj.getW());
+            }
+
+            @Override
+            public DataView addTo(Vector4l obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    .set(DataQueries.W_POS, obj.getW())
+                    ;
             }
 
             @Override
@@ -524,11 +614,20 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Vector4d obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ())
                         .set(DataQueries.W_POS, obj.getW());
+            }
+
+            @Override
+            public DataView addTo(Vector4d obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    .set(DataQueries.W_POS, obj.getW())
+                    ;
             }
 
             @Override
@@ -559,9 +658,16 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Complexd obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY());
+            }
+
+            @Override
+            public DataView addTo(Complexd obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    ;
             }
 
             @Override
@@ -592,9 +698,15 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Complexf obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY());
+            }
+
+            @Override
+            public DataView addTo(Complexf obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY());
             }
 
             @Override
@@ -627,11 +739,19 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Quaterniond obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ())
                         .set(DataQueries.W_POS, obj.getW());
+            }
+
+            @Override
+            public DataView addTo(Quaterniond obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    .set(DataQueries.W_POS, obj.getW());
             }
 
             @Override
@@ -664,11 +784,19 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(Quaternionf obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.X_POS, obj.getX())
                         .set(DataQueries.Y_POS, obj.getY())
                         .set(DataQueries.Z_POS, obj.getZ())
                         .set(DataQueries.W_POS, obj.getW());
+            }
+
+            @Override
+            public DataView addTo(Quaternionf obj, DataView dataView) {
+                return dataView.set(DataQueries.X_POS, obj.getX())
+                    .set(DataQueries.Y_POS, obj.getY())
+                    .set(DataQueries.Z_POS, obj.getZ())
+                    .set(DataQueries.W_POS, obj.getW());
             }
 
             @Override
@@ -713,11 +841,19 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(LocalTime obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
                         .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
                         .set(DataQueries.LOCAL_TIME_SECOND, obj.getSecond())
                         .set(DataQueries.LOCAL_TIME_NANO, obj.getNano());
+            }
+
+            @Override
+            public DataView addTo(LocalTime obj, DataView dataView) {
+                return dataView.set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
+                    .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
+                    .set(DataQueries.LOCAL_TIME_SECOND, obj.getSecond())
+                    .set(DataQueries.LOCAL_TIME_NANO, obj.getNano());
             }
 
             @Override
@@ -758,10 +894,17 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(LocalDate obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
                         .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
                         .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth());
+            }
+
+            @Override
+            public DataView addTo(LocalDate obj, DataView dataView) {
+                return dataView.set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
+                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                    .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth());
             }
 
             @Override
@@ -818,7 +961,7 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(LocalDateTime obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
                         .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
                         .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
@@ -826,6 +969,17 @@ public final class DataSerializers {
                         .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
                         .set(DataQueries.LOCAL_TIME_SECOND, obj.getSecond())
                         .set(DataQueries.LOCAL_TIME_NANO, obj.getNano());
+            }
+
+            @Override
+            public DataView addTo(LocalDateTime obj, DataView dataView) {
+                return dataView.set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
+                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                    .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
+                    .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
+                    .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
+                    .set(DataQueries.LOCAL_TIME_SECOND, obj.getSecond())
+                    .set(DataQueries.LOCAL_TIME_NANO, obj.getNano());
             }
 
             @Override
@@ -886,7 +1040,7 @@ public final class DataSerializers {
 
             @Override
             public DataContainer translate(ZonedDateTime obj) throws InvalidDataException {
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
                         .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
                         .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
@@ -895,6 +1049,18 @@ public final class DataSerializers {
                         .set(DataQueries.LOCAL_TIME_SECOND, obj.getSecond())
                         .set(DataQueries.LOCAL_TIME_NANO, obj.getNano())
                         .set(DataQueries.ZONE_TIME_ID, obj.getZone().getId());
+            }
+
+            @Override
+            public DataView addTo(ZonedDateTime obj, DataView dataView) {
+                return dataView.set(DataQueries.LOCAL_DATE_YEAR, obj.getYear())
+                    .set(DataQueries.LOCAL_DATE_MONTH, obj.getMonth())
+                    .set(DataQueries.LOCAL_DATE_DAY, obj.getDayOfMonth())
+                    .set(DataQueries.LOCAL_TIME_HOUR, obj.getHour())
+                    .set(DataQueries.LOCAL_TIME_MINUTE, obj.getMinute())
+                    .set(DataQueries.LOCAL_TIME_SECOND, obj.getSecond())
+                    .set(DataQueries.LOCAL_TIME_NANO, obj.getNano())
+                    .set(DataQueries.ZONE_TIME_ID, obj.getZone().getId());
             }
 
             @Override
@@ -952,7 +1118,7 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Instant obj) throws InvalidDataException {
                 final LocalDateTime local = obj.atZone(ZoneOffset.UTC).toLocalDateTime();
-                return new MemoryDataContainer()
+                return DataContainer.createNew()
                         .set(DataQueries.LOCAL_DATE_YEAR, local.getYear())
                         .set(DataQueries.LOCAL_DATE_MONTH, local.getMonth())
                         .set(DataQueries.LOCAL_DATE_DAY, local.getDayOfMonth())
@@ -960,6 +1126,18 @@ public final class DataSerializers {
                         .set(DataQueries.LOCAL_TIME_MINUTE, local.getMinute())
                         .set(DataQueries.LOCAL_TIME_SECOND, local.getSecond())
                         .set(DataQueries.LOCAL_TIME_NANO, local.getNano());
+            }
+
+            @Override
+            public DataView addTo(Instant obj, DataView dataView) {
+                final LocalDateTime local = obj.atZone(ZoneOffset.UTC).toLocalDateTime();
+                return dataView.set(DataQueries.LOCAL_DATE_YEAR, local.getYear())
+                    .set(DataQueries.LOCAL_DATE_MONTH, local.getMonth())
+                    .set(DataQueries.LOCAL_DATE_DAY, local.getDayOfMonth())
+                    .set(DataQueries.LOCAL_TIME_HOUR, local.getHour())
+                    .set(DataQueries.LOCAL_TIME_MINUTE, local.getMinute())
+                    .set(DataQueries.LOCAL_TIME_SECOND, local.getSecond())
+                    .set(DataQueries.LOCAL_TIME_NANO, local.getNano());
             }
 
             @Override

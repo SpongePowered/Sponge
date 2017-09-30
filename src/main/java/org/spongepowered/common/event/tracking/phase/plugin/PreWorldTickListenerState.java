@@ -28,14 +28,8 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
@@ -48,30 +42,18 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-        context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
-    }
-
-    @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-        final IMixinWorldTickEvent worldTickEvent = phaseContext
-                .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
+    public void unwind(ListenerPhaseContext phaseContext) {
+        final IMixinWorldTickEvent worldTickEvent = phaseContext.getTickEvent();
         final Object listener = phaseContext.getSource(Object.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
-            if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
-                && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
-                logWarningOfDifferentWorldchanges(causeTracker, worldTickEvent, listener);
-            }
-            TrackingUtil.processBlockCaptures(blocks, causeTracker, this, phaseContext);
-        });
-    }
+            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
+        });    }
 
     @Override
-    public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+    public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getCapturedPlayer().ifPresent(player ->
                 ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
                         .setBlockNotifier(notifyPos, player.getUniqueId())
@@ -79,7 +61,7 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+    public void capturePlayerUsingStackToBreakBlocks(ListenerPhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

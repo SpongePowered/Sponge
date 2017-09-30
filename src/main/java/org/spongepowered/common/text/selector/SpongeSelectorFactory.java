@@ -26,7 +26,6 @@ package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -42,7 +41,6 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
@@ -60,7 +58,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @NonnullByDefault
-@SuppressWarnings("deprecation")
 public class SpongeSelectorFactory implements SelectorFactory {
 
     public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
@@ -74,17 +71,15 @@ public class SpongeSelectorFactory implements SelectorFactory {
         ImmutableMap.Builder<String, SelectorType> builder =
                 ImmutableMap.builder();
 
-        for (SelectorType type : SpongeImpl.getGame().getRegistry()
-                .getAllOf(SelectorType.class)) {
-            builder.put(type.getId(), type);
+        for (SelectorType type : Sponge.getRegistry().getAllOf(SelectorType.class)) {
+            builder.put(type.getName(), type);
         }
 
         idToType = builder.build();
     }
 
     @SuppressWarnings("unchecked")
-    public static <K, V> Function<K, V> methodAsFunction(final Method m,
-                                                         boolean isStatic) {
+    public static <K, V> Function<K, V> methodAsFunction(final Method m, boolean isStatic) {
         if (isStatic) {
             return input -> {
                 try {
@@ -97,25 +92,24 @@ public class SpongeSelectorFactory implements SelectorFactory {
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
-                    throw Throwables.propagate(e.getCause());
-                }
-            };
-        } else {
-            return input -> {
-                try {
-                    return (V) m.invoke(input);
-                } catch (IllegalAccessException e) {
-                    SpongeImpl.getLogger().debug(m + " wasn't public", e);
-                    return null;
-                } catch (IllegalArgumentException e) {
-                    SpongeImpl.getLogger()
-                            .debug(m + " failed with paramter " + input, e);
-                    return null;
-                } catch (InvocationTargetException e) {
-                    throw Throwables.propagate(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             };
         }
+        return input -> {
+            try {
+                return (V) m.invoke(input);
+            } catch (IllegalAccessException e) {
+                SpongeImpl.getLogger().debug(m + " wasn't public", e);
+                return null;
+            } catch (IllegalArgumentException e) {
+                SpongeImpl.getLogger()
+                        .debug(m + " failed with paramter " + input, e);
+                return null;
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getCause());
+            }
+        };
     }
 
     private final Map<String, ArgumentHolder.Limit<ArgumentType<Integer>>> scoreToTypeMap =
@@ -128,7 +122,6 @@ public class SpongeSelectorFactory implements SelectorFactory {
         return new SpongeSelectorBuilder();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Selector parseRawSelector(String selector) {
         checkArgument(selector.startsWith("@"), "Invalid selector %s",
@@ -344,7 +337,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             }
             choices = choices.map(input -> prefix + input);
         }
-        return choices.filter(choice -> choice.startsWith(selector)).collect(GuavaCollectors.toImmutableList());
+        return choices.filter(choice -> choice.startsWith(selector)).collect(ImmutableList.toImmutableList());
     }
 
 }
