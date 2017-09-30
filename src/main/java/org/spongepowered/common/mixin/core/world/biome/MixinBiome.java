@@ -110,12 +110,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));
 
         String s = world.getWorldInfo().getGeneratorOptions();
-        ChunkGeneratorSettings settings;
-        if (s != null) {
-            settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
-        } else {
-            settings = ChunkGeneratorSettings.Factory.jsonToFactory("").build();
-        }
+        ChunkGeneratorSettings settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
 
         Ore dirt = Ore.builder()
                 .ore((BlockState) Blocks.DIRT.getDefaultState())
