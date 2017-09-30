@@ -33,7 +33,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.mojang.authlib.GameProfile;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
@@ -89,17 +88,13 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -147,8 +142,6 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.FakePlayer;
-import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
@@ -404,56 +397,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return setBlock(x, y, z, block, BlockChangeFlag.ALL);
     }
 
-
-    private Direction checkValidFace(Direction face) {
-        checkArgument(checkNotNull(face, "side").isCardinal() || face.isUpright(), "Direction must be a valid block face");
-        return face;
-    }
-
-    private GameProfile getProfileFromCause(Cause cause) {
-        checkNotNull(cause, "cause");
-        Optional<Object> simulatedCause = cause.get(NamedCause.PLAYER_SIMULATED, Object.class);
-        checkArgument(simulatedCause.isPresent(), "Cause does not contain a NamedCause.PLAYER_SIMULATED object");
-        Object obj = simulatedCause.get();
-        checkArgument(obj instanceof GameProfile || obj instanceof User, "Simulated cause object is not a GameProfile or User");
-        return obj instanceof GameProfile ? (GameProfile) obj : (GameProfile) ((User) obj).getProfile();
-    }
-
-    @Override
-    public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
-        return FakePlayer.controller.hit(this, x, y, z, checkValidFace(side), getProfileFromCause(cause), cause);
-    }
-
-    @Override
-    public boolean interactBlock(int x, int y, int z, Direction side, Cause cause) {
-        return FakePlayer.controller.interact(this, x, y, z, null, checkValidFace(side), getProfileFromCause(cause), cause);
-    }
-
-    @Override
-    public boolean interactBlockWith(int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, Direction side, Cause cause) {
-        return FakePlayer.controller.interact(this, x, y, z, checkNotNull(itemStack, "itemStack"), checkValidFace(side), getProfileFromCause(cause),
-                cause);
-    }
-
-    @Override
-    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, Cause cause) {
-        return FakePlayer.controller.place(this, x, y, z, checkNotNull(block, "block"), checkValidFace(side), getProfileFromCause(cause), cause);
-    }
-
-    @Override
-    public boolean digBlock(int x, int y, int z, Cause cause) {
-        return FakePlayer.controller.dig(this, x, y, z, null, getProfileFromCause(cause), cause);
-    }
-
-    @Override
-    public boolean digBlockWith(int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, Cause cause) {
-        return FakePlayer.controller.dig(this, x, y, z, checkNotNull(itemStack, "itemStack"), getProfileFromCause(cause), cause);
-    }
-
-    @Override
-    public int getBlockDigTimeWith(int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, Cause cause) {
-        return FakePlayer.controller.digTime(this, x, y, z, checkNotNull(itemStack, "itemStack"), getProfileFromCause(cause), cause);
-    }
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
@@ -1625,9 +1568,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     //this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
                     net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity.getPos());
-                    if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity) {
+                    if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity)
                         chunk.removeTileEntity(tileentity.getPos());
-                    }
                     // Sponge end
                 }
             }

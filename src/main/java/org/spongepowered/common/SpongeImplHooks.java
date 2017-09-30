@@ -69,12 +69,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.SpongeCommands;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.world.FakePlayer;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.world.FakePlayer;
 
 import java.util.Collection;
 import java.util.Iterator;

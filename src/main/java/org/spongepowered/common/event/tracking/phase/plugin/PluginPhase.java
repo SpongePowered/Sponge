@@ -47,7 +47,7 @@ public final class PluginPhase extends TrackingPhase {
         public static final IPhaseState<ExplosionContext> CUSTOM_EXPLOSION = new CustomExplosionState();
         public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
         public static final IPhaseState<BasicPluginContext> TELEPORT = new BasicPluginState();
-        public static final IPhaseState FAKEPLAYER = new FakeplayerState();
+        public static final IPhaseState<BasicPluginContext> FAKE_PLAYER = new BasicPluginState();
 
         private State() {
         }
@@ -76,19 +76,6 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        ((PluginPhaseState) state).processPostTick(causeTracker, phaseContext);
-    }
-
-    @Override
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-        if (state instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
-        } else if (state instanceof FakeplayerState) {
-            ((FakeplayerState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
-        }
-    }
-
     public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos,
                                         IMixinBlockEventData blockEvent) {
         if (phaseState instanceof ListenerPhaseState) {

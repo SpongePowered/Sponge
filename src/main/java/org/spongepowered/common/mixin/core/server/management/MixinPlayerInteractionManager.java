@@ -63,9 +63,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.world.FakePlayer;
 
 import java.util.Optional;
 
@@ -115,20 +113,6 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
         @Nullable final ItemStack oldStack = stack.copy();
-
-        Cause cause;
-        // Handle fake players
-        if (player instanceof FakePlayer) {
-            Optional<Object> simulated = ((IMixinWorldServer) player.world).getCauseTracker().getCurrentContext()
-                    .firstNamed(NamedCause.PLAYER_SIMULATED, Object.class);
-            if (simulated.isPresent()) {
-                cause = Cause.of(NamedCause.of(NamedCause.PLAYER_SIMULATED, simulated.get()));
-            } else {
-                cause = Cause.of(NamedCause.of(NamedCause.PLAYER_SIMULATED, ((EntityPlayer) player).getGameProfile()));
-            }
-        } else {
-            cause = Cause.of(NamedCause.source(player));
-        }
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack,
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,

@@ -95,10 +95,10 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -113,6 +113,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -187,6 +188,7 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModDat
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.FakePlayer;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -1079,6 +1081,48 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
         }
+    }
+
+    private Direction checkValidFace(Direction face) {
+        checkArgument(checkNotNull(face, "side").isCardinal() || face.isUpright(), "Direction must be a valid block face");
+        return face;
+    }
+
+    @Override
+    public boolean hitBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        return FakePlayer.controller.hit(this, x, y, z, checkValidFace(side), checkNotNull(profile, "profile"));
+    }
+
+    @Override
+    public boolean interactBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        return FakePlayer.controller.interact(this, x, y, z, null, checkValidFace(side), checkNotNull(profile, "profile"));
+    }
+
+    @Override
+    public boolean interactBlockWith(int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, Direction side,
+            GameProfile profile) {
+        return FakePlayer.controller.interact(this, x, y, z, checkNotNull(itemStack, "itemStack"), checkValidFace(side),
+                checkNotNull(profile, "profile"));
+    }
+
+    @Override
+    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, GameProfile profile) {
+        return FakePlayer.controller.place(this, x, y, z, checkNotNull(block, "block"), checkValidFace(side), checkNotNull(profile, "profile"));
+    }
+
+    @Override
+    public boolean digBlock(int x, int y, int z, GameProfile profile) {
+        return FakePlayer.controller.dig(this, x, y, z, null, checkNotNull(profile, "profile"));
+    }
+
+    @Override
+    public boolean digBlockWith(int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, GameProfile profile) {
+        return FakePlayer.controller.dig(this, x, y, z, checkNotNull(itemStack, "itemStack"), checkNotNull(profile, "profile"));
+    }
+
+    @Override
+    public int getBlockDigTimeWith(int x, int y, int z, org.spongepowered.api.item.inventory.ItemStack itemStack, GameProfile profile) {
+        return FakePlayer.controller.digTime(this, x, y, z, checkNotNull(itemStack, "itemStack"), checkNotNull(profile, "profile"));
     }
 
     @Override

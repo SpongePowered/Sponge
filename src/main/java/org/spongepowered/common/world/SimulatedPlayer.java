@@ -58,7 +58,7 @@ public class SimulatedPlayer extends EntityPlayerMP implements FakePlayer {
         }
 
         @Override
-        public void disconnect(String reason) {
+        public void disconnect(ITextComponent reason) {
         }
 
         @Override

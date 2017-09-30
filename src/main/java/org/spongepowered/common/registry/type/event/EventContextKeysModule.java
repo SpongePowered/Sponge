@@ -84,7 +84,7 @@ public final class EventContextKeysModule
         createKey("sponge:notifier", "Notifier", User.class);
         createKey("sponge:owner", "Owner", User.class);
         createKey("sponge:player", "Player", Player.class);
-        createKey("sponge:player_simulated", "Game Profile", GameProfile.class);
+        createKey("sponge:player_simulated", "Player Simulated", GameProfile.class);
         createKey("sponge:projectile_source", "Projectile Source", ProjectileSource.class);
         createKey("sponge:service_manager", "Service Manager", ServiceManager.class);
         createKey("sponge:spawn_type", "Spawn Type", SpawnType.class);

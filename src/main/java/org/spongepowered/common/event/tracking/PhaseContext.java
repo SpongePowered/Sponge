@@ -44,7 +44,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,13 +88,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     public P owner(Supplier<Optional<User>> supplier) {
         supplier.get().ifPresent(this::owner);
         return (P) this;
-    }
-
-    public PhaseContext addCause(Cause cause) {
-        for (Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-            add(NamedCause.of(entry.getKey(), entry.getValue()));
-        }
-        return this;
     }
 
     public P owner(User owner) {
@@ -250,14 +242,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Optional.empty();
     }
 
-    public Cause toCause() {
-        Cause.Builder b = Cause.builder();
-        for (NamedCause namedCause : this.contextObjects) {
-            b.named(namedCause);
-        }
-        return b.build();
-    }
-
     public <T> T requireSource(Class<T> targetClass) {
         return getSource(targetClass)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
@@ -297,6 +281,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
+        if (this.blocksSupplier == null) {
+            throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
+        }
         return this.blocksSupplier.get();
     }
 
