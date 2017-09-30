@@ -229,6 +229,12 @@ public class PacketUtil {
             }
         } else if (packetIn instanceof CPacketPlayerTryUseItem) {
             CPacketPlayerTryUseItem packet = (CPacketPlayerTryUseItem) packetIn;
+
+            // Put the item being used into the context to handle cases where items are firing events AFTER InteractItemEvent is called for
+            // specific logic (such as FishingEvent.Start/etc)
+            final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
+            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             long packetDiff = System.currentTimeMillis() - lastTryBlockPacketTimeStamp;
             // If the time between packets is small enough, use the last result.
@@ -236,9 +242,6 @@ public class PacketUtil {
                 // Use previous result and avoid firing a second event
                 return lastTryBlockPacketItemResult;
             }
-
-            final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
             SpongeCommonEventFactory.callInteractBlockEventSecondary(playerMP, heldItem, Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
             if (isCancelled) {
