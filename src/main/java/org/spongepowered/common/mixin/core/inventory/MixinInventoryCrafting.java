@@ -28,6 +28,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,25 +50,24 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventory
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
 public abstract class MixinInventoryCrafting implements IInventory, LensProvider<IInventory, ItemStack> {
 
+    @Shadow private NonNullList<ItemStack> stackList;
     protected Fabric<IInventory> fabric;
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
-    @Shadow public abstract int getSizeInventory();
-
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
-        this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
+        this.slots = new SlotCollection.Builder().add(this.stackList.size()).build();
         this.lens = getRootLens(fabric, ((InventoryAdapter) this));
     }
 
     @Override
     public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        if (this.getSizeInventory() == 0) {
+        if (this.stackList.size() == 0) {
             return null; // No Lens when inventory has no slots
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
+        return new OrderedInventoryLensImpl(0, this.stackList.size(), 1, this.slots);
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
