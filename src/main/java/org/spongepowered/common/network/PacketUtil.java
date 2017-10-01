@@ -87,7 +87,7 @@ public class PacketUtil {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 Sponge.getCauseStackManager().pushCause(packetPlayer);
-                // If true, logic was handled in Pre so return
+                // If true, we won't run any additional logic on the server as the pre event has determined we should not continue
                 if (firePreEvents(packetIn, packetPlayer)) {
                     return;
                 }
@@ -166,6 +166,13 @@ public class PacketUtil {
         return packetIn instanceof CPacketCreativeInventoryAction;
     }
 
+    /**
+     * Handles firing of events that are triggered before server logic. Be aware that this method makes changes to the current context
+     * of the current frame of the {@link CauseStackManager.StackFrame} (namely to set the used_item).
+     * @param packetIn
+     * @param playerMP
+     * @return True to not proceed with server processing, false otherwise
+     */
     private static boolean firePreEvents(Packet<?> packetIn, EntityPlayerMP playerMP) {
         if (packetIn instanceof CPacketAnimation) {
             CPacketAnimation packet = (CPacketAnimation) packetIn;
@@ -198,7 +205,8 @@ public class PacketUtil {
                     final BlockPos pos = packet.getPosition();
                     Vector3d interactionPoint = VecHelper.toVector3d(pos);
                     BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
-                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, Optional.of(interactionPoint), blockSnapshot).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, Optional.of(interactionPoint),
+                            blockSnapshot).isCancelled()) {
                         ((IMixinEntityPlayerMP) playerMP).sendBlockChange(pos, playerMP.world.getBlockState(pos));
                         return true;
                     }
@@ -259,7 +267,8 @@ public class PacketUtil {
             BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
             final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
             Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.of(interactionPoint), blockSnapshot).isCancelled();
+            boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), Optional.of
+                    (interactionPoint), blockSnapshot).isCancelled();
             lastTryBlockPacketItemResult = isCancelled;
             if(isCancelled) {
                 // update client
