@@ -28,8 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageModifierType;
 
 import java.util.Collection;
@@ -38,8 +39,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<DamageModifierType>, AlternateCatalogRegistryModule<DamageModifierType> {
+public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<DamageModifierType> {
 
+    @RegisterCatalog(DamageModifierTypes.class)
     private final Map<String, DamageModifierType> modifierTypeMap = new HashMap<>();
 
     @Override
@@ -72,13 +74,5 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         final DamageModifierType sweeping = new SpongeDamageModifierType("Sweeping", "sweeping");
         this.modifierTypeMap.put("sweeping", sweeping);
         this.modifierTypeMap.put("sweaping", sweeping); // TODO: remove
-    }
-
-    // TODO: replace with @RegisterCatalog on the field - only needed until DamageModifierTypes#SWEAPING is removed
-    @Override
-    public Map<String, DamageModifierType> provideCatalogMap() {
-        final Map<String, DamageModifierType> map = new HashMap<>(this.modifierTypeMap);
-        map.remove("sweaping"); // do not remap
-        return map;
     }
 }
