@@ -34,7 +34,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 @RunWith(LaunchWrapperTestRunner.class)
-public class CauseStackManagerTest {
+public class PhaseStackManagerTest {
 
     @Test
     public void testPoppingFramePopsCauses() throws Exception {

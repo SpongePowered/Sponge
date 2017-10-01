@@ -49,6 +49,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -98,12 +99,15 @@ public final class PhaseTracker {
         */
     };
 
-    private final CauseStack stack = new CauseStack();
+    private final PhaseStack stack = new PhaseStack();
 
     @Nullable private PhaseData currentProcessingState = null;
 
     public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
     public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
+    private boolean hasPrintedEmptyOnce = false;
+    private boolean hasPrintedAboutRunnawayPhases = false;
+    private List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
 
     private PhaseTracker() {
         // We cannot have two instances ever. ever ever.
@@ -118,7 +122,7 @@ public final class PhaseTracker {
 
     // ----------------- STATE ACCESS ----------------------------------
 
-    public void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
+    void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
@@ -137,28 +141,6 @@ public final class PhaseTracker {
         }
 
         this.stack.push(state, phaseContext);
-    }
-
-    public void switchToPhase(PhaseData phaseData) {
-        checkNotNull(phaseData.state, "State cannot be null!");
-        checkNotNull(phaseData.state.getPhase(), "Phase cannot be null!");
-        checkNotNull(phaseData.context, "PhaseContext cannot be null!");
-        checkArgument(phaseData.context.isComplete(), "PhaseContext must be complete!");
-
-        final IPhaseState<?> currentState = this.stack.peek().state;
-        if (this.isVerbose) {
-            if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
-                // This printing is to detect possibilities of a phase not being cleared properly
-                // and resulting in a "runaway" phase state accumulation.
-                printRunawayPhase(phaseData.state, phaseData.context);
-            }
-            if (!currentState.canSwitchTo(phaseData.state) && phaseData.state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
-                // This is to detect incompatible phase switches.
-                printPhaseIncompatibility(currentState, phaseData.state);
-            }
-        }
-
-        this.stack.push(phaseData.state, phaseData.context);
     }
 
     /**
@@ -222,6 +204,10 @@ public final class PhaseTracker {
     }
 
     private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
+        if (!this.isVerbose && !this.hasPrintedAboutRunnawayPhases) {
+            // Avoiding spam logs.
+            return;
+        }
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Completing Phase").centre().hr();
         printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
@@ -234,6 +220,9 @@ public final class PhaseTracker {
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.hasPrintedAboutRunnawayPhases = true;
+        }
     }
 
     public void generateVersionInfo(PrettyPrinter printer) {
@@ -245,6 +234,17 @@ public final class PhaseTracker {
     }
 
     private void printIncorrectPhaseCompletion(IPhaseState<?> prevState, IPhaseState<?> state) {
+        if (!this.isVerbose && !this.completedIncorrectStates.isEmpty()) {
+            for (Tuple<IPhaseState<?>, IPhaseState<?>> tuple : this.completedIncorrectStates) {
+                if ((tuple.getFirst().equals(prevState)
+                        && tuple.getSecond().equals(state))) {
+                    // we've already printed once about the previous state and the current state
+                    // being completed incorrectly. only print it once.
+                    return;
+                }
+            }
+        }
+
         PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
                 .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
                         + "a change to any world takes place, however, we are attempting"
@@ -260,9 +260,19 @@ public final class PhaseTracker {
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.completedIncorrectStates.add(new Tuple<>(prevState, state));
+        }
     }
 
     private void printEmptyStackOnCompletion() {
+        if (!this.isVerbose && this.hasPrintedEmptyOnce) {
+            // We want to only mention it once that we are completing an
+            // empty state, of course something is bound to break, but
+            // we don't want to spam megabytes worth of log files just
+            // because of it.
+            return;
+        }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpectedly Completing An Empty Stack").centre().hr()
                 .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
                                 + "a change to any world takes place, however, we have been told"
@@ -274,9 +284,16 @@ public final class PhaseTracker {
                 .add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.hasPrintedEmptyOnce = true;
+        }
     }
 
     private void printRunawayPhase(IPhaseState<?> state, PhaseContext<?> context) {
+        if (!this.isVerbose && !this.hasPrintedAboutRunnawayPhases) {
+            // Avoiding spam logs.
+            return;
+        }
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add("Switching Phase").centre().hr();
         printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
@@ -290,9 +307,22 @@ public final class PhaseTracker {
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.hasPrintedAboutRunnawayPhases = true;
+        }
     }
 
     private void printPhaseIncompatibility(IPhaseState<?> currentState, IPhaseState<?> incompatibleState) {
+        if (!this.isVerbose && !this.completedIncorrectStates.isEmpty()) {
+            for (Tuple<IPhaseState<?>, IPhaseState<?>> tuple : this.completedIncorrectStates) {
+                if ((tuple.getFirst().equals(currentState)
+                        && tuple.getSecond().equals(incompatibleState))) {
+                    // we've already printed once about the previous state and the current state
+                    // being completed incorrectly. only print it once.
+                    return;
+                }
+            }
+        }
         PrettyPrinter printer = new PrettyPrinter(80);
         printer.add("Switching Phase").centre().hr();
         printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
@@ -307,13 +337,16 @@ public final class PhaseTracker {
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.completedIncorrectStates.add(Tuple.of(currentState, incompatibleState));
+        }
     }
 
     public void printMessageWithCaughtException(String header, String subHeader, Throwable e) {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState<?> state, PhaseContext<?> context, Throwable t) {
+    private void printMessageWithCaughtException(String header, String subHeader, IPhaseState<?> state, PhaseContext<?> context, Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -328,7 +361,7 @@ public final class PhaseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    public String dumpStack() {
+    String dumpStack() {
         if (this.stack.isEmpty()) {
             return "[Empty stack]";
         }
@@ -354,10 +387,6 @@ public final class PhaseTracker {
 
     public PhaseContext<?> getCurrentContext() {
         return this.stack.peekContext();
-    }
-
-    public PhaseData getCurrentProcessingPhase() {
-        return this.currentProcessingState == null ? CauseStack.EMPTY_DATA : this.currentProcessingState;
     }
 
     // --------------------- DELEGATED WORLD METHODS -------------------------

@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * Note that the {@link PhaseContext} must be marked as {@link PhaseContext#isComplete()},
  * otherwise an {@link IllegalArgumentException} is thrown.
  */
-final class CauseStack {
+final class PhaseStack {
 
     private static final PhaseContext<?> EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
     static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
@@ -49,17 +49,17 @@ final class CauseStack {
 
     private final Deque<PhaseData> states;
 
-    CauseStack() {
+    PhaseStack() {
         this(DEFAULT_QUEUE_SIZE);
     }
 
-    private CauseStack(int size) {
+    private PhaseStack(int size) {
         this.states = new ArrayDeque<>(size);
     }
 
     PhaseData peek() {
         final PhaseData phase = this.states.peek();
-        return phase == null ? CauseStack.EMPTY_DATA : phase;
+        return phase == null ? PhaseStack.EMPTY_DATA : phase;
     }
 
     IPhaseState<?> peekState() {
@@ -69,21 +69,21 @@ final class CauseStack {
 
     PhaseContext<?> peekContext() {
         final PhaseData peek = this.states.peek();
-        return peek == null ? CauseStack.EMPTY : peek.context;
+        return peek == null ? PhaseStack.EMPTY : peek.context;
     }
 
     PhaseData pop() {
         return this.states.pop();
     }
 
-    private CauseStack push(PhaseData tuple) {
+    private PhaseStack push(PhaseData tuple) {
         checkNotNull(tuple, "Tuple cannot be null!");
         checkArgument(tuple.context.isComplete(), "Phase context must be complete: %s", tuple);
         this.states.push(tuple);
         return this;
     }
 
-    CauseStack push(IPhaseState<?> state, PhaseContext<?> context) {
+    PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
         return push(new PhaseData(context, state));
     }
 
@@ -112,7 +112,7 @@ final class CauseStack {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final CauseStack other = (CauseStack) obj;
+        final PhaseStack other = (PhaseStack) obj;
         return Objects.equals(this.states, other.states);
     }
 
