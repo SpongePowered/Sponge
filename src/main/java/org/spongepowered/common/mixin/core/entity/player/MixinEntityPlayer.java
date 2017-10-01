@@ -687,7 +687,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                         final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
                                                 .cause(Cause.of(EventContext.empty(), heldSnapshot))
                                                 .item(heldSnapshot)
-                                                .type(DamageModifierTypes.SWEAPING)
+                                                .type(DamageModifierTypes.SWEEPING)
                                                 .build(),
                                             (incoming) -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
                                         final List<DamageFunction> sweapingFunctions = new ArrayList<>();

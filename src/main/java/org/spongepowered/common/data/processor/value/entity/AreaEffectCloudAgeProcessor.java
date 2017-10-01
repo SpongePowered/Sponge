@@ -35,9 +35,9 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class AReaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudAgeProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
 
-    public AReaEffectCloudAgeProcessor() {
+    public AreaEffectCloudAgeProcessor() {
         super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_AGE);
     }
 

@@ -28,9 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageModifierType;
 
 import java.util.Collection;
@@ -39,11 +38,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<DamageModifierType> {
+public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<DamageModifierType>, AlternateCatalogRegistryModule<DamageModifierType> {
 
-    @RegisterCatalog(DamageModifierTypes.class)
     private final Map<String, DamageModifierType> modifierTypeMap = new HashMap<>();
-
 
     @Override
     public Optional<DamageModifierType> getById(String id) {
@@ -72,6 +69,16 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         this.modifierTypeMap.put("absorption", new SpongeDamageModifierType("Absorption", "absorption"));
         this.modifierTypeMap.put("critical_hit", new SpongeDamageModifierType("Critical Hit", "critical_hit"));
         this.modifierTypeMap.put("attack_cooldown", new SpongeDamageModifierType("Attack Cooldown", "attack_cooldown"));
-        this.modifierTypeMap.put("sweaping", new SpongeDamageModifierType("Sweaping", "sweaping"));
+        final DamageModifierType sweeping = new SpongeDamageModifierType("Sweeping", "sweeping");
+        this.modifierTypeMap.put("sweeping", sweeping);
+        this.modifierTypeMap.put("sweaping", sweeping); // TODO: remove
+    }
+
+    // TODO: replace with @RegisterCatalog on the field - only needed until DamageModifierTypes#SWEAPING is removed
+    @Override
+    public Map<String, DamageModifierType> provideCatalogMap() {
+        final Map<String, DamageModifierType> map = new HashMap<>(this.modifierTypeMap);
+        map.remove("sweaping"); // do not remap
+        return map;
     }
 }
