@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
@@ -68,8 +69,8 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     @Override
     public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        final ItemStack usedStack = context.getItemUsed();
-        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+        //final ItemStack usedStack = context.getItemUsed();
+        //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(spongePlayer);
@@ -85,11 +86,14 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                         entities.add(EntityUtil.fromNative(item));
                     }
 
-                    final CPacketPlayerDigging packetIn = context.getPacket();
-
-                    CPacketPlayerDigging.Action action = packetIn.getAction();
-
-                    final int usedButton = action == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+                    int usedButton = 0;
+                    if (context.getPacket() instanceof CPacketPlayerDigging) {
+                        final CPacketPlayerDigging packetIn = context.getPacket();
+                        usedButton = packetIn.getAction() == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+                    } else {
+                        final CPacketClickWindow packetIn = context.getPacket();
+                        usedButton = packetIn.getUsedButton();
+                    }
 
                     Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                     final IMixinContainer mixinContainer = ContainerUtil.toMixin( player.openContainer);
