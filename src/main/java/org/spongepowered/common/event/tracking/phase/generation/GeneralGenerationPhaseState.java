@@ -116,11 +116,9 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
     
-            final SpawnEntityEvent.Spawner
-                    event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(), spawnedEntities);
+            final SpawnEntityEvent.Spawner event = SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), spawnedEntities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity entity : event.getEntities()) {
@@ -135,10 +133,10 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity.getLocation().getExtent());
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
 
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
-                    entities);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled() && event.getEntities().size() > 0) {
                 for (Entity item : event.getEntities()) {
