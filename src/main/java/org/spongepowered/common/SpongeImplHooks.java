@@ -35,6 +35,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -49,6 +50,8 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
@@ -358,5 +361,14 @@ public final class SpongeImplHooks {
 
     public static Predicate<? super PluginContainer> getPluginFilterPredicate() {
         return plugin -> !SpongeCommands.CONTAINER_LIST_STATICS.contains(plugin.getId());
+    }
+
+    // Borrowed from Forge, with adjustments by us
+
+    @Nullable
+    public static RayTraceResult rayTraceEyes(EntityLivingBase entity, double length) {
+        final Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+        final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
+        return entity.world.rayTraceBlocks(startPos, endPos);
     }
 }

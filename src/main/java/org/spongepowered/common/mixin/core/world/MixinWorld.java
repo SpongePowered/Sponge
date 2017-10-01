@@ -784,7 +784,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         final IBlockState state = getBlockState(pos);
         final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
         try {
-            return Optional.of(VecHelper.toSponge(box).offset(x, y, z));
+            return Optional.of(VecHelper.toSpongeAABB(box).offset(x, y, z));
         } catch (IllegalArgumentException exception) {
             // Box is degenerate
             return Optional.empty();
@@ -795,7 +795,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
-        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entity -> filter.test((Entity) entity))
+        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entity -> filter.test((Entity) entity))
                 .stream()
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toSet());
@@ -804,8 +804,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(null, VecHelper.toMC(box)).stream()
-                .map(VecHelper::toSponge)
+        return getCollisionBoxes(null, VecHelper.toMinecraftAABB(box)).stream()
+                .map(VecHelper::toSpongeAABB)
                 .collect(Collectors.toSet());
     }
 
@@ -813,8 +813,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
         checkNotNull(owner, "owner");
         checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream()
-                .map(VecHelper::toSponge)
+        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraftAABB(box)).stream()
+                .map(VecHelper::toSpongeAABB)
                 .collect(Collectors.toSet());
     }
 

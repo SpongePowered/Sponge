@@ -49,6 +49,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.Sponge;
@@ -64,6 +65,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -85,7 +87,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
      * @reason Fire interact block event.
      */
     @Overwrite
-    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
+    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
         if (this.gameType == GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -112,11 +114,11 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
-        @Nullable final ItemStack oldStack = stack.copy();
+        final ItemStack oldStack = stack.copy();
+
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack,
-                Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
-                DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack, VecHelper.toVector3d(pos.add
+                (offsetX, offsetY, offsetZ)), currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }

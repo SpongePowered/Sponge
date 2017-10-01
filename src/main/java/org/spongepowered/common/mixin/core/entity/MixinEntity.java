@@ -755,7 +755,7 @@ public abstract class MixinEntity implements IMixinEntity {
             return Optional.empty();
         }
         try {
-            return Optional.of(VecHelper.toSponge(boundingBox));
+            return Optional.of(VecHelper.toSpongeAABB(boundingBox));
         } catch (IllegalArgumentException exception) {
             // Bounding box is degenerate, the entity doesn't actually have one
             return Optional.empty();
