@@ -22,34 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.common.inject.plugin;
 
-import org.slf4j.Logger;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
-import org.spongepowered.api.network.ChannelBinding;
-import org.spongepowered.api.network.ChannelId;
-import org.spongepowered.api.plugin.Plugin;
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+import org.spongepowered.api.plugin.PluginContainer;
 
-import javax.inject.Inject;
+public final class ModularPluginModule extends AbstractModule {
 
-@Plugin(id = "injection-test", authors = "kashike")
-public class InjectionTest {
+    private final PluginContainer container;
+    private final Object plugin;
 
-    private final Logger logger;
-    private final ChannelBinding.RawDataChannel channel;
-
-    @Inject
-    private InjectionTest(
-            final Logger logger,
-            @ChannelId("injection") ChannelBinding.RawDataChannel channel
-    ) {
-        this.logger = logger;
-        this.channel = channel;
+    public ModularPluginModule(final PluginContainer container, final Object plugin) {
+        this.container = container;
+        this.plugin = plugin;
     }
 
-    @Listener
-    public void starting(final GameStartingServerEvent event) {
-        this.logger.info("Channel: {}", this.channel);
+    @Override
+    protected void configure() {
+        this.install(new PluginModule(this.container, this.plugin.getClass()));
+        this.install((Module) this.plugin);
+        this.requestInjection(this.plugin);
     }
 }

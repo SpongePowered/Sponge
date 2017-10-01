@@ -44,7 +44,7 @@ import org.spongepowered.common.inject.provider.config.PluginConfigurationModule
 /**
  * A module installed for each plugin.
  */
-public class PluginModule extends AbstractModule {
+public final class PluginModule extends AbstractModule {
 
     private final PluginContainer container;
     private final Class<?> pluginClass;
