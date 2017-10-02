@@ -41,6 +41,7 @@ import com.flowpowered.math.vector.Vector4f;
 import com.flowpowered.math.vector.Vector4i;
 import com.flowpowered.math.vector.Vector4l;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
@@ -120,8 +121,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:uuid";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("uuid");
             }
 
             @Override
@@ -159,8 +160,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_d";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_2_d");
             }
 
             @Override
@@ -198,8 +199,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_f";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_2_f");
             }
 
             @Override
@@ -238,8 +239,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_i";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_2_i");
             }
 
             @Override
@@ -277,8 +278,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_2_l";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_2_l");
             }
 
             @Override
@@ -320,8 +321,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_d";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_3_d");
             }
 
             @Override
@@ -363,8 +364,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_f";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_3_f");
             }
 
             @Override
@@ -406,8 +407,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_i";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_3_i");
             }
 
             @Override
@@ -449,8 +450,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_3_l";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_3_l");
             }
 
             @Override
@@ -495,8 +496,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_f";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_4_f");
             }
 
             @Override
@@ -541,8 +542,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_i";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_4_i");
             }
 
             @Override
@@ -587,8 +588,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_l";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_4_l");
             }
 
             @Override
@@ -633,8 +634,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:vector_4_d";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("vector_4_d");
             }
 
             @Override
@@ -673,8 +674,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:complexd";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("complexd");
             }
 
             @Override
@@ -712,8 +713,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:complexf";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("complexf");
             }
 
             @Override
@@ -757,8 +758,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:quaterniond";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("quaterniond");
             }
 
             @Override
@@ -802,8 +803,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:quaternionf";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("quaternionf");
             }
 
             @Override
@@ -859,8 +860,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:local_time";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("local_time");
             }
 
             @Override
@@ -910,8 +911,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:local_date";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("local_date");
             }
 
             @Override
@@ -985,8 +986,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:local_date_time";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("local_date_time");
             }
 
             @Override
@@ -1066,8 +1067,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:zoned_date_time";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("zoned_date_time");
             }
 
             @Override
@@ -1143,8 +1144,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:instant";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("instant");
             }
 
             @Override
@@ -1181,8 +1182,8 @@ public final class DataSerializers {
             }
 
             @Override
-            public String getId() {
-                return "sponge:month";
+            public CatalogKey getKey() {
+                return CatalogKey.sponge("month");
             }
 
             @Override

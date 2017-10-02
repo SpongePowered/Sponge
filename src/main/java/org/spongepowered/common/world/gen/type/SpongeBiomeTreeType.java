@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 
@@ -37,24 +38,24 @@ import javax.annotation.Nullable;
 
 public class SpongeBiomeTreeType implements BiomeTreeType {
 
-    private String id;
+    private final CatalogKey id;
     private String name;
     private PopulatorObject smallObject;
     private @Nullable PopulatorObject largeObject;
 
-    public SpongeBiomeTreeType(String id, String name, PopulatorObject small) {
+    public SpongeBiomeTreeType(CatalogKey id, String name, PopulatorObject small) {
         this.id = id;
         this.name = name;
         this.smallObject = small;
     }
 
-    public SpongeBiomeTreeType(String id, String name, PopulatorObject small, @Nullable PopulatorObject large) {
+    public SpongeBiomeTreeType(CatalogKey id, String name, PopulatorObject small, @Nullable PopulatorObject large) {
         this(id, name, small);
         this.largeObject = large;
     }
 
     @Override
-    public String getId() {
+    public CatalogKey getKey() {
         return this.id;
     }
 
@@ -97,7 +98,7 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
             return false;
         }
         SpongeBiomeTreeType b = (SpongeBiomeTreeType) o;
-        return getId().equals(b.getId());
+        return getKey().equals(b.getKey());
     }
 
     @Override
@@ -108,7 +109,7 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
     @Override
     public String toString() {
         ToStringHelper tsh = MoreObjects.toStringHelper(this)
-                .add("id", this.getId())
+                .add("id", this.getKey())
                 .add("smallObj", this.smallObject.getClass().getName());
         if (this.largeObject != null) {
             tsh.add("largeObj", this.largeObject.getClass().getName());

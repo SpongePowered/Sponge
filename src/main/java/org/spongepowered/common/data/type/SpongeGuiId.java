@@ -24,21 +24,23 @@
  */
 package org.spongepowered.common.data.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.property.GuiId;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.registry.RegistryMap;
 
 import javax.annotation.Nullable;
 
 public class SpongeGuiId extends SpongeCatalogType implements GuiId {
 
-    @Nullable private String internalId;
+    @Nullable private final String internalId;
 
-    public SpongeGuiId(String id) {
-        super(id);
+    public SpongeGuiId(final CatalogKey key) {
+        this(key, null);
     }
 
-    public SpongeGuiId(String id, String internalId) {
-        this(id);
+    public SpongeGuiId(final CatalogKey key, @Nullable final String internalId) {
+        super(key, RegistryMap.name(key));
         this.internalId = internalId;
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.type.block;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.PopulatorObject;
@@ -45,8 +46,8 @@ public class MushroomTypeRegistryModule
 
     @Override
     public void registerDefaults() {
-        register(new SpongeMushroomType("minecraft:brown", "brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK)));
-        register(new SpongeMushroomType("minecraft:red", "red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK)));
+        register(new SpongeMushroomType(CatalogKey.minecraft("brown"), "brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK)));
+        register(new SpongeMushroomType(CatalogKey.minecraft("red"), "red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK)));
     }
 
 }

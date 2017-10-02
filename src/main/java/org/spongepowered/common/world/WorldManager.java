@@ -995,7 +995,7 @@ public final class WorldManager {
         // Since we now store the modid, we need to support older save files that only include id without modid.
         if (!name.contains(":")) {
             for (org.spongepowered.api.world.DimensionType type : Sponge.getRegistry().getAllOf(org.spongepowered.api.world.DimensionType.class)) {
-                String typeId = (type.getId().substring(type.getId().lastIndexOf(":") + 1));
+                String typeId = type.getKey().getValue();
                 if (typeId.equals(name)) {
                     return type.getId();
                     // Note: We don't update the NBT here but instead fix it on next

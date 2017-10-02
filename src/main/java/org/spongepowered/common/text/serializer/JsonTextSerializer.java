@@ -26,6 +26,7 @@ package org.spongepowered.common.text.serializer;
 
 import com.google.gson.JsonParseException;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializer;
@@ -38,8 +39,8 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 public final class JsonTextSerializer implements TextSerializer {
 
     @Override
-    public String getId() {
-        return "minecraft:json";
+    public CatalogKey getKey() {
+        return CatalogKey.minecraft("json");
     }
 
     @Override

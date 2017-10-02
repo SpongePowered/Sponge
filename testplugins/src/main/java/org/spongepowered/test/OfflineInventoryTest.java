@@ -91,12 +91,12 @@ public class OfflineInventoryTest {
         User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(uuid).get();
         this.logger.info(user.getName() + " has an Inventory with:");
         for (Inventory slot : user.getInventory()) {
-            slot.peek().ifPresent(stack -> this.logger.info(stack.getType().getId() + "x" + stack.getQuantity()));
+            slot.peek().ifPresent(stack -> this.logger.info(stack.getType().getKey() + "x" + stack.getQuantity()));
         }
-        user.getHelmet().ifPresent(s -> this.logger.info("Helmet: " + s.getType().getId()));
-        user.getChestplate().ifPresent(s -> this.logger.info("Chestplate: " + s.getType().getId()));
-        user.getLeggings().ifPresent(s -> this.logger.info("Leggings: " + s.getType().getId()));
-        user.getBoots().ifPresent(s -> this.logger.info("Boots: " + s.getType().getId()));
+        user.getHelmet().ifPresent(s -> this.logger.info("Helmet: " + s.getType().getKey()));
+        user.getChestplate().ifPresent(s -> this.logger.info("Chestplate: " + s.getType().getKey()));
+        user.getLeggings().ifPresent(s -> this.logger.info("Leggings: " + s.getType().getKey()));
+        user.getBoots().ifPresent(s -> this.logger.info("Boots: " + s.getType().getKey()));
 
         this.logger.info("and a hotbar full of diamonds!");
         for (Inventory inv : user.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class)).slots()) {

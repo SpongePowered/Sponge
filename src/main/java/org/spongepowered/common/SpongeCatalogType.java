@@ -27,31 +27,39 @@ package org.spongepowered.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
 
 // TODO - id's and names should NEVER be the same....
 public abstract class SpongeCatalogType implements CatalogType {
 
-    private final String id;
+    private final CatalogKey key;
+    private final String name;
 
+    @Deprecated
     public SpongeCatalogType(String id) {
-        this.id = checkNotNull(id, "id");
+        this(CatalogKey.resolve(id), id);
+    }
+
+    public SpongeCatalogType(final CatalogKey key, final String name) {
+        this.key = key;
+        this.name = name;
     }
 
     @Override
-    public final String getId() {
-        return this.id;
+    public final CatalogKey getKey() {
+        return this.key;
     }
 
     @Override
     public String getName() {
-        return getId();
+        return this.name;
     }
 
     @Override
     public final int hashCode() {
-        return this.id.hashCode();
+        return this.key.hashCode();
     }
 
     @Override

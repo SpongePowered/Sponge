@@ -25,17 +25,13 @@
 package org.spongepowered.common.registry.type;
 
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 public abstract class MinecraftEnumBasedCatalogTypeModule<E extends Enum<E>, T extends CatalogType>
-        extends AbstractPrefixCheckCatalogRegistryModule<T> implements AlternateCatalogRegistryModule<T> {
+        extends AbstractCatalogRegistryModule<T> {
 
 
     protected MinecraftEnumBasedCatalogTypeModule() {
-        super("minecraft");
         generateInitialMap();
     }
 
@@ -43,17 +39,8 @@ public abstract class MinecraftEnumBasedCatalogTypeModule<E extends Enum<E>, T e
 
     protected void generateInitialMap() {
         for (E enumType: getValues()) {
-            this.catalogTypeMap.put(enumAs(enumType).getId(), enumAs(enumType));
+            this.map.put(enumAs(enumType).getKey(), enumAs(enumType));
         }
-    }
-
-    @Override
-    public Map<String, T> provideCatalogMap() {
-        final HashMap<String, T> map = new HashMap<>();
-        for (Map.Entry<String, T> entry : this.catalogTypeMap.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
-        }
-        return map;
     }
 
     @SuppressWarnings("unchecked")

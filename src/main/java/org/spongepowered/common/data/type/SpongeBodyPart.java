@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.data.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.registry.RegistryMap;
 
 public class SpongeBodyPart extends SpongeCatalogType implements BodyPart {
 
-    public SpongeBodyPart(String id) {
-        super(id);
+    public SpongeBodyPart(final CatalogKey key) {
+        super(key, RegistryMap.name(key));
     }
 
 }

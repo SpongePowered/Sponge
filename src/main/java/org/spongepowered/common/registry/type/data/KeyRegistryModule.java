@@ -35,6 +35,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
 import org.h2.mvstore.ConcurrentArrayList;
 import org.spongepowered.api.Sponge;
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -75,7 +78,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     private final Map<String, Key<?>> fieldMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     // This map is the one used for catalog id lookups.
-    private final Map<String, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();
+    private final Map<CatalogKey, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     @Override
     public void registerDefaults() {
@@ -602,25 +605,21 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
     private void register(String fieldName, Key<?> key) {
         this.fieldMap.put(fieldName, key);
-        this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
+        this.keyMap.put(key.getKey(), key);
     }
 
     @Override
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
-        final PluginContainer parent = ((SpongeKey) extraCatalog).getParent();
-        final String pluginId = parent.getId().toLowerCase(Locale.ENGLISH);
-        final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
-        final String[] split = id.split(":");
-        checkArgument(split.length == 2, "Key id's have to be in two parts! The first part being the plugin id, the second part being the key's individual id. Currently you have: " + Arrays.toString(split));
-        checkArgument(split[0].equals(pluginId),  "A plugin is trying to register custom keys under a different plugin id namespace! This is unsupported! The provided key: " + id);
+        final CatalogKey id = extraCatalog.getKey();
+        checkArgument(!id.getNamespace().equals(CatalogKey.SPONGE_NAMESPACE), "A plugin is trying to register custom keys under the sponge id namespace! This is a fake key! " + id);
         this.keyMap.put(id, extraCatalog);
     }
 
     @Override
-    public Optional<Key<?>> getById(String id) {
-        return Optional.ofNullable(this.keyMap.get(id.toLowerCase(Locale.ENGLISH)));
+    public Optional<Key<?>> get(final CatalogKey key) {
+        return Optional.ofNullable(this.keyMap.get(key));
     }
 
     @Override

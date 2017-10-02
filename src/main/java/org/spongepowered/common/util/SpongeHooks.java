@@ -158,7 +158,7 @@ public class SpongeHooks {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) world).getDimensionId() + ")",
-                    ((BlockType) block).getId(),
+                    ((BlockType) block).getKey(),
                     pos);
             logStack(config);
         } else if (config.getConfig().getLogging().blockTrackLogging() && !allowed) {
@@ -166,7 +166,7 @@ public class SpongeHooks {
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) world).getDimensionId(),
-                    ((BlockType) block).getId(),
+                    ((BlockType) block).getKey(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
     }

@@ -31,16 +31,14 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Locale;
-
 @RegisterCatalog(BossBarColors.class)
 public final class BossBarColorRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BossInfo.Color, BossBarColor> {
 
     @AdditionalRegistration
     public void customRegistration() {
         for (BossInfo.Color color : BossInfo.Color.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(color).getId())) {
-                this.catalogTypeMap.put(enumAs(color).getId().toLowerCase(Locale.ENGLISH), (BossBarColor) (Object) color);
+            if (!this.map.containsKey(enumAs(color).getKey())) {
+                this.map.put(enumAs(color).getKey(), (BossBarColor) (Object) color);
             }
         }
     }

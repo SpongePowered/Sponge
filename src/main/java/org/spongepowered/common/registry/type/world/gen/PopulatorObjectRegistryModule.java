@@ -48,29 +48,22 @@ import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
-import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 @RegisterCatalog(PopulatorObjects.class)
-public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<PopulatorObject>
-    implements AlternateCatalogRegistryModule<PopulatorObject>, AdditionalCatalogRegistryModule<PopulatorObject> {
-
-
-    public PopulatorObjectRegistryModule() {
-        super("minecraft");
-    }
+public class PopulatorObjectRegistryModule extends AbstractCatalogRegistryModule<PopulatorObject>
+    implements AdditionalCatalogRegistryModule<PopulatorObject> {
 
     @Override
     public void registerAdditionalCatalog(PopulatorObject extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.catalogTypeMap.containsKey(extraCatalog.getId()), "Duplicate Id");
-        this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
+        this.register(extraCatalog);
     }
 
     @Override

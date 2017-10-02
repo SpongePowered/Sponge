@@ -22,60 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.weather;
+package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
-@NonnullByDefault
-public class SpongeWeather implements Weather {
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
-    private final CatalogKey id;
-    private final String name;
+public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
-    public SpongeWeather(CatalogKey id, String name) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
+    protected final RegistryMap<C> map = new RegistryMap<>();
+
+    protected void register(final C value) {
+        this.register(value.getKey(), value);
+    }
+
+    protected void register(final CatalogKey key, final C value) {
+        checkState(!this.map.containsKey(key), "duplicate value for key %s", key);
+        this.map.put(value.getKey(), value);
     }
 
     @Override
-    public CatalogKey getKey() {
-        return this.id;
+    public final Optional<C> get(final CatalogKey key) {
+        return this.map.getOptional(key);
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public final Optional<C> getById(final String id) {
+        return AlternateCatalogRegistryModule.super.getById(id);
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .toString();
+    public final Collection<C> getAll() {
+        return this.map.values();
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SpongeWeather that = (SpongeWeather) o;
-        return Objects.equal(this.id, that.id) &&
-               Objects.equal(this.name, that.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
+    public final Map<String, C> provideCatalogMap() {
+        return this.map.forCatalogRegistration();
     }
 }

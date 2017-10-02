@@ -22,37 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.serializer;
+package org.spongepowered.common.mixin.core.util;
 
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.SafeTextSerializer;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class PlainTextSerializer implements SafeTextSerializer {
+@Mixin(ResourceLocation.class)
+public class MixinResourceLocation implements CatalogKey {
+
+    @Final @Shadow protected String resourceDomain;
+    @Final @Shadow protected String resourcePath;
 
     @Override
-    public CatalogKey getKey() {
-        return CatalogKey.minecraft("plain");
+    public String getNamespace() {
+        return this.resourceDomain;
     }
 
     @Override
-    public String getName() {
-        return "Plain Text";
+    public String getValue() {
+        return this.resourcePath;
     }
-
-    @Override
-    public String serialize(Text text) {
-        return text.toPlain();
-    }
-
-    @Override
-    public String serializeSingle(Text text) {
-        return text.toPlainSingle();
-    }
-
-    @Override
-    public Text deserialize(String input) {
-        return Text.of(input);
-    }
-
 }

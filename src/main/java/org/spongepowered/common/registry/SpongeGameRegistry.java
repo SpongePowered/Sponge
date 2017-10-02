@@ -39,6 +39,7 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Sponge;
@@ -157,6 +158,24 @@ public class SpongeGameRegistry implements GameRegistry {
     @Inject
     public SpongeGameRegistry(SpongePropertyRegistry propertyRegistry) {
         this.propertyRegistry = propertyRegistry;
+    }
+
+    @Override
+    public CatalogKey createKey(final String namespace, final String value) {
+        checkNotNull(namespace, "namespace");
+        checkNotNull(value, "value");
+        return (CatalogKey) new ResourceLocation(namespace, value);
+    }
+
+    @Override
+    public CatalogKey resolveKey(final String value) {
+        checkNotNull(value, "value");
+        return (CatalogKey) new ResourceLocation(value);
+    }
+
+    @Override
+    public <T extends CatalogType> Optional<T> getType(final Class<T> typeClass, final CatalogKey key) {
+        return this.getRegistryModuleFor(typeClass).flatMap(module -> module.get(key));
     }
 
     public final RegistrationPhase getPhase() {

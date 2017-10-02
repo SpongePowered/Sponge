@@ -24,27 +24,21 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
-import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.weather.SpongeWeather;
 
 @RegisterCatalog(Weathers.class)
-public final class WeatherRegistryModule
-    extends AbstractPrefixAlternateCatalogTypeRegistryModule<Weather>
-        implements AlternateCatalogRegistryModule<Weather> {
-
-    public WeatherRegistryModule() {
-        super("minecraft");
-    }
+public final class WeatherRegistryModule extends AbstractCatalogRegistryModule<Weather> {
 
     @Override
     public void registerDefaults() {
-        register(new SpongeWeather("minecraft:clear", "clear"));
-        register(new SpongeWeather("minecraft:rain", "rain"));
-        register(new SpongeWeather("minecraft:thunder_storm", "thunder_storm"));
+        this.register(new SpongeWeather(CatalogKey.minecraft("clear"), "clear"));
+        this.register(new SpongeWeather(CatalogKey.minecraft("rain"), "rain"));
+        this.register(new SpongeWeather(CatalogKey.minecraft("thunder_storm"), "thunder_storm"));
     }
 
 }

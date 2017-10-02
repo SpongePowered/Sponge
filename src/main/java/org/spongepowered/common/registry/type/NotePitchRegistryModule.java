@@ -24,42 +24,24 @@
  */
 package org.spongepowered.common.registry.type;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeNotePitch;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-public final class NotePitchRegistryModule implements CatalogRegistryModule<NotePitch> {
-
-    @RegisterCatalog(NotePitches.class)
-    private final Map<String, NotePitch> notePitchMap = new HashMap<>();
-
-    @Override
-    public Optional<NotePitch> getById(String id) {
-        return Optional.ofNullable(this.notePitchMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<NotePitch> getAll() {
-        return ImmutableList.copyOf(this.notePitchMap.values());
-    }
+@RegisterCatalog(NotePitches.class)
+public final class NotePitchRegistryModule extends AbstractCatalogRegistryModule<NotePitch> {
 
     @Override
     public void registerDefaults() {
         RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) this.notePitchMap.size(), input);
-            this.notePitchMap.put(input.toLowerCase(Locale.ENGLISH), pitch);
+            NotePitch pitch = new SpongeNotePitch((byte) this.map.size(), input);
+            this.map.put(CatalogKey.minecraft(input.toLowerCase(Locale.ENGLISH)), pitch);
             return pitch;
         });
     }

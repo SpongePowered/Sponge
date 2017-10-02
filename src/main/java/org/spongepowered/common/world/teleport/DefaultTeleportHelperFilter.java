@@ -34,6 +34,7 @@ import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockSnow;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.common.block.BlockUtil;
@@ -46,8 +47,8 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
     private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.AIR, Material.CACTUS, Material.FIRE, Material.LAVA);
 
     @Override
-    public String getId() {
-        return "sponge:default";
+    public CatalogKey getKey() {
+        return CatalogKey.sponge("default");
     }
 
     @Override

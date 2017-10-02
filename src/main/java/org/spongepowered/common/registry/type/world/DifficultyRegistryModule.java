@@ -24,63 +24,30 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.EnumDifficulty;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class DifficultyRegistryModule implements AlternateCatalogRegistryModule<Difficulty> {
-
-    @RegisterCatalog(Difficulties.class)
-    private final Map<String, Difficulty> difficultyMappings = new HashMap<>();
-
-    @Override
-    public Optional<Difficulty> getById(String id) {
-        checkNotNull(id);
-        if (!id.contains(":") && !id.equals("none")) {
-            id = "minecraft:" + id; // assume vanilla
-        }
-        return Optional.ofNullable(this.difficultyMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Difficulty> getAll() {
-        return ImmutableList.copyOf(this.difficultyMappings.values());
-    }
-
-    @Override
-    public Map<String, Difficulty> provideCatalogMap() {
-        Map<String, Difficulty> newMap = new HashMap<>();
-        for (Map.Entry<String, Difficulty> entry : this.difficultyMappings.entrySet()) {
-            newMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return newMap;
-    }
+@RegisterCatalog(Difficulties.class)
+public final class DifficultyRegistryModule extends AbstractCatalogRegistryModule<Difficulty> {
 
     @Override
     public void registerDefaults() {
-        this.difficultyMappings.put("minecraft:peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL);
-        this.difficultyMappings.put("minecraft:easy", (Difficulty) (Object) EnumDifficulty.EASY);
-        this.difficultyMappings.put("minecraft:normal", (Difficulty) (Object) EnumDifficulty.NORMAL);
-        this.difficultyMappings.put("minecraft:hard", (Difficulty) (Object) EnumDifficulty.HARD);
+        this.register(CatalogKey.minecraft("peaceful"), (Difficulty) (Object) EnumDifficulty.PEACEFUL);
+        this.register(CatalogKey.minecraft("easy"), (Difficulty) (Object) EnumDifficulty.EASY);
+        this.register(CatalogKey.minecraft("normal"), (Difficulty) (Object) EnumDifficulty.NORMAL);
+        this.register(CatalogKey.minecraft("hard"), (Difficulty) (Object) EnumDifficulty.HARD);
     }
 
     @AdditionalRegistration
     public void additional() {
         for (EnumDifficulty difficulty : EnumDifficulty.values()) {
-            if (!this.difficultyMappings.containsValue(difficulty)) {
-                this.difficultyMappings.put(difficulty.name(), (Difficulty) (Object) difficulty);
+            if (!this.map.containsValue(difficulty)) {
+                this.map.put(CatalogKey.resolve(difficulty.name()), (Difficulty) (Object) difficulty);
             }
         }
     }

@@ -22,37 +22,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.serializer;
+package org.spongepowered.common.registry;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.spongepowered.api.CatalogKey;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.SafeTextSerializer;
 
-public final class PlainTextSerializer implements SafeTextSerializer {
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-    @Override
-    public CatalogKey getKey() {
-        return CatalogKey.minecraft("plain");
+/**
+ * A special map for use in registry modules.
+ *
+ * @param <V> The value type
+ */
+public final class RegistryMap<V> extends HashMap<CatalogKey, V> {
+
+    /**
+     * Gets a value by its key.
+     *
+     * @param key The key
+     * @return The optional value
+     */
+    public Optional<V> getOptional(final CatalogKey key) {
+        return Optional.ofNullable(this.get(key));
+    }
+
+    /**
+     * Creates a copy of this map prepared for catalog field registration.
+     *
+     * @return A map of keys to values
+     */
+    public Map<String, V> forCatalogRegistration() {
+        final Map<String, V> map = new HashMap<>(this.size());
+        for (final Map.Entry<CatalogKey, V> entry : this.entrySet()) {
+            map.put(entry.getKey().getValue(), entry.getValue());
+        }
+        return map;
     }
 
     @Override
-    public String getName() {
-        return "Plain Text";
+    public Collection<V> values() {
+        return Collections.unmodifiableCollection(super.values());
     }
 
-    @Override
-    public String serialize(Text text) {
-        return text.toPlain();
+    public static String name(final CatalogKey key) {
+        return WordUtils.capitalize(key.getValue(), '_');
     }
-
-    @Override
-    public String serializeSingle(Text text) {
-        return text.toPlainSingle();
-    }
-
-    @Override
-    public Text deserialize(String input) {
-        return Text.of(input);
-    }
-
 }

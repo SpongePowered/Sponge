@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
@@ -52,8 +53,8 @@ public class SpongeTextStyle extends TextStyle.Base {
     }
 
     @Override
-    public String getId() {
-        return "minecraft:" + this.handle.name().toLowerCase(Locale.ENGLISH);
+    public CatalogKey getKey() {
+        return CatalogKey.minecraft(this.handle.name().toLowerCase(Locale.ENGLISH));
     }
 
     public static SpongeTextStyle of(TextFormatting handle) {

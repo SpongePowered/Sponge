@@ -24,71 +24,51 @@
  */
 package org.spongepowered.common.registry.type.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.property.GuiId;
 import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeGuiId;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class GuiIdRegistryModule implements CatalogRegistryModule<GuiId>, AdditionalCatalogRegistryModule<GuiId> {
+@RegisterCatalog(GuiIds.class)
+public class GuiIdRegistryModule extends AbstractCatalogRegistryModule<GuiId> implements AdditionalCatalogRegistryModule<GuiId> {
 
     public static GuiIdRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(GuiIds.class)
-    private final Map<String, GuiId> guiIdMap = new HashMap<>();
-
-    @Override
-    public Optional<GuiId> getById(String id) {
-        return Optional.ofNullable(this.guiIdMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<GuiId> getAll() {
-        return ImmutableList.copyOf(this.guiIdMap.values());
-    }
-
     @Override
     public void registerDefaults() {
-        this.register("minecraft:chest");
-        this.register("minecraft:furnace");
-        this.register("minecraft:dispenser");
-        this.register("minecraft:crafting_table");
-        this.register("minecraft:brewing_stand");
-        this.register("minecraft:hopper");
-        this.register("minecraft:beacon");
-        this.register("minecraft:enchanting_table");
-        this.register("minecraft:anvil");
-        this.register("minecraft:villager");
-        this.register("minecraft:horse", "EntityHorse");
-        this.register("minecraft:shulker_box");
+        this.register(CatalogKey.minecraft("chest"));
+        this.register(CatalogKey.minecraft("furnace"));
+        this.register(CatalogKey.minecraft("dispenser"));
+        this.register(CatalogKey.minecraft("crafting_table"));
+        this.register(CatalogKey.minecraft("brewing_stand"));
+        this.register(CatalogKey.minecraft("hopper"));
+        this.register(CatalogKey.minecraft("beacon"));
+        this.register(CatalogKey.minecraft("enchanting_table"));
+        this.register(CatalogKey.minecraft("anvil"));
+        this.register(CatalogKey.minecraft("villager"));
+        this.register(CatalogKey.minecraft("horse"), "EntityHorse");
+        this.register(CatalogKey.minecraft("shulker_box"));
     }
 
-    private void register(String id) {
-        this.guiIdMap.put(id, new SpongeGuiId(id));
+    private void register(final CatalogKey key) {
+        this.map.put(key, new SpongeGuiId(key));
     }
 
-    private void register(String id, String internalId) {
-        this.guiIdMap.put(id, new SpongeGuiId(id, internalId));
+    private void register(final CatalogKey key, final String internalId) {
+        this.map.put(key, new SpongeGuiId(key, internalId));
     }
 
     @Override
     public void registerAdditionalCatalog(GuiId guiId) {
-        if (this.guiIdMap.containsKey(guiId.getId())) {
+        if (this.map.containsKey(guiId.getKey())) {
             throw new IllegalArgumentException("GuiId is already registered");
         }
-        this.guiIdMap.put(guiId.getId(), guiId);
+        this.map.put(guiId.getKey(), guiId);
     }
 
     private GuiIdRegistryModule() {

@@ -476,6 +476,7 @@
         "util.MixinEnumHand",
         "util.MixinIndirectEntityDamageSource",
         "util.MixinPacketThreadUtil",
+        "util.MixinResourceLocation",
         "util.datafix.MixinDataFixer",
         "util.math.MixinVec3i",
         "village.MixinVillage",

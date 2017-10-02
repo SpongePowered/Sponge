@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.Team;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,16 +40,16 @@ public abstract class MixinEnumVisible implements Visibility {
 
     @Shadow @Final public String internalName;
 
-    private String spongeId;
+    private CatalogKey key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void setSpongeIdAtConstructor(String nameIn, int idIn, String enumName, int ordinal, CallbackInfo callbackInfo) {
-        this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.internalName);
+        this.key = CatalogKey.resolve(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.internalName));
     }
 
     @Override
-    public String getId() {
-        return this.spongeId;
+    public CatalogKey getKey() {
+        return this.key;
     }
 
     @Override

@@ -142,7 +142,7 @@ public interface MixinIBlockState extends IBlockState, BlockState {
     @Override
     default String getId() {
         StringBuilder builder = new StringBuilder();
-        builder.append(((BlockType) getBlock()).getId());
+        builder.append(((BlockType) getBlock()).getKey());
         final ImmutableMap<IProperty<?>, Comparable<?>> properties = (ImmutableMap<IProperty<?>, Comparable<?>>) (ImmutableMap<?, ?>) this.getProperties();
         if (!properties.isEmpty()) {
             builder.append('[');

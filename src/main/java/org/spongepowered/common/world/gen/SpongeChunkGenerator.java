@@ -57,6 +57,7 @@ import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -117,7 +118,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
 
-    protected Map<String, Timing> populatorTimings = Maps.newHashMap();
+    protected Map<CatalogKey, Timing> populatorTimings = Maps.newHashMap();
     protected Timing chunkGeneratorTiming;
 
     public SpongeChunkGenerator(World world, GenerationPopulator base, BiomeGenerator biomegen) {
@@ -347,11 +348,11 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Timing timing = null;
                 if (Timings.isTimingsEnabled()) {
-                    timing = this.populatorTimings.get(populator.getType().getId());
+                    timing = this.populatorTimings.get(populator.getType().getKey());
                     if (timing == null) {
-                        timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
+                        timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getKey());// ,
                                                                                                           // this.chunkGeneratorTiming);
-                        this.populatorTimings.put(populator.getType().getId(), timing);
+                        this.populatorTimings.put(populator.getType().getKey(), timing);
                     }
                     timing.startTimingIfSync();
                 }

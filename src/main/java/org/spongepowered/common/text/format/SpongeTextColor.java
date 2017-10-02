@@ -27,10 +27,13 @@ package org.spongepowered.common.text.format;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.util.text.TextFormatting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
+
+import java.util.Locale;
 
 @NonnullByDefault
 public class SpongeTextColor implements TextColor {
@@ -39,8 +42,8 @@ public class SpongeTextColor implements TextColor {
     private final Color color;
 
     @Override
-    public String getId() {
-        return this.handle.name();
+    public CatalogKey getKey() {
+        return CatalogKey.minecraft(this.handle.name().toLowerCase(Locale.ENGLISH));
     }
 
     public SpongeTextColor(TextFormatting handle, Color color) {
