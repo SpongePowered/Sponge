@@ -189,10 +189,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             return EnumActionResult.PASS;
         } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
             return EnumActionResult.PASS;
-        } else if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock()) {
+        } else if (stack.getItem() instanceof ItemBlock) {
             Block block = ((ItemBlock)stack.getItem()).getBlock();
 
-            if (block instanceof BlockCommandBlock || block instanceof BlockStructure)
+            if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !player.canUseCommandBlock())
             {
                 return EnumActionResult.FAIL;
             }
