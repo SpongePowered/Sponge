@@ -22,26 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type;
+package org.spongepowered.common.registry;
 
-import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
-import java.util.Locale;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
-@RegisterCatalog(NotePitches.class)
-public final class NotePitchRegistryModule extends AbstractCatalogRegistryModule<NotePitch> {
+public abstract class AbstractAlternateCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
+
+    protected final RegistryMap<C> map = RegistryMap.create();
 
     @Override
-    public void registerDefaults() {
-        RegistryHelper.mapFields(NotePitches.class, input -> {
-            NotePitch pitch = new SpongeNotePitch((byte) this.map.size(), input);
-            this.map.put(input.toLowerCase(Locale.ENGLISH), pitch);
-            return pitch;
-        });
+    public final Optional<C> getById(final String id) {
+        return this.map.getOptional(id);
+    }
+
+    @Override
+    public final Collection<C> getAll() {
+        return this.map.values();
+    }
+
+    @Override
+    public final Map<String, C> provideCatalogMap() {
+        return this.map.forCatalogRegistration();
     }
 }
