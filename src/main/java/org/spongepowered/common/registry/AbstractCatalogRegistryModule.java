@@ -25,12 +25,13 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
-public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements CatalogRegistryModule<C> {
+public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
     protected final RegistryMap<C> map = RegistryMap.create();
 
@@ -42,5 +43,10 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
     @Override
     public final Collection<C> getAll() {
         return this.map.values();
+    }
+
+    @Override
+    public final Map<String, C> provideCatalogMap() {
+        return this.map.forCatalogRegistration();
     }
 }
