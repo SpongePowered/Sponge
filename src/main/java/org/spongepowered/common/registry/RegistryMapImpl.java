@@ -50,13 +50,13 @@ final class RegistryMapImpl<V> extends HashMap<String, V> implements RegistryMap
     }
 
     @Override
-    public V put(final String key, final V value) {
-        return super.put(Namespaces.toLowerCase(key), value);
+    public V put(final String id, final V value) {
+        return super.put(Namespaces.namespacedId(this.defaultNamespace, id), value);
     }
 
     @Override
-    public boolean containsKey(final String key) {
-        return super.containsKey(Namespaces.toLowerCase(key));
+    public boolean containsKey(final String id) {
+        return super.containsKey(Namespaces.toLowerCase(id));
     }
 
     @Override
@@ -67,7 +67,7 @@ final class RegistryMapImpl<V> extends HashMap<String, V> implements RegistryMap
     @Override
     public Map<String, V> forCatalogRegistration() {
         final Map<String, V> map = new HashMap<>(this.size());
-        for (Map.Entry<String, V> entry : this.entrySet()) {
+        for (final Map.Entry<String, V> entry : this.entrySet()) {
             map.put(Namespaces.prepareForField(entry.getKey()), entry.getValue());
         }
         return map;

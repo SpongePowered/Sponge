@@ -59,24 +59,73 @@ public interface RegistryMap<V> {
         return new RegistryMapImpl<>(defaultNamespace);
     }
 
+    /**
+     * Gets a value by its id.
+     *
+     * <p>If {@code id} is not namespaced it will have the default namespace prepended.</p>
+     *
+     * @param id The id
+     * @return The value
+     */
     @Nullable
     V get(final String id);
 
+    /**
+     * Gets a value by its id.
+     *
+     * <p>If {@code id} is not namespaced it will have the default namespace prepended.</p>
+     *
+     * @param id The id
+     * @return The optional value
+     */
     Optional<V> getOptional(final String id);
 
+    /**
+     * Inserts a mapping between the id and value.
+     *
+     * <p>If {@code id} is not namespaced it will have the default namespace prepended.</p>
+     *
+     * @param id The id
+     * @param value The value
+     * @return The previous value
+     */
     @Nullable
-    V put(final String key, final V value);
+    V put(final String id, final V value);
 
+    /**
+     * Creates a copy of this map prepared for catalog field registration.
+     *
+     * @return A map of ids to values
+     */
+    Map<String, V> forCatalogRegistration();
+
+    /*
+     * Forwarding methods
+     */
+
+    /**
+     * @see Map#containsKey(Object)
+     */
     boolean containsKey(final String key);
 
     // Use Object instead of V to avoid casting
+    /**
+     * @see Map#containsValue(Object)
+     */
     boolean containsValue(final Object value);
 
+    /**
+     * @see Map#size()
+     */
     int size();
 
+    /**
+     * @see Map#values()
+     */
     Collection<V> values();
 
+    /**
+     * @see Map#entrySet()
+     */
     Set<Map.Entry<String, V>> entrySet();
-
-    Map<String, V> forCatalogRegistration();
 }

@@ -26,12 +26,9 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.common.SpongeImpl;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public final class Namespaces {
 
@@ -54,16 +51,7 @@ public final class Namespaces {
     }
 
     // Replace the minecraft and sponge namespace for fields.
-    public static <C extends CatalogType> Map<String, C> prepareForField(final Map<String, ? extends C> in) {
-        final Map<String, C> map = new HashMap<>(in.size());
-        for (Map.Entry<String, ? extends C> entry : in.entrySet()) {
-            map.put(prepareForField(entry.getKey()), entry.getValue());
-        }
-        return map;
-    }
-
-    // Replace the minecraft and sponge namespace for fields.
-    public static String prepareForField(final String id) {
+    static String prepareForField(final String id) {
         return id
                 .replace(MINECRAFT + ':', "")
                 .replace(SPONGE + ':', "");

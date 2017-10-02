@@ -31,7 +31,6 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Locale;
 import java.util.Optional;
 
 @RegisterCatalog(DyeColors.class)
@@ -44,7 +43,7 @@ public final class DyeColorRegistryModule extends AbstractCatalogRegistryModule<
     @Override
     public void registerDefaults() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
-            this.map.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+            this.map.put(dyeColor.getName(), (DyeColor) (Object) dyeColor);
         }
     }
 
@@ -52,7 +51,7 @@ public final class DyeColorRegistryModule extends AbstractCatalogRegistryModule<
     public void registerAdditional() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
             if (!this.map.containsValue(dyeColor)) {
-                this.map.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
+                this.map.put(dyeColor.getName(), (DyeColor) (Object) dyeColor);
             }
         }
     }
