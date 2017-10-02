@@ -224,7 +224,9 @@ public final class GeneralPhase extends TrackingPhase {
                     newState)) {
                 newState.getBlock().onBlockAdded(worldServer, pos, newState);
                 postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-
+                    final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
+                    entities.clear();
+                    ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
                 });
                 capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
                     final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
