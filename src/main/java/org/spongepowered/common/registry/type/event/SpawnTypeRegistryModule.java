@@ -25,75 +25,47 @@
 package org.spongepowered.common.registry.type.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.common.registry.Namespaces;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(SpawnTypes.class)
+public class SpawnTypeRegistryModule extends AbstractCatalogRegistryModule<SpawnType> implements AdditionalCatalogRegistryModule<SpawnType> {
 
-public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<SpawnType>, AdditionalCatalogRegistryModule<SpawnType> {
-
-    @RegisterCatalog(SpawnTypes.class)
-    private final Map<String, SpawnType> spawnTypeMap = new HashMap<>();
+    public SpawnTypeRegistryModule() {
+        super(Namespaces.SPONGE);
+    }
 
     @Override
     public void registerAdditionalCatalog(SpawnType extraCatalog) {
-        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH)),
+        checkArgument(!this.map.containsKey(extraCatalog.getId()),
                 "SpawnType with the same id is already registered: {}", extraCatalog.getId());
-        this.spawnTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
-    }
-
-    @Override
-    public Optional<SpawnType> getById(String id) {
-        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        if (!key.contains(":")) {
-            key = "sponge:" + key; // There are no minecraft based spawn types.
-        }
-        return Optional.ofNullable(this.spawnTypeMap.get(key));
-    }
-
-    @Override
-    public Collection<SpawnType> getAll() {
-        return ImmutableSet.copyOf(this.spawnTypeMap.values());
+        this.map.put(extraCatalog.getId(), extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
-        this.spawnTypeMap.put("sponge:block_spawning", InternalSpawnTypes.BLOCK_SPAWNING);
-        this.spawnTypeMap.put("sponge:breeding", InternalSpawnTypes.BREEDING);
-        this.spawnTypeMap.put("sponge:dispense", InternalSpawnTypes.DISPENSE);
-        this.spawnTypeMap.put("sponge:dropped_item", InternalSpawnTypes.DROPPED_ITEM);
-        this.spawnTypeMap.put("sponge:experience", InternalSpawnTypes.EXPERIENCE);
-        this.spawnTypeMap.put("sponge:falling_block", InternalSpawnTypes.FALLING_BLOCK);
-        this.spawnTypeMap.put("sponge:mob_spawner", InternalSpawnTypes.MOB_SPAWNER);
-        this.spawnTypeMap.put("sponge:passive", InternalSpawnTypes.PASSIVE);
-        this.spawnTypeMap.put("sponge:placement", InternalSpawnTypes.PLACEMENT);
-        this.spawnTypeMap.put("sponge:projectile", InternalSpawnTypes.PROJECTILE);
-        this.spawnTypeMap.put("sponge:spawn_egg", InternalSpawnTypes.SPAWN_EGG);
-        this.spawnTypeMap.put("sponge:structure", InternalSpawnTypes.STRUCTURE);
-        this.spawnTypeMap.put("sponge:tnt_ignite", InternalSpawnTypes.TNT_IGNITE);
-        this.spawnTypeMap.put("sponge:weather", InternalSpawnTypes.WEATHER);
-        this.spawnTypeMap.put("sponge:custom", InternalSpawnTypes.CUSTOM);
-        this.spawnTypeMap.put("sponge:chunk_load", InternalSpawnTypes.CHUNK_LOAD);
-        this.spawnTypeMap.put("sponge:world_spawner", InternalSpawnTypes.WORLD_SPAWNER);
-        this.spawnTypeMap.put("sponge:plugin", InternalSpawnTypes.PLUGIN);
-    }
-
-    @Override
-    public Map<String, SpawnType> provideCatalogMap() {
-        final HashMap<String, SpawnType> map = new HashMap<>();
-        for (Map.Entry<String, SpawnType> entry : this.spawnTypeMap.entrySet()) {
-            map.put(entry.getKey().replace("sponge:", ""), entry.getValue());
-        }
-        return map;
+        this.map.put("sponge:block_spawning", InternalSpawnTypes.BLOCK_SPAWNING);
+        this.map.put("sponge:breeding", InternalSpawnTypes.BREEDING);
+        this.map.put("sponge:dispense", InternalSpawnTypes.DISPENSE);
+        this.map.put("sponge:dropped_item", InternalSpawnTypes.DROPPED_ITEM);
+        this.map.put("sponge:experience", InternalSpawnTypes.EXPERIENCE);
+        this.map.put("sponge:falling_block", InternalSpawnTypes.FALLING_BLOCK);
+        this.map.put("sponge:mob_spawner", InternalSpawnTypes.MOB_SPAWNER);
+        this.map.put("sponge:passive", InternalSpawnTypes.PASSIVE);
+        this.map.put("sponge:placement", InternalSpawnTypes.PLACEMENT);
+        this.map.put("sponge:projectile", InternalSpawnTypes.PROJECTILE);
+        this.map.put("sponge:spawn_egg", InternalSpawnTypes.SPAWN_EGG);
+        this.map.put("sponge:structure", InternalSpawnTypes.STRUCTURE);
+        this.map.put("sponge:tnt_ignite", InternalSpawnTypes.TNT_IGNITE);
+        this.map.put("sponge:weather", InternalSpawnTypes.WEATHER);
+        this.map.put("sponge:custom", InternalSpawnTypes.CUSTOM);
+        this.map.put("sponge:chunk_load", InternalSpawnTypes.CHUNK_LOAD);
+        this.map.put("sponge:world_spawner", InternalSpawnTypes.WORLD_SPAWNER);
+        this.map.put("sponge:plugin", InternalSpawnTypes.PLUGIN);
     }
 }

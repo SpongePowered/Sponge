@@ -22,29 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.entity;
+package org.spongepowered.common.registry;
 
-import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.data.type.SkinParts;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.data.type.SpongeSkinPart;
-import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
-@RegisterCatalog(SkinParts.class)
-public final class SkinPartRegistryModule extends AbstractCatalogRegistryModule<SkinPart> {
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
-    @Override
-    public void registerDefaults() {
-        this.map.put("minecraft:hat", this.createSkinPart(6, "hat"));
-        this.map.put("minecraft:cape", this.createSkinPart(0, "cape"));
-        this.map.put("minecraft:jacket", this.createSkinPart(1, "jacket"));
-        this.map.put("minecraft:left_sleeve", this.createSkinPart(2, "left_sleeve"));
-        this.map.put("minecraft:right_sleeve", this.createSkinPart(3, "right_sleeve"));
-        this.map.put("minecraft:left_pants_leg", this.createSkinPart(4, "left_pants_leg"));
-        this.map.put("minecraft:right_pants_leg", this.createSkinPart(5, "right_pants_leg"));
+public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
+
+    protected final RegistryMap<C> map;
+
+    protected AbstractCatalogRegistryModule() {
+        this.map = RegistryMap.create();
     }
 
-    private SkinPart createSkinPart(int ordinal, String id) {
-        return new SpongeSkinPart(ordinal, id);
+    protected AbstractCatalogRegistryModule(final String defaultNamespace) {
+        this.map = RegistryMap.create(defaultNamespace);
+    }
+
+    @Override
+    public final Optional<C> getById(final String id) {
+        return this.map.getOptional(id);
+    }
+
+    @Override
+    public final Collection<C> getAll() {
+        return this.map.values();
+    }
+
+    @Override
+    public final Map<String, C> provideCatalogMap() {
+        return this.map.forCatalogRegistration();
     }
 }

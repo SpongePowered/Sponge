@@ -22,29 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.entity;
+package org.spongepowered.common.registry;
 
-import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.data.type.SkinParts;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.data.type.SpongeSkinPart;
-import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-@RegisterCatalog(SkinParts.class)
-public final class SkinPartRegistryModule extends AbstractCatalogRegistryModule<SkinPart> {
+import org.spongepowered.common.SpongeImpl;
 
-    @Override
-    public void registerDefaults() {
-        this.map.put("minecraft:hat", this.createSkinPart(6, "hat"));
-        this.map.put("minecraft:cape", this.createSkinPart(0, "cape"));
-        this.map.put("minecraft:jacket", this.createSkinPart(1, "jacket"));
-        this.map.put("minecraft:left_sleeve", this.createSkinPart(2, "left_sleeve"));
-        this.map.put("minecraft:right_sleeve", this.createSkinPart(3, "right_sleeve"));
-        this.map.put("minecraft:left_pants_leg", this.createSkinPart(4, "left_pants_leg"));
-        this.map.put("minecraft:right_pants_leg", this.createSkinPart(5, "right_pants_leg"));
+import java.util.Locale;
+
+public final class Namespaces {
+
+    public static final String MINECRAFT = SpongeImpl.GAME_ID;
+    public static final String SPONGE = SpongeImpl.ECOSYSTEM_ID;
+
+    private Namespaces() {
     }
 
-    private SkinPart createSkinPart(int ordinal, String id) {
-        return new SpongeSkinPart(ordinal, id);
+    public static String namespacedId(final String id) {
+        return namespacedId(MINECRAFT, id);
+    }
+
+    public static String namespacedId(final String namespace, final String id) {
+        checkNotNull(id, "id");
+        if (id.indexOf(':') == -1) {
+            return toLowerCase(namespace) + ':' + toLowerCase(id);
+        }
+        return toLowerCase(id);
+    }
+
+    // Replace the minecraft and sponge namespace for fields.
+    static String prepareForField(final String id) {
+        return id
+                .replace(MINECRAFT + ':', "")
+                .replace(SPONGE + ':', "");
+    }
+
+    static String toLowerCase(final String string) {
+        return string.toLowerCase(Locale.ENGLISH);
     }
 }

@@ -24,40 +24,19 @@
  */
 package org.spongepowered.common.registry.type;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.ban.SpongeBanType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
-
-public class BanTypeRegistryModule implements CatalogRegistryModule<BanType> {
-
-    @RegisterCatalog(BanTypes.class)
-    public final BiMap<String, BanType> banTypeMappings = HashBiMap.create();
-
-    @Override
-    public Optional<BanType> getById(String id) {
-        return Optional.ofNullable(this.banTypeMappings.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BanType> getAll() {
-        return ImmutableList.copyOf(this.banTypeMappings.values());
-    }
+@RegisterCatalog(BanTypes.class)
+public class BanTypeRegistryModule extends AbstractCatalogRegistryModule<BanType> {
 
     @Override
     public void registerDefaults() {
-        this.banTypeMappings.put("profile", new SpongeBanType(0, "PROFILE", Ban.Profile.class));
-        this.banTypeMappings.put("ip", new SpongeBanType(1, "IP", Ban.Ip.class));
+        this.map.put("profile", new SpongeBanType(0, "PROFILE", Ban.Profile.class));
+        this.map.put("ip", new SpongeBanType(1, "IP", Ban.Ip.class));
     }
 }

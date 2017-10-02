@@ -24,52 +24,33 @@
  */
 package org.spongepowered.common.registry.type.boss;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import net.minecraft.world.BossInfo;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.BossBarOverlays;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-public final class BossBarOverlayRegistryModule implements CatalogRegistryModule<BossBarOverlay> {
-
-    @RegisterCatalog(BossBarOverlays.class)
-    public final Map<String, BossBarOverlay> overlayMap = Maps.newHashMap();
+@RegisterCatalog(BossBarOverlays.class)
+public final class BossBarOverlayRegistryModule extends AbstractCatalogRegistryModule<BossBarOverlay> {
 
     @Override
     public void registerDefaults() {
-        this.overlayMap.put("progress", (BossBarOverlay) (Object) BossInfo.Overlay.PROGRESS);
-        this.overlayMap.put("notched_6", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_6);
-        this.overlayMap.put("notched_10", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_10);
-        this.overlayMap.put("notched_12", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_12);
-        this.overlayMap.put("notched_20", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_20);
-    }
-
-    @Override
-    public Optional<BossBarOverlay> getById(String id) {
-        return Optional.ofNullable(this.overlayMap.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BossBarOverlay> getAll() {
-        return ImmutableSet.copyOf(this.overlayMap.values());
+        this.map.put("progress", (BossBarOverlay) (Object) BossInfo.Overlay.PROGRESS);
+        this.map.put("notched_6", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_6);
+        this.map.put("notched_10", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_10);
+        this.map.put("notched_12", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_12);
+        this.map.put("notched_20", (BossBarOverlay) (Object) BossInfo.Overlay.NOTCHED_20);
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (BossInfo.Overlay overlay : BossInfo.Overlay.values()) {
             String name = overlay.name().toLowerCase(Locale.ENGLISH);
-            if (!this.overlayMap.containsKey(name)) {
-                this.overlayMap.put(name, (BossBarOverlay) (Object) overlay);
+            if (!this.map.containsKey(name)) {
+                this.map.put(name, (BossBarOverlay) (Object) overlay);
             }
         }
     }
