@@ -33,7 +33,15 @@ import java.util.Optional;
 
 public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
-    protected final RegistryMap<C> map = RegistryMap.create();
+    protected final RegistryMap<C> map;
+
+    protected AbstractCatalogRegistryModule() {
+        this.map = RegistryMap.create();
+    }
+
+    protected AbstractCatalogRegistryModule(final String defaultNamespace) {
+        this.map = RegistryMap.create(defaultNamespace);
+    }
 
     @Override
     public final Optional<C> getById(final String id) {

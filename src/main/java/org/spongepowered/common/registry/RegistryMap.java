@@ -92,6 +92,10 @@ public interface RegistryMap<V> {
     @Nullable
     V put(final String id, final V value);
 
+    default void putAll(final Map<String, ? extends V> that) {
+        that.forEach(this::put);
+    }
+
     /**
      * Creates a copy of this map prepared for catalog field registration.
      *

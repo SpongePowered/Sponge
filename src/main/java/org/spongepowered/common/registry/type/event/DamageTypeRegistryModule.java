@@ -24,49 +24,32 @@
  */
 package org.spongepowered.common.registry.type.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.damage.SpongeDamageType;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
-
-public final class DamageTypeRegistryModule implements CatalogRegistryModule<DamageType> {
-
-    @RegisterCatalog(DamageTypes.class)
-    private final ImmutableMap<String, DamageType> damageTypeMappings = new ImmutableMap.Builder<String, DamageType>()
-        .put("attack", new SpongeDamageType("attack"))
-        .put("contact", new SpongeDamageType("contact"))
-        .put("custom", new SpongeDamageType("custom"))
-        .put("drown", new SpongeDamageType("drown"))
-        .put("explosive", new SpongeDamageType("explosive"))
-        .put("fall", new SpongeDamageType("fall"))
-        .put("fire", new SpongeDamageType("fire"))
-        .put("generic", new SpongeDamageType("generic"))
-        .put("hunger", new SpongeDamageType("hunger"))
-        .put("magic", new SpongeDamageType("magic"))
-        .put("projectile", new SpongeDamageType("projectile"))
-        .put("suffocate", new SpongeDamageType("suffocate"))
-        .put("void", new SpongeDamageType("void"))
-            .put("sweeping_attack", new SpongeDamageType("sweeping_attack"))
-            .put("magma", new SpongeDamageType("magma"))
-        .build();
+@RegisterCatalog(DamageTypes.class)
+public final class DamageTypeRegistryModule extends AbstractCatalogRegistryModule<DamageType> {
 
     @Override
-    public Optional<DamageType> getById(String id) {
-        return Optional.ofNullable(this.damageTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<DamageType> getAll() {
-        return ImmutableList.copyOf(this.damageTypeMappings.values());
+    public void registerDefaults() {
+        this.map.put("attack", new SpongeDamageType("attack"));
+        this.map.put("contact", new SpongeDamageType("contact"));
+        this.map.put("custom", new SpongeDamageType("custom"));
+        this.map.put("drown", new SpongeDamageType("drown"));
+        this.map.put("explosive", new SpongeDamageType("explosive"));
+        this.map.put("fall", new SpongeDamageType("fall"));
+        this.map.put("fire", new SpongeDamageType("fire"));
+        this.map.put("generic", new SpongeDamageType("generic"));
+        this.map.put("hunger", new SpongeDamageType("hunger"));
+        this.map.put("magic", new SpongeDamageType("magic"));
+        this.map.put("projectile", new SpongeDamageType("projectile"));
+        this.map.put("suffocate", new SpongeDamageType("suffocate"));
+        this.map.put("void", new SpongeDamageType("void"));
+        this.map.put("sweeping_attack", new SpongeDamageType("sweeping_attack"));
+        this.map.put("magma", new SpongeDamageType("magma"));
     }
 
 }

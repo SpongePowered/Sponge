@@ -24,40 +24,18 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class OcelotTypeRegistryModule implements CatalogRegistryModule<OcelotType> {
-
-    @RegisterCatalog(OcelotTypes.class)
-    private final Map<String, OcelotType> ocelotTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<OcelotType> getById(String id) {
-        return Optional.ofNullable(this.ocelotTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<OcelotType> getAll() {
-        return ImmutableList.copyOf(this.ocelotTypeMap.values());
-    }
+@RegisterCatalog(OcelotTypes.class)
+public class OcelotTypeRegistryModule extends AbstractCatalogRegistryModule<OcelotType> {
 
     @Override
     public void registerDefaults() {
-        this.ocelotTypeMap.putAll(SpongeEntityConstants.OCELOT_TYPES);
-
+        this.map.putAll(SpongeEntityConstants.OCELOT_TYPES);
     }
 
 }

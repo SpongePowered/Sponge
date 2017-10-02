@@ -24,40 +24,18 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitType> {
-
-    @RegisterCatalog(RabbitTypes.class)
-    private final Map<String, RabbitType> rabbitTypeMap = new HashMap<>();
-
-    @Override
-    public Optional<RabbitType> getById(String id) {
-        return Optional.ofNullable(this.rabbitTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<RabbitType> getAll() {
-        return ImmutableList.copyOf(this.rabbitTypeMap.values());
-    }
+@RegisterCatalog(RabbitTypes.class)
+public class RabbitTypeRegistryModule extends AbstractCatalogRegistryModule<RabbitType> {
 
     @Override
     public void registerDefaults() {
-        this.rabbitTypeMap.putAll(SpongeEntityConstants.RABBIT_TYPES);
-
+        this.map.putAll(SpongeEntityConstants.RABBIT_TYPES);
     }
 
 }

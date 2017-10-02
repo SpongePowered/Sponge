@@ -24,58 +24,27 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.type.SkinParts;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeSkinPart;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class SkinPartRegistryModule implements AlternateCatalogRegistryModule<SkinPart> {
-
-    @RegisterCatalog(SkinParts.class)
-    public final Map<String, SkinPart> skinPartMap = Maps.newHashMap();
+@RegisterCatalog(SkinParts.class)
+public final class SkinPartRegistryModule extends AbstractCatalogRegistryModule<SkinPart> {
 
     @Override
     public void registerDefaults() {
-        this.skinPartMap.put("minecraft:hat", this.createSkinPart(6, "hat"));
-        this.skinPartMap.put("minecraft:cape", this.createSkinPart(0, "cape"));
-        this.skinPartMap.put("minecraft:jacket", this.createSkinPart(1, "jacket"));
-        this.skinPartMap.put("minecraft:left_sleeve", this.createSkinPart(2, "left_sleeve"));
-        this.skinPartMap.put("minecraft:right_sleeve", this.createSkinPart(3, "right_sleeve"));
-        this.skinPartMap.put("minecraft:left_pants_leg", this.createSkinPart(4, "left_pants_leg"));
-        this.skinPartMap.put("minecraft:right_pants_leg", this.createSkinPart(5, "right_pants_leg"));
+        this.map.put("minecraft:hat", this.createSkinPart(6, "hat"));
+        this.map.put("minecraft:cape", this.createSkinPart(0, "cape"));
+        this.map.put("minecraft:jacket", this.createSkinPart(1, "jacket"));
+        this.map.put("minecraft:left_sleeve", this.createSkinPart(2, "left_sleeve"));
+        this.map.put("minecraft:right_sleeve", this.createSkinPart(3, "right_sleeve"));
+        this.map.put("minecraft:left_pants_leg", this.createSkinPart(4, "left_pants_leg"));
+        this.map.put("minecraft:right_pants_leg", this.createSkinPart(5, "right_pants_leg"));
     }
 
     private SkinPart createSkinPart(int ordinal, String id) {
         return new SpongeSkinPart(ordinal, id);
-    }
-
-    @Override
-    public Optional<SkinPart> getById(String id) {
-        return Optional.ofNullable(this.skinPartMap.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<SkinPart> getAll() {
-        return ImmutableSet.copyOf(this.skinPartMap.values());
-    }
-
-    @Override
-    public Map<String, SkinPart> provideCatalogMap() {
-        final HashMap<String, SkinPart> map = new HashMap<>();
-        for (Map.Entry<String, SkinPart> entry : this.skinPartMap.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
-        }
-        return map;
     }
 }
