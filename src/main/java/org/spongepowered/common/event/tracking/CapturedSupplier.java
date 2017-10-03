@@ -63,7 +63,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<List<T>> consumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
+        if (!this.isEmpty()) {
             consumer.accept(this.captured);
             this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
             // with recycling the captured object.
@@ -78,7 +78,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
      * @return If not empty, the captured list otherwise the fallback list
      */
     public final List<T> orElse(List<T> list) {
-        return this.captured == null ? list : this.captured.isEmpty() ? list : this.captured;
+        return this.isEmpty() ? list : this.captured;
     }
 
     public final List<T> orEmptyList() {

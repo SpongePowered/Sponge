@@ -67,7 +67,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
      * @param biConsumer The consumer to activate
      */
     public final void acceptIfNotEmpty(BiConsumer<K, List<V>> biConsumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
+        if (!this.isEmpty()) {
             for (K key : this.captured.asMap().keySet()) {
                 final List<V> values = this.captured.get(key);
                 if (!values.isEmpty()) {
@@ -85,7 +85,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
      * @param consumer The consumer to activate
      */
     public final void acceptIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
+        if (!this.isEmpty()) {
             consumer.accept(this.captured);
         }
     }
@@ -98,7 +98,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
      * @param consumer The consumer to activate
      */
     public final void acceptAndRemoveIfPresent(K key, Consumer<List<V>> consumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
+        if (!this.isEmpty()) {
             final List<V> values = this.captured.removeAll(key);
             if (!values.isEmpty()) {
                 consumer.accept(values);
@@ -115,7 +115,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
      * @param key The key to remove
      */
     public final void removeAllIfNotEmpty(K key) {
-        if (this.captured == null && !this.captured.isEmpty()) {
+        if (this.isEmpty()) {
             return;
         }
 
@@ -153,7 +153,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
      */
     @Nullable
     public final <U> U mapIfPresent(K key, Function<List<V>, ? extends U> function) {
-        if (this.captured == null || this.captured.isEmpty()) {
+        if (this.isEmpty()) {
             return null;
         }
 
