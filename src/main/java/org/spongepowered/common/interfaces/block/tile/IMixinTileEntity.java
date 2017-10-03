@@ -109,4 +109,6 @@ public interface IMixinTileEntity {
     @Nullable IMixinChunk getActiveChunk();
 
     void setActiveChunk(IMixinChunk chunk);
+
+    boolean shouldTick();
 }

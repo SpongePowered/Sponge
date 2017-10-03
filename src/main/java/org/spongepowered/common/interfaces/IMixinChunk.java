@@ -118,4 +118,6 @@ public interface IMixinChunk {
     boolean isQueuedForUnload();
 
     CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type);
+
+    void markChunkDirty();
 }

@@ -310,4 +310,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public void setActiveChunk(@Nullable IMixinChunk chunk) {
         this.activeChunk = new WeakReference<IMixinChunk>(chunk);
     }
+
+    @Override
+    public boolean shouldTick() {
+        final IMixinChunk chunk = this.getActiveChunk();
+        if (chunk == null || (chunk.isQueuedForUnload() && !chunk.isPersistedChunk())) {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -199,6 +199,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public void markChunkDirty() {
+        this.dirty = true;
+    }
+
+    @Override
     public boolean isChunkLoaded() {
         return this.loaded;
     }

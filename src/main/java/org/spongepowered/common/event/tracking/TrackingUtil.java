@@ -135,12 +135,11 @@ public final class TrackingUtil {
     public static void tickEntity(net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        final IMixinChunk chunk = ((IMixinEntity) entityIn).getActiveChunk();
-        if (chunk != null && chunk.isQueuedForUnload() && !chunk.isPersistedChunk()) {
-            // Don't tick entities in chunks queued for unload
+        final IMixinEntity mixinEntity = EntityUtil.toMixin(entityIn);
+        if (!mixinEntity.shouldTick()) {
             return;
         }
-        final IMixinEntity mixinEntity = EntityUtil.toMixin(entityIn);
+
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext()
                     .source(entityIn);
@@ -165,12 +164,11 @@ public final class TrackingUtil {
     public static void tickRidingEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final IMixinChunk chunk = ((IMixinEntity) entity).getActiveChunk();
-        if (chunk != null && chunk.isQueuedForUnload() && !chunk.isPersistedChunk()) {
-            // Don't tick entity in chunks queued for unload
+        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        if (!mixinEntity.shouldTick()) {
             return;
         }
-        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+
         final Optional<User> notifierUser = mixinEntity.getNotifierUser();
         final Optional<User> creatorUser = mixinEntity.getCreatorUser();
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
@@ -195,10 +193,10 @@ public final class TrackingUtil {
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
+        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
         final BlockPos pos = tileEntity.getPos();
         final IMixinChunk chunk = ((IMixinTileEntity) tile).getActiveChunk();
-        if (chunk == null || (chunk.isQueuedForUnload() && !chunk.isPersistedChunk())) {
-            // Don't tick TE's in chunks queued for unload
+        if (!mixinTileEntity.shouldTick()) {
             return;
         }
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
@@ -213,7 +211,6 @@ public final class TrackingUtil {
                         phaseContext.notifier(notifier);
                     });
 
-            final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
             User blockOwner = mixinTileEntity.getSpongeOwner();
             if (!mixinTileEntity.hasSetOwner()) {
                 blockOwner = chunk.getBlockOwner(pos).orElse(null);
