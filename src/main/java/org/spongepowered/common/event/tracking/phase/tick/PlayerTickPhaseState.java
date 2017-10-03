@@ -62,7 +62,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
-            phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 final SpawnEntityEvent spawnEntityEvent =
                         SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                 SpongeImpl.postEvent(spawnEntityEvent);
@@ -72,7 +72,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
                 }
             });
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final ArrayList<Entity> capturedEntities = new ArrayList<>();
                 for (EntityItem entity : entities) {
                     capturedEntities.add(EntityUtil.fromNative(entity));
@@ -86,7 +86,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
                     EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             });
-            phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
+            phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blockSnapshots -> {
                 TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
             });
         }

@@ -63,12 +63,12 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> {
+                    .acceptAndClearIfNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
                     });
     
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final SpawnEntityEvent event =
                                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
@@ -80,7 +80,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     
                     });
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : entities) {
                             capturedEntities.add(EntityUtil.fromNative(entity));

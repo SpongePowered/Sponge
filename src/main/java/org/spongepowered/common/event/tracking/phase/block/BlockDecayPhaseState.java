@@ -65,7 +65,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
         context.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(items -> {
+                .acceptAndClearIfNotEmpty(items -> {
                     // Nothing happens here yet for some reason.
                 });
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -73,7 +73,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
             context.addNotifierAndOwnerToCauseStack();
             context.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final SpawnEntityEvent event =
                                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
@@ -84,9 +84,9 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                         }
                     });
             context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
             context.getCapturedItemStackSupplier()
-                    .ifPresentAndNotEmpty(drops -> {
+                    .acceptAndClearIfNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
                                 .map(drop -> drop.create(mixinWorld.asMinecraftWorld()))
                                 .collect(Collectors.toList());

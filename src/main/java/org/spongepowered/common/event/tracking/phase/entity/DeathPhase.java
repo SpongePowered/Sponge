@@ -44,7 +44,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -86,7 +85,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
             final Optional<User> owner = context.getOwner();
             final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
             context.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         // Separate experience orbs from other entity drops
                         final List<Entity> experience = entities.stream()
                                 .filter(entity -> entity instanceof ExperienceOrb)
@@ -137,8 +136,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
                 }
                 return;
             }
-            context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                final Collection<EntityItem> items = map.get(dyingEntity.getUniqueId());
+            context.getCapturedEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
                     entities.add(EntityUtil.fromNative(item));
@@ -164,11 +162,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
                  // This avoids many issues with mods such as Tinkers Construct's soulbound items.
             });
             // Note that this is only used if and when item pre-merging is enabled.
-            context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
-                final Collection<ItemDropData> itemStacks = map.get(dyingEntity.getUniqueId());
-                if (itemStacks.isEmpty()) {
-                    return;
-                }
+            context.getCapturedEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
                 final List<ItemDropData> items = new ArrayList<>();
                 items.addAll(itemStacks);
     

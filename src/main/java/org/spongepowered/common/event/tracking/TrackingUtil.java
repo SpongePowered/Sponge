@@ -92,7 +92,6 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -553,23 +552,13 @@ public final class TrackingUtil {
                 if (!transaction.isValid()) {
                     invalid.add(transaction);
                     // Cancel any block drops performed, avoids any item drops, regardless
-                    final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-    
-                    context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(blockPos)) {
-                            map.get(blockPos).clear();
-                        }
-                    });
-                    context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(blockPos)) {
-                            map.get(blockPos).clear();
-                        }
-                    });
-                    context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(blockPosEntityMultimap -> {
-                        if (blockPosEntityMultimap.containsKey(blockPos)) {
-                            blockPosEntityMultimap.get(blockPos).clear();
-                        }
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
+                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
     
@@ -583,14 +572,11 @@ public final class TrackingUtil {
                     if (state.tracksBlockSpecificDrops()) {
                         // Cancel any block drops or harvests for the block change.
                         // This prevents unnecessary spawns.
-                        final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                        context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
-                            // Check if the mapping actually has the position to avoid unnecessary
-                            // collection creation
-                            if (map.containsKey(position)) {
-                                map.get(position).clear();
-                            }
-                        });
+                        final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                        if (location != null) {
+                            final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                            context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                        }
                     }
                 }
             }
@@ -653,13 +639,13 @@ public final class TrackingUtil {
             // Handle item drops captured
             final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
             // This is for pre-merged items
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot,
+            capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> spawnItemDataForBlockDrops(items, newBlockSnapshot,
                 phaseContext, phaseState));
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot,
-                phaseContext, phaseState));
+            capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> spawnItemEntitiesForBlockDrops(items, newBlockSnapshot,
+                    phaseContext, phaseState));
             // This is for entities actually spawned
-            capturedBlockEntitySpawns.ifPresentAndNotEmpty(map -> spawnEntitiesForBlock(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot,
+            capturedBlockEntitySpawns.acceptAndRemoveIfPresent(pos, items -> spawnEntitiesForBlock(items, newBlockSnapshot,
                 phaseContext, phaseState));
 
             SpongeHooks.logBlockAction(mixinWorldServer.asMinecraftWorld(), oldBlockSnapshot.blockChange, transaction);

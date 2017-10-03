@@ -77,9 +77,9 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
 
             context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
             context.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(items -> {
+                .acceptAndClearIfNotEmpty(items -> {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
@@ -111,7 +111,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     mixinContainer.setCaptureInventory(false);
                 });
             context.getCapturedEntityDropSupplier()
-                .ifPresentAndNotEmpty(itemMapping -> {
+                .acceptIfNotEmpty(itemMapping -> {
 
                 });
             final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);

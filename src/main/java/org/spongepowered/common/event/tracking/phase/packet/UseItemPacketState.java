@@ -91,7 +91,7 @@ class UseItemPacketState extends BasicPacketState {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE,
                 itemStack.getType() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
+                .acceptAndClearIfNotEmpty(entities -> {
                     final SpawnEntityEvent spawnEntityEvent =
                         SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                     SpongeImpl.postEvent(spawnEntityEvent);
@@ -101,7 +101,7 @@ class UseItemPacketState extends BasicPacketState {
                 });
         }
         context.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(
+            .acceptAndClearIfNotEmpty(
                 originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, this, context));
 
     }

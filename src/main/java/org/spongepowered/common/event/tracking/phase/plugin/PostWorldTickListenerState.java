@@ -42,7 +42,7 @@ final class PostWorldTickListenerState extends ListenerPhaseState {
 
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
+        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
 
     }
 

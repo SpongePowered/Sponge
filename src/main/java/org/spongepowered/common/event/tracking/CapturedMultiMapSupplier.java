@@ -52,53 +52,117 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
         return this.captured;
     }
 
+    /**
+     * Returns {@code true} if there are no captured objects.
+     * 
+     * @return {@code true} if empty
+     */
     public final boolean isEmpty() {
         return this.captured == null || this.captured.isEmpty();
     }
 
-    public final void ifPresentAndNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
-            consumer.accept(this.captured);
-
-            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
-            // with recycling the captured object.
-        }
-    }
-
-    public final void ifPresentAndNotEmpty(BiConsumer<K, List<V>> biConsumer) {
+    /**
+     * If not empty, activates the {@link BiConsumer} with captures.
+     * 
+     * @param biConsumer The consumer to activate
+     */
+    public final void acceptIfNotEmpty(BiConsumer<K, List<V>> biConsumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             for (K key : this.captured.asMap().keySet()) {
-                biConsumer.accept(key, this.captured.get(key)); // Note that this will cause the consumer to be called for each key
+                final List<V> values = this.captured.get(key);
+                if (!values.isEmpty()) {
+                    // Note that this will cause the consumer to be called for each key
+                    biConsumer.accept(key, values);
+                }
             }
-
-            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
-            // with recycling the captured object.
         }
     }
 
-    public final void ifPresentAndNotEmpty(K key, Consumer<List<V>> consumer) {
+    /**
+     * If not empty, activates the consumer with the captured
+     * {@link ListMultimap}.
+     * 
+     * @param consumer The consumer to activate
+     */
+    public final void acceptIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
-            if (this.captured.containsKey(key)) {
-                consumer.accept(this.captured.get(key));
-            }
-
-            this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
-            // with recycling the captured object.
+            consumer.accept(this.captured);
         }
     }
 
-    public final ListMultimap<K, V> orElse(ListMultimap<K, V> list) {
-        return this.captured == null ? list : this.captured;
+    /**
+     * If not empty and key is present, removes the key then activates
+     * the consumer with the captured {@link ListMultimap}.
+     * 
+     * @param key The key to process and remove
+     * @param consumer The consumer to activate
+     */
+    public final void acceptAndRemoveIfPresent(K key, Consumer<List<V>> consumer) {
+        if (this.captured != null && !this.captured.isEmpty()) {
+            final List<V> values = this.captured.removeAll(key);
+            if (!values.isEmpty()) {
+                consumer.accept(values);
+            }
+        }
     }
 
+    /**
+     * If not empty, removes all values associated with key.
+     * 
+     * Note: If you require the list of removals, use
+     * {@link #acceptAndRemoveIfPresent}
+     * 
+     * @param key The key to remove
+     */
+    public final void removeAllIfNotEmpty(K key) {
+        if (this.captured == null && !this.captured.isEmpty()) {
+            return;
+        }
+
+        this.captured.removeAll(key);
+    }
+
+    /**
+     * If not empty, returns the captured {@link ListMultimap}.
+     * Otherwise, this will return the passed list.
+     * 
+     * @param list The fallback list
+     * @return If not empty, the captured list otherwise the fallback list
+     */
+    public final ListMultimap<K, V> orElse(ListMultimap<K, V> list) {
+        return this.captured == null ? list : this.captured.isEmpty() ? list : this.captured;
+    }
+
+    /**
+     * If not empty, returns a sequential stream of values associated with key.
+     * 
+     * @param key The key
+     * @return A sequential stream of values
+     */
     public final Stream<V> stream(K key) {
         // authors note: Multimap#get(K) returns an empty collection if there is no mapping.
-        return this.captured == null ? Stream.empty() : this.captured.containsKey(key) ? this.captured.get(key).stream() : Stream.empty();
+        return this.captured == null ? Stream.empty() : this.captured.get(key).stream();
     }
 
+    /**
+     * If not empty and key is present, applies the function to the resulting values.
+     * 
+     * @param key The key
+     * @param function The function to apply
+     * @return The function result or null if no key was found
+     */
     @Nullable
-    public final <U> U map(K key, Function<List<V>, ? extends U> function) {
-        return this.captured == null ? null : function.apply(this.captured.get(key));
+    public final <U> U mapIfPresent(K key, Function<List<V>, ? extends U> function) {
+        if (this.captured == null || this.captured.isEmpty()) {
+            return null;
+        }
+
+        final List<V> values = this.captured.get(key);
+        if (values.isEmpty()) {
+            return null;
+        }
+
+        return function.apply(values);
     }
 
     @Override

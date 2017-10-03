@@ -43,7 +43,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.*;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -53,7 +52,6 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -169,12 +167,12 @@ public final class GeneralPhase extends TrackingPhase {
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
-                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                    postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(position)) {
-                            map.get(position).clear();
-                        }
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        // Cancel any block drops performed, avoids any item drops, regardless
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        postContext.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
             invalidTransactions.clear();
@@ -206,10 +204,10 @@ public final class GeneralPhase extends TrackingPhase {
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldLocation.getExtent();
             final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, unwindingPhaseContext, unwindingState));
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot,
+            capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
+                    .spawnItemDataForBlockDrops(items, newBlockSnapshot, unwindingPhaseContext, unwindingState));
+            capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
+                    .spawnItemEntitiesForBlockDrops(items, newBlockSnapshot,
                         unwindingPhaseContext, unwindingState));
 
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
@@ -223,14 +221,12 @@ public final class GeneralPhase extends TrackingPhase {
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
                     newState)) {
                 newState.getBlock().onBlockAdded(worldServer, pos, newState);
-                postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+                postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                     final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
-                    entities.clear();
                     ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
                 });
-                capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
+                capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
                     final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-                    blocks.clear();
                     processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingPhaseContext);
                 });
             }
@@ -251,7 +247,7 @@ public final class GeneralPhase extends TrackingPhase {
                 worldServer.updateObservingBlocksAt(pos, newState.getBlock());
             }
 
-            capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
+            capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
                 blocks.clear();
                 processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingPhaseContext);

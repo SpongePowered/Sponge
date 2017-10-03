@@ -84,13 +84,13 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> {
+                    .acceptAndClearIfNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
                     });
             Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : entities) {
                             capturedEntities.add(EntityUtil.fromNative(entity));

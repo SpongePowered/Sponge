@@ -138,9 +138,9 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> {
+                    .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
                             capturedEntities.add(EntityUtil.fromNative(entity));

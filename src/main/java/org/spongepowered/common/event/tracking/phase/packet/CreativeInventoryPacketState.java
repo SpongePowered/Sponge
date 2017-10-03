@@ -57,7 +57,7 @@ final class CreativeInventoryPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         context.getCapturedItemsSupplier()
-            .ifPresentAndNotEmpty(items -> {
+            .acceptAndClearIfNotEmpty(items -> {
                 if (items.isEmpty()) {
                     return;
                 }

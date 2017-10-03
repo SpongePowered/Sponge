@@ -73,7 +73,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, phaseContext.getOwner().get());
             }
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> {
+                    .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> entities = new ArrayList<>();
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
@@ -88,7 +88,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                         }
                     });
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final SpawnEntityEvent event =
                                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
@@ -104,9 +104,9 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
 
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
+                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
             phaseContext.getCapturedItemStackSupplier()
-                    .ifPresentAndNotEmpty(drops -> {
+                    .acceptAndClearIfNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
                                 .map(drop -> drop.create(mixinWorld.asMinecraftWorld()))
                                 .collect(Collectors.toList());

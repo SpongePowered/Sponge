@@ -103,7 +103,7 @@ final class InteractEntityPacketState extends BasicPacketState {
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
         phaseContext.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(blocks -> {
+            .acceptAndClearIfNotEmpty(blocks -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
                 printer.add("The blocks captured are:");
@@ -113,7 +113,7 @@ final class InteractEntityPacketState extends BasicPacketState {
                 printer.trace(System.err);
             });
         phaseContext.getCapturedEntitySupplier()
-            .ifPresentAndNotEmpty(entities -> {
+            .acceptAndClearIfNotEmpty(entities -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
                 printer.add("The entities captured are:");
@@ -125,7 +125,7 @@ final class InteractEntityPacketState extends BasicPacketState {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
-            phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                 SpawnEntityEvent event =
                     SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
@@ -137,7 +137,7 @@ final class InteractEntityPacketState extends BasicPacketState {
             });
         }
         phaseContext.getCapturedEntityDropSupplier()
-            .ifPresentAndNotEmpty(map -> {
+            .acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
                 printer.add("The item stacks captured are: ");
@@ -152,6 +152,6 @@ final class InteractEntityPacketState extends BasicPacketState {
             });
 
         phaseContext.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
+            .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
     }
 }

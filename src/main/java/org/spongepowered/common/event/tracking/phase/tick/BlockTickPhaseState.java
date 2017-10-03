@@ -83,9 +83,9 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             final User entityCreator = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
             context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
+                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
             context.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> {
+                    .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
                             capturedEntities.add(EntityUtil.fromNative(entity));

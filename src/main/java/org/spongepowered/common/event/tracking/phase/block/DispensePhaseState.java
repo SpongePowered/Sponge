@@ -60,13 +60,13 @@ final class DispensePhaseState extends BlockPhaseState {
         final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+                .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(blockSnapshot);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DISPENSE);
             phaseContext.addNotifierAndOwnerToCauseStack();
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> {
+                    .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> entities = new ArrayList<>();
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
@@ -82,7 +82,7 @@ final class DispensePhaseState extends BlockPhaseState {
                         }
                     });
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final SpawnEntityEvent
                                 event =
                                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);

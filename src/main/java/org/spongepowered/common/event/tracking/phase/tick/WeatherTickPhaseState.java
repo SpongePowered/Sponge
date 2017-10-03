@@ -51,7 +51,7 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     public void unwind(TickContext.General phaseContext) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-            phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 final SpawnEntityEvent spawnEntityEvent =
                         SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                 SpongeImpl.postEvent(spawnEntityEvent);
@@ -59,7 +59,7 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
                     EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             });
-            phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
+            phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blockSnapshots -> {
                 TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
             });
         }

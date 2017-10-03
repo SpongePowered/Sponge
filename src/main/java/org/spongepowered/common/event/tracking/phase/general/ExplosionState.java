@@ -42,6 +42,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -99,9 +101,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
             Sponge.getCauseStackManager().pushCause(explosion);
             context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
+                    .acceptAndClearIfNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
             context.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
                         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
@@ -201,24 +203,14 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
             for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
                 if (!transaction.isValid()) {
                     invalid.add(transaction);
-                    final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-    
-                    // Cancel any block drops performed, avoids any item drops, regardless
-                    context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(blockPos)) {
-                            map.get(blockPos).clear();
-                        }
-                    });
-                    context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(blockPos)) {
-                            map.get(blockPos).clear();
-                        }
-                    });
-                    context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(blockPosEntityMultimap -> {
-                        if (blockPosEntityMultimap.containsKey(blockPos)) {
-                            blockPosEntityMultimap.get(blockPos).clear();
-                        }
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        // Cancel any block drops performed, avoids any item drops, regardless
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
+                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
     
@@ -232,14 +224,11 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                     if (this.tracksBlockSpecificDrops()) {
                         // Cancel any block drops or harvests for the block change.
                         // This prevents unnecessary spawns.
-                        final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                        context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
-                            // Check if the mapping actually has the position to avoid unnecessary
-                            // collection creation
-                            if (map.containsKey(position)) {
-                                map.get(position).clear();
-                            }
-                        });
+                        final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                        if (location != null) {
+                            final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                            context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                        }
                     }
                 }
             }

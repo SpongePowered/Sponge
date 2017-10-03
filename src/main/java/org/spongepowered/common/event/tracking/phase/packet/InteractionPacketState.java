@@ -124,7 +124,7 @@ final class InteractionPacketState extends BasicPacketState {
                     return;
                 }
             } else {
-                phaseContext.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                phaseContext.getBlockItemDropSupplier().acceptIfNotEmpty(map -> {
                     final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                     if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
 
@@ -159,10 +159,7 @@ final class InteractionPacketState extends BasicPacketState {
             }
 
             phaseContext.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(items -> {
-                    if (items.isEmpty()) {
-                        return;
-                    }
+                .acceptAndClearIfNotEmpty(items -> {
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
                         entities.add(EntityUtil.fromNative(item));
@@ -175,7 +172,7 @@ final class InteractionPacketState extends BasicPacketState {
                     }
                 });
             phaseContext.getCapturedEntityDropSupplier()
-                .ifPresentAndNotEmpty(map -> {
+                .acceptIfNotEmpty(map -> {
                     if (map.isEmpty()) {
                         return;
                     }
@@ -190,7 +187,7 @@ final class InteractionPacketState extends BasicPacketState {
                     }
                     printer.trace(System.err);
                 });
-            phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> projectiles = new ArrayList<>(entities.size());
                 final List<Entity> spawnEggs = new ArrayList<>(entities.size());
                 final List<Entity> normalPlacement = new ArrayList<>(entities.size());

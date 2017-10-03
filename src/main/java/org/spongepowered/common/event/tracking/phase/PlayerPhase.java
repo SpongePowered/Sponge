@@ -93,7 +93,7 @@ public class PlayerPhase extends TrackingPhase {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-            phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
+            phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
                     entities.add(EntityUtil.fromNative(item));
@@ -108,7 +108,7 @@ public class PlayerPhase extends TrackingPhase {
                 }
             });
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            phaseContext.getCapturedItemStackSupplier().ifPresentAndNotEmpty(items -> {
+            phaseContext.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<EntityItem> drops = items.stream()
                         .map(drop -> drop.create(EntityUtil.getMinecraftWorld(player)))
                         .collect(Collectors.toList());
@@ -125,7 +125,7 @@ public class PlayerPhase extends TrackingPhase {
                 }
             });
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, phaseContext));
+                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, phaseContext));
         }
     }
 

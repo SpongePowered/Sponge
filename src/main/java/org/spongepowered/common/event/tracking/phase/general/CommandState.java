@@ -77,12 +77,12 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
+                .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(sender);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid,
                         // need to investigate further.
                         final SpawnEntityEvent spawnEntityEvent =
@@ -104,7 +104,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
             Sponge.getCauseStackManager().pushCause(sender);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             phaseContext.getCapturedEntityDropSupplier()
-                    .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
+                    .acceptIfNotEmpty(uuidItemStackMultimap -> {
                         for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
                             final UUID key = entry.getKey();
                             @Nullable

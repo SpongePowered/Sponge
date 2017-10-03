@@ -85,7 +85,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             Sponge.getCauseStackManager().pushCause(tickingEntity);
             phaseContext.addNotifierAndOwnerToCauseStack();
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final List<Entity> experience = new ArrayList<Entity>(entities.size());
                         final List<Entity> nonExp = new ArrayList<Entity>(entities.size());
                         final List<Entity> breeding = new ArrayList<Entity>(entities.size());
@@ -175,7 +175,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         }
                     });
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : entities) {
                             capturedEntities.add(EntityUtil.fromNative(entity));
@@ -194,9 +194,9 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         }
                     });
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
             phaseContext.getBlockItemDropSupplier()
-                    .ifPresentAndNotEmpty(map -> {
+                    .acceptIfNotEmpty(map -> {
                         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                         for (BlockSnapshot snapshot : capturedBlocks) {
                             final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
@@ -220,7 +220,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
                     });
             phaseContext.getCapturedItemStackSupplier()
-                    .ifPresentAndNotEmpty(drops -> {
+                    .acceptAndClearIfNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
                                 .map(drop -> drop.create(EntityUtil.getMinecraftWorld(tickingEntity)))
                                 .collect(Collectors.toList());

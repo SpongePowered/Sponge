@@ -49,7 +49,7 @@ public class ScheduledTaskPhaseState extends BasicPluginState {
 
     @Override
     public void unwind(BasicPluginContext phaseContext) {
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
+        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
             TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
         });
     }
