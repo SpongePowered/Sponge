@@ -69,4 +69,6 @@ public interface IMixinWorldSettings {
     void fromBuilder(boolean state);
 
     void setRandomSeed(boolean state);
+
+    Boolean internalKeepSpawnLoaded();
 }

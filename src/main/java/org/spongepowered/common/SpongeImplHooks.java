@@ -371,4 +371,16 @@ public final class SpongeImplHooks {
         final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
+
+    public static boolean shouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, int dimensionId) {
+        if (dimensionId == 0 || dimensionId == 1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {
+        // This is only used in SpongeForge
+    }
 }

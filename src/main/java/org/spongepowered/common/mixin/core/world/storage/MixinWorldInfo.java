@@ -79,6 +79,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
@@ -187,7 +188,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         createWorldConfig();
         setEnabled(archetype.isEnabled());
         setLoadOnStartup(archetype.loadOnStartup());
-        setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
+        if (((IMixinWorldSettings)(Object) settings).internalKeepSpawnLoaded() != null) {
+            setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
+        }
         setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
         setDifficulty(archetype.getDifficulty());
         Collection<WorldGeneratorModifier> modifiers = this.getGeneratorModifiers();
@@ -626,8 +629,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
         }
         if (keepSpawnLoaded == null) {
-            keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
-            this.setKeepSpawnLoaded(keepSpawnLoaded);
+            return SpongeImplHooks.shouldLoadSpawn((net.minecraft.world.DimensionType)(Object) this.dimensionType, this.dimensionId);
         }
         return keepSpawnLoaded;
     }
@@ -638,6 +640,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
             this.getOrCreateWorldConfig().save();
         }
+        SpongeImplHooks.setShouldLoadSpawn((net.minecraft.world.DimensionType)(Object) this.dimensionType, loaded);
     }
 
     @Override

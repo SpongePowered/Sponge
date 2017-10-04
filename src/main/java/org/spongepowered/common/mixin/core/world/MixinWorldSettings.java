@@ -88,7 +88,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
-    private boolean keepSpawnLoaded = true;
+    private Boolean keepSpawnLoaded = null;
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
@@ -224,6 +224,12 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Override
     public boolean doesKeepSpawnLoaded() {
+        if (this.keepSpawnLoaded == null) {
+            if (this.dimensionType == DimensionTypes.OVERWORLD) {
+                return true;
+            }
+            return false;
+        }
         return this.keepSpawnLoaded;
     }
 
@@ -351,5 +357,10 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Override
     public void fromBuilder(boolean state) {
         this.fromBuilder = state;
+    }
+
+    @Override
+    public Boolean internalKeepSpawnLoaded() {
+        return this.keepSpawnLoaded;
     }
 }
