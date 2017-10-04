@@ -103,6 +103,15 @@ public class WorldCategory extends ConfigCategory {
 
     @Setting(value = "weather-ice-and-snow", comment = "Enable to allow the natural formation of ice and snow in supported biomes.")
     private boolean weatherIceAndSnow = true;
+
+    public static final int USE_SERVER_VIEW_DISTANCE = -1;
+    @Setting(
+            value = "view-distance",
+            comment = "The view distance."
+                    + "\nThe value must be greater than or equal to 3 and less than or equal to 32"
+                    + "\nThe server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + "."
+    )
+    private int viewDistance = USE_SERVER_VIEW_DISTANCE;
     
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
@@ -215,5 +224,13 @@ public class WorldCategory extends ConfigCategory {
 
     public boolean getWeatherIceAndSnow() {
         return this.weatherIceAndSnow;
+    }
+
+    public int getViewDistance() {
+        return this.viewDistance;
+    }
+
+    public void setViewDistance(final int viewDistance) {
+        this.viewDistance = viewDistance;
     }
 }
