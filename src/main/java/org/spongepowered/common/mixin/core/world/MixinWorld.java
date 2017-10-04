@@ -1617,14 +1617,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         this.addTileEntity(tileentity1);
                     }
 
-                    // Sponge start - use cached chunk
-                    final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinTileEntity) tileentity1).getActiveChunk();
-                    if (activeChunk != null) {
-                        IBlockState iblockstate = activeChunk.getBlockState(tileentity1.getPos());
-                        activeChunk.addTileEntity(tileentity1.getPos(), tileentity1);
+                    if (this.isBlockLoaded(tileentity1.getPos())) {
+                        net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity1.getPos());
+                        IBlockState iblockstate = chunk.getBlockState(tileentity1.getPos());
+                        chunk.addTileEntity(tileentity1.getPos(), tileentity1);
                         this.notifyBlockUpdate(tileentity1.getPos(), iblockstate, iblockstate, 3);
                     }
-                    // Sponge end
                 }
             }
 
