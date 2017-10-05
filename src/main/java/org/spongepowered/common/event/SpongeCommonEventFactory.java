@@ -276,31 +276,23 @@ public class SpongeCommonEventFactory {
         EntityPlayer player = null;
         User owner = data.context.getOwner().orElse(null);
         User notifier = data.context.getNotifier().orElse(null);
-        // handle FakePlayer
-        boolean isFake = false;
-        if (source instanceof EntityPlayer) {
+
+        Sponge.getCauseStackManager().pushCause(source);
+        if (source instanceof Player) {
             player = (EntityPlayer) source;
             if (SpongeImplHooks.isFakePlayer(player)) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
-                Sponge.getCauseStackManager().pushCause(owner);
-                isFake = true;
+                Sponge.getCauseStackManager().addContext(EventContextKeys.FAKE_PLAYER, EntityUtil.toPlayer(player));
             }
         }
 
-        if (!isFake) {
-            Sponge.getCauseStackManager().pushCause(source);
-        }
-
-        if(owner != null) {
+        if (owner != null) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
+        } else if (player != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, (User) player);
         }
+
         if (notifier != null) {
-            Optional<Player> oplayer = data.context.getSource(Player.class);
-            if (oplayer.isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, oplayer.get());
-            } else {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
-            }
+            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
         }
 
         ChangeBlockEvent.Pre event =
