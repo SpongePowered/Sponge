@@ -31,6 +31,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
@@ -90,6 +91,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
@@ -476,6 +478,8 @@ public final class EntityUtil {
         SpongeImpl.postEvent(event);
         final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
         final IMixinTeleporter toMixinTeleporter = (IMixinTeleporter) teleporter;
+        final Transform<World> toTransform = event.getToTransform();
+        final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
 
         if (event.isCancelled()) {
             // Mods may cancel this event in order to run custom transfer logic
@@ -483,6 +487,12 @@ public final class EntityUtil {
             if (!portalExitTransform.getExtent().getUniqueId().equals(mixinEntity.getLocation().getExtent().getUniqueId())) {
                 // update cache
                 ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+                if (!capturedBlocks.isEmpty()) {
+                    for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
+                        original.restore(true, BlockChangeFlag.NONE);
+                    }
+                    capturedBlocks.clear();
+                }
                 mixinEntity.setLocationAndAngles(fromTransform);
             } else {
                 // Call setTransform to let plugins know mods changed the position
@@ -492,9 +502,6 @@ public final class EntityUtil {
             return event;
         }
 
-        final Transform<World> toTransform = event.getToTransform();
-        final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-
         if (!portalExitTransform.equals(toTransform)) {
             // if plugin set to same world, just set the transform
             if (fromWorld == toTransform.getExtent()) {
@@ -502,14 +509,13 @@ public final class EntityUtil {
                 event.setCancelled(true);
                 // update cache
                 toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
-                mixinEntity.setLocationAndAngles(toTransform);
-                if (entityIn instanceof EntityPlayerMP) {
-                    EntityPlayerMP player = (EntityPlayerMP) entityIn;
-                    // close any open inventory
-                    player.closeScreen();
-                    // notify client
-                    player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+                if (!capturedBlocks.isEmpty()) {
+                    for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
+                        original.restore(true, BlockChangeFlag.NONE);
+                    }
+                    capturedBlocks.clear();
                 }
+                mixinEntity.setLocationAndAngles(toTransform);
                 return event;
             }
         } else {
@@ -517,11 +523,6 @@ public final class EntityUtil {
                 BlockPos blockpos = entityIn.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
                 entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
             }
-        }
-
-        // Attempt to create the portal
-        if (event.isCancelled()) {
-            return null;
         }
 
         if (!capturedBlocks.isEmpty()
