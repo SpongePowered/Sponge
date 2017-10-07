@@ -124,7 +124,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public float experience;
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
-    @Shadow private BlockPos spawnChunk;
+    @Shadow private BlockPos spawnPos;
     @Shadow private BlockPos bedLocation;
     @Shadow protected FoodStats foodStats;
     @Shadow public InventoryEnderChest enderChest;
@@ -671,7 +671,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                         if (isSweapingAttack) {
                             for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-                                if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSqToEntity(entitylivingbase) < 9.0D) {
+                                if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);

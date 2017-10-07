@@ -235,7 +235,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean isInWater();
     @Shadow public abstract boolean isRiding();
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract double getDistanceSq(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);

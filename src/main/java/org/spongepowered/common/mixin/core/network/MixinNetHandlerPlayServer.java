@@ -688,7 +688,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 d0 = 9.0D; // 1.5 blocks
             }
 
-            if (this.player.getDistanceSqToEntity(entity) < d0) {
+            if (this.player.getDistanceSq(entity) < d0) {
                 // Sponge start - Ignore CPacketUseEntity.Action.INTERACT
                 /*if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
                     // The client will only send this packet if INTERACT_AT is not successful.
