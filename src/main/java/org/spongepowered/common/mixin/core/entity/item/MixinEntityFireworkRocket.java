@@ -27,8 +27,11 @@ package org.spongepowered.common.mixin.core.entity.item;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Firework;
@@ -174,5 +177,16 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
                 postPrime();
             }
         }
+    }
+
+    @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;attackEntityFrom"
+            + "(Lnet/minecraft/util/DamageSource;F)Z"))
+    public boolean useEntitySource(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
+        final DamageSource originalFireworks = DamageSource.FIREWORKS;
+        DamageSource.FIREWORKS = new EntityDamageSource(originalFireworks.damageType, (Entity) (Object) this).setExplosion();
+        final boolean result = entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
+        DamageSource.FIREWORKS = originalFireworks;
+
+        return result;
     }
 }
