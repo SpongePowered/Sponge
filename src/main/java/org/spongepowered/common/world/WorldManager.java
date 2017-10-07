@@ -330,6 +330,7 @@ public final class WorldManager {
         worldPropertiesByFolderName.remove(properties.getWorldName());
         worldPropertiesByWorldUuid.remove(properties.getUniqueId());
         worldUuidByFolderName.remove(properties.getWorldName());
+        worldFolderByDimensionId.remove(((IMixinWorldInfo) properties).getDimensionId());
         if (((IMixinWorldInfo) properties).getDimensionId() != null && freeDimensionId) {
             dimensionBits.clear(((IMixinWorldInfo) properties).getDimensionId());
         }
@@ -1027,6 +1028,14 @@ public final class WorldManager {
 
         final WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
         info.setWorldName(newName);
+
+        // As we are moving a world, we want to move the dimension ID and UUID with the world to ensure
+        // plugins and Sponge do not break.
+        ((IMixinWorldInfo) info).setUniqueId(worldProperties.getUniqueId());
+        if (((IMixinWorldInfo) worldProperties).getDimensionId() != null) {
+            ((IMixinWorldInfo) info).setDimensionId(((IMixinWorldInfo) worldProperties).getDimensionId());
+        }
+
         ((IMixinWorldInfo) info).createWorldConfig();
         new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
                 .saveWorldInfo(info);
