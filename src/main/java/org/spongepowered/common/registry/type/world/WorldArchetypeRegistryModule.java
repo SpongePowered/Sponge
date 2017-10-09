@@ -38,6 +38,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldArchetypes;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
+import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 
 import java.util.Collection;
@@ -48,7 +49,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegistrationDependency({GameModeRegistryModule.class, GeneratorTypeRegistryModule.class, DifficultyRegistryModule.class,
-        DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, WorldGeneratorModifierRegistryModule.class})
+        DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, WorldGeneratorModifierRegistryModule.class,
+        DataFormatRegistryModule.class})
 public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryModule<WorldArchetype>, AlternateCatalogRegistryModule<WorldArchetype> {
 
     public static WorldArchetypeRegistryModule getInstance() {

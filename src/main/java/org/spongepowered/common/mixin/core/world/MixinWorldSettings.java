@@ -29,10 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -40,13 +42,13 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -58,13 +60,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Collection;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
@@ -72,6 +79,7 @@ import java.util.Collection;
 public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldSettings {
 
     @Shadow private boolean commandsAllowed;
+    @Shadow private String generatorOptions;
 
     @Shadow public abstract long shadow$getSeed();
     @Shadow public abstract GameType getGameType();
@@ -104,7 +112,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();
-            this.generatorSettings = properties.getGeneratorSettings();
+            this.generatorSettings = properties.getGeneratorSettings().copy();
             this.isEnabled = properties.isEnabled();
             this.loadOnStartup = properties.loadOnStartup();
             this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
@@ -282,6 +290,20 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Override
     public void setGeneratorSettings(DataContainer generatorSettings) {
+        // Update the generatorOptions string
+        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
+        if (optCustomSettings.isPresent()) {
+            this.generatorOptions = optCustomSettings.get();
+        } else {
+            try {
+                StringWriter writer = new StringWriter();
+                HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
+                        .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(generatorSettings));
+                this.generatorOptions = writer.toString();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
         this.generatorSettings = generatorSettings;
     }
 
