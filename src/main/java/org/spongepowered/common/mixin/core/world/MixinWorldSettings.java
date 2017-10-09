@@ -64,6 +64,7 @@ import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegist
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
@@ -71,6 +72,7 @@ import java.util.Collection;
 public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldSettings {
 
     @Shadow private boolean commandsAllowed;
+    @Shadow private String generatorOptions;
 
     @Shadow public abstract long shadow$getSeed();
     @Shadow public abstract GameType getGameType();
@@ -104,7 +106,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
             this.dimensionType = properties.getDimensionType();
             this.difficulty = properties.getDifficulty();
             this.serializationBehavior = properties.getSerializationBehavior();
-            this.generatorSettings = properties.getGeneratorSettings();
+            this.generatorSettings = properties.getGeneratorSettings().copy();
             this.isEnabled = properties.isEnabled();
             this.loadOnStartup = properties.loadOnStartup();
             this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
@@ -292,6 +294,17 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Override
     public void setGeneratorSettings(DataContainer generatorSettings) {
+        // Update the generatorOptions string
+        Optional<String> optCustomSettings = generatorSettings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
+        if (optCustomSettings.isPresent()) {
+            this.generatorOptions = optCustomSettings.get();
+        } else {
+            try {
+                this.generatorOptions = DataFormats.JSON.write(generatorSettings);
+            } catch (IOException e) {
+                // ignore
+            }
+        }
         this.generatorSettings = generatorSettings;
     }
 
