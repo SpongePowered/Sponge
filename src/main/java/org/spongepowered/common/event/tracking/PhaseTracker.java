@@ -96,7 +96,7 @@ public final class PhaseTracker {
             }
 
             final List<net.minecraft.entity.Entity> entities = new ArrayList<>(ASYNC_CAPTURED_ENTITIES);
-            ASYNC_CAPTURED_ENTITIES.clear();
+            ASYNC_CAPTURED_ENTITIES.removeAll(entities);
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                 // we'll just mark it as "forced".
