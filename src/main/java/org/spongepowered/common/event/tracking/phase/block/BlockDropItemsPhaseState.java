@@ -31,6 +31,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
@@ -102,7 +103,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             phaseContext.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
             phaseContext.getCapturedItemStackSupplier()

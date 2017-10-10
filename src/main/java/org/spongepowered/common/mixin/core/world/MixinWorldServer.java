@@ -1254,6 +1254,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntity(net.minecraft.entity.Entity entity) {
+        if (!PhaseTracker.validateEntitySpawn(this, (Entity) entity)) {
+            return true;
+        }
         return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
     }
 
@@ -1494,6 +1497,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean spawnEntity(Entity entity) {
+        if (!PhaseTracker.validateEntitySpawn(this, entity)) {
+            return true;
+        }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {

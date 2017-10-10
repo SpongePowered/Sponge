@@ -24,37 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.GeneralizedContext;
 
-public final class BlockPhase extends TrackingPhase {
+/**
+ * Used in SpongeForge
+ */
+public class TileChunkUnloadState extends BlockPhaseState {
 
-    public static final class State {
-        public static final IPhaseState<?> BLOCK_DECAY = new BlockDecayPhaseState();
-        public static final IPhaseState<?> RESTORING_BLOCKS = new RestoringBlockPhaseState();
-        public static final IPhaseState<?> DISPENSE = new DispensePhaseState();
-        public static final IPhaseState<?> BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
-        /**
-         * Specifically for Forge environments where a TileEntity may need to perform block
-         * changes or entity spawns as a chunk unloads.
-         */
-        public static final IPhaseState<?> TILE_CHUNK_UNLOAD = new TileChunkUnloadState();
-
-        private State() {
-        }
-
+    @Override
+    public void unwind(GeneralizedContext context) {
+        super.unwind(context);
     }
-
-    public static BlockPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    private BlockPhase() {
-    }
-
-    private static final class Holder {
-        static final BlockPhase INSTANCE = new BlockPhase();
-    }
-
-
 }

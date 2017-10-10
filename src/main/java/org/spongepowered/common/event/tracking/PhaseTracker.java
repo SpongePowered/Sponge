@@ -46,9 +46,12 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
@@ -62,11 +65,13 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
@@ -78,6 +83,32 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings("unchecked")
 public final class PhaseTracker {
+
+    private static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
+
+    @SuppressWarnings("unused")
+    public static final Task ASYNC_TO_SYNC_SPAWNER = Task.builder()
+        .name("Sponge Async To Sync Entity Spawn Task")
+        .intervalTicks(1)
+        .execute(() -> {
+            if (ASYNC_CAPTURED_ENTITIES.isEmpty()) {
+                return;
+            }
+
+            final List<net.minecraft.entity.Entity> entities = new ArrayList<>(ASYNC_CAPTURED_ENTITIES);
+            ASYNC_CAPTURED_ENTITIES.clear();
+            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                // We are forcing the spawn, as we can't throw the proper event at the proper time, so
+                // we'll just mark it as "forced".
+                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.FORCED);
+                for (net.minecraft.entity.Entity entity : entities) {
+                    // At this point, we don't care what the causes are...
+                    PhaseTracker.getInstance().spawnEntityWithCause((World) entity.getEntityWorld(), (Entity) entity);
+                }
+            }
+
+        })
+        .submit(SpongeImpl.getPlugin());
 
     static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer);
@@ -105,8 +136,10 @@ public final class PhaseTracker {
 
     public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
     public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
+    public static final boolean CAPTURE_ENTITIES_ASYNC = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().captureEntitiesAsync();
     private boolean hasPrintedEmptyOnce = false;
     private boolean hasPrintedAboutRunnawayPhases = false;
+    private boolean hasPrintedAsyncEntities = false;
     private List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
 
     private PhaseTracker() {
@@ -719,4 +752,83 @@ public final class PhaseTracker {
         return true;
     }
 
+    /**
+     * Validates the {@link Entity} being spawned is being spawned on the main server
+     * thread, if it is available. If the entity is NOT being spawned on the main server thread,
+     * well..... a mod (or plugin) is attempting to spawn an entity to the world
+     * <b>off thread</b>. The problem with doing this is that the PhaseTracker is
+     * <b>not</b> thread safe, and capturing entities off thread is always bad.
+     *
+     * @param mixinWorldServer The server the entity is being spawned into
+     * @param entity The entity to spawn
+     * @return True if the entity spawn is on the main thread.
+     */
+    public static boolean validateEntitySpawn(IMixinWorldServer mixinWorldServer, Entity entity) {
+        if (Sponge.isServerAvailable() && Sponge.getServer().isMainThread()) {
+            return true;
+        }
+        // We aren't in the server thread at this point, and an entity is spawning on the server....
+        // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
+        if (!CAPTURE_ENTITIES_ASYNC) {
+            // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
+            if (!PhaseTracker.getInstance().isVerbose) {
+                return false;
+            }
+            // Just checking if we've already printed once about it.
+            // If we have, we don't want to print any more times.
+            if (!PhaseTracker.getInstance().verboseErrors && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
+                return false;
+            }
+            // Otherwise, let's print out either the first time, or several more times.
+            new PrettyPrinter(60)
+                .add("Async Entity Spawn Warning").centre().hr()
+                .add("An entity was attempting to spawn off the \"main\" server thread")
+                .add()
+                .add("Details of the spawning are disabled according to the Sponge")
+                .add("configuration file. A stack trace of the attempted spawn should")
+                .add("provide information about how it was being spawned. Sponge is")
+                .add("currently configured to NOT attempt to capture this spawn and")
+                .add("spawn the entity at an appropriate time, while on the main server")
+                .add("thread.")
+                .add()
+                .add("Details of the spawn:")
+                .add("%s : %s", "Entity", entity)
+                .add("Stacktrace")
+                .add(new Exception("Async entity spawn attempt"))
+                .trace(SpongeImpl.getLogger(), Level.WARN);
+            PhaseTracker.getInstance().hasPrintedAsyncEntities = true;
+            return false;
+        }
+        ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
+        // At this point we can print an exception about it, if we are told to.
+        // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
+        if (!PhaseTracker.getInstance().isVerbose) {
+            return false;
+        }
+        // Just checking if we've already printed once about it.
+        // If we have, we don't want to print any more times.
+        if (!PhaseTracker.getInstance().verboseErrors && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
+            return false;
+        }
+        // Otherwise, let's print out either the first time, or several more times.
+        new PrettyPrinter(60)
+            .add("Async Entity Spawn Warning").centre().hr()
+            .add("An entity was attempting to spawn off the \"main\" server thread")
+            .add()
+            .add("Delayed spawning is ENABLED for Sponge.")
+            .add("The entity is safely captured by Sponge while off the main")
+            .add("server thread, and therefor will be spawned the next tick.")
+            .add("Some cases where a mod is expecting the entity back while")
+            .add("async can cause issues with said mod.")
+            .add()
+            .add("Details of the spawn:")
+            .add("%s : %s", "Entity", entity)
+            .add("Stacktrace")
+            .add(new Exception("Async entity spawn attempt"))
+            .trace(SpongeImpl.getLogger(), Level.WARN);
+        PhaseTracker.getInstance().hasPrintedAsyncEntities = true;
+
+
+        return false;
+    }
 }
