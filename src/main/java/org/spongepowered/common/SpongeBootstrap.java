@@ -38,7 +38,7 @@ import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.command.SpongeCommandGenerator;
+import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
@@ -71,8 +71,8 @@ public final class SpongeBootstrap {
     }
 
     public static void initializeCommands() {
-        commandManager.register(SpongeImpl.getPlugin(), SpongeCommandGenerator.createSpongeCommand(), "sponge", "sp");
-        commandManager.register(SpongeImpl.getPlugin(), SpongeCommandGenerator.createHelpCommand(), "help", "?");
+        commandManager.register(SpongeImpl.getPlugin(), SpongeCommandFactory.createSpongeCommand(), "sponge", "sp");
+        commandManager.register(SpongeImpl.getPlugin(), SpongeCommandFactory.createHelpCommand(), "help", "?");
         commandManager.register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }
 

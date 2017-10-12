@@ -69,17 +69,13 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.SpongeApiTranslationHelper;
 import org.spongepowered.api.util.StartsWithPredicate;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -119,8 +115,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
-public class SpongeCommandGenerator {
+public class SpongeCommandFactory {
+
     public static final String INDENT = "    ";
     public static final String LONG_INDENT = INDENT + INDENT;
     public static final List<String> CONTAINER_LIST_STATICS = Lists.newArrayList("minecraft", "mcp", "spongeapi", "sponge");
@@ -138,7 +134,8 @@ public class SpongeCommandGenerator {
     private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
 
         @Nullable
-        @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+        @Override
+        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             String input = args.next();
             Optional<? extends CommandMapping> cmd = SpongeImpl.getGame().getCommandManager().get(input, source);
 
@@ -151,8 +148,8 @@ public class SpongeCommandGenerator {
         @Override public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
             final String prefix = args.nextIfPresent().orElse("");
             return commandsStr(src).stream()
-                .filter(new StartsWithPredicate(prefix))
-                .collect(GuavaCollectors.toImmutableList());
+                    .filter(new StartsWithPredicate(prefix))
+                    .collect(ImmutableList.toImmutableList());
         }
     };
     private static final Text NOT_FOUND = Text.of("notFound");
@@ -772,7 +769,8 @@ public class SpongeCommandGenerator {
 
     /**
      * Creates a new instance of the Sponge help command.
-     * @return The newly created command
+     *
+     * @return The created help command
      */
     public static CommandSpec createHelpCommand() {
         return CommandSpec
@@ -792,12 +790,11 @@ public class SpongeCommandGenerator {
                         Text.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
                                 + " a command to insert it into your chat bar."))
                 .executor((src, args) -> {
-
                     if(args.getOne(NOT_FOUND).isPresent()){
                         throw new CommandException(Text.of("No such command: ", args.getOne(NOT_FOUND).get()));
                     }
 
-                    Optional<CommandMapping> command = args.getOne(COMMAND_KEY);
+                    final Optional<CommandMapping> command = args.getOne(COMMAND_KEY);
                     Optional<Integer> page = args.getOne(PAGE_KEY);
 
                     if (command.isPresent()) {
@@ -811,35 +808,39 @@ public class SpongeCommandGenerator {
                         return CommandResult.success();
                     }
 
-                    Translation helpTip = Sponge.getRegistry().getTranslationById("commands.help.footer").get();
-                    PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-                    builder.title(Text.builder("Showing Help (/page <page>):").color(TextColors.DARK_GREEN).build());
-
-                    ImmutableList<Text> contents = ImmutableList.<Text>builder()
-                            .add(Text.of(helpTip))
+                    final ImmutableList<Text> contents = ImmutableList.<Text>builder()
+                            .add(Text.of(Sponge.getRegistry().getTranslationById("commands.help.footer").get()))
                             .addAll(Collections2.transform(commands(src), input -> createDescription(src, input))).build();
-                    builder.contents(contents);
-                    builder.build().sendTo(src, page.orElse(1));
+
+                    PaginationList.builder()
+                            .title(Text.of(TextColors.DARK_GREEN, "Showing Help (/page <page>):"))
+                            .padding(Text.of(TextColors.DARK_GREEN, "="))
+                            .contents(contents)
+                            .build().sendTo(src, page.orElse(1));
+
                     return CommandResult.success();
                 }).build();
     }
 
     /**
-     * get a collection of primary aliases of commands that the source has access to.
-     * @param src the command source to permission check.
-     * @return a collection of primary aliases.
+     * Gets a collection of the primary aliases of commands that
+     * the source has access to.
+     *
+     * @param src The command source to permission check
+     * @return A collection of primary aliases
      */
     private static Collection<String> commandsStr(CommandSource src) {
         return commands(src).stream().map(CommandMapping::getPrimaryAlias).collect(Collectors.toList());
     }
 
     /**
+     * Gets a tree set of command mappings the command source has access to.
      *
-     * @param src the CommandSource to test permissions against.
-     * @return a set of commandMapping, sorted by primary alias
+     * @param src The command source to test permissions against
+     * @return A set of command mappings, sorted by primary alias
      */
     private static TreeSet<CommandMapping> commands(CommandSource src) {
-        TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
+        final TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
         commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
                 .testPermission(src)));
         return commands;
@@ -847,16 +848,19 @@ public class SpongeCommandGenerator {
 
     /**
      * Creates a short description for display on the help index.
-     * @param source the source the description will be shown to for translation purposes.
-     * @param mapping the command mapping to generate a description from
-     * @return a Text representing the command mapping, formatted for display on the help index.
+     *
+     * @param source The source the description will be shown to for
+     *     translation purposes
+     * @param mapping The command mapping to generate a description from
+     * @return A text representing the command mapping, formatted for display
+     *     on the help index
      */
     private static Text createDescription(CommandSource source, CommandMapping mapping) {
         @SuppressWarnings("unchecked")
         final Optional<Text> description = mapping.getCallable().getShortDescription(source);
-        Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
+        final Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
         text.color(TextColors.GREEN);
-        //End with a space, so tab completion works immediately.
+        // End with a space, so tab completion works immediately.
         text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
         Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
         if (longDescription.isPresent()) {

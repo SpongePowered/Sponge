@@ -102,8 +102,7 @@ public class SpongePaginationList implements PaginationList {
 
     @Override
     public void sendTo(final MessageReceiver receiver, int page) {
-        checkNotNull(this.contents, "contents");
-        checkNotNull(receiver, "source");
+        checkNotNull(receiver, "The message receiver cannot be null!");
         this.service.registerCommandOnce();
 
         MessageReceiver realSource = receiver;
