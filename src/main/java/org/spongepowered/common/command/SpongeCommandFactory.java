@@ -39,7 +39,6 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
@@ -810,7 +809,8 @@ public class SpongeCommandFactory {
 
                     final ImmutableList<Text> contents = ImmutableList.<Text>builder()
                             .add(Text.of(Sponge.getRegistry().getTranslationById("commands.help.footer").get()))
-                            .addAll(Collections2.transform(commands(src), input -> createDescription(src, input))).build();
+                            .addAll(commands(src).stream().map(input -> createDescription(src, input)).collect(Collectors.toList()))
+                            .build();
 
                     PaginationList.builder()
                             .title(Text.of(TextColors.DARK_GREEN, "Showing Help (/page <page>):"))
@@ -841,8 +841,7 @@ public class SpongeCommandFactory {
      */
     private static TreeSet<CommandMapping> commands(CommandSource src) {
         final TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
-        commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
-                .testPermission(src)));
+        commands.addAll(Sponge.getCommandManager().getAll().values().stream().filter(input -> input.getCallable().testPermission(src)).collect(Collectors.toList()));
         return commands;
     }
 
