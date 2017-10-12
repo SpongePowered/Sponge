@@ -39,7 +39,6 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
@@ -56,8 +55,12 @@ import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.CommandElement;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
@@ -65,13 +68,13 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.util.SpongeApiTranslationHelper;
+import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -107,9 +110,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-@NonnullByDefault
-public class SpongeCommands {
+import javax.annotation.Nullable;
+
+public class SpongeCommandFactory {
+
     public static final String INDENT = "    ";
     public static final String LONG_INDENT = INDENT + INDENT;
     public static final List<String> CONTAINER_LIST_STATICS = Lists.newArrayList("minecraft", "mcp", "spongeapi", "sponge");
@@ -121,6 +127,32 @@ public class SpongeCommands {
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
     private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
+    private static final Comparator<CommandMapping> COMMAND_COMPARATOR = Comparator.comparing(CommandMapping::getPrimaryAlias);
+    private static final Text PAGE_KEY = Text.of("page");
+    private static final Text COMMAND_KEY = Text.of("command");
+    private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
+
+        @Nullable
+        @Override
+        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+            String input = args.next();
+            Optional<? extends CommandMapping> cmd = SpongeImpl.getGame().getCommandManager().get(input, source);
+
+            if (!cmd.isPresent()) {
+                throw args.createError(SpongeApiTranslationHelper.t("No such command: ", input));
+            }
+            return cmd.orElse(null);
+        }
+
+        @Override public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+            final String prefix = args.nextIfPresent().orElse("");
+            return commandsStr(src).stream()
+                    .filter(new StartsWithPredicate(prefix))
+                    .collect(ImmutableList.toImmutableList());
+        }
+    };
+    private static final Text NOT_FOUND = Text.of("notFound");
+
     /**
      * Create a new instance of the Sponge command structure.
      *
@@ -167,7 +199,6 @@ public class SpongeCommands {
                 .executor(nonFlagChildren)
                 .build();
     }
-
 
     // TODO: Have some sort of separator between outputs for each world/dimension/global/whatever (that are exactly one line?)
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
@@ -455,7 +486,6 @@ public class SpongeCommands {
                 .build();
     }
 
-
     private static CommandSpec createSpongeAuditCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Audit Mixin classes for implementation"))
@@ -581,7 +611,6 @@ public class SpongeCommands {
             src.sendMessage(builder.build());
         }
     }
-
 
     private static CommandCallable createSpongeTimingsCommand() {
         return CommandSpec.builder()
@@ -737,22 +766,38 @@ public class SpongeCommands {
         return mean;
     }
 
-    // Not registered under the 'sponge' alias but kept here for consistency
+    /**
+     * Creates a new instance of the Sponge help command.
+     *
+     * @return The created help command
+     */
     public static CommandSpec createHelpCommand() {
         return CommandSpec
-            .builder()
-            .permission("sponge.command.help")
-            .arguments(optional(string(Text.of("command"))))
-            .description(Text.of("View a list of all commands."))
-            .extendedDescription(
-                    Text.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
-                            + " a command to insert it into your chat bar."))
-            .executor((src, args) -> {
-                Optional<String> command = args.getOne("command");
-                if (command.isPresent()) {
-                    Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(command.get(), src);
-                    if (mapping.isPresent()) {
-                        CommandCallable callable = mapping.get().getCallable();
+                .builder()
+                .permission("sponge.command.help")
+                .arguments(
+                        optional(
+                                firstParsing(
+                                        GenericArguments.integer(PAGE_KEY),
+                                        COMMAND_ARGUMENT,
+                                        string(NOT_FOUND)
+                                )
+                        )
+                )
+                .description(Text.of("View a list of all commands."))
+                .extendedDescription(
+                        Text.of("View a list of all commands. Hover over\n" + " a command to view its description. Click\n"
+                                + " a command to insert it into your chat bar."))
+                .executor((src, args) -> {
+                    if(args.getOne(NOT_FOUND).isPresent()){
+                        throw new CommandException(Text.of("No such command: ", args.getOne(NOT_FOUND).get()));
+                    }
+
+                    final Optional<CommandMapping> command = args.getOne(COMMAND_KEY);
+                    Optional<Integer> page = args.getOne(PAGE_KEY);
+
+                    if (command.isPresent()) {
+                        CommandCallable callable = command.get().getCallable();
                         Optional<? extends Text> desc = callable.getHelp(src);
                         if (desc.isPresent()) {
                             src.sendMessage(desc.get());
@@ -761,30 +806,65 @@ public class SpongeCommands {
                         }
                         return CommandResult.success();
                     }
-                    throw new CommandException(Text.of("No such command: ", command.get()));
-                }
 
-                PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-                builder.title(Text.of(TextColors.DARK_GREEN, "Available commands:"));
-                builder.padding(Text.of(TextColors.DARK_GREEN, "="));
+                    final ImmutableList<Text> contents = ImmutableList.<Text>builder()
+                            .add(Text.of(Sponge.getRegistry().getTranslationById("commands.help.footer").get()))
+                            .addAll(commands(src).stream().map(input -> createDescription(src, input)).collect(Collectors.toList()))
+                            .build();
 
-                TreeSet<CommandMapping> commands = new TreeSet<>(Comparator.comparing(CommandMapping::getPrimaryAlias));
-                commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
-                        .testPermission(src)));
-                builder.contents(ImmutableList.copyOf(Collections2.transform(commands, input -> getDescription(src, input))));
-                builder.sendTo(src);
-                return CommandResult.success();
-            }).build();
+                    PaginationList.builder()
+                            .title(Text.of(TextColors.DARK_GREEN, "Showing Help (/page <page>):"))
+                            .padding(Text.of(TextColors.DARK_GREEN, "="))
+                            .contents(contents)
+                            .build().sendTo(src, page.orElse(1));
+
+                    return CommandResult.success();
+                }).build();
     }
 
-    private static Text getDescription(CommandSource source, CommandMapping mapping) {
+    /**
+     * Gets a collection of the primary aliases of commands that
+     * the source has access to.
+     *
+     * @param src The command source to permission check
+     * @return A collection of primary aliases
+     */
+    private static Collection<String> commandsStr(CommandSource src) {
+        return commands(src).stream().map(CommandMapping::getPrimaryAlias).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a tree set of command mappings the command source has access to.
+     *
+     * @param src The command source to test permissions against
+     * @return A set of command mappings, sorted by primary alias
+     */
+    private static TreeSet<CommandMapping> commands(CommandSource src) {
+        final TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
+        commands.addAll(Sponge.getCommandManager().getAll().values().stream().filter(input -> input.getCallable().testPermission(src)).collect(Collectors.toList()));
+        return commands;
+    }
+
+    /**
+     * Creates a short description for display on the help index.
+     *
+     * @param source The source the description will be shown to for
+     *     translation purposes
+     * @param mapping The command mapping to generate a description from
+     * @return A text representing the command mapping, formatted for display
+     *     on the help index
+     */
+    private static Text createDescription(CommandSource source, CommandMapping mapping) {
+        @SuppressWarnings("unchecked")
         final Optional<Text> description = mapping.getCallable().getShortDescription(source);
-        Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
+        final Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
         text.color(TextColors.GREEN);
-        text.style(TextStyles.UNDERLINE);
         // End with a space, so tab completion works immediately.
         text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
-        mapping.getCallable().getHelp(source).ifPresent(text1 -> text.onHover(TextActions.showText(text1)));
+        Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
+        if (longDescription.isPresent()) {
+            text.onHover(TextActions.showText(longDescription.get()));
+        }
         return Text.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
     }
 }

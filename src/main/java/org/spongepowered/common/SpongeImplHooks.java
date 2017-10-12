@@ -68,7 +68,7 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.command.SpongeCommands;
+import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -360,7 +360,7 @@ public final class SpongeImplHooks {
     }
 
     public static Predicate<? super PluginContainer> getPluginFilterPredicate() {
-        return plugin -> !SpongeCommands.CONTAINER_LIST_STATICS.contains(plugin.getId());
+        return plugin -> !SpongeCommandFactory.CONTAINER_LIST_STATICS.contains(plugin.getId());
     }
 
     // Borrowed from Forge, with adjustments by us
