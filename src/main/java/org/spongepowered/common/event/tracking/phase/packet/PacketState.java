@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.util.math.BlockPos;
@@ -38,11 +39,13 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -85,8 +88,15 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return false;
     }
 
-    public void associateBlockEventNotifier(PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
+    }
+
+    @Override
+    public void associateNeighborStateNotifier(P unwindingContext, BlockPos sourcePos, Block block, BlockPos notifyPos, WorldServer minecraftWorld,
+        PlayerTracker.Type notifier) {
+        final Player player = unwindingContext.getSpongePlayer();
+        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, P context) {
@@ -97,7 +107,8 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return false;
     }
 
-    public boolean ignoresItemPreMerges() {
+    @Override
+    public boolean ignoresItemPreMerging() {
         return false;
     }
 

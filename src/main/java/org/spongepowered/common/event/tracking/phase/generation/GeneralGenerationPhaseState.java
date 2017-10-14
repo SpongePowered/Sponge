@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -41,6 +42,7 @@ import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
@@ -107,6 +109,21 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     @Override
     public boolean requiresBlockCapturing() {
         return false;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
+
+    @Override
+    public boolean isWorldGeneration() {
+        return true;
+    }
+
+    @Override
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
+
     }
 
     @Override

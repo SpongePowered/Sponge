@@ -35,12 +35,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 
@@ -74,10 +75,17 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     @Override
     public void unwind(C phaseContext) { }
 
-
-    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+    @Override
+    public void associateNeighborStateNotifier(C context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
+    }
+
+    @Override
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+        if (this == TickPhase.Tick.BLOCK || this == TickPhase.Tick.RANDOM_BLOCK) {
+
+        }
     }
 
     @Override
@@ -93,7 +101,8 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
         }
     }
 
-    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
+    @Override
+    public void appendContextPreExplosion(ExplosionContext explosionContext, C context) {
 
     }
 

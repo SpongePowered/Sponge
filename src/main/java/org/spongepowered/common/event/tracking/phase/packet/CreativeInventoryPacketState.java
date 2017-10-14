@@ -41,7 +41,7 @@ import java.util.ArrayList;
 final class CreativeInventoryPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 

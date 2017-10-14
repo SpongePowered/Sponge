@@ -94,6 +94,16 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
+    public boolean alreadyCapturingEntitySpawns() {
+        return true;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
+
+    @Override
     public void unwind(ExplosionContext context) {
         final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

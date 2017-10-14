@@ -80,7 +80,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
         final IPhaseState currentState = phaseTracker.getCurrentPhaseData().state;
-        final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
+        final boolean isWorldGen = currentState.isWorldGeneration();
         try (PhaseContext<?> context = isBlockAlready && !isWorldGen
                                        ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                                            .source(LocatableBlock.builder()
@@ -113,7 +113,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
-            final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
+            final boolean isWorldGen = currentState.isWorldGeneration();
             final boolean isBlockAlready = phaseTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
             try (PhaseContext<?> context = isBlockAlready && !isWorldGen ? BlockPhase.State.BLOCK_DECAY.createPhaseContext()
                 .source(LocatableBlock.builder()

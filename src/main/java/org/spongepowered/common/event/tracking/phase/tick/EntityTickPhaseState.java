@@ -54,8 +54,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
@@ -333,7 +333,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
+    public void appendContextPreExplosion(ExplosionContext explosionContext, EntityTickContext context) {
         context.getOwner().ifPresent(explosionContext::owner);
         context.getNotifier().ifPresent(explosionContext::notifier);
         final Entity tickingEntity = context.getSource(Entity.class)

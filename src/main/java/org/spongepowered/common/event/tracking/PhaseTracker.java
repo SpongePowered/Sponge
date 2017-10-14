@@ -441,7 +441,8 @@ public final class PhaseTracker {
             // Sponge start - prepare notification
             final PhaseData peek = this.stack.peek();
             final IPhaseState<?> state = peek.state;
-            state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+            ((IPhaseState) state).associateNeighborStateNotifier(peek.context,
+                sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
             iblockstate.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);

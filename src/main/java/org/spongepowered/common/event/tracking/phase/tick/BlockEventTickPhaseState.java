@@ -47,7 +47,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -73,7 +72,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+    public void associateNeighborStateNotifier(BlockEventTickContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (sourcePos == null) {
             LocatableBlock locatableBlock =  context.getSource(LocatableBlock.class).orElse(null);

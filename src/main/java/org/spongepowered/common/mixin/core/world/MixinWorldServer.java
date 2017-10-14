@@ -866,7 +866,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             .build();
 
         blockEvent.setTickBlock(locatable);
-        phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, this, pos, blockEvent);
+        phaseState.addNotifierToBlockEvent(context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -1060,7 +1060,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkBlockBounds(x, y, z);
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        boolean isWorldGen = peek.state.getPhase().isWorldGeneration(peek.state);
+        boolean isWorldGen = peek.state.isWorldGeneration();
         boolean handlesOwnCompletion = peek.state.handlesOwnStateCompletion();
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
@@ -1391,7 +1391,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.alreadyCapturingEntityTicks()) {
             entityIn.onUpdate();
             return;
         }
@@ -1409,7 +1409,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
 
-        if (state.getPhase().alreadyCapturingTileTicks(state)) {
+        if (state.alreadyCapturingTileTicks()) {
             tile.update();
             return;
         }
@@ -1421,7 +1421,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.alreadyCapturingEntityTicks()) {
             entity.onUpdate();
             return;
         }
@@ -1434,7 +1434,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.alreadyCapturingEntityTicks()) {
             entity.updateRidden();
             return;
         }
@@ -1502,7 +1502,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {
+        if (!state.alreadyCapturingEntitySpawns()) {
             try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
                 .addCaptures()
                 .buildAndSwitch()) {

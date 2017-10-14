@@ -43,6 +43,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
+    public void appendContextPreExplosion(ExplosionContext explosionContext, BlockTickContext context) {
         context.getOwner().ifPresent(explosionContext::owner);
         context.getNotifier().ifPresent(explosionContext::notifier);
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
