@@ -22,29 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.core.world;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import net.minecraft.world.WorldProviderSurface;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.nio.file.Path;
 
-public interface IMixinDimensionType {
+@Mixin(WorldProviderSurface.class)
+public abstract class MixinWorldProviderSurface extends MixinWorldProvider {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
-
-    Context getContext();
-
-    String getEnumName();
-
-    String getModId();
-
-    Path getConfigPath();
-
-    boolean shouldGenerateSpawnOnLoad();
-
-    boolean shouldLoadSpawn();
-
-    void setShouldLoadSpawn(boolean keepSpawnLoaded);
+    /**
+     * @author Zidane
+     * @reason Have overworld respect our configs for keeping spawn chunks loaded
+     */
+    @Override
+    public boolean canDropChunk(int x, int z) {
+        return super.canDropChunk(x, z);
+    }
 }

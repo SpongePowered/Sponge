@@ -69,6 +69,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.SpongeCommandFactory;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -77,6 +78,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.SpawnerSpawnType;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -372,12 +374,10 @@ public final class SpongeImplHooks {
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
-    public static boolean shouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, int dimensionId) {
-        if (dimensionId == 0 || dimensionId == 1) {
-            return true;
-        }
+    public static boolean shouldKeepSpawnLoaded(net.minecraft.world.DimensionType dimensionType, int dimensionId) {
+        final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
+        return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
 
-        return false;
     }
 
     public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {

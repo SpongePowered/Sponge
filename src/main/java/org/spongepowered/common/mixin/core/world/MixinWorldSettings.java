@@ -225,10 +225,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Override
     public boolean doesKeepSpawnLoaded() {
         if (this.keepSpawnLoaded == null) {
-            if (this.dimensionType == DimensionTypes.OVERWORLD) {
-                return true;
-            }
-            return false;
+            this.keepSpawnLoaded = this.dimensionType == DimensionTypes.OVERWORLD;
         }
         return this.keepSpawnLoaded;
     }

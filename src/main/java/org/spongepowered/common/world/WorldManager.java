@@ -461,12 +461,14 @@ public final class WorldManager {
 
     public static void queueWorldToUnload(WorldServer worldServer) {
         checkNotNull(worldServer);
+
         unloadQueue.add(worldServer);
     }
 
     // TODO Result
     public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig) {
         checkNotNull(worldServer);
+
         final MinecraftServer server = SpongeImpl.getServer();
 
         // Likely leaked, don't want to drop leaked world data
@@ -487,6 +489,7 @@ public final class WorldManager {
                 }
             }
         }
+
         try (PhaseContext<?> context = GeneralPhase.State.WORLD_UNLOAD.createPhaseContext()
             .source(worldServer)
             .buildAndSwitch()) {

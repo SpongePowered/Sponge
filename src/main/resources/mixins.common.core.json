@@ -467,6 +467,7 @@
         "world.MixinWorld_Data",
         "world.MixinWorldBorder",
         "world.MixinWorldProvider",
+        "world.MixinWorldProviderSurface",
         "world.MixinWorldProviderHell",
         "world.MixinWorldServer",
         "world.MixinWorldServerMulti",

@@ -617,7 +617,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        Boolean keepSpawnLoaded = null;
+        Boolean keepSpawnLoaded;
+        // World config isn't enabled
         if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
             DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
             if (dimConfig.isConfigEnabled()) {
@@ -628,9 +629,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         } else {
             keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
         }
+
         if (keepSpawnLoaded == null) {
-            return SpongeImplHooks.shouldLoadSpawn((net.minecraft.world.DimensionType)(Object) this.dimensionType, this.dimensionId);
+            keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldLoadSpawn();
         }
+
         return keepSpawnLoaded;
     }
 
@@ -640,7 +643,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
             this.getOrCreateWorldConfig().save();
         }
-        SpongeImplHooks.setShouldLoadSpawn((net.minecraft.world.DimensionType)(Object) this.dimensionType, loaded);
     }
 
     @Override
