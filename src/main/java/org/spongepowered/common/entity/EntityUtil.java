@@ -1004,7 +1004,7 @@ public final class EntityUtil {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, suggested);
             SpongeImpl.postEvent(event);
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+            item = event.isCancelled() || dropEvent.getDroppedItems().isEmpty() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
             if (item == null) {
                 return null;
             }
