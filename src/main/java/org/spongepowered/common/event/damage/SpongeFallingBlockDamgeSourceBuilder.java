@@ -82,6 +82,7 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
         if (this.explosion) {
             damageSource.setExplosion();
         }
+        damageSource.hungerDamage = (float) this.exhaustion;
         return (FallingBlockDamageSource) damageSource;
     }
 
