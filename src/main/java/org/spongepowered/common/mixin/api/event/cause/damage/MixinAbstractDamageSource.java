@@ -65,8 +65,7 @@ public abstract class MixinAbstractDamageSource implements DamageSource {
         if (doesAffectCreative()) {
             ((SpongeCommonDamageSource) (Object) this).canHarmInCreative();
         }
-        // Sets exhaustion after absolute, as to allow control over hunger
-        // damage even if the damage is absolute through #setDamageIsAbsolute()
+        // Sets exhaustion last as to allow control if the builder specified a custom exhaustion value
         ((SpongeCommonDamageSource) (Object) this).hungerDamage = (float) getExhaustion();
     }
 

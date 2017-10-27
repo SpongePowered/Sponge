@@ -45,6 +45,7 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
 
     @Override
     public EntityDamageSource build() throws IllegalStateException {
+        checkState(this.damageType != null, "Damage type cannot be null!");
         checkState(this.reference.get() != null);
         net.minecraft.util.EntityDamageSource damageSource =
             new net.minecraft.util.EntityDamageSource(this.damageType.getId(), (net.minecraft.entity.Entity) this.reference.get());
@@ -66,7 +67,9 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
         if (this.explosion) {
             damageSource.setExplosion();
         }
-        damageSource.hungerDamage = (float) this.exhaustion;
+        if (this.exhaustion != null) {
+            damageSource.hungerDamage = this.exhaustion.floatValue();
+        }
         return (EntityDamageSource) damageSource;
     }
 

@@ -74,7 +74,9 @@ public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<
         if (this.creative) {
             damageSource.setDamageAllowedInCreativeMode();
         }
-        damageSource.hungerDamage = (float) this.exhaustion;
+        if (this.exhaustion != null) {
+            damageSource.hungerDamage = this.exhaustion.floatValue();
+        }
         return (BlockDamageSource) damageSource;
     }
 
