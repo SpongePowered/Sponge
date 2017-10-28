@@ -25,10 +25,13 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.plugin.Plugin;
@@ -41,15 +44,29 @@ public class StopSoundTest {
     @Inject private PluginContainer pluginContainer;
 
     @Listener
+    public void onServerStart(GameStartedServerEvent event) {
+        // Block rain sounds
+        /*
+        Task.builder()
+                .intervalTicks(1)
+                .execute(() -> Sponge.getServer().getOnlinePlayers().forEach(player -> {
+                    player.stopSounds(SoundTypes.WEATHER_RAIN, SoundCategories.WEATHER);
+                    player.stopSounds(SoundTypes.WEATHER_RAIN_ABOVE, SoundCategories.WEATHER);
+                }))
+                .submit(this.pluginContainer);
+        */
+    }
+
+    @Listener
     public void onUseItem(InteractItemEvent event, @First Player player) {
         if (event.getItemStack().getType() != ItemTypes.END_ROD) {
             return;
         }
-        player.playSound(SoundTypes.ENTITY_ENDERMEN_DEATH, player.getLocation().getPosition(), 1.0);
+        player.playSound(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER, player.getLocation().getPosition(), 1.0);
         if (event instanceof InteractItemEvent.Secondary) {
             Task.builder()
-                    .delayTicks(2)
-                    .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMEN_DEATH))
+                    .delayTicks(5)
+                    .execute(() -> player.stopSounds(SoundTypes.ENTITY_ENDERMEN_DEATH, SoundCategories.MASTER))
                     .submit(this.pluginContainer);
         }
     }
