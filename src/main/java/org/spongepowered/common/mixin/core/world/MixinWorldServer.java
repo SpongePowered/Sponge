@@ -152,6 +152,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.*;
@@ -2119,6 +2120,31 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     // There's no method for playing a custom sound to all, so I made one -_-
                     listener.playCustomSoundToAllNearExcept(null, soundIn, category, x, y, z, volume, pitch);
                 });
+    }
+
+    @Override
+    public void stopSounds() {
+        stopSounds0(null, null);
+    }
+
+    @Override
+    public void stopSounds(SoundType sound) {
+        stopSounds0(checkNotNull(sound, "sound"), null);
+    }
+
+    @Override
+    public void stopSounds(SoundCategory category) {
+        stopSounds0(null, checkNotNull(category, "category"));
+    }
+
+    @Override
+    public void stopSounds(SoundType sound, SoundCategory category) {
+        stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+    }
+
+    private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
+        this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(
+                SoundEffectHelper.createStopSoundPacket(sound, category), getDimensionId());
     }
 
     @Override

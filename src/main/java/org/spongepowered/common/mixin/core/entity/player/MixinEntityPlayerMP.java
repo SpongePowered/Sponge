@@ -148,6 +148,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
@@ -683,6 +684,30 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         this.connection.sendPacket(new SPacketSoundEffect(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
                 position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
+    }
+
+    @Override
+    public void stopSounds() {
+        stopSounds0(null, null);
+    }
+
+    @Override
+    public void stopSounds(SoundType sound) {
+        stopSounds0(checkNotNull(sound, "sound"), null);
+    }
+
+    @Override
+    public void stopSounds(SoundCategory category) {
+        stopSounds0(null, checkNotNull(category, "category"));
+    }
+
+    @Override
+    public void stopSounds(SoundType sound, SoundCategory category) {
+        stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+    }
+
+    private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
+        this.connection.sendPacket(SoundEffectHelper.createStopSoundPacket(sound, category));
     }
 
     @Override
