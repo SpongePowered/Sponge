@@ -1,5 +1,5 @@
 /*
- * This file is part of SpongeAPI, licensed under the MIT License (MIT).
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -25,7 +25,6 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.sound.SoundCategories;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
