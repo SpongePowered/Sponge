@@ -46,6 +46,7 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
+import org.spongepowered.api.event.entity.ai.SetAttackTargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,6 +63,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -229,10 +231,18 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
     public void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
-        if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isVanished()
-            && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
-            this.attackTarget = null;
-            ci.cancel();
+        if (entitylivingbaseIn != null) {
+            if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
+                this.attackTarget = null;
+                ci.cancel();
+            } else {
+                SetAttackTargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
+                if (event.isCancelled()) {
+                    ci.cancel();
+                } else {
+                    this.attackTarget = ((EntityLivingBase) event.getTarget().orElse(null));
+                }
+            }
         }
     }
 
