@@ -73,6 +73,10 @@ public class JavaVersionCheckUtils {
         // Split the version up into parts
         String[] versionParts = version.split("\\.");
         double versionValue = 0;
+        // Workaround for Java 9+ version strings
+        if (versionParts.length > 0 && !versionParts[0].equals("1")) {
+            versionValue = Math.pow(10, versionParts.length * 3);
+        }
         for(int i = 0; i < versionParts.length; i++) {
             try {
                 int part = Integer.valueOf(versionParts[i]);
