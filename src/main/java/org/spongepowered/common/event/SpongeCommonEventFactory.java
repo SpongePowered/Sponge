@@ -62,6 +62,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -79,6 +80,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.ai.SetAttackTargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
@@ -1033,5 +1035,12 @@ public class SpongeCommonEventFactory {
         }
         // else inventory was missing the slot for some reason
         return transaction.get();
+    }
+
+    public static SetAttackTargetEvent callSetAttackTargetEvent(@Nullable Entity target, Agent agent) {
+        SetAttackTargetEvent
+                event = SpongeEventFactory.createSetAttackTargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
+        SpongeImpl.postEvent(event);
+        return event;
     }
 }
