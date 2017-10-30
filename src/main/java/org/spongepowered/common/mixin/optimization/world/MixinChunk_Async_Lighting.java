@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Mixin(value = Chunk.class, priority = 1002)
@@ -268,9 +269,17 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
             }
 
             if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                this.lightExecutorService.execute(() -> {
-                    this.checkLightAsync(neighborChunks);
-                });
+                try {
+                    this.lightExecutorService.execute(() -> {
+                        this.checkLightAsync(neighborChunks);
+                    });
+                } catch (RejectedExecutionException e) {
+                    // This could happen if ServerHangWatchdog kills the server
+                    // between the start of the method and the execute() call.
+                    if (!this.world.getMinecraftServer().isServerStopped() && !this.lightExecutorService.isShutdown()) {
+                        throw e;
+                    }
+                }
             } else {
                 this.checkLightAsync(neighborChunks);
             }
