@@ -67,13 +67,18 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     private void enforceMainThread() {
         // On clients, this may not be available immediately, we can't bomb out that early.
-        if (Sponge.isServerAvailable() && !Sponge.getServer().isMainThread()) {
+        if (Sponge.isServerAvailable() && !isPermittedThread()) {
             throw new IllegalStateException(String.format(
                     "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                     ThreadUtil.getDescription(Thread.currentThread()),
                     ThreadUtil.getDescription(SpongeImpl.getServer().getServerThread())
             ));
         }
+    }
+
+    private static boolean isPermittedThread() {
+        return Sponge.getServer().isMainThread()
+            || Thread.currentThread().getName().equals("Server Shutdown Thread");
     }
 
     @Override
