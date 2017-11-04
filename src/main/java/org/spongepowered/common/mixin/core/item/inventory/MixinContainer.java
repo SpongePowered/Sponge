@@ -166,9 +166,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public void detectAndSendChanges(boolean captureOnly) {
-        if (!this.initialized) {
-            this.init();
-        }
+        this.init();
 
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
