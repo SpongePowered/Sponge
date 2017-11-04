@@ -113,6 +113,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.adapters.clear();
         this.fabric = MinecraftFabric.of(this);
         this.slots = ContainerUtil.countSlots((Container) (Object) this);
+        this.lens = null;
         this.lens = this.spectatorChest ? null : ContainerUtil.getLens(this.fabric, (Container) (Object) this, this.slots); // TODO handle spectator
         this.archetype = ContainerUtil.getArchetype((Container) (Object) this);
         this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
