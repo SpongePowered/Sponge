@@ -183,7 +183,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     final ItemStackSnapshot newItem = itemstack.isEmpty() ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
-                    SlotAdapter adapter = this.getSlotAdapter(i);
+                    SlotAdapter adapter = null;
+                    try {
+                        adapter = this.getSlotAdapter(i);
+                    } catch (IndexOutOfBoundsException e) {
+                        SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
+                    }
 
                     this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
                     // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
