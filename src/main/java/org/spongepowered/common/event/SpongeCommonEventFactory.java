@@ -790,7 +790,7 @@ public class SpongeCommonEventFactory {
                 ItemStackSnapshot clickedItem = slot.getStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
                 SlotTransaction slotTransaction =
-                        new SlotTransaction(new SlotAdapter(slot), clickedItem, ItemStackSnapshot.NONE);
+                        new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }

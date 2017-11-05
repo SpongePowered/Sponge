@@ -30,6 +30,6 @@ import java.util.Set;
 
 public interface MutableLensSet<TInventory, TStack> extends Set<Lens<TInventory, TStack>>, DynamicLensCollection<TInventory, TStack> {
     
-    public abstract void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
+    void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
 
 }

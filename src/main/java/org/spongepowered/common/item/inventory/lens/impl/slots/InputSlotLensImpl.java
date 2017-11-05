@@ -25,18 +25,25 @@
 package org.spongepowered.common.item.inventory.lens.impl.slots;
 
 import net.minecraft.inventory.IInventory;
+import org.apache.commons.lang3.ObjectUtils;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import java.util.function.Predicate;
 
 
 public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlotLens<IInventory, net.minecraft.item.ItemStack> {
+
+    public InputSlotLensImpl(int index) {
+        this(index, (s) -> true, (s) -> true);
+    }
 
     public InputSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
         this(index, InputSlotAdapter.class, stackFilter, typeFilter);
@@ -47,8 +54,8 @@ public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlo
     }
     
     @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new InputSlotAdapter(inv, this, parent);
+    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
+        return ObjectUtils.firstNonNull(MinecraftFabric.getAdapter(fabric, parent, this.base, this.adapterType), new InputSlotAdapter(fabric, this, parent));
     }
 
 }

@@ -68,7 +68,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
@@ -107,7 +107,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this.villagerInventory);
+        this.fabric = new IInventoryFabric(this.villagerInventory);
         this.slots = new SlotCollection.Builder().add(8).build();
         this.lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);
     }
@@ -120,7 +120,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getInventory() {
+    public Fabric<IInventory> inventory$getFabric() {
         return this.fabric;
     }
 

@@ -44,6 +44,7 @@ import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.custom.CustomLens;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
@@ -54,13 +55,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 @Mixin(CustomInventory.class)
-public abstract class MixinCustomInventory implements MinecraftInventoryAdapter, Inventory, CarriedInventory<Carrier> {
+public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<IInventory>, Inventory, CarriedInventory<Carrier> {
 
     @Shadow(remap = false) protected InventoryArchetype archetype;
     @Shadow(remap = false) private InventoryBasic inv;
     @Shadow(remap = false) private Carrier carrier;
 
-    private Fabric<IInventory> inventory;
     private SlotCollection slots;
     private CustomLens lens;
     private PluginContainer plugin;
@@ -68,7 +68,6 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier, Map<Class<? extends
             InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin, CallbackInfo ci) {
-        this.inventory = MinecraftFabric.of(this);
         this.slots = new SlotCollection.Builder().add(this.inv.getSizeInventory()).build();
         this.lens = new CustomLens(this, this.slots, archetype, properties);
         this.plugin = plugin;
@@ -77,11 +76,6 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     @Override
     public Lens<IInventory, ItemStack> getRootLens() {
         return this.lens;
-    }
-
-    @Override
-    public Fabric<IInventory> getInventory() {
-        return this.inventory;
     }
 
     @Override
@@ -106,5 +100,10 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     @Override
     public PluginContainer getPlugin() {
         return this.plugin;
+    }
+
+    @Override
+    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+        return this.slots;
     }
 }

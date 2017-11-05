@@ -47,7 +47,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -57,9 +56,9 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
@@ -82,7 +81,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         throw new AbstractMethodError("Shadow");
     }
 
-    @Shadow protected static boolean isInventoryEmpty(IInventory inventoryIn, EnumFacing side) {
+    @Shadow private static boolean isInventoryEmpty(IInventory inventoryIn, EnumFacing side) {
         throw new AbstractMethodError("Shadow");
     }
 
@@ -95,15 +94,21 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         return this.capturedTransactions;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
-        ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,
-                ((InventoryAdapter) this),
-                s -> new GridInventoryLensImpl(0, 5, 1, 5, s),
-                () -> new SlotCollection.Builder().add(5).build());
-        this.slots = reusableLens.getSlots();
-        this.lens = reusableLens.getLens();
+    @SuppressWarnings("unchecked")
+    @Override
+    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+        return new SlotCollection.Builder().add(5).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+        Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
+        return new GridInventoryLensImpl(0, 5, 1, 5, thisClass, slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))

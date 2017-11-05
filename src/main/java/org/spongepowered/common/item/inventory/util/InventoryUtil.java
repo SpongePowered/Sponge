@@ -27,53 +27,36 @@ package org.spongepowered.common.item.inventory.util;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityLockableLoot;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinInventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class InventoryUtil {
 
     private InventoryUtil() {}
 
     public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
-        DefaultInventoryFabric fabric = new DefaultInventoryFabric(inv);
+        IInventoryFabric fabric = new IInventoryFabric(inv);
         CraftingGridInventoryLens lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
 
         return new CraftingGridInventoryAdapter(fabric, lens);
     }
 
     public static InventoryCrafting toNativeInventory(CraftingGridInventory inv) {
-        Fabric<IInventory> fabric = ((CraftingInventoryAdapter) inv).getInventory();
+        Fabric<IInventory> fabric = ((CraftingInventoryAdapter) inv).getFabric();
         Iterator<IInventory> inventories = fabric.allInventories().iterator();
         InventoryCrafting inventoryCrafting = (InventoryCrafting) inventories.next();
 

@@ -28,11 +28,14 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,21 +58,19 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         int base = CRAFTING_OUTPUT; // 1
-        final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, CRAFTING_GRID, slots);
+        final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
         // TODO pass player for carrier to EquipmentInventory
         final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots);
         base += EQUIPMENT; // 4
-        final GridInventoryLensImpl main = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
-        base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH; // 27
-        final HotbarLensImpl hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
-        base += HOTBAR * INVENTORY_WIDTH; // 9
-        final OrderedInventoryLensImpl offHand = new OrderedInventoryLensImpl(base, OFFHAND, 1, slots);
+        final MainPlayerInventoryLensImpl main = new MainPlayerInventoryLensImpl(base, slots);
+        base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH + HOTBAR * INVENTORY_WIDTH; // 9
+        final SlotLens<IInventory, ItemStack> offHand = slots.getSlot(base);
         base += OFFHAND;
 
-        this.viewedInventories = new ArrayList<>(Arrays.asList(hotbar, main, armor, crafting, offHand));
+        this.viewedInventories = new ArrayList<>(Arrays.asList(crafting, armor, offHand, main));
 
-        int additionalSlots = this.size - base;
+        int additionalSlots = this.size - base - 1;
         if (additionalSlots > 0) {
             viewedInventories.add(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
         }

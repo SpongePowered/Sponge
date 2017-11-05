@@ -22,12 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.inventory;
+package org.spongepowered.common.item.inventory.lens;
 
-import org.spongepowered.common.interfaces.inventory.trait.IInventoryObservable;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 
-public interface IMixinSlot extends IInventoryObservable {
+/**
+ * @param <TInventory>
+ * @param <TStack>
+ */
+public interface ReusableLensProvider<TInventory, TStack> {
+
+    ReusableLens<?> generateLens(Fabric<TInventory> fabric, InventoryAdapter<TInventory, TStack> adapter);
     
-    int getSlotIndex();
-
 }

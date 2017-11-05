@@ -42,9 +42,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
@@ -68,15 +68,21 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Shadow public abstract void checkForAdjacentChests();
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
-        ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,
-                ((InventoryAdapter) this),
-                s -> new GridInventoryLensImpl(0, 9, 3, 9, s),
-                () -> new SlotCollection.Builder().add(27).build());
-        this.slots = reusableLens.getSlots();
-        this.lens = reusableLens.getLens();
+    @SuppressWarnings("unchecked")
+    @Override
+    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+        return new SlotCollection.Builder().add(27).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+        Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
+        return new GridInventoryLensImpl(0, 9, 3, 9, thisClass, slots);
     }
 
     /**

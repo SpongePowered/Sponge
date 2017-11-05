@@ -22,40 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.lens.impl;
 
-import com.google.common.collect.ImmutableSet;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.api.item.inventory.type.OrderedInventory;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 
-public class IntersectStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Inventory> {
+/**
+ * Lenses for inventory concepts like {@link OrderedInventory} or {@link GridInventory}.
+ *
+ * <p>This lenses will usually return a new matching adapter (usually extending {@link AbstractInventoryAdapter})</p>
+ */
+@SuppressWarnings("rawtypes")
+public abstract class ConceptualLens extends AbstractLens<IInventory, ItemStack> {
 
-    private ImmutableSet<Inventory> inventories;
-
-    @Override
-    public QueryStrategy<TInventory, TStack, Inventory> with(ImmutableSet<Inventory> inventories) {
-        this.inventories = inventories;
-        return this;
+    public ConceptualLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, size, adapterType, slots);
     }
 
-    @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.inventories.isEmpty()) {
-            return false; // Intersect with nothing
-        }
-
-        for (Inventory intersectWith : this.inventories) {
-            for (Inventory slot : intersectWith.slots()) {
-                if (((AbstractInventoryAdapter) slot).getRootLens().equals(lens)) {
-                    return true;
-                }
-            }
-
-        }
-
-        return false;
+    public ConceptualLens(int base, int size, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, size, adapter, slots);
     }
+
 }

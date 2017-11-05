@@ -22,40 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.inventory;
+package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 
-@Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
-@Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
-public abstract class MixinInventoryBasic implements IInventory, LensProvider<IInventory, ItemStack> {
+import java.util.ArrayList;
+import java.util.List;
+
+@Mixin(ContainerWorkbench.class)
+public abstract class MixinContainerWorkbench extends MixinContainer implements LensProvider<IInventory, ItemStack> {
 
     @Override
     public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        if (this.getSizeInventory() == 0) {
-            return new DefaultEmptyLens<>(adapter);
-        }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.getSlotProvider());
+        List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
+        lenses.add(new CraftingInventoryLensImpl(0, 1, 3, 3, inventory$getSlotProvider()));
+        lenses.add(new MainPlayerInventoryLensImpl(3 * 3 + 1, inventory$getSlotProvider()));
+        return new ContainerLens(adapter, inventory$getSlotProvider(), lenses);
     }
 
     @Override
     public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+        SlotCollection.Builder builder = new SlotCollection.Builder()
+                .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
+                .add(9)
+                .add(36);
+        return builder.build();
     }
-
 }

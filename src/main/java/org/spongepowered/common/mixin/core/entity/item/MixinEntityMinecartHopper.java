@@ -41,7 +41,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
 @Mixin(EntityMinecartHopper.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"), @Interface(iface = HopperMinecart.class, prefix =
@@ -54,7 +54,7 @@ public abstract class MixinEntityMinecartHopper extends MixinEntityMinecartConta
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
+        this.fabric = new IInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(5).build();
         this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
     }
@@ -72,7 +72,7 @@ public abstract class MixinEntityMinecartHopper extends MixinEntityMinecartConta
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getInventory() {
+    public Fabric<IInventory> inventory$getFabric() {
         return this.fabric;
     }
 }

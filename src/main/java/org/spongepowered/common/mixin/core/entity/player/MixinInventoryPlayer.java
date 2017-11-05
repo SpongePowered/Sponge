@@ -52,7 +52,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
@@ -60,10 +59,10 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -95,7 +94,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
-    protected MinecraftLens lens;
+    protected Lens<IInventory, ItemStack> lens;
 
     private Player carrier;
     private HotbarAdapter hotbar;
@@ -119,7 +118,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         if (playerIn instanceof EntityPlayerMP) {
             this.carrier = (Player) playerIn;
 
-            this.inventory = new DefaultInventoryFabric((IInventory) this);
+            this.inventory = new IInventoryFabric((IInventory) this);
             Class clazz = this.getClass();
             if (clazz == InventoryPlayer.class) { // Build Player Lens
                 // We only care about Server inventories
@@ -156,7 +155,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     }
 
     @Override
-    public Fabric<IInventory> getInventory() {
+    public Fabric<IInventory> getFabric() {
         return this.inventory;
     }
 

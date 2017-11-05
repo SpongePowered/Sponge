@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -46,7 +47,7 @@ public interface IMixinContainer extends IMixinInventory {
     
     void setSpectatorChest(boolean spectatorChest);
 
-    SlotAdapter getSlotAdapter(int slot);
+    Slot getContainerSlot(int slot);
 
     void setPlugin(PluginContainer plugin);
 }
