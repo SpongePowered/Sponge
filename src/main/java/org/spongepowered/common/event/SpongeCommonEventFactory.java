@@ -996,11 +996,14 @@ public class SpongeCommonEventFactory {
      * @param originalStack the original Stack
      */
     public static void captureTransaction(IMixinInventory captureIn, Inventory inv, int index, ItemStack originalStack) {
-        org.spongepowered.api.item.inventory.Slot slot = ((OrderedInventory) inv.query(OrderedInventory.class)).getSlot(SlotIndex.of(index)).get();
-        SlotTransaction trans = new SlotTransaction(slot,
-                ItemStackUtil.snapshotOf(originalStack),
-                ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-        captureIn.getCapturedTransactions().add(trans);
+        Inventory slot = inv.query(OrderedInventory.class).query(SlotIndex.of(index));
+        if (slot instanceof org.spongepowered.api.item.inventory.Slot) {
+
+            SlotTransaction trans = new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot),
+                    ItemStackUtil.snapshotOf(originalStack),
+                    ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
+            captureIn.getCapturedTransactions().add(trans);
+        }
     }
 
     /**
