@@ -32,7 +32,7 @@ import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 
-public class CraftingInventoryAdapter extends GridInventoryAdapter implements CraftingInventory {
+public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements CraftingInventory {
 
     protected final CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> craftingLens;
     

@@ -36,14 +36,15 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
+import org.spongepowered.common.item.inventory.lens.impl.ConceptualLens;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedInventoryLens<IInventory, ItemStack> {
+public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedInventoryLens<IInventory, ItemStack> {
 
     protected final int stride;
     
@@ -116,10 +117,4 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         return new OrderedInventoryAdapter(inv, this, parent);
     }
-
-    @Override
-    protected boolean isDelayedInit() {
-        return true;
-    }
-
 }

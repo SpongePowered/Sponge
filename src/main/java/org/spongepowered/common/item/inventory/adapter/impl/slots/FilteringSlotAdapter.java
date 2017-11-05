@@ -36,7 +36,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.function.Predicate;
 
-public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
+public class FilteringSlotAdapter extends SlotAdapter<IInventory> implements FilteringSlot {
     
     protected final FilteringSlotLens<IInventory, net.minecraft.item.ItemStack> filteringSlot;
 

@@ -35,7 +35,6 @@ import it.unimi.dsi.fastutil.ints.IntSets;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.adapter.InvalidAdapterException;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.InvalidLensDefinitionException;
@@ -48,7 +47,6 @@ import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs.Type;
 import org.spongepowered.common.util.observer.Observer;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,8 +56,6 @@ import java.util.NoSuchElementException;
 
 public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TInventory, TStack> implements Observer<InventoryEventArgs> {
 
-    protected final InventoryAdapter<TInventory, TStack> adapter;
-    
     protected final Class<? extends Inventory> adapterType;
     
     protected final int base;
@@ -77,26 +73,19 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     private int maxOrdinal = 0;
     
     public AbstractLens(int base, int size, InventoryAdapter<TInventory, TStack> adapter, SlotProvider<TInventory, TStack> slots) {
-        this(base, size, checkNotNull(adapter, "adapter"), adapter.getClass(), slots);
-    }
-    
-    public AbstractLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<TInventory, TStack> slots) {
-        this(base, size, null, checkNotNull(adapterType, "adapterType"), slots);
+        this(base, size, adapter.getClass(), slots);
     }
 
-    public AbstractLens(int base, int size, InventoryAdapter<TInventory, TStack> adapter, Class<? extends Inventory> adapterType, SlotProvider<TInventory, TStack> slots) {
+    public AbstractLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<TInventory, TStack> slots) {
         checkArgument(base >= 0, "Invalid offset: %s", base);
         checkArgument(size > 0, "Invalid size: %s", size);
-        
+        checkNotNull(adapterType, "adapterType");
+
         this.base = base;
         this.size = size;
         this.adapterType = adapterType;
-        this.adapter = adapter;
-        
+
         this.prepare();
-        if (!this.isDelayedInit()) {
-            this.init(adapter, slots);
-        }
     }
 
     protected void prepare() {
@@ -119,10 +108,6 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         } catch (NoSuchElementException ex) {
             throw new InvalidLensDefinitionException("Invalid lens definition, the lens referenced slots which do not exist.", ex);
         }
-    }
-
-    protected boolean isDelayedInit() {
-        return false;
     }
 
     /**
@@ -184,31 +169,6 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         return this.adapterType;
     }
     
-    @SuppressWarnings("unchecked")
-    @Override
-    public InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
-        if (this.adapter != null) {
-            return this.adapter;
-        }
-        
-        if (inv instanceof InventoryAdapter) {
-            return (InventoryAdapter<TInventory, TStack>) inv;
-        }
-
-        return this.createAdapter(inv, parent);
-    }
-
-    protected InventoryAdapter<TInventory, TStack> createAdapter(Fabric<TInventory> inv, Inventory parent) {
-        try {
-            Constructor<InventoryAdapter<TInventory, TStack>> ctor = this.getAdapterCtor();
-            return ctor.newInstance(inv, this, parent);
-        } catch (Exception ex) {
-            throw new InvalidAdapterException("Adapter class for " + this.getClass().getSimpleName() + " does not have a constructor which accepts this lens", ex);
-        }
-    }
-
-    protected abstract Constructor<InventoryAdapter<TInventory, TStack>> getAdapterCtor() throws NoSuchMethodException;
-
     @Override
     public TStack getStack(Fabric<TInventory> inv, int ordinal) {
         LensHandle<TInventory, TStack> lens = this.getLensForOrdinal(ordinal);
@@ -310,6 +270,11 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
         LensHandle<TInventory, TStack> child = this.getLensForOrdinal(ordinal);
         return child.lens.getRealIndex(inv, ordinal - child.ordinal);
+    }
+
+    @Override
+    public int getMaxStackSize(Fabric<TInventory> inv) {
+        return inv.getMaxStackSize();
     }
 
     protected boolean checkOrdinal(int ordinal) {

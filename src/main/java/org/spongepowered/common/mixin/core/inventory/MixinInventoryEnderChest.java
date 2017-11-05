@@ -37,7 +37,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 public abstract class MixinInventoryEnderChest extends MixinInventoryBasic {
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        return new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return new GridInventoryLensImpl(0, 9, 3, 9, adapter.getSlotProvider());
     }
 }

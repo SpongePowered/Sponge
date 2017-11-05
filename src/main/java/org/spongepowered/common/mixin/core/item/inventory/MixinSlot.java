@@ -47,7 +47,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 @Mixin(Slot.class)
-public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter {
+public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter<IInventory> {
 
     @Shadow @Final public int slotIndex;
     @Shadow @Final public IInventory inventory;
@@ -56,7 +56,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
-    private InventoryAdapter<IInventory, ItemStack> adapter;
+    private InventoryAdapter<IInventory, ItemStack> parentAdapter;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
@@ -75,11 +75,11 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         if (this.inventory instanceof Inventory) {
             return ((Inventory) this.inventory);
         }
-        if (this.adapter == null) {
+        if (this.parentAdapter == null) {
             OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.fabric.getSize(), 1, new SlotCollection.Builder().add(this.fabric.getSize()).build());
-            this.adapter = new OrderedInventoryAdapter(this.fabric, lens);
+            this.parentAdapter = new OrderedInventoryAdapter(this.fabric, lens);
         }
-        return this.adapter;
+        return this.parentAdapter;
     }
 
     @Override
@@ -103,7 +103,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     }
 
     @Override
-    public Fabric<IInventory> getInventory() {
+    public Fabric<IInventory> getFabric() {
         return this.fabric;
     }
 }

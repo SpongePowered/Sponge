@@ -38,8 +38,8 @@ import java.util.List;
  */
 public interface MutableLensCollection<TInventory, TStack> extends List<Lens<TInventory, TStack>>, DynamicLensCollection<TInventory, TStack> {
     
-    public abstract void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
+    void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
 
-    public abstract void add(int index, Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
+    void add(int index, Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
 
 }

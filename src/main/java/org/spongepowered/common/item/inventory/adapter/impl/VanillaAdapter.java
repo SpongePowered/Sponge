@@ -22,40 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.adapter.impl;
 
-import com.google.common.collect.ImmutableSet;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
-public class IntersectStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Inventory> {
+import javax.annotation.Nullable;
 
-    private ImmutableSet<Inventory> inventories;
+/**
+ * Base Adapter based on the vanilla {@link IInventory}
+ */
+public class VanillaAdapter extends AbstractInventoryAdapter<IInventory> {
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Inventory> with(ImmutableSet<Inventory> inventories) {
-        this.inventories = inventories;
-        return this;
+    /**
+     * Used to calculate {@link #getPlugin()}.
+     */
+    private final Container rootContainer;
+
+    public VanillaAdapter(Fabric<IInventory> inventory, net.minecraft.inventory.Container container) {
+        super(inventory);
+        this.rootContainer = (Container) container;
+    }
+
+    public VanillaAdapter(Fabric<IInventory> inventory, @Nullable Lens<IInventory, ItemStack> root, @Nullable Inventory parent) {
+        super(inventory, root, parent);
+        this.rootContainer = null;
     }
 
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.inventories.isEmpty()) {
-            return false; // Intersect with nothing
+    public PluginContainer getPlugin() {
+        PluginContainer plugin = super.getPlugin();
+        if (plugin != null) {
+            return plugin;
         }
-
-        for (Inventory intersectWith : this.inventories) {
-            for (Inventory slot : intersectWith.slots()) {
-                if (((AbstractInventoryAdapter) slot).getRootLens().equals(lens)) {
-                    return true;
-                }
-            }
-
+        if (this.rootContainer == null) {
+            return null;
         }
-
-        return false;
+        return this.rootContainer.getPlugin();
     }
 }

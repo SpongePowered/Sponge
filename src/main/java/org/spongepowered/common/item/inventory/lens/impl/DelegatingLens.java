@@ -22,23 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.item.inventory.lens.impl;
 
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.LensProvider;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerChestInventoryLens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
-@Mixin(ContainerChest.class)
-public abstract class MixinContainerChest extends MixinContainer implements LensProvider<IInventory, ItemStack> {
+/**
+ * A delegating Lens used in Containers. Provides ordered inventory access.
+ */
+@SuppressWarnings("rawtypes")
+public class DelegatingLens extends AbstractLens<IInventory, ItemStack> {
+
+    private Lens<IInventory, ItemStack> delegate;
+
+    public DelegatingLens(int base, Lens<IInventory, ItemStack> lens, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, lens.slotCount(), VanillaAdapter.class, slots);
+        this.delegate = lens;
+        this.init(slots);
+    }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        return new ContainerChestInventoryLens(adapter, inventory$getSlotProvider(), ((ContainerChest) (Object)this).numRows);
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        this.addSpanningChild(new OrderedInventoryLensImpl(this.base, this.size, 1, slots));
+        this.addChild(delegate);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+        return new VanillaAdapter(inv, this, parent);
     }
 }

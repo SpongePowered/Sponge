@@ -24,74 +24,67 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.fabric;
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Collection;
-import java.util.Collections;
 
-public class DelegatingFabric extends MinecraftFabric {
+public class IInventoryFabric extends MinecraftFabric {
 
-    private final Slot slot;
+    private final IInventory inventory;
 
-    public DelegatingFabric(Slot inventory) {
-        this.slot = inventory;
+    public IInventoryFabric(IInventory inventory) {
+        this.inventory = inventory;
     }
 
     @Override
     public Collection<IInventory> allInventories() {
-        return Collections.emptyList();
+        return ImmutableSet.of(this.inventory);
     }
 
     @Override
     public IInventory get(int index) {
-        if (this.slot.inventory != null) {
-            return this.slot.inventory;
-        }
-
-        throw new UnsupportedOperationException("Unable to access slot at " + index + " for delegating fabric of " + this.slot.getClass());
+        return this.inventory;
     }
 
     @Override
     public ItemStack getStack(int index) {
-        return this.slot.getStack();
+        return this.inventory.getStackInSlot(index);
     }
 
     @Override
     public void setStack(int index, ItemStack stack) {
-        this.slot.putStack(stack);
+        this.inventory.setInventorySlotContents(index, stack);
     }
 
     @Override
     public int getMaxStackSize() {
-        return this.slot.getSlotStackLimit();
+        return this.inventory.getInventoryStackLimit();
     }
 
     @Override
     public Translation getDisplayName() {
-        return SlotLensImpl.SLOT_NAME;
+        return new FixedTranslation(this.inventory.getDisplayName().getUnformattedText());
     }
 
     @Override
     public int getSize() {
-        return this.slot.getStack().getCount();
+        return this.inventory.getSizeInventory();
     }
 
     @Override
     public void clear() {
-        this.slot.putStack(ItemStack.EMPTY);
+        this.inventory.clear();
     }
 
     @Override
     public void markDirty() {
-        this.slot.onSlotChanged();
+        this.inventory.markDirty();
     }
 
-    public Slot getDelegate() {
-        return this.slot;
-    }
 }

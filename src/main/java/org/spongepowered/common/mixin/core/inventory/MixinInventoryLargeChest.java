@@ -28,61 +28,60 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.ILockableContainer;
+import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.LargeChestInventoryLens;
 
+import java.util.Optional;
+
 @Mixin(InventoryLargeChest.class)
-public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdapter {
+public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdapter<IInventory>, CarriedInventory<TileEntityCarrier>, ReusableLensProvider<IInventory, ItemStack> {
 
     @Shadow @Final private ILockableContainer upperChest;
     @Shadow @Final private ILockableContainer lowerChest;
 
-    protected SlotCollection slots;
-    protected Fabric<IInventory> inventory;
-    protected LargeChestInventoryLens lens;
-
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
-    private void onConstructed(CallbackInfo ci) {
-        this.inventory = new DefaultInventoryFabric((IInventory) this);
-        ReusableLens<LargeChestInventoryLens> reuseLens = MinecraftLens.getLens(LargeChestInventoryLens.class,
-                this,
-                s -> new LargeChestInventoryLens(this, s),
-                () -> new SlotCollection.Builder().add(this.inventory.getSize()).build());
-        this.slots = reuseLens.getSlots();
-        this.lens = reuseLens.getLens();
+    @Override
+    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return ReusableLens.getLens(LargeChestInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
-    @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
-        return this.slots;
+    @SuppressWarnings("unchecked")
+    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+        return new SlotCollection.Builder().add(this.getFabric().getSize()).build();
     }
 
-    @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
-        return this.lens;
-    }
-
-    @Override
-    public Fabric<IInventory> getInventory() {
-        return this.inventory;
+    @SuppressWarnings("unchecked")
+    private LargeChestInventoryLens generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+        return new LargeChestInventoryLens(this, slots);
     }
 
     @Override
     public Inventory getChild(Lens<IInventory, ItemStack> lens) {
         return null;
+    }
+
+    @Override
+    public Optional<TileEntityCarrier> getCarrier() {
+        return Optional.of(((TileEntityCarrier) upperChest));
     }
 }

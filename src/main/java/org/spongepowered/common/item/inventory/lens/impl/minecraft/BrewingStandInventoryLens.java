@@ -31,22 +31,25 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.slot.OutputSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FuelSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 
-public class BrewingStandInventoryLens extends OrderedInventoryLensImpl {
+public class BrewingStandInventoryLens extends RealLens {
 
     private OrderedInventoryLensImpl potions;
     private InputSlotLensImpl ingredient;
     private InputSlotLensImpl fuel;
 
     public BrewingStandInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
+        super(0, adapter.getFabric().getSize(), adapter.getClass(), slots);
+        this.init(slots);
     }
 
     public BrewingStandInventoryLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(base, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
+        super(base, adapter.getFabric().getSize(), adapter.getClass(), slots);
+        this.init(slots);
     }
 
     @Override

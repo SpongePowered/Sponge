@@ -35,7 +35,7 @@ import java.util.Collection;
 
 public interface QueryResult<TInventory, TStack> extends Result<TInventory, TStack> {
     
-    public abstract class QueryLens<TInventory, TStack> extends AbstractLens<TInventory, TStack> {
+    abstract class QueryLens<TInventory, TStack> extends AbstractLens<TInventory, TStack> {
         
         private final MutableLensSet<TInventory, TStack> resultSet;
 
@@ -43,11 +43,6 @@ public interface QueryResult<TInventory, TStack> extends Result<TInventory, TSta
             super(0, size, QueryResult.class, null);
             this.resultSet = resultSet;
             this.init(null);
-        }
-        
-        @Override
-        protected boolean isDelayedInit() {
-            return true;
         }
 
         @Override

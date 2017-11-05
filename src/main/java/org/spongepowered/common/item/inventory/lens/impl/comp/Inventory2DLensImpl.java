@@ -71,18 +71,12 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
         this.xBase = xBase;
         this.yBase = yBase;
 
-        this.init(null, slots);
-    }
-
-    @Override
-    protected boolean isDelayedInit() {
-        return true;
+        this.init(slots, true);
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-
-        this.init(slots, true);
+        //this.init(slots, true);
     }
 
     /**
