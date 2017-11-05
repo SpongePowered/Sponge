@@ -133,7 +133,6 @@
         "command.MixinMinecartCommandBlockSender",
         "command.MixinSignCommandSender",
         "command.MixinSubject",
-        "command.MixinEntitySelector",
         "command.MixinEntitySelectorScore",
         "command.server.MixinCommandBanIp",
         "command.server.MixinCommandPardonIp",
