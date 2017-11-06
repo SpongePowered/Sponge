@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockDropper;
 import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,6 +38,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -57,6 +60,25 @@ public abstract class MixinBlockDropper {
             IMixinInventory capture = forCapture(tileentitydispenser);
             Inventory sourceInv = toInventory(tileentitydispenser);
             SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+            SpongeCommonEventFactory.callTransferPost(capture, sourceInv, toInventory(iinventory));
+        }
+        callbackInfo.cancel();
+    }
+
+    @Surrogate
+    private void afterDispense(World worldIn, BlockPos pos, CallbackInfo callbackInfo,
+            BlockSourceImpl blocksourceimpl, TileEntityDispenser tileentitydispenser, int i, ItemStack itemstack,
+            ItemStack itemstack1) {
+        // after setInventorySlotContents
+        tileentitydispenser.setInventorySlotContents(i, itemstack1);
+        // Transfer worked if remainder is one less than the original stack
+        if (itemstack1.getCount() == itemstack.getCount() - 1) {
+            IMixinInventory capture = forCapture(tileentitydispenser);
+            Inventory sourceInv = toInventory(tileentitydispenser);
+            SpongeCommonEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+            EnumFacing enumfacing = (EnumFacing)worldIn.getBlockState(pos).getValue(BlockDispenser.FACING);
+            BlockPos blockpos = pos.offset(enumfacing);
+            IInventory iinventory = TileEntityHopper.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
             SpongeCommonEventFactory.callTransferPost(capture, sourceInv, toInventory(iinventory));
         }
         callbackInfo.cancel();
