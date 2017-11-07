@@ -996,13 +996,15 @@ public class SpongeCommonEventFactory {
      * @param originalStack the original Stack
      */
     public static void captureTransaction(IMixinInventory captureIn, Inventory inv, int index, ItemStack originalStack) {
-        Inventory slot = inv.query(OrderedInventory.class).query(SlotIndex.of(index));
-        if (slot instanceof org.spongepowered.api.item.inventory.Slot) {
-
-            SlotTransaction trans = new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot),
-                    ItemStackUtil.snapshotOf(originalStack),
-                    ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-            captureIn.getCapturedTransactions().add(trans);
+        Inventory ordered = inv.query(OrderedInventory.class);
+        if (ordered instanceof OrderedInventory) {
+            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
+            if (slot.isPresent()) {
+                SlotTransaction trans = new SlotTransaction(slot.get(),
+                        ItemStackUtil.snapshotOf(originalStack),
+                        ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
+                captureIn.getCapturedTransactions().add(trans);
+            }
         }
     }
 
@@ -1016,13 +1018,18 @@ public class SpongeCommonEventFactory {
      * @return the result if the transaction
      */
     public static ItemStack captureTransaction(IMixinInventory captureIn, Inventory inv, int index, Supplier<ItemStack> transaction) {
-        Inventory slot = inv.query(OrderedInventory.class).query(SlotIndex.of(index));
-        if (slot instanceof org.spongepowered.api.item.inventory.Slot) {
-            ItemStackSnapshot original = slot.peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-            ItemStack remaining = transaction.get();
-            ItemStackSnapshot replacement = slot.peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-            captureIn.getCapturedTransactions().add(new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), original, replacement));
-            return remaining;
+        Inventory ordered = inv.query(OrderedInventory.class);
+        if (ordered instanceof OrderedInventory) {
+            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
+            if (slot.isPresent()) {
+                ItemStackSnapshot original = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
+                ItemStack remaining = transaction.get();
+                if (remaining.isEmpty()) {
+                    ItemStackSnapshot replacement = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
+                    captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
+                }
+                return remaining;
+            }
         }
         // else inventory was missing the slot for some reason
         return transaction.get();
