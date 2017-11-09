@@ -276,7 +276,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                 } catch (RejectedExecutionException e) {
                     // This could happen if ServerHangWatchdog kills the server
                     // between the start of the method and the execute() call.
-                    if (!this.world.getMinecraftServer().isServerStopped() && !this.lightExecutorService.isShutdown()) {
+                    if (!this.worldObj.getMinecraftServer().isServerStopped() && !this.lightExecutorService.isShutdown()) {
                         throw e;
                     }
                 }
