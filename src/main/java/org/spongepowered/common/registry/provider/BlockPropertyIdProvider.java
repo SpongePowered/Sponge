@@ -273,6 +273,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockTrapDoor.HALF, "minecraft:trap_door_half");
         register(BlockRedstoneRepeater.DELAY, "minecraft:redstone_repeater_delay");
         register(BlockRedstoneRepeater.LOCKED, "minecraft:redstone_repeater_locked");
+        register(BlockConcretePowder.COLOR, "minecraft:concrete_powder_color");
     }
 
     private static final class Holder {
