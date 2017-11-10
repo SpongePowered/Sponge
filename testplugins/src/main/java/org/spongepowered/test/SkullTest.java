@@ -84,19 +84,19 @@ public class SkullTest {
     }
 
     private static ItemStack.Builder playerHead(CommandContext commandContext, ItemStack.Builder builder) {
-        return builder.keyValue(
+        return builder.add(
                 Keys.REPRESENTED_PLAYER, commandContext.<Player>getOne(PLAYER).get().getProfile()
         );
     }
 
     private static ItemStack.Builder blazeHead(CommandContext commandContext, ItemStack.Builder builder) {
-        return builder.keyValue(
+        return builder.add(
                 Keys.REPRESENTED_PLAYER, GameProfile.of(UUID.fromString("4c38ed11-596a-4fd4-ab1d-26f386c1cbac"), "MHF_Blaze")
         );
     }
 
     private static ItemStack.Builder mobHead(CommandContext ctx, ItemStack.Builder builder) {
-        return builder.keyValue(Keys.SKULL_TYPE, ctx.<SkullType>getOne(SKULL).get());
+        return builder.add(Keys.SKULL_TYPE, ctx.<SkullType>getOne(SKULL).get());
     }
 
     private static CommandExecutor giveSkull(final BiFunction<CommandContext, ItemStack.Builder, ItemStack.Builder> profile) {
