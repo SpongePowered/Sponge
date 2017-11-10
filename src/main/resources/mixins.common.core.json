@@ -30,6 +30,7 @@
         "block.MixinBlockCocoa",
         "block.MixinBlockColored",
         "block.MixinBlockCommandBlock",
+        "block.MixinBlockConcretePowder",
         "block.MixinBlockCrops",
         "block.MixinBlockDaylightDetector",
         "block.MixinBlockDirectional",
