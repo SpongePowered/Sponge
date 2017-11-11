@@ -131,6 +131,7 @@ public class SpongeLaunch {
         Mixins.addConfiguration("mixins.common.entityactivation.json");
         Mixins.addConfiguration("mixins.common.entitycollisions.json");
         Mixins.addConfiguration("mixins.common.exploit.json");
+        Mixins.addConfiguration("mixins.common.movementchecks.json");
         Mixins.addConfiguration("mixins.common.tracking.json");
         Mixins.addConfiguration("mixins.common.optimization.json");
         Mixins.addConfiguration("mixins.common.realtime.json");
