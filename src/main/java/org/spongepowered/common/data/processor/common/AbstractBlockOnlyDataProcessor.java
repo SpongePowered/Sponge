@@ -68,9 +68,4 @@ public abstract class AbstractBlockOnlyDataProcessor<T, V extends BaseValue<T>, 
         return ImmutableSpongeValue.cachedOf(this.key, getDefaultValue(), value);
     }
 
-    @Override
-    public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, T value, Cause cause) {
-        throw new UnsupportedOperationException();
-    }
-
 }

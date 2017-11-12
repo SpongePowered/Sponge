@@ -205,7 +205,17 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
+    public <E> Optional<E> getDefault(Key<? extends BaseValue<E>> key) {
+        return Optional.empty();
+    }
+
+    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(Key<V> key) {
         return Optional.empty();
     }
 

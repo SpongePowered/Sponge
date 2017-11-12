@@ -271,6 +271,12 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
+    public <E> Optional<E> getDefault(int x, int y, int z, Key<? extends BaseValue<E>> key) {
+        checkBlockRange(x, y, z);
+        return this.extent.getDefault(x, y, z, key);
+    }
+
+    @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(int x, int y, int z, Class<T> manipulatorClass) {
         checkBlockRange(x, y, z);
         return this.extent.get(x, y, z, manipulatorClass);
@@ -292,6 +298,12 @@ public class ExtentViewDownsize implements DefaultedExtent {
     public <E, V extends BaseValue<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
         checkBlockRange(x, y, z);
         return this.extent.getValue(x, y, z, key);
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(int x, int y, int z, Key<V> key) {
+        checkBlockRange(x, y, z);
+        return this.extent.getDefaultValue(x, y, z, key);
     }
 
     @Override

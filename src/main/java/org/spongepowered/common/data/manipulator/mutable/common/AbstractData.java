@@ -204,11 +204,28 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
     }
 
     @Override
+    public <E> Optional<E> getDefault(Key<? extends BaseValue<E>> key) {
+        if (!supports(key)) {
+            return Optional.empty();
+        }
+        return Optional.of((E) this.keyValueMap.get(key).get().getDefault());
+    }
+
+    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (!this.keyValueMap.containsKey(key)) {
             return Optional.empty();
         }
         return Optional.of((V) checkNotNull(this.keyValueMap.get(key).get()));
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(Key<V> key) {
+        if (!this.keyValueMap.containsKey(key)) {
+            return Optional.empty();
+        }
+        ImmutableValue<V> val = (ImmutableValue) this.keyValueMap.get(key).get();
+        return Optional.of((V) checkNotNull(val.with(val.getDefault())));
     }
 
     @Override

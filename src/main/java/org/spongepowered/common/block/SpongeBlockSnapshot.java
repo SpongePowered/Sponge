@@ -378,6 +378,16 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.empty();
     }
 
+    @Override
+    public <E> Optional<E> getDefault(Key<? extends BaseValue<E>> key) {
+        if (this.keyValueMap.containsKey(key)) {
+            return Optional.of((E) this.keyValueMap.get(key).getDefault());
+        } else if (getKeyValueMap().containsKey(key)) {
+            return Optional.of((E) this.blockKeyValueMap.get(key).getDefault());
+        }
+        return Optional.empty();
+    }
+
     private ImmutableMap<Key<?>, ImmutableValue<?>> getKeyValueMap() {
         if (this.blockKeyValueMap == null) {
             final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
@@ -430,6 +440,18 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
         } else if (getKeyValueMap().containsKey(key)) {
             return Optional.of((V) this.blockKeyValueMap.get(key).asMutable());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(Key<V> key) {
+        if (this.keyValueMap.containsKey(key)) {
+            ImmutableValue<V> val = (ImmutableValue) this.keyValueMap.get(key);
+            return Optional.of((V) val.with(val.getDefault()).asMutable());
+        } else if (getKeyValueMap().containsKey(key)) {
+            ImmutableValue<V> val = (ImmutableValue) this.blockKeyValueMap.get(key);
+            return Optional.of((V) val.with(val.getDefault()).asMutable());
         }
         return Optional.empty();
     }

@@ -343,11 +343,35 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @SuppressWarnings("unchecked")
     @Override
+    public <E> Optional<E> getDefault(Key<? extends BaseValue<E>> key) {
+        checkNotNull(key);
+        for (ImmutableValue<?> value : this.values) {
+            if (value.getKey().equals(key)) {
+                return Optional.of((E) value.getDefault());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         checkNotNull(key);
         for (ImmutableValue<?> value : this.values) {
             if (value.getKey().equals(key)) {
                 return Optional.of((V) value.asMutable());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(Key<V> key) {
+        checkNotNull(key);
+        for (ImmutableValue<?> value : this.values) {
+            if (value.getKey().equals(key)) {
+                return Optional.of((V) ((ImmutableValue) value).with(value.getDefault()).asMutable());
             }
         }
         return Optional.empty();
@@ -435,7 +459,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 if (this.compound != null) {
                     nmsEntity.readFromNBT(this.compound);
                 }
-    
+
                 boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity);
                 if (spawnResult) {
                     return Optional.of((Entity) nmsEntity);

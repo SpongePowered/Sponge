@@ -112,8 +112,18 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
+    public <E> Optional<E> getDefault(Key<? extends BaseValue<E>> key) {
+        return this.blockState.getDefault(key);
+    }
+
+    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         return this.blockState.getValue(key);
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(Key<V> key) {
+        return this.blockState.getDefaultValue(key);
     }
 
     @Override

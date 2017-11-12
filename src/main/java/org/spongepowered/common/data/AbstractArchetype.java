@@ -199,10 +199,22 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .flatMap(processor -> processor.readValue(this.data));
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <R> Optional<R> getDefault(Key<? extends BaseValue<R>> key) {
+        return DataUtil.getNbtProcessor(this.getDataType(), key)
+                .flatMap(processor -> processor.readFrom(this.data).map(v -> v.getDefault()));
+    }
+
     @Override
     public <R, V extends BaseValue<R>> Optional<V> getValue(Key<V> key) {
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .flatMap(processor -> processor.readFrom(this.data));
+    }
+
+    @Override
+    public <R, V extends BaseValue<R>> Optional<V> getDefaultValue(Key<V> key) {
+        throw new UnsupportedOperationException(); // TODO - can we construct a new value here?
     }
 
     @Override

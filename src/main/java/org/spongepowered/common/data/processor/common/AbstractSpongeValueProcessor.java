@@ -130,7 +130,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
         return DataTransactionResult.failResult(newValue);
     }
 
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
     @Override
     public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause) {
         if (supports(container)) {
@@ -152,6 +152,6 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
             return Optional.of(event);
         }
         return Optional.empty();
-    }
+    }*/
 
 }

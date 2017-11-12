@@ -44,6 +44,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
@@ -328,6 +329,27 @@ public abstract class MixinDataHolder implements DataHolder {
     }
 
     @Override
+    public <E> Optional<E> getDefault(Key<? extends BaseValue<E>> key) {
+        TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
+        SpongeTimings.dataGetByKey.startTimingIfSync();
+        final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(checkNotNull(key));
+        if (optional.isPresent()) {
+            final Optional<E> value = optional.get().getApiValueFromContainer(this).map(v -> v.getDefault());
+            SpongeTimings.dataGetByKey.stopTimingIfSync();
+            TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+            return value;
+        } else if (this instanceof IMixinCustomDataHolder) {
+            final Optional<E> custom = ((IMixinCustomDataHolder) this).getCustomValue(key).map(v -> v.getDefault());
+            SpongeTimings.dataGetByKey.stopTimingIfSync();
+            TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+            return custom;
+        }
+        SpongeTimings.dataGetByKey.stopTimingIfSync();
+        TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+        return Optional.empty();
+    }
+
+    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataGetValue.startTimingIfSync();
@@ -342,6 +364,25 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataGetValue.stopTimingIfSync();
             TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
             return customValue;
+        }
+        SpongeTimings.dataGetValue.stopTimingIfSync();
+        TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+        return Optional.empty();
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getDefaultValue(Key<V> key) {
+        TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
+        SpongeTimings.dataGetValue.startTimingIfSync();
+        final Optional<ValueProcessor<E, V>> optional = DataUtil.getValueProcessor(checkNotNull(key));
+        if (optional.isPresent()) {
+            final Optional<V> value = optional.get().getApiValueFromContainer(this);
+            value.map(v -> (v instanceof Value ? ((Value) v).asImmutable() : (ImmutableValue) v).with(v.getDefault()));
+            SpongeTimings.dataGetValue.stopTimingIfSync();
+            TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+            return value;
+        } else if (this instanceof IMixinCustomDataHolder) {
+            throw new UnsupportedOperationException();
         }
         SpongeTimings.dataGetValue.stopTimingIfSync();
         TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
@@ -426,7 +467,36 @@ public abstract class MixinDataHolder implements DataHolder {
     public <E> Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(Key<? extends BaseValue<E>> key, E value, Cause cause) {
         TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
         SpongeTimings.dataOfferKey.startTimingIfSync();
-        final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
+
+        if (supports(key)) {
+            final BaseValue<E> tempVal = this.getDefaultValue(key).get();
+
+            // TODO - decide on how to make this kind of thing possible, cleanly, through the API
+            final ImmutableValue<E> newVal = (tempVal instanceof Value ? ((Value) tempVal).asImmutable() : (ImmutableValue) tempVal).with(value);
+
+            final Optional<E> oldVal = this.get(key);
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder()
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .success(newVal);
+
+            oldVal.ifPresent(v -> builder.replace(newVal.with(v)));
+
+            ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(cause, builder.build(), this);
+            if (!SpongeImpl.postEvent(event) && event.getEndResult().getType() == DataTransactionResult.Type.SUCCESS) {
+                for (ImmutableValue<?> val: event.getEndResult().getSuccessfulData()) {
+                    this.offer(val);
+                }
+            }
+            TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
+            SpongeTimings.dataOfferKey.startTimingIfSync();
+            return Optional.of(event);
+        }
+
+        TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
+        SpongeTimings.dataOfferKey.startTimingIfSync();
+        return Optional.empty();
+
+        /*final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
         if (optional.isPresent()) {
             final Optional<ChangeDataHolderEvent.ValueChange> result = optional.get().offerWithEvent(this, value, cause);
             SpongeTimings.dataOfferKey.stopTimingIfSync();
@@ -435,7 +505,7 @@ public abstract class MixinDataHolder implements DataHolder {
         }
         SpongeTimings.dataOfferKey.stopTimingIfSync();
         TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
-        return Optional.empty();
+        return Optional.empty();*/
         /*final ImmutableValue<E> newValue = constructImmutableValue(value);
 
         final Optional<ImmutableValue<?>> oldVal = this

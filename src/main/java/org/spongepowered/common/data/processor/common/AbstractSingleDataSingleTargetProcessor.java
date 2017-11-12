@@ -195,7 +195,7 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
         return DataTransactionResult.failResult(newValue);
     }
 
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
     @Override
     public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, T value, Cause cause) {
         if (supports(container)) {
@@ -216,7 +216,7 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
             return Optional.of(event);
         }
         return Optional.empty();
-    }
+    }*/
 
     @Override
     public final DataTransactionResult remove(DataHolder dataHolder) {

@@ -15,7 +15,7 @@ public class FoodChangeTest {
     @Listener
     public void onChange(ChangeDataHolderEvent.ValueChange event) {
         ImmutableValue<Integer> food = null;
-        for (ImmutableValue<?> val: event.getEndResult().getReplacedData()) {
+           for (ImmutableValue<?> val: event.getEndResult().getReplacedData()) {
             if (val.getKey().equals(Keys.FOOD_LEVEL)) {
                 MessageChannel.TO_ALL.send(Text.of("Old food " + val.getDirect().get()));
             }
@@ -28,7 +28,7 @@ public class FoodChangeTest {
             }
         }
 
-        event.proposeChanges(DataTransactionResult.successResult(food.with(20)));
+        //event.proposeChanges(DataTransactionResult.successResult(food.with(20)));
 
     }
 

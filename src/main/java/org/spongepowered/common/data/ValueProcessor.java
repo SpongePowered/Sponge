@@ -160,7 +160,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * @param value
      * @return
      */
-    Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause);
+    //Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause);
 
     /**
      * Attempts to remove the known keyed data associated with this

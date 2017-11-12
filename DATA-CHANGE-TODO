@@ -1,0 +1,6 @@
+* Should we allow accessing the default underlying and default value directly through the API?
+* Should there be a (convenience) method for creating a value with a given underlying, in the context of a DataHolder?
+* Should it be easily possbile to go from a BaseValue to an ImmutableValue/Value without casting?
+* Should ChangeDataHolderEvent deal with only values, or manipulators too?
+* Should DataTransactionResult use a Map for each of 'successful, rejected, and replaced' data?
+* What form should the event filters take?

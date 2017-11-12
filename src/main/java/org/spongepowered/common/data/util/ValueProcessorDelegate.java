@@ -123,7 +123,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         return DataTransactionResult.failNoData();
     }
 
-    @Override
+    /*@Override
     public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause) {
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
@@ -135,7 +135,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         }
 
         return Optional.empty();
-    }
+    }*/
 
 
 
