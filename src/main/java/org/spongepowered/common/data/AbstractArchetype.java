@@ -42,6 +42,8 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
@@ -120,6 +122,11 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         return DataUtil.getNbtProcessor(this.getDataType(), key)
                 .map(processor -> processor.offer(this.data, value))
                 .orElseGet(DataTransactionResult::failNoData);
+    }
+
+    @Override
+    public <E> Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(Key<? extends BaseValue<E>> key, E value, Cause cause) {
+        throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

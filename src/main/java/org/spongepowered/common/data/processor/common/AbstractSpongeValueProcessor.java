@@ -26,12 +26,17 @@ package org.spongepowered.common.data.processor.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ValueProcessor;
 
@@ -118,11 +123,35 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
                 }
                 return builder.result(DataTransactionResult.Type.FAILURE).reject(newValue).build();
             } catch (Exception e) {
-                SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
+                SpongeImpl.getLogger().error("An exception occurred when setting data: ", e);
                 return builder.result(DataTransactionResult.Type.ERROR).reject(newValue).build();
             }
         }
         return DataTransactionResult.failResult(newValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause) {
+        if (supports(container)) {
+            final ImmutableValue<E> newValue = constructImmutableValue(value);
+
+            final Optional<E> oldVal = getVal((C) container);
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder()
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .success(newValue);
+
+            oldVal.ifPresent(e -> builder.replace(constructImmutableValue(e)));
+
+            ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(cause, builder.build(), container);
+            if (!SpongeImpl.postEvent(event) && event.getEndResult().getType() == DataTransactionResult.Type.SUCCESS) {
+                for (ImmutableValue<?> val: event.getEndResult().getSuccessfulData()) {
+                    container.offer(val);
+                }
+            }
+            return Optional.of(event);
+        }
+        return Optional.empty();
     }
 
 }

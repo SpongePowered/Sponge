@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.event.cause.Cause;
 
 import java.util.Optional;
 
@@ -96,6 +97,8 @@ public interface DataProcessor<M extends DataManipulator<M, I>, I extends Immuta
      * @return The transaction result
      */
     DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function);
+
+    //void setWithEvent(DataHolder container, M manipulator, Cause cause);
 
     Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable);
 

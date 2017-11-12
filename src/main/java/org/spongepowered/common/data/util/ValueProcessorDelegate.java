@@ -25,11 +25,14 @@
 package org.spongepowered.common.data.util;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
@@ -119,6 +122,22 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         }
         return DataTransactionResult.failNoData();
     }
+
+    @Override
+    public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause) {
+        for (ValueProcessor<E, V> processor : this.processors) {
+            if (processor.supports(container)) {
+                final Optional<ChangeDataHolderEvent.ValueChange> result = processor.offerWithEvent(container, value, cause);
+                if (result.isPresent()) {
+                    return result;
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {

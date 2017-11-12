@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.common;
 
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -32,6 +33,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
@@ -63,6 +66,11 @@ public abstract class AbstractBlockOnlyDataProcessor<T, V extends BaseValue<T>, 
     @Override
     protected ImmutableValue<T> constructImmutableValue(T value) {
         return ImmutableSpongeValue.cachedOf(this.key, getDefaultValue(), value);
+    }
+
+    @Override
+    public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, T value, Cause cause) {
+        throw new UnsupportedOperationException();
     }
 
 }

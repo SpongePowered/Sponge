@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.interfaces.IMixinFoodStats;
 
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected boolean set(EntityPlayer container, Integer value) {
-        container.getFoodStats().setFoodLevel(value);
+        ((IMixinFoodStats) container.getFoodStats()).setFoodLevelDirect(value);
         return true;
     }
 

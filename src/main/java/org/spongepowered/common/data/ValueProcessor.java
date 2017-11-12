@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data;
 
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -35,6 +36,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.mutable.CollectionValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 
 import java.util.Optional;
 
@@ -149,6 +152,15 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * @return The transaction result
      */
     DataTransactionResult offerToStore(ValueContainer<?> container, E value);
+
+    /**
+     * Offers the provided value to the value container, firing an appropriate
+     * {@link ChangeDataHolderEvent.ValueChange}. The returned value should be
+     * @param container
+     * @param value
+     * @return
+     */
+    Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, E value, Cause cause);
 
     /**
      * Attempts to remove the known keyed data associated with this

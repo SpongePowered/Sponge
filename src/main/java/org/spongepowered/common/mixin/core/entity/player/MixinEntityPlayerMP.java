@@ -162,6 +162,7 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinFoodStats;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
@@ -244,6 +245,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Nullable private Vector3d velocityOverride = null;
     private boolean healthScaling = false;
     private double healthScale = 20;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onInit(CallbackInfo ci) {
+        ((IMixinFoodStats) this.foodStats).setPlayer((EntityPlayer) (Object) this);
+    }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {

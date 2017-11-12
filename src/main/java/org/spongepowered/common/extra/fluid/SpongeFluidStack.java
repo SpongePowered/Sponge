@@ -39,6 +39,8 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -134,9 +136,16 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
+    public <E> Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(Key<? extends BaseValue<E>> key, E value, Cause cause) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
         return DataTransactionResult.failNoData();
     }
+
+
 
     @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {

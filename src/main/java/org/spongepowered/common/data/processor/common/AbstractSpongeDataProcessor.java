@@ -24,10 +24,20 @@
  */
 package org.spongepowered.common.data.processor.common;
 
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
+
+import java.util.List;
+import java.util.Optional;
 
 public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
 
@@ -40,4 +50,23 @@ public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I
     public boolean supports(EntityType entityType) {
         return false;
     }
+
+    /*@Override
+    public void setWithEvent(DataHolder container, M manipulator, Cause cause) {
+        if (supports(container)) {
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder()
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .success(manipulator.getValues());
+
+
+            Optional<M> old = this.from(container);
+            old.ifPresent(m -> builder.replace(m.getValues()));
+
+            ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(cause, builder.build(), container);
+            if (!SpongeImpl.postEvent(event) && event.getEndResult().getType() == DataTransactionResult.Type.SUCCESS) {
+                ImmutableValue<?> val = event.getEndResult().get(DataTransactionResult.DataCategory.SUCCESSFUL, this.key).orElseThrow(() -> new IllegalStateException(String.format("Event %s no longer has value with key %s", event, this.key)));
+                set((C) container, (E) val.get());
+            }
+        }
+    }*/
 }

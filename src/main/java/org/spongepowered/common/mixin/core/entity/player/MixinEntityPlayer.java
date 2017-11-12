@@ -98,6 +98,7 @@ import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
+import org.spongepowered.common.interfaces.IMixinFoodStats;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;

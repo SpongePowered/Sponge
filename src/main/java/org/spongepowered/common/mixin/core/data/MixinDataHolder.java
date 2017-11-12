@@ -44,7 +44,11 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.ValueProcessor;
@@ -416,6 +420,38 @@ public abstract class MixinDataHolder implements DataHolder {
     @Override
     public DataHolder copy() {
         return this;
+    }
+
+    @Override
+    public <E> Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(Key<? extends BaseValue<E>> key, E value, Cause cause) {
+        TimingsManager.DATA_GROUP_HANDLER.startTimingIfSync();
+        SpongeTimings.dataOfferKey.startTimingIfSync();
+        final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = DataUtil.getBaseValueProcessor(key);
+        if (optional.isPresent()) {
+            final Optional<ChangeDataHolderEvent.ValueChange> result = optional.get().offerWithEvent(this, value, cause);
+            SpongeTimings.dataOfferKey.stopTimingIfSync();
+            TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+            return result;
+        }
+        SpongeTimings.dataOfferKey.stopTimingIfSync();
+        TimingsManager.DATA_GROUP_HANDLER.stopTimingIfSync();
+        return Optional.empty();
+        /*final ImmutableValue<E> newValue = constructImmutableValue(value);
+
+        final Optional<ImmutableValue<?>> oldVal = this
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder()
+                .result(DataTransactionResult.Type.SUCCESS)
+                .success(newValue);
+
+        oldVal.ifPresent(e -> builder.replace(constructImmutableValue(e)));
+
+        ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(cause, builder.build(), container);
+        if (!SpongeImpl.postEvent(event) && event.getEndResult().getType() == DataTransactionResult.Type.SUCCESS) {
+            ImmutableValue<?> val = event.getEndResult().get(DataTransactionResult.DataCategory.SUCCESSFUL, this.key).orElseThrow(() -> new IllegalStateException(String.format("Event %s no longer has value with key %s", event, this.key)));
+            set((C) container, (E) val.get());
+        }
+
+        }*/
     }
 
 }

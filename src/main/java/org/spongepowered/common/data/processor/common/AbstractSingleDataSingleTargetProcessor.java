@@ -37,6 +37,9 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.util.DataUtil;
@@ -190,6 +193,29 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
             }
         }
         return DataTransactionResult.failResult(newValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<ChangeDataHolderEvent.ValueChange> offerWithEvent(DataHolder container, T value, Cause cause) {
+        if (supports(container)) {
+            final ImmutableValue<T> newValue = constructImmutableValue(value);
+
+            final Optional<T> oldVal = getVal((Holder) container);
+            final DataTransactionResult.Builder builder = DataTransactionResult.builder()
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .success(newValue);
+
+            oldVal.ifPresent(e -> builder.replace(constructImmutableValue(e)));
+
+            ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(cause, builder.build(), container);
+            if (!SpongeImpl.postEvent(event) && event.getEndResult().getType() == DataTransactionResult.Type.SUCCESS) {
+                ImmutableValue<?> val = event.getEndResult().get(DataTransactionResult.DataCategory.SUCCESSFUL, this.key).orElseThrow(() -> new IllegalStateException(String.format("Event %s no longer has value with key %s", event, this.key)));
+                set((Holder) container, (T) val.get());
+            }
+            return Optional.of(event);
+        }
+        return Optional.empty();
     }
 
     @Override

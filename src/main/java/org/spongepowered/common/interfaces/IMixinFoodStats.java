@@ -22,36 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.common.interfaces;
 
-import org.slf4j.Logger;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameStartingServerEvent;
-import org.spongepowered.api.network.ChannelBinding;
-import org.spongepowered.api.network.ChannelId;
-import org.spongepowered.api.plugin.Plugin;
+import net.minecraft.entity.player.EntityPlayer;
 
-import javax.inject.Inject;
+public interface IMixinFoodStats {
 
-@Plugin(id = "injection-test", authors = "kashike")
-public class InjectionTest {
+    void setPlayer(EntityPlayer player);
 
-    private final Logger logger;
-    private final ChannelBinding.RawDataChannel channel;
+    void setFoodLevelDirect(int foodLevel);
 
-    @Inject
-    private InjectionTest(
-            final Logger logger,
-            @ChannelId("injection") ChannelBinding.RawDataChannel channel
-    ) {
-        this.logger = logger;
-        this.channel = channel;
-    }
-
-    @Listener
-    public void starting(final GameStartingServerEvent event) {
-        this.logger.info("Channel: {}", this.channel);
-    }
 }

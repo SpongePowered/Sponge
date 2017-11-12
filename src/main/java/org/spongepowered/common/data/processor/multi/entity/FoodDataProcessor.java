@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFoodData
 import org.spongepowered.api.data.manipulator.mutable.entity.FoodData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFoodData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.interfaces.IMixinFoodStats;
 
 import java.util.Map;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class FoodDataProcessor extends AbstractEntityDataProcessor<EntityPlayer,
 
     @Override
     protected boolean set(EntityPlayer entity, Map<Key<?>, Object> keyValues) {
-        entity.getFoodStats().setFoodLevel((Integer) keyValues.get(Keys.FOOD_LEVEL));
+        ((IMixinFoodStats) entity.getFoodStats()).setFoodLevelDirect((Integer) keyValues.get(Keys.FOOD_LEVEL));
         entity.getFoodStats().foodSaturationLevel = ((Double) keyValues.get(Keys.SATURATION)).floatValue();
         entity.getFoodStats().foodExhaustionLevel = ((Double) keyValues.get(Keys.EXHAUSTION)).floatValue();
         return true;
