@@ -67,9 +67,10 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
 
     @Override
     public ImmutableBoundedValue<E> with(E value) {
-        return (this.comparator.compare(checkNotNull(value), this.minimum) > 0 || this.comparator.compare(checkNotNull(value), this.maximum) < 0) ?
-               new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue()) :
-               new ImmutableSpongeBoundedValue<>(getKey(), value, getDefault(), getComparator(), getMinValue(), getMaxValue());
+        if (this.comparator.compare(value, this.minimum) >= 0 && this.comparator.compare(value, this.maximum) <= 0) {
+            return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), value,  getComparator(), getMinValue(), getMaxValue());
+        }
+        return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue());
     }
 
     @Override
