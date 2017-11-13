@@ -37,6 +37,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
@@ -426,19 +427,33 @@ public class EventFilterTest {
     @Test
     public void testGetKey() throws Exception {
         GetKeyListener listener = new GetKeyListener();
+
         AnnotatedEventListener getKeyListener = this.getListener(listener, "getKeyListener", ChangeDataHolderEvent.ValueChange.class, Integer.class,
                 MutableBoundedValue.class, ImmutableValue.class);
+        AnnotatedEventListener dataHolderListener = this.getListener(listener, "dataHolderListener", ChangeDataHolderEvent.ValueChange.class, Player.class, Integer.class);
 
         DataHolder holder = mock(DataHolder.class);
 
+
+        MutableBoundedValue<Integer> value = SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
+                .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
+                .minimum(0)
+                .maximum(20)
+                .actualValue(15)
+                .build();
+
+        Player player = mock(Player.class);
+        when(player.get(Keys.FOOD_LEVEL)).thenReturn(Optional.of(15));
+        when(player.getValue(Keys.FOOD_LEVEL)).thenReturn(Optional.of(value));
+
         getKeyListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(Cause.of(EventContext.empty(), Text.of()),
-                DataTransactionResult.successResult(SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
-                        .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
-                        .minimum(0)
-                        .maximum(20)
-                        .actualValue(12)
-                        .build().asImmutable()), holder));
+                DataTransactionResult.successResult(value.asImmutable()), holder));
         Assert.assertTrue("Listener with @GetKey annotation was not called!", listener.getKeyListenerCalled);
+
+
+        dataHolderListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(Cause.of(EventContext.empty(), player),
+                DataTransactionResult.successNoData(), player));
+        Assert.assertTrue("Listener with tagged @GetKey annotation was not called!", listener.dataHolderListenerCalled);
     }
 
     public static class TestEvent implements Event, Cancellable {

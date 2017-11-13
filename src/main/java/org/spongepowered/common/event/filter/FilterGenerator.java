@@ -107,7 +107,7 @@ public class FilterGenerator {
         name = name.replace('.', '/');
         Parameter[] params = method.getParameters();
 
-        ClassWriter cw = new ClassWriter(/*ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS*/0);
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });

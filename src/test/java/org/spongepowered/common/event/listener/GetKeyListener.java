@@ -25,22 +25,33 @@
 package org.spongepowered.common.event.listener;
 
 import org.junit.Assert;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.data.GetKey;
 
 public class GetKeyListener {
 
     public boolean getKeyListenerCalled;
+    public boolean dataHolderListenerCalled;
 
     @Listener
     public void getKeyListener(ChangeDataHolderEvent.ValueChange event, @GetKey("FOOD_LEVEL") Integer foodLevel, @GetKey("FOOD_LEVEL") MutableBoundedValue<Integer> foodValue, @GetKey("FOOD_LEVEL") ImmutableValue<Integer> foodImmut) {
         this.getKeyListenerCalled = true;
         Assert.assertEquals(foodLevel, foodValue.get());
         Assert.assertEquals(foodLevel, foodImmut.get());
-        Assert.assertEquals((long) foodLevel, 12);
+        Assert.assertEquals((long) foodLevel, 15);
+    }
+
+    @Listener
+    public void dataHolderListener(ChangeDataHolderEvent.ValueChange event, @First(tag = "foo") Player player, @GetKey(value = "FOOD_LEVEL", tag = "foo") Integer taggedFood) {
+        this.dataHolderListenerCalled = true;
+        Assert.assertEquals(taggedFood, player.get(Keys.FOOD_LEVEL).get());
+        Assert.assertEquals((long) taggedFood, 15);
     }
 
 }
