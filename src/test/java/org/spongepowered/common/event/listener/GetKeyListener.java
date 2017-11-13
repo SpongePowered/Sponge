@@ -22,17 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter.delegate;
+package org.spongepowered.common.event.listener;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
+import org.junit.Assert;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.event.filter.data.GetKey;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+public class GetKeyListener {
 
-public interface ParameterFilterDelegate {
+    public boolean getKeyListenerCalled;
 
-    void write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int localParam);
-
+    @Listener
+    public void getKeyListener(ChangeDataHolderEvent.ValueChange event, @GetKey("FOOD_LEVEL") Integer foodLevel, @GetKey("FOOD_LEVEL") MutableBoundedValue<Integer> foodValue, @GetKey("FOOD_LEVEL") ImmutableValue<Integer> foodImmut) {
+        this.getKeyListenerCalled = true;
+        Assert.assertEquals(foodLevel, foodValue.get());
+        Assert.assertEquals(foodLevel, foodImmut.get());
+        Assert.assertEquals((long) foodLevel, 12);
+    }
 
 }

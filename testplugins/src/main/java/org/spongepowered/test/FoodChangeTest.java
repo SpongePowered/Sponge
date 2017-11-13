@@ -5,6 +5,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.event.filter.data.GetKey;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -13,15 +14,15 @@ import org.spongepowered.api.text.channel.MessageChannel;
 public class FoodChangeTest {
 
     @Listener
-    public void onChange(ChangeDataHolderEvent.ValueChange event) {
+    public void onChange(ChangeDataHolderEvent.ValueChange event, @GetKey("FOOD_LEVEL") int foodLevel) {
         ImmutableValue<Integer> food = null;
-           for (ImmutableValue<?> val: event.getEndResult().getReplacedData()) {
+           for (ImmutableValue<?> val: event.getChanges().getReplacedData()) {
             if (val.getKey().equals(Keys.FOOD_LEVEL)) {
                 MessageChannel.TO_ALL.send(Text.of("Old food " + val.getDirect().get()));
             }
         }
 
-        for (ImmutableValue<?> val: event.getEndResult().getSuccessfulData()) {
+        for (ImmutableValue<?> val: event.getChanges().getSuccessfulData()) {
             if (val.getKey().equals(Keys.FOOD_LEVEL)) {
                 MessageChannel.TO_ALL.send(Text.of("New food: " + val.getDirect().get()));
                 food = (ImmutableValue) val;

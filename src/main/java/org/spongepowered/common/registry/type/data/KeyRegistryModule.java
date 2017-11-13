@@ -90,15 +90,15 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("velocity", makeSingleKey(TypeTokens.VECTOR_3D_TOKEN, TypeTokens.VECTOR_3D_VALUE_TOKEN, of("Velocity"), "sponge:velocity", "Velocity"));
 
-        this.fieldMap.put("food_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("FoodLevel"), "sponge:food_level", "Food Level"));
+        this.fieldMap.put("food_level", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("FoodLevel"), "sponge:food_level", "Food Level"));
 
         this.fieldMap.put("saturation", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("FoodSaturationLevel"), "sponge:food_saturation_level", "Food Saturation Level"));
 
         this.fieldMap.put("exhaustion", makeSingleKey(TypeTokens.DOUBLE_TOKEN, TypeTokens.DOUBLE_VALUE_TOKEN, of("FoodExhaustionLevel"), "sponge:food_exhaustion_level", ""));
 
-        this.fieldMap.put("max_air", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("MaxAir"), "sponge:max_air", "Max Air"));
+        this.fieldMap.put("max_air", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("MaxAir"), "sponge:max_air", "Max Air"));
 
-        this.fieldMap.put("remaining_air", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("RemainingAir"), "sponge:remaining_air", "Remaining Air"));
+        this.fieldMap.put("remaining_air", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("RemainingAir"), "sponge:remaining_air", "Remaining Air"));
 
         this.fieldMap.put("fire_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("FireTicks"), "sponge:fire_ticks", "Fire Ticks"));
 
@@ -134,7 +134,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("command", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("Command"), "sponge:command", "Command"));
 
-        this.fieldMap.put("success_count", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("SuccessCount"), "sponge:success_count", "SuccessCount"));
+        this.fieldMap.put("success_count", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("SuccessCount"), "sponge:success_count", "SuccessCount"));
 
         this.fieldMap.put("tracks_output", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("TracksOutput"), "sponge:tracks_output", "Tracks Output"));
 
@@ -266,7 +266,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("max_cook_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("MaxCookTime"), "sponge:max_cook_time", "Max Cook Time"));
 
-        this.fieldMap.put("contained_experience", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("ContainedExperience"), "sponge:contained_experience", "Contained Experience"));
+        this.fieldMap.put("contained_experience", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("ContainedExperience"), "sponge:contained_experience", "Contained Experience"));
 
         this.fieldMap.put("remaining_brew_time", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("RemainingBrewTime"), "sponge:remaining_brew_time", "Remaining Brew Time"));
 
@@ -316,7 +316,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("fall_distance", makeSingleKey(TypeTokens.FLOAT_TOKEN, TypeTokens.FLOAT_VALUE_TOKEN, of("FallDistance"), "sponge:fall_distance", "Fall Distance"));
 
-        this.fieldMap.put("cooldown", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("Cooldown"), "sponge:cooldown", "Cooldown"));
+        this.fieldMap.put("cooldown", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Cooldown"), "sponge:cooldown", "Cooldown"));
 
         this.fieldMap.put("note_pitch", makeSingleKey(TypeTokens.NOTE_TOKEN, TypeTokens.NOTE_VALUE_TOKEN, of("Note"), "sponge:note", "Note"));
 
@@ -474,7 +474,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("ticks_remaining", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("TicksRemaining"), "sponge:ticks_remaining", "Ticks Remaining"));
 
-        this.fieldMap.put("explosion_radius", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.INTEGER_VALUE_TOKEN, of("ExplosionRadius"), "sponge:explosion_radius", "Explosion Radius"));
+        this.fieldMap.put("explosion_radius", makeSingleKey(TypeTokens.OPTIONAL_INTEGER_TOKEN, TypeTokens.OPTIONAL_INTEGER_VALUE_TOKEN, of("ExplosionRadius"), "sponge:explosion_radius", "Explosion Radius"));
 
         this.fieldMap.put("armor_stand_has_arms", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasArms"), "sponge:has_arms", "Has Arms"));
 

@@ -482,8 +482,8 @@ public abstract class MixinDataHolder implements DataHolder {
             oldVal.ifPresent(v -> builder.replace(newVal.with(v)));
 
             ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(cause, builder.build(), this);
-            if (!SpongeImpl.postEvent(event) && event.getEndResult().getType() == DataTransactionResult.Type.SUCCESS) {
-                for (ImmutableValue<?> val: event.getEndResult().getSuccessfulData()) {
+            if (!SpongeImpl.postEvent(event) && event.getChanges().getType() == DataTransactionResult.Type.SUCCESS) {
+                for (ImmutableValue<?> val: event.getChanges().getSuccessfulData()) {
                     this.offer(val);
                 }
             }

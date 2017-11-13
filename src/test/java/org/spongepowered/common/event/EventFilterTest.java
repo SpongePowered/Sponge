@@ -29,19 +29,30 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.listener.AllCauseListener;
@@ -52,19 +63,23 @@ import org.spongepowered.common.event.listener.DataHasListener;
 import org.spongepowered.common.event.listener.DataSupportsListener;
 import org.spongepowered.common.event.listener.DoubleListener;
 import org.spongepowered.common.event.listener.FirstLastCauseListener;
+import org.spongepowered.common.event.listener.GetKeyListener;
 import org.spongepowered.common.event.listener.GetterListener;
 import org.spongepowered.common.event.listener.IncludeExcludeListener;
 import org.spongepowered.common.event.listener.InvalidCancelledListener;
 import org.spongepowered.common.event.listener.InvalidIncludeExcludeListener;
 import org.spongepowered.common.event.listener.RootListener;
 import org.spongepowered.common.event.listener.SimpleListener;
+import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.util.Optional;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class EventFilterTest {
-    
+
     public static final Cause TEST_CAUSE = Cause.of(EventContext.empty(), EventFilterTest.class);
-    
+
     private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
             new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
@@ -406,6 +421,24 @@ public class EventFilterTest {
         covariantListener.handle(new CovariantEvent.OverloadedEvent(Cause.of(EventContext.empty(), Text.of()), new SubObject()));
         Assert.assertTrue("Listener with @Getter targeting a method with a covariant return type was not called!", listener.covariantListenerCalled);
 
+    }
+
+    @Test
+    public void testGetKey() throws Exception {
+        GetKeyListener listener = new GetKeyListener();
+        AnnotatedEventListener getKeyListener = this.getListener(listener, "getKeyListener", ChangeDataHolderEvent.ValueChange.class, Integer.class,
+                MutableBoundedValue.class, ImmutableValue.class);
+
+        DataHolder holder = mock(DataHolder.class);
+
+        getKeyListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(Cause.of(EventContext.empty(), Text.of()),
+                DataTransactionResult.successResult(SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
+                        .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
+                        .minimum(0)
+                        .maximum(20)
+                        .actualValue(12)
+                        .build().asImmutable()), holder));
+        Assert.assertTrue("Listener with @GetKey annotation was not called!", listener.getKeyListenerCalled);
     }
 
     public static class TestEvent implements Event, Cancellable {

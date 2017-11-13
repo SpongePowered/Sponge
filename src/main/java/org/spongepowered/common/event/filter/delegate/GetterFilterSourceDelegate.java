@@ -53,12 +53,13 @@ public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate
 
     private final Getter anno;
 
-    public GetterFilterSourceDelegate(Getter a) {
+    public GetterFilterSourceDelegate(Getter a)
+    {
         this.anno = a;
     }
 
     @Override
-    public Tuple<Integer, Integer> write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
+    public Tuple<Integer, Integer> write(String name, ClassWriter cw, MethodVisitor constructorMv, MethodVisitor mv, Method method, Parameter param, int local) {
         Class<?> targetType = param.getType();
         Class<?> eventClass = method.getParameterTypes()[0];
         String targetMethod = this.anno.value();

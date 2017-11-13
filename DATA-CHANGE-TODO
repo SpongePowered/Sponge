@@ -4,3 +4,4 @@
 * Should ChangeDataHolderEvent deal with only values, or manipulators too?
 * Should DataTransactionResult use a Map for each of 'successful, rejected, and replaced' data?
 * What form should the event filters take?
+* Should DataTransactionResult be a ValueContainer/something else, or expose three views into iteslf that implement ValueContainer/something else?

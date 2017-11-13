@@ -41,7 +41,7 @@ import java.lang.reflect.Parameter;
 public abstract class CauseFilterSourceDelegate implements ParameterFilterSourceDelegate {
 
     @Override
-    public Tuple<Integer, Integer> write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
+    public Tuple<Integer, Integer> write(String name, ClassWriter cw, MethodVisitor constructorMv, MethodVisitor mv, Method method, Parameter param, int local) {
         // Get the cause
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "getCause",

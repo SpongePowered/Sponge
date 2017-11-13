@@ -41,9 +41,11 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
 
 import com.google.common.collect.Lists;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.util.CheckClassAdapter;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.filter.Getter;
@@ -54,6 +56,7 @@ import org.spongepowered.api.event.filter.cause.Before;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.filter.data.GetKey;
 import org.spongepowered.api.event.filter.data.Has;
 import org.spongepowered.api.event.filter.data.Supports;
 import org.spongepowered.api.event.filter.type.Exclude;
@@ -68,6 +71,7 @@ import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDel
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.GetKeyFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.GetterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
@@ -81,6 +85,8 @@ import org.spongepowered.common.event.filter.delegate.SupportsDataFilterDelegate
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -101,13 +107,15 @@ public class FilterGenerator {
         name = name.replace('.', '/');
         Parameter[] params = method.getParameters();
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        ClassWriter cw = new ClassWriter(/*ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS*/0);
         MethodVisitor mv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
 
         SubtypeFilterDelegate sfilter = null;
         List<FilterDelegate> additional = Lists.newArrayList();
+        List<ParameterFilterSourceDelegate> sourceDelegates = Lists.newArrayList();
+
         boolean cancellation = false;
         for (Annotation anno : method.getAnnotations()) {
             Object obj = filterFromAnnotation(anno.annotationType());
@@ -134,18 +142,14 @@ public class FilterGenerator {
         if (sfilter != null) {
             sfilter.createFields(cw);
         }
-        {
-            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
-            mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-            if (sfilter != null) {
-                sfilter.writeCtor(name, cw, mv);
-            }
-            mv.visitInsn(RETURN);
-            mv.visitMaxs(0, 0);
-            mv.visitEnd();
+        MethodVisitor constructorMv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+        constructorMv.visitCode();
+        constructorMv.visitVarInsn(ALOAD, 0);
+        constructorMv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        if (sfilter != null) {
+            sfilter.writeCtor(name, cw, constructorMv);
         }
+
         {
             mv = cw.visitMethod(ACC_PUBLIC, "filter", "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;", null, null);
             mv.visitCode();
@@ -186,7 +190,8 @@ public class FilterGenerator {
                     throw new IllegalStateException(
                             "Cannot have additional parameters filters without an array source (for " + param.getName() + ")");
                 }
-                Tuple<Integer, Integer> localState = source.write(cw, mv, method, param, local);
+
+                Tuple<Integer, Integer> localState = source.write(name, cw, constructorMv, mv, method, param, local);
                 local = localState.getFirst();
                 plocals[i - 1] = localState.getSecond();
 
@@ -194,6 +199,11 @@ public class FilterGenerator {
                     paramFilter.write(cw, mv, method, param, plocals[i - 1]);
                 }
             }
+
+            // Finalize constructor after the delegates have all had a chance to modify it
+            constructorMv.visitInsn(RETURN);
+            constructorMv.visitMaxs(100, 100);
+            constructorMv.visitEnd();
 
             // create the return array
             if (params.length == 1) {
@@ -217,11 +227,13 @@ public class FilterGenerator {
                 mv.visitInsn(AASTORE);
             }
             mv.visitInsn(ARETURN);
-            mv.visitMaxs(0, 0);
+            mv.visitMaxs(100, 100);
             mv.visitEnd();
         }
         cw.visitEnd();
         byte[] data = cw.toByteArray();
+
+        CheckClassAdapter.verify(new ClassReader(data), false, new PrintWriter(new OutputStreamWriter(System.err)));
 
         if (FILTER_DEBUG) {
             File outDir = new File(".sponge.debug.out");
@@ -317,6 +329,7 @@ public class FilterGenerator {
         CAUSE_ALL(All.class),
         CAUSE_ROOT(Root.class),
         GETTER(Getter.class),
+        GET_KEY(GetKey.class)
         ;
 
         private final Class<? extends Annotation> cls;
@@ -346,6 +359,9 @@ public class FilterGenerator {
             }
             if (this == GETTER) {
                 return new GetterFilterSourceDelegate((Getter) anno);
+            }
+            if (this == GET_KEY) {
+                return new GetKeyFilterSourceDelegate((GetKey) anno);
             }
             throw new UnsupportedOperationException();
         }
