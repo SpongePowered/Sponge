@@ -1929,6 +1929,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity)
     {
+        if (unusedTileEntity == null) {
+            super.markChunkDirty(pos, unusedTileEntity);
+            return;
+        }
         final IMixinTileEntity spongeTileEntity = (IMixinTileEntity) unusedTileEntity;
         final IMixinChunk chunk = spongeTileEntity.getActiveChunk();
         if (chunk != null) {
