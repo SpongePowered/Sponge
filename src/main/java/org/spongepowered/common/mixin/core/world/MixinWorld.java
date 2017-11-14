@@ -239,7 +239,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public abstract void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity);
+    @Shadow public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity){};
    // @Shadow public abstract List<Entity> getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super net.minecraft.entity.Entity > predicate);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
