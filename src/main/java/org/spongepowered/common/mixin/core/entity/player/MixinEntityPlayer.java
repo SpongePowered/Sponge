@@ -52,6 +52,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
@@ -153,6 +154,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void addExperienceLevel(int levels);
     @Shadow public abstract void addScore(int scoreIn);
+    @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;

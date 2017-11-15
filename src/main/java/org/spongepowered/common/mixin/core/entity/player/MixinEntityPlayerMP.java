@@ -95,6 +95,7 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -1148,5 +1149,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void updateDataManagerForScaledHealth() {
         this.dataManager.set(EntityLivingBase.HEALTH, getInternalScaledHealth());
+    }
+
+    @Override
+    public CooldownTracker getCooldownTracker() {
+        return (CooldownTracker) shadow$getCooldownTracker();
     }
 }
