@@ -25,6 +25,7 @@
 package org.spongepowered.common.event;
 
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
+import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleSlotRestore;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -122,6 +123,7 @@ import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -161,45 +163,78 @@ public class SpongeCommonEventFactory {
     public static int lastPrimaryPacketTick = 0;
     public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
-    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
-        ItemStack itemStack = itemToPickup.getItem();
-        int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemStack);
-        Slot slot = null;
-        if (slotId != -1) {
-            if (slotId < InventoryPlayer.getHotbarSize()) {
-                slot = player.inventoryContainer.getSlot(slotId + player.inventory.mainInventory.size());
-            } else {
-                slot = player.inventoryContainer.getSlot(slotId);
-            }
+    public static boolean callPlayerChangeInventoryPickupPreEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
+        ItemStack stack = itemToPickup.getItem();
+        Sponge.getCauseStackManager().pushCause(player);
+        ChangeInventoryEvent.Pickup.Pre event =
+                SpongeEventFactory.createChangeInventoryEventPickupPre(Sponge.getCauseStackManager().getCurrentCause(),
+                        Optional.empty(), Collections.singletonList(stack), ItemStackUtil.snapshotOf(stack), ((Item) itemToPickup),
+                        ((Inventory) player.inventory));
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        if (event.isCancelled()) {Sponge.getCauseStackManager().popCause();
+            return false;
         }
-
-        if (pickupDelay <= 0 && slot != null) {
-            ItemStackSnapshot sourceSnapshot = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
-                    : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
-            ItemStackSnapshot targetSnapshot;
-            if (sourceSnapshot != ItemStackSnapshot.NONE) {
-                // combined slot
-                targetSnapshot =
-                        org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack)
-                                .quantity(itemStack.getCount() + slot.getStack().getCount()).build().createSnapshot();
-            } else {
-                // empty slot
-                targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
-            }
-
-            ((SpongeItemStackSnapshot) targetSnapshot).setCreator(creator);
-            SlotTransaction slotTransaction =
-                    new SlotTransaction(new SlotAdapter(slot), sourceSnapshot, targetSnapshot);
-            ImmutableList<SlotTransaction> transactions =
-                    new ImmutableList.Builder<SlotTransaction>().add(slotTransaction).build();
-            ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Sponge.getCauseStackManager().getCurrentCause(),
-                    (Item) itemToPickup, (Inventory) player.inventoryContainer, transactions);
-            if (SpongeImpl.postEvent(event)) {
+        if (event.getCustom().isPresent()) {
+            List<ItemStackSnapshot> list = event.getCustom().get();
+            if (list.isEmpty()) {
                 return false;
             }
-        }
 
+            boolean fullTransfer = true;
+            IMixinInventoryPlayer capture = (IMixinInventoryPlayer) player.inventory;
+            capture.setCapture(true);
+            for (ItemStackSnapshot item : list) {
+                org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
+                player.inventory.addItemStackToInventory(ItemStackUtil.toNative(itemStack));
+                if (!itemStack.isEmpty()) {
+                    fullTransfer = false;
+                    break;
+                }
+
+            }
+            capture.setCapture(false);
+            if (!fullTransfer) {
+                for (SlotTransaction trans : capture.getCapturedTransactions()) {
+                    trans.getSlot().set(trans.getOriginal().createStack());
+                }
+                return false;
+            }
+
+            callPlayerChangeInventoryPickupEvent(player, capture);
+            itemToPickup.getItem().setCount(0);
+        }
         return true;
+    }
+
+    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, IMixinInventoryPlayer inventory) {
+        if (inventory.getCapturedTransactions().isEmpty()) {
+            return true;
+        }
+        Sponge.getCauseStackManager().pushCause(player);
+        ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Sponge.getCauseStackManager().getCurrentCause(), (Inventory) player.inventoryContainer,
+                inventory.getCapturedTransactions());
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        applyTransactions(event);
+        inventory.getCapturedTransactions().clear();
+        return !event.isCancelled();
+    }
+
+    private static void applyTransactions(ChangeInventoryEvent.Pickup event) {
+        if (event.isCancelled()) {
+            for (SlotTransaction trans : event.getTransactions()) {
+                trans.getSlot().set(trans.getOriginal().createStack());
+            }
+            return;
+        }
+        for (SlotTransaction trans : event.getTransactions()) {
+            if (!trans.isValid()) {
+                trans.getSlot().set(trans.getOriginal().createStack());
+            } else if (trans.getCustom().isPresent()) {
+                trans.getSlot().set(trans.getFinal().createStack());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

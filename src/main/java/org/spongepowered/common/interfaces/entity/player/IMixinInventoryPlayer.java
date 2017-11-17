@@ -26,27 +26,44 @@ package org.spongepowered.common.interfaces.entity.player;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+
+import java.util.List;
 
 public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
 
     int getHeldItemIndex(EnumHand hand);
-    
+
     /**
      * Set the current hotbar item and optionally notify the client
-     * 
+     *
      * @param itemIndex Hotbar index to set
      * @param notify True to send an update packet to the client if this is a
      *      server
      */
-    public abstract void setSelectedItem(int itemIndex, boolean notify);
+    void setSelectedItem(int itemIndex, boolean notify);
 
     /**
      * Gets the first available slot id for itemstack.
-     * 
+     *
      * @param itemstack The itemstack attempting to be stored
      * @return The slot id or -1 if no slot found.
      */
     int getFirstAvailableSlot(ItemStack itemstack);
+
+    /**
+     * Gets the captured transactions.
+     *
+     * @return The captured transactions.
+     */
+    List<SlotTransaction> getCapturedTransactions();
+
+    /**
+     * Sets whether to capture transactions.
+     *
+     * @param enable whether to capture transactions.
+     */
+    void setCapture(boolean enable);
 
 }

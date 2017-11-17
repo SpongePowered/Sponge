@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.key.Keys;
@@ -43,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -50,6 +52,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -198,10 +201,25 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, ((Entity) this).getCreator().orElse(null))) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay, this.getCreator().orElse(null))) {
             ci.cancel();
         }
     }
+
+    @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
+    public boolean onAddItemStackToInventory(InventoryPlayer inventory, ItemStack itemStack, EntityPlayer player) {
+        IMixinInventoryPlayer inv = (IMixinInventoryPlayer) inventory;
+        inv.setCapture(true);
+        boolean added = inventory.addItemStackToInventory(itemStack);
+        inv.setCapture(false);
+        inv.getCapturedTransactions();
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {
+            return false;
+        }
+        return added;
+    }
+
+    // TODO non pre event
 
     // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data
 
