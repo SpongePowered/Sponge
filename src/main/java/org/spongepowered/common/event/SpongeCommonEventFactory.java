@@ -966,6 +966,10 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean callTransferPost(IMixinInventory captureSource, Inventory source, Inventory destination) {
+        // TODO make sure we never got null
+        if (captureSource == null || source == null || destination == null) {
+            return true;
+        }
         Sponge.getCauseStackManager().pushCause(source);
         ChangeInventoryEvent.Transfer.Post event =
                 SpongeEventFactory.createChangeInventoryEventTransferPost(Sponge.getCauseStackManager().getCurrentCause(),
@@ -998,6 +1002,10 @@ public class SpongeCommonEventFactory {
      * @param originalStack the original Stack
      */
     public static void captureTransaction(IMixinInventory captureIn, Inventory inv, int index, ItemStack originalStack) {
+        // TODO make sure we never got null
+        if (captureIn == null || inv == null) {
+            return;
+        }
         Inventory ordered = inv.query(OrderedInventory.class);
         if (ordered instanceof OrderedInventory) {
             Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
@@ -1020,6 +1028,10 @@ public class SpongeCommonEventFactory {
      * @return the result if the transaction
      */
     public static ItemStack captureTransaction(IMixinInventory captureIn, Inventory inv, int index, Supplier<ItemStack> transaction) {
+        // TODO make sure we never got null
+        if (captureIn == null || inv == null) {
+            return transaction.get();
+        }
         Inventory ordered = inv.query(OrderedInventory.class);
         if (ordered instanceof OrderedInventory) {
             Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
@@ -1038,9 +1050,12 @@ public class SpongeCommonEventFactory {
     }
 
     public static SetAttackTargetEvent callSetAttackTargetEvent(@Nullable Entity target, Agent agent) {
-        SetAttackTargetEvent
-                event = SpongeEventFactory.createSetAttackTargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
+        SetAttackTargetEvent event = SpongeEventFactory.createSetAttackTargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
         SpongeImpl.postEvent(event);
         return event;
+    }
+
+    public static Inventory toInventory(IInventory iinventory) {
+        return ((Inventory) iinventory);
     }
 }

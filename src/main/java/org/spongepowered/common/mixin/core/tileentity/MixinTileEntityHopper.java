@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
+import static org.spongepowered.common.event.SpongeCommonEventFactory.toInventory;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
@@ -203,11 +204,6 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
                 itemStack1 = itemStack;
             }
         }
-    }
-
-
-    private static Inventory toInventory(IInventory iinventory) {
-        return ((Inventory) iinventory);
     }
 
     private static @Nullable IMixinInventory forCapture(Object toCapture) {
