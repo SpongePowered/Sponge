@@ -36,4 +36,11 @@ public abstract class PluginPhaseState<P extends PluginPhaseContext<P>> implemen
         return TrackingPhases.PLUGIN;
     }
 
+    private final String className = this.getClass().getSimpleName();
+
+    @Override
+    public String toString() {
+        return this.getPhase() + "{" + this.className + "}";
+    }
+
 }

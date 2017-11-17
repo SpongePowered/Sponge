@@ -70,6 +70,12 @@ public class PlayerPhase extends TrackingPhase {
         public void unwind(GeneralizedContext phaseContext) {
 
         }
+        private final String className = this.getClass().getSimpleName();
+
+        @Override
+        public String toString() {
+            return this.getPhase() + "{" + this.className + "}";
+        }
     }
 
     public static PlayerPhase getInstance() {

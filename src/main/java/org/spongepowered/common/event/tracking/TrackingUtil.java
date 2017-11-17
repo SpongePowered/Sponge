@@ -76,6 +76,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -139,10 +140,10 @@ public final class TrackingUtil {
         if (!mixinEntity.shouldTick()) {
             return;
         }
-
+        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext()
+            .source(entityIn);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext()
-                    .source(entityIn);
+             final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
         ) {
             Sponge.getCauseStackManager().pushCause(entityIn);
@@ -158,6 +159,8 @@ public final class TrackingUtil {
                     });
             context.buildAndSwitch();
             entityIn.onUpdate();
+        } catch (Exception | NoClassDefFoundError e) {
+            PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
         }
     }
 
@@ -171,11 +174,12 @@ public final class TrackingUtil {
 
         final Optional<User> notifierUser = mixinEntity.getNotifierUser();
         final Optional<User> creatorUser = mixinEntity.getCreatorUser();
+        final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext()
+            .source(entity)
+            .notifier(() -> notifierUser)
+            .owner(() -> creatorUser);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext()
-                    .source(entity)
-                    .notifier(() -> notifierUser)
-                    .owner(() -> creatorUser)
+             final EntityTickContext context = tickContext
                     .buildAndSwitch();
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
              ) {
@@ -185,6 +189,8 @@ public final class TrackingUtil {
             creatorUser
                     .ifPresent(notifier -> frame.addContext(EventContextKeys.OWNER, notifier));
             entity.updateRidden();
+        } catch (Exception | NoClassDefFoundError e) {
+            PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
         }
     }
 
@@ -199,9 +205,10 @@ public final class TrackingUtil {
         if (!mixinTileEntity.shouldTick()) {
             return;
         }
+        final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext()
+            .source(tile);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final PhaseContext<?> phaseContext = TickPhase.Tick.TILE_ENTITY.createPhaseContext()
-                 .source(tile)) {
+             final PhaseContext<?> phaseContext = context) {
             Sponge.getCauseStackManager().pushCause(tile);
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
@@ -231,7 +238,7 @@ public final class TrackingUtil {
                 tile.update();
             }
         } catch (Exception e) {
-            PhaseTracker.getInstance().printExceptionFromPhase(e);
+            PhaseTracker.getInstance().printExceptionFromPhase(e, context);
         }
     }
 
@@ -269,7 +276,7 @@ public final class TrackingUtil {
             try (PhaseContext<?> context = phaseContext.buildAndSwitch()) {
                 block.updateTick(minecraftWorld, pos, state, random);
             } catch (Exception | NoClassDefFoundError e) {
-                phaseTracker.printExceptionFromPhase(e);
+                phaseTracker.printExceptionFromPhase(e, phaseContext);
             }
         }
     }
@@ -306,6 +313,8 @@ public final class TrackingUtil {
             // Now actually switch to the new phase
             try (PhaseContext<?> context = phaseContext.buildAndSwitch()) {
                 block.randomTick(minecraftWorld, pos, state, random);
+            } catch (Exception | NoClassDefFoundError e) {
+                phaseTracker.printExceptionFromPhase(e, phaseContext);
             }
         }
     }

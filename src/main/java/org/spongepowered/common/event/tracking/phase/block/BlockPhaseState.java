@@ -63,4 +63,11 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     public boolean allowEntitySpawns() {
         return true;
     }
+
+    private final String className = this.getClass().getSimpleName();
+
+    @Override
+    public String toString() {
+        return this.getPhase() + "{" + this.className + "}";
+    }
 }

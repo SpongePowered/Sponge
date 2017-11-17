@@ -185,9 +185,11 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
 
+    private final String className = this.getClass().getSimpleName();
+
     @Override
     public String toString() {
-        return Objects.toString("PacketState");
+        return this.getPhase() + "{" + this.className + "}";
     }
 
 }

@@ -163,10 +163,10 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         return Objects.hashCode(this.id);
     }
 
+    private final String className = this.getClass().getSimpleName();
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .toString();
+        return this.getPhase() + "{" + this.className + ":" + this.id +  "}";
     }
 }

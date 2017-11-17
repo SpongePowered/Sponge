@@ -27,8 +27,11 @@ package org.spongepowered.common.event.tracking;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -103,6 +106,20 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
             if (!values.isEmpty()) {
                 consumer.accept(values);
             }
+        }
+    }
+
+
+    public final void acceptAndRemoveOrNewList(K key, Consumer<List<V>> consumer) {
+        if (this.isEmpty()) {
+            consumer.accept(new ArrayList<>());
+            return;
+        }
+        final List<V> values = this.captured.removeAll(key);
+        if (!values.isEmpty()) {
+            consumer.accept(values);
+        } else {
+            consumer.accept(new ArrayList<>());
         }
     }
 
@@ -188,4 +205,5 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
                 .add("Captured", this.captured == null ? 0 : this.captured.size())
                 .toString();
     }
+
 }
