@@ -34,17 +34,22 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
@@ -61,7 +66,9 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +85,13 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Shadow public abstract int getInventoryStackLimit();
 
     @Shadow public abstract int getSizeInventory();
+
+    @Shadow public abstract ItemStack getStackInSlot(int index);
+
+    @Shadow protected abstract int addResource(int p_191973_1_, ItemStack p_191973_2_);
+
+    private List<SlotTransaction> capturedTransactions = new ArrayList<>();
+    private boolean doCapture = false;
 
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
@@ -243,5 +257,39 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         }
 
         return -1;
+    }
+
+    @Override
+    public List<SlotTransaction> getCapturedTransactions() {
+        return this.capturedTransactions;
+    }
+
+    @Override
+    public void setCapture(boolean doCapture) {
+        this.doCapture = doCapture;
+    }
+
+    @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
+    public void onAdd(int index, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        if (this.doCapture) {
+            // Capture "damaged" items picked up
+            Slot slot = this.main.getSlot(SlotIndex.of(index)).get();
+            this.capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(stack)));
+        }
+    }
+
+    @Redirect(method = "storePartialItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addResource(ILnet/minecraft/item/ItemStack;)I"))
+    public int onAdd(InventoryPlayer inv, int index, ItemStack stack) {
+        if (this.doCapture) {
+            // Capture items getting picked up
+            Slot slot = this.getMain().getSlot(SlotIndex.of(index)).get();
+            ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
+            int result = this.addResource(index, stack);
+            ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
+            this.capturedTransactions.add(new SlotTransaction(slot, original, replacement));
+            return result;
+        }
+        return this.addResource(index, stack);
+
     }
 }
