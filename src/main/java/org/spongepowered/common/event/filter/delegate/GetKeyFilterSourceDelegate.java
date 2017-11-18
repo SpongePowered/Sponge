@@ -36,6 +36,8 @@ import static org.objectweb.asm.Opcodes.IFNE;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 import com.google.common.collect.Sets;
@@ -64,6 +66,7 @@ import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.filter.data.GetKey;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -80,6 +83,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
             .newHashSet(After.class, Before.class, ContextValue.class, First.class, Last.class, Root.class, Getter.class);
 
     private Class<?> paramType;
+    private Class<?> boxedParamType;
     private final GetKey getKey;
     private final String keyId;
     private final Key<?> key;
@@ -87,6 +91,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
     private Parameter sourceParam;
     private int sourceParamIndex;
     private boolean parameterIsSpongeValue;
+    private String name;
 
     public GetKeyFilterSourceDelegate(GetKey getKey) {
         this.getKey = getKey;
@@ -129,19 +134,19 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
 
     private void sanityCheck(Parameter param, Method method) {
         // The parameter type must be a supertype of either the value wrapper or the underlying value
-        if (!(this.paramType.isAssignableFrom(this.key.getElementToken().getRawType()) || paramType.isAssignableFrom(this.key.getValueToken().getRawType()))) {
+        if (!(this.boxedParamType.isAssignableFrom(this.key.getElementToken().getRawType()) || this.boxedParamType.isAssignableFrom(this.key.getValueToken().getRawType()))) {
             if (ImmutableValue.class.isAssignableFrom(paramType)) {
                 try {
                     Class<?> immutableType = this.key.getValueToken().getRawType().getMethod("asImmutable").getReturnType();
-                    if (!this.paramType.isAssignableFrom(immutableType)) {
-                        throw new IllegalStateException(String.format("Parameter '%s' must be a supertype of %s", param, immutableType));
+                    if (!this.boxedParamType.isAssignableFrom(immutableType)) {
+                        throw new IllegalStateException(String.format("Parameter '%s' must be a supertype of immutable value type %s", param, immutableType));
                     }
                 } catch (NoSuchMethodException e) {
                     throw new RuntimeException(e);
                 }
             } else {
                 throw new IllegalStateException(
-                        String.format("Parameter '%s' must be of type %s or %s", param, key.getElementToken(), key.getValueToken()));
+                        String.format("Parameter '%s' must be a supertype of type %s or %s", param, key.getElementToken(), key.getValueToken()));
             }
         }
 
@@ -168,7 +173,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
             }
 
             String paramTag;
-            if (i == 0) {
+            if (i == 0 && ChangeDataHolderEvent.ValueChange.class.isAssignableFrom(methodParam.getType())) {
                 paramTag = ""; // The event has an implicit tag of ""
             } else {
                 Set<Object> sourceAnnotations = Arrays.stream(methodParam.getAnnotations()).filter(p -> TAG_ANNOTATIONS.contains(p.annotationType())).collect(Collectors.toSet());
@@ -195,7 +200,8 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
             throw new IllegalStateException(String.format("No matches found for tag '%s' on @GetKey parameter '%s'", tag, param));
         }
         if (matchedParams.size() > 1) {
-            throw new IllegalStateException(String.format("Tag '%s' for @GetKey on parameter %s matches multiple other parameters: '%s'", tag, param, matchedParams));
+            throw new IllegalStateException(String.format("Tag '%s' for @GetKey on parameter %s matches multiple other parameters: '%s'", tag, param, matchedParams.stream().map(
+                    Tuple::getFirst).collect(Collectors.toList())));
         }
         this.sourceParam = matchedParams.get(0).getFirst();
         this.sourceParamIndex = matchedParams.get(0).getSecond();
@@ -205,6 +211,8 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
     public Tuple<Integer, Integer> write(String name, ClassWriter cw, MethodVisitor constructorMv, MethodVisitor mv, Method method, Parameter param, int local) {
 
         this.paramType = param.getType();
+        this.name = name;
+        this.boxedParamType = this.paramType.isPrimitive() ? GeneratorUtils.boxClass(this.paramType) : this.paramType;
         this.fieldName = "key" + local;
         this.parameterIsSpongeValue = BaseValue.class.isAssignableFrom(this.paramType);
 
@@ -219,20 +227,14 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
 
         Label success = new Label();
 
-        int temp = local++;
         int paramLocal = local++;
 
 
-        // Load the key into a temp local
-        mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, name, this.fieldName, Type.getDescriptor(Key.class));
-        mv.visitVarInsn(ASTORE, temp);
-
         boolean isMutable;
         if (Event.class.isAssignableFrom(this.sourceParam.getType())) {
-            isMutable = this.handleEventSource(mv, success, temp);
+            isMutable = this.handleEventSource(mv, success);
         } else {
-            isMutable = this.handleDataHolder(mv, success, temp);
+            isMutable = this.handleDataHolder(mv, success);
         }
 
 
@@ -249,8 +251,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
         if (!this.parameterIsSpongeValue) {
             mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(BaseValue.class), "get", "()Ljava/lang/Object;", true);
 
-            // Cast and store the underlying value into the parameter local
-            mv.visitTypeInsn(CHECKCAST, Type.getInternalName(paramType));
+            GeneratorUtils.visitUnboxingMethod(mv, Type.getType(this.paramType));
         } else {
             // If the type wanted by the parameter and the type we have disagree, we need to convert by calling asMutable or asImmutable
             // If they agree, we can just cast
@@ -262,18 +263,22 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
             mv.visitTypeInsn(CHECKCAST, Type.getInternalName(paramType));
         }
         // Store the final value into the parameter local
-        mv.visitVarInsn(ASTORE, paramLocal);
+        mv.visitVarInsn(Type.getType(this.paramType).getOpcode(ISTORE), paramLocal);
 
         return new Tuple<>(local, paramLocal);
 
     }
 
-    private boolean handleDataHolder(MethodVisitor mv, Label success, int temp) {
+    private void loadKey(MethodVisitor mv) {
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, this.name, this.fieldName, Type.getDescriptor(Key.class));
+    }
+
+    private boolean handleDataHolder(MethodVisitor mv, Label success) {
         mv.visitVarInsn(ALOAD, this.sourceParamIndex);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(DataHolder.class));
 
-        // Load key
-        mv.visitVarInsn(ALOAD, temp);
+        this.loadKey(mv);
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(ValueContainer.class), "getValue", "(" + Type.getDescriptor(Key.class) + ")" + Type.getDescriptor(Optional.class), true);
 
         mv.visitInsn(DUP);
@@ -286,7 +291,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
         return true;
     }
 
-    private boolean handleEventSource(MethodVisitor mv, Label success, int temp) {
+    private boolean handleEventSource(MethodVisitor mv, Label success) {
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(ChangeDataHolderEvent.ValueChange.class), "getChanges", "()" + Type.getDescriptor(
                 DataTransactionResult.class), true);
@@ -296,8 +301,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
             mv.visitInsn(DUP);
             // Load enum value
             mv.visitFieldInsn(GETSTATIC, Type.getInternalName(DataTransactionResult.DataCategory.class), category.name(), Type.getDescriptor(DataTransactionResult.DataCategory.class));
-            // Load key
-            mv.visitVarInsn(ALOAD, temp);
+            this.loadKey(mv);
 
             // Call DataTransactionResult#get
             mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(DataTransactionResult.class), "get", "(" + Type.getDescriptor(
@@ -309,6 +313,8 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
 
             // If the Optional is present, we're done
             mv.visitJumpInsn(IFNE, success);
+            // Otherwise, pop the empty optional in preparation for the next category
+            mv.visitInsn(POP);
 
         }
 

@@ -24,26 +24,42 @@
  */
 package org.spongepowered.common.event;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.internal.matchers.ThrowableCauseMatcher;
+import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.RailDirections;
+import org.spongepowered.api.data.value.BoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
@@ -53,7 +69,6 @@ import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.listener.AllCauseListener;
@@ -71,7 +86,6 @@ import org.spongepowered.common.event.listener.InvalidCancelledListener;
 import org.spongepowered.common.event.listener.InvalidIncludeExcludeListener;
 import org.spongepowered.common.event.listener.RootListener;
 import org.spongepowered.common.event.listener.SimpleListener;
-import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.util.Optional;
@@ -84,6 +98,9 @@ public class EventFilterTest {
     private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
             new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testSimpleEvent() throws Exception {
@@ -134,8 +151,9 @@ public class EventFilterTest {
         Assert.assertTrue("Listener annotated with @IsCancelled(Tristate.UNDEFINED) was not called!", listener.alwaysCalledWasCalled);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testCancelledEvent_InvalidListener() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("Attempted to filter a non-cancellable event")));
         this.getListener(new InvalidCancelledListener(), "onEvent", UncancellableEvent.class);
     }
 
@@ -177,8 +195,9 @@ public class EventFilterTest {
         Assert.assertTrue("Listener annotated with multi-target @Exclude was not called!", listener.multiExcludeListenerCalled);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testIncludeExcludeListener_InvalidListener() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("Cannot have both @Include and @Exclude annotations")));
         this.getListener(new InvalidIncludeExcludeListener(), "invalidListener", TestEvent.class);
     }
 
@@ -428,12 +447,23 @@ public class EventFilterTest {
     public void testGetKey() throws Exception {
         GetKeyListener listener = new GetKeyListener();
 
-        AnnotatedEventListener getKeyListener = this.getListener(listener, "getKeyListener", ChangeDataHolderEvent.ValueChange.class, Integer.class,
+        AnnotatedEventListener getKeyListener = this.getListener(listener, "getKeyListener", ChangeDataHolderEvent.ValueChange.class, int.class,
                 MutableBoundedValue.class, ImmutableValue.class);
-        AnnotatedEventListener dataHolderListener = this.getListener(listener, "dataHolderListener", ChangeDataHolderEvent.ValueChange.class, Player.class, Integer.class);
+        AnnotatedEventListener dataHolderListener = this.getListener(listener, "dataHolderListener", ChangeDataHolderEvent.ValueChange.class, int.class, MutableBoundedValue.class, Player.class, int.class);
+        AnnotatedEventListener rejectedDataListener = this.getListener(listener, "rejectedDataListener", ChangeDataHolderEvent.ValueChange.class, RailDirection.class);
+        AnnotatedEventListener multipleCategoriesListene = this.getListener(listener, "multipleCategories", ChangeDataHolderEvent.ValueChange.class, RailDirection.class,
+                RabbitType.class);
+
 
         DataHolder holder = mock(DataHolder.class);
 
+
+        MutableBoundedValue<Integer> oldValue = SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
+                .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
+                .minimum(0)
+                .maximum(20)
+                .actualValue(16)
+                .build();
 
         MutableBoundedValue<Integer> value = SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
                 .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
@@ -442,18 +472,73 @@ public class EventFilterTest {
                 .actualValue(15)
                 .build();
 
+        ImmutableValue<RailDirection> railDirectionRejected = SpongeValueFactory.getInstance().createValue(Keys.RAIL_DIRECTION, RailDirections.ASCENDING_EAST, RailDirections.NORTH_SOUTH).asImmutable();
+        ImmutableValue<RailDirection> railDirectionSuccess = SpongeValueFactory.getInstance().createValue(Keys.RAIL_DIRECTION, RailDirections.ASCENDING_NORTH, RailDirections.NORTH_SOUTH).asImmutable();
+
+        ImmutableValue<RabbitType> rabbitTypeReplaced = SpongeValueFactory.getInstance().createValue(Keys.RABBIT_TYPE, RabbitTypes.BLACK_AND_WHITE, RabbitTypes.BROWN).asImmutable();
+
         Player player = mock(Player.class);
         when(player.get(Keys.FOOD_LEVEL)).thenReturn(Optional.of(15));
         when(player.getValue(Keys.FOOD_LEVEL)).thenReturn(Optional.of(value));
 
-        getKeyListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(Cause.of(EventContext.empty(), Text.of()),
+        getKeyListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(TEST_CAUSE,
                 DataTransactionResult.successResult(value.asImmutable()), holder));
         Assert.assertTrue("Listener with @GetKey annotation was not called!", listener.getKeyListenerCalled);
 
 
         dataHolderListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(Cause.of(EventContext.empty(), player),
-                DataTransactionResult.successNoData(), player));
+                DataTransactionResult.successReplaceResult(value.asImmutable(), oldValue.asImmutable()), player));
         Assert.assertTrue("Listener with tagged @GetKey annotation was not called!", listener.dataHolderListenerCalled);
+
+        rejectedDataListener.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(TEST_CAUSE,
+                DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).success(railDirectionSuccess).reject(railDirectionRejected).build(), player));
+        Assert.assertTrue("Listener with REJECTED DataCategory was not called!", listener.rejectedDataListenerCalled);
+
+        multipleCategoriesListene.handle(SpongeEventFactory.createChangeDataHolderEventValueChange(TEST_CAUSE,
+                DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).reject(railDirectionRejected).replace(rabbitTypeReplaced).build(), player));
+    }
+
+    @Test
+    public void testGetKey_InvalidKey() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("NOT_A_REAL_KEY")));
+        this.getListener(new GetKeyListener(), "invalidKeyListener", ChangeDataHolderEvent.ValueChange.class, Integer.class);
+    }
+
+    @Test
+    public void testGetKey_InvalidImmutableValue() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("must be a supertype of immutable value type")));
+        this.getListener(new GetKeyListener(), "invalidImmutableParameterType", ChangeDataHolderEvent.ValueChange.class, ImmutableBoundedValue.class);
+    }
+
+    @Test
+    public void testGetKey_InvalidMutableValue() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("must be a supertype of type")));
+        this.getListener(new GetKeyListener(), "invalidMutableParameterType", ChangeDataHolderEvent.ValueChange.class, MutableBoundedValue.class);
+    }
+
+    @Test
+    public void testGetKey_InvalidParamType() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("must be a supertype of type")));
+        this.getListener(new GetKeyListener(), "invalidParamType", ChangeDataHolderEvent.ValueChange.class, String.class);
+    }
+
+
+    @Test
+    public void testGetKey_InvalidTagType() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("which is not a DataHolder or ChangeDataHolderEvent.ValueChange")));
+        this.getListener(new GetKeyListener(), "invalidTagType", InteractBlockEvent.class, Text.class, BlockState.class);
+    }
+
+    @Test
+    public void testGetKey_MultipleMatches() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("matches multiple other parameters")));
+        this.getListener(new GetKeyListener(), "multipleMatches", ChangeDataHolderEvent.ValueChange.class, Text.class, BlockState.class);
+    }
+
+    @Test
+    public void testGetKey_NoMatches() throws Exception {
+        this.expectException(ThrowableMessageMatcher.hasMessage(containsString("No matches found for tag 'foo'")));
+        this.getListener(new GetKeyListener(), "noMatches", ChangeDataHolderEvent.ValueChange.class, BlockState.class);
     }
 
     public static class TestEvent implements Event, Cancellable {
@@ -564,5 +649,18 @@ public class EventFilterTest {
 
     private AnnotatedEventListener getListener(Object listener, String method, Class<?>... classes) throws Exception {
         return this.handlerFactory.create(listener, listener.getClass().getMethod(method, classes));
+    }
+
+    /**
+     * Unwraps the two layers of exceptions added by the EventFilter infrastructure
+     * @param matcher
+     */
+    private void expectException(Matcher<? extends Throwable> matcher) {
+        this.expectException(IllegalStateException.class, matcher);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void expectException(Class<? extends Throwable> throwable, Matcher<? extends Throwable> matcher) {
+        this.thrown.expectCause(ThrowableCauseMatcher.hasCause(allOf((Matcher) instanceOf(throwable), (Matcher) matcher))); // These casts allow it to compile under Intellij; don't remove them
     }
 }

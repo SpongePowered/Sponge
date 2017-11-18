@@ -202,7 +202,7 @@ public class FilterGenerator {
 
             // Finalize constructor after the delegates have all had a chance to modify it
             constructorMv.visitInsn(RETURN);
-            constructorMv.visitMaxs(100, 100);
+            constructorMv.visitMaxs(0,0 );
             constructorMv.visitEnd();
 
             // create the return array
@@ -227,7 +227,7 @@ public class FilterGenerator {
                 mv.visitInsn(AASTORE);
             }
             mv.visitInsn(ARETURN);
-            mv.visitMaxs(100, 100);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         cw.visitEnd();
