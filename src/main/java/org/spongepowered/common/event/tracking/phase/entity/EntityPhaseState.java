@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import com.google.common.base.Objects;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -61,7 +60,6 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
     public void unwind(E context) {
 
     }
-    private final String className = this.getClass().getSimpleName();
 
     @Override
     public String toString() {
