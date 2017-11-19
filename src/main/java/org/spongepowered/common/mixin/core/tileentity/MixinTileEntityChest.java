@@ -50,8 +50,10 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
@@ -170,5 +172,23 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         return InventoryUtil.getDoubleChestInventory(((TileEntityChest)(Object) this));
     }
 
+    @Override
+    public Set<Chest> getConnectedChests() {
+        this.checkForAdjacentChests();
+        Set<Chest> set = new HashSet<>();
+        if (this.adjacentChestXNeg != null) {
+            set.add(((Chest) this.adjacentChestXNeg));
+        }
+        if (this.adjacentChestXPos != null) {
+            set.add(((Chest) this.adjacentChestXPos));
+        }
+        if (this.adjacentChestZNeg != null) {
+            set.add(((Chest) this.adjacentChestZNeg));
+        }
+        if (this.adjacentChestZPos != null) {
+            set.add(((Chest) this.adjacentChestZPos));
+        }
+        return set;
+    }
 }
 
