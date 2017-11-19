@@ -420,6 +420,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             return ((IChunkGenerator) this.baseGenerator).getPossibleCreatures(creatureType, pos);
         }
 
+        if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            return ((SpongeGenerationPopulator) this.baseGenerator).getChunkGenerator().getPossibleCreatures(creatureType, pos);
+        }
+
         Biome biome = this.world.getBiome(pos);
         return biome.getSpawnableList(creatureType);
     }

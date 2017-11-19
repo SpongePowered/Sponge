@@ -146,6 +146,10 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
         return this.cachedChunk;
     }
 
+    public IChunkGenerator getChunkGenerator() {
+        return this.chunkGenerator;
+    }
+
     public void clearCachedChunk() {
         this.cachedChunk = null;
     }
