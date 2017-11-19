@@ -41,6 +41,7 @@ import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Primitives;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -212,7 +213,7 @@ public class GetKeyFilterSourceDelegate implements ParameterFilterSourceDelegate
 
         this.paramType = param.getType();
         this.name = name;
-        this.boxedParamType = this.paramType.isPrimitive() ? GeneratorUtils.boxClass(this.paramType) : this.paramType;
+        this.boxedParamType = Primitives.wrap(this.paramType);
         this.fieldName = "key" + local;
         this.parameterIsSpongeValue = BaseValue.class.isAssignableFrom(this.paramType);
 
