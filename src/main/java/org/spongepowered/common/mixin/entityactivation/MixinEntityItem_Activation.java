@@ -46,7 +46,7 @@ public abstract class MixinEntityItem_Activation extends MixinEntity_Activation 
             --this.pickupDelay;
         }
 
-        if (!this.world.isRemote && this.age >= ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getItemDespawnRate()) {
+        if (!this.world.isRemote && this.age >= ((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getItemDespawnRate()) {
             this.setDead();
         }
     }
