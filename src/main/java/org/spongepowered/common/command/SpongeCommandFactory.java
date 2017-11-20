@@ -774,7 +774,7 @@ public class SpongeCommandFactory {
     public static CommandSpec createHelpCommand() {
         return CommandSpec
                 .builder()
-                .permission("sponge.command.help")
+                .permission(CommandPermissions.SPONGE_HELP_PERMISSION)
                 .arguments(
                         optional(
                                 firstParsing(

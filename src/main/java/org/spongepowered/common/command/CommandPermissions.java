@@ -44,6 +44,9 @@ public final class CommandPermissions {
     private static final String SELECTOR_COMMAND = "@";
     private static final String SELECTOR_PERMISSION = "minecraft.selector";
     private static final int SELECTOR_LEVEL = 2;
+    private static final String SPONGE_HELP_COMMAND = "sponge:help";
+    static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
+    private static final int SPONGE_HELP_LEVEL = 0;
 
     private CommandPermissions() {
     }
@@ -68,10 +71,13 @@ public final class CommandPermissions {
 
     public static void populateNonCommandPermissions(SubjectData data, BiFunction<Integer, String, Boolean> testPermission) {
         if (testPermission.apply(CommandPermissions.COMMAND_BLOCK_LEVEL, CommandPermissions.COMMAND_BLOCK_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, SELECTOR_PERMISSION, Tristate.TRUE);
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, CommandPermissions.SELECTOR_PERMISSION, Tristate.TRUE);
         }
         if (testPermission.apply(CommandPermissions.SELECTOR_LEVEL, CommandPermissions.SELECTOR_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, COMMAND_BLOCK_COMMAND, Tristate.TRUE);
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, CommandPermissions.COMMAND_BLOCK_COMMAND, Tristate.TRUE);
+        }
+        if (testPermission.apply(CommandPermissions.SPONGE_HELP_LEVEL, CommandPermissions.SPONGE_HELP_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, CommandPermissions.SPONGE_HELP_PERMISSION, Tristate.TRUE);
         }
     }
 
