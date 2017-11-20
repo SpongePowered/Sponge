@@ -32,6 +32,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -195,6 +196,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 return false;
             }
 
+            // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
+            if (current.getBlock().getClass() == BlockShulkerBox.class) {
+                world.removeTileEntity(pos);
+            }
             mixinWorldServer.setBlockState(pos, replaced, flag);
             world.getPlayerChunkMap().markBlockForUpdate(pos);
             if (this.compound != null) {
