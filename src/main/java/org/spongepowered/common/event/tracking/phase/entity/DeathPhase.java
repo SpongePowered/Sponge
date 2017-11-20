@@ -125,7 +125,18 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             // Forge always fires a living drop event even if nothing was captured
             // This allows mods such as Draconic Evolution to add items to the drop list
-            context.getCapturedEntityItemDropSupplier().acceptAndRemoveOrNewList(dyingEntity.getUniqueId(), items -> {
+            if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
+                final ArrayList<Entity> entities = new ArrayList<>();
+                final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
+                SpongeImpl.postEvent(destruct);
+                if (!destruct.isCancelled()) {
+                    for (Entity entity : destruct.getEntities()) {
+                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                    }
+                }
+                return;
+            }
+            context.getCapturedEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
                     entities.add(EntityUtil.fromNative(item));
@@ -150,17 +161,6 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
                 // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
                 // This avoids many issues with mods such as Tinkers Construct's soulbound items.
             });
-            if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
-                SpongeImpl.postEvent(destruct);
-                if (!destruct.isCancelled()) {
-                    for (Entity entity : destruct.getEntities()) {
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                    }
-                }
-                return;
-            }
             // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
             context.getCapturedEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
                 final List<ItemDropData> items = new ArrayList<>();
