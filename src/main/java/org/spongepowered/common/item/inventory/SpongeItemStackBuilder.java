@@ -140,6 +140,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
+            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getItemDamage();
             final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();
