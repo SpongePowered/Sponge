@@ -27,17 +27,26 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPortal;
 import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAxisData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.ConstructPortalEvent;
 import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -82,5 +91,15 @@ public abstract class BlockPortalMixin extends BlockMixin {
     private ImmutableAxisData impl$getAxisData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
                 Constants.DirectionFunctions.convertAxisToSponge(blockState.getValue(BlockPortal.AXIS)));
+    }
+
+    @Redirect(method = "trySpawnPortal", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockPortal$Size;placePortalBlocks()V"))
+    private void onPortalSpawn(BlockPortal.Size size) {
+        ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(Sponge.getCauseStackManager()
+                .getCurrentCause(), new Location<>((World) size.world, VecHelper.toVector3i(size.bottomLeft)));
+        SpongeImpl.postEvent(constructPortalEvent);
+        if (!constructPortalEvent.isCancelled()) {
+            size.placePortalBlocks();
+        }
     }
 }

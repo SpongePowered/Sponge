@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -63,6 +64,7 @@ import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.explosive.FusedExplosive;
@@ -74,7 +76,9 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.world.ConstructPortalEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
@@ -175,6 +179,19 @@ public final class EntityUtil {
                 // TODO All of this code assumes that all teleports outside of the API are portals...need to re-think this and somehow correctly
                 // TODO determine what it truly is for API 8
                 frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
+
+                if (!context.getCapturedBlockChanges().isEmpty()) {
+                    ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(Sponge.getCauseStackManager()
+                            .getCurrentCause(), context.getExitTransform().getLocation());
+                    SpongeImpl.postEvent(constructPortalEvent);
+                    if (constructPortalEvent.isCancelled()) {
+                        for (BlockSnapshot original : Lists.reverse(context.getCapturedBlockChanges())) {
+                            original.restore(true, BlockChangeFlags.NONE);
+                        }
+                        context.getCapturedBlockChanges().clear();
+                        return null;
+                    }
+                }
 
                 event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, context.getExitTransform(),
                     context.getTeleporter(), sEntity, true, true);
@@ -345,6 +362,19 @@ public final class EntityUtil {
                 // TODO All of this code assumes that all teleports outside of the API are portals...need to re-think this and somehow correctly
                 // TODO determine what it truly is for API 8
                 frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
+
+                if (!context.getCapturedBlockChanges().isEmpty()) {
+                    ConstructPortalEvent constructPortalEvent = SpongeEventFactory.createConstructPortalEvent(Sponge.getCauseStackManager()
+                            .getCurrentCause(), context.getExitTransform().getLocation());
+                    SpongeImpl.postEvent(constructPortalEvent);
+                    if (constructPortalEvent.isCancelled()) {
+                        for (BlockSnapshot original : Lists.reverse(context.getCapturedBlockChanges())) {
+                            original.restore(true, BlockChangeFlags.NONE);
+                        }
+                        context.getCapturedBlockChanges().clear();
+                        return null;
+                    }
+                }
 
                 event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, context.getExitTransform(),
                     context.getTeleporter(), sPlayer, true, true);
