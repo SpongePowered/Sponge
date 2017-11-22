@@ -37,7 +37,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,8 +50,6 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(EntityFireworkRocket.class)
 public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework, IMixinEntityFireworkRocket {
@@ -170,7 +167,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
-        if (this.fireworkAge == 1) {
+        if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(this);
                 Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
