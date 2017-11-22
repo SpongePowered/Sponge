@@ -36,7 +36,11 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.world.ConstructPortalEvent;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.world.explosion.Explosion;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +60,15 @@ public class PortalTest {
 
     @Listener
     public void onCreatePortal(ConstructPortalEvent e) {
+        if (RANDOM.nextInt(5) == 0) {
+            e.setCancelled(true);
+            e.getPortalLocation().getExtent().triggerExplosion(Explosion.builder()
+                    .location(e.getPortalLocation())
+                    .radius(10)
+                    .build());
+            e.getCause().last(MessageReceiver.class).ifPresent(x -> x.sendMessage(Text.of(TextColors.RED, "The portal destabilized! Try again.")));
+            return;
+        }
         List<Color> dyeColors = new ArrayList<>();
         for (DyeColor x : Sponge.getRegistry().getAllOf(DyeColor.class)) {
             if (!DyeColors.RED.equals(x)) {
@@ -67,10 +80,6 @@ public class PortalTest {
             }
         }
         Color randomColor = dyeColors.get(RANDOM.nextInt(dyeColors.size()));
-        if (RANDOM.nextInt(5) == 0) {
-            e.setCancelled(true);
-            randomColor = DyeColors.RED.getColor();
-        }
         Firework firework = (Firework) e.getPortalLocation().createEntity(EntityTypes.FIREWORK);
         firework.offer(Keys.FIREWORK_EFFECTS, Collections.singletonList(FireworkEffect.builder().color(randomColor).build()));
         e.getPortalLocation().getExtent().spawnEntity(firework);
