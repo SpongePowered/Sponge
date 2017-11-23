@@ -786,6 +786,7 @@ public final class EntityUtil {
             fromWorld.getEntityTracker().untrack(entity);
         }
 
+        entity.dismountRidingEntity();
         entity.world.removeEntityDangerously(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
