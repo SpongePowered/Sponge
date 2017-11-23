@@ -1050,7 +1050,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static SetAITargetEvent callSetAttackTargetEvent(@Nullable Entity target, Agent agent) {
-        SetAITargetEvent event = SpongeEventFactory.createSetAttackTargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
+        SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
         SpongeImpl.postEvent(event);
         return event;
     }

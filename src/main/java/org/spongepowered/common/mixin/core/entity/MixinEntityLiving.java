@@ -231,16 +231,18 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
     public void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
-        if (entitylivingbaseIn != null) {
-            if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
-                this.attackTarget = null;
-                ci.cancel();
-            } else {
-                SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
-                if (event.isCancelled()) {
+        if (ShouldFire.SET_A_I_TARGET_EVENT) {
+            if (entitylivingbaseIn != null) {
+                if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
+                    this.attackTarget = null;
                     ci.cancel();
                 } else {
-                    this.attackTarget = ((EntityLivingBase) event.getTarget().orElse(null));
+                    SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
+                    if (event.isCancelled()) {
+                        ci.cancel();
+                    } else {
+                        this.attackTarget = ((EntityLivingBase) event.getTarget().orElse(null));
+                    }
                 }
             }
         }
