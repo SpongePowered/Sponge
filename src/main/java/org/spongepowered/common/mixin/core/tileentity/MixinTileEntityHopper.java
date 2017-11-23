@@ -51,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinInventory;
@@ -139,6 +140,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         if (isInventoryEmpty(inventory, facing)) {
             return true;
         }
+        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+            return true;
+        }
         return SpongeCommonEventFactory.callTransferPre(toInventory(inventory), toInventory(hopper)).isCancelled();
     }
 
@@ -146,6 +150,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
               target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryFull(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"))
     private boolean onIsInventoryFull(TileEntityHopper hopper, IInventory inventory, EnumFacing enumfacing) {
         if (this.isInventoryFull(inventory, enumfacing)) {
+            return true;
+        }
+        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
             return true;
         }
         return SpongeCommonEventFactory.callTransferPre(toInventory(hopper), toInventory(inventory)).isCancelled();
@@ -157,6 +164,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     private static ItemStack onInsertStack(IInventory source, IInventory destination, ItemStack stack, int index, EnumFacing direction) {
         // capture Transaction
         if (!((source instanceof IMixinInventory || destination instanceof IMixinInventory) && destination instanceof InventoryAdapter)) {
+            return insertStack(source, destination, stack, index, direction);
+        }
+        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST) {
             return insertStack(source, destination, stack, index, direction);
         }
         IMixinInventory captureIn = forCapture(source);
@@ -173,7 +183,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
             target = "Lnet/minecraft/item/ItemStack;isEmpty()Z", ordinal = 1))
     private void afterPutStackInSlots(CallbackInfoReturnable<Boolean> cir, IInventory iInventory, EnumFacing enumFacing, int i, ItemStack itemStack, ItemStack itemStack1) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (itemStack1.isEmpty()) {
+        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
             IMixinInventory capture = forCapture(this);
             Inventory source = toInventory(this);
@@ -193,7 +203,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     private static void afterPullItemFromSlot(IHopper hopper, IInventory iInventory, int index, EnumFacing direction, CallbackInfoReturnable<Boolean> cir,
             ItemStack itemStack, ItemStack itemStack1, ItemStack itemStack2) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (itemStack2.isEmpty()) {
+        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             IMixinInventory capture = forCapture(hopper);
             Inventory source = toInventory(iInventory);
