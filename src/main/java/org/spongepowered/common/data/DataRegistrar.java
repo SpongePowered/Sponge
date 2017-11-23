@@ -197,9 +197,6 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
                 ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, new DisplayNameDataProcessor());
 
-        DataUtil.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
-                ImmutableSpongeDyeableData.class, new DyeableDataProcessor());
-
         // Entity Processors
 
         DataUtil.registerDataProcessorAndImpl(ArmorStandData.class, SpongeArmorStandData.class,
@@ -439,6 +436,11 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(AreaEffectCloudData.class, SpongeAreaEffectData.class, ImmutableAreaEffectCloudData.class,
                 ImmutableSpongeAreaEffectCloudData.class, new AreaEffectCloudDataProcessor());
 
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new SheepDyeColorDataProcessor());
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new WolfDyeColorDataProcessor());
+
         // Item Processors
 
         DataUtil.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -518,6 +520,9 @@ public class DataRegistrar {
 
         DataUtil.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 new HideDataProcessor());
+
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class, new
+                ItemDyeColorDataProcessor());
 
         // Block Processors
 
@@ -706,6 +711,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(HealthScalingData.class, SpongeHealthScaleData.class, ImmutableHealthScalingData.class, ImmutableSpongeHealthScalingData.class,
                 new HealthScalingProcessor());
 
+        DataUtil.registerDualProcessor(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class, ImmutableSpongeDyeableData.class,
+                new BedDyeColorDataProcessor());
+
         // Values
 
         DataUtil.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
@@ -766,9 +774,6 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.VANISH, new VanishValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH_IGNORES_COLLISION, new VanishCollisionValueProcessor());
         DataUtil.registerValueProcessor(Keys.VANISH_PREVENTS_TARGETING, new VanishTargetValueProcessor());
-        DataUtil.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
-        DataUtil.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
-        DataUtil.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
         DataUtil.registerValueProcessor(Keys.FIRST_DATE_PLAYED, new FirstJoinValueProcessor());
         DataUtil.registerValueProcessor(Keys.LAST_DATE_PLAYED, new LastPlayedValueProcessor());
         DataUtil.registerValueProcessor(Keys.HIDE_ENCHANTMENTS, new HideEnchantmentsValueProcessor());

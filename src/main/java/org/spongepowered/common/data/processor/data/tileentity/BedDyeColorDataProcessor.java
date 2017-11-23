@@ -22,51 +22,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.entity;
+package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.tileentity.TileEntityBed;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
+import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
+import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class WolfDyeColorValueProcessor extends AbstractSpongeValueProcessor<EntityWolf, DyeColor, Value<DyeColor>> {
+public class BedDyeColorDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntityBed, DyeColor, Value<DyeColor>, DyeableData,
+        ImmutableDyeableData> {
 
-    public WolfDyeColorValueProcessor() {
-        super(EntityWolf.class, Keys.DYE_COLOR);
+    public BedDyeColorDataProcessor() {
+        super(TileEntityBed.class, Keys.DYE_COLOR);
     }
 
     @Override
-    protected Value<DyeColor> constructValue(DyeColor actualValue) {
-        return SpongeValueFactory.getInstance().createValue(Keys.DYE_COLOR, actualValue, DyeColors.BLACK);
-    }
-
-    @Override
-    protected boolean set(EntityWolf container, DyeColor value) {
-        container.setCollarColor((EnumDyeColor) (Object) value);
+    protected boolean set(TileEntityBed dataHolder, DyeColor value) {
+        dataHolder.setColor((EnumDyeColor) (Object) value);
         return true;
     }
 
     @Override
-    protected Optional<DyeColor> getVal(EntityWolf container) {
-        return Optional.of((DyeColor) (Object) container.getCollarColor());
+    protected Optional<DyeColor> getVal(TileEntityBed dataHolder) {
+        return Optional.of((DyeColor) (Object) dataHolder.getColor());
     }
 
     @Override
     protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
-        return constructValue(value).asImmutable();
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DYE_COLOR, DyeColors.RED, value);
+    }
+
+    @Override
+    protected Value<DyeColor> constructValue(DyeColor actualValue) {
+        // Beds are red by default, not white.
+        return new SpongeValue<>(Keys.DYE_COLOR, DyeColors.RED, actualValue);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected DyeableData createManipulator() {
+        // Beds are red by default, not white.
+        return new SpongeDyeableData(DyeColors.RED);
     }
 }

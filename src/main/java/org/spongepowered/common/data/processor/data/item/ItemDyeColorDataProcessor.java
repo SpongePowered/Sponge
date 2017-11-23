@@ -22,26 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.entity;
+package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
+import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class SheepDyeColorValueProcessor extends AbstractSpongeValueProcessor<EntitySheep, DyeColor, Value<DyeColor>> {
+public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<DyeColor, Value<DyeColor>, DyeableData, ImmutableDyeableData> {
 
-    public SheepDyeColorValueProcessor() {
-        super(EntitySheep.class, Keys.DYE_COLOR);
+    public ItemDyeColorDataProcessor() {
+        super(x -> isDyeable(x.getItem()), Keys.DYE_COLOR);
+    }
+
+    public static boolean isDyeable(Item item) {
+        if (item.equals(Items.DYE) || item.equals(Items.BED)) {
+            return true;
+        }
+
+        final Block block = Block.getBlockFromItem(item);
+
+        return block.equals(Blocks.WOOL)
+                || block.equals(Blocks.STAINED_GLASS)
+                || block.equals(Blocks.CARPET)
+                || block.equals(Blocks.STAINED_GLASS_PANE)
+                || block.equals(Blocks.STAINED_HARDENED_CLAY)
+                || block.equals(Blocks.CONCRETE)
+                || block.equals(Blocks.CONCRETE_POWDER);
     }
 
     @Override
@@ -50,14 +73,21 @@ public class SheepDyeColorValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(EntitySheep container, DyeColor value) {
-        container.setFleeceColor((EnumDyeColor) (Object) value);
+    protected boolean set(ItemStack container, DyeColor value) {
+        if(container.getItem().equals(Items.DYE)) {
+            container.setItemDamage(((EnumDyeColor) (Object) value).getDyeDamage());
+        } else {
+            container.setItemDamage(((EnumDyeColor) (Object) value).getMetadata());
+        }
         return true;
     }
 
     @Override
-    protected Optional<DyeColor> getVal(EntitySheep container) {
-        return Optional.of((DyeColor) (Object) container.getFleeceColor());
+    protected Optional<DyeColor> getVal(ItemStack container) {
+        if(container.getItem().equals(Items.DYE)) {
+            return Optional.of((DyeColor) (Object) EnumDyeColor.byDyeDamage(container.getItemDamage()));
+        }
+        return Optional.of((DyeColor) (Object) EnumDyeColor.byMetadata(container.getItemDamage()));
     }
 
     @Override
@@ -68,5 +98,10 @@ public class SheepDyeColorValueProcessor extends AbstractSpongeValueProcessor<En
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected DyeableData createManipulator() {
+        return new SpongeDyeableData();
     }
 }
