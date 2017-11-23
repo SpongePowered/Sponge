@@ -46,7 +46,7 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
-import org.spongepowered.api.event.entity.ai.SetAttackTargetEvent;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -236,7 +236,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
                 this.attackTarget = null;
                 ci.cancel();
             } else {
-                SetAttackTargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
+                SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
                 if (event.isCancelled()) {
                     ci.cancel();
                 } else {

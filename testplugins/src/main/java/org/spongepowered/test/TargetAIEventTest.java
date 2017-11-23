@@ -29,7 +29,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.ai.SetAttackTargetEvent;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
@@ -60,7 +60,7 @@ public class TargetAIEventTest {
     public static class AITargetListener {
 
         @Listener
-        public void onPreTransferEvent(SetAttackTargetEvent event) {
+        public void onPreTransferEvent(SetAITargetEvent event) {
             if (event.getTarget().map(e -> e instanceof Player).orElse(false)) {
                 event.setCancelled(true);
             }

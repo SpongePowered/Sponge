@@ -80,7 +80,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.ai.SetAttackTargetEvent;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
@@ -1049,8 +1049,8 @@ public class SpongeCommonEventFactory {
         return transaction.get();
     }
 
-    public static SetAttackTargetEvent callSetAttackTargetEvent(@Nullable Entity target, Agent agent) {
-        SetAttackTargetEvent event = SpongeEventFactory.createSetAttackTargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
+    public static SetAITargetEvent callSetAttackTargetEvent(@Nullable Entity target, Agent agent) {
+        SetAITargetEvent event = SpongeEventFactory.createSetAttackTargetEvent(Sponge.getCauseStackManager().getCurrentCause(), Optional.ofNullable(target), agent);
         SpongeImpl.postEvent(event);
         return event;
     }
