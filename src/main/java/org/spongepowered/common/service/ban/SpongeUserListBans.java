@@ -34,6 +34,7 @@ import org.spongepowered.api.util.ban.Ban;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -81,7 +82,8 @@ public class SpongeUserListBans extends UserListBans {
 
     @Override
     public void removeEntry(com.mojang.authlib.GameProfile entry) {
-        getService().pardon((GameProfile) entry);
+        Optional<Ban.Profile> ban = getService().getBanFor((GameProfile) entry);
+        ban.ifPresent(profile -> getService().removeBan(profile));
     }
 
     @Override

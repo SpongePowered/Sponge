@@ -40,6 +40,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -90,7 +91,8 @@ public class SpongeIPBanList extends UserListIPBans {
         }
 
         try {
-            getService().pardon(InetAddress.getByName(entry));
+            Optional<Ban.Ip> ban = getService().getBanFor(InetAddress.getByName(entry));
+            ban.ifPresent(ip -> getService().removeBan(ip));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
