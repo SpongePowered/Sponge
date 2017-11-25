@@ -133,8 +133,13 @@ public class SpongeBanService implements BanService {
     @Override
     public boolean removeBan(Ban ban) {
         if (ban.getType().equals(BanTypes.PROFILE)) {
+            User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate(((Ban.Profile) ban).getProfile());
+            Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
+
             return this.pardon(((Ban.Profile) ban).getProfile());
         } else if (ban.getType().equals(BanTypes.IP)) {
+            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+
             return this.pardon(((Ban.Ip) ban).getAddress());
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
