@@ -26,10 +26,15 @@ package org.spongepowered.common.mixin.core.entity.passive;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.key.Keys;
@@ -54,6 +59,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -61,6 +67,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -93,6 +101,9 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow public abstract boolean shadow$isTrading(); // isTrading
     @Shadow @Nullable public abstract EntityPlayer shadow$getCustomer(); // getCustomer
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
+    @Shadow private boolean canVillagerPickupItem(Item itemIn) {
+        throw new UnsupportedOperationException("Shadowed");
+    }
 
     private Fabric<IInventory> fabric;
     private SlotCollection slots;
@@ -236,5 +247,26 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Override
     public Optional<Villager> getCarrier() {
         return Optional.of(this);
+    }
+
+    @Redirect(method = "updateEquipmentIfNeeded",  at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityVillager;canVillagerPickupItem(Lnet/minecraft/item/Item;)Z"))
+    public boolean onCanVillagerPickUpItem(EntityVillager villager, Item item, EntityItem itemEntity) {
+        boolean result = this.canVillagerPickupItem(item);
+        if (!SpongeCommonEventFactory.callChangeInventoryPickupPreEvent(((EntityLiving)(Object) this), itemEntity)) {
+            return false;
+        }
+        return result;
+    }
+
+    @Redirect(method = "updateEquipmentIfNeeded", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/InventoryBasic;addItem(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"))
+    public ItemStack onSetItemStackToSlot(InventoryBasic inventory, net.minecraft.item.ItemStack stack) {
+        int prev = stack.getCount();
+        ItemStack result = inventory.addItem(stack);
+        // TODO capture pickupevent transaction
+        if (!SpongeCommonEventFactory.callChangeInventoryPickupEvent(((EntityLiving)(Object) this), ((IMixinInventory) inventory))) {
+            stack.setCount(prev);
+            return stack;
+        }
+        return result;
     }
 }

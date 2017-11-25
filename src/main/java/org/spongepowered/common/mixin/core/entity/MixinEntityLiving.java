@@ -27,7 +27,9 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -48,6 +50,8 @@ import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -64,12 +68,14 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 
 import java.util.Iterator;
 import java.util.List;
@@ -89,6 +95,10 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow public abstract boolean isAIDisabled();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashHolder();
     @Shadow protected abstract void initEntityAI();
+
+    @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, net.minecraft.item.ItemStack stack);
+
+    @Nullable private Inventory inventory = null;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
@@ -293,6 +303,31 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Override
     public void onJoinWorld() {
         this.initSpongeAI();
+    }
+
+    // TODO how to access this? should EntityLiving be a Carrier? Usually most living cannot pickup their items.
+    protected Inventory getInventory() {
+        if (this.inventory == null) {
+            this.inventory = new somekindofadapter();
+        }
+        return this.inventory;
+    }
+
+    @Inject(method = "updateEquipmentIfNeeded", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/EntityEquipmentSlot;getSlotType()Lnet/minecraft/inventory/EntityEquipmentSlot$Type;"))
+    public void onUpdateEquipmentIfNeeded(EntityItem itemEntity, CallbackInfo ci) {
+        if (!SpongeCommonEventFactory.callChangeInventoryPickupPreEvent(((EntityLiving)(Object) this), itemEntity)) {
+            ci.cancel();
+        }
+    }
+
+    @Redirect(method = "updateEquipmentIfNeeded", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setItemStackToSlot(Lnet/minecraft/inventory/EntityEquipmentSlot;Lnet/minecraft/item/ItemStack;)V"))
+    public void onSetItemStackToSlot(EntityLiving thisEntity, EntityEquipmentSlot slotIn, net.minecraft.item.ItemStack stack) {
+        int prev = stack.getCount();
+        thisEntity.setItemStackToSlot(slotIn, stack);
+        // TODO capture pickupevent transaction
+        if (!SpongeCommonEventFactory.callChangeInventoryPickupEvent(thisEntity, ((IMixinInventory) this.getInventory()))) {
+            stack.setCount(prev);
+        }
     }
 
 }
