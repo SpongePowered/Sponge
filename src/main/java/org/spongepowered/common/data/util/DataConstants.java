@@ -209,4 +209,10 @@ public final class DataConstants {
         public static final int MAXIMUM_STRENGTH = 5;
 
     }
+
+    public static final class Parrot {
+
+        public static final ParrotVariant DEFAULT_VARIANT = ParrotVariants.RED;
+
+    }
 }
