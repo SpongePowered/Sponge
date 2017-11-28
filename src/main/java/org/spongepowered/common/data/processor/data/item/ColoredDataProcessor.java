@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -38,14 +40,19 @@ import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProc
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.util.ColorUtil;
 
 import java.util.Optional;
 
 public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color, Value<Color>, ColoredData, ImmutableColoredData> {
 
     public ColoredDataProcessor() {
-        super(ColorUtil::hasColor, Keys.COLOR);
+        super(ColoredDataProcessor::supportsColor, Keys.COLOR);
+    }
+
+    private static boolean supportsColor(ItemStack stack) {
+        final Item item = stack.getItem();
+        return item instanceof ItemArmor &&
+                ((ItemArmor) item).getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER;
     }
 
     @Override
@@ -56,7 +63,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            if (!ColorUtil.hasColorInNbt(stack)) {
+            if (!NbtDataUtil.hasColorFromNBT(stack)) {
                 return DataTransactionResult.failNoData();
             }
             NbtDataUtil.removeColorFromNBT(stack);
@@ -70,13 +77,19 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
         if (!supports(container)) {
             return false;
         }
-        ColorUtil.setItemStackColor(container, value);
+        NbtDataUtil.setColorToNbt(container, value);
         return true;
     }
 
     @Override
     protected Optional<Color> getVal(ItemStack container) {
-        return ColorUtil.getItemStackColor(container);
+        // Special case for armor: it has a special method
+        final Item item = container.getItem();
+        if (item instanceof ItemArmor) {
+            final int color = ((ItemArmor) item).getColor(container);
+            return color == -1 ? Optional.empty() : Optional.of(Color.ofHex(color));
+        }
+        return NbtDataUtil.getItemCompound(container).flatMap(NbtDataUtil::getColorFromNBT);
     }
 
     @Override

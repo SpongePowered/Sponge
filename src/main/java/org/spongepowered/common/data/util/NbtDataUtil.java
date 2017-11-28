@@ -35,7 +35,6 @@ import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -308,7 +307,7 @@ public final class NbtDataUtil {
         if (!subCompound.hasKey(ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.ofRgb(subCompound.getInteger(ITEM_COLOR)));
+        return Optional.of(Color.ofHex(subCompound.getInteger(ITEM_COLOR)));
     }
 
     public static void removeColorFromNBT(ItemStack stack) {
@@ -319,8 +318,8 @@ public final class NbtDataUtil {
     }
 
     public static void setColorToNbt(ItemStack stack, Color color) {
-        final int mojangColor = ColorUtil.javaColorToMojangColor(color);
-        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, mojangColor);
+        final int hex = color.getHex();
+        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, hex);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {
