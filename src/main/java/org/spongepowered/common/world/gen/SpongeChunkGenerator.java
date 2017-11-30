@@ -449,18 +449,18 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         } else if ("EndCity".equals(structureName)) {
             target = MapGenEndCity.class;
         }
-        if (target == null) {
-            return null;
-        }
-        for (GenerationPopulator gen : this.genpop) {
-            if (target.isInstance(gen)) {
-                return ((MapGenStructure) gen).getNearestStructurePos(worldIn, position, p_180513_4_);
+        if (target != null) {
+            for (GenerationPopulator gen : this.genpop) {
+                if (target.isInstance(gen)) {
+                    return ((MapGenStructure) gen).getNearestStructurePos(worldIn, position, p_180513_4_);
+                }
             }
         }
+
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getNearestStructurePos(worldIn, structureName, position,
-                    p_180513_4_);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getNearestStructurePos(worldIn, structureName, position, p_180513_4_);
         }
+
         return null;
     }
 
@@ -484,17 +484,18 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         } else if ("EndCity".equals(structureName)) {
             target = MapGenEndCity.class;
         }
-        if (target == null) {
-            return false;
-        }
-        for (GenerationPopulator gen : this.genpop) {
-            if (target.isInstance(gen)) {
-                return ((MapGenStructure) gen).isInsideStructure(position);
+        if (target != null) {
+            for (GenerationPopulator gen : this.genpop) {
+                if (target.isInstance(gen)) {
+                    return ((MapGenStructure) gen).isInsideStructure(position);
+                }
             }
         }
+
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
             return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).isInsideStructure(worldIn, structureName, position);
         }
+
         return false;
 }
 
@@ -502,8 +503,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     public void recreateStructures(Chunk chunkIn, int x, int z) {
         if (this.baseGenerator instanceof IChunkGenerator) {
             ((IChunkGenerator) this.baseGenerator).recreateStructures(chunkIn, x, z);
-            return;
         }
+
+        if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).recreateStructures(chunkIn, x, z);
+        }
+
         for (GenerationPopulator populator : this.genpop) {
             if (populator instanceof MapGenStructure) {
                 ((MapGenStructure) populator).generate(chunkIn.getWorld(), x, z, null);
