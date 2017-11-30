@@ -37,6 +37,7 @@ import org.spongepowered.common.config.category.ExploitCategory;
 import org.spongepowered.common.config.category.GlobalGeneralCategory;
 import org.spongepowered.common.config.category.GlobalWorldCategory;
 import org.spongepowered.common.config.category.ModuleCategory;
+import org.spongepowered.common.config.category.MovementChecksCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.category.SqlCategory;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
@@ -83,6 +84,9 @@ public class GlobalConfig extends ConfigBase {
 
     @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
+
+    @Setting("movement-checks")
+    private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
     public GlobalConfig() {
         super();
@@ -149,6 +153,10 @@ public class GlobalConfig extends ConfigBase {
 
     public TeleportHelperCategory getTeleportHelper() {
         return this.teleportHelper;
+    }
+
+    public MovementChecksCategory getMovementChecks() {
+        return this.movementChecks;
     }
 
 }
