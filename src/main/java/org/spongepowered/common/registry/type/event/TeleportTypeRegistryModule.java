@@ -76,6 +76,7 @@ public final class TeleportTypeRegistryModule implements AlternateCatalogRegistr
         this.teleportTypeMappings.put("minecraft:command", new SpongeTeleportType("minecraft:command", "Command"));
         this.teleportTypeMappings.put("minecraft:entity_teleport", new SpongeTeleportType("minecraft:entity_teleport", "Entity Teleport"));
         this.teleportTypeMappings.put("minecraft:portal", new SpongeTeleportType("minecraft:portal", "Portal"));
+        this.teleportTypeMappings.put("minecraft:chorus_fruit", new SpongeTeleportType("minecraft:chorus_fruit", "Chorus Fruit"));
         this.teleportTypeMappings.put("sponge:plugin", new SpongeTeleportType("sponge:plugin", "Plugin"));
         this.teleportTypeMappings.put("sponge:unknown", new SpongeTeleportType("sponge:unknown", "Unknown"));
     }

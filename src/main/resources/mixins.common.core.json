@@ -333,6 +333,7 @@
         "item.MixinItem",
         "item.MixinItemArmorMaterial",
         "item.MixinItemBlock",
+        "item.MixinItemChorusFruit",
         "item.MixinItemEnderEye",
         "item.MixinItemFirework",
         "item.MixinItemFishingRod",
