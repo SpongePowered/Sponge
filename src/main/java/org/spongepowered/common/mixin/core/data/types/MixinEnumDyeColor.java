@@ -61,7 +61,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
         int r = GenericMath.floor(color[0] * 255);
         int g = GenericMath.floor(color[1] * 255);
         int b = GenericMath.floor(color[2] * 255);
-        return Color.ofRgb(r, g, b);
+        return Color.of(r, g, b);
     }
 
     public Translation dye$getTranslation() {

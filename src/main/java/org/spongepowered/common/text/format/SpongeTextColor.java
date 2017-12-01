@@ -37,7 +37,6 @@ public class SpongeTextColor implements TextColor {
 
     private final TextFormatting handle;
     private final Color color;
-    private final Color backgroundColor;
 
     @Override
     public String getId() {
@@ -47,7 +46,6 @@ public class SpongeTextColor implements TextColor {
     public SpongeTextColor(TextFormatting handle, Color color) {
         this.handle = checkNotNull(handle, "handle");
         this.color = checkNotNull(color, "color");
-        this.backgroundColor = Color.ofRgb(color.getRed()/4, color.getGreen()/4, color.getBlue()/4);
     }
 
     public TextFormatting getHandle() {
@@ -62,11 +60,6 @@ public class SpongeTextColor implements TextColor {
     @Override
     public Color getColor() {
         return this.color;
-    }
-
-    @Override
-    public Color getBackgroundColor() {
-        return this.backgroundColor;
     }
 
     @Override

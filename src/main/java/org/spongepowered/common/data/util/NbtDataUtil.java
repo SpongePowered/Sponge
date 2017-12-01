@@ -307,7 +307,7 @@ public final class NbtDataUtil {
         if (!subCompound.hasKey(ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.ofHex(subCompound.getInteger(ITEM_COLOR)));
+        return Optional.of(Color.of(subCompound.getInteger(ITEM_COLOR)));
     }
 
     public static void removeColorFromNBT(ItemStack stack) {
@@ -318,8 +318,8 @@ public final class NbtDataUtil {
     }
 
     public static void setColorToNbt(ItemStack stack, Color color) {
-        final int hex = color.getHex();
-        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, hex);
+        final int rbg = color.getRgb();
+        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, rbg);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {

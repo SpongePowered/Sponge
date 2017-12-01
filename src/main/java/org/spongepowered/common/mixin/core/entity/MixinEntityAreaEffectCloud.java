@@ -71,7 +71,7 @@ public abstract class MixinEntityAreaEffectCloud extends MixinEntity implements 
 
     @Override
     public AreaEffectCloudData getAreaEffectCloudData() {
-        return new SpongeAreaEffectData(Color.ofHex(this.getColor()),
+        return new SpongeAreaEffectData(Color.of(this.getColor()),
                 this.getRadius(),
                 ParticleTypes.MOB_SPELL,
                 this.duration,
@@ -87,7 +87,7 @@ public abstract class MixinEntityAreaEffectCloud extends MixinEntity implements 
 
     @Override
     public Value<Color> color() {
-        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, Color.ofHex(getColor()));
+        return new SpongeValue<>(Keys.AREA_EFFECT_CLOUD_COLOR, Color.WHITE, Color.of(getColor()));
     }
 
     @Override

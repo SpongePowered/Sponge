@@ -60,20 +60,20 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
     @Override
     public void registerDefaults() {
         addTextColor(TextFormatting.BLACK, Color.BLACK);
-        addTextColor(TextFormatting.DARK_BLUE, Color.ofHex(0x0000AA));
-        addTextColor(TextFormatting.DARK_GREEN, Color.ofHex(0x00AA00));
-        addTextColor(TextFormatting.DARK_AQUA, Color.ofHex(0x00AAAA));
-        addTextColor(TextFormatting.DARK_RED, Color.ofHex(0xAA0000));
-        addTextColor(TextFormatting.DARK_PURPLE, Color.ofHex(0xAA00AA));
-        addTextColor(TextFormatting.GOLD, Color.ofHex(0xFFAA00));
-        addTextColor(TextFormatting.GRAY, Color.ofHex(0xAAAAAA));
-        addTextColor(TextFormatting.DARK_GRAY, Color.ofHex(0x555555));
-        addTextColor(TextFormatting.BLUE, Color.ofHex(0x5555FF));
-        addTextColor(TextFormatting.GREEN, Color.ofHex(0x55FF55));
-        addTextColor(TextFormatting.AQUA, Color.ofHex(0x55FFFF));
-        addTextColor(TextFormatting.RED, Color.ofHex(0xFF5555));
-        addTextColor(TextFormatting.LIGHT_PURPLE, Color.ofHex(0xFF55FF));
-        addTextColor(TextFormatting.YELLOW, Color.ofHex(0xFFFF55));
+        addTextColor(TextFormatting.DARK_BLUE, Color.of(0x0000AA));
+        addTextColor(TextFormatting.DARK_GREEN, Color.of(0x00AA00));
+        addTextColor(TextFormatting.DARK_AQUA, Color.of(0x00AAAA));
+        addTextColor(TextFormatting.DARK_RED, Color.of(0xAA0000));
+        addTextColor(TextFormatting.DARK_PURPLE, Color.of(0xAA00AA));
+        addTextColor(TextFormatting.GOLD, Color.of(0xFFAA00));
+        addTextColor(TextFormatting.GRAY, Color.of(0xAAAAAA));
+        addTextColor(TextFormatting.DARK_GRAY, Color.of(0x555555));
+        addTextColor(TextFormatting.BLUE, Color.of(0x5555FF));
+        addTextColor(TextFormatting.GREEN, Color.of(0x55FF55));
+        addTextColor(TextFormatting.AQUA, Color.of(0x55FFFF));
+        addTextColor(TextFormatting.RED, Color.of(0xFF5555));
+        addTextColor(TextFormatting.LIGHT_PURPLE, Color.of(0xFF55FF));
+        addTextColor(TextFormatting.YELLOW, Color.of(0xFFFF55));
         addTextColor(TextFormatting.WHITE, Color.WHITE);
         addTextColor(TextFormatting.RESET, Color.WHITE);
 
