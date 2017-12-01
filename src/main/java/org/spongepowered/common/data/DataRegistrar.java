@@ -41,7 +41,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.block.*;
@@ -69,11 +69,12 @@ import org.spongepowered.common.data.builder.authlib.SpongeGameProfileBuilder;
 import org.spongepowered.common.data.builder.block.state.SpongeBlockStateMetaContentUpdater;
 import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
-import org.spongepowered.common.data.builder.data.meta.*;
 import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
+import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndVarianceBuilder;
 import org.spongepowered.common.data.builder.util.weighted.FixedBuilder;
@@ -157,7 +158,7 @@ public class DataRegistrar {
         // ItemStack stuff
         dataManager.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
         dataManager.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
-        dataManager.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
+        dataManager.registerBuilder(Enchantment.class, new SpongeEnchantmentBuilder());
         dataManager.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
                 new ImmutableItemEnchantmentDataBuilder());
         dataManager.registerBuilder(FireworkEffect.class, new SpongeFireworkEffectDataBuilder());

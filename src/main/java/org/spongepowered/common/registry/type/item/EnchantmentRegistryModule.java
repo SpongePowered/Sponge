@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.item.Enchantment;
-import org.spongepowered.api.item.Enchantments;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -41,17 +41,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogRegistryModule<Enchantment>, AlternateCatalogRegistryModule<Enchantment> {
+public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogRegistryModule<EnchantmentType>, AlternateCatalogRegistryModule<EnchantmentType> {
 
     public static EnchantmentRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(Enchantments.class)
-    private final Map<String, Enchantment> enchantmentMappings = new HashMap<>();
+    @RegisterCatalog(EnchantmentTypes.class)
+    private final Map<String, EnchantmentType> enchantmentMappings = new HashMap<>();
 
     @Override
-    public Optional<Enchantment> getById(String id) {
+    public Optional<EnchantmentType> getById(String id) {
         checkNotNull(id);
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
@@ -60,14 +60,14 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
     }
 
     @Override
-    public Collection<Enchantment> getAll() {
+    public Collection<EnchantmentType> getAll() {
         return ImmutableList.copyOf(this.enchantmentMappings.values());
     }
 
     @Override
-    public Map<String, Enchantment> provideCatalogMap() {
-        Map<String, Enchantment> newMap = new HashMap<>();
-        for (Map.Entry<String, Enchantment> entry : this.enchantmentMappings.entrySet()) {
+    public Map<String, EnchantmentType> provideCatalogMap() {
+        Map<String, EnchantmentType> newMap = new HashMap<>();
+        for (Map.Entry<String, EnchantmentType> entry : this.enchantmentMappings.entrySet()) {
             newMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
         return newMap;
@@ -76,7 +76,7 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
     @Override
     public void registerDefaults() {
         for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
-            this.enchantmentMappings.put(key.toString(), (Enchantment) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key));
+            this.enchantmentMappings.put(key.toString(), (EnchantmentType) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key));
         }
     }
 
@@ -89,7 +89,7 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
             }
             if (!this.enchantmentMappings.containsValue(enchantment)) {
                 final String name = enchantment.getName().replace("enchantment.", "");
-                this.enchantmentMappings.put(name.toLowerCase(Locale.ENGLISH), (Enchantment) enchantment);
+                this.enchantmentMappings.put(name.toLowerCase(Locale.ENGLISH), (EnchantmentType) enchantment);
             }
         }
 
@@ -104,13 +104,13 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
     }
 
     @Override
-    public void registerAdditionalCatalog(Enchantment extraCatalog) {
-        checkNotNull(extraCatalog, "Enchantment cannot be null!");
+    public void registerAdditionalCatalog(EnchantmentType extraCatalog) {
+        checkNotNull(extraCatalog, "EnchantmentType cannot be null!");
         this.enchantmentMappings.put(extraCatalog.getId(), extraCatalog);
     }
 
-    public void registerFromGameData(String s, Enchantment obj) {
-        checkNotNull(obj, "Enchantment cannot be null!");
+    public void registerFromGameData(String s, EnchantmentType obj) {
+        checkNotNull(obj, "EnchantmentType cannot be null!");
         this.enchantmentMappings.put(s, obj);
     }
 

@@ -22,33 +22,65 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
+package org.spongepowered.common.item.enchantment;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
-import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeStoredEnchantmentData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 
-import java.util.ArrayList;
-import java.util.List;
+public final class SpongeEnchantment implements Enchantment {
 
-public class SpongeStoredEnchantmentData extends AbstractListData<Enchantment, StoredEnchantmentData, ImmutableStoredEnchantmentData>
-        implements StoredEnchantmentData {
+    private final EnchantmentType enchantmentType;
+    private final int level;
 
-    public SpongeStoredEnchantmentData(List<Enchantment> value) {
-        super(StoredEnchantmentData.class, value, Keys.STORED_ENCHANTMENTS, ImmutableSpongeStoredEnchantmentData.class);
+    public SpongeEnchantment(final EnchantmentType enchantmentType, final int level) {
+        this.enchantmentType = enchantmentType;
+        this.level = level;
     }
 
-    public SpongeStoredEnchantmentData() {
-        this(new ArrayList<>());
+    @Override
+    public EnchantmentType getType() {
+        return this.enchantmentType;
+    }
+
+    @Override
+    public int getLevel() {
+        return this.level;
+    }
+
+    @Override
+    public int getContentVersion() {
+        return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Keys.STORED_ENCHANTMENTS, getValue());
+                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.ENCHANTMENT_ID, this.enchantmentType.getId())
+                .set(Queries.LEVEL, this.level);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.enchantmentType, this.level);
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        final SpongeEnchantment other = (SpongeEnchantment) object;
+
+        return Objects.equal(this.enchantmentType, other.enchantmentType) && Objects.equal(this.level, other.level);
+    }
+
 }

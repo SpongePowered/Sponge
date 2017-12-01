@@ -35,7 +35,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
@@ -52,14 +52,14 @@ public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<Imm
 
     @Override
     public ImmutableEnchantmentData createImmutable() {
-        return new ImmutableSpongeEnchantmentData(ImmutableList.<ItemEnchantment>of());
+        return new ImmutableSpongeEnchantmentData(ImmutableList.of());
     }
 
     @Override
     public Optional<ImmutableEnchantmentData> createFrom(DataHolder dataHolder) {
         if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).isItemEnchanted()) {
-                final List<ItemEnchantment> enchantments = NbtDataUtil.getItemEnchantments((ItemStack) dataHolder);
+                final List<Enchantment> enchantments = NbtDataUtil.getItemEnchantments((ItemStack) dataHolder);
                 return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
             }
         }
@@ -79,7 +79,7 @@ public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<Imm
     @Override
     protected Optional<ImmutableEnchantmentData> buildContent(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), ItemEnchantment.class).get();
+        final List<Enchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), Enchantment.class).get();
         return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
     }
 

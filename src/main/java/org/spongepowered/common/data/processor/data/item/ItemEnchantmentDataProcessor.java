@@ -33,7 +33,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class ItemEnchantmentDataProcessor
-        extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
+        extends AbstractItemSingleDataProcessor<List<Enchantment>, ListValue<Enchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
     public ItemEnchantmentDataProcessor() {
         super(input -> true, Keys.ITEM_ENCHANTMENTS);
@@ -59,13 +59,13 @@ public class ItemEnchantmentDataProcessor
     }
 
     @Override
-    protected boolean set(ItemStack itemStack, List<ItemEnchantment> value) {
+    protected boolean set(ItemStack itemStack, List<Enchantment> value) {
         NbtDataUtil.setItemEnchantments(itemStack, value);
         return true;
     }
 
     @Override
-    protected Optional<List<ItemEnchantment>> getVal(ItemStack itemStack) {
+    protected Optional<List<Enchantment>> getVal(ItemStack itemStack) {
         if (itemStack.isItemEnchanted()) {
             return Optional.of(NbtDataUtil.getItemEnchantments(itemStack));
         }
@@ -73,20 +73,20 @@ public class ItemEnchantmentDataProcessor
     }
 
     @Override
-    protected ListValue<ItemEnchantment> constructValue(List<ItemEnchantment> actualValue) {
+    protected ListValue<Enchantment> constructValue(List<Enchantment> actualValue) {
         return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, actualValue);
     }
 
     @Override
-    protected ImmutableValue<List<ItemEnchantment>> constructImmutableValue(List<ItemEnchantment> value) {
+    protected ImmutableValue<List<Enchantment>> constructImmutableValue(List<Enchantment> value) {
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), ItemEnchantment.class).get();
-        final ListValue<ItemEnchantment> existing = enchantmentData.enchantments();
+        final List<Enchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), Enchantment.class).get();
+        final ListValue<Enchantment> existing = enchantmentData.enchantments();
         existing.addAll(enchantments);
         enchantmentData.set(existing);
         return Optional.of(enchantmentData);
@@ -96,7 +96,7 @@ public class ItemEnchantmentDataProcessor
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
             ItemStack stack = (ItemStack) container;
-            Optional<List<ItemEnchantment>> old = getVal(stack);
+            Optional<List<Enchantment>> old = getVal(stack);
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }

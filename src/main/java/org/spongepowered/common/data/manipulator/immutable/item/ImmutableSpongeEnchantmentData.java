@@ -28,23 +28,23 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 
 import java.util.List;
 
-public class ImmutableSpongeEnchantmentData extends AbstractImmutableListData<ItemEnchantment, ImmutableEnchantmentData, EnchantmentData>
+public class ImmutableSpongeEnchantmentData extends AbstractImmutableListData<Enchantment, ImmutableEnchantmentData, EnchantmentData>
     implements ImmutableEnchantmentData {
 
-    public ImmutableSpongeEnchantmentData(List<ItemEnchantment> enchantments) {
+    public ImmutableSpongeEnchantmentData(List<Enchantment> enchantments) {
         super(ImmutableEnchantmentData.class, enchantments, Keys.ITEM_ENCHANTMENTS, SpongeEnchantmentData.class);
         registerGetters();
     }
 
     @Override
-    public ImmutableListValue<ItemEnchantment> enchantments() {
+    public ImmutableListValue<Enchantment> enchantments() {
         return getValueGetter();
     }
 
