@@ -491,6 +491,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("pickup_rule", makeSingleKey(TypeTokens.PICKUP_TOKEN, TypeTokens.PICKUP_VALUE_TOKEN, of("PickupRule"), "sponge:pickup_rule", "Pickup Rule"));
 
         this.fieldMap.put("invulnerability_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("HurtTime"), "sponge:invulnerability_ticks", "Invulnerability Ticks"));
+        this.fieldMap.put("invulnerable", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Invulnerable"), "sponge:invulnerable", "Invulnerable"));
 
         this.fieldMap.put("has_gravity", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
 
