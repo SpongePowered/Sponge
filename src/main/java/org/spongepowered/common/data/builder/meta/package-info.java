@@ -22,33 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
-import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
-import org.spongepowered.api.item.enchantment.Enchantment;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeStoredEnchantmentData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class SpongeStoredEnchantmentData extends AbstractListData<Enchantment, StoredEnchantmentData, ImmutableStoredEnchantmentData>
-        implements StoredEnchantmentData {
-
-    public SpongeStoredEnchantmentData(List<Enchantment> value) {
-        super(StoredEnchantmentData.class, value, Keys.STORED_ENCHANTMENTS, ImmutableSpongeStoredEnchantmentData.class);
-    }
-
-    public SpongeStoredEnchantmentData() {
-        this(new ArrayList<>());
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return DataContainer.createNew()
-                .set(Keys.STORED_ENCHANTMENTS, getValue());
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.builder.meta;
