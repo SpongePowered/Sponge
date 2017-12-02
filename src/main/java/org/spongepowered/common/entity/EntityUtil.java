@@ -481,6 +481,10 @@ public final class EntityUtil {
         return (Player) player;
     }
 
+    public static int getHorseInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {
+        return color.getBitMask() | style.getBitMask();
+    }
+
 
     static final class EntityTrace {
 

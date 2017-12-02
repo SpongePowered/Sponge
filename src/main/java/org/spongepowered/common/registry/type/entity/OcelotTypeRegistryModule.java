@@ -27,11 +27,12 @@ package org.spongepowered.common.registry.type.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.entity.SpongeOcelotType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,6 +42,13 @@ import java.util.Optional;
 
 public class OcelotTypeRegistryModule implements CatalogRegistryModule<OcelotType> {
 
+    public static final Map<String, OcelotType> OCELOT_TYPES = Maps.newHashMap();
+    public static final Map<Integer, OcelotType> OCELOT_IDMAP = Maps.newHashMap();
+    // ocelot types
+    public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");
+    public static final SpongeOcelotType BLACK_CAT = new SpongeOcelotType(1, "BLACK_CAT");
+    public static final SpongeOcelotType RED_CAT = new SpongeOcelotType(2, "RED_CAT");
+    public static final SpongeOcelotType SIAMESE_CAT = new SpongeOcelotType(3, "SIAMESE_CAT");
     @RegisterCatalog(OcelotTypes.class)
     private final Map<String, OcelotType> ocelotTypeMap = new HashMap<>();
 
@@ -56,7 +64,16 @@ public class OcelotTypeRegistryModule implements CatalogRegistryModule<OcelotTyp
 
     @Override
     public void registerDefaults() {
-        this.ocelotTypeMap.putAll(SpongeEntityConstants.OCELOT_TYPES);
+        OcelotTypeRegistryModule.OCELOT_TYPES.put("wild_ocelot", OcelotTypeRegistryModule.WILD_OCELOT);
+        OcelotTypeRegistryModule.OCELOT_TYPES.put("black_cat", OcelotTypeRegistryModule.BLACK_CAT);
+        OcelotTypeRegistryModule.OCELOT_TYPES.put("red_cat", OcelotTypeRegistryModule.RED_CAT);
+        OcelotTypeRegistryModule.OCELOT_TYPES.put("siamese_cat", OcelotTypeRegistryModule.SIAMESE_CAT);
+
+        OcelotTypeRegistryModule.OCELOT_IDMAP.put(0, OcelotTypeRegistryModule.WILD_OCELOT);
+        OcelotTypeRegistryModule.OCELOT_IDMAP.put(1, OcelotTypeRegistryModule.BLACK_CAT);
+        OcelotTypeRegistryModule.OCELOT_IDMAP.put(2, OcelotTypeRegistryModule.RED_CAT);
+        OcelotTypeRegistryModule.OCELOT_IDMAP.put(3, OcelotTypeRegistryModule.SIAMESE_CAT);
+        this.ocelotTypeMap.putAll(OCELOT_TYPES);
 
     }
 

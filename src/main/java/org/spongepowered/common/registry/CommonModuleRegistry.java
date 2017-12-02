@@ -455,6 +455,8 @@ public final class CommonModuleRegistry {
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
             .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
+            .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
+            .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

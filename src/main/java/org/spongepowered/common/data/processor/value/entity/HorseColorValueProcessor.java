@@ -33,11 +33,13 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
+import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
+import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
 import java.util.Optional;
 
@@ -54,14 +56,14 @@ public class HorseColorValueProcessor extends AbstractSpongeValueProcessor<Entit
 
     @Override
     protected boolean set(EntityHorse container, HorseColor value) {
-        final SpongeHorseStyle style = (SpongeHorseStyle) HorseUtils.getHorseStyle(container);
-        container.setHorseVariant(HorseUtils.getInternalVariant((SpongeHorseColor) value, style));
+        final SpongeHorseStyle style = (SpongeHorseStyle) HorseStyleRegistryModule.getHorseStyle(container);
+        container.setHorseVariant(EntityUtil.getHorseInternalVariant((SpongeHorseColor) value, style));
         return true;
     }
 
     @Override
     protected Optional<HorseColor> getVal(EntityHorse container) {
-        return Optional.of(HorseUtils.getHorseColor(container));
+        return Optional.of(HorseColorRegistryModule.getHorseColor(container));
     }
 
     @Override

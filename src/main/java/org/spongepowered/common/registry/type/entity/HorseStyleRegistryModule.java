@@ -22,41 +22,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.common;
+package org.spongepowered.common.registry.type.entity;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
+import com.google.common.collect.Maps;
 import net.minecraft.entity.passive.EntityHorse;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-public class HorseUtils {
+import java.util.Map;
 
-    public static int getInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {
-        return color.getBitMask() | style.getBitMask();
-    }
+@RegisterCatalog(HorseStyles.class)
+public class HorseStyleRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<HorseStyle> {
 
-    public static HorseColor getHorseColor(EntityHorse horse) {
-        return SpongeEntityConstants.HORSE_COLOR_IDMAP.get(horse.getHorseVariant() & 255);
-    }
+    public static final SpongeHorseStyle WHITE_STYLE = new SpongeHorseStyle(1, "minecraft:white", "WHITE");
+    public static final SpongeHorseStyle WHITEFIELD = new SpongeHorseStyle(2, "minecraft:whitefield", "WHITEFIELD");
+    public static final SpongeHorseStyle WHITE_DOTS = new SpongeHorseStyle(3, "minecraft:white_dots", "WHITE_DOTS");
+    public static final SpongeHorseStyle BLACK_DOTS = new SpongeHorseStyle(4, "minecraft:black_dots", "BLACK_DOTS");
+    public static final SpongeHorseStyle NONE = new SpongeHorseStyle(0, "minecraft:none", "NONE");
 
-    public static HorseColor getHorseColor(DataView container) {
+    public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
+    private static final HorseStyleRegistryModule INSTANCE = new HorseStyleRegistryModule();
 
-        return SpongeImpl.getRegistry().getType(HorseColor.class, getData(container, Keys.HORSE_COLOR, String.class)).get();
+    private HorseStyleRegistryModule() {
+        super("minecraft");
     }
 
     public static HorseStyle getHorseStyle(EntityHorse horse) {
-        return SpongeEntityConstants.HORSE_STYLE_IDMAP.get((horse.getHorseVariant() & 65280) >> 8);
+        return HORSE_STYLE_IDMAP.get((horse.getHorseVariant() & 65280) >> 8);
     }
 
     public static HorseStyle getHorseStyle(DataView container) {
         return SpongeImpl.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
     }
 
+    public static HorseStyleRegistryModule getInstance() {
+        return INSTANCE;
+    }
+
+
+
+    @Override
+    public void registerDefaults() {
+        register(NONE);
+        register(WHITE_STYLE);
+        register(WHITEFIELD);
+        register(WHITE_DOTS);
+        register(BLACK_DOTS);
+
+        HORSE_STYLE_IDMAP.put(0, NONE);
+        HORSE_STYLE_IDMAP.put(1, WHITE_STYLE);
+        HORSE_STYLE_IDMAP.put(2, WHITEFIELD);
+        HORSE_STYLE_IDMAP.put(3, WHITE_DOTS);
+        HORSE_STYLE_IDMAP.put(4, BLACK_DOTS);
+
+    }
 }

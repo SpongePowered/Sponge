@@ -49,7 +49,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
@@ -90,12 +90,12 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
 
     @Override
     public OcelotData getOcelotData() {
-        return new SpongeOcelotData(SpongeEntityConstants.OCELOT_IDMAP.get(this.getTameSkin()));
+        return new SpongeOcelotData(OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 
     @Override
     public Value<OcelotType> variant() {
-        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Ocelot.DEFAULT_TYPE, SpongeEntityConstants.OCELOT_IDMAP.get(this.getTameSkin()));
+        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Ocelot.DEFAULT_TYPE, OcelotTypeRegistryModule.OCELOT_IDMAP.get(this.getTameSkin()));
     }
 
     @Override
