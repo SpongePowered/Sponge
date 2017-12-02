@@ -40,6 +40,7 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.type.ParrotVariants;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -233,6 +234,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         RegistryHelper.mapFields(HorseStyles.class, SpongeEntityConstants.HORSE_STYLES);
         RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
         RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);
+        RegistryHelper.mapFields(ParrotVariants.class, ParrotVariantRegistryModule.PARROT_VARIANTS);
     }
 
     @Override

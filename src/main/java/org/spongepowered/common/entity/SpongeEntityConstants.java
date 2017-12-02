@@ -29,6 +29,7 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 
 import java.util.Map;
 
@@ -73,7 +74,6 @@ public class SpongeEntityConstants {
     public static final SpongeHorseStyle WHITEFIELD = new SpongeHorseStyle(2, "WHITEFIELD");
     public static final SpongeHorseStyle WHITE_DOTS = new SpongeHorseStyle(3, "WHITE_DOTS");
     public static final SpongeHorseStyle BLACK_DOTS = new SpongeHorseStyle(4, "BLACK_DOTS");
-
 
     static {
         OCELOT_TYPES.put("wild_ocelot", WILD_OCELOT);
@@ -130,5 +130,5 @@ public class SpongeEntityConstants {
         HORSE_STYLE_IDMAP.put(3, WHITE_DOTS);
         HORSE_STYLE_IDMAP.put(4, BLACK_DOTS);
 
-    }
+   }
 }
