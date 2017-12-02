@@ -29,8 +29,8 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 

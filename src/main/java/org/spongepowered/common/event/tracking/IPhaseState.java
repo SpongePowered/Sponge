@@ -50,7 +50,6 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;

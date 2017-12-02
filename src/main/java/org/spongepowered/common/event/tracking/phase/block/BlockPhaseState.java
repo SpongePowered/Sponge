@@ -25,8 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 public class BlockPhaseState implements IPhaseState<GeneralizedContext> {

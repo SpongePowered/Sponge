@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 

@@ -25,13 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
 

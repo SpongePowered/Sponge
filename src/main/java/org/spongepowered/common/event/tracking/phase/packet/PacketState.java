@@ -52,9 +52,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 public abstract class PacketState<P extends PacketContext<P>> implements IPhaseState<P> {
 

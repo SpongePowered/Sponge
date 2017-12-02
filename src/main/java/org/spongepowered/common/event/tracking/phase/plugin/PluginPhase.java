@@ -24,17 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-
-import javax.annotation.Nullable;
 
 public final class PluginPhase extends TrackingPhase {
 

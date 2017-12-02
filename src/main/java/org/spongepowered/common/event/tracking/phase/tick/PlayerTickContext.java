@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-
 public class PlayerTickContext extends TickContext<PlayerTickContext> {
     public PlayerTickContext() {
         super(TickPhase.Tick.PLAYER);

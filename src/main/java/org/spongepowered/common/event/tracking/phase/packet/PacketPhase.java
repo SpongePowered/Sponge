@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.network.Packet;
@@ -59,27 +58,18 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStartState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public final class PacketPhase extends TrackingPhase {
 

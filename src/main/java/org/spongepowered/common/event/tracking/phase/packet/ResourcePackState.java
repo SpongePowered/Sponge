@@ -33,7 +33,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -59,8 +61,6 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
