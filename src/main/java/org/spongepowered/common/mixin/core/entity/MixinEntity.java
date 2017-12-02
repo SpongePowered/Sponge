@@ -253,6 +253,8 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
 
+    @Shadow private boolean invulnerable;
+
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
         if (worldIn instanceof IMixinWorldServer) {
@@ -1352,5 +1354,10 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         return true;
+    }
+
+    @Override
+    public void setInvulnerable(boolean value) {
+        this.invulnerable = value;
     }
 }

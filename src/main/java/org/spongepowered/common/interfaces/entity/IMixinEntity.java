@@ -146,4 +146,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     void setActiveChunk(IMixinChunk chunk);
 
     boolean shouldTick();
+
+    void setInvulnerable(boolean value);
+
 }

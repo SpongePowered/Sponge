@@ -205,6 +205,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(ArmorStandData.class, SpongeArmorStandData.class,
                 ImmutableArmorStandData.class, ImmutableSpongeArmorStandData.class, new ArmorStandDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(InvulnerabilityData.class, SpongeInvulnerabilityData.class,
+                ImmutableInvulnerabilityData.class, ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
                 ImmutableSpongeFuseData.class, new FuseDataProcessor());
 
@@ -414,9 +417,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
                 ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
-
-        DataUtil.registerDualProcessor(InvulnerabilityData.class, SpongeInvulnerabilityData.class, ImmutableInvulnerabilityData.class,
-                ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
 
         DataUtil.registerDualProcessor(GlowingData.class, SpongeGlowingData.class, ImmutableGlowingData.class, ImmutableSpongeGlowingData.class,
                 new GlowingDataProcessor());
@@ -815,6 +815,8 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultValueProcessor());
         DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultZombieValueProcessor());
         DataUtil.registerValueProcessor(Keys.AGE, new AgeableAgeValueProcessor());
+        DataUtil.registerValueProcessor(Keys.INVULNERABILITY_TICKS, new InvulnerabilityTicksValueProcessor());
+        DataUtil.registerValueProcessor(Keys.INVULNERABLE, new InvulnerableValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
