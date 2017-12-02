@@ -444,6 +444,7 @@
         "tileentity.MixinTileEntityStructureMode",
         "util.MixinChatType",
         "util.MixinClassInheritanceMultiMap",
+        "util.MixinCooldownTracker",
         "util.MixinDamageSource",
         "util.MixinEntityDamageSource",
         "util.MixinEnumHand",
