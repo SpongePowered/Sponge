@@ -529,7 +529,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
         // before respawning the player, so we know what dimension to spawn them into. This means that the bed location must be copied
         // over to the new player
-        newPlayer.setSpawnPoint(playerIn.getBedLocation(), playerIn.isSpawnForced());
+        if (playerIn.getBedLocation() != null) {
+            newPlayer.setSpawnPoint(playerIn.getBedLocation(), playerIn.isSpawnForced());
+        }
 
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
