@@ -28,7 +28,7 @@ import net.minecraft.item.Item;
 import net.minecraft.stats.StatCrafting;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.BlockStatistic;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;

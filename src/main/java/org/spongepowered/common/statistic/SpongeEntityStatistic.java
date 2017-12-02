@@ -27,7 +27,7 @@ package org.spongepowered.common.statistic;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.EntityStatistic;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
