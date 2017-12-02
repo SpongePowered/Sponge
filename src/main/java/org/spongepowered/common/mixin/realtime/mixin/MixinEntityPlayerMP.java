@@ -45,7 +45,17 @@ public abstract class MixinEntityPlayerMP extends Entity {
     @Redirect(method = "decrementTimeUntilPortal", at = @At(value = "FIELD", target = ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupPortalCooldown(EntityPlayerMP self, int modifier) {
         int ticks = (int) ((IMixinRealTimeTicking) self.getEntityWorld()).getRealTimeTicks();
-        this.timeUntilPortal = Math.max(0, this.timeUntilPortal - ticks);
+        // The initially apparent function of timeUntilPortal is a cooldown for
+        // nether portals. However, there is a much more important use:
+        // preventing players from being immediately sent back to the other end
+        // of the portal. Since it only checks timeUntilPortal to determine
+        // whether the player was just in a portal, if timeUntilPortal gets set
+        // to 0, it assumes the player left and reentered the portal (see
+        // Entity.setPortal()). To prevent this, "snag" the value of
+        // timeUntilPortal at 1. If setPortal() does not reset it (the player
+        // exits the portal), modifier will become 0, indicating that it is
+        // OK to teleport the player.
+        this.timeUntilPortal = Math.max(modifier > 0 ? 1 : 0, this.timeUntilPortal - ticks);
     }
 
 }
