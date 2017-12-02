@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.event.damage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -48,9 +51,9 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
@@ -70,11 +73,12 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class DamageEventHandler {
 
@@ -238,10 +242,12 @@ public class DamageEventHandler {
             if (itemStack.isEmpty()) {
                 continue;
             }
+            final Multimap<Enchantment, Short> enchantments = LinkedHashMultimap.create();
             NBTTagList enchantmentList = itemStack.getEnchantmentTagList();
             if (enchantmentList == null) {
                 continue;
             }
+
             for (int i = 0; i < enchantmentList.tagCount(); ++i) {
                 final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
                 final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
@@ -251,50 +257,56 @@ public class DamageEventHandler {
                     final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {
-                        ItemStackSnapshot snapshot = ((ItemStack) itemStack).createSnapshot();
-                        // Now we can actually consider this as a modifier!
-
-                        final DamageObject object = new DamageObject();
-                        int modifier = enchantment.calcModifierDamage(level, damageSource);
-                        object.previousDamage = totalModifier;
-                        if (object.previousDamage > 25) {
-                            object.previousDamage = 25;
-                        }
-                        totalModifier += modifier;
-                        object.augment = first;
-                        object.ratio = modifier;
-                        DoubleUnaryOperator enchantmentFunction = damageIn -> {
-                            if (object.augment) {
-                                enchantmentDamageTracked = damageIn;
-                            }
-                            if (damageIn <= 0) {
-                                return 0D;
-                            }
-                            double actualDamage = enchantmentDamageTracked;
-                            if (object.previousDamage > 25) {
-                                return 0D;
-                            }
-                            double modifierDamage = actualDamage;
-                            double magicModifier;
-                            if (modifier > 0 && modifier <= 20) {
-                                int j = 25 - modifier;
-                                magicModifier = modifierDamage * j;
-                                modifierDamage = magicModifier / 25.0F;
-                            }
-                            return - Math.max(actualDamage - modifierDamage, 0.0D);
-                        };
-                        if (first) {
-                            first = false;
-                        }
-
-                        // TODO: direct cause creation: bad bad bad
-                        DamageModifier enchantmentModifier = DamageModifier.builder()
-                            .cause(Cause.of(EventContext.empty(), enchantment, snapshot, entityLivingBase))
-                            .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
-                            .build();
-                        modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
+                        enchantments.put(enchantment, level);
                     }
                 }
+            }
+            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+
+            for (Map.Entry<Enchantment, Collection<Short>> enchantment : enchantments.asMap().entrySet()) {
+                final DamageObject object = new DamageObject();
+                int modifierTemp = 0;
+                for (short level : enchantment.getValue()) {
+                    modifierTemp += enchantment.getKey().calcModifierDamage(level, damageSource);
+                }
+                final int modifier = modifierTemp;
+                object.previousDamage = totalModifier;
+                if (object.previousDamage > 25) {
+                    object.previousDamage = 25;
+                }
+                totalModifier += modifier;
+                object.augment = first;
+                object.ratio = modifier;
+                DoubleUnaryOperator enchantmentFunction = damageIn -> {
+                    if (object.augment) {
+                        enchantmentDamageTracked = damageIn;
+                    }
+                    if (damageIn <= 0) {
+                        return 0D;
+                    }
+                    double actualDamage = enchantmentDamageTracked;
+                    if (object.previousDamage > 25) {
+                        return 0D;
+                    }
+                    double modifierDamage = actualDamage;
+                    double magicModifier;
+                    if (modifier > 0 && modifier <= 20) {
+                        int j = 25 - modifier;
+                        magicModifier = modifierDamage * j;
+                        modifierDamage = magicModifier / 25.0F;
+                    }
+                    return - Math.max(actualDamage - modifierDamage, 0.0D);
+                };
+                if (first) {
+                    first = false;
+                }
+
+                // TODO: direct cause creation: bad bad bad
+                DamageModifier enchantmentModifier = DamageModifier.builder()
+                        .cause(Cause.of(EventContext.empty(), enchantment, snapshot, entityLivingBase))
+                        .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
+                        .build();
+                modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
             }
         }
         if (!modifiers.isEmpty()) {
@@ -374,35 +386,41 @@ public class DamageEventHandler {
 
     public static List<DamageFunction> createAttackEnchantmentFunction(
             net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute, float attackStrength) {
+        final Multimap<Enchantment, Integer> enchantments = LinkedHashMultimap.create();
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (!heldItem.isEmpty()) {
-            Supplier<ItemStackSnapshot> supplier = new Supplier<ItemStackSnapshot>() {
-                private ItemStackSnapshot snapshot;
-                @Override
-                public ItemStackSnapshot get() {
-                    if (this.snapshot == null) {
-                        this.snapshot = ItemStackUtil.snapshotOf(heldItem);
-                    }
-                    return this.snapshot;
-                }
-            };
             NBTTagList nbttaglist = heldItem.getEnchantmentTagList();
+            if (nbttaglist.hasNoTags()) {
+                return ImmutableList.of();
+            }
 
             for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                 int j = nbttaglist.getCompoundTagAt(i).getShort("id");
                 int enchantmentLevel = nbttaglist.getCompoundTagAt(i).getShort("lvl");
 
-                    final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
-                    if (enchantment != null) {
-                        final DamageModifier enchantmentModifier = DamageModifier.builder()
-                            .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
-                            .cause(Cause.of(EventContext.empty(), supplier.get(), enchantment))
-                            .build();
-                        DoubleUnaryOperator enchantmentFunction = (damage) ->
-                                (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute) * attackStrength;
-                        damageModifierFunctions.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
-
+                final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
+                if (enchantment != null) {
+                    enchantments.put(enchantment, enchantmentLevel);
                 }
+            }
+            if (enchantments.isEmpty()) {
+                return ImmutableList.of();
+            }
+            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(heldItem);
+
+            for (Map.Entry<Enchantment, Collection<Integer>> enchantment : enchantments.asMap().entrySet()) {
+                final DamageModifier enchantmentModifier = DamageModifier.builder()
+                        .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
+                        .cause(Cause.of(EventContext.empty(), snapshot, enchantment))
+                        .build();
+                DoubleUnaryOperator enchantmentFunction = (damage) -> {
+                    double totalDamage = 0;
+                    for (int level : enchantment.getValue()) {
+                        totalDamage += (double) enchantment.getKey().calcDamageByCreature(level, creatureAttribute) * attackStrength;
+                    }
+                    return totalDamage;
+                };
+                damageModifierFunctions.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
             }
         }
 
