@@ -25,12 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -72,31 +69,6 @@ public final class PluginPhase extends TrackingPhase {
 
     private static final class Holder {
         static final PluginPhase INSTANCE = new PluginPhase();
-    }
-
-    @Override
-    public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos,
-                                        IMixinBlockEventData blockEvent) {
-        if (phaseState instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) phaseState).associateBlockEventNotifier((ListenerPhaseContext) context, mixinWorld, pos, blockEvent);
-        }
-    }
-
-
-    @Override
-    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        if (state instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) state).associateNeighborBlockNotifier((ListenerPhaseContext) context, sourcePos, block, notifyPos, minecraftWorld, notifier);
-        }
-    }
-
-    @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState<?> state, PhaseContext<?> context,
-            PhaseTracker phaseTracker) {
-        if (state instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks((ListenerPhaseContext) context, playerMP, itemStack);
-        }
     }
 
 }

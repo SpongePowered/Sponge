@@ -73,6 +73,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -260,8 +261,8 @@ public final class TrackingUtil {
                     .state((BlockState) state)
                     .build();
             Sponge.getCauseStackManager().pushCause(locatable);
-            IPhaseState<?> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
-            final PhaseContext<?> phaseContext = phase.createPhaseContext()
+            IPhaseState<BlockTickContext> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+            final BlockTickContext phaseContext = phase.createPhaseContext()
                     .source(locatable);
     
             checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
@@ -270,7 +271,7 @@ public final class TrackingUtil {
             // We have to associate any notifiers in case of scheduled block updates from other sources
             final PhaseData current = phaseTracker.getCurrentPhaseData();
             final IPhaseState<?> currentState = current.state;
-            currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
+            ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
             // Now actually switch to the new phase
 
             try (PhaseContext<?> context = phaseContext.buildAndSwitch()) {
@@ -300,8 +301,8 @@ public final class TrackingUtil {
                     .state((BlockState) state)
                     .build();
             Sponge.getCauseStackManager().pushCause(locatable);
-            IPhaseState<?> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
-            final PhaseContext<?> phaseContext = phase.createPhaseContext()
+            IPhaseState<BlockTickContext> phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+            final BlockTickContext phaseContext = phase.createPhaseContext()
                     .source(locatable);
     
             checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
@@ -309,7 +310,7 @@ public final class TrackingUtil {
             // We have to associate any notifiers in case of scheduled block updates from other sources
             final PhaseData current = phaseTracker.getCurrentPhaseData();
             final IPhaseState<?> currentState = current.state;
-            currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
+            ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
             // Now actually switch to the new phase
             try (PhaseContext<?> context = phaseContext.buildAndSwitch()) {
                 block.randomTick(minecraftWorld, pos, state, random);

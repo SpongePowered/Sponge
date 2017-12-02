@@ -55,7 +55,7 @@ import javax.annotation.Nullable;
 final class InteractEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
     @Override

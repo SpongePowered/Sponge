@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 final class UnknownPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 

@@ -68,7 +68,8 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
     }
 
 
-    public void associateBlockEventNotifier(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    @Override
+    public void addNotifierToBlockEvent(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -77,7 +78,8 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
 
     }
 
-    public void capturePlayerUsingStackToBreakBlocks(ListenerPhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+    @Override
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
 
     }
 

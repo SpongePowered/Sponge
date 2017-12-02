@@ -56,7 +56,7 @@ final class PostWorldTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlocks(ListenerPhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 }

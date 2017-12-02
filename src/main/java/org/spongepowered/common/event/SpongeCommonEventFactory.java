@@ -473,7 +473,7 @@ public class SpongeCommonEventFactory {
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final PhaseContext<?> context = peek.context;
         // Don't fire notify events during world gen or while restoring
-        if (peek.state.getPhase().isWorldGeneration(peek.state) || peek.state == State.RESTORING_BLOCKS) {
+        if (peek.state.isWorldGeneration() || peek.state == State.RESTORING_BLOCKS) {
             return null;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

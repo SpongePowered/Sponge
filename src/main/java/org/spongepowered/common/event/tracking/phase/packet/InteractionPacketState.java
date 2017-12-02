@@ -108,6 +108,11 @@ final class InteractionPacketState extends BasicPacketState {
     }
 
     @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
+
+    @Override
     public void unwind(BasicPacketContext phaseContext) {
 
         final EntityPlayerMP player = phaseContext.getPacketPlayer();

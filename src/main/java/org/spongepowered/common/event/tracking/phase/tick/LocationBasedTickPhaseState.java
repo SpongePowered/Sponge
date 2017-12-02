@@ -54,7 +54,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
 
     @Override
-    public void associateNeighborBlockNotifier(PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+    public void associateNeighborStateNotifier(T context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (sourcePos == null) {
             LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);

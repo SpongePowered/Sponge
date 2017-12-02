@@ -149,7 +149,7 @@ public final class ContainerUtil {
         final IPhaseState currentState = currentPhase.state;
         if (currentState.tracksBlockSpecificDrops()) {
             final PhaseContext<?> context = currentPhase.context;
-            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 // Add itemstack to pre merge list
                 final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
                 final BlockPos pos = new BlockPos(x, y, z);
