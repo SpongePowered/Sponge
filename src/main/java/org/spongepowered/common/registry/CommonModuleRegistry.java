@@ -98,7 +98,7 @@ import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
