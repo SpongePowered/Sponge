@@ -452,8 +452,8 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(ParrotData.class, SpongeParrotData.class, ImmutableParrotData.class,
                 ImmutableSpongeParrotData.class, new ParrotDataProcessor());
 
-        DataUtil.registerDualProcessor(TagsData.class, SpongeTagsData.class, ImmutableTagsData.class,
-                ImmutableSpongeTagsData.class, new TagsDataProcessor());
+        DataUtil.registerDualProcessor(TagData.class, SpongeTagData.class, ImmutableTagData.class,
+                ImmutableSpongeTagData.class, new TagDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(PickupDelayData.class, SpongePickupDelayData.class, ImmutablePickupDelayData.class,
                 ImmutableSpongePickupDelayData.class, new PickupDelayDataProcessor());

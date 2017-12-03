@@ -27,12 +27,12 @@ package org.spongepowered.common.data.processor.data.entity;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagsData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TagsData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TagData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagsData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
@@ -43,9 +43,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class TagsDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Set<String>, SetValue<String>, TagsData, ImmutableTagsData> {
+public class TagDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Set<String>, SetValue<String>, TagData, ImmutableTagData> {
 
-    public TagsDataProcessor() {
+    public TagDataProcessor() {
         super(Entity.class, Keys.TAGS);
     }
 
@@ -91,8 +91,8 @@ public class TagsDataProcessor extends AbstractEntitySingleDataProcessor<Entity,
     }
 
     @Override
-    protected TagsData createManipulator() {
-        return new SpongeTagsData();
+    protected TagData createManipulator() {
+        return new SpongeTagData();
     }
 
 }

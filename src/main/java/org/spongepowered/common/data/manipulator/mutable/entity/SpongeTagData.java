@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.entity;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagsData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TagsData;
-import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleSetData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagsData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TagData;
+import org.spongepowered.api.data.value.mutable.SetValue;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTagData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
-public class ImmutableSpongeTagsData extends AbstractImmutableSingleSetData<String, ImmutableTagsData, TagsData> implements ImmutableTagsData {
+public class SpongeTagData extends AbstractSingleSetData<String, TagData, ImmutableTagData> implements TagData {
 
-    public ImmutableSpongeTagsData() {
-        this(ImmutableSet.of());
+    public SpongeTagData() {
+        this(Collections.emptySet());
     }
 
-    public ImmutableSpongeTagsData(Set<String> tags) {
-        super(ImmutableTagsData.class, tags, Keys.TAGS, SpongeTagsData.class);
+    public SpongeTagData(Set<String> tags) {
+        super(TagData.class, new HashSet<>(tags), Keys.TAGS, ImmutableSpongeTagData.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public ImmutableSetValue<String> tags() {
-        return getValueGetter();
+    public SetValue<String> tags() {
+        return (SetValue<String>) getValueGetter();
     }
 
 }

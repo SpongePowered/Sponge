@@ -22,32 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.entity;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
+import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagsData;
-import org.spongepowered.api.data.manipulator.mutable.entity.TagsData;
-import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTagsData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagData;
+import org.spongepowered.api.data.manipulator.mutable.entity.TagData;
+import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleSetData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagData;
 
-import java.util.HashSet;
 import java.util.Set;
 
-public class SpongeTagsData extends AbstractSingleSetData<String, TagsData, ImmutableTagsData> implements TagsData {
+public class ImmutableSpongeTagData extends AbstractImmutableSingleSetData<String, ImmutableTagData, TagData> implements ImmutableTagData {
 
-    public SpongeTagsData() {
-        this(new HashSet<>());
+    public ImmutableSpongeTagData() {
+        this(ImmutableSet.of());
     }
 
-    public SpongeTagsData(Set<String> tags) {
-        super(TagsData.class, new HashSet<>(tags), Keys.TAGS, ImmutableSpongeTagsData.class);
+    public ImmutableSpongeTagData(Set<String> tags) {
+        super(ImmutableTagData.class, tags, Keys.TAGS, SpongeTagData.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public SetValue<String> tags() {
-        return (SetValue<String>) getValueGetter();
+    public ImmutableSetValue<String> tags() {
+        return getValueGetter();
     }
 
 }
