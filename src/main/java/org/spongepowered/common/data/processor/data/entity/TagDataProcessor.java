@@ -51,22 +51,24 @@ public class TagDataProcessor extends AbstractEntitySingleDataProcessor<Entity, 
 
     @Override
     protected boolean set(Entity dataHolder, Set<String> value) {
-        for (String oldTag : dataHolder.getTags()) {
-            dataHolder.removeTag(oldTag);
-        }
-
-        final List<String> added = new ArrayList<>();
-
-        for (String newTag : value) {
-            if (!dataHolder.addTag(newTag)) {
-                for (String tag : added) {
-                    dataHolder.removeTag(tag);
-                }
-                return false;
+        synchronized (dataHolder.getTags()) {
+            for (String oldTag : dataHolder.getTags()) {
+                dataHolder.removeTag(oldTag);
             }
-            added.add(newTag);
-        }
 
+            final List<String> added = new ArrayList<>();
+
+            for (String newTag : value) {
+                if (!dataHolder.addTag(newTag)) {
+                    for (String tag : added) {
+                        dataHolder.removeTag(tag);
+                    }
+                    return false;
+                }
+                added.add(newTag);
+            }
+
+        }
         return true;
     }
 
