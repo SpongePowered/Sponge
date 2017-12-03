@@ -1,5 +1,5 @@
 /*
- * This file is part of SpongeAPI, licensed under the MIT License (MIT).
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
@@ -30,8 +30,11 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class ColorTest {
 
     @Test
@@ -66,7 +69,6 @@ public class ColorTest {
     public void testOfVector3d() {
         final Vector3d vecPurple = new Vector3d(127 + 4/7D, 0.414, 128.08);
         final Color purple = Color.of(vecPurple);
-        System.out.println(purple.toString());
         assertTrue(Color.PURPLE.equals(purple));
     }
 
