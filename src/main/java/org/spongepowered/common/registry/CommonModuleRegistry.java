@@ -177,6 +177,7 @@ import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
+import org.spongepowered.common.registry.type.data.InstrumentTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleOptionRegistryModule;
@@ -457,6 +458,7 @@ public final class CommonModuleRegistry {
             .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
             .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
+            .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())
