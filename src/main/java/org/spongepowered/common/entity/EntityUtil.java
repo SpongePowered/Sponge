@@ -85,7 +85,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
@@ -409,7 +409,7 @@ public final class EntityUtil {
                     ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                     if (!capturedBlocks.isEmpty()) {
                         for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
-                            original.restore(true, BlockChangeFlag.NONE);
+                            original.restore(true, BlockChangeFlags.NONE);
                         }
                         capturedBlocks.clear();
                     }
@@ -432,7 +432,7 @@ public final class EntityUtil {
                     // Undo created portal
                     if (!capturedBlocks.isEmpty()) {
                         for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
-                            original.restore(true, BlockChangeFlag.NONE);
+                            original.restore(true, BlockChangeFlags.NONE);
                         }
                     }
                     capturedBlocks.clear();

@@ -344,6 +344,7 @@ public final class CommonModuleRegistry {
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
+            .registerModule(BlockChangeFlagRegistryModule.getInstance())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
             .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
             .registerModule(Art.class, new ArtRegistryModule())

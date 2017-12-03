@@ -62,10 +62,11 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -507,6 +508,11 @@ public final class PhaseTracker {
      * @return True if the block was successfully set (or captured)
      */
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final int flags) {
+        return setBlockState(mixinWorld, pos, newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
+    }
+
+    public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, BlockChangeFlag flag) {
+        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final net.minecraft.world.World minecraftWorld = mixinWorld.asMinecraftWorld();
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
         // It is now possible for setBlockState to be called on an empty chunk due to our optimization
@@ -533,21 +539,21 @@ public final class PhaseTracker {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
-                    .add("Sponge's tracking system is very dependent on knowing when\n"
-                         + "a change to any world takes place, however there are chances\n"
-                         + "where Sponge does not know of changes that mods may perform.\n"
-                         + "In cases like this, it is best to report to Sponge to get this\n"
-                         + "change tracked correctly and accurately.").hr()
-                    .add("StackTrace:")
-                    .add(new Exception())
-                    .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+                .add("Sponge's tracking system is very dependent on knowing when\n"
+                     + "a change to any world takes place, however there are chances\n"
+                     + "where Sponge does not know of changes that mods may perform.\n"
+                     + "In cases like this, it is best to report to Sponge to get this\n"
+                     + "change tracked correctly and accurately.").hr()
+                .add("StackTrace:")
+                .add(new Exception())
+                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
         }
         if (phaseState.requiresBlockCapturing()) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
-                return TrackingUtil.trackBlockChange(this, mixinWorld, chunk, currentState, newState, pos, flags, phaseData.context, phaseState);
+                return TrackingUtil.trackBlockChange(this, mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context, phaseState);
             } catch (Exception | NoClassDefFoundError e) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
                 printer.addWrapped(40, "%s :", "PhaseContext");
@@ -576,12 +582,12 @@ public final class PhaseTracker {
                 minecraftWorld.profiler.endSection();
             }
 
-            if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
+            if (spongeFlag.isNotifyClients() && (!minecraftWorld.isRemote || !spongeFlag.isIgnoreRender()) && chunk.isPopulated())
             {
-                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flags);
+                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
             }
 
-            if (!minecraftWorld.isRemote && (flags & 1) != 0)
+            if (!minecraftWorld.isRemote && spongeFlag.updateNeighbors())
             {
                 minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
 
@@ -590,55 +596,13 @@ public final class PhaseTracker {
                     minecraftWorld.updateComparatorOutputLevel(pos, block);
                 }
             }
-            else if (!minecraftWorld.isRemote && (flags & 16) == 0)
+            else if (!minecraftWorld.isRemote && spongeFlag.notifyObservers())
             {
                 minecraftWorld.updateObservingBlocksAt(pos, block);
             }
 
             return true;
         }
-    }
-
-    public boolean setBlockStateWithFlag(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, BlockChangeFlag flag) {
-        final net.minecraft.world.World minecraftWorld = mixinWorld.asMinecraftWorld();
-        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final Block newBlock = newState.getBlock();
-        // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
-        final IBlockState currentState = chunk.getBlockState(pos);
-
-        if (currentState == newState) {
-            // Some micro optimization in case someone is trying to set the new state to the same as current
-            return false;
-        }
-
-        // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = mixinChunk.setBlockState(pos, newState, currentState, null, flag);
-
-        if (iblockstate == null) {
-            return false;
-        }
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            minecraftWorld.profiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.profiler.endSection();
-        }
-
-        if (chunk.isPopulated()) {
-            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flag.updateNeighbors() ? 3 : 2);
-        }
-
-        if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
-            }
-        }
-
-        // TODO - Add Observer block change flag
-
-        return true;
     }
 
     /**

@@ -64,6 +64,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -284,7 +285,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
-                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4));
+                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL.withUpdateNeighbors(false)));
 
                 // unused, to be removed and re-located when phase context is cleaned up
                 //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))

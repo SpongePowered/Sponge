@@ -43,7 +43,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -230,7 +230,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                 // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
                 // or the events were cancelled), again in reverse order of which they were received.
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                    transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                    transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                     if (this.tracksBlockSpecificDrops()) {
                         // Cancel any block drops or harvests for the block change.
                         // This prevents unnecessary spawns.

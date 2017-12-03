@@ -63,6 +63,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -90,6 +91,7 @@ import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCaptur
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
@@ -130,7 +132,7 @@ public final class TrackingUtil {
         final BlockPos blockPos = ((IMixinLocation) (Object) originalLocation).getBlockPos();
         final IBlockState newState = worldServer.getBlockState(blockPos);
         final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
-        final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, 0);
+        final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         return new Transaction<>(blockSnapshot, newSnapshot);
     };
 
@@ -248,7 +250,7 @@ public final class TrackingUtil {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(minecraftWorld);
             if (ShouldFire.TICK_BLOCK_EVENT) {
-                BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
+                BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
                 final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
                 SpongeImpl.postEvent(event);
                 if(event.isCancelled()) {
@@ -288,7 +290,7 @@ public final class TrackingUtil {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(minecraftWorld);
             if (ShouldFire.TICK_BLOCK_EVENT) {
-                final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
+                final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
                 final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
                 SpongeImpl.postEvent(event);
                 if(event.isCancelled()) {
@@ -362,8 +364,8 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    static boolean trackBlockChange(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
-                                    PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
+    static boolean trackBlockChange(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState,
+        IBlockState newState, BlockPos pos, BlockChangeFlag flags, PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
         if (((IPhaseState) phaseState).shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
@@ -575,7 +577,7 @@ public final class TrackingUtil {
                 // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
                 // or the events were cancelled), again in reverse order of which they were received.
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                    transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                    transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                     if (state.tracksBlockSpecificDrops()) {
                         // Cancel any block drops or harvests for the block change.
                         // This prevents unnecessary spawns.
@@ -635,7 +637,7 @@ public final class TrackingUtil {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                transaction.getFinal().restore(true, BlockChangeFlag.NONE);
+                transaction.getFinal().restore(true, BlockChangeFlags.NONE);
             }
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
@@ -656,7 +658,7 @@ public final class TrackingUtil {
                 phaseContext, phaseState));
 
             SpongeHooks.logBlockAction(mixinWorldServer.asMinecraftWorld(), oldBlockSnapshot.blockChange, transaction);
-            final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
+            final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // We call onBlockAdded here for both TE blocks (BlockContainer's) and other blocks.
@@ -674,14 +676,13 @@ public final class TrackingUtil {
             proxyBlockAccess.proceed();
             ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
-            final int minecraftChangeFlag = oldBlockSnapshot.getUpdateFlag();
-            if (((minecraftChangeFlag & 2) != 0)) { // Always try to notify clients of the change.
-                mixinWorldServer.asMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, minecraftChangeFlag);
+            if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
+                mixinWorldServer.asMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
             }
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
-            } else if ((minecraftChangeFlag & 16) == 0) {
+                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
+            } else if (changeFlag.notifyObservers()) {
                 mixinWorldServer.asMinecraftWorld().updateObservingBlocksAt(pos, newState.getBlock());
             }
 

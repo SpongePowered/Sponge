@@ -43,7 +43,6 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
@@ -52,7 +51,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
@@ -130,7 +129,7 @@ public class CopyPasta {
                     return CommandResult.success();
                 }
                 Sponge.getCauseStackManager().pushCause(this);
-                volume.apply(player.getLocation(), BlockChangeFlag.ALL);
+                volume.apply(player.getLocation(), BlockChangeFlags.ALL);
                 Sponge.getCauseStackManager().popCause();
                 player.sendMessage(Text.of(TextColors.GREEN, "Pasted clipboard into world."));
                 return CommandResult.success();
