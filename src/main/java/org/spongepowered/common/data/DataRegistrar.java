@@ -268,6 +268,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(SittingData.class, SpongeSittingData.class, ImmutableSittingData.class,
                 ImmutableSpongeSittingData.class, new SittingDataProcessor());
 
+        DataUtil.registerDualProcessor(JohnnyData.class, SpongeJohnnyData.class, ImmutableJohnnyData.class,
+                ImmutableSpongeJohnnyData.class, new JohnnyDataProcessor());
+
         DataUtil.registerDualProcessor(ShearedData.class, SpongeShearedData.class, ImmutableShearedData.class,
                 ImmutableSpongeShearedData.class, new ShearedDataProcessor());
 
