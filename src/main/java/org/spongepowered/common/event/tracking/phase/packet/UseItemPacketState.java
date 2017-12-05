@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -47,6 +48,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
@@ -102,7 +104,14 @@ class UseItemPacketState extends BasicPacketState {
         }
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(
-                originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, this, context));
+                originalBlocks -> {
+                    boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
+                    if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                        Sponge.getCauseStackManager().pushCause(player);
+                        EnumHand hand = ((CPacketPlayerTryUseItem) context.getPacket()).getHand();
+                        PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                    }
+                });
 
     }
 }
