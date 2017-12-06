@@ -24,48 +24,82 @@
  */
 package org.spongepowered.test;
 
-import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 
-@Plugin(id = "color_test", name = "Color Test", description = "Right click to get an items color. Left click to set the color to orange.")
+import java.util.Optional;
+
+@Plugin(id = "color_test", name = "Color Test", description = "Use /color info to show color or dye color info. Use /color test to change an items color.")
 public class ColorTest {
 
     @Listener
-    public void onPrimaryClick(InteractItemEvent.Primary event, @First Player player) {
-        player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(item -> {
-            String id = item.getType().getId();
-            if (item.supports(Keys.COLOR)) {
-                Color color = item.get(Keys.COLOR).get();
-                player.sendMessage(Text.of(id, "'s color is ", String.format("0x%06X", color.getRgb()), " ", color.toVector3i()));
-            } else if (item.supports(Keys.DYE_COLOR)) {
-                DyeColor dyeColor = item.get(Keys.DYE_COLOR).get();
-                player.sendMessage(Text.of(id, "'s dye color is ", dyeColor.getId(), " (", String.format("0x%06X", dyeColor.getColor().getRgb()), "),", dyeColor.getColor().toVector3i()));
-            } else {
-                player.sendMessage(Text.of(id, " does not support color or dye color."));
-            }
-        });
+    public void onInit(GameInitializationEvent event) {
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            Optional<ItemStack> optItem = getHandItem(src);
+                            if (optItem.isPresent()) {
+                                String id = optItem.get().getType().getId();
+                                if (optItem.get().supports(Keys.COLOR)) {
+                                    Color color = optItem.get().get(Keys.COLOR).get();
+                                    src.sendMessage(Text.of(id, "'s color is ", String.format("0x%06X", color.getRgb()), " ", color.toVector3i()));
+                                } else if (optItem.get().supports(Keys.DYE_COLOR)) {
+                                    DyeColor dyeColor = optItem.get().get(Keys.DYE_COLOR).get();
+                                    src.sendMessage(Text.of(id, "'s dye color is ", dyeColor.getId(), " (", String.format("0x%06X", dyeColor.getColor().getRgb()), "),", dyeColor.getColor().toVector3i()));
+                                } else {
+                                    src.sendMessage(Text.of(id, " does not have a color or dye color."));
+                                }
+                                return CommandResult.success();
+                            }
+                            return CommandResult.empty();
+                        })
+                        .build(), "info")
+                .child(CommandSpec.builder()
+                        .executor(((src, args) -> {
+                            Optional<ItemStack> optItem = getHandItem(src);
+                            if (optItem.isPresent()) {
+                                String id = optItem.get().getType().getId();
+                                if (optItem.get().supports(Keys.COLOR)) {
+                                    Color color = optItem.get().get(Keys.COLOR).get();
+                                    src.sendMessage(Text.of(id, "'s old color is ", String.format("0x%06X", color.getRgb()), " ", color.toVector3i()));
+                                    color = Color.of((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
+                                    src.sendMessage(Text.of(id, "'s new color is ", String.format("0x%06X", color.getRgb()), " ", color.toVector3i()));
+                                    optItem.get().offer(Keys.COLOR, color);
+                                    ((Player) src).setItemInHand(HandTypes.MAIN_HAND, optItem.get());
+                                    return CommandResult.success();
+                                } else {
+                                    src.sendMessage(Text.of(id, " does not have a color."));
+                                }
+                            }
+                            return CommandResult.empty();
+                        }))
+                        .build(), "test")
+                .build(), "color");
     }
 
-    private static double radians;
-    private static final double increment = Math.PI / 7, shift = 2 * Math.PI / 3;
-    private static final Vector3d shifts = Vector3d.from(2 * shift, shift, 0), offset = Vector3d.from(127.5);
-
-    @Listener
-    public void onSecondaryClick(InteractItemEvent.Secondary event, @First Player player) {
-        player.getItemInHand(HandTypes.MAIN_HAND).filter(item -> item.supports(Keys.COLOR)).ifPresent(item -> {
-            Vector3d vec = Vector3d.from(radians += increment).add(shifts);
-            item.offer(Keys.COLOR, Color.of(Vector3d.from(Math.sin(vec.getX()), Math.sin(vec.getY()), Math.sin(vec.getZ())).mul(offset).add(offset).round().toInt()));
-            player.setItemInHand(HandTypes.MAIN_HAND, item);
-        });
+    private Optional<ItemStack> getHandItem(CommandSource src) {
+        Optional<ItemStack> optItem = Optional.empty();
+        if (src instanceof Player) {
+            optItem = ((Player) src).getItemInHand(HandTypes.MAIN_HAND);
+            if (!optItem.isPresent()) {
+                src.sendMessage(Text.of("You must be holding an item in your main hand."));
+            }
+        } else {
+            src.sendMessage(Text.of("Only a player may use this command."));
+        }
+        return optItem;
     }
 
 }
