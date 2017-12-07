@@ -85,12 +85,12 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ICr
 
     @Override
     public Optional<Instant> add(int score) {
-        return add(MathHelper.clamp(getScore() + score, 0, getGoal()));
+        return set(MathHelper.clamp(getScore() + score, 0, getGoal()));
     }
 
     @Override
     public Optional<Instant> remove(int score) {
-        return add(MathHelper.clamp(getScore() - score, 0, getGoal()));
+        return set(MathHelper.clamp(getScore() - score, 0, getGoal()));
     }
 
     @Override
