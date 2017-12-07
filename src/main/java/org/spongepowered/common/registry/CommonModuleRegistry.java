@@ -25,6 +25,13 @@
 package org.spongepowered.common.registry;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.api.advancement.DisplayInfo;
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.TriggerType;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -136,6 +143,11 @@ import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
+import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
+import org.spongepowered.common.advancement.SpongeCriterionBuilder;
+import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
+import org.spongepowered.common.advancement.SpongeScoreCriterionBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
@@ -172,6 +184,9 @@ import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
+import org.spongepowered.common.registry.type.advancement.AdvancementTypeRegistryModule;
+import org.spongepowered.common.registry.type.advancement.CriterionRegistryModule;
+import org.spongepowered.common.registry.type.advancement.TriggerTypeRegistryModule;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
 import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
@@ -341,6 +356,11 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
             .registerBuilderSupplier(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
             .registerBuilderSupplier(Key.Builder.class, SpongeKeyBuilder::new)
+            .registerBuilderSupplier(Advancement.Builder.class, SpongeAdvancementBuilder::new)
+            .registerBuilderSupplier(AdvancementTree.Builder.class, SpongeAdvancementTreeBuilder::new)
+            .registerBuilderSupplier(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
+            .registerBuilderSupplier(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
+            .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
         ;
     }
 
@@ -462,6 +482,9 @@ public final class CommonModuleRegistry {
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
             .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
             .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())
+            .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
+            .registerModule(TriggerType.class, TriggerTypeRegistryModule.getInstance())
+            .registerModule(new CriterionRegistryModule())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

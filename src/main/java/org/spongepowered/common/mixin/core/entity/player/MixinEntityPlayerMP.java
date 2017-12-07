@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Sets;
+import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -84,6 +85,9 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementProgress;
+import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
@@ -168,6 +172,7 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
+import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -201,6 +206,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow @Final public MinecraftServer mcServer;
     @Shadow @Final public PlayerInteractionManager interactionManager;
+    @Shadow @Final private PlayerAdvancements advancements;
     @Shadow private String language;
     @Shadow public NetHandlerPlayServer connection;
     @Shadow public int lastExperience;
@@ -1169,4 +1175,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.hasPermission(getActiveContexts(), "minecraft.force-gamemode.override");
     }
 
+    @Override
+    public AdvancementProgress getProgress(Advancement advancement) {
+        checkNotNull(advancement, "advancement");
+        return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
+    }
+
+    @Override
+    public Set<AdvancementTree> getUnlockedAdvancementTrees() {
+        return ((IMixinPlayerAdvancements) this.advancements).getAdvancementTrees();
+    }
 }
