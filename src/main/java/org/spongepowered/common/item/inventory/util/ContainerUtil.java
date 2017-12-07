@@ -50,27 +50,32 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomContainer;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -394,6 +399,9 @@ public final class ContainerUtil {
     }
 
     public static Carrier getCarrier(Container container) {
+        if (container instanceof BlockCarrier) {
+            return ((BlockCarrier) container);
+        }
         if (container instanceof CustomContainer) {
             return ((CustomContainer) container).inv.getCarrier();
         } else if (container instanceof ContainerChest) {
@@ -402,27 +410,16 @@ public final class ContainerUtil {
                 if (inventory instanceof TileEntityChest) {
                     return (Carrier) inventory;
                 } else if (inventory instanceof InventoryLargeChest) {
-                    return ((Carrier) ((InventoryLargeChest) inventory).lowerChest);
-                    // TODO: Decide what the carrier should be (wrapper of 2 Block-based carriers including info which block is the upper inventory)
+                    return ((BlockCarrier) inventory);
                 }
             }
-
             return carrierOrNull(inventory);
         } else if (container instanceof ContainerHopper) {
             return carrierOrNull(((ContainerHopper) container).hopperInventory);
         } else if (container instanceof ContainerDispenser) {
             return carrierOrNull(((ContainerDispenser) container).dispenserInventory);
-        } else if (container instanceof ContainerWorkbench) {
-            return null; // TODO: Return a block-based carrier
         } else if (container instanceof ContainerFurnace) {
             return carrierOrNull(((ContainerFurnace) container).tileFurnace);
-        } else if (container instanceof ContainerEnchantment) {
-            /*ContainerEnchantment enchantment = ((ContainerEnchantment) container);
-            net.minecraft.tileentity.TileEntity tileEntity = enchantment.worldPointer.getTileEntity(enchantment.position);
-            return tileEntity != null && tileEntity instanceof TileEntityEnchantmentTable ? (Carrier) tileEntity : null;*/
-            return null; // TODO: Decide whether or not this should be a Carrier in the api
-        } else if (container instanceof ContainerRepair) {
-            return null; // TODO: Return a block-base
         } else if (container instanceof ContainerBrewingStand) {
             return carrierOrNull(((ContainerBrewingStand) container).tileBrewingStand);
         } else if (container instanceof ContainerBeacon) {
@@ -441,8 +438,24 @@ public final class ContainerUtil {
         // Fallback: Try to find a Carrier owning the first Slot of the Container
         if (container instanceof net.minecraft.inventory.Container) {
             for (Slot slot : ((net.minecraft.inventory.Container) container).inventorySlots) {
+                // Slot Inventory is a Carrier?
                 if (slot.inventory instanceof Carrier) {
                     return ((Carrier) slot.inventory);
+                }
+                // Slot Inventory is a TileEntity
+                if (slot.inventory instanceof TileEntity) {
+                    return new IMixinSingleBlockCarrier() {
+                        @Override
+                        public Location<org.spongepowered.api.world.World> getLocation() {
+                            BlockPos pos = ((TileEntity) slot.inventory).getPos();
+                            return new Location<>(((org.spongepowered.api.world.World) ((TileEntity) slot.inventory).getWorld()), pos.getX(), pos.getY(), pos.getZ());
+                        }
+
+                        @Override
+                        public CarriedInventory<?> getInventory() {
+                            return ((CarriedInventory) container);
+                        }
+                    };
                 }
                 return null;
             }

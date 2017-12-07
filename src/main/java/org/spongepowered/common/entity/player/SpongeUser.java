@@ -45,6 +45,7 @@ import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -227,7 +228,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<?> getInventory() {
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
