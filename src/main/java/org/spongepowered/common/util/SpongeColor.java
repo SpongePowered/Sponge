@@ -104,11 +104,15 @@ public final class SpongeColor implements Color {
                 .toString();
     }
 
-    public static final class Builder implements Color.Builder {
+    public static final class Builder extends AbstractDataBuilder<Color> implements Color.Builder {
 
-        private int red;
-        private int green;
-        private int blue;
+        private int red = -1;
+        private int green = -1;
+        private int blue = -1;
+
+        public Builder() {
+            super(Color.class, 1);
+        }
 
         @Override
         public Builder rgb(int rgb) {
@@ -141,29 +145,23 @@ public final class SpongeColor implements Color {
 
         @Override
         public Builder from(Color value) {
-            return rgb(red, green, blue);
+            return rgb(value.getRed(), value.getGreen(), value.getBlue());
         }
 
         @Override
         public Builder reset() {
-            return rgb(0, 0, 0);
+            this.red = -1;
+            this.green = -1;
+            this.blue = -1;
+            return this;
         }
 
         @Override
         public Color build() {
+            if (red == -1 || green == -1 || blue == -1) {
+                throw new IllegalStateException("No color has been defined.");
+            }
             return new SpongeColor(red, green, blue);
-        }
-
-    }
-
-    public static final class DataBuilder extends AbstractDataBuilder<Color> {
-
-        /**
-         * Creates a new {@link DataBuilder} for building {@link Color} objects,
-         * either from {@link DataView}s, or otherwise.
-         */
-        public DataBuilder() {
-            super(Color.class, 1);
         }
 
         @Override
