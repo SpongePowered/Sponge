@@ -32,10 +32,15 @@ public class JavaVersionCheckUtils {
 
     private static final String REQUIRED_VERSION = "1.8.0_20";
 
-    private static final String ERROR_MESSAGE = "We have detected that you are JRE version %s, which is out of date!\n"
+    private static final String ERROR_MESSAGE = "We have detected that you are using JRE version %s, which is out of date!\n"
                                                 + "In order to run Sponge, you **must** be running JRE version %s (or above).\n"
                                                 + "Previous builds of JRE version 1.8 will not work with Sponge.\n"
                                                 + "This can be downloaded from Oracle: http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html";
+    
+    private static final String UNSUPPORTED = "We have detected that you are using JRE version %s, which is currently not supported!\n"
+                                              + "In order to run Sponge, you **must** be running JRE version %s (or above).\n"
+                                              + "Previous builds of JRE version 1.8 will not work with Sponge.\n"
+                                              + "This can be downloaded from Oracle: http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html";
 
     public static void ensureJava8() {
         String version = getCurrentVersion();
@@ -48,6 +53,19 @@ public class JavaVersionCheckUtils {
                 }
                 throw new RuntimeException(error);
             }
+            System.out.println("You may be running an outdated version of Java. Any crashes from Sponge may require an update to Java.");
+        }
+    }
+    
+    public static void checkForNewVersions() {
+        String version = getCurrentVersion();
+        if (getVersionValue(version) > getVersionValue(REQUIRED_VERSION)) {
+            String error = String.format(UNSUPPORTED, version, REQUIRED_VERSION);
+
+                if (!GraphicsEnvironment.isHeadless()) {
+                    JOptionPane.showMessageDialog(null, error, "PEBKACException!", JOptionPane.ERROR_MESSAGE);
+                }
+            throw new RuntimeException(error);
             System.out.println("You may be running an outdated version of Java. Any crashes from Sponge may require an update to Java.");
         }
     }
