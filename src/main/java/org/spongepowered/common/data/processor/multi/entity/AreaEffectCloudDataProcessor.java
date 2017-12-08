@@ -100,7 +100,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
     protected Map<Key<?>, ?> getValues(EntityAreaEffectCloud dataHolder) {
         final HashMap<Key<?>, Object> map = new HashMap<>();
         map.put(Keys.AREA_EFFECT_CLOUD_AGE, dataHolder.ticksExisted);
-        map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.of(dataHolder.getColor()));
+        map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.ofRgb(dataHolder.getColor()));
         map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, dataHolder.getRadius());
         final IMixinAreaEffectCloud mixinAreaEffect = (IMixinAreaEffectCloud) dataHolder;
         final List<net.minecraft.potion.PotionEffect> potionEffects = mixinAreaEffect.getPotionEffects();

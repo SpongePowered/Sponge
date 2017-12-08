@@ -307,7 +307,7 @@ public final class NbtDataUtil {
         if (!subCompound.hasKey(ITEM_COLOR)) {
             return Optional.empty();
         }
-        return Optional.of(Color.of(subCompound.getInteger(ITEM_COLOR)));
+        return Optional.of(Color.ofRgb(subCompound.getInteger(ITEM_COLOR)));
     }
 
     public static void removeColorFromNBT(ItemStack stack) {

@@ -87,7 +87,7 @@ public class ColoredDataProcessor extends AbstractItemSingleDataProcessor<Color,
         final Item item = container.getItem();
         if (item instanceof ItemArmor) {
             final int color = ((ItemArmor) item).getColor(container);
-            return color == -1 ? Optional.empty() : Optional.of(Color.of(color));
+            return color == -1 ? Optional.empty() : Optional.of(Color.ofRgb(color));
         }
         return NbtDataUtil.getItemCompound(container).flatMap(NbtDataUtil::getColorFromNBT);
     }

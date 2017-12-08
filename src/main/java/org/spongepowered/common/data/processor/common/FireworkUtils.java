@@ -98,7 +98,7 @@ public class FireworkUtils {
             List<Color> colors = Lists.newArrayList();
             int[] colorsRaw = effectNbt.getIntArray("Colors");
             for(int color : colorsRaw) {
-                colors.add(Color.of(color));
+                colors.add(Color.ofRgb(color));
             }
             builder.colors(colors);
         }
@@ -106,7 +106,7 @@ public class FireworkUtils {
             List<Color> fades = Lists.newArrayList();
             int[] fadesRaw = effectNbt.getIntArray("FadeColors");
             for(int fade : fadesRaw) {
-                fades.add(Color.of(fade));
+                fades.add(Color.ofRgb(fade));
             }
             builder.fades(fades);
         }
