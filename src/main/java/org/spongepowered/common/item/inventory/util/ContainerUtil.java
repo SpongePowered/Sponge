@@ -253,6 +253,8 @@ public final class ContainerUtil {
                 if (adapterLens != null) {
                     if (adapterLens instanceof PlayerInventoryLens) {
                         playerLens = true;
+                    } else if (subInventory.getSizeInventory() == 0) {
+                        lens = new DefaultEmptyLens<>(((InventoryAdapter) subInventory));
                     } else {
                         lens = new DelegatingLens(index, adapterLens, slots);
                     }

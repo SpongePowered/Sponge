@@ -172,7 +172,7 @@ public class SpongeCommonEventFactory {
                         ((Inventory) player.inventory));
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
-        if (event.isCancelled()) {Sponge.getCauseStackManager().popCause();
+        if (event.isCancelled()) {
             return false;
         }
         if (event.getCustom().isPresent()) {
