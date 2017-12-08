@@ -22,41 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
+package org.spongepowered.common.mixin.core.advancement;
 
-import org.spongepowered.api.advancement.Advancement;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementTreeNode;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.TreeLayout;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.advancement.SpongeAdvancementTree;
+import org.spongepowered.common.advancement.SpongeTreeLayout;
 
-public class SpongeAdvancementTree implements AdvancementTree {
+@Mixin(AdvancementTreeNode.class)
+public class MixinAdvancementTreeNode {
 
-    private final Advancement rootAdvancement;
-    private final String id;
-    private final String name;
-
-    public SpongeAdvancementTree(Advancement rootAdvancement, String pluginId, String id) {
-        this.rootAdvancement = rootAdvancement;
-        this.id = pluginId + ':' + id;
-        this.name = id;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Advancement getRootAdvancement() {
-        return this.rootAdvancement;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public String getBackground() {
-        return ((net.minecraft.advancements.Advancement) this.rootAdvancement).getDisplay().background.toString();
+    @Inject(method = "layout", at = @At("RETURN"))
+    private static void onLayout(Advancement root, CallbackInfo ci) {
+        final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
+        final TreeLayout layout = new SpongeTreeLayout((SpongeAdvancementTree) advancementTree);
+        SpongeImpl.postEvent(SpongeEventFactory.createAdvancementTreeEventGenerateLayout(
+                Sponge.getCauseStackManager().getCurrentCause(), layout, advancementTree));
     }
 }

@@ -28,9 +28,9 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
 
@@ -55,7 +55,7 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriteri
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
+    public Collection<Trigger> getTriggers() {
         return Collections.emptySet();
     }
 }

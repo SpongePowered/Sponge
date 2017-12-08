@@ -108,11 +108,6 @@ public abstract class MixinDisplayInfo implements IMixinDisplayInfo, TreeLayoutE
     }
 
     @Override
-    public void setPosition(Vector2d position) {
-        setPosition(position.getX(), position.getY());
-    }
-
-    @Override
     public void setPosition(double x, double y) {
         this.x = (float) x;
         this.y = (float) y;

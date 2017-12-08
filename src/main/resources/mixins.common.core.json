@@ -11,6 +11,7 @@
         "MixinBootstrapAnonInner11",
         "advancement.MixinAdvancement",
         "advancement.MixinAdvancementProgress",
+        "advancement.MixinAdvancementTreeNode",
         "advancement.MixinCriteriaTriggers",
         "advancement.MixinCriterion",
         "advancement.MixinCriterionProgress",

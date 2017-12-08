@@ -1182,7 +1182,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public Set<AdvancementTree> getUnlockedAdvancementTrees() {
+    public Collection<AdvancementTree> getUnlockedAdvancementTrees() {
         return ((IMixinPlayerAdvancements) this.advancements).getAdvancementTrees();
     }
 }

@@ -39,12 +39,12 @@ import javax.annotation.Nullable;
 public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
 
     private final String name;
-    private final Set<AdvancementCriterion> criteria;
+    private final Collection<AdvancementCriterion> criteria;
 
-    @Nullable private Set<AdvancementCriterion> recursiveChildrenCriteria;
-    @Nullable private Set<AdvancementCriterion> leafChildrenCriteria;
+    @Nullable private Collection<AdvancementCriterion> recursiveChildrenCriteria;
+    @Nullable private Collection<AdvancementCriterion> leafChildrenCriteria;
 
-    SpongeOperatorCriterion(String namePrefix, Set<AdvancementCriterion> criteria) {
+    SpongeOperatorCriterion(String namePrefix, Collection<AdvancementCriterion> criteria) {
         this.name = namePrefix + Arrays.toString(criteria.stream().map(AdvancementCriterion::getName).toArray(String[]::new));
         this.criteria = ImmutableSet.copyOf(criteria);
     }
@@ -54,7 +54,7 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
         return this.name;
     }
 
-    private Set<AdvancementCriterion> getAllChildrenCriteria0(boolean onlyLeaves) {
+    private Collection<AdvancementCriterion> getAllChildrenCriteria0(boolean onlyLeaves) {
         final ImmutableSet.Builder<AdvancementCriterion> criteria = ImmutableSet.builder();
         if (!onlyLeaves) {
             criteria.add(this);
@@ -67,7 +67,7 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
         return criteria.build();
     }
 
-    public Set<AdvancementCriterion> getRecursiveChildren() {
+    public Collection<AdvancementCriterion> getRecursiveChildren() {
         if (this.recursiveChildrenCriteria == null) {
             this.recursiveChildrenCriteria = getAllChildrenCriteria0(false);
         }
@@ -75,12 +75,12 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
     }
 
     @Override
-    public Set<AdvancementCriterion> getCriteria() {
+    public Collection<AdvancementCriterion> getCriteria() {
         return this.criteria;
     }
 
     @Override
-    public Set<AdvancementCriterion> getLeafCriteria() {
+    public Collection<AdvancementCriterion> getLeafCriteria() {
         if (this.leafChildrenCriteria == null) {
             this.leafChildrenCriteria = getAllChildrenCriteria0(true);
         }

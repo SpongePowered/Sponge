@@ -114,9 +114,9 @@ public final class SpongeCriterionHelper {
                 }
                 andCriteria.add((AdvancementCriterion) criteria.get(name));
             }
-            orCriteria.add(AndCriterion.build(andCriteria));
+            orCriteria.add(AndCriterion.of(andCriteria));
         }
-        return OrCriterion.build(orCriteria);
+        return OrCriterion.of(orCriteria);
     }
 
     // If the following can be simplified, be my guest
