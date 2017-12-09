@@ -25,10 +25,13 @@
 package org.spongepowered.common.interfaces.advancement;
 
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.Set;
 
 public interface IMixinPlayerAdvancements {
 
     Set<AdvancementTree> getAdvancementTrees();
+
+    Player getPlayer();
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -65,6 +66,25 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ICr
             }
         }
         return this.score;
+    }
+
+    public void setSilently(int score) {
+        if (score == getGoal()) {
+            for (AdvancementCriterion criterion : this.criterion.internalCriteria.subList(0, score)) {
+                final CriterionProgress progress = (CriterionProgress) this.progress.get(criterion).get();
+                if (!progress.isObtained()) {
+                    progress.obtain();
+                }
+            }
+            return;
+        }
+        for (AdvancementCriterion criterion : this.criterion.internalCriteria.subList(score, getGoal())) {
+            ((CriterionProgress) this.progress.get(criterion).get()).reset();
+        }
+        for (AdvancementCriterion criterion : this.criterion.internalCriteria.subList(0, score)) {
+            ((CriterionProgress) this.progress.get(criterion).get()).obtain();
+        }
+        this.score = score;
     }
 
     @Override

@@ -36,11 +36,18 @@ import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.advancement.CriterionEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.advancement.ICriterionProgress;
 import org.spongepowered.common.advancement.SpongeAndCriterion;
 import org.spongepowered.common.advancement.SpongeAndCriterionProgress;
@@ -52,6 +59,7 @@ import org.spongepowered.common.advancement.SpongeScoreCriterionProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
+import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -78,6 +86,69 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             criterion.setName(entry.getKey());
             this.progressMap.put((AdvancementCriterion) entry.getValue(), (ICriterionProgress) criterionProgress);
         }
+    }
+
+    @Redirect(method = "grantCriterion", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/advancements/CriterionProgress;isObtained()Z"))
+    private boolean onGrantCriterion(net.minecraft.advancements.CriterionProgress criterionProgress) {
+        if (!criterionProgress.isObtained()) {
+            final CriterionProgress progress = (CriterionProgress) criterionProgress;
+            final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
+            final CriterionEvent.Grant event = SpongeEventFactory.createCriterionEventGrant(
+                    SpongeImpl.getCauseStackManager().getCurrentCause(), getAdvancement(), progress.getCriterion(),
+                    player, progress.get().get());
+            if (SpongeImpl.postEvent(event)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Overwrite
+    public boolean revokeCriterion(String criterionIn) {
+        final net.minecraft.advancements.CriterionProgress criterionProgress = this.criteria.get(criterionIn);
+        if (criterionProgress == null || !criterionProgress.isObtained()) {
+            return false;
+        }
+        final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
+        final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
+        final CriterionProgress progress = (CriterionProgress) criterionProgress;
+        final AdvancementCriterion criterion = progress.getCriterion();
+        final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
+        // The score criterion needs special care
+        final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
+        if (scoreCriterion != null) {
+            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) get(scoreCriterion).get();
+            final int previousScore = scoreProgress.getScore();
+            int newScore = scoreProgress.getScore() - 1;
+
+            final CriterionEvent.ScoreChange event = SpongeEventFactory.createCriterionEventScoreChange(
+                    cause, getAdvancement(), scoreCriterion, player, previousScore, newScore);
+            if (SpongeImpl.postEvent(event)) {
+                return false;
+            }
+            newScore = event.getNewScore();
+            if (newScore == event.getPreviousScore()) {
+                return false;
+            }
+            if (event.wasGrantedBefore()) {
+                final CriterionEvent.Revoke revokeEvent = SpongeEventFactory.createCriterionEventRevoke(
+                        cause, getAdvancement(), criterion, player);
+                if (SpongeImpl.postEvent(revokeEvent)) {
+                    return false;
+                }
+                newScore = event.getPreviousScore();
+            }
+            scoreProgress.setSilently(newScore); // Set the score without triggering more events
+            return true;
+        }
+        final CriterionEvent.Revoke event = SpongeEventFactory.createCriterionEventRevoke(
+                cause, getAdvancement(), criterion, player);
+        if (!SpongeImpl.postEvent(event)) {
+            criterionProgress.reset();
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.advancement.ICriterion;
+import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
 import java.util.Collections;
@@ -45,6 +46,7 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
     @Shadow @Final private ICriterionInstance criterionInstance;
 
     @Nullable private String name;
+    @Nullable private SpongeScoreCriterion scoreCriterion;
 
     @Override
     public String getName() {
@@ -57,6 +59,17 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Nullable
+    @Override
+    public SpongeScoreCriterion getScoreCriterion() {
+        return this.scoreCriterion;
+    }
+
+    @Override
+    public void setScoreCriterion(@Nullable SpongeScoreCriterion criterion) {
+        this.scoreCriterion = criterion;
     }
 
     @Override

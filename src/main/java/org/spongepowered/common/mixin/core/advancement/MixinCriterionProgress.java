@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.advancement;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.Advancement;
@@ -37,7 +38,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.advancement.ICriterionProgress;
+import org.spongepowered.common.advancement.SpongeScoreCriterion;
+import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
+import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
 
 import java.time.Instant;
@@ -93,6 +97,7 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
         if (this.obtained != null) {
             return this.obtained.toInstant();
         }
+        final SpongeScoreCriterion scoreCriterion = ((IMixinCriterion) getCriterion()).getScoreCriterion();
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
         ((IMixinAdvancementProgress) this.advancementProgress).getPlayerAdvancements()

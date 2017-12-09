@@ -24,7 +24,16 @@
  */
 package org.spongepowered.common.interfaces.advancement;
 
+import org.spongepowered.common.advancement.SpongeScoreCriterion;
+
+import javax.annotation.Nullable;
+
 public interface IMixinCriterion {
 
     void setName(String name);
+
+    @Nullable
+    SpongeScoreCriterion getScoreCriterion();
+
+    void setScoreCriterion(@Nullable SpongeScoreCriterion criterion);
 }

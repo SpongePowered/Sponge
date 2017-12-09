@@ -19,6 +19,7 @@
         "advancement.MixinFrameType",
         "advancement.MixinICriterionInstance",
         "advancement.MixinICriterionTrigger",
+        "advancement.MixinICriterionTriggerListener",
         "advancement.MixinPlayerAdvancements",
         "authlib.MixinGameProfile",
         "authlib.MixinProperty",

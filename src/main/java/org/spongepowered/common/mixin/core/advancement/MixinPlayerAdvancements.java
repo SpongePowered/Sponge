@@ -28,7 +28,9 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,9 +44,10 @@ import java.util.Map;
 import java.util.Set;
 
 @Mixin(PlayerAdvancements.class)
-public abstract class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
+public class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
 
     @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
+    @Shadow private EntityPlayerMP player;
 
     @Inject(method = "startProgress", at = @At("RETURN"))
     private void onStartProgress(Advancement advancement, AdvancementProgress progress, CallbackInfo ci) {
@@ -63,5 +66,10 @@ public abstract class MixinPlayerAdvancements implements IMixinPlayerAdvancement
             }
         }
         return builder.build();
+    }
+
+    @Override
+    public Player getPlayer() {
+        return (Player) this.player;
     }
 }
