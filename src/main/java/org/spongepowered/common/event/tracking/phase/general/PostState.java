@@ -52,7 +52,10 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     public boolean canSwitchTo(IPhaseState state) {
         return state.getPhase() == TrackingPhases.GENERATION
                 || state.getPhase() == TrackingPhases.PLUGIN
-                || state == BlockPhase.State.RESTORING_BLOCKS;
+                || state == BlockPhase.State.RESTORING_BLOCKS
+                // Decay can be caused when a block is performing a lot of
+                // changes in place
+                || state == BlockPhase.State.BLOCK_DECAY;
     }
 
     @Override
