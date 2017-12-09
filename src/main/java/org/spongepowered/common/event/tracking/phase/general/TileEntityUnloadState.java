@@ -50,4 +50,19 @@ public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
         BlockPos pos) {
         return false;
     }
+
+    @Override
+    public boolean tracksBlockSpecificDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
 }
