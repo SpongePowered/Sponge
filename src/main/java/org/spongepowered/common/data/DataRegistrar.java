@@ -41,7 +41,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.block.*;
@@ -69,11 +69,12 @@ import org.spongepowered.common.data.builder.authlib.SpongeGameProfileBuilder;
 import org.spongepowered.common.data.builder.block.state.SpongeBlockStateMetaContentUpdater;
 import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
-import org.spongepowered.common.data.builder.data.meta.*;
 import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
+import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndVarianceBuilder;
 import org.spongepowered.common.data.builder.util.weighted.FixedBuilder;
@@ -157,7 +158,7 @@ public class DataRegistrar {
         // ItemStack stuff
         dataManager.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
         dataManager.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
-        dataManager.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
+        dataManager.registerBuilder(Enchantment.class, new SpongeEnchantmentBuilder());
         dataManager.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
                 new ImmutableItemEnchantmentDataBuilder());
         dataManager.registerBuilder(FireworkEffect.class, new SpongeFireworkEffectDataBuilder());
@@ -203,6 +204,9 @@ public class DataRegistrar {
 
         DataUtil.registerDataProcessorAndImpl(ArmorStandData.class, SpongeArmorStandData.class,
                 ImmutableArmorStandData.class, ImmutableSpongeArmorStandData.class, new ArmorStandDataProcessor());
+
+        DataUtil.registerDataProcessorAndImpl(InvulnerabilityData.class, SpongeInvulnerabilityData.class,
+                ImmutableInvulnerabilityData.class, ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
                 ImmutableSpongeFuseData.class, new FuseDataProcessor());
@@ -414,9 +418,6 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
                 ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
 
-        DataUtil.registerDualProcessor(InvulnerabilityData.class, SpongeInvulnerabilityData.class, ImmutableInvulnerabilityData.class,
-                ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
-
         DataUtil.registerDualProcessor(GlowingData.class, SpongeGlowingData.class, ImmutableGlowingData.class, ImmutableSpongeGlowingData.class,
                 new GlowingDataProcessor());
 
@@ -425,6 +426,9 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(PickupRuleData.class, SpongePickupRuleData.class, ImmutablePickupRuleData.class,
                 ImmutableSpongePickupRuleData.class, new PickupRuleDataProcessor());
+
+        DataUtil.registerDualProcessor(ParrotData.class, SpongeParrotData.class, ImmutableParrotData.class,
+                ImmutableSpongeParrotData.class, new ParrotDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(PickupDelayData.class, SpongePickupDelayData.class, ImmutablePickupDelayData.class,
                 ImmutableSpongePickupDelayData.class, new PickupDelayDataProcessor());
@@ -800,7 +804,7 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new SpawnerNextEntityToSpawnValueProcessor());
         DataUtil.registerValueProcessor(Keys.SPAWNER_ENTITIES, new SpawnerEntitiesValueProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_COLOR, new AreaEffectCloudColorProcessor());
-        DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_AGE, new AReaEffectCloudAgeProcessor());
+        DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_AGE, new AreaEffectCloudAgeProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, new AreaEffectCloudParticleTypeProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_DURATION, new AreaEffectCloudDurationProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, new AreaEffectCloudDurationOnUseProcessor());
@@ -811,6 +815,8 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultValueProcessor());
         DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultZombieValueProcessor());
         DataUtil.registerValueProcessor(Keys.AGE, new AgeableAgeValueProcessor());
+        DataUtil.registerValueProcessor(Keys.INVULNERABILITY_TICKS, new InvulnerabilityTicksValueProcessor());
+        DataUtil.registerValueProcessor(Keys.INVULNERABLE, new InvulnerableValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
@@ -835,6 +841,7 @@ public class DataRegistrar {
         propertyRegistry.register(UnbreakableProperty.class, new UnbreakablePropertyStore());
         propertyRegistry.register(SurrogateBlockProperty.class, new SurrogateBlockPropertyStore());
         propertyRegistry.register(FullBlockSelectionBoxProperty.class, new FullBlockSelectionBoxPropertyStore());
+        propertyRegistry.register(InstrumentProperty.class, new InstrumentPropertyStore());
 
         // Items
         propertyRegistry.register(ApplicableEffectProperty.class, new ApplicableEffectPropertyStore());

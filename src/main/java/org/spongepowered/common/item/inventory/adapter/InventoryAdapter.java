@@ -57,7 +57,7 @@ public interface InventoryAdapter<TInventory, TStack> extends Inventory, Observe
     
     Lens<TInventory, TStack> getRootLens();
 
-    Fabric<TInventory> getInventory();
+    Fabric<TInventory> getFabric();
 
     Inventory getChild(int index);
     

@@ -49,6 +49,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.Sponge;
@@ -64,6 +65,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -85,7 +87,8 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
      * @reason Fire interact block event.
      */
     @Overwrite
-    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
+    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos
+            pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (this.gameType == GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -112,11 +115,11 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
-        @Nullable final ItemStack oldStack = stack.copy();
+        final ItemStack oldStack = stack.copy();
+
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack,
-                Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
-                DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack, VecHelper.toVector3d(pos.add
+                (hitX, hitY, hitZ)), currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
@@ -157,7 +160,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
                 Container lastOpenContainer = player.openContainer;
 
-                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, offsetX, offsetY, offsetZ)
+                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, hitX, hitY, hitZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
                 // if itemstack changed, avoid restore
@@ -186,10 +189,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             return EnumActionResult.PASS;
         } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
             return EnumActionResult.PASS;
-        } else if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock()) {
+        } else if (stack.getItem() instanceof ItemBlock) {
             Block block = ((ItemBlock)stack.getItem()).getBlock();
 
-            if (block instanceof BlockCommandBlock || block instanceof BlockStructure)
+            if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !player.canUseCommandBlock())
             {
                 return EnumActionResult.FAIL;
             }
@@ -205,7 +208,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // }
         // } // Sponge - Remove unecessary else bracket
         // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
-        final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
+        final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
         if (this.isCreative()) {
             stack.setItemDamage(oldStack.getItemDamage());
             stack.setCount(oldStack.getCount());

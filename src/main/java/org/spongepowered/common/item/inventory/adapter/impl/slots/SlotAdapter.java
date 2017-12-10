@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -34,11 +33,10 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
+import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DelegatingFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.SlotFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FakeSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
@@ -46,9 +44,14 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Optional;
 
-public class SlotAdapter extends Adapter implements Slot {
+/**
+ * Base SlotAdapter implementation for {@link net.minecraft.item.ItemStack} based Inventories.
+ *
+ * @param <TInventory> the Inventory Type
+ */
+public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory> implements Slot {
 
-    private final SlotLens<IInventory, net.minecraft.item.ItemStack> slot;
+    private final SlotLens<TInventory, net.minecraft.item.ItemStack> slot;
 
     private final int ordinal;
 
@@ -58,13 +61,8 @@ public class SlotAdapter extends Adapter implements Slot {
     // Internal use for events, will be removed soon!
     public int slotNumber = -1;
 
-    public SlotAdapter(net.minecraft.inventory.Slot slot) {
-        this(MinecraftFabric.of(slot), getLens(slot), slot.inventory instanceof Inventory ? (Inventory) slot.inventory : null);
-        this.slotNumber = slot.slotNumber;
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static SlotLens<IInventory, net.minecraft.item.ItemStack> getLens(net.minecraft.inventory.Slot slot) {
+    private static <TInventory> SlotLens<TInventory, net.minecraft.item.ItemStack> getLens(net.minecraft.inventory.Slot slot) {
         if (((IMixinSlot) slot).getSlotIndex() >= 0) { // Normal Slot?
             if (slot.inventory instanceof InventoryAdapter) { // If the inventory is an adapter we can get the existing SlotLens
                 return ((InventoryAdapter) slot.inventory).getSlotProvider().getSlot(((IMixinSlot) slot).getSlotIndex());
@@ -75,7 +73,7 @@ public class SlotAdapter extends Adapter implements Slot {
         return new FakeSlotLensImpl(slot);
     }
 
-    public SlotAdapter(Fabric<IInventory> inventory, SlotLens<IInventory, net.minecraft.item.ItemStack> lens, Inventory parent) {
+    public SlotAdapter(Fabric<TInventory> inventory, SlotLens<TInventory, net.minecraft.item.ItemStack> lens, Inventory parent) {
         super(inventory, lens, parent);
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
@@ -115,22 +113,12 @@ public class SlotAdapter extends Adapter implements Slot {
     }
 
     @Override
-    public Optional<ItemStack> poll(int limit) {
-        return super.poll(limit);
-    }
-
-    @Override
     public Optional<ItemStack> peek() {
         net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
         if (stack.isEmpty()) {
             return Optional.empty();
         }
         return ItemStackUtil.cloneDefensiveOptional(stack);
-    }
-
-    @Override
-    public Optional<ItemStack> peek(int limit) {
-        return super.peek(limit);
     }
 
     @Override
@@ -253,16 +241,11 @@ public class SlotAdapter extends Adapter implements Slot {
     }
 
     @Override
-    public int getMaxStackSize() {
-        return super.getMaxStackSize();
-    }
-
-    @Override
     public Slot transform(Type type) {
         switch (type) {
             case INVENTORY:
-                if (this.inventory instanceof DelegatingFabric) {
-                    return ((Slot) ((DelegatingFabric) this.inventory).getDelegate());
+                if (this.inventory instanceof SlotFabric) {
+                    return ((Slot) ((SlotFabric) this.inventory).getDelegate());
                 }
                 if (this.inventory instanceof ContainerFabric) {
                     return ((Slot) ((ContainerFabric) this.inventory).getContainer().getSlot(this.slotNumber));

@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.util.PrettyPrinter;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {

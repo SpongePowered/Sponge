@@ -50,7 +50,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -97,7 +96,7 @@ class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void associateBlockEventNotifier(PhaseContext<?> context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(BasicPacketContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
         final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = new Location<>(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatableBlock = LocatableBlock.builder()
@@ -120,7 +119,7 @@ class PlaceBlockPacketState extends BasicPacketState {
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
-            .ifPresentAndNotEmpty(entities -> {
+            .acceptAndClearIfNotEmpty(entities -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     Sponge.getCauseStackManager().pushCause(player);
                     Sponge.getCauseStackManager().pushCause(snapshot);
@@ -134,7 +133,7 @@ class PlaceBlockPacketState extends BasicPacketState {
                 }
             });
         context.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(
+            .acceptAndClearIfNotEmpty(
                 originalBlocks -> {
                     Sponge.getCauseStackManager().pushCause(player);
                     boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
@@ -145,7 +144,7 @@ class PlaceBlockPacketState extends BasicPacketState {
                     }
                     Sponge.getCauseStackManager().popCause();
                 });
-        context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
+        context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<Entity> entities =
                 drops.stream().map(drop -> drop.create(player.getServerWorld())).map(EntityUtil::fromNative)
                     .collect(Collectors.toList());

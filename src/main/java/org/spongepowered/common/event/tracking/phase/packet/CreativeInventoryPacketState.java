@@ -41,7 +41,7 @@ import java.util.ArrayList;
 final class CreativeInventoryPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 
@@ -57,7 +57,7 @@ final class CreativeInventoryPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
         context.getCapturedItemsSupplier()
-            .ifPresentAndNotEmpty(items -> {
+            .acceptAndClearIfNotEmpty(items -> {
                 if (items.isEmpty()) {
                     return;
                 }

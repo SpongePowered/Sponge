@@ -69,7 +69,7 @@ final class DropItemOutsideWindowState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 }

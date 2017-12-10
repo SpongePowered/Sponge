@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCarpet;
 import net.minecraft.block.BlockColored;
+import net.minecraft.block.BlockConcretePowder;
 import net.minecraft.block.BlockStainedGlass;
 import net.minecraft.block.BlockStainedGlassPane;
 import net.minecraft.block.properties.PropertyEnum;
@@ -47,7 +48,7 @@ import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
 import java.util.List;
 import java.util.Optional;
 
-@Mixin({BlockCarpet.class, BlockColored.class, BlockStainedGlass.class, BlockStainedGlassPane.class})
+@Mixin({BlockCarpet.class, BlockColored.class, BlockStainedGlass.class, BlockStainedGlassPane.class, BlockConcretePowder.class})
 public abstract class MixinDyeableBlock extends MixinBlock implements IMixinDyeableBlock {
 
     private PropertyEnum<EnumDyeColor> property;

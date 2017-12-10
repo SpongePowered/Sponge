@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -39,7 +38,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.Collection;
@@ -51,7 +49,7 @@ import java.util.stream.Collectors;
 final class UnknownPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 
@@ -72,8 +70,8 @@ final class UnknownPacketState extends BasicPacketState {
         try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-            context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            context.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 SpawnEntityEvent event =
                     SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                 SpongeImpl.postEvent(event);
@@ -82,7 +80,7 @@ final class UnknownPacketState extends BasicPacketState {
 
                 }
             });
-            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                 SpawnEntityEvent event =
                     SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
@@ -93,7 +91,7 @@ final class UnknownPacketState extends BasicPacketState {
                 }
             });
         }
-        context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+        context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
             final PrettyPrinter printer = new PrettyPrinter(80);
             printer.add("Processing An Unknown Packet for Entity Drops").centre().hr();
             printer.add("The item stacks captured are: ");
@@ -106,7 +104,7 @@ final class UnknownPacketState extends BasicPacketState {
             }
             printer.trace(System.err);
         });
-        context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+        context.getCapturedEntityItemDropSupplier().acceptIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                 final UUID entityUuid = entry.getKey();
                 final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
@@ -133,7 +131,7 @@ final class UnknownPacketState extends BasicPacketState {
                 }
             }
         });
-        context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
+        context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
             final List<EntityItem> items =
                 drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final List<Entity> entities = items

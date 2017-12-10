@@ -117,6 +117,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.LocatableBlock;
@@ -153,10 +154,14 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
+import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -183,9 +188,11 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.FakePlayer;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -237,6 +244,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
     private int dimensionId;
+    private IMixinChunkProviderServer mixinChunkProviderServer;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -304,6 +312,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
         this.updateEntityTick = 0;
+        this.mixinChunkProviderServer = ((IMixinChunkProviderServer) this.getChunkProvider());
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
@@ -402,10 +411,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
         this.chunkUnloadDelay = this.activeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         if (this.getChunkProvider() != null) {
-            final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
             final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
-            mixinChunkProvider.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
-            mixinChunkProvider.setDenyChunkRequests(this.activeConfig.getConfig().getWorld().getDenyChunkRequests());
+            this.mixinChunkProviderServer.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
+            this.mixinChunkProviderServer.setDenyChunkRequests(this.activeConfig.getConfig().getWorld().getDenyChunkRequests());
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {
                     ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
@@ -767,7 +775,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posX = fromPos.getX();
             posZ = fromPos.getZ();
         }
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
         if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
             return false;
         }
@@ -867,7 +875,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             .build();
 
         blockEvent.setTickBlock(locatable);
-        phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, this, pos, blockEvent);
+        phaseState.addNotifierToBlockEvent(context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -1061,7 +1069,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkBlockBounds(x, y, z);
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        boolean isWorldGen = peek.state.getPhase().isWorldGeneration(peek.state);
+        boolean isWorldGen = peek.state.isWorldGeneration();
         boolean handlesOwnCompletion = peek.state.handlesOwnStateCompletion();
         if (!isWorldGen) {
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
@@ -1126,7 +1134,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public BlockSnapshot createSnapshot(int x, int y, int z) {
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState currentState = this.getBlockState(pos);
-        return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos, 2);
+        return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos,
+            BlockChangeFlagRegistryModule.fromNativeInt(2));
     }
 
     @Override
@@ -1297,6 +1306,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntity(net.minecraft.entity.Entity entity) {
+        if (!PhaseTracker.validateEntitySpawn(this, (Entity) entity)) {
+            return true;
+        }
         return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
     }
 
@@ -1328,7 +1340,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockStateWithFlag(this, pos, state, flag);
+            return PhaseTracker.getInstance().setBlockState(this, pos, state, flag);
         }
     }
 
@@ -1431,7 +1443,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.alreadyCapturingEntityTicks()) {
             entityIn.onUpdate();
             return;
         }
@@ -1449,7 +1461,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
 
-        if (state.getPhase().alreadyCapturingTileTicks(state)) {
+        if (state.alreadyCapturingTileTicks()) {
             tile.update();
             return;
         }
@@ -1461,7 +1473,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.alreadyCapturingEntityTicks()) {
             entity.onUpdate();
             return;
         }
@@ -1474,7 +1486,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+        if (state.alreadyCapturingEntityTicks()) {
             entity.updateRidden();
             return;
         }
@@ -1497,8 +1509,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // IMixinWorld method
     @Override
-    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
-        if ((flags & 1) != 0) {
+    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags) {
+        if (flags.updateNeighbors()) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
@@ -1537,9 +1549,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean spawnEntity(Entity entity) {
+        if (!PhaseTracker.validateEntitySpawn(this, entity)) {
+            return true;
+        }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
-        if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {
+        if (!state.alreadyCapturingEntitySpawns()) {
             try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
                 .addCaptures()
                 .buildAndSwitch()) {
@@ -1578,7 +1593,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
 
     @Override
-    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
+    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag) {
         this.builder.reset();
         this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
@@ -1610,7 +1625,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
-        return new SpongeBlockSnapshot(this.builder, BlockChangeFlag.ALL.setUpdateNeighbors((updateFlag & 1) != 0), updateFlag);
+        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) BlockChangeFlags.ALL.withUpdateNeighbors(updateFlag.updateNeighbors()));
     }
 
     /**
@@ -1695,15 +1710,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         } else {
             // ExtraUtilities 2 expects to get the proper chunk while mining or it gets stuck in infinite loop
             // TODO add TE config to disable/enable chunk loads
-            final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) this.getChunkProvider();
-            final boolean forceChunkRequests = chunkProviderServer.getForceChunkRequests();
+            final boolean forceChunkRequests = this.mixinChunkProviderServer.getForceChunkRequests();
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final IPhaseState currentState = phaseTracker.getCurrentState();
             if (currentState == TickPhase.Tick.TILE_ENTITY) {
                 ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
             }
             net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
-            chunkProviderServer.setForceChunkRequests(forceChunkRequests);
+            this.mixinChunkProviderServer.setForceChunkRequests(forceChunkRequests);
             return chunk.getBlockState(pos);
         }
     }
@@ -1727,7 +1741,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
             BlockPos samePosition) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        final Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         return !(chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded());
     }
 
@@ -1751,7 +1765,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
             // Sponge Start - Use our hook to get the chunk only if it is loaded
             // return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
-            final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            final Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
             // Sponge End
         }
@@ -1806,7 +1820,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
                 // Chunk chunk = this.getChunkFromBlockCoords(pos);
                 // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
-                final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+                final Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
                 return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
                 // Sponge End
             }
@@ -1835,7 +1849,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // Sponge End
             return type.defaultLightValue;
         } else {
-            Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk == null) {
                 return type.defaultLightValue;
             }
@@ -1899,7 +1913,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         xEnd = xEnd >> 4;
         zEnd = zEnd >> 4;
 
-        net.minecraft.world.chunk.Chunk base = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(xStart, zStart);
+        net.minecraft.world.chunk.Chunk base = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(xStart, zStart);
         if (base == null) {
             return false;
         }
@@ -1943,6 +1957,40 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onCanAddEntityLogWarn(Logger logger, String message, Object param1, Object param2) {
         // don't log anything to avoid useless spam
     }
+
+    /**
+     * @author blood - October 3rd, 2017
+     * @reason Rewrites the check to avoid loading chunks.
+     *
+     * @param x The chunk x position
+     * @param z The chunk z position
+     * @param allowEmpty Whether empty chunks are allowed
+     * @return If chunk is loaded
+     */
+    @Overwrite
+    protected boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
+        final IMixinChunk spongeChunk = (IMixinChunk) this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(x, z);
+        if (spongeChunk == null || (spongeChunk.isQueuedForUnload() && !spongeChunk.isPersistedChunk())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity)
+    {
+        if (unusedTileEntity == null) {
+            super.markChunkDirty(pos, unusedTileEntity);
+            return;
+        }
+        final IMixinTileEntity spongeTileEntity = (IMixinTileEntity) unusedTileEntity;
+        final IMixinChunk chunk = spongeTileEntity.getActiveChunk();
+        if (chunk != null) {
+            chunk.markChunkDirty();
+        }
+    }
+
     /**************************** TIMINGS ***************************************/
     /*
     The remaining of these overridden methods are all injectors into World#updateEntities() to where
@@ -2127,6 +2175,31 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     // There's no method for playing a custom sound to all, so I made one -_-
                     listener.playCustomSoundToAllNearExcept(null, soundIn, category, x, y, z, volume, pitch);
                 });
+    }
+
+    @Override
+    public void stopSounds() {
+        stopSounds0(null, null);
+    }
+
+    @Override
+    public void stopSounds(SoundType sound) {
+        stopSounds0(checkNotNull(sound, "sound"), null);
+    }
+
+    @Override
+    public void stopSounds(SoundCategory category) {
+        stopSounds0(null, checkNotNull(category, "category"));
+    }
+
+    @Override
+    public void stopSounds(SoundType sound, SoundCategory category) {
+        stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+    }
+
+    private void stopSounds0(@Nullable SoundType sound, @Nullable SoundCategory category) {
+        this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(
+                SoundEffectHelper.createStopSoundPacket(sound, category), getDimensionId());
     }
 
     @Override

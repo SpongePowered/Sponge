@@ -52,6 +52,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
@@ -124,7 +125,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public float experience;
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
-    @Shadow private BlockPos spawnChunk;
+    @Shadow private BlockPos spawnPos;
     @Shadow private BlockPos bedLocation;
     @Shadow protected FoodStats foodStats;
     @Shadow public InventoryEnderChest enderChest;
@@ -153,6 +154,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract void addExperienceLevel(int levels);
     @Shadow public abstract void addScore(int scoreIn);
+    @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -671,7 +673,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                         if (isSweapingAttack) {
                             for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
-                                if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSqToEntity(entitylivingbase) < 9.0D) {
+                                if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSq(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
@@ -687,7 +689,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                         final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
                                                 .cause(Cause.of(EventContext.empty(), heldSnapshot))
                                                 .item(heldSnapshot)
-                                                .type(DamageModifierTypes.SWEAPING)
+                                                .type(DamageModifierTypes.SWEEPING)
                                                 .build(),
                                             (incoming) -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
                                         final List<DamageFunction> sweapingFunctions = new ArrayList<>();

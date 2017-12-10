@@ -45,8 +45,8 @@ public class FuelSlotLensImpl extends InputSlotLensImpl {
     }
     
     @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new FuelSlotAdapter(inv, this, parent);
+    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
+        return new FuelSlotAdapter(fabric, this, parent);
     }
 
 }

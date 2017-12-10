@@ -24,35 +24,55 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ReusableLens<T extends Lens<IInventory, ItemStack>> {
 
-    private final SlotCollection slots;
-    private final T lens;
-    private final Class<? extends MinecraftInventoryAdapter> adapter;
+    // InventoryAdapterClass -> LensClass -> Size -> ReusableLens
+    private static Map<Class<? extends InventoryAdapter>, Map<Class<? extends Lens<IInventory, ItemStack>>, Int2ObjectMap<ReusableLens>>>
+            reusableLenses = new HashMap<>();
 
-    public ReusableLens(SlotCollection slots, Function<SlotCollection, T> lens, Class<? extends MinecraftInventoryAdapter> adapter) {
+    private final SlotProvider<IInventory, ItemStack> slots;
+    private final T lens;
+
+    public ReusableLens(SlotProvider<IInventory, ItemStack> slots, T lens) {
         this.slots = slots;
-        this.adapter = adapter;
-        this.lens = lens.apply(slots);
+        this.lens = lens;
     }
 
-    public SlotCollection getSlots() {
+    public ReusableLens(SlotProvider<IInventory, ItemStack> slots, Function<SlotProvider<IInventory, ItemStack>, T> lensProvider) {
+        this.slots = slots;
+        this.lens = lensProvider.apply(slots);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Lens<IInventory, ItemStack>> ReusableLens<T> getLens(Class<T> lensType, InventoryAdapter<IInventory, ItemStack> adapter,
+            Supplier<SlotProvider<IInventory, ItemStack>> slots, Function<SlotProvider<IInventory, ItemStack>, T> lens) {
+        Map<Class<? extends Lens<IInventory, ItemStack>>, Int2ObjectMap<ReusableLens>>
+                adapterLenses = reusableLenses.computeIfAbsent(adapter.getClass(), k -> new HashMap<>());
+        Int2ObjectMap<ReusableLens> lenses = adapterLenses.computeIfAbsent(lensType, k -> new Int2ObjectOpenHashMap<>());
+        return lenses.computeIfAbsent(adapter.getFabric().getSize(), k -> {
+            SlotProvider<IInventory, ItemStack> sl = slots.get();
+            return new ReusableLens(sl, lens);
+        });
+    }
+
+    public SlotProvider<IInventory, ItemStack> getSlots() {
         return this.slots;
     }
 
     public T getLens() {
         return this.lens;
-    }
-
-    public Class<? extends MinecraftInventoryAdapter> getAdapter() {
-        return this.adapter;
     }
 }

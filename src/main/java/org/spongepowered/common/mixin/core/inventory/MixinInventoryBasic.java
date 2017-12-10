@@ -26,57 +26,36 @@ package org.spongepowered.common.mixin.core.inventory;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
-@Mixin(InventoryBasic.class)
+@Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
 public abstract class MixinInventoryBasic implements IInventory, LensProvider<IInventory, ItemStack> {
 
-    protected Fabric<IInventory> fabric;
-    protected SlotCollection slots;
-    protected Lens<IInventory, ItemStack> lens;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
-        this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-        this.lens = getRootLens(fabric, ((InventoryAdapter) this));
+    @Override
+    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        if (this.getSizeInventory() == 0) {
+            return new DefaultEmptyLens<>(adapter);
+        }
+        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.getSlotProvider());
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        if (this.getSizeInventory() == 0) {
-            return null; // No Lens when inventory has no slots
-        }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
-    }
-
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return this.slots;
-    }
-
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return this.lens;
-    }
-
-    public Fabric<IInventory> inventory$getInventory() {
-        return this.fabric;
+    public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
     }
 
 }

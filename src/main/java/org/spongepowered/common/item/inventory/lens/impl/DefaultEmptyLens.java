@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -40,13 +39,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
+public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, ItemStack> {
 
     private static final IntSet EMPTY_SLOT_SET = IntSets.EMPTY_SET;
     
-    protected final InventoryAdapter<IInventory, ItemStack> adapter;
+    protected final InventoryAdapter<TInventory, ItemStack> adapter;
     
-    public DefaultEmptyLens(InventoryAdapter<IInventory, ItemStack> adapter) {
+    public DefaultEmptyLens(InventoryAdapter<TInventory, ItemStack> adapter) {
         this.adapter = adapter;
     }
 
@@ -56,12 +55,12 @@ public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter<TInventory, ItemStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
         return this.adapter;
     }
     
     @Override
-    public Translation getName(Fabric<IInventory> inv) {
+    public Translation getName(Fabric<TInventory> inv) {
         return inv.getDisplayName();
     }
 
@@ -71,41 +70,41 @@ public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
     }
 
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
         return -1;
     }
 
     @Override
-    public ItemStack getStack(Fabric<IInventory> inv, int ordinal) {
-        return null;
+    public ItemStack getStack(Fabric<TInventory> inv, int ordinal) {
+        return ItemStack.EMPTY;
     }
     
     @Override
-    public boolean setStack(Fabric<IInventory> inv, int index, ItemStack stack) {
+    public boolean setStack(Fabric<TInventory> inv, int index, ItemStack stack) {
         return false;
     }
 
     @Override
-    public int getMaxStackSize(Fabric<IInventory> inv) {
+    public int getMaxStackSize(Fabric<TInventory> inv) {
         return 0;
     }
 
     @Override
-    public List<Lens<IInventory, ItemStack>> getChildren() {
-        return Collections.<Lens<IInventory, ItemStack>>emptyList();
+    public List<Lens<TInventory, ItemStack>> getChildren() {
+        return Collections.<Lens<TInventory, ItemStack>>emptyList();
     }
 
     @Override
-    public List<Lens<IInventory, ItemStack>> getSpanningChildren() {
-        return Collections.<Lens<IInventory, ItemStack>>emptyList();
+    public List<Lens<TInventory, ItemStack>> getSpanningChildren() {
+        return Collections.<Lens<TInventory, ItemStack>>emptyList();
     }
 
     @Override
-    public void invalidate(Fabric<IInventory> inv) {
+    public void invalidate(Fabric<TInventory> inv) {
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getLens(int index) {
+    public Lens<TInventory, ItemStack> getLens(int index) {
         return null;
     }
 
@@ -115,17 +114,17 @@ public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens<IInventory, ItemStack> child) {
+    public Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, ItemStack> child) {
         return Collections.<InventoryProperty<?, ?>>emptyList();
     }
 
     @Override
-    public boolean has(Lens<IInventory, ItemStack> lens) {
+    public boolean has(Lens<TInventory, ItemStack> lens) {
         return false;
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<IInventory, ItemStack>> c) {
+    public boolean isSubsetOf(Collection<Lens<TInventory, ItemStack>> c) {
         return true;
     }
     
@@ -140,12 +139,12 @@ public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
     }
     
     @Override
-    public Lens<IInventory, ItemStack> getParent() {
+    public Lens<TInventory, ItemStack> getParent() {
         return null;
     }
 
     @Override
-    public Iterator<Lens<IInventory, ItemStack>> iterator() {
+    public Iterator<Lens<TInventory, ItemStack>> iterator() {
         // TODO 
         return null;
     }

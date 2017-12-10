@@ -29,8 +29,8 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 @FunctionalInterface
-public interface SlotLensProvider {
+public interface SlotLensProvider<TInventory> {
 
-    SlotLens<IInventory, ItemStack> createSlotLens(int slotIndex);
+    SlotLens<TInventory, ItemStack> createSlotLens(int slotIndex);
 
 }

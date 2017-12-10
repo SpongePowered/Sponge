@@ -50,14 +50,14 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
 import java.util.Optional;
 
 @Mixin(SpongeUserInventory.class)
-public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter, UserInventory<User> {
+public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter<IInventory>, UserInventory<User> {
 
     @Shadow(remap = false) @Final public NonNullList<ItemStack> mainInventory;
     @Shadow(remap = false) @Final public NonNullList<ItemStack> armorInventory;
@@ -79,7 +79,7 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(SpongeUser playerIn, CallbackInfo ci) {
         // We only care about Server inventories
-        this.inventory = new DefaultInventoryFabric((IInventory) this);
+        this.inventory = new IInventoryFabric((IInventory) this);
 
         this.slots = new SlotCollection.Builder()
                 .add(this.mainInventory.size())
@@ -98,7 +98,7 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     }
 
     @Override
-    public Fabric<IInventory> getInventory() {
+    public Fabric<IInventory> getFabric() {
         return this.inventory;
     }
 

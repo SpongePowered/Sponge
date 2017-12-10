@@ -235,7 +235,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean isInWater();
     @Shadow public abstract boolean isRiding();
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract double getDistanceSq(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
@@ -252,6 +252,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public float entityCollisionReduction;
 
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
+
+    @Shadow private boolean invulnerable;
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
@@ -755,7 +757,7 @@ public abstract class MixinEntity implements IMixinEntity {
             return Optional.empty();
         }
         try {
-            return Optional.of(VecHelper.toSponge(boundingBox));
+            return Optional.of(VecHelper.toSpongeAABB(boundingBox));
         } catch (IllegalArgumentException exception) {
             // Bounding box is degenerate, the entity doesn't actually have one
             return Optional.empty();
@@ -1342,5 +1344,20 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void setActiveChunk(@Nullable IMixinChunk chunk) {
         this.activeChunk = new WeakReference<IMixinChunk>(chunk);
+    }
+
+    @Override
+    public boolean shouldTick() {
+        final IMixinChunk chunk = this.getActiveChunk();
+        if (chunk != null && chunk.isQueuedForUnload() && !chunk.isPersistedChunk()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void setInvulnerable(boolean value) {
+        this.invulnerable = value;
     }
 }

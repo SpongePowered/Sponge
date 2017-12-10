@@ -39,8 +39,8 @@ import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataPr
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeOcelotType;
+import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -67,7 +67,7 @@ public class OcelotDataProcessor extends
 
     @Override
     protected Optional<OcelotType> getVal(EntityOcelot entity) {
-        return Optional.ofNullable(SpongeEntityConstants.OCELOT_IDMAP.get(entity.getTameSkin()));
+        return Optional.ofNullable(OcelotTypeRegistryModule.OCELOT_IDMAP.get(entity.getTameSkin()));
     }
 
     @Override

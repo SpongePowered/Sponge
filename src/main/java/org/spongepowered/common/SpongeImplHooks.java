@@ -35,6 +35,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -49,6 +50,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
@@ -65,9 +68,10 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.command.SpongeCommands;
-import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -75,6 +79,7 @@ import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.FakePlayer;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -284,7 +289,7 @@ public final class SpongeImplHooks {
     }
 
     public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
-        world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 2);
+        world.setBlockToAir(blockpos);
         block.onBlockDestroyedByExplosion(world, blockpos, explosion);
     }
 
@@ -358,6 +363,25 @@ public final class SpongeImplHooks {
     }
 
     public static Predicate<? super PluginContainer> getPluginFilterPredicate() {
-        return plugin -> !SpongeCommands.CONTAINER_LIST_STATICS.contains(plugin.getId());
+        return plugin -> !SpongeCommandFactory.CONTAINER_LIST_STATICS.contains(plugin.getId());
+    }
+
+    // Borrowed from Forge, with adjustments by us
+
+    @Nullable
+    public static RayTraceResult rayTraceEyes(EntityLivingBase entity, double length) {
+        final Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+        final Vec3d endPos = startPos.add(entity.getLookVec().scale(length));
+        return entity.world.rayTraceBlocks(startPos, endPos);
+    }
+
+    public static boolean shouldKeepSpawnLoaded(net.minecraft.world.DimensionType dimensionType, int dimensionId) {
+        final WorldServer worldServer = WorldManager.getWorldByDimensionId(dimensionId).orElse(null);
+        return worldServer != null && ((WorldProperties) worldServer.getWorldInfo()).doesKeepSpawnLoaded();
+
+    }
+
+    public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {
+        // This is only used in SpongeForge
     }
 }

@@ -64,6 +64,9 @@ public class ModuleCategory extends ConfigCategory {
     @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")
     private boolean pluginRealTime = false;
 
+    @Setting(value = "movement-checks", comment = "Allows configuring Vanilla movement and speed checks")
+    private boolean movementChecks = false;
+
     public boolean usePluginBungeeCord() {
         return this.pluginBungeeCord;
     }
@@ -126,6 +129,10 @@ public class ModuleCategory extends ConfigCategory {
 
     public boolean applyGameFixes() {
         return this.gameFixes;
+    }
+
+    public boolean useMovementChecks() {
+        return this.movementChecks;
     }
 
     public void setGameFixes(boolean gameFixes) {

@@ -56,10 +56,10 @@ public class DropInventoryState extends BasicInventoryPacketState {
             Sponge.getCauseStackManager().pushCause(spongePlayer);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
             context.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(items -> {
+                .acceptAndClearIfNotEmpty(items -> {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {

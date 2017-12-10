@@ -38,8 +38,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeRabbitType;
+import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public class RabbitDataProcessor
 
     @Override
     protected Optional<RabbitType> getVal(EntityRabbit entity) {
-        return Optional.ofNullable(SpongeEntityConstants.RABBIT_IDMAP.get(entity.getRabbitType()));
+        return Optional.ofNullable(RabbitTypeRegistryModule.RABBIT_IDMAP.get(entity.getRabbitType()));
     }
 
     @Override

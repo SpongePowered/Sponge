@@ -35,16 +35,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.OrderedInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 @Mixin(Slot.class)
-public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter {
+public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter<IInventory> {
 
     @Shadow @Final public int slotIndex;
     @Shadow @Final public IInventory inventory;
@@ -52,6 +55,8 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     protected Fabric<IInventory> fabric;
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
+
+    private InventoryAdapter<IInventory, ItemStack> parentAdapter;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
@@ -67,7 +72,14 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
 
     @Override
     public Inventory parent() {
-        return ((Inventory) this.inventory);
+        if (this.inventory instanceof Inventory) {
+            return ((Inventory) this.inventory);
+        }
+        if (this.parentAdapter == null) {
+            OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.fabric.getSize(), 1, new SlotCollection.Builder().add(this.fabric.getSize()).build());
+            this.parentAdapter = new OrderedInventoryAdapter(this.fabric, lens);
+        }
+        return this.parentAdapter;
     }
 
     @Override
@@ -91,7 +103,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     }
 
     @Override
-    public Fabric<IInventory> getInventory() {
+    public Fabric<IInventory> getFabric() {
         return this.fabric;
     }
 }

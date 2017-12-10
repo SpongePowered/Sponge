@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 public class ExplosionContext extends PluginPhaseContext<ExplosionContext> {
 

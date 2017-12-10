@@ -34,13 +34,13 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public class PlayerInventoryLens extends MinecraftLens {
+public class PlayerInventoryLens extends RealLens {
 
     private static final int EQUIPMENT = 4;
     private static final int MAIN_INVENTORY_HEIGHT = 3;
@@ -53,7 +53,7 @@ public class PlayerInventoryLens extends MinecraftLens {
     private SlotLens<IInventory, ItemStack> offhand;
 
     public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
+        super(0, adapter.getFabric().getSize(), adapter, slots);
         if (adapter instanceof InventoryPlayer) {
             this.player = (ArmorEquipable) ((InventoryPlayer) adapter).player;
         }
@@ -74,10 +74,10 @@ public class PlayerInventoryLens extends MinecraftLens {
 
         int base = 0;
         int INVENTORY_WIDTH = InventoryPlayer.getHotbarSize();
-        this.main = new MainPlayerInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + HOTBAR, INVENTORY_WIDTH, slots);
+        this.main = new MainPlayerInventoryLensImpl(base, slots);
         base += INVENTORY_WIDTH * HOTBAR;
         base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
-        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) this.player, base, EQUIPMENT, 1, slots);
+        this.equipment = new EquipmentInventoryLensImpl(this.player, base, EQUIPMENT, 1, slots);
         base += EQUIPMENT;
         this.offhand = slots.getSlot(base);
 
@@ -87,16 +87,11 @@ public class PlayerInventoryLens extends MinecraftLens {
         this.addSpanningChild(this.offhand);
 
         // Additional Slots for bigger modded inventories
-        int additionalSlots = this.size - base;
+        int additionalSlots = this.size - base - 1;
         if (additionalSlots > 0) {
             this.addSpanningChild(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
         }
 
-    }
-
-    @Override
-    protected boolean isDelayedInit() {
-        return true; // player is needed for EquipmentInventoryLensImpl
     }
 
     public MainPlayerInventoryLens<IInventory, ItemStack> getMainLens() {

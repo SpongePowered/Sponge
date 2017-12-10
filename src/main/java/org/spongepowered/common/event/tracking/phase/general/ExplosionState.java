@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -41,7 +43,9 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -57,8 +61,6 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
@@ -92,6 +94,16 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
+    public boolean alreadyCapturingEntitySpawns() {
+        return true;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
+
+    @Override
     public void unwind(ExplosionContext context) {
         final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -99,9 +111,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
             Sponge.getCauseStackManager().pushCause(explosion);
             context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
+                    .acceptAndClearIfNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
             context.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
                         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
@@ -201,24 +213,14 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
             for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
                 if (!transaction.isValid()) {
                     invalid.add(transaction);
-                    final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-    
-                    // Cancel any block drops performed, avoids any item drops, regardless
-                    context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(blockPos)) {
-                            map.get(blockPos).clear();
-                        }
-                    });
-                    context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(blockPos)) {
-                            map.get(blockPos).clear();
-                        }
-                    });
-                    context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(blockPosEntityMultimap -> {
-                        if (blockPosEntityMultimap.containsKey(blockPos)) {
-                            blockPosEntityMultimap.get(blockPos).clear();
-                        }
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        // Cancel any block drops performed, avoids any item drops, regardless
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
+                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
     
@@ -228,18 +230,15 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                 // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
                 // or the events were cancelled), again in reverse order of which they were received.
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                    transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                    transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                     if (this.tracksBlockSpecificDrops()) {
                         // Cancel any block drops or harvests for the block change.
                         // This prevents unnecessary spawns.
-                        final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                        context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
-                            // Check if the mapping actually has the position to avoid unnecessary
-                            // collection creation
-                            if (map.containsKey(position)) {
-                                map.get(position).clear();
-                            }
-                        });
+                        final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                        if (location != null) {
+                            final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                            context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                        }
                     }
                 }
             }

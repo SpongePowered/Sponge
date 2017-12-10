@@ -35,8 +35,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
-            phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 final SpawnEntityEvent spawnEntityEvent =
                         SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                 SpongeImpl.postEvent(spawnEntityEvent);
@@ -72,7 +72,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
                 }
             });
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+            phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final ArrayList<Entity> capturedEntities = new ArrayList<>();
                 for (EntityItem entity : entities) {
                     capturedEntities.add(EntityUtil.fromNative(entity));
@@ -86,14 +86,14 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
                     EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             });
-            phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
+            phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blockSnapshots -> {
                 TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
             });
         }
     }
 
     @Override
-    public void appendExplosionContext(PhaseContext<?> explosionContext, PhaseContext<?> context) {
+    public void appendContextPreExplosion(ExplosionContext explosionContext, PlayerTickContext context) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.owner(player);

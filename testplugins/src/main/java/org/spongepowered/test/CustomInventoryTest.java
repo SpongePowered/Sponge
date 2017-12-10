@@ -47,6 +47,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.GuiIdProperty;
 import org.spongepowered.api.item.inventory.property.GuiIds;
+import org.spongepowered.api.item.inventory.property.Identifiable;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -134,9 +135,10 @@ public class CustomInventoryTest {
         }
         if (event.getTargetEntity() instanceof Slime) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.MENU_GRID)
-                    .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(1, 9))
-                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Slime Content")))
-                    .property("guiidproperty", new GuiIdProperty(GuiIds.DISPENSER))
+                    .property(InventoryDimension.of(1, 9))
+                    .property(InventoryTitle.of(Text.of("Slime Content")))
+                    .property(new Identifiable())
+                    .property(new GuiIdProperty(GuiIds.DISPENSER))
                     .build(this);
             ItemStack flard = ItemStack.of(ItemTypes.SLIME, 1);
             flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
@@ -184,6 +186,7 @@ public class CustomInventoryTest {
 
     @Listener
     public void onInventoryClick(ClickInventoryEvent event, @First Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
+        container.getInventoryProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
         for (SlotTransaction trans : event.getTransactions()) {
             Slot slot = trans.getSlot();
             Slot realSlot = slot.transform();

@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    private final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
+    final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;

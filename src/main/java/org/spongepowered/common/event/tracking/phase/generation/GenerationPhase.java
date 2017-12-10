@@ -24,20 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-
-import java.util.ArrayList;
 
 /**
  * A specific {@link TrackingPhase} to handle any point in which world or chunk
@@ -95,21 +85,6 @@ public final class GenerationPhase extends TrackingPhase {
 
     private static final class Holder {
         static final GenerationPhase INSTANCE = new GenerationPhase();
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
-        return true;
-    }
-
-    @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState<?> currentState, PhaseContext<?> context, PhaseContext<?> newContext) {
-
-    }
-
-    @Override
-    public boolean isWorldGeneration(IPhaseState<?> state) {
-        return true;
     }
 
 

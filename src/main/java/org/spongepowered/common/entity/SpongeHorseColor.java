@@ -28,8 +28,16 @@ import org.spongepowered.api.data.type.HorseColor;
 
 public class SpongeHorseColor extends SpongeEntityMeta implements HorseColor {
 
-    public SpongeHorseColor(int color, String name) {
-        super(color, name);
+    private final String name;
+
+    public SpongeHorseColor(int color, String id, String name) {
+        super(color, id);
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     public int getBitMask() {

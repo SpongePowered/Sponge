@@ -36,9 +36,10 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
+import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
 import java.util.List;
 
@@ -48,17 +49,17 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
 
     @Override
     public Value<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseUtils.getHorseStyle((EntityHorse) (Object) this));
+        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
     }
 
     @Override
     public Value<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, HorseUtils.getHorseColor((EntityHorse) (Object) this));
+        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this));
     }
 
     @Override
     public HorseData getHorseData() {
-        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this));
+        return new SpongeHorseData(HorseColorRegistryModule.getHorseColor((EntityHorse) (Object) this), HorseStyleRegistryModule.getHorseStyle((EntityHorse) (Object) this));
     }
 
     @Override

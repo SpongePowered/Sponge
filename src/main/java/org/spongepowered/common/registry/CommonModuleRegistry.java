@@ -38,6 +38,7 @@ import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -74,7 +75,7 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
-import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
@@ -141,7 +142,8 @@ import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
-import org.spongepowered.common.data.builder.data.meta.SpongePatternLayerBuilder;
+import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
+import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
@@ -175,6 +177,7 @@ import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
+import org.spongepowered.common.registry.type.data.InstrumentTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleOptionRegistryModule;
@@ -335,12 +338,14 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
             .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
             .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
+            .registerBuilderSupplier(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
         ;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
+            .registerModule(BlockChangeFlagRegistryModule.getInstance())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
             .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
             .registerModule(Art.class, new ArtRegistryModule())
@@ -372,7 +377,7 @@ public final class CommonModuleRegistry {
             .registerModule(DisplaySlot.class, DisplaySlotRegistryModule.getInstance())
             .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
             .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
-            .registerModule(Enchantment.class, EnchantmentRegistryModule.getInstance())
+            .registerModule(EnchantmentType.class, EnchantmentRegistryModule.getInstance())
             .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
             .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
             .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())
@@ -392,6 +397,7 @@ public final class CommonModuleRegistry {
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
             .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
+            .registerModule(ParrotVariant.class, new ParrotVariantRegistryModule())
             .registerModule(ParticleType.class, ParticleRegistryModule.getInstance())
             .registerModule((Class<ParticleOption<?>>) (Class<?>) ParticleOption.class, new ParticleOptionRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
@@ -451,6 +457,9 @@ public final class CommonModuleRegistry {
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())
             .registerModule(EventContextKey.class, EventContextKeysModule.getInstance())
             .registerModule(RecordType.class, RecordTypeRegistryModule.getInstance())
+            .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
+            .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
+            .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

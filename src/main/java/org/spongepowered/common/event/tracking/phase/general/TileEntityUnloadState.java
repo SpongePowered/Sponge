@@ -25,13 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
 
@@ -54,5 +49,20 @@ public class TileEntityUnloadState extends GeneralState<GeneralizedContext> {
     public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
         BlockPos pos) {
         return false;
+    }
+
+    @Override
+    public boolean tracksBlockSpecificDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
     }
 }

@@ -49,6 +49,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldArchetypeRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
@@ -65,7 +66,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     private boolean hardcore;
     private boolean worldEnabled;
     private boolean loadOnStartup;
-    private boolean keepSpawnLoaded;
+    private Boolean keepSpawnLoaded;
     private boolean generateSpawnOnLoad;
     private boolean pvpEnabled;
     private boolean commandsAllowed;
@@ -290,8 +291,8 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.hardcore = false;
         this.worldEnabled = true;
         this.loadOnStartup = true;
-        this.keepSpawnLoaded = true;
-        this.generateSpawnOnLoad = true;
+        this.keepSpawnLoaded = null;
+        this.generateSpawnOnLoad = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
         this.generatorSettings = DataContainer.createNew();
         this.generatorModifiers = ImmutableList.of();
         this.pvpEnabled = true;

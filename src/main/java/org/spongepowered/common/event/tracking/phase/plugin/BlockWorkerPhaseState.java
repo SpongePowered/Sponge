@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 public class BlockWorkerPhaseState extends BasicPluginState {
@@ -40,11 +39,13 @@ public class BlockWorkerPhaseState extends BasicPluginState {
 
     @Override
     public void unwind(BasicPluginContext phaseContext) {
-        phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
+        phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
 
         });
         phaseContext.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
+            .acceptAndClearIfNotEmpty(snapshots ->
+                TrackingUtil.processBlockCaptures(snapshots, this, phaseContext)
+            );
     }
 
     @Override

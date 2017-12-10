@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
@@ -39,7 +40,6 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
@@ -48,7 +48,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -68,28 +67,31 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     @Override
     public void unwind(InventoryPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
-        final ItemStack usedStack = context.getItemUsed();
-        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+        //final ItemStack usedStack = context.getItemUsed();
+        //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(spongePlayer);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
 
             context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
             context.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(items -> {
+                .acceptAndClearIfNotEmpty(items -> {
 
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
                         entities.add(EntityUtil.fromNative(item));
                     }
 
-                    final CPacketPlayerDigging packetIn = context.getPacket();
-
-                    CPacketPlayerDigging.Action action = packetIn.getAction();
-
-                    final int usedButton = action == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+                    int usedButton = 0;
+                    if (context.getPacket() instanceof CPacketPlayerDigging) {
+                        final CPacketPlayerDigging packetIn = context.getPacket();
+                        usedButton = packetIn.getAction() == CPacketPlayerDigging.Action.DROP_ITEM ? PacketPhase.PACKET_BUTTON_PRIMARY_ID : 1;
+                    } else {
+                        final CPacketClickWindow packetIn = context.getPacket();
+                        usedButton = packetIn.getUsedButton();
+                    }
 
                     Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                     final IMixinContainer mixinContainer = ContainerUtil.toMixin( player.openContainer);
@@ -107,7 +109,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     mixinContainer.setCaptureInventory(false);
                 });
             context.getCapturedEntityDropSupplier()
-                .ifPresentAndNotEmpty(itemMapping -> {
+                .acceptIfNotEmpty(itemMapping -> {
 
                 });
             final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
@@ -141,7 +143,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 

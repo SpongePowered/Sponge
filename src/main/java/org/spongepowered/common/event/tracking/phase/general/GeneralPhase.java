@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
@@ -34,29 +33,31 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.CapturedMultiMapSupplier;
+import org.spongepowered.common.event.tracking.CapturedSupplier;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public final class GeneralPhase extends TrackingPhase {
 
@@ -165,16 +166,16 @@ public final class GeneralPhase extends TrackingPhase {
             // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
             // or the events were cancelled), again in reverse order of which they were received.
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
-                transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
-                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                    postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
-                        if (map.containsKey(position)) {
-                            map.get(position).clear();
-                        }
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        // Cancel any block drops performed, avoids any item drops, regardless
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        postContext.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
             invalidTransactions.clear();
@@ -196,7 +197,7 @@ public final class GeneralPhase extends TrackingPhase {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                transaction.getFinal().restore(true, BlockChangeFlag.ALL);
+                transaction.getFinal().restore(true, BlockChangeFlags.ALL);
             }
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
@@ -206,16 +207,16 @@ public final class GeneralPhase extends TrackingPhase {
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldLocation.getExtent();
             final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, unwindingPhaseContext, unwindingState));
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot,
+            capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
+                    .spawnItemDataForBlockDrops(items, newBlockSnapshot, unwindingPhaseContext, unwindingState));
+            capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
+                    .spawnItemEntitiesForBlockDrops(items, newBlockSnapshot,
                         unwindingPhaseContext, unwindingState));
 
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
             SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
-            final int updateFlag = oldBlockSnapshot.getUpdateFlag();
+            final int updateFlag = changeFlag.updateNeighbors() ? BlockChangeFlagRegistryModule.Flags.NEIGHBOR_MASK : 0;
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
@@ -223,12 +224,12 @@ public final class GeneralPhase extends TrackingPhase {
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
                     newState)) {
                 newState.getBlock().onBlockAdded(worldServer, pos, newState);
-                postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-
+                postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
+                    final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
+                    ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
                 });
-                capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
+                capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
                     final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
-                    blocks.clear();
                     processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingPhaseContext);
                 });
             }
@@ -244,68 +245,17 @@ public final class GeneralPhase extends TrackingPhase {
             }
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
+                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getChangeFlag());
             } else if ((updateFlag & 16) == 0) {
                 worldServer.updateObservingBlocksAt(pos, newState.getBlock());
             }
 
-            capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
+            capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
                 blocks.clear();
                 processBlockTransactionListsPost(postContext, blockSnapshots, unwindingState, unwindingPhaseContext);
             });
         }
-    }
-
-    @Override
-    public boolean alreadyCapturingEntitySpawns(IPhaseState<?> state) {
-        return state == Post.UNWINDING || state == State.EXPLOSION;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntityTicks(IPhaseState<?> state) {
-        return state == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean alreadyCapturingTileTicks(IPhaseState<?> state) {
-        return state == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
-        return currentState == Post.UNWINDING || currentState == State.EXPLOSION;
-    }
-
-    @Override
-    public boolean ignoresItemPreMerging(IPhaseState<?> currentState) {
-        return currentState == State.COMMAND || currentState == State.COMPLETE || super.ignoresItemPreMerging(currentState);
-    }
-
-    @Override
-    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        if (state == Post.UNWINDING) {
-            final IPhaseState<?> unwindingState = ((UnwindingPhaseContext) context).getUnwindingState();
-            final PhaseContext<?> unwindingContext = ((UnwindingPhaseContext) context).getUnwindingContext();
-            unwindingState.getPhase()
-                    .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
-        } else if (state == State.COMMAND) {
-            context.getSource(Player.class)
-                    .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
-                            .setBlockNotifier(notifyPos, player.getUniqueId()));
-
-        }
-    }
-
-
-    @Override
-    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
-        if (currentPhaseData.state == Post.UNWINDING) {
-            ((PostState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
-            return;
-        }
-        super.appendContextPreExplosion(phaseContext, currentPhaseData);
     }
 
 }

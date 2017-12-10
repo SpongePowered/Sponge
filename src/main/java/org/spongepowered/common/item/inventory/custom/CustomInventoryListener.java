@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,11 +46,15 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
 
     @Override
     public void handle(InteractInventoryEvent event) throws Exception {
-        if (!(event.getTargetInventory() == this.inventory || (event.getTargetInventory() instanceof CustomContainer && (((CustomContainer) event.getTargetInventory()).inv == this.inventory)))) {
-            return;
-        }
-        for (Consumer<InteractInventoryEvent> consumer: this.consumers) {
-            consumer.accept(event);
+        net.minecraft.inventory.Container nativeContainer = ContainerUtil.toNative(event.getTargetInventory());
+        for (net.minecraft.inventory.Slot slot : nativeContainer.inventorySlots) {
+            if (slot.inventory == this.inventory) {
+                // This container does contain our inventory
+                for (Consumer<InteractInventoryEvent> consumer: this.consumers) {
+                    consumer.accept(event);
+                }
+                break;
+            }
         }
     }
 }

@@ -34,9 +34,12 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
@@ -97,4 +100,15 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         return createWorldBorder();
     }
 
+    /**
+     * @author Zidane
+     * @reason Check configs when dropping a chunk to see if we should keep the spawn loaded
+     */
+    @Overwrite
+    public boolean canDropChunk(int x, int z) {
+        final boolean isSpawnChunk = this.world.isSpawnChunk(x, z);
+
+        return !isSpawnChunk || !SpongeImplHooks.shouldKeepSpawnLoaded(this.world.provider.getDimensionType(), ((IMixinWorldServer) this.world)
+                .getDimensionId());
+    }
 }

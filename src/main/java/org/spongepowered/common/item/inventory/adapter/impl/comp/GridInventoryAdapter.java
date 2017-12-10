@@ -33,7 +33,8 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
-import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.AdapterLogic;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
@@ -76,7 +77,7 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
 
     @Override
     public Optional<Slot> getSlot(int x, int y) {
-        return Adapter.forSlot(this.inventory, this.getSlotLens(x, y), this);
+        return VanillaAdapter.forSlot(this.inventory, this.getSlotLens(x, y), this);
     }
 
     @Override
@@ -101,27 +102,27 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
 
     @Override
     public Optional<ItemStack> poll(int x, int y) {
-        return Adapter.Logic.pollSequential(this.inventory, this.getSlotLens(x, y));
+        return AdapterLogic.pollSequential(this.inventory, this.getSlotLens(x, y));
     }
 
     @Override
     public Optional<ItemStack> poll(int x, int y, int limit) {
-        return Adapter.Logic.pollSequential(this.inventory, this.getSlotLens(x, y), limit);
+        return AdapterLogic.pollSequential(this.inventory, this.getSlotLens(x, y), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y) {
-        return Adapter.Logic.peekSequential(this.inventory, this.getSlotLens(x, y));
+        return AdapterLogic.peekSequential(this.inventory, this.getSlotLens(x, y));
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y, int limit) {
-        return Adapter.Logic.peekSequential(this.inventory, this.getSlotLens(x, y), limit);
+        return AdapterLogic.peekSequential(this.inventory, this.getSlotLens(x, y), limit);
     }
 
     @Override
     public InventoryTransactionResult set(int x, int y, ItemStack stack) {
-        return Adapter.Logic.insertSequential(this.inventory, this.getSlotLens(x, y), stack);
+        return AdapterLogic.insertSequential(this.inventory, this.getSlotLens(x, y), stack);
     }
 
 }

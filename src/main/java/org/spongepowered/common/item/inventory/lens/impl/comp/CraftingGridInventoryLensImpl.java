@@ -41,7 +41,7 @@ public class CraftingGridInventoryLensImpl extends GridInventoryLensImpl impleme
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new CraftingGridInventoryAdapter(inv, this, parent);
+    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
+        return new CraftingGridInventoryAdapter(fabric, this, parent);
     }
 }

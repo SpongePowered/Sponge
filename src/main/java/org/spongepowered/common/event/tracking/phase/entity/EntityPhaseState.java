@@ -34,6 +34,8 @@ import javax.annotation.Nullable;
 
 public abstract class EntityPhaseState<E extends EntityContext<E>> implements IPhaseState<E> {
 
+    private final String className = this.getClass().getSimpleName();
+
     @Override
     public final TrackingPhase getPhase() {
         return TrackingPhases.ENTITY;
@@ -57,6 +59,11 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
     @Override
     public void unwind(E context) {
 
+    }
+
+    @Override
+    public String toString() {
+        return this.getPhase() + "{" + this.className + "}";
     }
 }
 

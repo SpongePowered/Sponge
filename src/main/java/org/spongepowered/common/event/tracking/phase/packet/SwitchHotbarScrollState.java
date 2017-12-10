@@ -81,9 +81,9 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
         SlotTransaction sourceTransaction =
-            new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, previousSlot + preHotbarSize), sourceSnapshot, sourceSnapshot);
+            new SlotTransaction(ContainerUtil.getSlot(inventoryContainer, previousSlot + preHotbarSize), sourceSnapshot, sourceSnapshot);
         SlotTransaction targetTransaction =
-            new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, itemChange.getSlotId() + preHotbarSize), targetSnapshot, targetSnapshot);
+            new SlotTransaction(ContainerUtil.getSlot(inventoryContainer, itemChange.getSlotId() + preHotbarSize), targetSnapshot, targetSnapshot);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             ImmutableList<SlotTransaction> transactions =

@@ -38,7 +38,6 @@ import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.type.HorseColors;
-import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.entity.EntityType;
@@ -49,7 +48,6 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -229,10 +227,6 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         });
         this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
 
-        RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);
-        RegistryHelper.mapFields(HorseStyles.class, SpongeEntityConstants.HORSE_STYLES);
-        RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
-        RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);
     }
 
     @Override

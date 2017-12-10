@@ -48,27 +48,49 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
         return this.captured;
     }
 
+    /**
+     * Returns {@code true} if there are no captured objects.
+     * 
+     * @return {@code true} if empty
+     */
     public final boolean isEmpty() {
         return this.captured == null || this.captured.isEmpty();
     }
 
-    public final void ifPresentAndNotEmpty(Consumer<List<T>> consumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
+    /**
+     * If not empty, activates the consumer then clears all captures.
+     * 
+     * @param consumer The consumer to activate
+     */
+    public final void acceptAndClearIfNotEmpty(Consumer<List<T>> consumer) {
+        if (!this.isEmpty()) {
             consumer.accept(this.captured);
             this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
             // with recycling the captured object.
         }
     }
 
+    /**
+     * If not empty, returns the captured {@link List}.
+     * Otherwise, this will return the passed list.
+     * 
+     * @param list The fallback list
+     * @return If not empty, the captured list otherwise the fallback list
+     */
     public final List<T> orElse(List<T> list) {
-        return this.captured == null ? list : this.captured;
+        return this.isEmpty() ? list : this.captured;
     }
 
-    @SuppressWarnings("unchecked")
-	public final List<T> orEmptyList() {
+    public final List<T> orEmptyList() {
         return this.captured == null ? Collections.emptyList() : this.captured;
     }
 
+    /**
+     * If not empty, returns a sequential stream of values associated with key.
+     * 
+     * @param key The key
+     * @return A sequential stream of values
+     */
     public final Stream<T> stream() {
         return this.captured == null ? Stream.empty() : this.captured.stream();
     }

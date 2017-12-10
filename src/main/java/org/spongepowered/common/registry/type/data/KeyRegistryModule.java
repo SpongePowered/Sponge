@@ -195,7 +195,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("disarmed", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Disarmed"), "sponge:disarmed", "Disarmed"));
 
-        this.fieldMap.put("item_enchantments", makeListKey(TypeTokens.LIST_ITEM_ENCHANTMENT_TOKEN, TypeTokens.LIST_ITEM_ENCHANTMENT_VALUE_TOKEN, of("ItemEnchantments"), "sponge:item_enchantments", "Item Enchantments"));
+        this.fieldMap.put("item_enchantments", makeListKey(TypeTokens.LIST_ENCHANTMENT_TOKEN, TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN, of("ItemEnchantments"), "sponge:item_enchantments", "Item EnchantmentTypes"));
 
         this.fieldMap.put("banner_patterns", makeListKey(TypeTokens.LIST_PATTERN_TOKEN, TypeTokens.LIST_PATTERN_VALUE_TOKEN, of("BannerPatterns"), "sponge:banner_patterns", "Banner Patterns"));
 
@@ -378,6 +378,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("rabbit_type", makeSingleKey(TypeTokens.RABBIT_TOKEN, TypeTokens.RABBIT_VALUE_TOKEN, of("RabbitType"), "sponge:rabbit_type", "Rabbit Type"));
 
+        this.fieldMap.put("parrot_variant", makeSingleKey(TypeTokens.PARROT_VARIANT_TOKEN, TypeTokens.PARROT_VARIANT_VALUE_TOKEN, of("ParrotVariant"), "sponge:parrot_variant", "Parrot Variant"));
+
         this.fieldMap.put("lock_token", makeSingleKey(TypeTokens.STRING_TOKEN, TypeTokens.STRING_VALUE_TOKEN, of("Lock"), "sponge:lock", "Lock"));
 
         this.fieldMap.put("banner_base_color", makeSingleKey(TypeTokens.DYE_COLOR_TOKEN, TypeTokens.DYE_COLOR_VALUE_TOKEN, of("BannerBaseColor"), "sponge:banner_base_color", "Banner Base Color"));
@@ -412,7 +414,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("persists", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Persists"), "sponge:persists", "Persists"));
 
-        this.fieldMap.put("stored_enchantments", makeListKey(TypeTokens.LIST_ITEM_ENCHANTMENT_TOKEN, TypeTokens.LIST_ITEM_ENCHANTMENT_VALUE_TOKEN, of("StoredEnchantments"), "sponge:stored_enchantments", "Stored Enchantments"));
+        this.fieldMap.put("stored_enchantments", makeListKey(TypeTokens.LIST_ENCHANTMENT_TOKEN, TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN, of("StoredEnchantments"), "sponge:stored_enchantments", "Stored Enchantments"));
 
         this.fieldMap.put("is_sprinting", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Sprinting"), "sponge:sprinting", "Sprinting"));
 
@@ -491,6 +493,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("pickup_rule", makeSingleKey(TypeTokens.PICKUP_TOKEN, TypeTokens.PICKUP_VALUE_TOKEN, of("PickupRule"), "sponge:pickup_rule", "Pickup Rule"));
 
         this.fieldMap.put("invulnerability_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("HurtTime"), "sponge:invulnerability_ticks", "Invulnerability Ticks"));
+        this.fieldMap.put("invulnerable", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("Invulnerable"), "sponge:invulnerable", "Invulnerable"));
 
         this.fieldMap.put("has_gravity", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
 

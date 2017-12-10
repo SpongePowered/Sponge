@@ -131,7 +131,7 @@ public class Query<TInventory, TStack> {
         QueryStrategy<TInventory, TStack, Object> strategy = Query.<TInventory, TStack, Object>getStrategy(type)
                 .with(ImmutableSet.copyOf(args));
         this.adapter = adapter;
-        this.inventory = adapter.getInventory();
+        this.inventory = adapter.getFabric();
         this.lens = adapter.getRootLens();
         this.strategy = strategy;
     }
@@ -266,7 +266,7 @@ public class Query<TInventory, TStack> {
 
     public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Inventory args) {
         CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.getRootLens());
-        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) adapter.getInventory(), (MinecraftFabric) ((InventoryAdapter) args).getInventory());
+        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) adapter.getFabric(), (MinecraftFabric) ((InventoryAdapter) args).getFabric());
         CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
         for (Object inv : args) {
             lensBuilder.add(((InventoryAdapter) inv).getRootLens());

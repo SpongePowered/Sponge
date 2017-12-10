@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import net.minecraft.block.Block;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -49,7 +52,10 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     public boolean canSwitchTo(IPhaseState state) {
         return state.getPhase() == TrackingPhases.GENERATION
                 || state.getPhase() == TrackingPhases.PLUGIN
-                || state == BlockPhase.State.RESTORING_BLOCKS;
+                || state == BlockPhase.State.RESTORING_BLOCKS
+                // Decay can be caused when a block is performing a lot of
+                // changes in place
+                || state == BlockPhase.State.BLOCK_DECAY;
     }
 
     @Override
@@ -70,6 +76,43 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     @Override
     public boolean ignoresScheduledUpdates() {
         return true;
+    }
+
+    @Override
+    public boolean alreadyCapturingEntitySpawns() {
+        return true;
+    }
+
+    @Override
+    public boolean alreadyCapturingEntityTicks() {
+        return true;
+    }
+
+    @Override
+    public boolean alreadyCapturingTileTicks() {
+        return true;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void appendContextPreExplosion(ExplosionContext explosionContext, UnwindingPhaseContext context) {
+        final IPhaseState phaseState = context.getUnwindingState();
+        final PhaseContext<?> unwinding = context.getUnwindingContext();
+        phaseState.appendContextPreExplosion(explosionContext, unwinding);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void associateNeighborStateNotifier(UnwindingPhaseContext context, BlockPos sourcePos, Block block, BlockPos notifyPos,
+        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        final IPhaseState<?> unwindingState = context.getUnwindingState();
+        final PhaseContext<?> unwindingContext = context.getUnwindingContext();
+        ((IPhaseState) unwindingState).associateNeighborStateNotifier(unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
     @SuppressWarnings("unchecked")
@@ -104,14 +147,6 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
             contextItems.clear();
             TrackingUtil.splitAndSpawnEntities(items);
         }
-    }
-
-    public void appendContextPreExplosion(PhaseContext<?> phaseContext, PhaseData currentPhaseData) {
-        final IPhaseState phaseState = ((UnwindingPhaseContext) currentPhaseData.context).getUnwindingState();
-        final PhaseContext<?> unwinding = ((UnwindingPhaseContext) currentPhaseData.context).getUnwindingContext();
-        final PhaseData phaseData = new PhaseData(unwinding, phaseState);
-        phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
-
     }
 
     @Override

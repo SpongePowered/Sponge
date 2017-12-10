@@ -38,7 +38,7 @@ final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
     public void unwind(BasicEntityContext context) {
-        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil
+        context.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> TrackingUtil
                 .processBlockCaptures(blocks, this, context));
     }
 }

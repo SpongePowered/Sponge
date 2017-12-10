@@ -46,6 +46,7 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
+import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,6 +63,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -177,7 +179,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -186,7 +188,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
@@ -194,7 +196,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(int value) {
         if (!this.world.isRemote) {
-            return ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getMinimumLife() * 20;
+            return ((IMixinWorldServer) this.world).getActiveConfig().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }
@@ -229,10 +231,20 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
     public void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
-        if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isVanished()
-            && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
-            this.attackTarget = null;
-            ci.cancel();
+        if (ShouldFire.SET_A_I_TARGET_EVENT) {
+            if (entitylivingbaseIn != null) {
+                if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
+                    this.attackTarget = null;
+                    ci.cancel();
+                } else {
+                    SetAITargetEvent event = SpongeCommonEventFactory.callSetAttackTargetEvent((Entity) entitylivingbaseIn, this);
+                    if (event.isCancelled()) {
+                        ci.cancel();
+                    } else {
+                        this.attackTarget = ((EntityLivingBase) event.getTarget().orElse(null));
+                    }
+                }
+            }
         }
     }
 

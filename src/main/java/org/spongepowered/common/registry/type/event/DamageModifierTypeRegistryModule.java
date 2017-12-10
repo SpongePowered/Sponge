@@ -44,7 +44,6 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
     @RegisterCatalog(DamageModifierTypes.class)
     private final Map<String, DamageModifierType> modifierTypeMap = new HashMap<>();
 
-
     @Override
     public Optional<DamageModifierType> getById(String id) {
         return Optional.ofNullable(this.modifierTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
@@ -72,6 +71,8 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         this.modifierTypeMap.put("absorption", new SpongeDamageModifierType("Absorption", "absorption"));
         this.modifierTypeMap.put("critical_hit", new SpongeDamageModifierType("Critical Hit", "critical_hit"));
         this.modifierTypeMap.put("attack_cooldown", new SpongeDamageModifierType("Attack Cooldown", "attack_cooldown"));
-        this.modifierTypeMap.put("sweaping", new SpongeDamageModifierType("Sweaping", "sweaping"));
+        final DamageModifierType sweeping = new SpongeDamageModifierType("Sweeping", "sweeping");
+        this.modifierTypeMap.put("sweeping", sweeping);
+        this.modifierTypeMap.put("sweaping", sweeping); // TODO: remove
     }
 }

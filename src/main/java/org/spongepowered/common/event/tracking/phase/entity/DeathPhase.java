@@ -44,7 +44,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -86,7 +85,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
             final Optional<User> owner = context.getOwner();
             final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
             context.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
+                    .acceptAndClearIfNotEmpty(entities -> {
                         // Separate experience orbs from other entity drops
                         final List<Entity> experience = entities.stream()
                                 .filter(entity -> entity instanceof ExperienceOrb)
@@ -128,7 +127,7 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
             // This allows mods such as Draconic Evolution to add items to the drop list
             if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
                 final ArrayList<Entity> entities = new ArrayList<>();
-                final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
                     for (Entity entity : destruct.getEntities()) {
@@ -137,38 +136,33 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
                 }
                 return;
             }
-            context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                final Collection<EntityItem> items = map.get(dyingEntity.getUniqueId());
+            context.getCapturedEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
                     entities.add(EntityUtil.fromNative(item));
                 }
-    
+
                 if (isPlayer) {
                     // Forge and Vanilla always clear items on player death BEFORE drops occur
                     // This will also provide the highest compatibility with mods such as Tinkers Construct
                     entityPlayer.inventory.clear();
                 }
-    
+
                 final DropItemEvent.Destruct
-                        destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    destruct =
+                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
                     for (Entity entity : destruct.getEntities()) {
-                       EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                     }
                 }
-    
-                 // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
-                 // This avoids many issues with mods such as Tinkers Construct's soulbound items.
+
+                // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
+                // This avoids many issues with mods such as Tinkers Construct's soulbound items.
             });
-            // Note that this is only used if and when item pre-merging is enabled.
-            context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
-                final Collection<ItemDropData> itemStacks = map.get(dyingEntity.getUniqueId());
-                if (itemStacks.isEmpty()) {
-                    return;
-                }
+            // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
+            context.getCapturedEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
                 final List<ItemDropData> items = new ArrayList<>();
                 items.addAll(itemStacks);
     

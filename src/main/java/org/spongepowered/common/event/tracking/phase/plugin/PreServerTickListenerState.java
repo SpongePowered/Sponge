@@ -46,7 +46,7 @@ final class PreServerTickListenerState extends ListenerPhaseState {
         final Object listener = phaseContext.getSource(Object.class)
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
+        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
             TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
         });
     }
@@ -61,7 +61,7 @@ final class PreServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlocks(ListenerPhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

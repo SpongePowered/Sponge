@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-
 public class TileEntityTickContext extends LocationBasedTickContext<TileEntityTickContext> {
     public TileEntityTickContext() {
         super(TickPhase.Tick.TILE_ENTITY);

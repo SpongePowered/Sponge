@@ -31,6 +31,6 @@ final class MovementPacketState extends BasicPacketState {
     @Override
     public void unwind(BasicPacketContext context) {
         context.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
     }
 }

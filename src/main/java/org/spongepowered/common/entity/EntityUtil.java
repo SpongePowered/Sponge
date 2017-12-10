@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
@@ -84,6 +85,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
@@ -396,13 +398,21 @@ public final class EntityUtil {
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
             final IMixinTeleporter toMixinTeleporter = (IMixinTeleporter) teleporter;
-    
+            final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+            final Transform<World> toTransform = event.getToTransform();
+
             if (event.isCancelled()) {
                 // Mods may cancel this event in order to run custom transfer logic
                 // We need to make sure to only restore the location if
                 if (!portalExitTransform.getExtent().getUniqueId().equals(mixinEntity.getLocation().getExtent().getUniqueId())) {
                     // update cache
                     ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
+                    if (!capturedBlocks.isEmpty()) {
+                        for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
+                            original.restore(true, BlockChangeFlags.NONE);
+                        }
+                        capturedBlocks.clear();
+                    }
                     mixinEntity.setLocationAndAngles(fromTransform);
                 } else {
                     // Call setTransform to let plugins know mods changed the position
@@ -411,10 +421,7 @@ public final class EntityUtil {
                 }
                 return event;
             }
-    
-            final Transform<World> toTransform = event.getToTransform();
-            final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-    
+
             if (!portalExitTransform.equals(toTransform)) {
                 // if plugin set to same world, just set the transform
                 if (fromWorld == toTransform.getExtent()) {
@@ -422,14 +429,14 @@ public final class EntityUtil {
                     event.setCancelled(true);
                     // update cache
                     toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
-                    mixinEntity.setLocationAndAngles(toTransform);
-                    if (entityIn instanceof EntityPlayerMP) {
-                        EntityPlayerMP player = (EntityPlayerMP) entityIn;
-                        // close any open inventory
-                        player.closeScreen();
-                        // notify client
-                        player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+                    // Undo created portal
+                    if (!capturedBlocks.isEmpty()) {
+                        for (BlockSnapshot original : Lists.reverse(capturedBlocks)) {
+                            original.restore(true, BlockChangeFlags.NONE);
+                        }
                     }
+                    capturedBlocks.clear();
+                    mixinEntity.setLocationAndAngles(toTransform);
                     return event;
                 }
             } else {
@@ -438,12 +445,7 @@ public final class EntityUtil {
                     entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
                 }
             }
-    
-            // Attempt to create the portal
-            if (event.isCancelled()) {
-                return null;
-            }
-    
+
             if (!capturedBlocks.isEmpty()
                 && !TrackingUtil.processBlockCaptures(capturedBlocks, EntityPhase.State.CHANGING_DIMENSION, context)) {
                 toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
@@ -477,6 +479,10 @@ public final class EntityUtil {
 
     public static Player toPlayer(EntityPlayer player) {
         return (Player) player;
+    }
+
+    public static int getHorseInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {
+        return color.getBitMask() | style.getBitMask();
     }
 
 
@@ -784,6 +790,7 @@ public final class EntityUtil {
             fromWorld.getEntityTracker().untrack(entity);
         }
 
+        entity.dismountRidingEntity();
         entity.world.removeEntityDangerously(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
@@ -938,7 +945,7 @@ public final class EntityUtil {
                 return null;
             }
     
-            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
                     final Collection<ItemDropData> itemStacks = multimap.get(entity.getUniqueID());
@@ -1002,7 +1009,7 @@ public final class EntityUtil {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, suggested);
             SpongeImpl.postEvent(event);
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+            item = event.isCancelled() || dropEvent.getDroppedItems().isEmpty() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
             if (item == null) {
                 return null;
             }
@@ -1010,7 +1017,7 @@ public final class EntityUtil {
             final IPhaseState currentState = peek.state;
             final PhaseContext<?> phaseContext = peek.context;
     
-            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 final Collection<ItemDropData> itemStacks;
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();

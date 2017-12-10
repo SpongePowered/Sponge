@@ -103,23 +103,17 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public <E> ItemStack.Builder keyValue(Key<? extends BaseValue<E>> key, E value) {
-        if (this.keyValues == null) {
-            this.keyValues = new LinkedHashMap<>();
-        }
-        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
-        return this;
-    }
-
-
-    @Override
     public ItemStack.Builder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
         return itemData(itemData.asMutable());
     }
 
     @Override
     public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
-        return keyValue(key, value);
+        if (this.keyValues == null) {
+            this.keyValues = new LinkedHashMap<>();
+        }
+        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
+        return this;
     }
 
     @Override
@@ -146,6 +140,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.type = itemStack.getType();
         this.quantity = itemStack.getQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
+            this.damageValue = ((net.minecraft.item.ItemStack) itemStack).getItemDamage();
             final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
             if (itemCompound != null) {
                 this.compound = itemCompound.copy();

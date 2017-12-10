@@ -30,10 +30,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
-import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.ColorUtil;
 
@@ -352,27 +353,27 @@ public final class NbtDataUtil {
         compound.setBoolean(ITEM_BOOK_RESOLVED, true);
     }
 
-    public static List<ItemEnchantment> getItemEnchantments(ItemStack itemStack) {
+    public static List<Enchantment> getItemEnchantments(ItemStack itemStack) {
         if (!itemStack.isItemEnchanted()) {
             return Collections.emptyList();
         }
-        final List<ItemEnchantment> enchantments = Lists.newArrayList();
+        final List<Enchantment> enchantments = Lists.newArrayList();
         final NBTTagList list = itemStack.getEnchantmentTagList();
         for (int i = 0; i < list.tagCount(); i++) {
             final NBTTagCompound compound = list.getCompoundTagAt(i);
             final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
             final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
-            if (enchantment == null) {
+            final EnchantmentType enchantmentType = (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
+            if (enchantmentType == null) {
                 continue;
             }
-            enchantments.add(new ItemEnchantment(enchantment, level));
+            enchantments.add(new SpongeEnchantment(enchantmentType, level));
         }
         return enchantments;
     }
 
-    public static void setItemEnchantments(ItemStack itemStack, List<ItemEnchantment> value) {
+    public static void setItemEnchantments(ItemStack itemStack, List<Enchantment> value) {
         final NBTTagCompound compound;
         if (itemStack.getTagCompound() == null) {
             compound = new NBTTagCompound();
@@ -386,13 +387,13 @@ public final class NbtDataUtil {
             return;
         }
 
-        final Map<Enchantment, Integer> valueMap = Maps.newLinkedHashMap();
-        for (ItemEnchantment enchantment : value) { // convert ItemEnchantment to map
-            valueMap.put(enchantment.getEnchantment(), enchantment.getLevel());
+        final Map<EnchantmentType, Integer> valueMap = Maps.newLinkedHashMap();
+        for (Enchantment enchantment : value) { // convert ItemEnchantment to map
+            valueMap.put(enchantment.getType(), enchantment.getLevel());
         }
 
         final NBTTagList newList = new NBTTagList(); // construct the enchantment list
-        for (Map.Entry<Enchantment, Integer> entry : valueMap.entrySet()) {
+        for (Map.Entry<EnchantmentType, Integer> entry : valueMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());

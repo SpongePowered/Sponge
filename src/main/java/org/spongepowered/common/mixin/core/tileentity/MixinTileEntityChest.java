@@ -27,13 +27,9 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -46,15 +42,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
@@ -69,15 +68,21 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Shadow public abstract void checkForAdjacentChests();
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
-        ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,
-                ((InventoryAdapter) this),
-                s -> new GridInventoryLensImpl(0, 9, 3, 9, s),
-                () -> new SlotCollection.Builder().add(27).build());
-        this.slots = reusableLens.getSlots();
-        this.lens = reusableLens.getLens();
+    @SuppressWarnings("unchecked")
+    @Override
+    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+    }
+
+    @SuppressWarnings("unchecked")
+    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+        return new SlotCollection.Builder().add(27).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+        Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
+        return new GridInventoryLensImpl(0, 9, 3, 9, thisClass, slots);
     }
 
     /**
@@ -170,27 +175,26 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Override
     public Optional<Inventory> getDoubleChestInventory() {
-        // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
-        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
-            BlockPos blockpos = this.pos.offset(enumfacing);
+        return InventoryUtil.getDoubleChestInventory(((TileEntityChest)(Object) this));
+    }
 
-            TileEntity tileentity1 = this.world.getTileEntity(blockpos);
-
-            if (tileentity1 instanceof TileEntityChest && tileentity1.getBlockType() == this.getBlockType()) {
-
-                InventoryLargeChest inventory;
-
-                if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH)
-                {
-                    inventory = new InventoryLargeChest("container.chestDouble", this, (TileEntityChest)tileentity1);
-                } else {
-                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest)tileentity1, this);
-                }
-
-                return Optional.of((Inventory) inventory);
-            }
+    @Override
+    public Set<Chest> getConnectedChests() {
+        this.checkForAdjacentChests();
+        Set<Chest> set = new HashSet<>();
+        if (this.adjacentChestXNeg != null) {
+            set.add(((Chest) this.adjacentChestXNeg));
         }
-        return Optional.empty();
+        if (this.adjacentChestXPos != null) {
+            set.add(((Chest) this.adjacentChestXPos));
+        }
+        if (this.adjacentChestZNeg != null) {
+            set.add(((Chest) this.adjacentChestZNeg));
+        }
+        if (this.adjacentChestZPos != null) {
+            set.add(((Chest) this.adjacentChestZPos));
+        }
+        return set;
     }
 }
 

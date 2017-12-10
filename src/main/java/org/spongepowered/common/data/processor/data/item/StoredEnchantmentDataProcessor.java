@@ -33,12 +33,13 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeStoredEnchantmentData;
+import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -47,26 +48,26 @@ import java.util.List;
 import java.util.Optional;
 
 public class StoredEnchantmentDataProcessor extends
-        AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
+        AbstractItemSingleDataProcessor<List<Enchantment>, ListValue<Enchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
 
     public StoredEnchantmentDataProcessor() {
         super(stack -> stack.getItem().equals(Items.ENCHANTED_BOOK), Keys.STORED_ENCHANTMENTS);
     }
 
     @Override
-    protected ListValue<ItemEnchantment> constructValue(List<ItemEnchantment> actualValue) {
+    protected ListValue<Enchantment> constructValue(List<Enchantment> actualValue) {
         return SpongeValueFactory.getInstance().createListValue(Keys.STORED_ENCHANTMENTS, actualValue, Lists.newArrayList());
     }
 
     @Override
-    protected boolean set(ItemStack entity, List<ItemEnchantment> value) {
+    protected boolean set(ItemStack entity, List<Enchantment> value) {
         if (!entity.hasTagCompound()) {
             entity.setTagCompound(new NBTTagCompound());
         }
         NBTTagList list = new NBTTagList();
-        for (ItemEnchantment enchantment : value) {
+        for (Enchantment enchantment : value) {
             NBTTagCompound tag = new NBTTagCompound();
-            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()));
+            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getType()));
             tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
             list.appendTag(tag);
         }
@@ -75,23 +76,23 @@ public class StoredEnchantmentDataProcessor extends
     }
 
     @Override
-    protected Optional<List<ItemEnchantment>> getVal(ItemStack entity) {
+    protected Optional<List<Enchantment>> getVal(ItemStack entity) {
         if (!entity.hasTagCompound() || !entity.getTagCompound().hasKey(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_LIST)) {
             return Optional.empty();
         }
-        List<ItemEnchantment> list = Lists.newArrayList();
+        List<Enchantment> list = Lists.newArrayList();
         NBTTagList tags = entity.getTagCompound().getTagList(NbtDataUtil.ITEM_STORED_ENCHANTMENTS_LIST, NbtDataUtil.TAG_COMPOUND);
         for (int i = 0; i < tags.tagCount(); i++) {
             NBTTagCompound tag = tags.getCompoundTagAt(i);
-            list.add(new ItemEnchantment(
-                    (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID)),
+            list.add(new SpongeEnchantment(
+                    (EnchantmentType) net.minecraft.enchantment.Enchantment.getEnchantmentByID(tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID)),
                     tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL)));
         }
         return Optional.of(list);
     }
 
     @Override
-    protected ImmutableValue<List<ItemEnchantment>> constructImmutableValue(List<ItemEnchantment> value) {
+    protected ImmutableValue<List<Enchantment>> constructImmutableValue(List<Enchantment> value) {
         return constructValue(value).asImmutable();
     }
 

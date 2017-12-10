@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 final class NoCaptureUseItemPacketState extends UseItemPacketState {
 

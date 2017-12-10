@@ -72,7 +72,7 @@ final class CloseWindowState extends BasicPacketState {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);// Non-merged
             // items
-            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
+            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> entities = items
                     .stream()
                     .map(EntityUtil::fromNative)
@@ -90,7 +90,7 @@ final class CloseWindowState extends BasicPacketState {
                 }
             });
             // Pre-merged items
-            context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(stacks -> {
+            context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
                 final List<EntityItem> items = stacks.stream()
                     .map(drop -> drop.create(player.getServerWorld()))
                     .collect(Collectors.toList());
@@ -112,7 +112,7 @@ final class CloseWindowState extends BasicPacketState {
             });
         }
         context.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
     }
 }

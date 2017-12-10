@@ -77,7 +77,7 @@ public final class PacketPhaseUtil {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
                 ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
-                final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(openContainer, slotId), snapshot, snapshot);
+                final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlot(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }

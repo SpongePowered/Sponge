@@ -73,10 +73,8 @@ public final class LensHandle<TInventory, TStack> {
     public LensHandle(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
         this.lens = lens;
         if (properties != null && properties.length > 0) {
-            this.properties = new ArrayList<InventoryProperty<?, ?>>();
-            for (InventoryProperty<?, ?> property : properties) {
-                this.properties.add(property);
-            }
+            this.properties = new ArrayList<>();
+            Collections.addAll(this.properties, properties);
         }
     }
 
@@ -90,13 +88,13 @@ public final class LensHandle<TInventory, TStack> {
     public LensHandle(Lens<TInventory, TStack> lens, Collection<InventoryProperty<?, ?>> properties) {
         this.lens = lens;
         if (properties != null && properties.size() > 0) {
-            this.properties = new ArrayList<InventoryProperty<?, ?>>(properties);
+            this.properties = new ArrayList<>(properties);
         }
     }
     
     public Collection<InventoryProperty<?, ?>> getProperties() {
         if (this.properties == null) {
-            return Collections.<InventoryProperty<?, ?>>emptyList();
+            return Collections.emptyList();
         }
         return Collections.unmodifiableCollection(this.properties);
     }

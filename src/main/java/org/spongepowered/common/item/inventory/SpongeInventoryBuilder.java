@@ -33,6 +33,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 
 import java.util.ArrayList;
@@ -75,6 +76,13 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     }
 
     @Override
+    public Inventory.Builder property(InventoryProperty<?, ?> property) {
+        Object key = AbstractInventoryProperty.getDefaultKey(property.getClass());
+        this.property(key.toString(), property);
+        return this;
+    }
+
+    @Override
     public Inventory.Builder withCarrier(Carrier carrier) {
         this.carrier = carrier;
         return this;
@@ -89,7 +97,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     @Override
     public Inventory.Builder from(Inventory value) {
         if (value instanceof CustomInventory) {
-            this.archetype = ((CustomInventory) value).getArchetype();
+            this.archetype = value.getArchetype();
             this.properties.putAll(((CustomInventory) value).getProperties());
             return this;
         }

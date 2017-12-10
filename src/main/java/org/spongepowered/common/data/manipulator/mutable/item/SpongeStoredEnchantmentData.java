@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
-import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeStoredEnchantmentData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class SpongeStoredEnchantmentData extends AbstractListData<ItemEnchantment, StoredEnchantmentData, ImmutableStoredEnchantmentData>
+public class SpongeStoredEnchantmentData extends AbstractListData<Enchantment, StoredEnchantmentData, ImmutableStoredEnchantmentData>
         implements StoredEnchantmentData {
 
-    public SpongeStoredEnchantmentData(List<ItemEnchantment> value) {
+    public SpongeStoredEnchantmentData(List<Enchantment> value) {
         super(StoredEnchantmentData.class, value, Keys.STORED_ENCHANTMENTS, ImmutableSpongeStoredEnchantmentData.class);
     }
 
     public SpongeStoredEnchantmentData() {
-        this(Lists.newArrayList());
+        this(new ArrayList<>());
     }
 
     @Override

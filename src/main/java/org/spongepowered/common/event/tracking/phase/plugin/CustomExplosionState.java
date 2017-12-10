@@ -41,7 +41,9 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -78,10 +80,10 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(
+                .acceptAndClearIfNotEmpty(
                     blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
             context.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
+                .acceptAndClearIfNotEmpty(entities -> {
                     final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
                     TrackingUtil.splitAndSpawnEntities(entities, entity -> entity.setCreator(user.getUniqueId()));
 
@@ -195,10 +197,11 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
                 if (!transaction.isValid()) {
                     invalid.add(transaction);
                     // Cancel any block drops performed, avoids any item drops, regardless
-                    context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                        final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                        map.get(blockPos).clear();
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
     
@@ -208,17 +211,14 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
                 // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
                 // or the events were cancelled), again in reverse order of which they were received.
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                    transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                    transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
-                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                    context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
-                        // Check if the mapping actually has the position to avoid unnecessary
-                        // collection creation
-                        if (map.containsKey(position)) {
-                            map.get(position).clear();
-                        }
-                    });
+                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                    if (location != null) {
+                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                    }
                 }
             }
             TrackingUtil.performBlockAdditions(postEvent.getTransactions(), this, context, noCancelledTransactions);

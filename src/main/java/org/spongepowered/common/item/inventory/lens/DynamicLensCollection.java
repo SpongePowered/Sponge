@@ -34,12 +34,12 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
  */
 public interface DynamicLensCollection<TInventory, TStack> extends LensCollection<TInventory, TStack> {
 
-    public abstract void setProperty(int index, InventoryProperty<?, ?> property);
+    void setProperty(int index, InventoryProperty<?, ?> property);
     
-    public abstract void setProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property); 
+    void setProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property);
 
-    public abstract void removeProperty(int index, InventoryProperty<?, ?> property);
+    void removeProperty(int index, InventoryProperty<?, ?> property);
     
-    public abstract void removeProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property); 
+    void removeProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property);
     
 }

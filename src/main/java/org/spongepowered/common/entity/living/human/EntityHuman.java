@@ -260,8 +260,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    protected SoundEvent getFallSound(int p_184588_1_) {
-        return p_184588_1_ > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
+    protected SoundEvent getFallSound(int height) {
+        return height > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
     }
     @Override
     public float getEyeHeight() {
@@ -499,7 +499,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public void attackEntityWithRangedAttack(EntityLivingBase target, float p_82196_2_) {
+    public void attackEntityWithRangedAttack(EntityLivingBase target, float distanceFactor) {
         // Borrowed from Skeleton
         // TODO Figure out how to API this out
         final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
@@ -511,7 +511,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         // These names are wrong
         int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
         int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
-        entitytippedarrow.setDamage(p_82196_2_ * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getDifficultyId() * 0.11F);
+        entitytippedarrow.setDamage(distanceFactor * 2.0F + this.rand.nextGaussian() * 0.25D + this.world.getDifficulty().getDifficultyId() * 0.11F);
 
         if (i > 0) {
             entitytippedarrow.setDamage(entitytippedarrow.getDamage() + i * 0.5D + 0.5D);

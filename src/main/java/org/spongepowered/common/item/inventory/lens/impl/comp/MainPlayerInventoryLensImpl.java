@@ -43,31 +43,38 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     private HotbarLensImpl hotbar;
     private GridInventoryLensImpl grid;
 
-    public MainPlayerInventoryLensImpl(int base, int width, int xBase, int yBase, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, xBase, yBase, MainPlayerInventoryAdapter.class, slots);
+    public MainPlayerInventoryLensImpl(int base, SlotProvider<IInventory, ItemStack> slots) {
+        this(base, MainPlayerInventoryAdapter.class, slots);
     }
 
-    public MainPlayerInventoryLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        super(base, width, xBase, yBase, adapterType, slots);
+    public MainPlayerInventoryLensImpl(int base, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, 9, 4, adapterType, slots);
     }
 
     @Override
-    protected void init(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super.init(adapter, slots);
-
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
         int base = this.base;
         int INVENTORY_WIDTH = InventoryPlayer.getHotbarSize();
-        this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
-        base += INVENTORY_WIDTH;
-        this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
 
-        this.addChild(this.hotbar);
-        this.addChild(this.grid);
+        this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+        base += INVENTORY_WIDTH * 3;
+        this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
+
+        this.addSpanningChild(this.grid);
+        this.addSpanningChild(this.hotbar);
+
+        this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, slots));
+
+        this.cache();
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new MainPlayerInventoryAdapter(inv, this, parent);
+    protected void init(SlotProvider<IInventory, ItemStack> slots, boolean spanning) {
+    }
+
+    @Override
+    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
+        return new MainPlayerInventoryAdapter(fabric, this, parent);
     }
 
     @Override

@@ -99,6 +99,7 @@ import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.Dimension;
@@ -129,6 +130,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -238,12 +240,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
+    @Shadow public void markChunkDirty(BlockPos pos, net.minecraft.tileentity.TileEntity unusedTileEntity){};
+   // @Shadow public abstract List<Entity> getEntitiesInAABBexcluding(@Nullable net.minecraft.entity.Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super net.minecraft.entity.Entity > predicate);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
-    @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
@@ -393,7 +396,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
-        return setBlock(x, y, z, block, BlockChangeFlag.ALL);
+        return setBlock(x, y, z, block, BlockChangeFlags.ALL);
     }
 
 
@@ -784,7 +787,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         final IBlockState state = getBlockState(pos);
         final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
         try {
-            return Optional.of(VecHelper.toSponge(box).offset(x, y, z));
+            return Optional.of(VecHelper.toSpongeAABB(box).offset(x, y, z));
         } catch (IllegalArgumentException exception) {
             // Box is degenerate
             return Optional.empty();
@@ -795,7 +798,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
-        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entity -> filter.test((Entity) entity))
+        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraftAABB(box), entity -> filter.test((Entity) entity))
                 .stream()
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toSet());
@@ -804,8 +807,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(null, VecHelper.toMC(box)).stream()
-                .map(VecHelper::toSponge)
+        return getCollisionBoxes(null, VecHelper.toMinecraftAABB(box)).stream()
+                .map(VecHelper::toSpongeAABB)
                 .collect(Collectors.toSet());
     }
 
@@ -813,8 +816,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
         checkNotNull(owner, "owner");
         checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream()
-                .map(VecHelper::toSponge)
+        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraftAABB(box)).stream()
+                .map(VecHelper::toSpongeAABB)
                 .collect(Collectors.toSet());
     }
 
@@ -1463,12 +1466,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
             net.minecraft.entity.Entity entity1 = this.unloadedEntityList.get(k);
-            int j = entity1.chunkCoordX;
-            int k1 = entity1.chunkCoordZ;
+            // Sponge start - use cached chunk
+            // int j = entity1.chunkCoordX;
+            // int k1 = entity1.chunkCoordZ;
 
-            if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true)) {
-                this.getChunkFromChunkCoords(j, k1).removeEntity(entity1);
+            final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) entity1).getActiveChunk();
+            if (activeChunk != null) {
+                activeChunk.removeEntity(entity1);
             }
+            // Sponge end
         }
 
         for (int l = 0; l < this.unloadedEntityList.size(); ++l) {
@@ -1514,12 +1520,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.startEntityRemovalTick(); // Sponge
 
             if (entity2.isDead) {
-                int l1 = entity2.chunkCoordX;
-                int i2 = entity2.chunkCoordZ;
+                // Sponge start - use cached chunk
+                // int l1 = entity2.chunkCoordX;
+                // int i2 = entity2.chunkCoordZ;
 
-                if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
-                    this.getChunkFromChunkCoords(l1, i2).removeEntity(entity2);
+                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinEntity) entity2).getActiveChunk();
+                if (activeChunk != null) {
+                    activeChunk.removeEntity(entity2);
                 }
+                // Sponge end
 
                 this.loadedEntityList.remove(i1--);
                 this.onEntityRemoved(entity2);
@@ -1541,7 +1550,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!tileentity.isInvalid() && tileentity.hasWorld()) {
                 BlockPos blockpos = tileentity.getPos();
 
-                if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {
+                if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
                         //this.profiler.startSection(tileentity.getClass().getSimpleName());
                         ((ITickable) tileentity).update();
@@ -1561,16 +1570,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (tileentity.isInvalid()) {
                 iterator.remove();
                 this.loadedTileEntityList.remove(tileentity);
-
-                if (this.isBlockLoaded(tileentity.getPos())) {
-                    // Sponge start - use forge hook
+                // Sponge start - use cached chunk
+                final net.minecraft.world.chunk.Chunk activeChunk = (net.minecraft.world.chunk.Chunk) ((IMixinTileEntity) tileentity).getActiveChunk();
+                if (activeChunk != null) {
                     //this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
-                    net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity.getPos());
-                    if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity)
-                        chunk.removeTileEntity(tileentity.getPos());
-                    // Sponge end
+                    if (activeChunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity) {
+                        activeChunk.removeTileEntity(tileentity.getPos());
+                    }
                 }
+                // Sponge end
             }
 
             this.stopTileEntityRemovelInWhile(); // Sponge
@@ -1641,13 +1650,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public int getSeaLevel() {
         return this.seaLevel;
     }
-
-    /**
-     * @author blood - July 1st, 2016
-     * @author gabizou - July 1st, 2016 - Update to 1.10 - Previous method was spliced between WorldClient and WorldServer.
-     *
-     * @reason Added chunk and block tick optimizations.
-     */
 
     protected void startEntityGlobalTimings() { }
 

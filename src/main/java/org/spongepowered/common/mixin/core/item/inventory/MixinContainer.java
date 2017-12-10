@@ -32,9 +32,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -50,11 +47,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -82,6 +79,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
     private boolean spectatorChest;
+    private boolean dirty = true;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -97,7 +95,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private boolean captureInventory = false;
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
     private Fabric<IInventory> fabric;
-    private SlotCollection slots;
+    private SlotProvider<IInventory, ItemStack> slots;
     private Lens<IInventory, ItemStack> lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
@@ -107,16 +105,23 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Nullable private PluginContainer plugin = null;
 
     private void init() {
+        if (this.initialized && !this.dirty) {
+            return;
+        }
+
+        this.dirty = false;
         this.initialized = true;
+        this.adapters.clear();
         this.fabric = MinecraftFabric.of(this);
-        this.slots = ContainerUtil.countSlots((Container) (Object) this);
+        this.slots = ContainerUtil.countSlots((Container) (Object) this, this.fabric);
+        this.lens = null;
         this.lens = this.spectatorChest ? null : ContainerUtil.getLens(this.fabric, (Container) (Object) this, this.slots); // TODO handle spectator
         this.archetype = ContainerUtil.getArchetype((Container) (Object) this);
         this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
 
         // If we know the lens, we can cache the adapters now
         if (this.lens != null) {
-            for (org.spongepowered.api.item.inventory.Slot slot : this.slots.getIterator(this, (MinecraftInventoryAdapter) this)) {
+            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollectionIterator<>(this, this.fabric, this.lens, this.slots)) {
                 this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
             }
         }
@@ -124,9 +129,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public InventoryArchetype getArchetype() {
-        if (!this.initialized) {
-            this.init();
-        }
+        this.init();
         return this.archetype;
     }
 
@@ -165,14 +168,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public void detectAndSendChanges(boolean captureOnly) {
-        if (!this.initialized) {
-            this.init();
-        }
+        this.init();
 
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
             final ItemStack itemstack = slot.getStack();
-            ItemStack itemstack1 = this.inventoryItemStacks .get(i);
+            ItemStack itemstack1 = this.inventoryItemStacks.get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
 
@@ -183,9 +184,14 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     final ItemStackSnapshot newItem = itemstack.isEmpty() ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
-                    SlotAdapter adapter = this.getSlotAdapter(i);
+                    org.spongepowered.api.item.inventory.Slot adapter = null;
+                    try {
+                        adapter = this.getContainerSlot(i);
+                        this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                    } catch (IndexOutOfBoundsException e) {
+                        SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
+                    }
 
-                    this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
                     // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
                     // We simply capture in order to send the proper changes back to client.
                     if (captureOnly) {
@@ -204,12 +210,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         }
     }
 
+    @Inject(method = "addSlotToContainer", at = @At(value = "HEAD"))
+    public void onAddSlotToContainer(Slot slotIn, CallbackInfoReturnable<Slot> cir) {
+        this.dirty = true;
+    }
+
     @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
     public void onPutStackInSlot(int slotId, ItemStack itemstack, CallbackInfo ci) {
         if (this.captureInventory) {
-            if (!this.initialized) {
-                this.init();
-            }
+            this.init();
 
             final Slot slot = getSlot(slotId);
             if (slot != null) {
@@ -218,7 +227,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 ItemStackSnapshot newItem =
                         itemstack.isEmpty() ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
-                SlotAdapter adapter = this.getSlotAdapter(slotId);
+                org.spongepowered.api.item.inventory.Slot adapter = this.getContainerSlot(slotId);
                 this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
@@ -245,23 +254,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        if (!this.initialized) {
-            this.init();
-        }
+        this.init();
         return this.slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        if (!this.initialized) {
-            this.init();
-        }
+        this.init();
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getInventory() {
-        if (!this.initialized) {
-            this.init();
-        }
+    public Fabric<IInventory> inventory$getFabric() {
+        this.init();
         return this.fabric;
     }
 
@@ -276,8 +279,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     @Override
-    public SlotAdapter getSlotAdapter(int slot) {
-        SlotAdapter adapter = this.adapters.get(slot);
+    public org.spongepowered.api.item.inventory.Slot getContainerSlot(int slot) {
+        org.spongepowered.api.item.inventory.Slot adapter = this.adapters.get(slot);
         if (adapter == null) // Slot is not in Lens
         {
             Slot mcSlot = this.inventorySlots.get(slot); // Try falling back to vanilla slot
@@ -286,7 +289,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 SpongeImpl.getLogger().warn("Could not find slot #%s in Container %s", slot, getClass().getName());
                 return null;
             }
-            return new SlotAdapter(mcSlot);
+            return ((org.spongepowered.api.item.inventory.Slot) mcSlot);
         }
         return adapter;
     }

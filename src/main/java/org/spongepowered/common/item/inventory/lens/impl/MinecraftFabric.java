@@ -28,12 +28,17 @@ import static com.google.common.base.Preconditions.*;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.UnsupportedFabricException;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DelegatingFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.SlotFabric;
 
 public abstract class MinecraftFabric implements Fabric<IInventory> {
 
@@ -45,15 +50,30 @@ public abstract class MinecraftFabric implements Fabric<IInventory> {
         } else if (target instanceof Slot) {
             Slot slot = (Slot)target;
             if (slot.inventory == null) {
-                return new DelegatingFabric(slot);
+                return new SlotFabric(slot);
             }
-            return new DefaultInventoryFabric(slot.inventory);
+            return new IInventoryFabric(slot.inventory);
         } else if (target instanceof Container) {
             return new ContainerFabric((Container) target);
+        } else if (target instanceof InventoryLargeChest) {
+            return new CompoundFabric(new IInventoryFabric(((InventoryLargeChest) target).upperChest), new IInventoryFabric(((InventoryLargeChest) target).lowerChest));
         } else if (target instanceof IInventory) {
-            return new DefaultInventoryFabric((IInventory) target);
+            return new IInventoryFabric((IInventory) target);
         }
         throw new UnsupportedFabricException("Container of type %s could not be used as an inventory fabric", target.getClass());
     }
-    
+
+    public static InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent, int base, Class<? extends Inventory> adapterType) {
+        IInventory inventory = fabric.get(base);
+        if (inventory.getClass() == adapterType) {
+            return ((InventoryAdapter) inventory);
+        }
+        if (fabric instanceof ContainerFabric) {
+            inventory = of(inventory).get(base);
+            if (inventory.getClass() == adapterType) {
+                return ((InventoryAdapter) inventory);
+            }
+        }
+        return null;
+    }
 }

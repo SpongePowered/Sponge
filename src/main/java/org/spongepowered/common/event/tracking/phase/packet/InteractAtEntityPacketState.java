@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
 final class InteractAtEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerges() {
+    public boolean ignoresItemPreMerging() {
         return true;
     }
 
@@ -99,7 +99,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
-            context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
 
                 SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                 SpongeImpl.postEvent(event);
@@ -107,7 +107,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     processSpawnedEntities(player, event);
                 }
             });
-            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                 SpawnEntityEvent event =
                     SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
@@ -116,7 +116,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     processSpawnedEntities(player, event);
                 }
             });
-            context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+            context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact At Entity").centre().hr();
                 printer.add("The item stacks captured are: ");
@@ -129,7 +129,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                 }
                 printer.trace(System.err);
             });
-            context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+            context.getCapturedEntityItemDropSupplier().acceptIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
                     final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
@@ -150,7 +150,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     }
                 }
             });
-            context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
+            context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
                 final List<EntityItem> items =
                     drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
                 final List<Entity> entities = items
@@ -169,6 +169,6 @@ final class InteractAtEntityPacketState extends BasicPacketState {
             });
         }
         context.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
+            .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
     }
 }

@@ -67,7 +67,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
         final Entity dyingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         context.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(items -> {
+                .acceptAndClearIfNotEmpty(items -> {
                     final DamageSource damageSource = context.getDamageSource();
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                         Sponge.getCauseStackManager().pushCause(dyingEntity);
@@ -88,7 +88,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     }
                 });
         context.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
+                .acceptAndClearIfNotEmpty(entities -> {
                     final List<Entity> experience = entities.stream()
                             .filter(entity -> entity instanceof ExperienceOrb)
                             .collect(Collectors.toList());
@@ -126,7 +126,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     }
 
                 });
-        context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+        context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
             if (map.isEmpty()) {
                 return;
             }
@@ -143,7 +143,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
             printer.trace(System.err);
         });
         context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
     }
 }

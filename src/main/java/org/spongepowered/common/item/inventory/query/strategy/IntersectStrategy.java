@@ -26,7 +26,7 @@ package org.spongepowered.common.item.inventory.query.strategy;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
+import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.query.QueryStrategy;
@@ -49,7 +49,7 @@ public class IntersectStrategy<TInventory, TStack> extends QueryStrategy<TInvent
 
         for (Inventory intersectWith : this.inventories) {
             for (Inventory slot : intersectWith.slots()) {
-                if (((Adapter) slot).getRootLens().equals(lens)) {
+                if (((AbstractInventoryAdapter) slot).getRootLens().equals(lens)) {
                     return true;
                 }
             }

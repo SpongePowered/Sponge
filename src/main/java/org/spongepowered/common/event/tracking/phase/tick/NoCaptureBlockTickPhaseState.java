@@ -46,4 +46,9 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     public boolean requiresBlockCapturing() {
         return false;
     }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
 }

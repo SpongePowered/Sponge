@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.network.Packet;
@@ -59,29 +58,18 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStartState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public final class PacketPhase extends TrackingPhase {
 
@@ -248,33 +236,6 @@ public final class PacketPhase extends TrackingPhase {
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
         ((PacketState) state).populateContext(entityPlayerMP, packet, (PacketContext) context);
         return context;
-    }
-
-
-    // TrackingPhase specific methods overridden for state specific handling
-
-    @Override
-    public void associateNeighborStateNotifier(IPhaseState<?> state, PhaseContext<?> context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-                                               WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        final Player player = context.getSource(Player.class)
-                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be tracking a player, but not!", context));
-        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
-
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns(IPhaseState<?> currentState) {
-        return currentState == General.INTERACTION;
-    }
-
-    @Override
-    public boolean ignoresItemPreMerging(IPhaseState<?> currentState) {
-        return ((PacketState<?>) currentState).ignoresItemPreMerges();
-    }
-
-    @Override
-    public void addNotifierToBlockEvent(IPhaseState<?> phaseState, PhaseContext<?> context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
-        ((PacketState<?>) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }
 
     // Inventory packet specific methods

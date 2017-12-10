@@ -63,12 +63,15 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
             return true;
         }
 
-        Block block = Block.getBlockFromItem(item);
-        return block != null
-            && (block.equals(Blocks.WOOL)
+        final Block block = Block.getBlockFromItem(item);
+
+        return block.equals(Blocks.WOOL)
                 || block.equals(Blocks.STAINED_GLASS)
+                || block.equals(Blocks.CARPET)
                 || block.equals(Blocks.STAINED_GLASS_PANE)
-                || block.equals(Blocks.STAINED_HARDENED_CLAY));
+                || block.equals(Blocks.STAINED_HARDENED_CLAY)
+                || block.equals(Blocks.CONCRETE)
+                || block.equals(Blocks.CONCRETE_POWDER);
     }
 
     @Override

@@ -33,28 +33,29 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class SlotCollectionIterator implements Iterable<Slot> {
+public class SlotCollectionIterator<TInventory> implements Iterable<Slot> {
     
     private Inventory parent;
 
-    private final Fabric<IInventory> inv;
+    private final Fabric<TInventory> inv;
     
     private final List<Slot> slots;
 
-    public SlotCollectionIterator(Inventory parent, Fabric<IInventory> inv, Lens<IInventory, ItemStack> lens, SlotCollection slots) {
+    public SlotCollectionIterator(Inventory parent, Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens, SlotProvider<IInventory, ItemStack> slots) {
         this.parent = parent;
         this.inv = inv;
         this.slots = this.traverseSpanningTree(inv, lens, slots, ImmutableList.<Slot>builder()).build();
     }
     
-    private Builder<Slot> traverseSpanningTree(Fabric<IInventory> inv, Lens<IInventory, ItemStack> lens, SlotCollection slots, Builder<Slot> list) {
-        for (Lens<IInventory, ItemStack> child : lens.getSpanningChildren()) {
+    private Builder<Slot> traverseSpanningTree(Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens, SlotProvider<IInventory, ItemStack> slots, Builder<Slot> list) {
+        for (Lens<TInventory, ItemStack> child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
                 list.add((SlotAdapter) child.getAdapter(inv, this.parent));
             } else if (child.getSpanningChildren().size() > 0) {
@@ -64,7 +65,7 @@ public class SlotCollectionIterator implements Iterable<Slot> {
         return list;
     }
 
-    public Fabric<IInventory> getFabric() {
+    public Fabric<TInventory> getFabric() {
         return this.inv;
     }
 

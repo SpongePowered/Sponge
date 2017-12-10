@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.item.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -44,8 +44,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
-@Implements(@Interface(iface = Enchantment.class, prefix = "enchantment$"))
-public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment {
+@Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
+public abstract class MixinEnchantment implements IMixinEnchantment, EnchantmentType {
 
     @Shadow protected String name;
     @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity rarity;
@@ -57,6 +57,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean isTreasureEnchantment();
+    @Shadow public abstract boolean shadow$isCurse();
 
     private String id = "";
 
@@ -108,7 +109,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     }
 
     @Override
-    public boolean isCompatibleWith(Enchantment ench) {
+    public boolean isCompatibleWith(EnchantmentType ench) {
         return canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
     }
 
@@ -127,9 +128,14 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
         return isTreasureEnchantment();
     }
 
+    @Intrinsic
+    public boolean enchantment$isCurse() {
+        return shadow$isCurse();
+    }
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper("Enchantment")
+        return MoreObjects.toStringHelper("EnchantmentType")
                 .add("Name", shadow$getName())
                 .add("Id", getId())
                 .toString();

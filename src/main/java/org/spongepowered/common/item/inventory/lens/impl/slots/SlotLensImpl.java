@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl.slots;
 
 import static com.google.common.base.Preconditions.*;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -37,7 +36,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.InvalidOrdinalException;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -45,8 +44,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-
-public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, ItemStack> {
+/**
+ * Base Lens for Slots
+ *
+ * @param <TInventory>
+ */
+public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack> implements SlotLens<TInventory, ItemStack> {
 
     public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");
 
@@ -62,42 +65,42 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
     }
 
     @Override
-    protected final void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected final void init(SlotProvider<TInventory, ItemStack> slots) {
         // No children
     }
 
     @Override
-    public Translation getName(Fabric<IInventory> inv) {
+    public Translation getName(Fabric<TInventory> inv) {
         return SlotLensImpl.SLOT_NAME;
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new SlotAdapter(inv, this, parent);
+    public InventoryAdapter<TInventory, ItemStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
+        return new SlotAdapter<>(inv, this, parent);
     }
 
     @Override
-    public List<Lens<IInventory, ItemStack>> getChildren() {
+    public List<Lens<TInventory, ItemStack>> getChildren() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Lens<IInventory, ItemStack>> getSpanningChildren() {
+    public List<Lens<TInventory, ItemStack>> getSpanningChildren() {
         return Collections.emptyList();
     }
 
     @Override
-    public int getOrdinal(Fabric<IInventory> inv) {
+    public int getOrdinal(Fabric<TInventory> inv) {
         return this.base;
     }
 
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
         return (ordinal != 0) ? -1 : this.getOrdinal(inv);
     }
 
     @Override
-    public ItemStack getStack(Fabric<IInventory> inv, int ordinal) {
+    public ItemStack getStack(Fabric<TInventory> inv, int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
@@ -105,12 +108,12 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
     }
 
     @Override
-    public ItemStack getStack(Fabric<IInventory> inv) {
+    public ItemStack getStack(Fabric<TInventory> inv) {
         return checkNotNull(inv, "Target inventory").getStack(this.base);
     }
 
     @Override
-    public boolean setStack(Fabric<IInventory> inv, int ordinal, ItemStack stack) {
+    public boolean setStack(Fabric<TInventory> inv, int ordinal, ItemStack stack) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
@@ -118,13 +121,13 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
     }
 
     @Override
-    public boolean setStack(Fabric<IInventory> inv, ItemStack stack) {
+    public boolean setStack(Fabric<TInventory> inv, ItemStack stack) {
         checkNotNull(inv, "Target inventory").setStack(this.base, stack);
         return true;
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getLens(int index) {
+    public Lens<TInventory, ItemStack> getLens(int index) {
         return this;
     }
 
@@ -134,13 +137,12 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
     }
 
     @Override
-    public boolean has(Lens<IInventory, ItemStack> lens) {
+    public boolean has(Lens<TInventory, ItemStack> lens) {
         return false;
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<IInventory, ItemStack>> c) {
+    public boolean isSubsetOf(Collection<Lens<TInventory, ItemStack>> c) {
         return false;
     }
-
 }

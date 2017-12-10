@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,10 +37,10 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
@@ -110,6 +110,21 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
+
+    @Override
+    public boolean isWorldGeneration() {
+        return true;
+    }
+
+    @Override
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
+
+    }
+
+    @Override
     public final void unwind(G context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
@@ -163,10 +178,10 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         return Objects.hashCode(this.id);
     }
 
+    private final String className = this.getClass().getSimpleName();
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .toString();
+        return this.getPhase() + "{" + this.className + ":" + this.id +  "}";
     }
 }

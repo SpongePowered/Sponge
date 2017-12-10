@@ -34,7 +34,7 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
@@ -42,14 +42,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class CustomLens extends MinecraftLens {
+public class CustomLens extends RealLens {
 
     private InventoryArchetype archetype;
     private Map<String, InventoryProperty<?, ?>> properties;
 
     public CustomLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots, InventoryArchetype archetype,
             Map<String, InventoryProperty<?, ?>> properties) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
+        super(0, adapter.getFabric().getSize(), adapter, slots);
         this.archetype = archetype;
         this.properties = properties;
         this.init(slots);
@@ -112,10 +112,5 @@ public class CustomLens extends MinecraftLens {
         }
         this.addSpanningChild(lens);
         return slotCount;
-    }
-
-    @Override
-    protected boolean isDelayedInit() {
-        return true;
     }
 }

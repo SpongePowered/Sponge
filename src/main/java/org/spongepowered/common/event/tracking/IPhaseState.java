@@ -24,22 +24,31 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
@@ -269,5 +278,48 @@ public interface IPhaseState<C extends PhaseContext<C>> {
                 }
             }
         );
+    }
+
+    default boolean alreadyCapturingEntitySpawns() {
+        return false;
+    }
+
+    default boolean alreadyCapturingEntityTicks() {
+        return false;
+    }
+    default boolean alreadyCapturingTileTicks() {
+        return false;
+    }
+
+    default boolean isWorldGeneration() {
+        return false;
+    }
+    default boolean alreadyCapturingItemSpawns() {
+        return false;
+    }
+    default boolean ignoresItemPreMerging() {
+        return false;
+    }
+
+    default void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
+        final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        if (chunk != null && !chunk.isEmpty()) {
+            mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);
+            mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);
+        }
+    }
+    default void capturePlayerUsingStackToBreakBlock(ItemStack itemStack, EntityPlayerMP playerIn, C context) {
+
+    }
+    default void addNotifierToBlockEvent(C context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+
+    }
+    default void associateNeighborStateNotifier(C unwindingContext, BlockPos sourcePos, Block block, BlockPos notifyPos,
+        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+
+    }
+    default void appendContextPreExplosion(ExplosionContext explosionContext, C currentPhaseData) {
+
     }
 }

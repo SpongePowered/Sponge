@@ -28,6 +28,6 @@ import org.spongepowered.common.interfaces.inventory.trait.IInventoryObservable;
 
 public interface IMixinSlot extends IInventoryObservable {
     
-    public abstract int getSlotIndex(); 
+    int getSlotIndex();
 
 }

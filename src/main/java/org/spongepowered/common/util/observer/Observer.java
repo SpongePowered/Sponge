@@ -41,6 +41,6 @@ public interface Observer<E extends EventArgs> {
      * @param source Source observable
      * @param eventArgs Payload
      */
-    public abstract void notify(Object source, E eventArgs);
+    void notify(Object source, E eventArgs);
 
 }

@@ -55,8 +55,7 @@ public class UserSubject extends SpongeSubject {
         this.data = new SingleParentMemorySubjectData(users.getService()) {
             @Override
             public SubjectReference getParent() {
-                int opLevel = getOpLevel();
-                return opLevel == 0 ? null : users.getService().getGroupForOpLevel(opLevel).asSubjectReference();
+                return users.getService().getGroupForOpLevel(getOpLevel()).asSubjectReference();
             }
 
             @Override

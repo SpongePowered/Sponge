@@ -94,7 +94,7 @@ final class AttackEntityPacketState extends BasicPacketState {
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
         context.getCapturedItemsSupplier()
-            .ifPresentAndNotEmpty(items -> {
+            .acceptAndClearIfNotEmpty(items -> {
                 // For destruction, this should be empty, however, some
                 // times,
                 // it may not be?
@@ -107,8 +107,8 @@ final class AttackEntityPacketState extends BasicPacketState {
                 printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
             });
         context.getCapturedBlockSupplier()
-            .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-        context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                 final UUID key = entry.getKey();
                 final Optional<Entity> affectedEntity = spongeWorld.getEntity(key);
@@ -142,7 +142,7 @@ final class AttackEntityPacketState extends BasicPacketState {
                 }
             }
         });
-        context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+        context.getCapturedEntityItemDropSupplier().acceptIfNotEmpty(map -> {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(player);
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);

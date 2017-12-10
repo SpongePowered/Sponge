@@ -38,6 +38,7 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.util.ThreadUtil;
 
 import java.util.Deque;
 import java.util.HashMap;
@@ -66,9 +67,18 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     private void enforceMainThread() {
         // On clients, this may not be available immediately, we can't bomb out that early.
-        if (Sponge.isServerAvailable() && !Sponge.getServer().isMainThread()) {
-            throw new IllegalStateException("CauseStackManager called from off main thread!");
+        if (Sponge.isServerAvailable() && !isPermittedThread()) {
+            throw new IllegalStateException(String.format(
+                    "CauseStackManager called from off main thread (current='%s', expected='%s')!",
+                    ThreadUtil.getDescription(Thread.currentThread()),
+                    ThreadUtil.getDescription(SpongeImpl.getServer().getServerThread())
+            ));
         }
+    }
+
+    private static boolean isPermittedThread() {
+        return Sponge.getServer().isMainThread()
+            || Thread.currentThread().getName().equals("Server Shutdown Thread");
     }
 
     @Override

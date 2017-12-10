@@ -43,4 +43,8 @@ public interface IMixinDimensionType {
     Path getConfigPath();
 
     boolean shouldGenerateSpawnOnLoad();
+
+    boolean shouldLoadSpawn();
+
+    void setShouldLoadSpawn(boolean keepSpawnLoaded);
 }

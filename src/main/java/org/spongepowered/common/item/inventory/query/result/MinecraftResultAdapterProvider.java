@@ -30,17 +30,15 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
+import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 import org.spongepowered.common.item.inventory.query.Query.ResultAdapterProvider;
 
-import java.lang.reflect.Constructor;
-
 public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IInventory, ItemStack> {
     
-    public class MinecraftQueryResultAdapter extends Adapter implements QueryResult<IInventory, ItemStack> {
+    public class MinecraftQueryResultAdapter extends AbstractInventoryAdapter<IInventory> implements QueryResult<IInventory, ItemStack> {
         
         public class MinecraftQueryLens extends QueryLens<IInventory, ItemStack> {
 
@@ -52,22 +50,7 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
             public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
                 return MinecraftQueryResultAdapter.this;
             }
-            
-            @SuppressWarnings("unchecked")
-            @Override
-            protected Constructor<InventoryAdapter<IInventory, ItemStack>> getAdapterCtor() throws NoSuchMethodException {
-                try {
-                    return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, this.getClass(), Inventory.class);
-                } catch (Exception ex1) {
-                    return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, Lens.class, Inventory.class);
-                }
-            }
 
-            @Override
-            public int getMaxStackSize(Fabric<IInventory> inv) {
-                return inv.getMaxStackSize();
-            }
-            
             @Override
             public void invalidate(Fabric<IInventory> inv) {
                 super.invalidate(inv);

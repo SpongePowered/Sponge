@@ -32,6 +32,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -54,6 +55,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -70,6 +72,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Collection;
 import java.util.List;
@@ -98,15 +101,13 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Nullable final UUID notifierUniqueId;
     // Internal use only
     private final BlockPos blockPos;
-    private int updateFlag;
-    private BlockChangeFlag changeFlag;
+    private SpongeBlockChangeFlag changeFlag;
     public BlockChange blockChange; // used for post event
 
     // Internal use for restores
-    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, BlockChangeFlag flag, int updateFlag) {
+    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, SpongeBlockChangeFlag flag) {
         this(builder);
         this.changeFlag = flag;
-        this.updateFlag = updateFlag;
     }
 
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
@@ -130,7 +131,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.keyValueMap = tileBuilder.build();
         this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
         this.compound = builder.compound == null ? null : builder.compound.copy();
-        this.changeFlag = BlockChangeFlag.ALL;
+        this.changeFlag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
     }
 
     @Override
@@ -195,6 +196,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 return false;
             }
 
+            // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
+            if (current.getBlock().getClass() == BlockShulkerBox.class) {
+                world.removeTileEntity(pos);
+            }
             mixinWorldServer.setBlockState(pos, replaced, flag);
             world.getPlayerChunkMap().markBlockForUpdate(pos);
             if (this.compound != null) {
@@ -484,12 +489,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     // Used internally for restores
 
-    public BlockChangeFlag getChangeFlag() {
+    public SpongeBlockChangeFlag getChangeFlag() {
         return this.changeFlag;
-    }
-
-    public int getUpdateFlag() {
-        return this.updateFlag;
     }
 
     public BlockPos getBlockPos() {
