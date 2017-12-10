@@ -45,6 +45,7 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
@@ -55,6 +56,7 @@ import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,6 +64,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@RegistrationDependency(BlockChangeFlagRegistryModule.class)
 public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<BlockType>, AlternateCatalogRegistryModule<BlockType> {
 
     public static BlockTypeRegistryModule getInstance() {

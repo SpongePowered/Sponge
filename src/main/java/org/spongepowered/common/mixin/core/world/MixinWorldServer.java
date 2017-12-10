@@ -95,10 +95,10 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -116,6 +116,7 @@ import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.LocatableBlock;
@@ -155,8 +156,11 @@ import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -183,8 +187,10 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -1084,7 +1090,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public BlockSnapshot createSnapshot(int x, int y, int z) {
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState currentState = this.getBlockState(pos);
-        return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos, 2);
+        return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos,
+            BlockChangeFlagRegistryModule.fromNativeInt(2));
     }
 
     @Override
@@ -1289,7 +1296,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockStateWithFlag(this, pos, state, flag);
+            return PhaseTracker.getInstance().setBlockState(this, pos, state, flag);
         }
     }
 
@@ -1458,8 +1465,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // IMixinWorld method
     @Override
-    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
-        if ((flags & 1) != 0) {
+    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags) {
+        if (flags.updateNeighbors()) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
@@ -1542,7 +1549,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
 
     @Override
-    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
+    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag) {
         this.builder.reset();
         this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
@@ -1574,7 +1581,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
-        return new SpongeBlockSnapshot(this.builder, BlockChangeFlag.ALL.setUpdateNeighbors((updateFlag & 1) != 0), updateFlag);
+        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) BlockChangeFlags.ALL.withUpdateNeighbors(updateFlag.updateNeighbors()));
     }
 
     /**

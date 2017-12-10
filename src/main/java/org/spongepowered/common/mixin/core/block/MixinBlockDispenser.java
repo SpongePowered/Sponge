@@ -36,6 +36,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -93,7 +94,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
     private void onSpongeDispense(BlockDispenser blockDispenser, World worldIn, BlockPos pos, World world, BlockPos position, IBlockState state, Random rand) {
-        final SpongeBlockSnapshot spongeBlockSnapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3);
+        final SpongeBlockSnapshot spongeBlockSnapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL);
         final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
         try (PhaseContext<?> context = BlockPhase.State.DISPENSE.createPhaseContext()
             .source(spongeBlockSnapshot)

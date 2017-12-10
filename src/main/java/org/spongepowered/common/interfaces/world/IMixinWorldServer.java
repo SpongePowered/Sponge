@@ -64,7 +64,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void updateRotation(Entity entityIn);
 
-    void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
+    void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, BlockChangeFlag flags);
 
     boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
@@ -80,7 +80,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
-    SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
+    SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, BlockChangeFlag updateFlag);
 
     SpongeWorldGenerator createWorldGenerator(DataContainer settings);
 

@@ -99,6 +99,7 @@ import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.Dimension;
@@ -395,7 +396,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block) {
-        return setBlock(x, y, z, block, BlockChangeFlag.ALL);
+        return setBlock(x, y, z, block, BlockChangeFlags.ALL);
     }
 
 

@@ -35,6 +35,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
@@ -50,6 +51,7 @@ import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
@@ -164,7 +166,7 @@ public final class GeneralPhase extends TrackingPhase {
             // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
             // or the events were cancelled), again in reverse order of which they were received.
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
-                transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
@@ -195,7 +197,7 @@ public final class GeneralPhase extends TrackingPhase {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                transaction.getFinal().restore(true, BlockChangeFlag.ALL);
+                transaction.getFinal().restore(true, BlockChangeFlags.ALL);
             }
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
@@ -214,7 +216,7 @@ public final class GeneralPhase extends TrackingPhase {
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
             SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
-            final int updateFlag = oldBlockSnapshot.getUpdateFlag();
+            final int updateFlag = changeFlag.updateNeighbors() ? BlockChangeFlagRegistryModule.Flags.NEIGHBOR_MASK : 0;
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
@@ -243,7 +245,7 @@ public final class GeneralPhase extends TrackingPhase {
             }
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
+                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getChangeFlag());
             } else if ((updateFlag & 16) == 0) {
                 worldServer.updateObservingBlocksAt(pos, newState.getBlock());
             }

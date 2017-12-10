@@ -76,6 +76,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
@@ -567,13 +568,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         IBlockState iblockstate1 = this.getBlockState(pos);
 
         // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
-        return setBlockState(pos, state, iblockstate1, null, BlockChangeFlag.ALL);
+        return setBlockState(pos, state, iblockstate1, null, BlockChangeFlags.ALL);
     }
 
     @Nullable
     @Override
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot) {
-        return this.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlag.ALL);
+        return this.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
     }
 
     /**
