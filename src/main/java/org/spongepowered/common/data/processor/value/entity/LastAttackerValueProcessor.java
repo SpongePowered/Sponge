@@ -60,7 +60,7 @@ public class LastAttackerValueProcessor
             return true;
         }
         if (lastAttacker.get().getUniqueId().isPresent()) {
-            final Optional<Entity> optionalEntity = ((World) dataHolder.getEntityWorld()).getEntity(lastAttacker.get().getUniqueId().get());
+            final Optional<Entity> optionalEntity = lastAttacker.get().restore();
             if (optionalEntity.isPresent()) {
                 final Entity entity = optionalEntity.get();
                 if (entity.isLoaded() && entity instanceof EntityLivingBase) {
