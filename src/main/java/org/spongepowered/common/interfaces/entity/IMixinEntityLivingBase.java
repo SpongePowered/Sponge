@@ -61,4 +61,8 @@ public interface IMixinEntityLivingBase {
         return false;
     }
 
+    double getLastDamageTaken();
+
+    void setRevengeTarget(EntityLivingBase entityLivingBase);
+
 }

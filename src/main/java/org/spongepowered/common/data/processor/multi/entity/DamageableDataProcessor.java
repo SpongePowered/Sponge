@@ -1,0 +1,110 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.data.processor.multi.entity;
+
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.entity.EntityLivingBase;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDamageableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+
+import java.util.Map;
+import java.util.Optional;
+
+public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityLivingBase, DamageableData, ImmutableDamageableData> {
+
+    public DamageableDataProcessor() {
+        super(EntityLivingBase.class);
+    }
+
+    @Override
+    protected boolean doesDataExist(EntityLivingBase dataHolder) {
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean set(EntityLivingBase dataHolder, Map<Key<?>, Object> keyValues) {
+        final Optional<EntitySnapshot> lastAttacker = (Optional<EntitySnapshot>) keyValues.get(Keys.LAST_ATTACKER);
+        if (lastAttacker == null || !lastAttacker.isPresent()) {
+            dataHolder.setRevengeTarget(null);
+            return true;
+        }
+        if (lastAttacker.get().getUniqueId().isPresent()) {
+            final Optional<Entity> optionalEntity = lastAttacker.get().restore();
+            if (optionalEntity.isPresent()) {
+                final Entity entity = optionalEntity.get();
+                if (entity.isLoaded() && entity instanceof EntityLivingBase) {
+                    dataHolder.setRevengeTarget((EntityLivingBase) entity);
+                    ((IMixinEntityLivingBase) dataHolder).setLastDamage(((Optional<Double>)keyValues.get(Keys.LAST_DAMAGE)).orElse(0D));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected Map<Key<?>, ?> getValues(EntityLivingBase dataHolder) {
+        return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(dataHolder.getAttackingEntity()),
+                Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.getAttackingEntity() == null ? null : ((IMixinEntityLivingBase) dataHolder).getLastDamageTaken()));
+    }
+
+    @Override
+    protected DamageableData createManipulator() {
+        return new SpongeDamageableData();
+    }
+
+    @Override
+    public Optional<DamageableData> fill(DataContainer container, DamageableData damageableData) {
+        if (container.contains(Keys.LAST_DAMAGE)) {
+            container.get(Keys.LAST_DAMAGE.getQuery()).ifPresent(o -> damageableData.set(Keys.LAST_DAMAGE, (Optional<Double>) o));
+        } else {
+            damageableData.set(Keys.LAST_DAMAGE, Optional.empty());
+        }
+
+        if (container.contains(Keys.LAST_ATTACKER)) {
+            container.get(Keys.LAST_ATTACKER.getQuery()).ifPresent(o -> damageableData.set(Keys.LAST_ATTACKER, (Optional<EntitySnapshot>) o));
+        } else {
+            container.set(Keys.LAST_ATTACKER, Optional.empty());
+        }
+
+        return Optional.of(damageableData);
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionResult.failNoData();
+    }
+}
