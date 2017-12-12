@@ -141,6 +141,8 @@ public final class PhaseTracker {
     private boolean hasPrintedEmptyOnce = false;
     private boolean hasPrintedAboutRunnawayPhases = false;
     private boolean hasPrintedAsyncEntities = false;
+    private List<IPhaseState<?>> printedExceptionsForBlocks = new ArrayList<>();
+    private List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
     private List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
     private List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
 
@@ -430,6 +432,59 @@ public final class PhaseTracker {
 
     }
 
+    private void printBlockTrackingException(PhaseData phaseData, IPhaseState<?> phaseState, Throwable e) {
+        if (!this.isVerbose && !this.printedExceptionsForBlocks.isEmpty()) {
+            if (this.printedExceptionsForBlocks.contains(phaseState)) {
+                return;
+            }
+        }
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
+        printer.addWrapped(40, "%s :", "PhaseContext");
+        CONTEXT_PRINTER.accept(printer, phaseData.context);
+        printer.addWrapped(60, "%s :", "Phases remaining");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add("Stacktrace:");
+        printer.add(e);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.printedExceptionsForBlocks.add(phaseState);
+        }
+    }
+
+    private void printUnexpectedBlockChange() {
+        if (!this.isVerbose) {
+            return;
+        }
+        new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
+            .add("Sponge's tracking system is very dependent on knowing when\n"
+                 + "a change to any world takes place, however there are chances\n"
+                 + "where Sponge does not know of changes that mods may perform.\n"
+                 + "In cases like this, it is best to report to Sponge to get this\n"
+                 + "change tracked correctly and accurately.").hr()
+            .add("StackTrace:")
+            .add(new Exception())
+            .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+    }
+
+    private void printExceptionSpawningEntity(PhaseContext<?> context, Throwable e) {
+        if (!this.isVerbose && this.printedExceptionsForEntities.isEmpty()) {
+            if (this.printedExceptionsForEntities.contains(context.state)) {
+                return;
+            }
+        }
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
+        printer.addWrapped(40, "%s :", "PhaseContext");
+        CONTEXT_PRINTER.accept(printer, context);
+        printer.addWrapped(60, "%s :", "Phases remaining");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add("Stacktrace:");
+        printer.add(e);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+        if (!this.isVerbose) {
+            this.printedExceptionsForEntities.add(context.state);
+        }
+    }
+
     String dumpStack() {
         if (this.stack.isEmpty()) {
             return "[Empty stack]";
@@ -538,16 +593,7 @@ public final class PhaseTracker {
         if (this.isVerbose && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
-                .add("Sponge's tracking system is very dependent on knowing when\n"
-                     + "a change to any world takes place, however there are chances\n"
-                     + "where Sponge does not know of changes that mods may perform.\n"
-                     + "In cases like this, it is best to report to Sponge to get this\n"
-                     + "change tracked correctly and accurately.").hr()
-                .add("StackTrace:")
-                .add(new Exception())
-                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-
+            printUnexpectedBlockChange();
         }
         if (phaseState.requiresBlockCapturing()) {
             try {
@@ -555,54 +601,40 @@ public final class PhaseTracker {
                 // of the original method where true means it successfully changed.
                 return TrackingUtil.trackBlockChange(this, mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context, phaseState);
             } catch (Exception | NoClassDefFoundError e) {
-                final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
-                printer.addWrapped(40, "%s :", "PhaseContext");
-                CONTEXT_PRINTER.accept(printer, phaseData.context);
-                printer.addWrapped(60, "%s :", "Phases remaining");
-                this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-                printer.add("Stacktrace:");
-                printer.add(e);
-                printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+                printBlockTrackingException(phaseData, phaseState, e);
                 return false;
             }
         }
         // Sponge End - continue with vanilla mechanics
         IBlockState iblockstate = chunk.setBlockState(pos, newState);
 
-        if (iblockstate == null)
-        {
+        if (iblockstate == null) {
             return false;
         }
-        else
-        {
-            if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue())
-            {
-                minecraftWorld.profiler.startSection("checkLight");
-                minecraftWorld.checkLight(pos);
-                minecraftWorld.profiler.endSection();
-            }
-
-            if (spongeFlag.isNotifyClients() && (!minecraftWorld.isRemote || !spongeFlag.isIgnoreRender()) && chunk.isPopulated())
-            {
-                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
-            }
-
-            if (!minecraftWorld.isRemote && spongeFlag.updateNeighbors())
-            {
-                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
-
-                if (newState.hasComparatorInputOverride())
-                {
-                    minecraftWorld.updateComparatorOutputLevel(pos, block);
-                }
-            }
-            else if (!minecraftWorld.isRemote && spongeFlag.notifyObservers())
-            {
-                minecraftWorld.updateObservingBlocksAt(pos, block);
-            }
-
-            return true;
+        // else { // Sponge - unnecessary formatting
+        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+            // minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
+            minecraftWorld.checkLight(pos);
+            // minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
         }
+
+        if (spongeFlag.isNotifyClients() && (!minecraftWorld.isRemote || !spongeFlag.isIgnoreRender()) && chunk.isPopulated()) {
+            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
+        }
+
+        if (!minecraftWorld.isRemote && spongeFlag.updateNeighbors()) {
+            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
+
+            if (newState.hasComparatorInputOverride()) {
+                minecraftWorld.updateComparatorOutputLevel(pos, block);
+            }
+        } else if (!minecraftWorld.isRemote && spongeFlag.notifyObservers()) {
+            minecraftWorld.updateObservingBlocksAt(pos, block);
+        }
+
+        return true;
+        // } // Sponge - unnecessary formatting
+
     }
 
     /**
@@ -689,14 +721,7 @@ public final class PhaseTracker {
                 } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
-                    final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
-                    printer.addWrapped(40, "%s :", "PhaseContext");
-                    CONTEXT_PRINTER.accept(printer, context);
-                    printer.addWrapped(60, "%s :", "Phases remaining");
-                    this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-                    printer.add("Stacktrace:");
-                    printer.add(e);
-                    printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+                    printExceptionSpawningEntity(context, e);
                     return false;
                 }
             }
@@ -740,14 +765,14 @@ public final class PhaseTracker {
         final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
         entities.add(entity);
 
-            final SpawnEntityEvent.Custom
-                    event =
-                    SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-            SpongeImpl.postEvent(event);
-            if (entity instanceof EntityPlayer || !event.isCancelled()) {
-                mixinWorldServer.forceSpawnEntity(entity);
-            }
-            // Sponge end
+        final SpawnEntityEvent.Custom
+            event =
+            SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        SpongeImpl.postEvent(event);
+        if (entity instanceof EntityPlayer || !event.isCancelled()) {
+            mixinWorldServer.forceSpawnEntity(entity);
+        }
+        // Sponge end
 
         return true;
     }
