@@ -128,6 +128,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
@@ -1601,7 +1603,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         if (!this.isRemote) {
-            try (final PhaseContext<?> context = GeneralPhase.State.TILE_ENTITY_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
+            try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
                 this.startPendingTileEntityTimings(); // Sponge
             }
         }

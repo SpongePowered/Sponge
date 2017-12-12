@@ -65,7 +65,6 @@ public final class GeneralPhase extends TrackingPhase {
         public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
         public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
         public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<?> TILE_ENTITY_UNLOAD = new TileEntityUnloadState();
         public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
 
         private State() { }

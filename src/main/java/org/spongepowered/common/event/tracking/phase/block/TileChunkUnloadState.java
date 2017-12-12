@@ -24,7 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+
+import java.util.ArrayList;
 
 /**
  * Used in SpongeForge
@@ -32,7 +43,53 @@ import org.spongepowered.common.event.tracking.GeneralizedContext;
 public class TileChunkUnloadState extends BlockPhaseState {
 
     @Override
+    public boolean canSwitchTo(IPhaseState<?> state) {
+        return true;
+    }
+
+    @Override
     public void unwind(GeneralizedContext context) {
-        super.unwind(context);
+
+    }
+
+    @Override
+    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
+        BlockPos pos) {
+        return false;
+    }
+
+    @Override
+    public boolean tracksBlockSpecificDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+        if (user != null) {
+            entity.setCreator(user.getUniqueId());
+        }
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+            entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            for (org.spongepowered.api.entity.Entity item: event.getEntities()) {
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
     }
 }
