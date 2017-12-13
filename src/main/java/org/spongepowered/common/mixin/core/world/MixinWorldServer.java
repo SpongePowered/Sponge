@@ -233,8 +233,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
     private SpongeConfig<?> activeConfig;
-    protected long weatherStartTime;
-    protected Weather prevWeather;
+    private long weatherStartTime;
+    private Weather prevWeather;
     protected WorldTimingsHandler timings;
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
@@ -266,7 +266,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;setWorld(Lnet/minecraft/world/World;)V"))
-    public void onSetWorld(WorldProvider worldProvider, World worldIn) {
+    private void onSetWorld(WorldProvider worldProvider, World worldIn) {
         // Guarantees no mod has changed our worldInfo.
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds in Sponge use separate save handlers.
@@ -276,7 +276,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
+    private void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn,
+        CallbackInfo callbackInfo) {
         if (info == null) {
             SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
                     new RuntimeException("Stack trace:"));
@@ -316,7 +317,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
-    public MapStorage onCreateMapStorage(ISaveHandler saveHandler) {
+    private MapStorage onCreateMapStorage(ISaveHandler saveHandler) {
         WorldServer overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
         // if overworld has loaded, use its mapstorage
         if (this.dimensionId != 0 && overWorld != null) {
@@ -332,7 +333,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     // are not saved into the global MapStorage when non-Overworld worlds are initialized.
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/MapStorage;setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
-    public void onMapStorageSetData(MapStorage storage, String name, WorldSavedData data) {
+    private void onMapStorageSetData(MapStorage storage, String name, WorldSavedData data) {
         if (name.equals("scoreboard") && this.dimensionId != 0) {
             return;
         }
@@ -340,7 +341,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V"))
-    public void onSetSaveDataScoreboard(ScoreboardSaveData scoreboardSaveData, Scoreboard scoreboard) {
+    private void onSetSaveDataScoreboard(ScoreboardSaveData scoreboardSaveData, Scoreboard scoreboard) {
         if (this.dimensionId != 0) {
             return;
         }
@@ -348,7 +349,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Inject(method = "createSpawnPosition", at = @At(value = "HEAD"))
-    public void onCreateBonusChest(CallbackInfo ci) {
+    private void onCreateBonusChest(CallbackInfo ci) {
         GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
                 .source(this)
                 .buildAndSwitch();
@@ -356,12 +357,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
 
     @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
-    public void onCreateBonusChestEnd(CallbackInfo ci) {
+    private void onCreateBonusChestEnd(CallbackInfo ci) {
         PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
-    public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
+    private void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
 
         // Allow bonus chest generation for non-Overworld worlds
@@ -376,7 +377,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "createSpawnPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
-    public boolean onIsBonusChestEnabled(WorldSettings settings) {
+    private boolean onIsBonusChestEnabled(WorldSettings settings) {
         return this.getProperties().doesGenerateBonusChest();
     }
 
@@ -767,7 +768,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
-    public boolean onBlockTickIsAreaLoaded(WorldServer worldIn, BlockPos fromPos, BlockPos toPos) {
+    private boolean onBlockTickIsAreaLoaded(WorldServer worldIn, BlockPos fromPos, BlockPos toPos) {
         int posX = fromPos.getX() + 8;
         int posZ = fromPos.getZ() + 8;
         // Forge passes the same block position for forced chunks
@@ -808,14 +809,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
-    public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    private void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         this.onUpdateTick(block, worldIn, pos, state, rand);
     }
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
     @SuppressWarnings("unchecked")
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
-    public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    private void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData phaseData = phaseTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
@@ -843,7 +844,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
-    public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
+    private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
         IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
         // We fire a Pre event to make sure our captures do not get stuck in a loop.
@@ -882,7 +883,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     // special handling for Pistons since they use their own event system
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
-    public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
+    private boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState phaseState = phaseTracker.getCurrentState();
         if (phaseState.ignoresBlockEvent()) {
@@ -892,7 +893,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
-    public boolean onTicktick(IChunkProvider chunkProvider) {
+    private boolean onTicktick(IChunkProvider chunkProvider) {
         // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
         if (this.chunkGCTickInterval > 0) {
             return false;
@@ -949,7 +950,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Inject(method = "saveLevel", at = @At("HEAD"))
-    public void onSaveLevel(CallbackInfo ci) {
+    private void onSaveLevel(CallbackInfo ci) {
         // Always call the provider's onWorldSave method as we do not use WorldServerMulti
         for (WorldServer worldServer : this.mcServer.worlds) {
             worldServer.provider.onWorldSave();
@@ -957,7 +958,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
-    public boolean canChunkProviderSave(ChunkProviderServer chunkProviderServer) {
+    private boolean canChunkProviderSave(ChunkProviderServer chunkProviderServer) {
         if (chunkProviderServer.canSave()) {
             Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Sponge.getCauseStackManager().getCurrentCause(), this));
             return true;
@@ -966,7 +967,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
-    public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
+    private void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Sponge.getCauseStackManager().getCurrentCause(), this));
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
         if (this.chunkGCTickInterval > 0) {
@@ -1034,7 +1035,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
-    public boolean isSpectatorOrIgnored(EntityPlayer entityPlayer) {
+    private boolean isSpectatorOrIgnored(EntityPlayer entityPlayer) {
         // spectators are excluded from the sleep tally in vanilla
         // this redirect expands that check to include sleep-ignored players as well
         boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
@@ -1043,7 +1044,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
-    public boolean isPlayerFullyAsleep(EntityPlayer entityPlayer) {
+    private boolean isPlayerFullyAsleep(EntityPlayer entityPlayer) {
         // if isPlayerFullyAsleep() returns false areAllPlayerAsleep() breaks its loop and returns false
         // this redirect forces it to return true if the player is sleep-ignored even if they're not sleeping
         boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
@@ -1052,7 +1053,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
-    public boolean isSpectatorAndNotIgnored(EntityPlayer entityPlayer) {
+    private boolean isSpectatorAndNotIgnored(EntityPlayer entityPlayer) {
         // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
         // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
         boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
@@ -1120,7 +1121,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     // We expect 0 because forge patches it correctly
     @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
-    public int getDimensionIdForWeatherEffect(DimensionType id) {
+    private int getDimensionIdForWeatherEffect(DimensionType id) {
         return this.getDimensionId();
     }
 
@@ -1912,7 +1913,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V", remap = false))
-    public void onCanAddEntityLogWarn(Logger logger, String message, Object param1, Object param2) {
+    private void onCanAddEntityLogWarn(Logger logger, String message, Object param1, Object param2) {
         // don't log anything to avoid useless spam
     }
 
@@ -2266,7 +2267,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Inject(method = "updateWeather", at = @At(value = "RETURN"))
-    public void onUpdateWeatherReturn(CallbackInfo ci) {
+    private void onUpdateWeatherReturn(CallbackInfo ci) {
         Weather weather = getWeather();
         int duration = (int) getRemainingDuration();
         if (this.prevWeather != weather && duration > 0) {
