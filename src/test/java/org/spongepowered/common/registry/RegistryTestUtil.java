@@ -30,9 +30,16 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.util.annotation.CatalogedBy;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class RegistryTestUtil {
 
@@ -68,4 +75,44 @@ class RegistryTestUtil {
 
         return objects;
     }
+
+    static Iterable<Object[]> generateCatalogTypeMethodTestObjects() {
+
+        final SpongeGameRegistry registry = (SpongeGameRegistry) Sponge.getGame().getRegistry();
+        final ArrayList<Object[]> array = new ArrayList<>();
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : registry.catalogRegistryMap.entrySet()) {
+            for (CatalogType catalogType : entry.getValue().getAll()) {
+                for (Method method : getTestableApiMethods(getApplicableApiCatalogTypeInterfaces(catalogType))) {
+                    array.add(new Object[] {entry.getKey().getSimpleName(), entry.getKey(), catalogType, catalogType.getId(), method,
+                            method.getDeclaringClass().getSimpleName() + "#" + method.getName() + "()", catalogType.getClass().getName()});
+                }
+            }
+        }
+        return array;
+    }
+
+    static Stream<Class<?>> getApplicableApiInterfaces(Object instance) {
+        Collection<Class<?>> interfaces = new LinkedHashSet<>();
+        Class<?> current = instance.getClass();
+        while (current != null) {
+            interfaces.addAll(Arrays.asList(current.getInterfaces()));
+            current = current.getSuperclass();
+        }
+        return interfaces.stream()
+                .filter(clazz -> clazz.getName().startsWith("org.spongepowered.api."));
+    }
+
+    static Stream<Class<?>> getApplicableApiCatalogTypeInterfaces(Object instance) {
+        return getApplicableApiInterfaces(instance)
+                .filter(CatalogType.class::isAssignableFrom)
+                .map(clazz -> clazz.<CatalogType>asSubclass(CatalogType.class));
+    }
+
+    static Set<Method> getTestableApiMethods(Stream<Class<?>> clazzes) {
+        return clazzes.map(Class::getMethods)
+                .flatMap(Arrays::stream)
+                .filter(m -> m.getParameters().length == 0)
+                .collect(Collectors.toSet());
+    }
+
 }

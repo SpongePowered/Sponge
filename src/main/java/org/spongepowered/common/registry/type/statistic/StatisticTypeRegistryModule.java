@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.type.statistic;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -49,24 +49,30 @@ public final class StatisticTypeRegistryModule implements CatalogRegistryModule<
 
     @Override
     public Collection<StatisticType> getAll() {
-        return ImmutableList.copyOf(this.statisticTypeMappings.values());
+        return ImmutableSet.copyOf(this.statisticTypeMappings.values());
     }
 
     @Override
     public void registerDefaults() {
         this.registerDefault("basic");
-        this.registerDefault("blocks_broken");
-        this.registerDefault("entities_killed");
-        this.registerDefault("items_broken");
-        this.registerDefault("items_crafted");
-        this.registerDefault("items_dropped");
-        this.registerDefault("items_picked_up");
-        this.registerDefault("items_used");
-        this.registerDefault("killed_by_entity");
+        this.registerDefault("blocks_broken", "mine_block");
+        this.registerDefault("entities_killed", "kill_entity");
+        this.registerDefault("items_broken", "break_item");
+        this.registerDefault("items_crafted", "craft_item");
+        this.registerDefault("items_dropped", "drop");
+        this.registerDefault("items_picked_up", "pickup");
+        this.registerDefault("items_used", "use_item");
+        this.registerDefault("killed_by_entity", "entity_killed_by");
     }
 
     private void registerDefault(String id) {
         this.statisticTypeMappings.put(id, new SpongeStatisticType(id));
+    }
+
+    private void registerDefault(String id, String alias) {
+        SpongeStatisticType type = new SpongeStatisticType(id);
+        this.statisticTypeMappings.put(id, type);
+        this.statisticTypeMappings.put(alias, type);
     }
 
 }

@@ -79,7 +79,7 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     @Intrinsic
     public boolean potion$isInstant() {
-        return this.isInstant();
+        return shadow$isInstant();
     }
 
     @Intrinsic
