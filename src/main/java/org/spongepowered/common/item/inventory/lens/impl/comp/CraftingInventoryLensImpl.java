@@ -47,7 +47,7 @@ public class CraftingInventoryLensImpl extends OrderedInventoryLensImpl implemen
 
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
-        this(outputSlotIndex, gridBase, width, height, GridInventoryAdapter.class, slots);
+        this(outputSlotIndex, gridBase, width, height, CraftingInventoryAdapter.class, slots);
     }
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
