@@ -142,11 +142,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @Redirect(method = "pullItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"))
     private static boolean onIsInventoryEmpty(IInventory inventory, EnumFacing facing, IHopper hopper) {
-        if (isInventoryEmpty(inventory, facing)) {
-            return true;
-        }
-        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
-            return true;
+        boolean result = isInventoryEmpty(inventory, facing);
+        if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+            return result;
         }
         return SpongeCommonEventFactory.callTransferPre(toInventory(inventory), toInventory(hopper)).isCancelled();
     }
@@ -154,11 +152,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     @Redirect(method = "transferItemsOut", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/tileentity/TileEntityHopper;isInventoryFull(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/EnumFacing;)Z"))
     private boolean onIsInventoryFull(TileEntityHopper hopper, IInventory inventory, EnumFacing enumfacing) {
-        if (this.isInventoryFull(inventory, enumfacing)) {
-            return true;
-        }
-        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
-            return true;
+        boolean result = this.isInventoryFull(inventory, enumfacing);
+        if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+            return result;
         }
         return SpongeCommonEventFactory.callTransferPre(toInventory(hopper), toInventory(inventory)).isCancelled();
     }
