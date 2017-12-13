@@ -94,6 +94,7 @@ final class SwitchHotbarScrollState extends BasicInventoryPacketState {
             SpongeImpl.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(changeInventoryEventHeld.getTransactions())) {
                 player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
+                inventory.currentItem = previousSlot;
             } else {
                 PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false);
                 inventory.currentItem = itemChange.getSlotId();
