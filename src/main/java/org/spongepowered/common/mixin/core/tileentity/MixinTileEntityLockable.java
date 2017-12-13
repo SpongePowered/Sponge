@@ -119,7 +119,6 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
     public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
         OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
-        System.out.println("using fallback lens");
         return new ReusableLens<>(slots, lens);
     }
 
