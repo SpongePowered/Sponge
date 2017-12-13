@@ -47,6 +47,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -1023,12 +1024,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
 
     /**
-     * @author Faithcaio - 31. 12. 2016
+     * Send SlotCrafting updates to client for custom recipes.
+     *
+     * @author Faithcaio - 31.12.2016
      * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
      */
-    @Overwrite
-    public void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack) {
-        if (!this.isChangingQuantityOnly) {
+    @Inject(method = "sendSlotContents", at = @At("HEAD"))
+    private void sendSlotContents(net.minecraft.inventory.Container containerToSend, int slotInd, ItemStack stack, CallbackInfo ci) {
+        if (containerToSend.getSlot(slotInd) instanceof SlotCrafting) {
             this.connection.sendPacket(new SPacketSetSlot(containerToSend.windowId, slotInd, stack));
         }
     }
