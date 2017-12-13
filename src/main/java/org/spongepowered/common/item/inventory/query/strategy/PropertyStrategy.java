@@ -59,7 +59,7 @@ public class PropertyStrategy<TInventory, TStack> extends QueryStrategy<TInvento
 
             for (InventoryProperty<?, ?> lensProperty : lensProperties) {
                 for (InventoryProperty<?, ?> property : this.properties) {
-                    if (property.equals(lensProperty)) {
+                    if (property.matches(lensProperty)) {
                         return true;
                     }
                 }
