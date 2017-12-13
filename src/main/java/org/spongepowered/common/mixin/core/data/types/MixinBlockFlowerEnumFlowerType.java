@@ -57,7 +57,11 @@ public abstract class MixinBlockFlowerEnumFlowerType implements PlantType {
     public Translation plant$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.flower2." + this.shadow$getUnlocalizedName() + ".name");
+            if (this == (Object) BlockFlower.EnumFlowerType.DANDELION) {
+                this.translation = new SpongeTranslation("tile.flower1." + this.shadow$getUnlocalizedName() + ".name");
+            } else {
+                this.translation = new SpongeTranslation("tile.flower2." + this.shadow$getUnlocalizedName() + ".name");
+            }
         }
         return this.translation;
     }

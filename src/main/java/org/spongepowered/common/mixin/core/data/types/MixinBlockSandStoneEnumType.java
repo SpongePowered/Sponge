@@ -26,17 +26,23 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockSandStone;
 import org.spongepowered.api.data.type.SandstoneType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import javax.annotation.Nullable;
 
 @Mixin(BlockSandStone.EnumType.class)
 @Implements(@Interface(iface = SandstoneType.class, prefix = "sandstone$"))
 public abstract class MixinBlockSandStoneEnumType {
 
     @Shadow public abstract String shadow$getUnlocalizedName();
+
+    @Nullable private Translation translation;
 
     public String sandstone$getId() {
         return "minecraft:" + shadow$getUnlocalizedName();
@@ -46,4 +52,12 @@ public abstract class MixinBlockSandStoneEnumType {
     public String sandstone$getName() {
         return shadow$getUnlocalizedName();
     }
+
+    public Translation sandstone$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("tile.sandStone." + shadow$getUnlocalizedName() + ".name");
+        }
+        return this.translation;
+    }
+
 }
