@@ -116,7 +116,7 @@ public abstract class MixinWorldEntitySpawner {
 
             int chunkSpawnCandidates = 0;
             final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
-                SpongeImpl.getServer().getPlayerList().getViewDistance());
+                    ((org.spongepowered.api.world.World) worldServerIn).getViewDistance());
             // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
             // Since we allow for custom ranges, we need to adjust the div count based on the
             // mob spawn range set by server.

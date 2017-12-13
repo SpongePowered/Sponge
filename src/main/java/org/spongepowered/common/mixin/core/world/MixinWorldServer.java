@@ -148,6 +148,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -311,6 +312,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
         this.updateEntityTick = 0;
         this.mixinChunkProviderServer = ((IMixinChunkProviderServer) this.getChunkProvider());
+        this.setMemoryViewDistance(this.chooseViewDistanceValue(this.getActiveConfig().getConfig().getWorld().getViewDistance()));
     }
 
     @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
@@ -2302,6 +2304,36 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public long getChunkUnloadDelay() {
         return this.chunkUnloadDelay;
+    }
+
+    @Override
+    public int getViewDistance() {
+        return this.playerChunkMap.playerViewRadius;
+    }
+
+    @Override
+    public void setViewDistance(final int viewDistance) {
+        this.setMemoryViewDistance(viewDistance);
+        final SpongeConfig<?> config = this.getActiveConfig();
+        // don't use the parameter, use the field that has been clamped
+        config.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
+        config.save();
+    }
+
+    private void setMemoryViewDistance(final int viewDistance) {
+        this.playerChunkMap.setPlayerViewRadius(viewDistance);
+    }
+
+    @Override
+    public void resetViewDistance() {
+        this.setViewDistance(this.chooseViewDistanceValue(WorldCategory.USE_SERVER_VIEW_DISTANCE));
+    }
+
+    private int chooseViewDistanceValue(final int value) {
+        if (value == WorldCategory.USE_SERVER_VIEW_DISTANCE) {
+            return this.mcServer.getPlayerList().getViewDistance();
+        }
+        return value;
     }
 
     @Override

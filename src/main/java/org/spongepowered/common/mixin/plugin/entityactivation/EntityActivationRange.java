@@ -230,7 +230,7 @@ public class EntityActivationRange {
                 }
             }
 
-            maxRange = Math.min((SpongeImpl.getServer().getPlayerList().getViewDistance() << 4) - 8, maxRange);
+            maxRange = Math.min((((org.spongepowered.api.world.World) world).getViewDistance() << 4) - 8, maxRange);
             ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
