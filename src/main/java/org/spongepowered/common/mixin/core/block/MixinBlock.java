@@ -115,6 +115,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract String getUnlocalizedName();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
+    @Shadow public abstract boolean shadow$getTickRandomly();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
 
     @Inject(method = "<init>*", at = @At("RETURN"))
@@ -195,7 +196,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Intrinsic
     public boolean block$getTickRandomly() {
-        return this.getTickRandomly();
+        return shadow$getTickRandomly();
     }
 
     @Override
