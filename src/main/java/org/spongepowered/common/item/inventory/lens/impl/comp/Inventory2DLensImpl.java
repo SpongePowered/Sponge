@@ -38,6 +38,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.property.SlotPosImpl;
 
 public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inventory2DLens<IInventory, net.minecraft.item.ItemStack> {
 
@@ -96,9 +97,9 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
 //                System.err.printf(">> %s ord: %-4d x: %-4d y: %-4d slot: %-4d => %s\n",
 //                        this.getClass().getSimpleName(), ord, x, y, slot, slotLens.getClass().getSimpleName());
                 if (spanning) {
-                    this.addSpanningChild(slotLens, new SlotIndex(ord), new SlotPos(this.xBase + x, this.yBase + y));
+                    this.addSpanningChild(slotLens, SlotIndex.of(ord), SlotPos.of(this.xBase + x, this.yBase + y));
                 } else {
-                    this.addChild(slotLens, new SlotIndex(ord), new SlotPos(this.xBase + x, this.yBase + y));
+                    this.addChild(slotLens, SlotIndex.of(ord), SlotPos.of(this.xBase + x, this.yBase + y));
                 }
             }
         }

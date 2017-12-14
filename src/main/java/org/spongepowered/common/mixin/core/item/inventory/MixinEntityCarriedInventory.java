@@ -22,33 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data;
+package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
+import net.minecraft.entity.item.EntityMinecartContainer;
+import net.minecraft.entity.passive.EntityVillager;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
 
-import java.util.Collection;
 import java.util.Optional;
 
-@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
-public abstract class MixinPropertyHolder implements PropertyHolder {
+@Mixin(value = {
+    EntityVillager.class,
+    EntityMinecartContainer.class
+})
+public abstract class MixinEntityCarriedInventory implements CarriedInventory {
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(p -> p.getFor(this));
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
-
+    public Optional getCarrier() {
+        return Optional.of(this);
     }
 }

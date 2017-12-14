@@ -22,33 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data;
+package org.spongepowered.common.item.inventory.property;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.item.inventory.InventoryProperty;
 
-import java.util.Collection;
-import java.util.Optional;
+public abstract class PropertyBuilderImpl<V, T extends InventoryProperty<?, V>, B extends InventoryProperty.Builder<V, T, B>> implements InventoryProperty.Builder<V, T, B> {
 
-@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
-public abstract class MixinPropertyHolder implements PropertyHolder {
+    protected V value;
+    protected Object key;
+    protected Property.Operator operator;
 
     @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(p -> p.getFor(this));
+    @SuppressWarnings("unchecked")
+    public B value(final V value) {
+        this.value = value;
+        return (B) this;
     }
 
     @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
-
+    @SuppressWarnings("unchecked")
+    public B key(Object key) {
+        this.key = key;
+        return (B) this;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public B operator(final Property.Operator operator) {
+        this.operator = operator;
+        return (B) this;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public B from(final T value) {
+        this.value = value.getValue();
+        this.operator = value.getOperator();
+        return (B) this;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public B reset() {
+        this.value = null;
+        this.operator = null;
+        return (B) this;
+    }
+
 }

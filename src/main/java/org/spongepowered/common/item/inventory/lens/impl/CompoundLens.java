@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -34,6 +37,7 @@ import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +63,7 @@ public class CompoundLens extends ConceptualLens {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
             if (!this.children.contains(slots.getSlot(slot))) {
-                this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));
+                this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
             }
         }
     }

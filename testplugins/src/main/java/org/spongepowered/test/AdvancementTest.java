@@ -292,7 +292,7 @@ public class AdvancementTest {
             return;
         }
         for (SlotTransaction transaction : event.getTransactions()) {
-            if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0) {
+            if (transaction.getSlot().getProperty(SlotIndex.class).get().getValue() == 0) {
                 if (transaction.getFinal().getType() == ItemTypes.DIRT) {
                     player.getProgress(this.cookDirtAdvancement).grant();
                 } else if (this.suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||

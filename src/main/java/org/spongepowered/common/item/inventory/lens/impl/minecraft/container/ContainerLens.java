@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -31,6 +33,7 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,7 +72,7 @@ public class ContainerLens extends RealLens {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+            this.addChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
 
         // Adding spanning children

@@ -38,7 +38,6 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.property.GuiId;
 import org.spongepowered.api.item.inventory.property.GuiIdProperty;
 import org.spongepowered.api.item.inventory.property.GuiIds;
@@ -50,6 +49,7 @@ import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.type.SpongeGuiId;
 import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
+import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 
 import java.util.HashSet;
 import java.util.List;

@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -35,6 +38,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 public class CraftingInventoryLensImpl extends OrderedInventoryLensImpl implements CraftingInventoryLens<IInventory, ItemStack> {
 
@@ -62,7 +66,7 @@ public class CraftingInventoryLensImpl extends OrderedInventoryLensImpl implemen
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+            this.addChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
     }
 
