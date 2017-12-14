@@ -30,13 +30,14 @@ import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.Optional;
 
@@ -59,13 +60,13 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
     private void initInventory(SlotProvider<IInventory, ItemStack> slots) {
         int index = this.base;
         int ord = 0;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.BOOTS));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord++), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
         index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord++), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
         index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord++), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
         index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
 
         this.cache();
     }
@@ -73,13 +74,13 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
     private void initContainer(SlotProvider<IInventory, ItemStack> slots) {
         int index = this.base;
         int ord = 0;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord++), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
         index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord++), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
         index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord++), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
         index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord), EquipmentSlotType.of(EquipmentTypes.BOOTS));
+        this.addSpanningChild(slots.getSlot(index), new SlotIndexImpl(ord), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
 
         this.cache();
     }

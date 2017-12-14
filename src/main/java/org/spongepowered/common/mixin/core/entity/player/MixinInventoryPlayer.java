@@ -133,7 +133,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
                 // We only care about Server inventories
                 this.slots = new SlotCollection.Builder()
                         .add(this.mainInventory.size())
-                        .add(this.offHandInventory.size())
+                        .add(this.offHandInventory.size(), EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.OFF_HAND))
                         // TODO predicates for ItemStack/ItemType?
                         .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
                         .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))

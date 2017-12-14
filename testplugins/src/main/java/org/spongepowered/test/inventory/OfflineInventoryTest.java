@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.test.inventory;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;

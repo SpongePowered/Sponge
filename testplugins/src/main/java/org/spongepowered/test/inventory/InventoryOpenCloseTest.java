@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.test.inventory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "inventoryplugintest", name = "Inventory Test", description = "A plugin to test the owner of an inventory.", version = "0.0.0")
-public class InventoryPluginTest {
+import java.util.Optional;
 
-    private final InventoryPluginListener listener = new InventoryPluginListener();
+@Plugin(id = "inventoryopenclosetest", name = "Inventory Open/Close Test", description = InventoryOpenCloseTest.DESCRIPTION, version = "0.0.0")
+public class InventoryOpenCloseTest {
+
+    public static final String DESCRIPTION = "A plugin to test open and close during inventory events.";
+    private final InventoryListener listener = new InventoryListener();
     private boolean registered = false;
 
     @Listener
@@ -54,14 +59,34 @@ public class InventoryPluginTest {
                         Sponge.getEventManager().registerListeners(this, this.listener);
                     }
                     return CommandResult.success();
-                }).build(), "toggleinventoryplugintest");
+                }).build(), "toggleinventoryopenclosetest");
     }
 
-    public static class InventoryPluginListener {
+    public class InventoryListener {
+
+        @Listener
+        public void onInventoryPrimary(ClickInventoryEvent.Primary event, @First Player player) {
+            Inventory inv = Inventory.builder().build(InventoryOpenCloseTest.this);
+            // This will open the inventory the next tick
+            player.openInventory(inv);
+        }
+
+        @Listener
+        public void onInventorySecondary(ClickInventoryEvent.Secondary event, @First Player player) {
+            // This will close the inventory the next tick
+            player.closeInventory();
+        }
 
         @Listener
         public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
-            player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
+            Optional<PluginContainer> pc = event.getCause().first(PluginContainer.class);
+            player.sendMessage(Text.of("Inventory closed by " + pc.map(PluginContainer::getId).orElse(player.getName())));
+        }
+
+        @Listener
+        public void onInventoryOpen(InteractInventoryEvent.Open event, @First Player player) {
+            Optional<PluginContainer> pc = event.getCause().first(PluginContainer.class);
+            player.sendMessage(Text.of("Inventory opened by " + pc.map(PluginContainer::getId).orElse(player.getName())));
         }
     }
 }

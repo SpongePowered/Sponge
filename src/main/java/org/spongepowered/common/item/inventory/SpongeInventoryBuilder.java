@@ -33,8 +33,8 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;

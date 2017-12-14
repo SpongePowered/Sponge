@@ -88,10 +88,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
     public Collection<Property<?, ?>> getPropertiesFor(PropertyHolder holder) {
         final ImmutableList.Builder<Property<?, ?>> builder = ImmutableList.builder();
         for (Map.Entry<Class<? extends Property<?, ?>>, PropertyStoreDelegate<?>> entry : this.delegateMap.entrySet()) {
-            final Optional<? extends Property<?, ?>> optional = entry.getValue().getFor(holder);
-            if (optional.isPresent()) {
-                builder.add(optional.get());
-            }
+            entry.getValue().getFor(holder).ifPresent(builder::add);
         }
         return builder.build();
     }

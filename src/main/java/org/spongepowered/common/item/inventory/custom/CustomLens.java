@@ -24,19 +24,21 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +74,7 @@ public class CustomLens extends RealLens {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+            this.addChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
     }
 
@@ -102,7 +104,11 @@ public class CustomLens extends RealLens {
         if (size instanceof InventoryDimension) {
             InventoryDimension dimension = ((InventoryDimension) size);
             slotCount = dimension.getColumns() * dimension.getRows();
-            lens = new GridInventoryLensImpl(base, dimension.getColumns(), dimension.getRows(), dimension.getColumns(), slots);
+            if (slotCount == 1) {
+                lens = slots.getSlot(base);
+            } else {
+                lens = new GridInventoryLensImpl(base, dimension.getColumns(), dimension.getRows(), dimension.getColumns(), slots);
+            }
         } else if (size instanceof InventoryCapacity) {
             InventoryCapacity capacity = ((InventoryCapacity) size);
             slotCount = capacity.getValue();

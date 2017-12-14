@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -39,6 +40,7 @@ import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ConceptualLens;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +95,7 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
-            this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));
+            this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
         this.cache();
     }

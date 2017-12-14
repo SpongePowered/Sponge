@@ -22,33 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data;
+package org.spongepowered.common.item.inventory.property;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.property.SlotSide;
+import org.spongepowered.api.util.Coerce;
+import org.spongepowered.api.util.Direction;
 
-import java.util.Collection;
-import java.util.Optional;
+public final class SlotSideImpl extends AbstractInventoryProperty<String, Direction> implements SlotSide {
 
-@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
-public abstract class MixinPropertyHolder implements PropertyHolder {
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(p -> p.getFor(this));
+    public SlotSideImpl(Direction value, Operator operator) {
+        super(Coerce.toEnum(value, Direction.class, Direction.NONE), operator);
     }
 
     @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
+    public int compareTo(Property<?, ?> other) {
+        if (other == null) {
+            return 1;
+        }
 
+        return this.getValue().compareTo(Coerce.toEnum(other.getValue(), Direction.class, Direction.NONE));
+    }
+
+    public static final class BuilderImpl extends PropertyBuilderImpl<Direction, SlotSide, SlotSide.Builder> implements SlotSide.Builder {
+
+        @Override
+        public SlotSide build() {
+            return new SlotSideImpl(this.value, this.operator);
+        }
     }
 }

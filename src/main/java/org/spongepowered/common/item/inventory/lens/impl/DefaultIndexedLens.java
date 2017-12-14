@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -32,6 +35,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAda
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 public class DefaultIndexedLens<TInventory> extends AbstractLens<TInventory, ItemStack> {
 
@@ -48,7 +52,7 @@ public class DefaultIndexedLens<TInventory> extends AbstractLens<TInventory, Ite
     @Override
     protected void init(SlotProvider<TInventory, ItemStack> slots) {
         for (int slot = 0; slot < this.size; slot++) {
-            this.addSpanningChild(slots.getSlot(slot), new SlotIndex(slot));
+            this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(slot, DELEGATE));
         }
     }
     

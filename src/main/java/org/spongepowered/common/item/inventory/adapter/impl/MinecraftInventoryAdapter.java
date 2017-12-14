@@ -26,22 +26,24 @@ package org.spongepowered.common.item.inventory.adapter.impl;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.inventory.IInventory;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.InventoryIterator;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
+import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.common.item.inventory.query.Query;
 import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
@@ -177,16 +179,19 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
         return this.parent().getProperty(this, property, key);
     }
 
-    @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Inventory child, Class<T> property) {
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property) {
         Object key = AbstractInventoryProperty.getDefaultKey(property);
         return this.getProperty(child, property, key);
     }
 
     @Override
-    default <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Class<T> property) {
-        Object key = AbstractInventoryProperty.getDefaultKey(property);
-        return this.getProperty(property, key);
+    default <T extends Property<?, ?>> Optional<T> getProperty(Class<T> property) {
+        return SpongeImpl.getPropertyRegistry().getStore(property).flatMap(p -> p.getFor(this));
+    }
+
+    @Override
+    default Collection<Property<?, ?>> getApplicableProperties() {
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
     }
 
     @Override

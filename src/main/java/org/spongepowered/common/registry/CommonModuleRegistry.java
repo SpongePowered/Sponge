@@ -93,7 +93,18 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.InventoryTransformation;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.api.item.inventory.property.GuiIdProperty;
+import org.spongepowered.api.item.inventory.property.Identifiable;
+import org.spongepowered.api.item.inventory.property.IntProperty;
+import org.spongepowered.api.item.inventory.property.InventoryCapacity;
+import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.property.SlotSide;
+import org.spongepowered.api.item.inventory.property.StringProperty;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -180,6 +191,17 @@ import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
+import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
+import org.spongepowered.common.item.inventory.property.IdentifieableImpl;
+import org.spongepowered.common.item.inventory.property.IntPropertyImpl;
+import org.spongepowered.common.item.inventory.property.InventoryCapacityImpl;
+import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
+import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
+import org.spongepowered.common.item.inventory.property.SlotPosImpl;
+import org.spongepowered.common.item.inventory.property.SlotSideImpl;
+import org.spongepowered.common.item.inventory.property.StringPropertyImpl;
 import org.spongepowered.common.item.inventory.query.SpongeTransformationBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
@@ -374,6 +396,17 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
             .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
             .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
+            .registerBuilderSupplier(SlotPos.Builder.class, SlotPosImpl.BuilderImpl::new)
+            .registerBuilderSupplier(SlotSide.Builder.class, SlotSideImpl.BuilderImpl::new)
+            .registerBuilderSupplier(StringProperty.Builder.class, StringPropertyImpl.BuilderImpl::new)
+            .registerBuilderSupplier(IntProperty.Builder.class, IntPropertyImpl.BuilderImpl::new)
+            .registerBuilderSupplier(SlotIndex.Builder.class, SlotIndexImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryCapacity.Builder.class, InventoryCapacityImpl.BuilderImpl::new)
+            .registerBuilderSupplier(Identifiable.Builder.class, IdentifieableImpl.BuilderImpl::new)
+            .registerBuilderSupplier(GuiIdProperty.Builder.class, GuiIdPropertyImpl.BuilderImpl::new)
+            .registerBuilderSupplier(EquipmentSlotType.Builder.class, EquipmentSlotTypeImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryDimension.Builder.class, InventoryDimensionImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryTitle.Builder.class, InventoryTitleImpl.BuilderImpl::new)
         ;
     }
 

@@ -73,12 +73,12 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType) {
-        return this.poll(new EquipmentSlotType(equipmentType));
+        return this.poll(EquipmentSlotType.of(equipmentType));
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType, int limit) {
-        return this.poll(new EquipmentSlotType(equipmentType), limit);
+        return this.poll(EquipmentSlotType.of(equipmentType), limit);
     }
 
     @Override
@@ -93,12 +93,12 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType) {
-        return this.peek(new EquipmentSlotType(equipmentType));
+        return this.peek(EquipmentSlotType.of(equipmentType));
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType, int limit) {
-        return this.peek(new EquipmentSlotType(equipmentType), limit);
+        return this.peek(EquipmentSlotType.of(equipmentType), limit);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
-        return this.set(new EquipmentSlotType(equipmentType), stack);
+        return this.set(EquipmentSlotType.of(equipmentType), stack);
     }
 
     @Override
@@ -122,6 +122,6 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public Optional<Slot> getSlot(EquipmentType equipmentType) {
-        return this.getSlot(new EquipmentSlotType(equipmentType));
+        return this.getSlot(EquipmentSlotType.of(equipmentType));
     }
 }

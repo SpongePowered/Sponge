@@ -52,7 +52,14 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     
     @Override
     public void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
-        this.lenses.add(new LensHandle<TInventory, TStack>(lens, properties));
+        int idx = this.indexOf(lens);
+        if (idx == -1) {
+            this.lenses.add(new LensHandle<TInventory, TStack>(lens, properties));
+        } else {
+            for (InventoryProperty<?, ?> property : properties) {
+                this.getHandle(idx).setProperty(property);
+            }
+        }
     }
     
     @Override

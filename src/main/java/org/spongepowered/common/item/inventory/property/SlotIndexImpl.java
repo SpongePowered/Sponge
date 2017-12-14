@@ -22,33 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data;
+package org.spongepowered.common.item.inventory.property;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.property.PropertyHolder;
-import org.spongepowered.api.data.property.PropertyStore;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.util.Coerce;
 
-import java.util.Collection;
-import java.util.Optional;
+public final class SlotIndexImpl extends IntPropertyImpl implements SlotIndex {
 
-@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
-public abstract class MixinPropertyHolder implements PropertyHolder {
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(p -> p.getFor(this));
+    public SlotIndexImpl(int value, Operator operator) {
+        super(value, operator);
     }
 
-    @Override
-    public Collection<Property<?, ?>> getApplicableProperties() {
-        return SpongeImpl.getPropertyRegistry().getPropertiesFor(this);
-
+    public SlotIndexImpl(int value) {
+        this(value, Operator.DELEGATE);
     }
+
+    public static final class BuilderImpl extends PropertyBuilderImpl<Integer, SlotIndex, SlotIndex.Builder> implements SlotIndex.Builder{
+
+        @Override
+        public SlotIndex build() {
+            return new SlotIndexImpl(this.value, this.operator);
+        }
+    }
+
 }

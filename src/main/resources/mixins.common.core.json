@@ -374,6 +374,7 @@
         "item.inventory.MixinContainerWorkbench",
         "item.inventory.MixinCustomInventory",
         "item.inventory.MixinCustomContainer",
+        "item.inventory.MixinEntityCarriedInventory",
         "item.inventory.MixinTraitInventory",
         "item.inventory.MixinTraitAdapter",
         "item.inventory.MixinSlot",
