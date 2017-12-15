@@ -184,6 +184,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return false; // SHADOWED
     }
     @Shadow public abstract AbstractAttributeMap getAttributeMap();
+    @Shadow public void onKillCommand() {
+        // Non-abstract for MixinEntityArmorStand
+    }
     @Shadow protected abstract int getExperiencePoints(EntityPlayer attackingPlayer);
 
     @Shadow @Nullable public abstract EntityLivingBase getRevengeTarget();
