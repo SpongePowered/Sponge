@@ -157,7 +157,7 @@ public final class TrackingUtil {
         try {
             entityIn.onUpdate();
         } catch (Exception e) {
-            CauseTracker.getInstance().printExceptionFromPhase(e, CauseTracker.getInstance().getCurrentPhaseData());
+            throw e;
         } finally {
             entityTiming.stopTiming();
             CauseTracker.getInstance().completePhase(TickPhase.Tick.ENTITY);
@@ -185,14 +185,9 @@ public final class TrackingUtil {
                 .complete());
         final Timing entityTiming = mixinEntity.getTimingsHandler();
         entityTiming.startTiming();
-        try {
-            entity.updateRidden();
-        } catch (Exception | NoClassDefFoundError e) {
-            CauseTracker.getInstance().printExceptionFromPhase(e, CauseTracker.getInstance().getCurrentPhaseData());
-        } finally {
-            entityTiming.stopTiming();
-            CauseTracker.getInstance().completePhase(TickPhase.Tick.ENTITY);
-        }
+        entity.updateRidden();
+        entityTiming.stopTiming();
+        CauseTracker.getInstance().completePhase(TickPhase.Tick.ENTITY);
     }
 
     public static void tickTileEntity(IMixinWorldServer mixinWorldServer, ITickable tile) {
@@ -232,94 +227,79 @@ public final class TrackingUtil {
         mixinTileEntity.getTimingsHandler().startTiming();
         try {
             tile.update();
-        } catch (Exception | NoClassDefFoundError e) {
-            CauseTracker.getInstance().printExceptionFromPhase(e, CauseTracker.getInstance().getCurrentPhaseData());
         } finally {
             mixinTileEntity.getTimingsHandler().stopTiming();
-            CauseTracker.getInstance().completePhase(TickPhase.Tick.ENTITY);
+            causeTracker.completePhase(TickPhase.Tick.TILE_ENTITY);
         }
     }
 
     public static void updateTickBlock(IMixinWorldServer mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
-        final CauseTracker causeTracker = CauseTracker.getInstance();
-        // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseData current = causeTracker.getCurrentPhaseData();
-        final IPhaseState currentState = current.state;
-
         if (ShouldFire.TICK_BLOCK_EVENT) {
             BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Cause.of(NamedCause.source(minecraftWorld)), snapshot);
             SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
+            if(event.isCancelled()) {
                 return;
             }
         }
 
         final LocatableBlock locatable = LocatableBlock.builder()
-            .location(new Location<>(mixinWorld.asSpongeWorld(), pos.getX(), pos.getY(), pos.getZ()))
-            .state((BlockState) state)
-            .build();
+                .location(new Location<>(mixinWorld.asSpongeWorld(), pos.getX(), pos.getY(), pos.getZ()))
+                .state((BlockState) state)
+                .build();
         final PhaseContext phaseContext = PhaseContext.start()
-            .add(NamedCause.source(locatable))
-            .addBlockCaptures()
-            .addEntityCaptures();
+                .add(NamedCause.source(locatable))
+                .addBlockCaptures()
+                .addEntityCaptures();
 
         checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
+        final CauseTracker causeTracker = CauseTracker.getInstance();
 
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseData current = causeTracker.getCurrentPhaseData();
+        final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
         IPhaseState phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+
         causeTracker.switchToPhase(phase, phaseContext.complete());
-        try {
-            block.updateTick(minecraftWorld, pos, state, random);
-        } catch (Exception | NoClassDefFoundError e) {
-            causeTracker.printExceptionFromPhase(e, current);
-        } finally {
-            causeTracker.completePhase(phase);
-        }
+        block.updateTick(minecraftWorld, pos, state, random);
+        causeTracker.completePhase(phase);
     }
 
     public static void randomTickBlock(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Block block,
         BlockPos pos, IBlockState state, Random random) {
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
-        // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseData current = causeTracker.getCurrentPhaseData();
-
-        final IPhaseState currentState = current.state;
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
-            final TickBlockEvent
-                event =
-                SpongeEventFactory.createTickBlockEventRandom(Cause.of(NamedCause.source(minecraftWorld)), currentTickBlock);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Cause.of(NamedCause.source(minecraftWorld)), currentTickBlock);
             SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
+            if(event.isCancelled()) {
                 return;
             }
         }
 
         final LocatableBlock locatable = LocatableBlock.builder()
-            .location(new Location<>(mixinWorld.asSpongeWorld(), pos.getX(), pos.getY(), pos.getZ()))
-            .state((BlockState) state)
-            .build();
+                .location(new Location<>(mixinWorld.asSpongeWorld(), pos.getX(), pos.getY(), pos.getZ()))
+                .state((BlockState) state)
+                .build();
         final PhaseContext phaseContext = PhaseContext.start()
-            .add(NamedCause.source(locatable))
-            .addEntityCaptures()
-            .addBlockCaptures();
+                .add(NamedCause.source(locatable))
+                .addEntityCaptures()
+                .addBlockCaptures();
 
         checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
 
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseData current = causeTracker.getCurrentPhaseData();
+        final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(mixinWorld, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
         IPhaseState phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
         causeTracker.switchToPhase(phase, phaseContext.complete());
-        try {
-            block.randomTick(minecraftWorld, pos, state, random);
-        } catch (Exception | NoClassDefFoundError e) {
-            causeTracker.printExceptionFromPhase(e, current);
-        } finally {
-            causeTracker.completePhase(phase);
-        }
+        block.randomTick(minecraftWorld, pos, state, random);
+        causeTracker.completePhase(phase);
     }
 
     private static void checkAndAssignBlockTickConfig(Block block, WorldServer minecraftWorld, PhaseContext phaseContext) {
