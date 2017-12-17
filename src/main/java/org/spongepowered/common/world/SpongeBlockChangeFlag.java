@@ -67,41 +67,22 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         this.name = name;
     }
 
-    /**
-     * Gets whether this flag defines that a block change should
-     * notify neighboring blocks.
-     *
-     * @return True if this is set to notify neighboring blocks
-     */
+    @Override
     public boolean updateNeighbors() {
         return this.updateNeighbors;
     }
 
-    /**
-     * Gets whether this flag defines that a block change should
-     * perform block physics checks or not. If not, no checks
-     * are performed.
-     *
-     * @return True if this is set to perform block physics on placement
-     */
+    @Override
     public boolean performBlockPhysics() {
         return this.performBlockPhysics;
     }
 
     @Override
     public boolean notifyObservers() {
-        return false;
+        return this.notifyObservers;
     }
 
-
-    /**
-     * Gets the equivalent {@link SpongeBlockChangeFlag} of this flag with all
-     * other flags while having the desired {@code updateNeighbors}
-     * as defined by the parameter.
-     *
-     * @param updateNeighbors Whether to update neighboring blocks
-     * @return The relative flag with the desired update neighbors
-     */
+    @Override
     public SpongeBlockChangeFlag withUpdateNeighbors(boolean updateNeighbors) {
         if (this.updateNeighbors == updateNeighbors) {
             return this;
@@ -115,14 +96,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
     }
 
-    /**
-     * Gets the equivalent {@link SpongeBlockChangeFlag} of this flag
-     * with all other flags while having the desired {@code performBlockPhysics}
-     * as defined by the parameter.
-     *
-     * @param performBlockPhysics Whether to perform block physics
-     * @return The relative flag with the desired block physics
-     */
+    @Override
     public SpongeBlockChangeFlag withPhysics(boolean performBlockPhysics) {
         if (this.performBlockPhysics == performBlockPhysics) {
             return this;
@@ -221,7 +195,6 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     public int getRawFlag() {
         return this.rawFlag;
     }
-
 
     @Override
     public String toString() {

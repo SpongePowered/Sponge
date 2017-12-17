@@ -1584,7 +1584,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
-        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) BlockChangeFlags.ALL.withUpdateNeighbors(updateFlag.updateNeighbors()));
+        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) updateFlag);
     }
 
     /**

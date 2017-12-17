@@ -120,7 +120,7 @@ class PlaceBlockPacketState extends BasicPacketState {
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (@SuppressWarnings("unused") CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     Sponge.getCauseStackManager().pushCause(player);
                     Sponge.getCauseStackManager().pushCause(snapshot);
                     Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
