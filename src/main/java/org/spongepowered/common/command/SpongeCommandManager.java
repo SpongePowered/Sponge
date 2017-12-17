@@ -43,6 +43,7 @@ import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
+import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -338,7 +339,14 @@ public class SpongeCommandManager implements CommandManager {
                 if (ex.shouldIncludeUsage()) {
                     final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
                     if (mapping.isPresent()) {
-                        source.sendMessage(error(t("Usage: /%s %s", argSplit[0], mapping.get().getCallable().getUsage(source))));
+                        Text usage;
+                        if (ex instanceof ArgumentParseException.WithUsage) {
+                            usage = ((ArgumentParseException.WithUsage) ex).getUsage();
+                        } else {
+                            usage = mapping.get().getCallable().getUsage(source);
+                        }
+
+                        source.sendMessage(error(t("Usage: /%s %s", argSplit[0], usage)));
                     }
                 }
             }
