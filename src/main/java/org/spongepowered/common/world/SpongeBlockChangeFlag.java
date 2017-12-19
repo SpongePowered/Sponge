@@ -73,16 +73,25 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
 
     @Override
     public SpongeBlockChangeFlag withUpdateNeighbors(boolean updateNeighbors) {
+        if (this.updateNeighbors == updateNeighbors) {
+            return this;
+        }
         return updateNeighbors ? andFlag(BlockChangeFlags.NEIGHBOR) : andNotFlag(BlockChangeFlags.NEIGHBOR);
     }
 
     @Override
     public SpongeBlockChangeFlag withPhysics(boolean performBlockPhysics) {
+        if (this.performBlockPhysics == performBlockPhysics) {
+            return this;
+        }
         return performBlockPhysics ? andFlag(BlockChangeFlags.PHYSICS) : andNotFlag(BlockChangeFlags.PHYSICS);
     }
 
     @Override
     public SpongeBlockChangeFlag withNotifyObservers(boolean notifyObservers) {
+        if (this.notifyObservers == notifyObservers) {
+            return this;
+        }
         return notifyObservers ? andFlag(BlockChangeFlags.OBSERVER) : andNotFlag(BlockChangeFlags.OBSERVER);
     }
 
@@ -94,30 +103,6 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                | (this.notifyClients ? 0 : BlockChangeFlagRegistryModule.Flags.NOTIFY_CLIENTS)
                                | (this.ignoreRender ? 0 : BlockChangeFlagRegistryModule.Flags.IGNORE_RENDER)
                                | (this.forceReRender ? 0 : BlockChangeFlagRegistryModule.Flags.FORCE_RE_RENDER);
-        return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
-    }
-
-    @Override
-    public BlockChangeFlag orFlag(BlockChangeFlag flag) {
-        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final int maskedFlag = (this.updateNeighbors | flag.updateNeighbors() ? BlockChangeFlagRegistryModule.Flags.NEIGHBOR_MASK : 0)
-                               | (this.performBlockPhysics | flag.performBlockPhysics() ? 0 : BlockChangeFlagRegistryModule.Flags.PHYSICS_MASK)
-                               | (this.notifyObservers | flag.notifyObservers() ? 0 : BlockChangeFlagRegistryModule.Flags.OBSERVER_MASK)
-                               | (this.notifyClients | spongeFlag.notifyClients ? BlockChangeFlagRegistryModule.Flags.NOTIFY_CLIENTS : 0)
-                               | (this.ignoreRender | spongeFlag.ignoreRender ? BlockChangeFlagRegistryModule.Flags.IGNORE_RENDER : 0)
-                               | (this.forceReRender | spongeFlag.forceReRender ? BlockChangeFlagRegistryModule.Flags.FORCE_RE_RENDER : 0);
-        return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
-    }
-
-    @Override
-    public BlockChangeFlag exclusiveOrFlag(BlockChangeFlag flag) {
-        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final int maskedFlag = (this.updateNeighbors ^ flag.updateNeighbors() ? BlockChangeFlagRegistryModule.Flags.NEIGHBOR_MASK : 0)
-                               | (this.performBlockPhysics ^ flag.performBlockPhysics() ? 0 : BlockChangeFlagRegistryModule.Flags.PHYSICS_MASK)
-                               | (this.notifyObservers ^ flag.notifyObservers() ? 0 : BlockChangeFlagRegistryModule.Flags.OBSERVER_MASK)
-                               | (this.notifyClients ^ spongeFlag.notifyClients ? BlockChangeFlagRegistryModule.Flags.NOTIFY_CLIENTS : 0)
-                               | (this.ignoreRender ^ spongeFlag.ignoreRender ? BlockChangeFlagRegistryModule.Flags.IGNORE_RENDER : 0)
-                               | (this.forceReRender ^ spongeFlag.forceReRender ? BlockChangeFlagRegistryModule.Flags.FORCE_RE_RENDER : 0);
         return BlockChangeFlagRegistryModule.fromNativeInt(maskedFlag);
     }
 
