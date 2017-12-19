@@ -28,7 +28,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -40,13 +42,13 @@ public class BehindCommandTestPlugin {
     @Inject
     private PluginContainer container;
 
-    private boolean enabled;
+    protected boolean enabled;
 
-    @Listener
-    public void onInit(final GamePreInitializationEvent event) {
-        Sponge.getEventManager().unregisterListeners(this);
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
+    protected CommandSpec.Builder baseCommand;
+
+    @Listener(order = Order.FIRST)
+    public void onPreInit(final GamePreInitializationEvent event) {
+        this.baseCommand = CommandSpec.builder().child(CommandSpec.builder()
                         .arguments()
                         .executor((src, args) -> {
                             this.enabled = !this.enabled;
@@ -62,7 +64,14 @@ public class BehindCommandTestPlugin {
                             return CommandResult.success();
                         })
                         .build(),
-                this.container.getId() + "enable");
+                "enable");
+    }
+
+    @Listener(order = Order.LAST)
+    public void onInit(final GameStartedServerEvent event) {
+        Sponge.getEventManager().unregisterListeners(this);
+
+        Sponge.getCommandManager().register(this, this.baseCommand.build(), this.container.getId());
     }
 
 }
