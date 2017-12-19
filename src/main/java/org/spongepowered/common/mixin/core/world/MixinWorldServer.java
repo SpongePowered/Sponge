@@ -2268,21 +2268,22 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "updateWeather", at = @At(value = "RETURN"))
     private void onUpdateWeatherReturn(CallbackInfo ci) {
-        Weather weather = getWeather();
+        final Weather weather = getWeather();
         int duration = (int) getRemainingDuration();
         if (this.prevWeather != weather && duration > 0) {
-            Sponge.getCauseStackManager().pushCause(this);
-            ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(Sponge.getCauseStackManager().getCurrentCause(), duration, duration,
-                    weather, weather, this.prevWeather, this);
-            SpongeImpl.postEvent(event);
-            Sponge.getCauseStackManager().popCause();
-            if (event.isCancelled()) {
-                this.setWeather(this.prevWeather);
-            } else {
-                // TODO: Rewrite this correctly so it doesn't rain 24/7
-                //this.setWeather(event.getWeather(), event.getDuration());
-                this.prevWeather = event.getWeather();
-                this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(this);
+                final ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(frame.getCurrentCause(), duration, duration,
+                        weather, weather, this.prevWeather, this);
+                if (Sponge.getEventManager().post(event)) {
+                    this.setWeather(this.prevWeather);
+                } else {
+                    if (!weather.equals(event.getWeather()) || duration != event.getDuration()) {
+                        this.setWeather(event.getWeather(), event.getDuration());
+                        this.prevWeather = event.getWeather();
+                        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+                    }
+                }
             }
         }
     }
