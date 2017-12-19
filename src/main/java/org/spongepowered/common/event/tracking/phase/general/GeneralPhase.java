@@ -215,13 +215,13 @@ public final class GeneralPhase extends TrackingPhase {
 
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
             SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
-            final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
-            final int updateFlag =  ((SpongeBlockChangeFlag) changeFlag).getRawFlag();
+            final SpongeBlockChangeFlag spongeFlag = oldBlockSnapshot.getChangeFlag();
+            final int updateFlag =  spongeFlag.getRawFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
-            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
+            if (spongeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
                     newState)) {
                 newState.getBlock().onBlockAdded(worldServer, pos, newState);
                 postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
@@ -238,15 +238,15 @@ public final class GeneralPhase extends TrackingPhase {
 
             ((IPhaseState) unwindingState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, unwindingPhaseContext);
 
-            if (changeFlag.updateNeighbors()) {
+            if (spongeFlag.isNotifyClients()) {
                 // Since notifyBlockUpdate is basically to tell clients that the block position has changed,
                 // we need to respect that flag
                 worldServer.notifyBlockUpdate(pos, originalState, newState, updateFlag);
             }
 
-            if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getChangeFlag());
-            } else if (changeFlag.notifyObservers()) {
+            if (spongeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, spongeFlag);
+            } else if (spongeFlag.notifyObservers()) {
                 worldServer.updateObservingBlocksAt(pos, newState.getBlock());
             }
 

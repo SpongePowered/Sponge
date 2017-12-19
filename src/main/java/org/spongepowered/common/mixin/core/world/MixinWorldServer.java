@@ -1094,7 +1094,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState currentState = this.getBlockState(pos);
         return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos,
-            BlockChangeFlagRegistryModule.fromNativeInt(2));
+            // PHYSICS_OBSERVER does not actually perform any changes except running physics
+            // and notifying observer blocks. It does NOT perform Neighbor notifications, and
+            // it DOES tell the client about the block change.
+            BlockChangeFlags.PHYSICS_OBSERVER);
     }
 
     @Override

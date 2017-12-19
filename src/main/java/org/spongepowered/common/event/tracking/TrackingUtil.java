@@ -133,7 +133,7 @@ public final class TrackingUtil {
         final BlockPos blockPos = ((IMixinLocation) (Object) originalLocation).getBlockPos();
         final IBlockState newState = worldServer.getBlockState(blockPos);
         final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
-        final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlagRegistryModule.fromNativeInt(0));
+        final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
         return new Transaction<>(blockSnapshot, newSnapshot);
     };
 
@@ -251,7 +251,7 @@ public final class TrackingUtil {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(minecraftWorld);
             if (ShouldFire.TICK_BLOCK_EVENT) {
-                BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlagRegistryModule.fromNativeInt(0));
+                BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
                 final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
                 SpongeImpl.postEvent(event);
                 if(event.isCancelled()) {
@@ -291,7 +291,7 @@ public final class TrackingUtil {
         try (@SuppressWarnings("unused") StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(minecraftWorld);
             if (ShouldFire.TICK_BLOCK_EVENT) {
-                final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlagRegistryModule.fromNativeInt(0));
+                final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
                 final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
                 SpongeImpl.postEvent(event);
                 if(event.isCancelled()) {
