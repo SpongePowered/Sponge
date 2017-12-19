@@ -189,6 +189,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModDat
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
+import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -1101,17 +1102,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public boolean spawnEntities(Iterable<? extends Entity> entities) {
-        List<Entity> entitiesToSpawn = new ArrayList<>();
+    public Collection<Entity> spawnEntities(Iterable<? extends Entity> entities) {
+        List<Entity> entitiesToSpawn = new NonNullArrayList<>();
         entities.forEach(entitiesToSpawn::add);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                this.forceSpawnEntity(entity);
-            }
+        if (Sponge.getEventManager().post(event)) {
+            return ImmutableList.of();
         }
-        return event.isCancelled();
+        for (Entity entity : event.getEntities()) {
+            this.forceSpawnEntity(entity);
+        }
+
+        return event.getEntities().stream().filter(Entity::isLoaded).collect(ImmutableList.toImmutableList());
     }
 
     /**
@@ -1511,6 +1513,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean spawnEntity(Entity entity) {
+        checkNotNull(entity, "The entity cannot be null!");
         if (!PhaseTracker.validateEntitySpawn(this, entity)) {
             return true;
         }
