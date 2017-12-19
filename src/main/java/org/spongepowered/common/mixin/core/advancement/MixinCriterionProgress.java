@@ -97,7 +97,6 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
         if (this.obtained != null) {
             return this.obtained.toInstant();
         }
-        final SpongeScoreCriterion scoreCriterion = ((IMixinCriterion) getCriterion()).getScoreCriterion();
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
         ((IMixinAdvancementProgress) this.advancementProgress).getPlayerAdvancements()

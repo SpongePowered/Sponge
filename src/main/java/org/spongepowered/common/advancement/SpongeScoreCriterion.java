@@ -35,6 +35,7 @@ import java.util.List;
 
 public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
 
+    public static boolean BYPASS_EVENT = false;
     static final String SUFFIX_BASE = "&score_goal_id=";
 
     private final String name;
