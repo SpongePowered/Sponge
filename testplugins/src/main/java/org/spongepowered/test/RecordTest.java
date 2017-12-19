@@ -37,7 +37,7 @@ import org.spongepowered.api.plugin.Plugin;
 import java.util.Optional;
 
 @Plugin(id = "record_test", name = "Record Test", description = "Right click to start/stop a record at a position.")
-public class RecordTest {
+public class RecordTest extends BehindCommandTestPlugin {
 
     @Listener
     public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {

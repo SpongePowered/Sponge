@@ -24,11 +24,7 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -38,33 +34,13 @@ import org.spongepowered.api.plugin.Plugin;
  * Bedrock in hoppers prevents them from working
  */
 @Plugin(id = "hoppereventtest", name = "Hopper Event Test", description = "A plugin to test hopper event")
-public class TransferEventTest {
-
-    private final TransferListener listener = new TransferListener();
-    private boolean registered = false;
+public class TransferEventTest extends BehindCommandTestPlugin {
 
     @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "togglebedrocktransferblockage");
-    }
-
-    public static class TransferListener {
-
-        @Listener
-        public void onPreTransferEvent(ChangeInventoryEvent.Transfer.Pre event) {
-            if (event.getSourceInventory().queryAny(ItemStack.of(ItemTypes.BEDROCK, 1)).capacity() != 0) {
-                event.setCancelled(true);
-            }
+    public void onPreTransferEvent(ChangeInventoryEvent.Transfer.Pre event) {
+        if (event.getSourceInventory().queryAny(ItemStack.of(ItemTypes.BEDROCK, 1)).capacity() != 0) {
+            event.setCancelled(true);
         }
     }
+
 }

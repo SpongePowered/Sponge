@@ -64,7 +64,7 @@ import org.spongepowered.api.world.World;
  * For detection this uses a very basic custom Carrier Implementation.
  */
 @Plugin(id = "custominventorytest", name = "Custom Inventory Test", description = "A plugin to test custom inventories")
-public class CustomInventoryTest {
+public class CustomInventoryTest extends BehindCommandTestPlugin {
 
     @Listener
     public void onPunchBlock(InteractBlockEvent.Primary event, @Root Player player) {

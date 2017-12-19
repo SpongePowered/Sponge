@@ -48,7 +48,7 @@ import javax.inject.Inject;
  * Tests intersect union on and containsInventory
  */
 @Plugin(id = "inventorysetoperationstest", name = "Inventory Set Operations Test", description = "A plugin to test inventory set operations")
-public class InventorySetOpsTest {
+public class InventorySetOpsTest extends BehindCommandTestPlugin {
 
     @Inject private Logger logger;
 

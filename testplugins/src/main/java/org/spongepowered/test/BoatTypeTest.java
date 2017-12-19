@@ -43,7 +43,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
 @Plugin(id = "boat_type_test", name = "Boat Type Test", description = "Right click a boat to get the TreeType, run /makeboat <treetype> to make a boat.")
-public class BoatTypeTest {
+public class BoatTypeTest extends BehindCommandTestPlugin {
 
     @Listener
     public void onInit(GameInitializationEvent event) {

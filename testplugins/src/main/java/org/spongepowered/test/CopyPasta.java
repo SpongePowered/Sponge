@@ -48,7 +48,6 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -66,12 +65,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 @Plugin(id = "copypasta", description = "A simple plugin that allows creating, saving, and pasting schematics with SpongeAPI")
-public class CopyPasta {
+public class CopyPasta extends BehindCommandTestPlugin {
 
     public static final String PLUGIN_ID = "copypasta";
 
     @Inject private Logger logger;
-    @Inject private PluginContainer plugin;
     @Inject @ConfigDir(sharedRoot = false) private File config;
 
     private final Map<UUID, PlayerData> player_data = Maps.newHashMap();

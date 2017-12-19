@@ -24,44 +24,19 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
 @Plugin(id = "inventoryplugintest", name = "Inventory Test", description = "A plugin to test the owner of an inventory.")
-public class InventoryPluginTest {
-
-    private final InventoryPluginListener listener = new InventoryPluginListener();
-    private boolean registered = false;
+public class InventoryPluginTest extends BehindCommandTestPlugin {
 
     @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "toggleinventoryplugintest");
+    public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
+        player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
     }
 
-    public static class InventoryPluginListener {
-
-        @Listener
-        public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
-            player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
-        }
-    }
 }

@@ -24,46 +24,22 @@
  */
 package org.spongepowered.test;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 /**
  * ignore players on command
  */
 @Plugin(id = "targetaieventtest", name = "Target AI Event Test", description = "A plugin to test the TargetAIEvent")
-public class TargetAIEventTest {
-
-    private final AITargetListener listener = new AITargetListener();
-    private boolean registered = false;
+public class TargetAIEventTest extends BehindCommandTestPlugin {
 
     @Listener
-    public void onInit(GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder().executor((source, context) -> {
-                    if (this.registered) {
-                        this.registered = false;
-                        Sponge.getEventManager().unregisterListeners(this.listener);
-                    } else {
-                        this.registered = true;
-                        Sponge.getEventManager().registerListeners(this, this.listener);
-                    }
-                    return CommandResult.success();
-                }).build(), "togglecannottargetplayers");
-    }
-
-    public static class AITargetListener {
-
-        @Listener
-        public void onPreTransferEvent(SetAITargetEvent event) {
-            if (event.getTarget().map(e -> e instanceof Player).orElse(false)) {
-                event.setCancelled(true);
-            }
+    public void onPreTransferEvent(SetAITargetEvent event) {
+        if (event.getTarget().map(e -> e instanceof Player).orElse(false)) {
+            event.setCancelled(true);
         }
     }
+
 }

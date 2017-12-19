@@ -45,29 +45,10 @@ import org.spongepowered.api.text.format.TextColors;
 
 @SuppressWarnings("ConstantConditions")
 @Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.")
-public class InstrumentTestPlugin {
-
-    private static boolean enabled = false;
+public class InstrumentTestPlugin extends BehindCommandTestPlugin {
 
     @Listener
     public void onInitialization(final GameInitializationEvent event) {
-        Sponge.getCommandManager().register(this,
-                CommandSpec.builder()
-                        .arguments()
-                        .executor((src, args) -> {
-                            enabled = !enabled;
-
-                            if (enabled) {
-                                src.sendMessage(Text.of(TextColors.DARK_GREEN,
-                                        "You have enabled instrument type testing. Shift right-click a block to use."));
-                            } else {
-                                src.sendMessage(Text.of(TextColors.DARK_GREEN, "You have disabled instrument type testing."));
-                            }
-
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "instrumenttest");
         Sponge.getCommandManager().register(this,
                 CommandSpec.builder()
                         .executor((src, args) -> {
@@ -88,7 +69,7 @@ public class InstrumentTestPlugin {
 
     @Listener
     public void onUseItem(InteractBlockEvent.Secondary.MainHand event, @First Player player) {
-        if (!enabled || !player.get(Keys.IS_SNEAKING).get()) {
+        if (!player.get(Keys.IS_SNEAKING).get()) {
             return;
         }
         final BlockSnapshot snapshot = event.getTargetBlock();

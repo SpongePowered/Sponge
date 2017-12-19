@@ -42,8 +42,6 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -55,7 +53,7 @@ import javax.inject.Inject;
  * Test for User(Offline-Player) Inventory
  */
 @Plugin(id = "offlineinventorytest", name = "Offline Inventory Test", description = "A plugin to test offline inventories")
-public class OfflineInventoryTest {
+public class OfflineInventoryTest extends BehindCommandTestPlugin {
 
     @Inject private Logger logger;
 

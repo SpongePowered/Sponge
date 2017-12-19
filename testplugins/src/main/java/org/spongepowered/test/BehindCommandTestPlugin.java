@@ -25,46 +25,44 @@
 package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "change_block_test", name = "ChangeBlock Listener Test", description = "Run /changeblocktest to break the block beneath you, should print out something.")
-public class ChangeBlockTest {
+import javax.inject.Inject;
 
-    private boolean enabled = false;
+public class BehindCommandTestPlugin {
 
-    @Listener
-    @Exclude(ChangeBlockEvent.Post.class)
-    public void onBlockChange(ChangeBlockEvent event, @First Player player) {
-        if (this.enabled) {
-            // Technically this should print twice, once for the Break and once for the Post.
-            System.err.println(event);
-        }
-    }
+    @Inject
+    private PluginContainer container;
+
+    private boolean enabled;
 
     @Listener
-    public void onPreInit(GamePreInitializationEvent event) {
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
-            .executor(((src, args) -> {
-                if (!(src instanceof Player)) {
-                    throw new CommandException(Text.of(TextColors.RED, "Must be a player to use this command!"));
-                }
-                this.enabled = true;
-                ((Player) src).getLocation().sub(0, 1,0 ).setBlock(BlockTypes.AIR.getDefaultState());
-                this.enabled = false;
-                return CommandResult.success();
-            })).build(), "changeblocktest");
+    public void onInit(final GamePreInitializationEvent event) {
+        Sponge.getEventManager().unregisterListeners(this);
+        Sponge.getCommandManager().register(this,
+                CommandSpec.builder()
+                        .arguments()
+                        .executor((src, args) -> {
+                            this.enabled = !this.enabled;
+
+                            if (this.enabled) {
+                                Sponge.getEventManager().registerListeners(this, this);
+                                src.sendMessage(Text.of(TextColors.DARK_GREEN, "You have enabled event testing for " + container.getName() + "."));
+                            } else {
+                                Sponge.getEventManager().unregisterListeners(this);
+                                src.sendMessage(Text.of(TextColors.DARK_GREEN, "You have disabled event testing for " + container.getName() + "."));
+                            }
+
+                            return CommandResult.success();
+                        })
+                        .build(),
+                this.container.getId() + "enable");
     }
 
 }

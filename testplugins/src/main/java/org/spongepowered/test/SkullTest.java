@@ -24,8 +24,8 @@
  */
 package org.spongepowered.test;
 
-import static org.spongepowered.api.command.args.GenericArguments.playerOrSource;
 import static org.spongepowered.api.command.args.GenericArguments.catalogedElement;
+import static org.spongepowered.api.command.args.GenericArguments.playerOrSource;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
