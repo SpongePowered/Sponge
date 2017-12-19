@@ -1287,7 +1287,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos, newState, flags);
+            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, flags);
         }
     }
 
@@ -1299,7 +1299,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos, state, flag);
+            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), state, flag);
         }
     }
 

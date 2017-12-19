@@ -62,6 +62,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -618,11 +619,11 @@ public final class PhaseTracker {
             // minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
         }
 
-        if (spongeFlag.isNotifyClients() && (!minecraftWorld.isRemote || !spongeFlag.isIgnoreRender()) && chunk.isPopulated()) {
+        if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
             minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
         }
 
-        if (!minecraftWorld.isRemote && spongeFlag.updateNeighbors()) {
+        if (spongeFlag.updateNeighbors()) {
             minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
