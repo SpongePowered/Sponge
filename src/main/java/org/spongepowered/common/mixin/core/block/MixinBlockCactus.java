@@ -64,7 +64,7 @@ public abstract class MixinBlockCactus extends MixinBlock {
         if (!worldIn.isRemote) {
             this.originalCactus = DamageSource.cactus;
             Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-            DamageSource.cactus = new MinecraftBlockDamageSource("cactus", location).setFireDamage();
+            DamageSource.cactus = new MinecraftBlockDamageSource("cactus", location);
         }
     }
 
