@@ -28,7 +28,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.dragon.phase.IPhase;
+import net.minecraft.entity.boss.dragon.phase.PhaseHover;
 import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.EnderCrystal;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
@@ -42,6 +45,8 @@ import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityDragon.class)
 public abstract class MixinEntityDragon extends MixinEntityLiving implements EnderDragon {
@@ -68,5 +73,21 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
     @Override
     public Optional<EnderCrystal> getHealingCrystal() {
         return Optional.ofNullable((EnderCrystal) this.healingEnderCrystal);
+    }
+
+    /**
+     * Fixes a hidden divide-by-zero error when {@link PhaseHover} returns the
+     * current location as the target location.
+     *
+     * @author JBYoshi
+     */
+    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/dragon/phase/IPhase;getTargetLocation()Lnet/minecraft/util/math/Vec3d;"))
+    @Nullable
+    private Vec3d getTargetLocationOrNull(IPhase iPhase) {
+        Vec3d target = iPhase.getTargetLocation();
+        if (target != null && target.x == this.posX && target.z == this.posZ) {
+            return null; // Skips the movement code
+        }
+        return target;
     }
 }
