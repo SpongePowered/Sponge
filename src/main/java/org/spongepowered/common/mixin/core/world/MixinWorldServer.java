@@ -1094,7 +1094,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState currentState = this.getBlockState(pos);
         return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos,
-            BlockChangeFlagRegistryModule.fromNativeInt(2));
+            // PHYSICS_OBSERVER does not actually perform any changes except running physics
+            // and notifying observer blocks. It does NOT perform Neighbor notifications, and
+            // it DOES tell the client about the block change.
+            BlockChangeFlags.PHYSICS_OBSERVER);
     }
 
     @Override
@@ -1287,7 +1290,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos, newState, flags);
+            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, flags);
         }
     }
 
@@ -1299,7 +1302,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos, state, flag);
+            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), state, flag);
         }
     }
 
@@ -1584,7 +1587,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
-        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) BlockChangeFlags.ALL.withUpdateNeighbors(updateFlag.updateNeighbors()));
+        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) updateFlag);
     }
 
     /**

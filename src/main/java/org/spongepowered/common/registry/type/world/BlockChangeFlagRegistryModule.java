@@ -52,6 +52,12 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
     }
 
     public static SpongeBlockChangeFlag fromNativeInt(int flag) {
+        if (flag == 3) {
+            return (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+        }
+        if (flag == 2) {
+            return (SpongeBlockChangeFlag) BlockChangeFlags.PHYSICS_OBSERVER;
+        }
         final SpongeBlockChangeFlag spongeBlockChangeFlag = getInstance().maskedFlags.get(flag);
         if (spongeBlockChangeFlag != null) {
             return spongeBlockChangeFlag;

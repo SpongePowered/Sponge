@@ -44,6 +44,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -52,6 +53,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +73,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     Vector3i coords;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
+    SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
 
 
     public SpongeBlockSnapshotBuilder() {
@@ -174,6 +177,11 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if(this.extendedState != null) {
             this.extendedState = this.extendedState.with(key, value).orElse(this.extendedState);
         }
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder flag(SpongeBlockChangeFlag flag) {
+        this.flag = flag;
         return this;
     }
 

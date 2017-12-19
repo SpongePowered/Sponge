@@ -286,7 +286,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
-                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.ALL.withUpdateNeighbors(false)));
+                        .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
 
                 // unused, to be removed and re-located when phase context is cleaned up
                 //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
