@@ -22,41 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
+package org.spongepowered.common.registry.type.advancement;
 
-import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-public class SpongeAdvancementTree implements AdvancementTree {
+public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<AdvancementTree> {
 
-    private final Advancement rootAdvancement;
-    private final String id;
-    private final String name;
+    public static AdvancementTreeRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
-    public SpongeAdvancementTree(Advancement rootAdvancement, String id, String name) {
-        this.rootAdvancement = rootAdvancement;
-        this.name = name;
-        this.id = id;
+    AdvancementTreeRegistryModule() {
+        super("minecraft");
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public void register(AdvancementTree advancement) {
+        super.register(advancement);
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Advancement getRootAdvancement() {
-        return this.rootAdvancement;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public String getBackground() {
-        return ((net.minecraft.advancements.Advancement) this.rootAdvancement).getDisplay().background.toString();
+    private static final class Holder {
+        static final AdvancementTreeRegistryModule INSTANCE = new AdvancementTreeRegistryModule();
     }
 }

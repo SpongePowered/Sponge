@@ -184,6 +184,8 @@ import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
+import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
+import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTypeRegistryModule;
 import org.spongepowered.common.registry.type.advancement.CriterionRegistryModule;
 import org.spongepowered.common.registry.type.advancement.TriggerTypeRegistryModule;
@@ -482,6 +484,8 @@ public final class CommonModuleRegistry {
             .registerModule(HorseStyle.class, HorseStyleRegistryModule.getInstance())
             .registerModule(HorseColor.class, HorseColorRegistryModule.getInstance())
             .registerModule(InstrumentType.class, InstrumentTypeRegistryModule.getInstance())
+            .registerModule(Advancement.class, AdvancementRegistryModule.getInstance())
+            .registerModule(AdvancementTree.class, AdvancementTreeRegistryModule.getInstance())
             .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
             .registerModule(TriggerType.class, TriggerTypeRegistryModule.getInstance())
             .registerModule(new CriterionRegistryModule())

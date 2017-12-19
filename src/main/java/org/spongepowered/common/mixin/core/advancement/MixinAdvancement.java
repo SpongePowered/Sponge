@@ -43,10 +43,12 @@ import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeCriterionHelper;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
+import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
+import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -65,6 +67,8 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     private AdvancementCriterion criterion;
     @Nullable private AdvancementTree tree;
+    private String spongeId;
+    private String name;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
@@ -74,8 +78,26 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         }
         this.criteria = new HashMap<>(criteriaIn);
         this.criterion = SpongeCriterionHelper.toCriterion(this.criteria, this.requirements);
+        String path = id.getResourcePath();
+        this.name = path.replace('/', '_');
+        this.spongeId = id.getResourceDomain() + ':' + this.name;
+        if (displayIn != null) {
+            this.name = SpongeTexts.toPlain(displayIn.getTitle());
+        }
+        AdvancementRegistryModule.getInstance().register(this);
         if (parentIn == null) {
-            this.tree = new SpongeAdvancementTree(this, id.getResourceDomain(), id.getResourcePath());
+            // Remove the root suffix from json file tree ids
+            if (path.endsWith("/root")) {
+                path = path.substring(0, path.lastIndexOf('/'));
+            }
+            path = path.replace('/', '_');
+            String name = path;
+            if (displayIn != null) {
+                name = this.name;
+            }
+            path = id.getResourceDomain() + ':' + path;
+            this.tree = new SpongeAdvancementTree(this, path, name);
+            AdvancementTreeRegistryModule.getInstance().register(this.tree);
         } else {
             this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
         }
@@ -122,13 +144,11 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public String getId() {
-        // TODO: Check if this is valid
-        return this.id.toString();
+        return this.spongeId;
     }
 
     @Override
     public String getName() {
-        // TODO: Check if this is valid
-        return this.id.getResourcePath();
+        return this.name;
     }
 }
