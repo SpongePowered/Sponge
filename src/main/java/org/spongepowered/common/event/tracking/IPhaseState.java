@@ -168,10 +168,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-    default boolean tracksBlockRestores() {
-        return false;
-    }
-
     default boolean tracksBlockSpecificDrops() {
         return false;
     }

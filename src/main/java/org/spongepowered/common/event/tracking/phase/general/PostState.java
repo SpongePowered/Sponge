@@ -59,11 +59,6 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public boolean tracksBlockRestores() {
-        return false; // TODO - check that this really is needed.
-    }
-
-    @Override
     public boolean requiresPost() {
         return false;
     }

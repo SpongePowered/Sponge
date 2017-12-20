@@ -61,6 +61,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -596,7 +597,7 @@ public final class PhaseTracker {
             // while a world is being changed unknowingly.
             printUnexpectedBlockChange();
         }
-        if (phaseState.requiresBlockCapturing()) {
+        if (phaseState != BlockPhase.State.RESTORING_BLOCKS && phaseState.requiresBlockCapturing()) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.

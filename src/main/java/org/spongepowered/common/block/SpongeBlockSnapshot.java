@@ -63,8 +63,6 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -180,13 +178,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
-        PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> currentState = phaseTracker.getCurrentState();
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
-        try (PhaseContext<?> context = !currentState.tracksBlockRestores()
-            ? null
-            : BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch()) {
+        try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch()) {
 
             BlockPos pos = VecHelper.toBlockPos(this.pos);
             IBlockState current = world.getBlockState(pos);
