@@ -114,34 +114,35 @@ public class SpongeBanService implements BanService {
 
     @Override
     public boolean pardon(GameProfile profile) {
+        Optional<Ban.Profile> ban = getBanFor(profile);
         this.getUserBanList().removeExpired();
-        boolean hadBan = this.isBanned(profile);
-        UserListUtils.removeEntry(this.getUserBanList(), profile);
-        return hadBan;
+        return ban.isPresent() && removeBan(ban.get());
     }
 
     @Override
     public boolean pardon(InetAddress address) {
-        UserListIPBans banList = this.getIPBanList();
-
-        banList.removeExpired();
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(address, 0);
-        boolean hadBan = this.isBanned(address);
-        UserListUtils.removeEntry(banList, banList.addressToString(inetSocketAddress));
-        return hadBan;
+        Optional<Ban.Ip> ban = getBanFor(address);
+        this.getIPBanList().removeExpired();
+        return ban.isPresent() && removeBan(ban.get());
     }
 
     @Override
     public boolean removeBan(Ban ban) {
+        if (!hasBan(ban)) {
+            return false;
+        }
         if (ban.getType().equals(BanTypes.PROFILE)) {
             User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
-            return this.pardon(((Ban.Profile) ban).getProfile());
+            UserListUtils.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
+            return true;
         } else if (ban.getType().equals(BanTypes.IP)) {
             Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
 
-            return this.pardon(((Ban.Ip) ban).getAddress());
+            InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
+            UserListUtils.removeEntry(this.getIPBanList(), this.getIPBanList().addressToString(inetSocketAddress));
+            return true;
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
     }
