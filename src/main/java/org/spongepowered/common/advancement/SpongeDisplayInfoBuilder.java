@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -97,9 +98,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
     @Override
     public DisplayInfo build() {
-        checkState(this.advancementType != null, "Advancement type has not been set");
         checkState(this.title != null, "Title has not been set");
-        checkState(this.description != null, "Description has not been set");
         checkState(this.icon != null, "Icon has not been set");
         final ITextComponent title = SpongeTexts.toComponent(this.title);
         final ITextComponent description = SpongeTexts.toComponent(this.description);
@@ -124,8 +123,8 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     @Override
     public DisplayInfo.Builder reset() {
         this.icon = null;
-        this.description = null;
-        this.advancementType = null;
+        this.description = Text.EMPTY;
+        this.advancementType = AdvancementTypes.TASK;
         this.announceToChat = true;
         this.hidden = false;
         this.showToast = true;

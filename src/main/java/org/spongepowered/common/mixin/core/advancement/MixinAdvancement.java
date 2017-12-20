@@ -58,17 +58,19 @@ import javax.annotation.Nullable;
 @Mixin(Advancement.class)
 public class MixinAdvancement implements org.spongepowered.api.advancement.Advancement, IMixinAdvancement {
 
+    @Shadow @Nullable public Advancement parent;
     @Shadow @Final private ResourceLocation id;
-    @Shadow @Final @Nullable private Advancement parent;
     @Shadow @Final private String[][] requirements;
     @Shadow @Final private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
 
-    private AdvancementCriterion criterion;
+    @Nullable private AdvancementCriterion criterion;
     @Nullable private AdvancementTree tree;
     private String spongeId;
     private String name;
+
+    @Nullable private Advancement tempParent;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
@@ -76,15 +78,20 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (displayIn != null) {
             ((IMixinDisplayInfo) displayIn).setAdvancement(this);
         }
-        this.criteria = new HashMap<>(criteriaIn);
-        this.criterion = SpongeCriterionHelper.toCriterion(this.criteria, this.requirements);
         String path = id.getResourcePath();
         this.name = path.replace('/', '_');
         this.spongeId = id.getResourceDomain() + ':' + this.name;
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
-        AdvancementRegistryModule.getInstance().register(this);
+        if (!AdvancementRegistryModule.INSIDE_REGISTER_EVENT) {
+            AdvancementRegistryModule.getInstance().registerAdditionalCatalog(this);
+        } else {
+            // Wait to set the parent until the advancement is registered
+            this.tempParent = parentIn;
+            this.parent = SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT;
+        }
+        // This is only possible when REGISTER_ADVANCEMENTS_ON_CONSTRUCT is true
         if (parentIn == null) {
             // Remove the root suffix from json file tree ids
             if (path.endsWith("/root")) {
@@ -97,7 +104,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             }
             path = id.getResourceDomain() + ':' + path;
             this.tree = new SpongeAdvancementTree(this, path, name);
-            AdvancementTreeRegistryModule.getInstance().register(this.tree);
+            AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.tree);
         } else {
             this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
         }
@@ -121,6 +128,9 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public AdvancementCriterion getCriterion() {
+        if (this.criterion == null) {
+            this.criterion = SpongeCriterionHelper.toCriterion(new HashMap<>(this.criteria), this.requirements);
+        }
         return this.criterion;
     }
 
@@ -130,7 +140,24 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     @Override
+    public boolean isRegistered() {
+        return this.tempParent == null;
+    }
+
+    @Override
+    public void setRegistered() {
+        if (this.tempParent == null) {
+            return;
+        }
+        this.parent = this.tempParent;
+        this.tempParent = null;
+    }
+
+    @Override
     public Optional<org.spongepowered.api.advancement.Advancement> getParent() {
+        if (this.tempParent != null) {
+            return Optional.of((org.spongepowered.api.advancement.Advancement) this.tempParent);
+        }
         if (this.parent == SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
             return Optional.empty();
         }

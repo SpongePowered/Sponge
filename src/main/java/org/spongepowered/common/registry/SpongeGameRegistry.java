@@ -47,6 +47,8 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -88,6 +90,7 @@ import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
@@ -203,9 +206,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
                 final Collection<? extends CatalogType> all = module.getSecond().getAll();
                 final List<CatalogType> catalogTypes = new ArrayList<>();
-                for (CatalogType o : all) {
-                    catalogTypes.add(o);
-                }
+                catalogTypes.addAll(all);
                 catalogTypes.sort(Comparator.comparing(CatalogType::getId));
                 for (CatalogType catalogType : catalogTypes) {
                     printer.add("  -%s", catalogType.getId());
@@ -553,9 +554,20 @@ public class SpongeGameRegistry implements GameRegistry {
         registerModulePhase();
     }
 
+    @SuppressWarnings("unchecked")
     public void init() {
         this.phase = RegistrationPhase.INIT;
         registerModulePhase();
+        // Throw the registry module events for the registries that should be loaded once
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
+            final CatalogRegistryModule module = entry.getValue();
+            if (module instanceof AdditionalCatalogRegistryModule && (!(module instanceof SpongeAdditionalCatalogRegistryModule) ||
+                    ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration()) &&
+                    module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
+                SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(Cause.of(EventContext.empty(), this),
+                        entry.getKey(), (AdditionalCatalogRegistryModule) module));
+            }
+        }
     }
 
     public void postInit() {

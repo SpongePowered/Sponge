@@ -22,31 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.interfaces.advancement;
 
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.advancements.PlayerAdvancements;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementList;
+import net.minecraft.util.ResourceLocation;
 
-@Mixin(ICriterionTrigger.Listener.class)
-public class MixinICriterionTriggerListener {
+import java.util.Map;
+import java.util.Set;
 
-    @Shadow @Final private ICriterionInstance criterionInstance;
+import javax.annotation.Nullable;
 
-    @Inject(method = "grantCriterion", at = @At("HEAD"))
-    private void onGrantCriterion(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
-        SpongeImpl.getCauseStackManager().pushCause(this.criterionInstance);
-    }
+public interface IMixinAdvancementList {
 
-    @Inject(method = "grantCriterion", at = @At("RETURN"))
-    private void onGrantCriterionReturn(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
-        SpongeImpl.getCauseStackManager().popCause();
-    }
+    Map<ResourceLocation, Advancement> getAdvancements();
+
+    Set<Advancement> getRootsSet();
+
+    Set<Advancement> getNonRootsSet();
+
+    @Nullable
+    AdvancementList.Listener getListener();
 }

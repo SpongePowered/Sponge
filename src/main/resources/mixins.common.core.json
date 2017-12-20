@@ -10,6 +10,8 @@
         "MixinBootstrapAnonInner10",
         "MixinBootstrapAnonInner11",
         "advancement.MixinAdvancement",
+        "advancement.MixinAdvancementList",
+        "advancement.MixinAdvancementManager",
         "advancement.MixinAdvancementProgress",
         "advancement.MixinAdvancementTreeNode",
         "advancement.MixinCriteriaTriggers",

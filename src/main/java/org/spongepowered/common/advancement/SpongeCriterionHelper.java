@@ -32,6 +32,7 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
 import java.util.ArrayList;
@@ -55,11 +56,11 @@ public final class SpongeCriterionHelper {
         for (AdvancementCriterion criterion1 : criteria) {
             build(type, criterion1, builder);
         }
-        return builder.isEmpty() ? AdvancementCriterion.EMPTY : builder.size() == 1 ? builder.get(0) : function.apply(ImmutableSet.copyOf(builder));
+        return builder.isEmpty() ? SpongeEmptyCriterion.INSTANCE : builder.size() == 1 ? builder.get(0) : function.apply(ImmutableSet.copyOf(builder));
     }
 
     private static void build(Class<? extends OperatorCriterion> type, AdvancementCriterion criterion, List<AdvancementCriterion> criteria) {
-        if (criterion == AdvancementCriterion.EMPTY) {
+        if (criterion == SpongeEmptyCriterion.INSTANCE) {
             return;
         }
         checkNotNull(criterion, "criterion");
@@ -85,6 +86,7 @@ public final class SpongeCriterionHelper {
                     criterion.internalCriteria.add(null);
                 }
                 criterion.internalCriteria.set(scoreIndex, (AdvancementCriterion) entry.getValue());
+                criteriaMap.put(name, criterion);
             } else {
                 criteriaMap.put(name, (AdvancementCriterion) entry.getValue());
             }
@@ -112,6 +114,8 @@ public final class SpongeCriterionHelper {
                 if (index != -1) {
                     name = name.substring(0, index);
                 }
+                AdvancementCriterion criterion = (AdvancementCriterion) criteria.get(name);
+                checkNotNull(criterion, name);
                 andCriteria.add((AdvancementCriterion) criteria.get(name));
             }
             orCriteria.add(AndCriterion.of(andCriteria));
@@ -127,15 +131,12 @@ public final class SpongeCriterionHelper {
     // The first layer represents the OR operator and the second one
     // the AND operator
 
-    /**
-     * Reduces the {@link AdvancementCriterion} to the String[][] structure
-     * used in vanilla minecraft.
-     *
-     * @param criterion The criterion
-     * @return The id array
-     */
-    static String[][] toIdArray(AdvancementCriterion criterion) {
-        final Wrapper wrapper = toWrapper(criterion);
+    static Tuple<Map<String, Criterion>, String[][]> toVanillaCriteriaData(AdvancementCriterion criterion) {
+        final Map<String, Criterion> criteria = new HashMap<>();
+        if (criterion == SpongeEmptyCriterion.INSTANCE) {
+            return new Tuple<>(criteria, new String[0][0]);
+        }
+        final Wrapper wrapper = toWrapper(criterion, criteria);
 
         final List<Wrapper> list;
         if (wrapper instanceof And) {
@@ -143,7 +144,7 @@ public final class SpongeCriterionHelper {
         } else if (wrapper instanceof Or) {
             list = merge((Or) wrapper);
         } else {
-            return new String[][] {{ ((One) wrapper).id }};
+            return new Tuple<>(criteria, new String[][] {{ ((One) wrapper).id }});
         }
 
         final List<List<String>> ids = new ArrayList<>();
@@ -161,7 +162,7 @@ public final class SpongeCriterionHelper {
             final List<String> entries = ids.get(i);
             idsArray[i] = entries.toArray(new String[entries.size()]);
         }
-        return idsArray;
+        return new Tuple<>(criteria, idsArray);
     }
 
     private static List<Wrapper> merge(Or or) {
@@ -213,21 +214,25 @@ public final class SpongeCriterionHelper {
         return stack;
     }
 
-    private static Wrapper toWrapper(AdvancementCriterion criterion) {
+    private static Wrapper toWrapper(AdvancementCriterion criterion, Map<String, Criterion> criteria) {
         if (criterion instanceof SpongeAndCriterion) {
             return new And(((SpongeAndCriterion) criterion).getCriteria().stream()
-                    .map(SpongeCriterionHelper::toWrapper).collect(Collectors.toList()));
+                    .map(c -> toWrapper(c, criteria)).collect(Collectors.toList()));
         } else if (criterion instanceof SpongeOrCriterion) {
             return new Or(((SpongeOrCriterion) criterion).getCriteria().stream()
-                    .map(SpongeCriterionHelper::toWrapper).collect(Collectors.toList()));
+                    .map(c -> toWrapper(c, criteria)).collect(Collectors.toList()));
         } else if (criterion instanceof SpongeScoreCriterion) {
+            final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
             final List<Wrapper> wrappers = new ArrayList<>();
             final String name = criterion.getName();
-            for (int i = 0; i < ((SpongeScoreCriterion) criterion).getGoal(); i++) {
-                wrappers.add(new One(name + SpongeScoreCriterion.SUFFIX_BASE + i));
+            for (int i = 0; i < scoreCriterion.getGoal(); i++) {
+                final String id = name + SpongeScoreCriterion.SUFFIX_BASE + i;
+                criteria.put(id, (Criterion) scoreCriterion.internalCriteria.get(i));
+                wrappers.add(new One(id));
             }
             return new And(wrappers);
         } else {
+            criteria.put(criterion.getName(), (Criterion) criterion);
             return new One(criterion.getName());
         }
     }

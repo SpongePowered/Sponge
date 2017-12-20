@@ -22,20 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.advancement;
+package org.spongepowered.common.event.registry;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.common.advancement.SpongeCriterionBuilder;
-import org.spongepowered.common.advancement.SpongeEmptyCriterion;
-import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.game.GameRegistryEvent;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.CatalogRegistryModule;
 
-public class CriterionRegistryModule implements RegistryModule {
+public class SpongeGameRegistryRegisterEvent<T extends CatalogType> implements GameRegistryEvent.Register<T> {
+
+    private final Cause cause;
+    private final Class<T> catalogType;
+    private final AdditionalCatalogRegistryModule<T> registryModule;
+
+    public SpongeGameRegistryRegisterEvent(Cause cause, Class<T> catalogType,
+            AdditionalCatalogRegistryModule<T> registryModule) {
+        this.cause = cause;
+        this.catalogType = catalogType;
+        this.registryModule = registryModule;
+    }
 
     @Override
-    public void registerDefaults() {
-        RegistryHelper.setFinalStatic(AdvancementCriterion.class, "EMPTY", SpongeEmptyCriterion.INSTANCE);
-        RegistryHelper.setFinalStatic(AdvancementCriterion.class, "DUMMY",
-                new SpongeCriterionBuilder().build("dummy"));
+    public Class<T> getCatalogType() {
+        return this.catalogType;
+    }
+
+    @Override
+    public CatalogRegistryModule<T> getRegistryModule() {
+        return this.registryModule;
+    }
+
+    @Override
+    public void register(T catalogType) {
+        this.registryModule.registerAdditionalCatalog(catalogType);
+    }
+
+    @Override
+    public Cause getCause() {
+        return this.cause;
     }
 }

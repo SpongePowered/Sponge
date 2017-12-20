@@ -24,10 +24,21 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
+import net.minecraft.advancements.AdvancementList;
+import net.minecraft.advancements.AdvancementManager;
 import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
+import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
+import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
+import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement> {
+@CustomRegistrationPhase
+public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
+        implements AdditionalCatalogRegistryModule<Advancement> {
+
+    public static boolean INSIDE_REGISTER_EVENT = false;
 
     public static AdvancementRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -37,9 +48,26 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         super("minecraft");
     }
 
+    public void clear() {
+        this.catalogTypeMap.clear();
+    }
+
     @Override
-    public void register(Advancement advancement) {
+    public void registerAdditionalCatalog(Advancement advancement) {
         super.register(advancement);
+        ((IMixinAdvancement) advancement).setRegistered();
+        if (INSIDE_REGISTER_EVENT) {
+            final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
+            final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
+            advancementList.getAdvancements().put(mcAdv.getId(), mcAdv);
+            if (mcAdv.parent != SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
+                advancementList.getNonRootsSet().add(mcAdv);
+                final AdvancementList.Listener listener = advancementList.getListener();
+                if (listener != null) {
+                    listener.nonRootAdvancementAdded(mcAdv);
+                }
+            }
+        }
     }
 
     private static final class Holder {

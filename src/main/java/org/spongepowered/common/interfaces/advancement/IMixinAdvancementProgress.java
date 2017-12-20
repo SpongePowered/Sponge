@@ -25,7 +25,6 @@
 package org.spongepowered.common.interfaces.advancement;
 
 import net.minecraft.advancements.PlayerAdvancements;
-import org.spongepowered.api.advancement.Advancement;
 
 public interface IMixinAdvancementProgress {
 
@@ -33,7 +32,7 @@ public interface IMixinAdvancementProgress {
 
     void setPlayerAdvancements(PlayerAdvancements playerAdvancements);
 
-    void setAdvancement(Advancement advancement);
+    void setAdvancement(String advancement);
 
     void invalidateAchievedState();
 }

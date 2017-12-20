@@ -25,7 +25,6 @@
 package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementRewards;
@@ -35,9 +34,9 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -56,6 +55,10 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
     @Nullable private Advancement parent;
     private AdvancementCriterion criterion;
     @Nullable private DisplayInfo displayInfo;
+
+    public SpongeAdvancementBuilder() {
+        reset();
+    }
 
     @Override
     public Advancement.Builder parent(@Nullable Advancement parent) {
@@ -78,18 +81,7 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
 
     @Override
     public Advancement build(String pluginId, String id) {
-        checkState(this.criterion != null, "Criterion has not been set");
-        final Map<String, Criterion> criteriaIn = new HashMap<>();
-        if (this.criterion != AdvancementCriterion.EMPTY) {
-            if (this.criterion instanceof SpongeOperatorCriterion) {
-                for (AdvancementCriterion criterion : ((SpongeOperatorCriterion) this.criterion).getLeafCriteria()) {
-                    criteriaIn.put(criterion.getName(), (Criterion) criterion);
-                }
-            } else {
-                criteriaIn.put(this.criterion.getName(), (Criterion) this.criterion);
-            }
-        }
-        final String[][] requirementsIn = SpongeCriterionHelper.toIdArray(this.criterion);
+        final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
         // TODO: Custom rewards?
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
         final ResourceLocation resourceLocation = new ResourceLocation(pluginId, id);
@@ -100,7 +92,7 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
             parent = DUMMY_ROOT_ADVANCEMENT; // Attach a dummy root until a tree is constructed
         }
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
-                resourceLocation, parent, displayInfo, rewards, criteriaIn, requirementsIn);
+                resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
         ((IMixinAdvancement) advancement).setCriterion(this.criterion);
         return advancement;
     }
@@ -115,8 +107,8 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
 
     @Override
     public Advancement.Builder reset() {
+        this.criterion = AdvancementCriterion.EMPTY;
         this.displayInfo = null;
-        this.criterion = null;
         this.parent = null;
         return this;
     }

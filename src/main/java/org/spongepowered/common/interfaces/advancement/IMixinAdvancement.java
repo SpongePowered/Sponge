@@ -32,4 +32,8 @@ public interface IMixinAdvancement {
     void setTree(AdvancementTree tree);
 
     void setCriterion(AdvancementCriterion criterion);
+
+    boolean isRegistered();
+
+    void setRegistered();
 }

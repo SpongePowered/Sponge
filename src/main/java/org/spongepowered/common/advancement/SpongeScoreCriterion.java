@@ -39,7 +39,7 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriteri
     static final String SUFFIX_BASE = "&score_goal_id=";
 
     private final String name;
-    final List<AdvancementCriterion> internalCriteria;
+    public final List<AdvancementCriterion> internalCriteria;
 
     SpongeScoreCriterion(String name, List<AdvancementCriterion> internalCriteria) {
         this.internalCriteria = internalCriteria;

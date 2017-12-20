@@ -33,7 +33,6 @@ import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
-import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 
 @SuppressWarnings("ConstantConditions")
 public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
@@ -48,6 +47,7 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
     @Override
     public AdvancementTree.Builder rootAdvancement(Advancement rootAdvancement) {
         checkNotNull(rootAdvancement, "rootAdvancement");
+        checkState(((IMixinAdvancement) rootAdvancement).isRegistered(), "The root advancement must be registered.");
         checkState(!rootAdvancement.getParent().isPresent(), "The root advancement cannot have a parent.");
         checkState(rootAdvancement.getDisplayInfo().isPresent(), "The root advancement must have display info.");
         checkState(((net.minecraft.advancements.Advancement) rootAdvancement).getDisplay().background == null,
@@ -68,7 +68,6 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
         checkState(this.rootAdvancement != null, "Root advancement has not been set");
         final String name = this.rootAdvancement.getDisplayInfo().map(DisplayInfo::getTitle).map(Text::toPlain).orElse(id);
         final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, pluginId + ':' + id, name);
-        AdvancementTreeRegistryModule.getInstance().register(advancementTree);
         ((net.minecraft.advancements.Advancement) this.rootAdvancement).getDisplay().background = new ResourceLocation(this.background);
         ((net.minecraft.advancements.Advancement) this.rootAdvancement).parent = null;
         applyTree(this.rootAdvancement, advancementTree);
