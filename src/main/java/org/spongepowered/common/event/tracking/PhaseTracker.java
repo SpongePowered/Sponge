@@ -597,7 +597,7 @@ public final class PhaseTracker {
             // while a world is being changed unknowingly.
             printUnexpectedBlockChange();
         }
-        if (phaseState != BlockPhase.State.RESTORING_BLOCKS && phaseState.requiresBlockCapturing()) {
+        if (phaseState.requiresBlockCapturing()) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
