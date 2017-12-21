@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.advancement;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.util.ResourceLocation;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.asm.mixin.Final;
@@ -49,6 +50,8 @@ import javax.annotation.Nullable;
 @Mixin(AdvancementList.class)
 public class MixinAdvancementList implements IMixinAdvancementList {
 
+    @Shadow @Final private static Logger LOGGER;
+
     @Shadow @Final private Map<ResourceLocation, Advancement> advancements;
     @Shadow @Final private Set<Advancement> roots;
     @Shadow @Final private Set<Advancement> nonRoots;
@@ -61,10 +64,15 @@ public class MixinAdvancementList implements IMixinAdvancementList {
         SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
                 org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance()));
         AdvancementRegistryModule.INSIDE_REGISTER_EVENT = false;
+    }
+
+    @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
+    private void onLoadAdvancementForTrees(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = true;
         SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
                 org.spongepowered.api.advancement.AdvancementTree.class, AdvancementTreeRegistryModule.getInstance()));
         AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = false;
+        LOGGER.info("Loaded " + this.roots.size() + " advancement trees");
     }
 
     @Override

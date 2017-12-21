@@ -28,12 +28,16 @@ import net.minecraft.advancements.FrameType;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
 
+@Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
 @Mixin(FrameType.class)
 public abstract class MixinFrameType implements AdvancementType {
 
@@ -59,11 +63,10 @@ public abstract class MixinFrameType implements AdvancementType {
         return this.id;
     }
 
-    @Override
-    public String getName() {
+    @Intrinsic
+    public String type$getName() {
         if (this.spongeName == null) {
-            this.spongeName = "minecraft:" +
-                    Character.isUpperCase(this.name.charAt(0)) + this.name.substring(1);
+            this.spongeName = Character.isUpperCase(this.name.charAt(0)) + this.name.substring(1);
         }
         return this.spongeName;
     }

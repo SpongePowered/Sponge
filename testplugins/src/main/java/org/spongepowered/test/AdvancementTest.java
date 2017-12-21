@@ -24,12 +24,14 @@
  */
 package org.spongepowered.test;
 
+import com.flowpowered.math.vector.Vector2d;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
+import org.spongepowered.api.advancement.TreeLayoutElement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -38,6 +40,7 @@ import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
@@ -51,11 +54,15 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Plugin(id = "advancement_test", name = "Advancement Test")
 public class AdvancementTest {
 
     @Inject private Logger logger;
 
+    private AdvancementTree advancementTree;
     private Advancement rootAdvancement;
 
     private ScoreAdvancementCriterion breakDirtCriterion;
@@ -67,10 +74,11 @@ public class AdvancementTest {
     public void onRegisterAdvancementTrees(GameRegistryEvent.Register<AdvancementTree> event) {
         this.logger.info("Loading advancement trees...");
         // Create the advancement tree
-        event.register(AdvancementTree.builder()
+        this.advancementTree = AdvancementTree.builder()
                 .rootAdvancement(this.rootAdvancement)
                 .background("minecraft:textures/blocks/dirt.png")
-                .build("advancement_test", "dirt"));
+                .build("advancement_test", "dirt");
+        event.register(this.advancementTree);
     }
 
     @Listener
@@ -113,6 +121,40 @@ public class AdvancementTest {
                         .build())
                 .build("advancement_test", "dirt_cooker");
         event.register(this.cookDirtAdvancement);
+    }
+
+    @Listener
+    public void onGenerateTreeLayout(AdvancementTreeEvent.GenerateLayout event) {
+        if (event.getTree() != this.advancementTree) {
+            return;
+        }
+        this.logger.info("Updating advancement tree layout...");
+        // Make the tree start at y 0, for every level within the tree
+        // The min y position mapped by the used x positions
+        final Map<Double, Double> values = new HashMap<>();
+        for (TreeLayoutElement element : event.getLayout().getElements()) {
+            final Vector2d pos = element.getPosition();
+            if (!values.containsKey(pos.getX()) || pos.getY() < values.get(pos.getX())) {
+                values.put(pos.getX(), pos.getY());
+            }
+        }
+        for (TreeLayoutElement element : event.getLayout().getElements()) {
+            final Vector2d pos = element.getPosition();
+            element.setPosition(pos.getX(), pos.getY() - values.get(pos.getX()));
+        }
+        /*
+        // Rotate the advancement tree
+        // The lines are currently drawn wrongly, that might be something
+        // for later as it involves "tricking" the client
+        double maxY = 0;
+        for (TreeLayoutElement element : event.getLayout().getElements()) {
+            maxY = Math.max(maxY, element.getPosition().getY());
+        }
+        for (TreeLayoutElement element : event.getLayout().getElements()) {
+            final Vector2d pos = element.getPosition();
+            element.setPosition(maxY - pos.getY(), pos.getX());
+        }
+        */
     }
 
     @Listener
