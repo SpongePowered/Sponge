@@ -45,16 +45,7 @@ import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.EmptyInventory;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.property.GuiId;
-import org.spongepowered.api.item.inventory.property.GuiIdProperty;
-import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.item.inventory.slot.FuelSlot;
-import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
@@ -74,9 +65,7 @@ public class AdvancementTest {
 
     @Listener
     public void onRegisterAdvancementTrees(GameRegistryEvent.Register<AdvancementTree> event) {
-        if (event.getCatalogType() != AdvancementTree.class) { // TODO: Remove this once generics are implemented
-            return;
-        }
+        this.logger.info("Loading advancement trees...");
         // Create the advancement tree
         event.register(AdvancementTree.builder()
                 .rootAdvancement(this.rootAdvancement)
@@ -86,9 +75,6 @@ public class AdvancementTest {
 
     @Listener
     public void onRegisterAdvancements(GameRegistryEvent.Register<Advancement> event) {
-        if (event.getCatalogType() != Advancement.class) { // TODO: Remove this once generics are implemented
-            return;
-        }
         this.logger.info("Loading advancements...");
         // Create the root advancement
         this.rootAdvancement = Advancement.builder()

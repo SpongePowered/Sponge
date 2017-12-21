@@ -24,10 +24,14 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import org.spongepowered.api.advancement.criteria.trigger.TriggerType;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
+import org.spongepowered.api.advancement.criteria.trigger.TriggerTypes;
+import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-public class TriggerTypeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<TriggerType> {
+@RegisterCatalog(TriggerTypes.class)
+public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<TriggerType> {
 
     public static TriggerTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -40,6 +44,13 @@ public class TriggerTypeRegistryModule extends AbstractPrefixCheckCatalogRegistr
     @Override
     public void register(TriggerType triggerType) {
         super.register(triggerType);
+    }
+
+    @Override
+    public void registerDefaults() {
+        // Force the vanilla trigger types to load,
+        // this is required while testing
+        CriteriaTriggers.getAll();
     }
 
     private static final class Holder {

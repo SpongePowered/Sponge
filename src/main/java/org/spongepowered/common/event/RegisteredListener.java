@@ -30,7 +30,6 @@ import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
@@ -43,7 +42,7 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     private final PluginContainer plugin;
 
-    private final TypeToken<T> eventType;
+    private final EventType<T> eventType;
     private final Order order;
 
     private final EventListener<? super T> listener;
@@ -51,7 +50,7 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     private final boolean beforeModifications;
     private Timing listenerTimer;
 
-    RegisteredListener(PluginContainer plugin, TypeToken<T> eventType, Order order, EventListener<? super T> listener, boolean beforeModifications) {
+    RegisteredListener(PluginContainer plugin, EventType<T> eventType, Order order, EventListener<? super T> listener, boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventType = checkNotNull(eventType, "eventType");
         this.order = checkNotNull(order, "order");
@@ -63,7 +62,7 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
         return this.plugin;
     }
 
-    public TypeToken<T> getEventType() {
+    public EventType<T> getEventType() {
         return this.eventType;
     }
 

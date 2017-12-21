@@ -34,7 +34,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.google.common.reflect.TypeResolverHelper;
 import com.google.common.reflect.TypeToken;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -56,8 +55,6 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +75,8 @@ import javax.inject.Singleton;
 @Singleton
 public class SpongeEventManager implements EventManager {
 
+    private static final TypeVariable<?> GENERIC_EVENT_TYPE = GenericEvent.class.getTypeParameters()[0];
+
     private final Object lock = new Object();
     protected final Logger logger;
     private final PluginManager pluginManager;
@@ -94,7 +93,7 @@ public class SpongeEventManager implements EventManager {
      * <p>The cache is currently entirely invalidated if handlers are added or
      * removed.</p>
      */
-    private final LoadingCache<TypeToken<? extends Event>, RegisteredListener.Cache> handlersCache =
+    private final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
             Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
 
     @Inject
@@ -126,17 +125,21 @@ public class SpongeEventManager implements EventManager {
         }
     }
 
-    <T extends Event> RegisteredListener.Cache bakeHandlers(TypeToken<T> rootEvent) {
+    <T extends Event> RegisteredListener.Cache bakeHandlers(EventType<T> eventType) {
         final List<RegisteredListener<?>> handlers = new ArrayList<>();
-        final TypeToken<T>.TypeSet types = rootEvent.getTypes();
+        final Set<Class<? super T>> types = TypeToken.of(eventType.getType()).getTypes().rawTypes();
 
         synchronized (this.lock) {
-            for (TypeToken<? super T> type : types) {
-                if (Event.class.isAssignableFrom(type.getRawType())) {
-                    final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type.getRawType());
-                    if (GenericEvent.class.isAssignableFrom(type.getRawType())) {
+            for (Class<? super T> type : types) {
+                if (Event.class.isAssignableFrom(type)) {
+                    final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
+                    if (GenericEvent.class.isAssignableFrom(type)) {
+                        final TypeToken<?> genericType = eventType.getGenericType();
+                        checkNotNull(genericType);
                         for (RegisteredListener<?> listener : listeners) {
-                            if (type.isSubtypeOf(listener.getEventType())) {
+                            final TypeToken<?> genericType1 = listener.getEventType().getGenericType();
+                            checkNotNull(genericType1);
+                            if (genericType.isSubtypeOf(genericType1)) {
                                 handlers.add(listener);
                             }
                         }
@@ -190,7 +193,7 @@ public class SpongeEventManager implements EventManager {
 
         synchronized (this.lock) {
             for (RegisteredListener<?> handler : handlers) {
-                final Class<?> raw = handler.getEventType().getRawType();
+                final Class<?> raw = handler.getEventType().getType();
                 if (this.handlersByEvent.put(raw, handler)) {
                     changed = true;
                     this.checker.registerListenerFor(raw);
@@ -225,7 +228,7 @@ public class SpongeEventManager implements EventManager {
                 String error = getHandlerErrorOrNull(method);
                 if (error == null) {
                     @SuppressWarnings("unchecked")
-                    TypeToken eventType = TypeToken.of(method.getGenericParameterTypes()[0]);
+                    final TypeToken eventType = TypeToken.of(method.getGenericParameterTypes()[0]);
                     AnnotatedEventListener handler;
                     try {
                         handler = this.handlerFactory.create(listenerObject, method);
@@ -268,9 +271,15 @@ public class SpongeEventManager implements EventManager {
         return createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
     }
 
-    private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, TypeToken<T> eventClass, Order order,
+    @SuppressWarnings("unchecked")
+    private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, TypeToken<T> eventType, Order order,
             boolean beforeModifications, EventListener<? super T> handler) {
-        return new RegisteredListener<>(plugin, eventClass, order, handler, beforeModifications);
+        TypeToken<?> genericType = null;
+        if (GenericEvent.class.isAssignableFrom(eventType.getRawType())) {
+            genericType = eventType.resolveType(GENERIC_EVENT_TYPE);
+        }
+        return new RegisteredListener<>(plugin, new EventType<>((Class<T>) eventType.getRawType(), genericType),
+                order, handler, beforeModifications);
     }
 
     private PluginContainer getPlugin(Object plugin) {
@@ -327,7 +336,7 @@ public class SpongeEventManager implements EventManager {
                     itr.remove();
                     changed = true;
                     // TODO: This doesn't seem right, even as it was before
-                    this.checker.unregisterListenerFor(handler.getEventType().getRawType());
+                    this.checker.unregisterListenerFor(handler.getEventType().getType());
                     this.registeredListeners.remove(handler.getHandle());
                 }
             }
@@ -354,49 +363,13 @@ public class SpongeEventManager implements EventManager {
     protected RegisteredListener.Cache getHandlerCache(Event event) {
         checkNotNull(event, "event");
         final Class<? extends Event> eventClass = event.getClass();
-        final TypeToken<? extends Event> typeToken;
+        final EventType<? extends Event> eventType;
         if (event instanceof GenericEvent) {
-            final TypeVariable<?>[] typeParameters = eventClass.getTypeParameters();
-            // Somebody decided to remove the generic parameter from the event...
-            if (typeParameters.length == 0) {
-                typeToken = TypeToken.of(eventClass);
-            } else {
-                // Some TypeToken magic
-                typeToken = (TypeToken<? extends Event>) TypeToken.of(TypeResolverHelper.typeWithGenericArg(
-                        new ClassParameterizedType(eventClass, typeParameters),
-                        typeParameters[0], ((GenericEvent) event).getGenericType().getType()));
-            }
+            eventType = new EventType<>(eventClass, checkNotNull(((GenericEvent) event).getGenericType()));
         } else {
-            typeToken = TypeToken.of(event.getClass());
+            eventType = new EventType<>(eventClass, null);
         }
-        return this.handlersCache.get(typeToken);
-    }
-
-    private static class ClassParameterizedType implements ParameterizedType {
-
-        private final Class<?> raw;
-        private TypeVariable<?>[] typeParameters;
-
-        private ClassParameterizedType(Class<?> raw, TypeVariable<?>[] typeParameters) {
-            this.typeParameters = typeParameters;
-            this.raw = raw;
-        }
-
-        @Override
-        public Type[] getActualTypeArguments() {
-            return this.typeParameters;
-        }
-
-        @Override
-        public Type getRawType() {
-            return this.raw;
-        }
-
-        @Nullable
-        @Override
-        public Type getOwnerType() {
-            return null;
-        }
+        return this.handlersCache.get(eventType);
     }
 
     @SuppressWarnings("unchecked")

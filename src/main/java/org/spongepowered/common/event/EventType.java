@@ -22,49 +22,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.event;
 
-import net.minecraft.advancements.FrameType;
-import org.spongepowered.api.advancement.AdvancementType;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.event.Event;
+
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-@Mixin(FrameType.class)
-public abstract class MixinFrameType implements AdvancementType {
+public final class EventType<T extends Event> {
 
-    @Shadow @Final private String name;
+    private final Class<T> eventType;
+    @Nullable private final TypeToken<?> genericType;
 
-    @Nullable private String id;
-    @Nullable private String spongeName;
-    @Nullable private Text toastText;
+    private int hashCode;
 
-    @Override
-    public Text format(Text title) {
-        if (this.toastText == null) {
-            this.toastText = Text.of(new SpongeTranslation("advancements.toast." + this.name));
-        }
-        return Text.of(this.toastText, Text.NEW_LINE, title);
+    public EventType(Class<T> eventType, @Nullable TypeToken<?> genericType) {
+        this.genericType = genericType;
+        this.eventType = eventType;
+    }
+
+    public Class<T> getType() {
+        return this.eventType;
+    }
+
+    @Nullable
+    public TypeToken<?> getGenericType() {
+        return this.genericType;
     }
 
     @Override
-    public String getId() {
-        if (this.id == null) {
-            this.id = "minecraft:" + this.name;
+    public String toString() {
+        String value = this.eventType.getName();
+        if (this.genericType != null) {
+            value += "<" + this.genericType.toString() + ">";
         }
-        return this.id;
+        return value;
     }
 
     @Override
-    public String getName() {
-        if (this.spongeName == null) {
-            this.spongeName = "minecraft:" +
-                    Character.isUpperCase(this.name.charAt(0)) + this.name.substring(1);
+    public boolean equals(@Nullable Object o) {
+        if (!(o instanceof EventType)) {
+            return false;
         }
-        return this.spongeName;
+        final EventType that = (EventType) o;
+        return that.eventType.equals(this.eventType) &&
+                Objects.equals(that.genericType, this.genericType);
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.hashCode == 0) {
+            this.hashCode = Objects.hash(this.eventType, this.genericType);
+        }
+        return this.hashCode;
     }
 }
