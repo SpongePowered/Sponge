@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.registry;
 
+import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameRegistryEvent;
@@ -61,5 +62,10 @@ public class SpongeGameRegistryRegisterEvent<T extends CatalogType> implements G
     @Override
     public Cause getCause() {
         return this.cause;
+    }
+
+    @Override
+    public TypeToken<T> getGenericType() {
+        return TypeToken.of(this.catalogType);
     }
 }
