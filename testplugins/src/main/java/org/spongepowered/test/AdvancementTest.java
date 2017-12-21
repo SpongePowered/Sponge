@@ -53,9 +53,12 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.explosion.Explosion;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 @Plugin(id = "advancement_test", name = "Advancement Test")
 public class AdvancementTest {
@@ -69,6 +72,7 @@ public class AdvancementTest {
     private Advancement breakDirtAdvancement;
 
     private Advancement cookDirtAdvancement;
+    @Nullable private Advancement suicidalAdvancement;
 
     @Listener
     public void onRegisterAdvancementTrees(GameRegistryEvent.Register<AdvancementTree> event) {
@@ -116,11 +120,28 @@ public class AdvancementTest {
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.FURNACE)
                         .title(Text.of("Dirty cook"))
-                        .description(Text.of("Cooking dirt? What could possibly go wrong?"))
+                        .description(Text.of("Try to cook dirt"))
                         .type(AdvancementTypes.CHALLENGE)
                         .build())
                 .build("advancement_test", "dirt_cooker");
         event.register(this.cookDirtAdvancement);
+
+        this.suicidalAdvancement = null;
+        event.getRegistryModule().getById("minecraft:adventure_root").ifPresent(parent -> {
+            // Create the suicidal advancement
+            this.suicidalAdvancement = Advancement.builder()
+                    .parent(parent)
+                    .criterion(AdvancementCriterion.DUMMY)
+                    .displayInfo(DisplayInfo.builder()
+                            .icon(ItemTypes.TNT)
+                            .title(Text.of("Suicidal?"))
+                            .description(Text.of("Put TNT in a burning furnace"))
+                            .type(AdvancementTypes.CHALLENGE)
+                            .hidden(true)
+                            .build())
+                    .build("advancement_test", "suicidal");
+            event.register(this.suicidalAdvancement);
+        });
     }
 
     @Listener
@@ -187,10 +208,21 @@ public class AdvancementTest {
             return;
         }
         for (SlotTransaction transaction : event.getTransactions()) {
-            if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0 &&
-                    transaction.getFinal().getType() == ItemTypes.DIRT) {
-                player.getProgress(this.cookDirtAdvancement).grant();
-                break;
+            if (transaction.getSlot().getInventoryProperty(SlotIndex.class).get().getValue() == 0) {
+                if (transaction.getFinal().getType() == ItemTypes.DIRT) {
+                    player.getProgress(this.cookDirtAdvancement).grant();
+                } else if (this.suicidalAdvancement != null && (transaction.getFinal().getType() == ItemTypes.TNT ||
+                        transaction.getFinal().getType() == ItemTypes.TNT_MINECART)) {
+                    player.getProgress(this.suicidalAdvancement).grant();
+                    final Explosion explosion = Explosion.builder()
+                            .location(furnace.getLocation())
+                            .shouldBreakBlocks(true)
+                            .canCauseFire(true)
+                            .shouldDamageEntities(true)
+                            .radius(7)
+                            .build();
+                    explosion.getWorld().triggerExplosion(explosion);
+                }
             }
         }
     }
