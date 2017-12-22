@@ -29,9 +29,13 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,9 +50,13 @@ import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.format.SpongeTextColor;
+import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -64,9 +72,12 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Shadow @Final private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
+    @Shadow @Final private ITextComponent displayText;
 
     @Nullable private AdvancementCriterion criterion;
     @Nullable private AdvancementTree tree;
+    private List<Text> toastText;
+    private Text text;
     private String spongeId;
     private String name;
 
@@ -108,6 +119,19 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         } else {
             this.tree = ((org.spongepowered.api.advancement.Advancement) parentIn).getTree().orElse(null);
         }
+        this.text = SpongeTexts.toText(this.displayText);
+        final ImmutableList.Builder<Text> toastText = ImmutableList.builder();
+        if (this.display != null) {
+            final FrameType frameType = this.display.getFrame();
+            toastText.add(Text.builder(new SpongeTranslation("advancements.toast." + frameType.getName()))
+                    .format(((AdvancementType) (Object) frameType).getTextFormat())
+                    .build());
+            toastText.add(getDisplayInfo().get().getTitle());
+        } else {
+            toastText.add(Text.of("Unlocked advancement"));
+            toastText.add(Text.of(getId()));
+        }
+        this.toastText = toastText.build();
     }
 
     @Override
@@ -170,6 +194,11 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     @Override
+    public List<Text> toToastText() {
+        return this.toastText;
+    }
+
+    @Override
     public String getId() {
         return this.spongeId;
     }
@@ -177,5 +206,10 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public Text toText() {
+        return this.text;
     }
 }

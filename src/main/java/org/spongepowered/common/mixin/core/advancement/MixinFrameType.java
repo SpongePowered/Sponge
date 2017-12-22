@@ -25,35 +25,30 @@
 package org.spongepowered.common.mixin.core.advancement;
 
 import net.minecraft.advancements.FrameType;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.advancement.AdvancementType;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.text.format.SpongeTextColor;
+import org.spongepowered.common.text.format.SpongeTextStyle;
 
 import javax.annotation.Nullable;
 
 @Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
 @Mixin(FrameType.class)
-public abstract class MixinFrameType implements AdvancementType {
+public class MixinFrameType implements AdvancementType {
 
     @Shadow @Final private String name;
+    @Shadow @Final private TextFormatting format;
 
     @Nullable private String id;
     @Nullable private String spongeName;
-    @Nullable private Text toastText;
-
-    @Override
-    public Text format(Text title) {
-        if (this.toastText == null) {
-            this.toastText = Text.of(new SpongeTranslation("advancements.toast." + this.name));
-        }
-        return Text.of(this.toastText, Text.NEW_LINE, title);
-    }
+    @Nullable private TextFormat textFormat;
 
     @Override
     public String getId() {
@@ -66,8 +61,18 @@ public abstract class MixinFrameType implements AdvancementType {
     @Intrinsic
     public String type$getName() {
         if (this.spongeName == null) {
-            this.spongeName = Character.isUpperCase(this.name.charAt(0)) + this.name.substring(1);
+            this.spongeName = Character.toUpperCase(this.name.charAt(0)) + this.name.substring(1);
         }
         return this.spongeName;
+    }
+
+    @Override
+    public TextFormat getTextFormat() {
+        if (this.textFormat == null) {
+            this.textFormat = TextFormat.of(
+                    SpongeTextColor.of(this.format),
+                    SpongeTextStyle.of(this.format));
+        }
+        return this.textFormat;
     }
 }
