@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
@@ -49,13 +48,11 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
@@ -66,10 +63,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
-
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {

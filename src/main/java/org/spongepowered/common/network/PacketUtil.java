@@ -42,7 +42,6 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
@@ -73,7 +72,6 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
-import java.util.Optional;
 
 public class PacketUtil {
     @SuppressWarnings("unchecked")

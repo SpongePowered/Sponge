@@ -30,7 +30,6 @@ import net.minecraft.server.management.UserListIPBans;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.user.UserStorageService;

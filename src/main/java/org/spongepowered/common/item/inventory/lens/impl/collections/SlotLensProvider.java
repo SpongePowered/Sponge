@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 

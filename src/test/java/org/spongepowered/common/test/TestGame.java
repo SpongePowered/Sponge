@@ -30,7 +30,6 @@ import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeGame;
 
 import java.nio.file.Path;
-import java.util.NoSuchElementException;
 
 @Singleton
 public class TestGame extends SpongeGame {

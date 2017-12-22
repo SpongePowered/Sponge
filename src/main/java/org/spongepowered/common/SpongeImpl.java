@@ -39,7 +39,6 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.config.SpongeConfig;

@@ -25,7 +25,6 @@
 package org.spongepowered.common.event;
 
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleSlotRestore;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -39,7 +38,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
@@ -119,11 +117,8 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;

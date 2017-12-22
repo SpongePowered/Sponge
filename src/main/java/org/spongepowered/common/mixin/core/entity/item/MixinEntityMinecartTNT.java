@@ -32,7 +32,6 @@ import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;

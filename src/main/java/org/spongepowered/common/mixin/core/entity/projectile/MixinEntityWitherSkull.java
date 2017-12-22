@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityWitherSkull;

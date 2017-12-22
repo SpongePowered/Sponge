@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;

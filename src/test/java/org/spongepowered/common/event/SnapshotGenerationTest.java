@@ -26,7 +26,6 @@ package org.spongepowered.common.event;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import co.aikar.timings.Timings;
@@ -37,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
@@ -47,7 +45,6 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
@@ -65,7 +62,7 @@ public class SnapshotGenerationTest extends InjectedTest {
     private Object plugin;
 
     @Before
-    public void init() throws NoSuchFieldException, IllegalAccessException {
+    public void init() {
         PluginManager manager = Mockito.mock(PluginManager.class);
         this.eventManager = new SpongeEventManager(this.logger, manager);
 

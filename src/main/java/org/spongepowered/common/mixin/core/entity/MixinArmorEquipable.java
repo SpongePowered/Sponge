@@ -36,7 +36,6 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.entity.Equipable;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Implements;

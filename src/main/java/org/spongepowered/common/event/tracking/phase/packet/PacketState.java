@@ -85,6 +85,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return false;
     }
 
+    @Override
     public void addNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }

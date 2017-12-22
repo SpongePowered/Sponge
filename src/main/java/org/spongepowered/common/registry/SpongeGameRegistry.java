@@ -34,7 +34,6 @@ import com.google.inject.Singleton;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;

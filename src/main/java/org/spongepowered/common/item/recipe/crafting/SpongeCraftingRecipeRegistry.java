@@ -27,7 +27,6 @@ package org.spongepowered.common.item.recipe.crafting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;

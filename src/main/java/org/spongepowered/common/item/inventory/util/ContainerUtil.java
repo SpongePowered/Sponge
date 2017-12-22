@@ -308,8 +308,8 @@ public final class ContainerUtil {
         return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses);
     }
 
-    private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens, SlotCollection slots)
-    {
+    private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens,
+            SlotCollection slots) {
         if (lens instanceof LargeChestInventoryLens) {
             return new LargeChestInventoryLens(base, adapter, slots);
         }
@@ -321,21 +321,21 @@ public final class ContainerUtil {
         }
         if (lens instanceof CraftingInventoryLens) {
             return new CraftingInventoryLensImpl(0, base,
-                    ((GridInventoryLens<?,?>) lens).getWidth(),
-                    ((GridInventoryLens<?,?>) lens).getHeight(),
+                    ((GridInventoryLens<?, ?>) lens).getWidth(),
+                    ((GridInventoryLens<?, ?>) lens).getHeight(),
                     slots);
         }
         if (lens instanceof GridInventoryLens) {
             return new GridInventoryLensImpl(base,
-                    ((GridInventoryLens<?,?>) lens).getWidth(),
-                    ((GridInventoryLens<?,?>) lens).getHeight(),
-                    ((GridInventoryLens<?,?>) lens).getStride(),
+                    ((GridInventoryLens<?, ?>) lens).getWidth(),
+                    ((GridInventoryLens<?, ?>) lens).getHeight(),
+                    ((GridInventoryLens<?, ?>) lens).getStride(),
                     slots);
         }
         if (lens instanceof Inventory2DLens) {
             return new Inventory2DLensImpl(base,
-                    ((Inventory2DLens<?,?>) lens).getWidth(),
-                    ((Inventory2DLens<?,?>) lens).getHeight(),
+                    ((Inventory2DLens<?, ?>) lens).getWidth(),
+                    ((Inventory2DLens<?, ?>) lens).getHeight(),
                     slots);
         }
         return null;

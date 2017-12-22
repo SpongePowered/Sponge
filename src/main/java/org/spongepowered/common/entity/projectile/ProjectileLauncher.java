@@ -76,7 +76,6 @@ import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Map;

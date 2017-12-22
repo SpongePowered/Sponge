@@ -47,7 +47,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.AABB;

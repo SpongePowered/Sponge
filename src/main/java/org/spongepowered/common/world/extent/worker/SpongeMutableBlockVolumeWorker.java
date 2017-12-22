@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.extent.worker;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeFiller;

@@ -155,6 +155,7 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter<I
         this.getFabric().clear();
     }
 
+    @Override
     public Fabric<IInventory> getFabric() {
         if (this.fabric == null) {
             this.fabric = MinecraftFabric.of(this);

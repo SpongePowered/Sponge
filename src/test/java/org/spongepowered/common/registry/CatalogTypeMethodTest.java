@@ -109,9 +109,8 @@ public class CatalogTypeMethodTest {
                 // Unwrap exception to avoid useless stacktrace entries
                 if (e.getCause() != null) {
                     throw e.getCause();
-                } else {
-                    throw e;
                 }
+                throw e;
             }
         } catch (Throwable t) {
             if (ignoredFailures.contains(this.implementationClass + "#" + this.method.getName() + "()")) {

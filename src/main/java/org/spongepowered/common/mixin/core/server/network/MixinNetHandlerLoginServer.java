@@ -32,7 +32,6 @@ import net.minecraft.server.network.NetHandlerLoginServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;

@@ -30,7 +30,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;

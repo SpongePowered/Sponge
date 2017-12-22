@@ -30,7 +30,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.mixin.core.entity.MixinEntityTrackerEntry;
 import org.spongepowered.common.mixin.core.network.datasync.IMixinEntityDataManager;
 
 import java.io.IOException;

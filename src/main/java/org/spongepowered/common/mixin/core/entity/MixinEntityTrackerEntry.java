@@ -25,14 +25,12 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketEntityMetadata;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

@@ -65,7 +65,7 @@ public class TopologicalOrder<T> {
         order.push(root.getData());
     }
 
-    public static <T>List<T> createOrderedLoad(DirectedGraph<T> graph) {
+    public static <T> List<T> createOrderedLoad(DirectedGraph<T> graph) {
         final List<T> orderedList = new ArrayList<>();
         while (graph.getNodeCount() != 0) {
             DirectedGraph.DataNode<T> next = null;

@@ -41,7 +41,6 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.ModifierFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;

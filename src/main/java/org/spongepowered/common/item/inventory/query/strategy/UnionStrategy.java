@@ -26,11 +26,9 @@ package org.spongepowered.common.item.inventory.query.strategy;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.query.QueryStrategy;
 
 public class UnionStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Inventory> {
