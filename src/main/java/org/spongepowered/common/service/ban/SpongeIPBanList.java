@@ -91,8 +91,7 @@ public class SpongeIPBanList extends UserListIPBans {
         }
 
         try {
-            Optional<Ban.Ip> ban = getService().getBanFor(InetAddress.getByName(entry));
-            ban.ifPresent(ip -> getService().removeBan(ip));
+            getService().pardon(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }

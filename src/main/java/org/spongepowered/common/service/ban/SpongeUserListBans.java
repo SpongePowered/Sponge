@@ -82,8 +82,7 @@ public class SpongeUserListBans extends UserListBans {
 
     @Override
     public void removeEntry(com.mojang.authlib.GameProfile entry) {
-        Optional<Ban.Profile> ban = getService().getBanFor((GameProfile) entry);
-        ban.ifPresent(profile -> getService().removeBan(profile));
+        getService().pardon((GameProfile) entry);
     }
 
     @Override
