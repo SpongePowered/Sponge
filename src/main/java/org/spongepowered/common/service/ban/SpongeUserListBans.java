@@ -34,7 +34,6 @@ import org.spongepowered.api.util.ban.Ban;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
