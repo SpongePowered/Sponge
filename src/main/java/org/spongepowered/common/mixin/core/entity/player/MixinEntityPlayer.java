@@ -42,6 +42,7 @@ import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -81,6 +82,10 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -97,6 +102,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -792,5 +798,23 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
-
+    @Inject(method = "setItemStackToSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
+    private void onSetItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack, CallbackInfo ci)
+    {
+        if (((IMixinInventoryPlayer) this.inventory).capturesTransactions()) {
+            if (slotIn == EntityEquipmentSlot.MAINHAND) {
+                ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
+                Slot slot = ((PlayerInventory) this.inventory).getMain().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
+                ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
+            } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
+                ItemStack orig = this.inventory.offHandInventory.get(0);
+                Slot slot = ((PlayerInventory) this.inventory).getOffhand();
+                ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
+            } else if (slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR) {
+                ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
+                Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
+                ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
+            }
+        }
+    }
 }

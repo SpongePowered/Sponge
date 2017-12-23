@@ -67,4 +67,5 @@ public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter<IInvent
      */
     void setCapture(boolean enable);
 
+    boolean capturesTransactions();
 }
