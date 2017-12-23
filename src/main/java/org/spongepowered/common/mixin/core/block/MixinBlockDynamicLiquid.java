@@ -68,18 +68,17 @@ public abstract class MixinBlockDynamicLiquid {
     // Capture Lava falling on Water forming Stone
     @Inject(method = "updateTick", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
-    private void beforeSetBlockState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        BlockPos sourcePos = pos.up();
+    private void beforeSetBlockState(net.minecraft.world.World worldIn, BlockPos sourcePos, IBlockState state, Random rand, CallbackInfo ci) {
         Location<org.spongepowered.api.world.World> loc = new Location<>(((org.spongepowered.api.world.World) worldIn), sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
         LocatableBlock source = LocatableBlock.builder().location(loc).build();
         IBlockState newState = Blocks.STONE.getDefaultState();
-        ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, pos, newState, source);
+        ChangeBlockEvent.Modify event = SpongeCommonEventFactory.callChangeBlockEventModifyLiquidMix(worldIn, sourcePos, newState, source);
         Transaction<BlockSnapshot> transaction = event.getTransactions().get(0);
         if (event.isCancelled() || !transaction.isValid()) {
             ci.cancel();
             return;
         }
-        if (!worldIn.setBlockState(pos, BlockUtil.toNative(transaction.getFinal().getState()))) {
+        if (!worldIn.setBlockState(sourcePos.down(), BlockUtil.toNative(transaction.getFinal().getState()))) {
             ci.cancel();
         }
     }
