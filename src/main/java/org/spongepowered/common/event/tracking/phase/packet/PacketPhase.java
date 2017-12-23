@@ -101,7 +101,6 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
         public static final IPhaseState<BasicPacketContext> START_FALL_FLYING = new BasicPacketState();
-        public static final IPhaseState<BasicPacketContext> SWAP_HAND_ITEMS = new BasicPacketState();
     }
 
     public static final class Inventory {
@@ -130,6 +129,8 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
         public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
         public static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
+        public static final BasicInventoryPacketState SWAP_HAND_ITEMS = new SwapHandItemsState();
+
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
                 .add(INVENTORY)
@@ -367,7 +368,7 @@ public final class PacketPhase extends TrackingPhase {
             .put(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, General.INTERACTION)
             .put(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, General.INTERACTION)
             .put(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, General.INTERACTION)
-            .put(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, General.SWAP_HAND_ITEMS)
+            .put(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, Inventory.SWAP_HAND_ITEMS)
             .build();
 
 }

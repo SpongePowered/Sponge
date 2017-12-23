@@ -267,6 +267,11 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         this.doCapture = doCapture;
     }
 
+    @Override
+    public boolean capturesTransactions() {
+        return this.doCapture;
+    }
+
     @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
     public void onAdd(int index, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         if (this.doCapture) {
