@@ -94,12 +94,20 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
         return this;
     }
 
-    SpongeDataRegistrationBuilder<M, I> implementationClass(Class<? extends M> implementation) {
+    @Override
+    public SpongeDataRegistrationBuilder<M, I> dataImplementation(Class<? extends M> implementation) {
+        checkState(this.manipulatorClass != null, "DataManipulator class must be set prior to setting the immutable variant!");
+        checkArgument(this.manipulatorClass.isAssignableFrom(implementation),
+                "Manipulator implementation class must be a subtype of the manipulator interface!");
         this.implementationData = implementation;
         return this;
     }
 
-    SpongeDataRegistrationBuilder<M, I> immutableImplementation(Class<? extends I> immutable) {
+    @Override
+    public SpongeDataRegistrationBuilder<M, I> immutableImplementation(Class<? extends I> immutable) {
+        checkState(this.immutableClass != null, "ImmutableDataManipulator class must be set prior to setting the immutable variant!");
+        checkArgument(this.immutableClass.isAssignableFrom(immutable),
+                "Immutable manipulator implementation class must be a subtype of the immutable manipulator interface!");
         this.immutableImplementation = checkNotNull(immutable);
         return this;
     }

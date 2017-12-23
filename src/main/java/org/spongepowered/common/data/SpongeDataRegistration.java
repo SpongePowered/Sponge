@@ -39,7 +39,9 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
 
 
     private final Class<M> manipulatorClass;
+    private final Class<? extends M> implementationClass;
     private final Class<I> immutableClass;
+    private final Class<? extends I> immutableImplementationClass;
     private final DataManipulatorBuilder<M, I> manipulatorBuilder;
     private final PluginContainer container;
     private final String id;
@@ -48,6 +50,8 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     SpongeDataRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
         this.manipulatorClass = checkNotNull(builder.manipulatorClass, "DataManipulator class is null!");
         this.immutableClass = checkNotNull(builder.immutableClass, "ImmutableDataManipulator class is null!");
+        this.implementationClass = builder.implementationData == null ? this.manipulatorClass : builder.implementationData;
+        this.immutableImplementationClass = builder.immutableImplementation == null ? this.immutableClass : builder.immutableImplementation;
         this.manipulatorBuilder = checkNotNull(builder.manipulatorBuilder, "DataManipulatorBuilder is null!");
         this.container = checkNotNull(builder.container, "PluginContainer is null!");
         this.id = this.container.getId() + ":" + checkNotNull(builder.id, "Data ID is null!");
@@ -59,9 +63,17 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
         return this.manipulatorClass;
     }
 
+    public Class<? extends M> getImplementationClass() {
+        return this.implementationClass;
+    }
+
     @Override
     public Class<I> getImmutableManipulatorClass() {
         return this.immutableClass;
+    }
+
+    public Class<? extends I> getImmutableImplementationClass() {
+        return this.immutableImplementationClass;
     }
 
     @Override
