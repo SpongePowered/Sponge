@@ -25,135 +25,148 @@
 package org.spongepowered.common.util.graph;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A directed graph type for performing graph operations.
+ */
 public class DirectedGraph<D> {
 
-    protected final List<DataNode<D>> nodes = Lists.newArrayList();
+    private final Map<D, DataNode<D>> nodes = new HashMap<>();
 
     public DirectedGraph() {
-
     }
 
+    /**
+     * Gets the count of nodes in the graph.
+     */
     public int getNodeCount() {
         return this.nodes.size();
     }
 
+    /**
+     * Gets the count of edges in the graph.
+     */
     public int getEdgeCount() {
         int count = 0;
-        for (DataNode<D> n : this.nodes) {
+        for (DataNode<D> n : this.nodes.values()) {
             count += n.getEdgeCount();
         }
         return count;
     }
 
+    /**
+     * Gets if the graph contains a node with the given data.
+     */
     public boolean contains(D data) {
-        for (DataNode<D> node : this.nodes) {
-            if (node.data.equals(data)) {
-                return true;
-            }
-        }
-        return false;
+        return this.nodes.containsKey(data);
     }
 
-    public DataNode<D> getNode(D data) {
-        for (DataNode<D> node : this.nodes) {
-            if (node.data.equals(data)) {
-                return node;
-            }
-        }
-        return null;
+    /**
+     * Gets the node corresponding to the given data.
+     */
+    public DataNode<D> get(D data) {
+        return this.nodes.get(data);
     }
 
+    /**
+     * Adds a directed edge between the two given nodes. If either the start or
+     * the end data does not have a corresponding node in the graph then a new
+     * node is added.
+     */
     public void addEdge(D from, D to) {
-        add(from);
-        add(to);
-        DataNode<D> fromNode = getNode(from);
-        DataNode<D> toNode = getNode(to);
-        addEdge(fromNode, toNode);
-    }
-
-    public void addEdge(DataNode<D> from, DataNode<D> to) {
-        if (!this.nodes.contains(from)) {
-            this.nodes.add(from);
-        }
-        if (!this.nodes.contains(to)) {
-            this.nodes.add(to);
-        }
-        if (!from.isAdjacent(to)) {
-            from.addEdge(to);
+        DataNode<D> fromNode = add(from);
+        DataNode<D> toNode = add(to);
+        if (!fromNode.isAdjacent(toNode)) {
+            fromNode.addEdge(toNode);
         }
     }
 
-    public Iterable<DataNode<D>> getNodes() {
-        return this.nodes;
+    /**
+     * Gets all nodes in the graph.
+     */
+    public Collection<DataNode<D>> getNodes() {
+        return this.nodes.values();
     }
 
+    /**
+     * Returns a directed graph which represents the reverse of this graph. The
+     * reverse of a directed graph is a graph with the same nodes but the
+     * direction of each edge is reversed.
+     */
     public DirectedGraph<D> reverse() {
         DirectedGraph<D> rev = new DirectedGraph<>();
-        Map<DataNode<D>, DataNode<D>> siblings = Maps.newHashMap();
-        for (DataNode<D> n : this.nodes) {
-            DataNode<D> b = n.clone();
+        Map<DataNode<D>, DataNode<D>> siblings = new HashMap<>();
+        for (DataNode<D> n : this.nodes.values()) {
+            DataNode<D> b = rev.add(n.getData());
             siblings.put(n, b);
         }
-        for (DataNode<D> n : this.nodes) {
+        for (DataNode<D> n : this.nodes.values()) {
+            DataNode<D> n_sibling = siblings.get(n);
             for (DataNode<D> b : n.getAdjacent()) {
-                rev.addEdge(siblings.get(b), siblings.get(n));
+                siblings.get(b).addEdge(n_sibling);
             }
         }
         return rev;
     }
 
+    /**
+     * Adds the given node to the graph.
+     */
     public DataNode<D> add(D d) {
-        if (!contains(d)) {
-            final DataNode<D> node = new DataNode<>(d);
-            this.nodes.add(node);
+        DataNode<D> node = this.nodes.get(d);
+        if (node == null) {
+            node = new DataNode<>(d);
+            this.nodes.put(d, node);
         }
-        return getNode(d);
+        return node;
     }
 
-    public void add(DataNode<D> n) {
-        if (!contains(n.data)) {
-            this.nodes.add(n);
+    /**
+     * Deletes the given node from the graph, and all edges that originated from
+     * or connected to the node.
+     */
+    public boolean remove(D n) {
+        DataNode<D> node = this.nodes.get(n);
+        if (node == null) {
+            return false;
         }
-    }
-
-    public void delete(D n) {
-        DataNode<D> node = null;
-        for (DataNode<D> node1 : this.nodes) {
-            if (node1.data.equals(n)) {
-                node = node1;
-                break;
-            }
-        }
-        if (node != null) {
-            delete(node);
-        }
-    }
-
-    public void delete(DataNode<D> n) {
-        for (DataNode<D> b : this.nodes) {
-            b.deleteEdge(n);
+        for (DataNode<D> b : this.nodes.values()) {
+            b.removeEdge(node);
         }
         this.nodes.remove(n);
+        return true;
+    }
+
+    /**
+     * Clears all nodes and edges from this graph.
+     */
+    public void clear() {
+        this.nodes.clear();
     }
 
     @Override
     public String toString() {
-        String s = getNodeCount() + "\n" + getEdgeCount() + "\n";
-        for (DataNode<D> n : this.nodes) {
-            s += ((DataNode<?>) n).getData().toString() + " ";
+        StringBuilder str = new StringBuilder();
+        str.append("Node count: ").append(getNodeCount());
+        str.append(" Edge count: ").append(getEdgeCount()).append("\n");
+        for (DataNode<D> n : this.nodes.values()) {
+            str.append(n.getData().toString()).append(" Edges: (");
             for (DataNode<D> a : n.getAdjacent()) {
-                s += this.nodes.indexOf(a) + " ";
+                str.append(a.getData().toString()).append(" ");
             }
-            s += "\n";
+            str.append(")\n");
         }
-        return s;
+        return str.toString();
     }
 
+    /**
+     * The representation of a node in a graph.
+     */
     public static class DataNode<D> {
 
         private final List<DataNode<D>> adj = Lists.newArrayList();
@@ -163,33 +176,46 @@ public class DirectedGraph<D> {
             this.data = obj;
         }
 
+        /**
+         * Gets the data that this node represents.
+         */
         public D getData() {
             return this.data;
         }
 
+        /**
+         * Adds an edge from this node to the given node.
+         */
         public void addEdge(DataNode<D> other) {
             this.adj.add(other);
         }
 
-        public void deleteEdge(DataNode<D> other) {
-            this.adj.remove(other);
+        /**
+         * Deletes the node from this node to the given node if it exists.
+         */
+        public boolean removeEdge(DataNode<D> other) {
+            return this.adj.remove(other);
         }
 
+        /**
+         * Returns if this node has an edge to the given node.
+         */
         public boolean isAdjacent(DataNode<D> other) {
             return this.adj.contains(other);
         }
 
+        /**
+         * Gets the count of edges originating from this node.
+         */
         public int getEdgeCount() {
             return this.adj.size();
         }
 
-        public Iterable<DataNode<D>> getAdjacent() {
+        /**
+         * Gets all nodes for which there is an edge from this node.
+         */
+        public Collection<DataNode<D>> getAdjacent() {
             return this.adj;
-        }
-
-        @Override
-        public DataNode<D> clone() {
-            return new DataNode<>(this.data);
         }
 
         @Override
@@ -199,10 +225,10 @@ public class DirectedGraph<D> {
 
         @Override
         public boolean equals(Object o) {
-            if(o == this) {
+            if (o == this) {
                 return true;
             }
-            if(!(o instanceof DataNode)) {
+            if (!(o instanceof DataNode)) {
                 return false;
             }
             DataNode<?> d = (DataNode<?>) o;

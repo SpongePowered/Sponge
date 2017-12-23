@@ -98,8 +98,10 @@ import org.spongepowered.common.text.selector.SpongeSelectorFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.LocaleCache;
+import org.spongepowered.common.util.graph.CyclicGraphException;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
+import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
 
 import java.awt.image.BufferedImage;
@@ -167,7 +169,22 @@ public class SpongeGameRegistry implements GameRegistry {
             addToGraph(module, graph);
         }
 
-        this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+        try {
+            this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+        } catch (CyclicGraphException e) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("Registry module dependencies are cyclical!\n");
+            msg.append("Dependency loops are:\n");
+            for (DataNode<?>[] cycle : e.getCycles()) {
+                msg.append("[");
+                for (DataNode<?> node : cycle) {
+                    msg.append(node.getData().toString()).append(" ");
+                }
+                msg.append("]\n");
+            }
+            SpongeImpl.getLogger().fatal(msg.toString());
+            throw new RuntimeException("Registry modules dependencies error.");
+        }
 
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
@@ -244,7 +261,22 @@ public class SpongeGameRegistry implements GameRegistry {
             addToGraph(aModule, graph);
         }
         this.orderedModules.clear();
-        this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+        try {
+            this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
+        } catch (CyclicGraphException e) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("Registry module dependencies are cyclical!\n");
+            msg.append("Dependency loops are:\n");
+            for (DataNode<?>[] cycle : e.getCycles()) {
+                msg.append("[");
+                for (DataNode<?> node : cycle) {
+                    msg.append(node.getData().toString()).append(" ");
+                }
+                msg.append("]\n");
+            }
+            SpongeImpl.getLogger().fatal(msg.toString());
+            throw new RuntimeException("Registry modules dependencies error.");
+        }
     }
 
     @Override
