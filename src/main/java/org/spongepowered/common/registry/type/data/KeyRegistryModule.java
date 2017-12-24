@@ -565,6 +565,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("is_sleeping", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsSleeping"), "sponge:is_sleeping", "Is Sleeping"));
 
+        this.fieldMap.put("is_johnny", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsJohnny"), "sponge:is_johnny", "Is Johnny"));
+
+        // Deprecated
         this.fieldMap.put("johnny_vindicator", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("JohnnyVindicator"), "sponge:johnny_vindicator", "Johnny Vindicator"));
 
         this.fieldMap.put("last_attacker", makeSingleKey(TypeTokens.LAST_ATTACKER_TOKEN, TypeTokens.LAST_ATTACKER_VALUE_TOKEN, of("LastAttacker"), "sponge:last_attacker", "Last Attacking Entity"));

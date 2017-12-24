@@ -22,44 +22,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
+package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.monster.EntityVindicator;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableJohnnyData;
+import org.spongepowered.api.data.manipulator.mutable.entity.JohnnyData;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.monster.Vindicator;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.monster.IMixinVindicator;
 
-import java.util.List;
+import java.util.Optional;
 
-@Mixin(EntityVindicator.class)
-public abstract class MixinEntityVindicator extends MixinEntityMob implements IMixinVindicator, Vindicator {
+public class JohnnyDataProcessor extends AbstractEntitySingleDataProcessor<EntityVindicator, Boolean, Value<Boolean>, JohnnyData, ImmutableJohnnyData> {
 
-    @Shadow private boolean johnny;
-
-    @Override
-    public Value<Boolean> johnny() {
-        return new SpongeValue<>(Keys.IS_JOHNNY, false, this.johnny);
+    public JohnnyDataProcessor() {
+        super(EntityVindicator.class, Keys.IS_JOHNNY);
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeJohnnyData(this.johnny));
+    protected boolean set(EntityVindicator dataHolder, Boolean value) {
+        ((IMixinVindicator) dataHolder).setJohnny(value);
+        return true;
     }
 
     @Override
-    public boolean isJohnny() {
-        return this.johnny;
+    protected Optional<Boolean> getVal(EntityVindicator dataHolder) {
+        return Optional.of(((IMixinVindicator) dataHolder).isJohnny());
     }
 
     @Override
-    public void setJohnny(boolean value) {
-        this.johnny = value;
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(this.key, false, value);
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, false, actualValue);
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected JohnnyData createManipulator() {
+        return new SpongeJohnnyData();
     }
 }
