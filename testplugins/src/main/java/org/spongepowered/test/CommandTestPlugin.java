@@ -26,12 +26,23 @@ package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.ArgumentParseException;
+import org.spongepowered.api.command.args.CommandArgs;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Plugin(id = "command-test", name = "Command Test", description = "Tests command related functions")
 public class CommandTestPlugin {
@@ -72,5 +83,50 @@ public class CommandTestPlugin {
                             return CommandResult.success();
                         }).build(),
                 "commandtestwithoutfallback");
+
+            // With thanks to felixoi, see https://gist.github.com/felixoi/65ba84c2d85d4ed5c28330f3af15bdfa
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                    .executor((src, args) -> {
+                        src.sendMessage(Text.of("Command Executed"));
+
+                        return CommandResult.success();
+                    })
+                    .child(CommandSpec.builder()
+                            .executor(((src, args) -> {
+                                src.sendMessage(Text.of("Command Child Executed"));
+
+                                return CommandResult.success();
+                            }))
+                            .arguments(new TestCommandElement(Text.of("test")))
+                            .build(), "test")
+                    .childArgumentParseExceptionFallback(false)
+                    .build(), "commandelementtest");
     }
+
+    @NonnullByDefault
+    public static class TestCommandElement extends CommandElement {
+
+        TestCommandElement(@Nullable Text key) {
+            super(key);
+        }
+
+        @Nullable
+        @Override
+        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+            String test = args.next();
+
+            if (test.equalsIgnoreCase("test")) {
+                return test;
+            } else {
+                throw args.createError(Text.of("Custom Command Element Exception"));
+            }
+        }
+
+        @Override
+        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+            return Collections.emptyList();
+        }
+
+    }
+
 }
