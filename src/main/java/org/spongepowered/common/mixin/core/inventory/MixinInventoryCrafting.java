@@ -41,6 +41,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
@@ -69,7 +70,7 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
     @Override
     public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         if (this.stackList.size() == 0) {
-            return null; // No Lens when inventory has no slots
+            return new DefaultEmptyLens<>(adapter);
         }
         return new CraftingGridInventoryLensImpl(0, this.getWidth(), this.getHeight(), this.getWidth(), this.slots);
     }
