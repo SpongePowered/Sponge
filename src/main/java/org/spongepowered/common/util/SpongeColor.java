@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
@@ -125,22 +122,6 @@ public final class SpongeColor implements Color {
             this.green = green & 0xFF;
             this.blue = blue & 0xFF;
             return this;
-        }
-
-        @Override
-        public Builder mix(Color... colors) {
-            Validate.noNullElements(colors, "No null colors allowed!");
-            checkArgument(colors.length > 0, "Cannot have an empty color array!");
-            if (colors.length == 1) {
-                return from(colors[0]);
-            }
-            reset();
-            for (Color color : colors) {
-                red += color.getRed();
-                green += color.getGreen();
-                blue += color.getBlue();
-            }
-            return rgb(Math.round((float) red / colors.length), Math.round((float) green / colors.length), Math.round((float) blue / colors.length));
         }
 
         @Override
