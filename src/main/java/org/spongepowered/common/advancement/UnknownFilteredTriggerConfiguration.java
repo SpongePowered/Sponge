@@ -24,43 +24,12 @@
  */
 package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+public final class UnknownFilteredTriggerConfiguration implements FilteredTriggerConfiguration {
 
-public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
+    public static final UnknownFilteredTriggerConfiguration INSTANCE = new UnknownFilteredTriggerConfiguration();
 
-    public static boolean BYPASS_EVENT = false;
-    static final String SUFFIX_BASE = "&score_goal_id=";
-
-    private final String name;
-    public final List<AdvancementCriterion> internalCriteria;
-
-    SpongeScoreCriterion(String name, List<AdvancementCriterion> internalCriteria) {
-        this.internalCriteria = internalCriteria;
-        this.name = name;
-        for (AdvancementCriterion criterion : internalCriteria) {
-            ((IMixinCriterion) criterion).setScoreCriterion(this);
-        }
-    }
-
-    @Override
-    public int getGoal() {
-        return this.internalCriteria.size();
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Collection<FilteredTrigger<?>> getTriggers() {
-        return Collections.emptySet();
+    private UnknownFilteredTriggerConfiguration() {
     }
 }

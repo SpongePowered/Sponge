@@ -104,6 +104,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ICr
         checkState(score >= 0 && score <= getGoal(), "Score cannot be negative or greater than the goal.");
         final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
         final Player player = ((IMixinPlayerAdvancements) ((IMixinAdvancementProgress) this.progress).getPlayerAdvancements()).getPlayer();
+        /*
         final CriterionEvent.ScoreChange event = SpongeEventFactory.createCriterionEventScoreChange(
                 cause, this.progress.getAdvancement(), getCriterion(), player, getScore(), score);
         if (SpongeImpl.postEvent(event)) {
@@ -125,6 +126,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ICr
                 return get();
             }
         }
+        */
         return setSilently(score);
     }
 

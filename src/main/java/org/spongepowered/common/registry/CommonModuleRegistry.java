@@ -31,7 +31,8 @@ import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.trigger.TriggerType;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -148,6 +149,8 @@ import org.spongepowered.common.advancement.SpongeAdvancementTreeBuilder;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
 import org.spongepowered.common.advancement.SpongeScoreCriterionBuilder;
+import org.spongepowered.common.advancement.SpongeFilteredTriggerBuilder;
+import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
@@ -363,6 +366,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
             .registerBuilderSupplier(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
             .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
+            .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
+            .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
         ;
     }
 
@@ -487,7 +492,7 @@ public final class CommonModuleRegistry {
             .registerModule(Advancement.class, AdvancementRegistryModule.getInstance())
             .registerModule(AdvancementTree.class, AdvancementTreeRegistryModule.getInstance())
             .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
-            .registerModule(TriggerType.class, TriggerTypeRegistryModule.getInstance())
+            .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
             .registerModule(new CriterionRegistryModule())
 
             // Miscellaneous Registries

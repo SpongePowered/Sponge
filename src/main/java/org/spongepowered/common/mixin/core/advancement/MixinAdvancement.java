@@ -50,8 +50,6 @@ import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.text.format.SpongeTextColor;
-import org.spongepowered.common.text.format.SpongeTextStyle;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;

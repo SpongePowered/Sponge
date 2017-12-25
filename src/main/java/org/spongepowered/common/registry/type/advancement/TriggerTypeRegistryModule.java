@@ -25,13 +25,16 @@
 package org.spongepowered.common.registry.type.advancement;
 
 import net.minecraft.advancements.CriteriaTriggers;
-import org.spongepowered.api.advancement.criteria.trigger.TriggerType;
-import org.spongepowered.api.advancement.criteria.trigger.TriggerTypes;
+import net.minecraft.advancements.ICriterionTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.api.advancement.criteria.trigger.Triggers;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-@RegisterCatalog(TriggerTypes.class)
-public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<TriggerType> {
+@RegisterCatalog(Triggers.class)
+public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Trigger>
+        implements AdditionalCatalogRegistryModule<Trigger> {
 
     public static TriggerTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -42,14 +45,20 @@ public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTyp
     }
 
     @Override
-    public void register(TriggerType triggerType) {
+    public void register(Trigger triggerType) {
         super.register(triggerType);
     }
 
     @Override
+    public void registerAdditionalCatalog(Trigger triggerType) {
+        // Register on CriterionTriggers, that register method will
+        // delegate to the register method within this module
+        CriteriaTriggers.register((ICriterionTrigger) triggerType);
+    }
+
+    @Override
     public void registerDefaults() {
-        // Force the vanilla trigger types to load,
-        // this is required while testing
+        // Force the vanilla trigger types to load
         CriteriaTriggers.getAll();
     }
 

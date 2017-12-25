@@ -27,7 +27,7 @@ package org.spongepowered.common.advancement;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -100,7 +100,7 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
+    public Set<FilteredTrigger<?>> getTriggers() {
         return ImmutableSet.of();
     }
 }

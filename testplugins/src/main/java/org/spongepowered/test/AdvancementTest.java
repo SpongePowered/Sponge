@@ -81,13 +81,14 @@ public class AdvancementTest {
         this.advancementTree = AdvancementTree.builder()
                 .rootAdvancement(this.rootAdvancement)
                 .background("minecraft:textures/blocks/dirt.png")
-                .build("advancement_test", "dirt");
+                .build("dirt");
         event.register(this.advancementTree);
     }
 
     @Listener
     public void onRegisterAdvancements(GameRegistryEvent.Register<Advancement> event) {
         this.logger.info("Loading advancements...");
+        System.out.println("DEBUG: " + Thread.currentThread().getName());
         // Create the root advancement
         this.rootAdvancement = Advancement.builder()
                 .displayInfo(DisplayInfo.builder()
@@ -95,7 +96,7 @@ public class AdvancementTest {
                         .title(Text.of("Dirt? Dirt!"))
                         .build())
                 .criterion(AdvancementCriterion.DUMMY)
-                .build("advancement_test", "dirt");
+                .build("dirt");
         event.register(this.rootAdvancement);
 
         // Create the break dirt advancement and criterion
@@ -110,7 +111,7 @@ public class AdvancementTest {
                         .description(Text.of("Start digging."))
                         .build())
                 .criterion(this.breakDirtCriterion)
-                .build("advancement_test", "dirt_digger");
+                .build("dirt_digger");
         event.register(this.breakDirtAdvancement);
 
         // Create the cook dirt advancement
@@ -123,7 +124,7 @@ public class AdvancementTest {
                         .description(Text.of("Try to cook dirt"))
                         .type(AdvancementTypes.CHALLENGE)
                         .build())
-                .build("advancement_test", "dirt_cooker");
+                .build("dirt_cooker");
         event.register(this.cookDirtAdvancement);
 
         this.suicidalAdvancement = null;
@@ -139,7 +140,7 @@ public class AdvancementTest {
                             .type(AdvancementTypes.CHALLENGE)
                             .hidden(true)
                             .build())
-                    .build("advancement_test", "suicidal");
+                    .build("suicidal");
             event.register(this.suicidalAdvancement);
         });
     }
@@ -152,6 +153,14 @@ public class AdvancementTest {
         this.logger.info("Updating advancement tree layout...");
         // Make the tree start at y 0, for every level within the tree
         // The min y position mapped by the used x positions
+        // For example:
+        //    |- y
+        // x -|- z
+        //    |- w
+        // to
+        // x -|- y
+        //    |- z
+        //    |- w
         final Map<Double, Double> values = new HashMap<>();
         for (TreeLayoutElement element : event.getLayout().getElements()) {
             final Vector2d pos = element.getPosition();

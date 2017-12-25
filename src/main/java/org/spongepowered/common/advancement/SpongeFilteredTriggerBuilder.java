@@ -22,35 +22,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
 
-@Mixin(ICriterionInstance.class)
-public interface MixinICriterionInstance extends FilteredTrigger {
+@SuppressWarnings("unchecked")
+public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration> implements FilteredTrigger.Builder<C> {
 
-    @Shadow ResourceLocation getId();
+    private C config;
+    private Trigger<C> type;
 
     @Override
-    default Trigger getType() {
-        final ICriterionTrigger triggerType = CriteriaTriggers.get(getId());
-        checkNotNull(triggerType, "triggerType");
-        return (Trigger) triggerType;
+    public <T extends FilteredTriggerConfiguration> FilteredTrigger.Builder<T> type(Trigger<T> type) {
+        checkNotNull(type, "type");
+        this.type = (Trigger<C>) type;
+        return (FilteredTrigger.Builder<T>) this;
     }
 
     @Override
-    default FilteredTriggerConfiguration getConfiguration() {
-        return UnknownFilteredTriggerConfiguration.INSTANCE;
+    public FilteredTrigger.Builder<C> config(C config) {
+        checkNotNull(config, "config");
+        this.config = config;
+        return this;
+    }
+
+    @Override
+    public FilteredTrigger<C> build() {
+        checkState(this.type != null, "The type must be set");
+        checkState(this.config != null, "The config must be set");
+        return new SpongeFilteredTrigger((SpongeTrigger) this.type, this.config);
+    }
+
+    @Override
+    public FilteredTrigger.Builder<C> from(FilteredTrigger<C> value) {
+        this.config = value.getConfiguration();
+        this.type = value.getType();
+        return this;
+    }
+
+    @Override
+    public FilteredTrigger.Builder<C> reset() {
+        this.config = null;
+        this.type = null;
+        return this;
     }
 }

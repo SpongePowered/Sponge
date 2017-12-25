@@ -26,27 +26,46 @@ package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Iterables;
 import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
 public class SpongeCriterionBuilder implements AdvancementCriterion.Builder {
+
+    @Nullable private FilteredTrigger<?> trigger;
+
+    @Override
+    public AdvancementCriterion.Builder trigger(FilteredTrigger<?> trigger) {
+        checkNotNull(trigger, "trigger");
+        this.trigger = trigger;
+        return this;
+    }
 
     @Override
     public AdvancementCriterion build(String name) {
         checkNotNull(name, "name");
-        final Criterion criterion = new Criterion();
+        final Criterion criterion = new Criterion((ICriterionInstance) this.trigger);
         ((IMixinCriterion) criterion).setName(name);
         return (AdvancementCriterion) criterion;
     }
 
     @Override
     public AdvancementCriterion.Builder from(AdvancementCriterion value) {
+        this.trigger = Iterables.getFirst(value.getTriggers(), null);
         return this;
     }
 
     @Override
     public AdvancementCriterion.Builder reset() {
+        this.trigger = null;
         return this;
     }
 }

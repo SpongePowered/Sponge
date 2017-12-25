@@ -24,43 +24,34 @@
  */
 package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
 
-public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
+    private final SpongeTrigger triggerType;
+    private final FilteredTriggerConfiguration configuration;
 
-    public static boolean BYPASS_EVENT = false;
-    static final String SUFFIX_BASE = "&score_goal_id=";
-
-    private final String name;
-    public final List<AdvancementCriterion> internalCriteria;
-
-    SpongeScoreCriterion(String name, List<AdvancementCriterion> internalCriteria) {
-        this.internalCriteria = internalCriteria;
-        this.name = name;
-        for (AdvancementCriterion criterion : internalCriteria) {
-            ((IMixinCriterion) criterion).setScoreCriterion(this);
-        }
+    SpongeFilteredTrigger(SpongeTrigger triggerType, FilteredTriggerConfiguration configuration) {
+        this.triggerType = triggerType;
+        this.configuration = configuration;
     }
 
     @Override
-    public int getGoal() {
-        return this.internalCriteria.size();
+    public ResourceLocation getId() {
+        return this.triggerType.getId();
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public Trigger getType() {
+        return (Trigger) this.triggerType;
     }
 
     @Override
-    public Collection<FilteredTrigger<?>> getTriggers() {
-        return Collections.emptySet();
+    public FilteredTriggerConfiguration getConfiguration() {
+        return this.configuration;
     }
 }

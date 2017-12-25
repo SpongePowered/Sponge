@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.advancement;
 
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.ICriterionInstance;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -73,7 +73,7 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
     }
 
     @Override
-    public Set<Trigger> getTriggers() {
-        return Collections.singleton((Trigger) this.criterionInstance);
+    public Set<FilteredTrigger<?>> getTriggers() {
+        return Collections.singleton((FilteredTrigger) this.criterionInstance);
     }
 }

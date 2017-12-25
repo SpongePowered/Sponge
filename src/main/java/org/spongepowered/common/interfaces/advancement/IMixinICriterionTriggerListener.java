@@ -22,35 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.interfaces.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import net.minecraft.advancements.Advancement;
 
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
+public interface IMixinICriterionTriggerListener {
 
-@Mixin(ICriterionInstance.class)
-public interface MixinICriterionInstance extends FilteredTrigger {
+    Advancement getAdvancement();
 
-    @Shadow ResourceLocation getId();
-
-    @Override
-    default Trigger getType() {
-        final ICriterionTrigger triggerType = CriteriaTriggers.get(getId());
-        checkNotNull(triggerType, "triggerType");
-        return (Trigger) triggerType;
-    }
-
-    @Override
-    default FilteredTriggerConfiguration getConfiguration() {
-        return UnknownFilteredTriggerConfiguration.INSTANCE;
-    }
+    String getCriterionName();
 }

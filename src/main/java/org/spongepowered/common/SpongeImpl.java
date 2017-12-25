@@ -227,4 +227,8 @@ public final class SpongeImpl {
 
         return containerOptional.get();
     }
+
+    public static boolean isMainThread() {
+        return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
+    }
 }

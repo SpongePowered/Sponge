@@ -59,7 +59,6 @@ import org.spongepowered.common.advancement.SpongeOrCriterionProgress;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.advancement.SpongeScoreCriterionProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
@@ -138,6 +137,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
+        /*
         final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
         // The score criterion needs special care
         final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
@@ -165,7 +165,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             }
             scoreProgress.setSilently(newScore); // Set the score without triggering more events
             return true;
-        }
+        }*/
         final CriterionEvent.Grant event = SpongeEventFactory.createCriterionEventGrant(
                 cause, getAdvancement(), criterion, player, Instant.now());
         if (!SpongeImpl.postEvent(event)) {
@@ -194,6 +194,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
+        /*
         final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
         // The score criterion needs special care
         final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
@@ -221,7 +222,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
             }
             scoreProgress.setSilently(newScore); // Set the score without triggering more events
             return true;
-        }
+        }*/
         final CriterionEvent.Revoke event = SpongeEventFactory.createCriterionEventRevoke(
                 cause, getAdvancement(), criterion, player);
         if (!SpongeImpl.postEvent(event)) {

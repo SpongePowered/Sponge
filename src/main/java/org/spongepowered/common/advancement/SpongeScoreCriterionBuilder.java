@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.advancements.Criterion;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
 import java.util.ArrayList;
@@ -41,6 +42,11 @@ public class SpongeScoreCriterionBuilder implements ScoreAdvancementCriterion.Bu
 
     public SpongeScoreCriterionBuilder() {
         reset();
+    }
+
+    @Override
+    public ScoreAdvancementCriterion.Builder trigger(FilteredTrigger<?> trigger) {
+        return this;
     }
 
     @Override

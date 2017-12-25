@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 
 @Implements(@Interface(iface = AdvancementType.class, prefix = "type$"))
 @Mixin(FrameType.class)
-public class MixinFrameType implements AdvancementType {
+public class MixinFrameType {
 
     @Shadow @Final private String name;
     @Shadow @Final private TextFormatting format;
@@ -50,8 +50,7 @@ public class MixinFrameType implements AdvancementType {
     @Nullable private String spongeName;
     @Nullable private TextFormat textFormat;
 
-    @Override
-    public String getId() {
+    public String type$getId() {
         if (this.id == null) {
             this.id = "minecraft:" + this.name;
         }
@@ -66,8 +65,7 @@ public class MixinFrameType implements AdvancementType {
         return this.spongeName;
     }
 
-    @Override
-    public TextFormat getTextFormat() {
+    public TextFormat type$getTextFormat() {
         if (this.textFormat == null) {
             this.textFormat = TextFormat.of(
                     SpongeTextColor.of(this.format),

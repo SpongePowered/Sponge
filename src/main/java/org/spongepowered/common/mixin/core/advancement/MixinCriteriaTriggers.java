@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.advancement;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.ICriterionTrigger;
-import org.spongepowered.api.advancement.criteria.trigger.TriggerType;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,6 +38,6 @@ public class MixinCriteriaTriggers {
 
     @Inject(method = "register", at = @At("RETURN"))
     private static void onRegister(ICriterionTrigger criterion, CallbackInfoReturnable<ICriterionTrigger> ci) {
-        TriggerTypeRegistryModule.getInstance().register((TriggerType) criterion);
+        TriggerTypeRegistryModule.getInstance().register((Trigger) criterion);
     }
 }
