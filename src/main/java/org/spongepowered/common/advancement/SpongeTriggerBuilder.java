@@ -25,10 +25,12 @@
 package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.gson.GsonConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -41,6 +43,7 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.event.advancement.CriterionEvent;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 
 import java.io.BufferedReader;
@@ -49,17 +52,20 @@ import java.io.StringReader;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("unchecked")
 public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implements Trigger.Builder<C> {
 
     private final static Gson GSON = new Gson();
 
     private final static FilteredTriggerConfiguration.Empty EMPTY_TRIGGER_CONFIGURATION = new FilteredTriggerConfiguration.Empty();
-    private final static Function<JsonObject, FilteredTriggerConfiguration.Empty> EMPTY_TRIGGER_CONFIGURATION_CONSTUCTOR =
+    private final static Function<JsonObject, FilteredTriggerConfiguration.Empty> EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR =
             jsonObject -> EMPTY_TRIGGER_CONFIGURATION;
 
     private Class<C> configType;
     private Function<JsonObject, C> constructor;
+    @Nullable private Consumer<CriterionEvent.Trigger<C>> eventHandler;
 
     @Override
     public <T extends FilteredTriggerConfiguration & DataSerializable> Trigger.Builder<T> dataSerializableConfig(Class<T> dataConfigClass) {
@@ -160,27 +166,41 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     @Override
     public Trigger.Builder<FilteredTriggerConfiguration.Empty> emptyConfig() {
         this.configType = (Class<C>) FilteredTriggerConfiguration.Empty.class;
-        this.constructor = (Function<JsonObject, C>) EMPTY_TRIGGER_CONFIGURATION_CONSTUCTOR;
+        this.constructor = (Function<JsonObject, C>) EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR;
         return (Trigger.Builder<FilteredTriggerConfiguration.Empty>) this;
     }
 
     @Override
     public Trigger.Builder<C> listener(Consumer<CriterionEvent.Trigger<C>> eventListener) {
-        return null;
+        this.eventHandler = eventListener;
+        return this;
     }
 
     @Override
     public Trigger<C> build(String id) {
-        return null;
+        checkNotNull(id, "id");
+        checkState(this.configType != null, "configType");
+        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
+        return (Trigger<C>) new SpongeTrigger((Class) this.configType, (Function) this.constructor,
+                new ResourceLocation(plugin.getId(), id), (Consumer) this.eventHandler);
     }
 
     @Override
     public Trigger.Builder<C> from(Trigger<C> value) {
-        return null;
+        if (!(value instanceof SpongeTrigger)) {
+            throw new IllegalStateException("Unsupported trigger type: " + value.getId());
+        }
+        this.configType = value.getConfigurationType();
+        this.constructor = (Function<JsonObject, C>) ((SpongeTrigger) value).constructor;
+        this.eventHandler = (Consumer) ((SpongeTrigger) value).eventHandler;
+        return this;
     }
 
     @Override
     public Trigger.Builder<C> reset() {
-        return null;
+        this.configType = null;
+        this.constructor = null;
+        this.eventHandler = null;
+        return this;
     }
 }

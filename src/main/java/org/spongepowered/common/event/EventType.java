@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.GenericEvent;
 
 import java.util.Objects;
 
@@ -34,11 +35,11 @@ import javax.annotation.Nullable;
 public final class EventType<T extends Event> {
 
     private final Class<T> eventType;
-    @Nullable private final TypeToken<?> genericType;
+    @Nullable private final TypeToken<GenericEvent<?>> genericType;
 
     private int hashCode;
 
-    public EventType(Class<T> eventType, @Nullable TypeToken<?> genericType) {
+    EventType(Class<T> eventType, @Nullable TypeToken<GenericEvent<?>> genericType) {
         this.genericType = genericType;
         this.eventType = eventType;
     }
@@ -48,7 +49,7 @@ public final class EventType<T extends Event> {
     }
 
     @Nullable
-    public TypeToken<?> getGenericType() {
+    public TypeToken<GenericEvent<?>> getGenericType() {
         return this.genericType;
     }
 

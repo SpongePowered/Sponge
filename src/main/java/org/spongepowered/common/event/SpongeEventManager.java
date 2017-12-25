@@ -36,6 +36,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -48,9 +49,11 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -134,10 +137,10 @@ public class SpongeEventManager implements EventManager {
                 if (Event.class.isAssignableFrom(type)) {
                     final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
                     if (GenericEvent.class.isAssignableFrom(type)) {
-                        final TypeToken<?> genericType = eventType.getGenericType();
+                        final TypeToken<GenericEvent<?>> genericType = eventType.getGenericType();
                         checkNotNull(genericType);
                         for (RegisteredListener<?> listener : listeners) {
-                            final TypeToken<?> genericType1 = listener.getEventType().getGenericType();
+                            final TypeToken<GenericEvent<?>> genericType1 = listener.getEventType().getGenericType();
                             checkNotNull(genericType1);
                             if (genericType.isSubtypeOf(genericType1)) {
                                 handlers.add(listener);
@@ -276,10 +279,10 @@ public class SpongeEventManager implements EventManager {
             boolean beforeModifications, EventListener<? super T> handler) {
         TypeToken<?> genericType = null;
         if (GenericEvent.class.isAssignableFrom(eventType.getRawType())) {
-            genericType = eventType.resolveType(GENERIC_EVENT_TYPE);
+            genericType = TypeTokenHelper.removeGenericTypes(eventType.resolveType(GENERIC_EVENT_TYPE));
         }
-        return new RegisteredListener<>(plugin, new EventType<>((Class<T>) eventType.getRawType(), genericType),
-                order, handler, beforeModifications);
+        return new RegisteredListener(plugin, new EventType(eventType.getRawType(), genericType == null ? null :
+                TypeTokenHelper.withGenericTypes(GenericEvent.class, genericType)), order, handler, beforeModifications);
     }
 
     private PluginContainer getPlugin(Object plugin) {
@@ -365,9 +368,10 @@ public class SpongeEventManager implements EventManager {
         final Class<? extends Event> eventClass = event.getClass();
         final EventType<? extends Event> eventType;
         if (event instanceof GenericEvent) {
-            eventType = new EventType<>(eventClass, checkNotNull(((GenericEvent) event).getGenericType()));
+            eventType = new EventType(eventClass, TypeTokenHelper.withGenericTypes(
+                    GenericEvent.class, checkNotNull(((GenericEvent) event).getGenericType())));
         } else {
-            eventType = new EventType<>(eventClass, null);
+            eventType = new EventType(eventClass, null);
         }
         return this.handlersCache.get(eventType);
     }

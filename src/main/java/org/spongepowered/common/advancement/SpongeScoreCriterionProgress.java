@@ -27,6 +27,7 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.util.math.MathHelper;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
@@ -73,61 +74,63 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ICr
         return this.score;
     }
 
-    public Optional<Instant> setSilently(int score) {
+    @Override
+    public Optional<Instant> set(int score) {
+        checkState(score >= 0 && score <= getGoal(), "Score cannot be negative or greater than the goal.");
+        int lastScore = getScore();
+        if (lastScore == score) {
+            return get();
+        }
+        final CriterionEvent.Score.Change event;
+        final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
+        final Advancement advancement = this.progress.getAdvancement();
+        final Player player = ((IMixinPlayerAdvancements) ((IMixinAdvancementProgress) this.progress).getPlayerAdvancements()).getPlayer();
+        if (lastScore == getGoal()) {
+            event = SpongeEventFactory.createCriterionEventScoreRevoke(
+                    cause, advancement, getCriterion(), player, lastScore, score);
+        } else if (score == getGoal()) {
+            event = SpongeEventFactory.createCriterionEventScoreGrant(
+                    cause, advancement, getCriterion(), player, Instant.now(), lastScore, score);
+        } else {
+            event = SpongeEventFactory.createCriterionEventScoreChange(
+                    cause, advancement, getCriterion(), player, lastScore, score);
+        }
+        if (SpongeImpl.postEvent(event)) {
+            return get();
+        }
         SpongeScoreCriterion.BYPASS_EVENT = true;
+        // This is the only case a instant will be returned
         if (score == getGoal()) {
-            if (this.score == score) {
-                return get();
-            }
             Instant instant = null;
-            for (AdvancementCriterion criterion : this.criterion.internalCriteria.subList(0, score)) {
+            for (AdvancementCriterion criterion : this.criterion.internalCriteria) {
                 final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
                 if (!progress.achieved()) {
                     instant = progress.grant();
                 }
             }
+            this.score = score;
             return Optional.of(instant == null ? Instant.now() : instant);
         }
-        for (AdvancementCriterion criterion : this.criterion.internalCriteria.subList(score, getGoal())) {
-            this.progress.get(criterion).get().revoke();
-        }
-        for (AdvancementCriterion criterion : this.criterion.internalCriteria.subList(0, score)) {
-            this.progress.get(criterion).get().grant();
+        for (AdvancementCriterion criterion : this.criterion.internalCriteria) {
+            final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
+            // We don't have enough score, grant more criteria
+            if (lastScore < score && !progress.achieved()) {
+                progress.grant();
+                lastScore++;
+
+            // We have too much score, revoke more criteria
+            } else if (lastScore > score && progress.achieved()) {
+                progress.revoke();
+                lastScore--;
+            }
+            // We reached the target score
+            if (lastScore == score) {
+                break;
+            }
         }
         this.score = score;
         SpongeScoreCriterion.BYPASS_EVENT = false;
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<Instant> set(int score) {
-        checkState(score >= 0 && score <= getGoal(), "Score cannot be negative or greater than the goal.");
-        final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
-        final Player player = ((IMixinPlayerAdvancements) ((IMixinAdvancementProgress) this.progress).getPlayerAdvancements()).getPlayer();
-        /*
-        final CriterionEvent.ScoreChange event = SpongeEventFactory.createCriterionEventScoreChange(
-                cause, this.progress.getAdvancement(), getCriterion(), player, getScore(), score);
-        if (SpongeImpl.postEvent(event)) {
-            return get();
-        }
-        score = MathHelper.clamp(event.getNewScore(), 0, getGoal());
-        if (event.getPreviousScore() == score) {
-            return get();
-        } else if (event.wasGrantedBefore() && !event.isGranted()) {
-            final CriterionEvent.Revoke revokeEvent = SpongeEventFactory.createCriterionEventRevoke(
-                    cause, this.progress.getAdvancement(), getCriterion(), player);
-            if (SpongeImpl.postEvent(revokeEvent)) {
-                return get();
-            }
-        } else if (event.isGranted() && !event.wasGrantedBefore()) {
-            final CriterionEvent.Grant grantEvent = SpongeEventFactory.createCriterionEventGrant(
-                    cause, this.progress.getAdvancement(), getCriterion(), player, Instant.now());
-            if (SpongeImpl.postEvent(grantEvent)) {
-                return get();
-            }
-        }
-        */
-        return setSilently(score);
     }
 
     @Override

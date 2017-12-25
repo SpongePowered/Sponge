@@ -83,9 +83,9 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
 
     @Override
     public Advancement build(String id) {
+        checkNotNull(id, "id");
         final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
-        // TODO: Custom rewards?
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
         final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), id);
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null :

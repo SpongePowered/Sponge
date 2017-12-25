@@ -62,7 +62,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -80,8 +79,6 @@ import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
-
-import net.minecraft.server.MinecraftServer;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -141,11 +138,6 @@ public final class SpongeImplHooks {
 
     public static double getBlockReachDistance(EntityPlayerMP player) {
         return 5.0d;
-    }
-
-    public static boolean isMainThread() {
-        // Overwritten in SpongeForge
-        return ((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread();
     }
 
     // Entity registry

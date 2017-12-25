@@ -1,0 +1,24 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:apple"
+        },
+        "title": {
+            "text": "Extra"
+        },
+        "description": {
+            "text": "Extra advancements?"
+        },
+        "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+        "show_toast": true,
+        "announce_to_chat": false
+    },
+    "criteria": {
+        "test": {
+            "trigger": "advancement_test:my_trigger",
+            "conditions": {
+                "chance": 50
+            }
+        }
+    }
+}

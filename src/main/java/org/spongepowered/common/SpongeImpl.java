@@ -229,6 +229,9 @@ public final class SpongeImpl {
     }
 
     public static boolean isMainThread() {
+        // Return true when the server isn't yet initialized, this means on a client
+        // that the game is still being loaded. This is needed to support initialization
+        // events with cause tracking.
         return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
     }
 }

@@ -26,6 +26,8 @@ package org.spongepowered.test;
 
 import com.flowpowered.math.vector.Vector2d;
 import com.google.inject.Inject;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.slf4j.Logger;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -34,6 +36,8 @@ import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.TreeLayoutElement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
@@ -57,6 +61,7 @@ import org.spongepowered.api.world.explosion.Explosion;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -74,6 +79,34 @@ public class AdvancementTest {
     private Advancement cookDirtAdvancement;
     @Nullable private Advancement suicidalAdvancement;
 
+    private Trigger<MyTriggerConfig> trigger;
+
+    @ConfigSerializable
+    public static class MyTriggerConfig implements FilteredTriggerConfiguration {
+
+        @Setting("chance")
+        private float chance;
+    }
+
+    @Listener
+    public void onRegister(GameRegistryEvent.Register event) {
+        this.logger.info("onRegister: " + event.getCatalogType().getName());
+    }
+
+    @Listener
+    public void onRegisterTriggers(GameRegistryEvent.Register<Trigger> event) {
+        this.trigger = Trigger.builder()
+                .typeSerializableConfig(MyTriggerConfig.class)
+                .listener(triggerEvent -> {
+                    final Random random = new Random();
+                    triggerEvent.setResult(random.nextFloat() < triggerEvent.getTrigger().getConfiguration().chance);
+                    triggerEvent.getTargetEntity().sendMessage(Text.of(random.nextFloat() +
+                            " < " + triggerEvent.getTrigger().getConfiguration().chance));
+                })
+                .build("my_trigger");
+        event.register(this.trigger);
+    }
+
     @Listener
     public void onRegisterAdvancementTrees(GameRegistryEvent.Register<AdvancementTree> event) {
         this.logger.info("Loading advancement trees...");
@@ -88,7 +121,6 @@ public class AdvancementTest {
     @Listener
     public void onRegisterAdvancements(GameRegistryEvent.Register<Advancement> event) {
         this.logger.info("Loading advancements...");
-        System.out.println("DEBUG: " + Thread.currentThread().getName());
         // Create the root advancement
         this.rootAdvancement = Advancement.builder()
                 .displayInfo(DisplayInfo.builder()
@@ -193,8 +225,11 @@ public class AdvancementTest {
             if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
                     (transaction.getOriginal().getState().getType() == BlockTypes.DIRT ||
                             transaction.getOriginal().getState().getType() == BlockTypes.GRASS)) {
-                System.out.println("DEBUG");
                 player.getProgress(this.breakDirtAdvancement).get(this.breakDirtCriterion).get().add(1);
+            } else if (transaction.getFinal().getState().getType() == BlockTypes.AIR &&
+                    (transaction.getOriginal().getState().getType() == BlockTypes.LEAVES ||
+                            transaction.getOriginal().getState().getType() == BlockTypes.LEAVES2)) {
+                this.trigger.trigger(player);
             }
         }
     }

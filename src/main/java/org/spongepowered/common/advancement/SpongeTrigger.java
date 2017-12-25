@@ -53,12 +53,12 @@ import javax.annotation.Nullable;
 public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, ITrigger {
 
     private final Class<FilteredTriggerConfiguration> triggerConfigurationClass;
-    private final Function<JsonObject, FilteredTriggerConfiguration> constructor;
+    final Function<JsonObject, FilteredTriggerConfiguration> constructor;
     private final ResourceLocation id;
     private final Multimap<PlayerAdvancements, Listener> listeners = HashMultimap.create();
-    @Nullable private final Consumer<CriterionEvent.Trigger> eventHandler;
+    @Nullable final Consumer<CriterionEvent.Trigger> eventHandler;
 
-    public SpongeTrigger(Class<FilteredTriggerConfiguration> triggerConfigurationClass,
+    SpongeTrigger(Class<FilteredTriggerConfiguration> triggerConfigurationClass,
             Function<JsonObject, FilteredTriggerConfiguration> constructor,
             ResourceLocation id, @Nullable Consumer<CriterionEvent.Trigger> eventHandler) {
         this.triggerConfigurationClass = triggerConfigurationClass;

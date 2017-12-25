@@ -59,6 +59,7 @@ import org.spongepowered.common.advancement.SpongeOrCriterionProgress;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.advancement.SpongeScoreCriterionProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementProgress;
+import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
@@ -120,6 +121,15 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
 
     /**
      * @author Cybermaxke
+     * @reason Rewrite the method to add support for the complex advancement criteria.
+     */
+    @Overwrite
+    public boolean isDone() {
+        return get(getAdvancement().getCriterion()).get().achieved();
+    }
+
+    /**
+     * @author Cybermaxke
      * @reason Rewrite the method to add support for triggering
      *         score criteria and calling grant events.
      */
@@ -137,42 +147,33 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
-        /*
         final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
         // The score criterion needs special care
         final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
+        CriterionEvent event;
         if (scoreCriterion != null) {
             final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) get(scoreCriterion).get();
-            final int previousScore = scoreProgress.getScore();
-            int newScore = scoreProgress.getScore() + 1;
-
-            final CriterionEvent.ScoreChange event = SpongeEventFactory.createCriterionEventScoreChange(
-                    cause, getAdvancement(), scoreCriterion, player, previousScore, newScore);
-            if (SpongeImpl.postEvent(event)) {
-                return false;
+            final int lastScore = scoreProgress.getScore();
+            final int score = lastScore + 1;
+            if (lastScore == scoreCriterion.getGoal()) {
+                event = SpongeEventFactory.createCriterionEventScoreRevoke(
+                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
+            } else if (score == scoreCriterion.getGoal()) {
+                event = SpongeEventFactory.createCriterionEventScoreGrant(
+                        cause, getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
+            } else {
+                event = SpongeEventFactory.createCriterionEventScoreChange(
+                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
             }
-            newScore = event.getNewScore();
-            if (newScore == event.getPreviousScore()) {
-                return false;
-            }
-            if (event.wasGrantedBefore() && !event.isGranted()) {
-                final CriterionEvent.Grant grantEvent = SpongeEventFactory.createCriterionEventGrant(
-                        cause, getAdvancement(), criterion, player, Instant.now());
-                if (SpongeImpl.postEvent(grantEvent)) {
-                    return false;
-                }
-                newScore = event.getPreviousScore();
-            }
-            scoreProgress.setSilently(newScore); // Set the score without triggering more events
-            return true;
-        }*/
-        final CriterionEvent.Grant event = SpongeEventFactory.createCriterionEventGrant(
-                cause, getAdvancement(), criterion, player, Instant.now());
-        if (!SpongeImpl.postEvent(event)) {
-            criterionProgress.obtain();
-            return true;
+        } else {
+            event = SpongeEventFactory.createCriterionEventGrant(
+                    cause, getAdvancement(), criterion, player, Instant.now());
         }
-        return false;
+        if (SpongeImpl.postEvent(event)) {
+            return false;
+        }
+        criterionProgress.obtain();
+        return true;
     }
 
     /**
@@ -194,42 +195,33 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         final Player player = ((IMixinPlayerAdvancements) this.playerAdvancements).getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
-        /*
         final IMixinCriterion mixinCriterion = (IMixinCriterion) criterion;
         // The score criterion needs special care
         final SpongeScoreCriterion scoreCriterion = mixinCriterion.getScoreCriterion();
+        CriterionEvent event;
         if (scoreCriterion != null) {
             final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) get(scoreCriterion).get();
-            final int previousScore = scoreProgress.getScore();
-            int newScore = scoreProgress.getScore() - 1;
-
-            final CriterionEvent.ScoreChange event = SpongeEventFactory.createCriterionEventScoreChange(
-                    cause, getAdvancement(), scoreCriterion, player, previousScore, newScore);
-            if (SpongeImpl.postEvent(event)) {
-                return false;
+            final int lastScore = scoreProgress.getScore();
+            final int score = lastScore + 1;
+            if (lastScore == scoreCriterion.getGoal()) {
+                event = SpongeEventFactory.createCriterionEventScoreRevoke(
+                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
+            } else if (score == scoreCriterion.getGoal()) {
+                event = SpongeEventFactory.createCriterionEventScoreGrant(
+                        cause, getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
+            } else {
+                event = SpongeEventFactory.createCriterionEventScoreChange(
+                        cause, getAdvancement(), scoreCriterion, player, lastScore, score);
             }
-            newScore = event.getNewScore();
-            if (newScore == event.getPreviousScore()) {
-                return false;
-            }
-            if (event.wasGrantedBefore() && !event.isGranted()) {
-                final CriterionEvent.Revoke revokeEvent = SpongeEventFactory.createCriterionEventRevoke(
-                        cause, getAdvancement(), criterion, player);
-                if (SpongeImpl.postEvent(revokeEvent)) {
-                    return false;
-                }
-                newScore = event.getPreviousScore();
-            }
-            scoreProgress.setSilently(newScore); // Set the score without triggering more events
-            return true;
-        }*/
-        final CriterionEvent.Revoke event = SpongeEventFactory.createCriterionEventRevoke(
-                cause, getAdvancement(), criterion, player);
-        if (!SpongeImpl.postEvent(event)) {
-            criterionProgress.reset();
-            return true;
+        } else {
+            event = SpongeEventFactory.createCriterionEventRevoke(
+                    cause, getAdvancement(), criterion, player);
         }
-        return false;
+        if (SpongeImpl.postEvent(event)) {
+            return false;
+        }
+        criterionProgress.reset();
+        return true;
     }
 
     @Override
@@ -259,9 +251,6 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     @Override
     public Advancement getAdvancement() {
         checkState(this.advancement != null, "The advancement is not yet initialized");
-        if (!AdvancementRegistryModule.getInstance().getById(this.advancement).isPresent()) {
-            System.out.println(this.advancement);
-        }
         return AdvancementRegistryModule.getInstance().getById(this.advancement).get();
     }
 
