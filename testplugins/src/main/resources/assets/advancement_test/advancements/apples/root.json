@@ -3,21 +3,19 @@
         "icon": {
             "item": "minecraft:apple"
         },
-        "title": {
-            "text": "Extra"
-        },
-        "description": {
-            "text": "Extra advancements?"
-        },
+        "title": "Apples",
+        "description": "... error 404 ...",
+        "frame": "challenge",
         "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
         "show_toast": true,
-        "announce_to_chat": false
+        "announce_to_chat": false,
+        "hidden": false
     },
     "criteria": {
         "test": {
             "trigger": "advancement_test:my_trigger",
             "conditions": {
-                "chance": 50
+                "chance": 0.25
             }
         }
     }

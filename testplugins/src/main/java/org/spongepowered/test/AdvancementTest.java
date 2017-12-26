@@ -56,6 +56,7 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.explosion.Explosion;
 
@@ -79,6 +80,8 @@ public class AdvancementTest {
     private Advancement cookDirtAdvancement;
     @Nullable private Advancement suicidalAdvancement;
 
+    @Inject private PluginContainer pluginContainer;
+
     private Trigger<MyTriggerConfig> trigger;
 
     @ConfigSerializable
@@ -94,14 +97,26 @@ public class AdvancementTest {
     }
 
     @Listener
+    public void onRegister2(GameRegistryEvent.Register<?> event) {
+        this.logger.info("onRegister<?>: " + event.getCatalogType().getName());
+    }
+
+    @Listener
+    public void onRegister3(GameRegistryEvent.Register<? extends Trigger> event) {
+        this.logger.info("onRegister<? extends Trigger>: " + event.getCatalogType().getName());
+    }
+
+    @Listener
     public void onRegisterTriggers(GameRegistryEvent.Register<Trigger> event) {
+        this.logger.info("Advancements test source: " + this.pluginContainer.getSource().orElse(null));
         this.trigger = Trigger.builder()
                 .typeSerializableConfig(MyTriggerConfig.class)
                 .listener(triggerEvent -> {
                     final Random random = new Random();
-                    triggerEvent.setResult(random.nextFloat() < triggerEvent.getTrigger().getConfiguration().chance);
-                    triggerEvent.getTargetEntity().sendMessage(Text.of(random.nextFloat() +
-                            " < " + triggerEvent.getTrigger().getConfiguration().chance));
+                    final float value = random.nextFloat();
+                    final float chance = triggerEvent.getTrigger().getConfiguration().chance;
+                    triggerEvent.setResult(value < chance);
+                    triggerEvent.getTargetEntity().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
                 })
                 .build("my_trigger");
         event.register(this.trigger);
