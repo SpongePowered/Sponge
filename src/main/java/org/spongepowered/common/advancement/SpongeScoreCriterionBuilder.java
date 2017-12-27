@@ -56,12 +56,14 @@ public class SpongeScoreCriterionBuilder implements ScoreAdvancementCriterion.Bu
 
     @Override
     public ScoreAdvancementCriterion.Builder from(ScoreAdvancementCriterion value) {
+        this.trigger = value.getTrigger().orElse(null);
         this.goal = value.getGoal();
         return this;
     }
 
     @Override
     public ScoreAdvancementCriterion.Builder reset() {
+        this.trigger = null;
         this.goal = 1;
         return this;
     }

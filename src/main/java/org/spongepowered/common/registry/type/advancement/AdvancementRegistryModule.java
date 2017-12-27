@@ -60,7 +60,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
             final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
             final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
             advancementList.getAdvancements().put(mcAdv.getId(), mcAdv);
-            if (mcAdv.parent != SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
+            if (mcAdv.getParent() != SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
                 advancementList.getNonRootsSet().add(mcAdv);
                 final AdvancementList.Listener listener = advancementList.getListener();
                 if (listener != null) {

@@ -35,6 +35,7 @@ import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
+import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 
 @SuppressWarnings("ConstantConditions")
 public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
@@ -52,7 +53,7 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
         checkState(((IMixinAdvancement) rootAdvancement).isRegistered(), "The root advancement must be registered.");
         checkState(!rootAdvancement.getParent().isPresent(), "The root advancement cannot have a parent.");
         checkState(rootAdvancement.getDisplayInfo().isPresent(), "The root advancement must have display info.");
-        checkState(((net.minecraft.advancements.Advancement) rootAdvancement).getDisplay().background == null,
+        checkState(((IMixinDisplayInfo) rootAdvancement.getDisplayInfo().get()).getBackground() == null,
                 "The root advancement is already used by a different Advancement Tree.");
         this.rootAdvancement = rootAdvancement;
         return this;
@@ -71,8 +72,8 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
         final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
         final String name = this.rootAdvancement.getDisplayInfo().map(DisplayInfo::getTitle).map(Text::toPlain).orElse(id);
         final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, plugin.getId() + ':' + id, name);
-        ((net.minecraft.advancements.Advancement) this.rootAdvancement).getDisplay().background = new ResourceLocation(this.background);
-        ((net.minecraft.advancements.Advancement) this.rootAdvancement).parent = null;
+        ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).setBackground(this.background);
+        ((IMixinAdvancement) this.rootAdvancement).setParent(null);
         applyTree(this.rootAdvancement, advancementTree);
         return advancementTree;
     }

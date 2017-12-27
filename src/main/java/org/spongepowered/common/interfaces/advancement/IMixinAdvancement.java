@@ -24,10 +24,15 @@
  */
 package org.spongepowered.common.interfaces.advancement;
 
+import net.minecraft.advancements.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 
+import javax.annotation.Nullable;
+
 public interface IMixinAdvancement {
+
+    void setParent(@Nullable Advancement advancement);
 
     void setTree(AdvancementTree tree);
 

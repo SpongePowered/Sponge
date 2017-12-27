@@ -31,16 +31,15 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
 
     public static boolean BYPASS_EVENT = false;
-    public static final String INTERNAL_SUFFIX_BASE = "&score_goal_id=";
+    static final String INTERNAL_SUFFIX_BASE = "&score_goal_id=";
 
     private final String name;
     public final List<ICriterion> internalCriteria;
@@ -68,7 +67,8 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriteri
     }
 
     @Override
-    public Collection<FilteredTrigger<?>> getTriggers() {
-        return Collections.emptySet();
+    public Optional<FilteredTrigger<?>> getTrigger() {
+        // The first internal criterion holds the trigger
+        return this.internalCriteria.get(0).getTrigger();
     }
 }

@@ -38,10 +38,10 @@ import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,14 +49,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
-import org.spongepowered.common.advancement.SpongeCriterionHelper;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
-import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -74,10 +72,10 @@ import javax.annotation.Nullable;
 @Mixin(Advancement.class)
 public class MixinAdvancement implements org.spongepowered.api.advancement.Advancement, IMixinAdvancement {
 
-    @Shadow @Nullable public Advancement parent;
+    @Shadow @Final @Mutable @Nullable private Advancement parent;
     @Shadow @Final private ResourceLocation id;
-    @Shadow private String[][] requirements;
-    @Shadow private Map<String, Criterion> criteria;
+    @Shadow @Final @Mutable private String[][] requirements;
+    @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
     @Shadow @Final private ITextComponent displayText;
@@ -185,6 +183,11 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Override
     public Optional<AdvancementTree> getTree() {
         return Optional.ofNullable(this.tree);
+    }
+
+    @Override
+    public void setParent(@Nullable Advancement advancement) {
+        this.parent = advancement;
     }
 
     @Override

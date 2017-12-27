@@ -26,15 +26,11 @@ package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -59,7 +55,7 @@ public class SpongeCriterionBuilder implements AdvancementCriterion.Builder {
 
     @Override
     public AdvancementCriterion.Builder from(AdvancementCriterion value) {
-        this.trigger = Iterables.getFirst(value.getTriggers(), null);
+        this.trigger = value.getTrigger().orElse(null);
         return this;
     }
 

@@ -26,8 +26,7 @@ package org.spongepowered.common.advancement;
 
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.Optional;
 
 public final class SpongeEmptyCriterion implements ICriterion {
 
@@ -42,7 +41,7 @@ public final class SpongeEmptyCriterion implements ICriterion {
     }
 
     @Override
-    public Set<FilteredTrigger<?>> getTriggers() {
-        return Collections.emptySet();
+    public Optional<FilteredTrigger<?>> getTrigger() {
+        return Optional.empty();
     }
 }

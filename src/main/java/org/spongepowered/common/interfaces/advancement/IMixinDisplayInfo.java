@@ -26,7 +26,14 @@ package org.spongepowered.common.interfaces.advancement;
 
 import org.spongepowered.api.advancement.Advancement;
 
+import javax.annotation.Nullable;
+
 public interface IMixinDisplayInfo {
 
     void setAdvancement(Advancement advancement);
+
+    @Nullable
+    String getBackground();
+
+    void setBackground(@Nullable String background);
 }

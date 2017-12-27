@@ -32,7 +32,6 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -54,6 +53,11 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
         return this.name;
     }
 
+    @Override
+    public Optional<FilteredTrigger<?>> getTrigger() {
+        return Optional.empty();
+    }
+
     private Collection<AdvancementCriterion> getAllChildrenCriteria0(boolean onlyLeaves) {
         final ImmutableSet.Builder<AdvancementCriterion> criteria = ImmutableSet.builder();
         if (!onlyLeaves) {
@@ -67,7 +71,7 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
         return criteria.build();
     }
 
-    public Collection<AdvancementCriterion> getRecursiveChildren() {
+    private Collection<AdvancementCriterion> getRecursiveChildren() {
         if (this.recursiveChildrenCriteria == null) {
             this.recursiveChildrenCriteria = getAllChildrenCriteria0(false);
         }
@@ -97,10 +101,5 @@ public class SpongeOperatorCriterion implements OperatorCriterion, ICriterion {
     public Optional<AdvancementCriterion> findFirst(String name) {
         return getRecursiveChildren().stream()
                 .filter(c -> c.getName().equals(name)).findFirst();
-    }
-
-    @Override
-    public Set<FilteredTrigger<?>> getTriggers() {
-        return ImmutableSet.of();
     }
 }

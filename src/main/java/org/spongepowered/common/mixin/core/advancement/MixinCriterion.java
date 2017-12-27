@@ -39,8 +39,7 @@ import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -48,7 +47,7 @@ import javax.annotation.Nullable;
 @Mixin(Criterion.class)
 public class MixinCriterion implements ICriterion, IMixinCriterion {
 
-    @Shadow @Final private ICriterionInstance criterionInstance;
+    @Shadow @Final @Nullable private ICriterionInstance criterionInstance;
 
     @Nullable private String name;
     @Nullable private SpongeScoreCriterion scoreCriterion;
@@ -60,6 +59,12 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
             this.name = UUID.randomUUID().toString().replace("-", "");
         }
         return this.name;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Optional<FilteredTrigger<?>> getTrigger() {
+        return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
     }
 
     @Override
@@ -87,12 +92,6 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
     @Override
     public void setScoreGoal(@Nullable Integer goal) {
         this.scoreGoal = goal;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Set<FilteredTrigger<?>> getTriggers() {
-        return Collections.singleton((FilteredTrigger) this.criterionInstance);
     }
 
     @Inject(method = "criterionFromJson", at = @At("RETURN"))

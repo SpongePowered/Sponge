@@ -26,6 +26,7 @@ package org.spongepowered.common.advancement;
 
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 
 public class SpongeAdvancementTree implements AdvancementTree {
 
@@ -57,6 +58,6 @@ public class SpongeAdvancementTree implements AdvancementTree {
     @SuppressWarnings("ConstantConditions")
     @Override
     public String getBackground() {
-        return ((net.minecraft.advancements.Advancement) this.rootAdvancement).getDisplay().background.toString();
+        return ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).getBackground();
     }
 }

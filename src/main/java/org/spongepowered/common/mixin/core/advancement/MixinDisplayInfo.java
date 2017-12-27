@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector2d;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -40,6 +41,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
@@ -49,12 +51,13 @@ import javax.annotation.Nullable;
 
 @Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "info$"))
 @Mixin(DisplayInfo.class)
-public abstract class MixinDisplayInfo implements IMixinDisplayInfo, TreeLayoutElement {
+public class MixinDisplayInfo implements IMixinDisplayInfo, TreeLayoutElement {
 
     @Shadow @Final private FrameType frame;
     @Shadow @Final private ItemStack icon;
     @Shadow @Final private ITextComponent title;
     @Shadow @Final private ITextComponent description;
+    @Shadow @Final @Mutable @Nullable private ResourceLocation background;
     @Shadow @Final private boolean showToast;
     @Shadow @Final private boolean announceToChat;
     @Shadow @Final private boolean hidden;
@@ -72,6 +75,17 @@ public abstract class MixinDisplayInfo implements IMixinDisplayInfo, TreeLayoutE
     @Override
     public void setAdvancement(Advancement advancement) {
         this.advancement = advancement;
+    }
+
+    @Nullable
+    @Override
+    public String getBackground() {
+        return this.background == null ? null : this.background.toString();
+    }
+
+    @Override
+    public void setBackground(@Nullable String background) {
+        this.background = background == null ? null : new ResourceLocation(background);
     }
 
     public ItemStackSnapshot info$getIcon() {
