@@ -60,7 +60,7 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
         // TODO pass player for carrier to EquipmentInventory
         final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots);
         base += EQUIPMENT; // 4
-        final MainPlayerInventoryLensImpl main = new MainPlayerInventoryLensImpl(base, slots);
+        final MainPlayerInventoryLensImpl main = new MainPlayerInventoryLensImpl(base, slots, true);
         base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH + HOTBAR * INVENTORY_WIDTH; // 9
         final SlotLens<IInventory, ItemStack> offHand = slots.getSlot(base);
         base += OFFHAND;

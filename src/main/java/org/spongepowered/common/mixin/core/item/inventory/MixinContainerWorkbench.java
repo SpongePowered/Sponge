@@ -50,7 +50,7 @@ public abstract class MixinContainerWorkbench extends MixinContainer implements 
     public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
         lenses.add(new CraftingInventoryLensImpl(0, 1, 3, 3, inventory$getSlotProvider()));
-        lenses.add(new MainPlayerInventoryLensImpl(3 * 3 + 1, inventory$getSlotProvider()));
+        lenses.add(new MainPlayerInventoryLensImpl(3 * 3 + 1, inventory$getSlotProvider(), true));
         return new ContainerLens(adapter, inventory$getSlotProvider(), lenses);
     }
 

@@ -42,26 +42,42 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
 
     private HotbarLensImpl hotbar;
     private GridInventoryLensImpl grid;
+    private boolean isContainer;
 
-    public MainPlayerInventoryLensImpl(int base, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, MainPlayerInventoryAdapter.class, slots);
+    public MainPlayerInventoryLensImpl(int base, SlotProvider<IInventory, ItemStack> slots, boolean isContainer) {
+        this(base, MainPlayerInventoryAdapter.class, slots, isContainer);
     }
 
-    public MainPlayerInventoryLensImpl(int base, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public MainPlayerInventoryLensImpl(int base, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots, boolean isContainer) {
         super(base, 9, 4, adapterType, slots);
+        this.isContainer = isContainer;
+
+        this.lateInit(slots);
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    }
+
+    private void lateInit(SlotProvider<IInventory, ItemStack> slots) {
         int base = this.base;
         int INVENTORY_WIDTH = InventoryPlayer.getHotbarSize();
 
-        this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
-        base += INVENTORY_WIDTH * 3;
-        this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
+        if (this.isContainer) {
+            this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+            base += INVENTORY_WIDTH * 3;
+            this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
 
-        this.addSpanningChild(this.grid);
-        this.addSpanningChild(this.hotbar);
+            this.addSpanningChild(this.grid);
+            this.addSpanningChild(this.hotbar);
+        } else {
+            this.hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
+            base += INVENTORY_WIDTH;
+            this.grid = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+
+            this.addSpanningChild(this.hotbar);
+            this.addSpanningChild(this.grid);
+        }
 
         this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, slots));
 

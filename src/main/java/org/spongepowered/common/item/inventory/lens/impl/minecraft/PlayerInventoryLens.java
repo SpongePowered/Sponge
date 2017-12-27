@@ -74,7 +74,7 @@ public class PlayerInventoryLens extends RealLens {
 
         int base = 0;
         int INVENTORY_WIDTH = InventoryPlayer.getHotbarSize();
-        this.main = new MainPlayerInventoryLensImpl(base, slots);
+        this.main = new MainPlayerInventoryLensImpl(base, slots, false);
         base += INVENTORY_WIDTH * HOTBAR;
         base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
         this.equipment = new EquipmentInventoryLensImpl(this.player, base, EQUIPMENT, 1, slots);

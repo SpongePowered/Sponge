@@ -278,7 +278,7 @@ public final class ContainerUtil {
                     lens = new SlotLensImpl(index);
                 } else if ((lens instanceof PlayerInventoryLens || playerLens) && slotCount == 36) { // Player
                     // Player Inventory + Hotbar
-                    lenses.add(new DelegatingLens(index, new MainPlayerInventoryLensImpl(index, slots), slots));
+                    lenses.add(new DelegatingLens(index, new MainPlayerInventoryLensImpl(index, slots, true), slots));
                     //lenses.add(new GridInventoryLensImpl(index, 9, 3, 9, slots));
                     //lenses.add(new HotbarLensImpl(index + 27, 9, slots));
                     lens = null;
