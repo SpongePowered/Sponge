@@ -142,6 +142,7 @@ import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
+import org.spongepowered.common.data.SpongeKeyBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -339,6 +340,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
             .registerBuilderSupplier(EventContextKey.Builder.class, SpongeEventContextKeyBuilder::new)
             .registerBuilderSupplier(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
+            .registerBuilderSupplier(Key.Builder.class, SpongeKeyBuilder::new)
         ;
     }
 
