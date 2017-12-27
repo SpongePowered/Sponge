@@ -26,11 +26,21 @@ package org.spongepowered.common.data;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+
+import javax.annotation.Nullable;
 
 public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
@@ -39,6 +49,8 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
     private final String name;
     private final DataQuery query;
     private final TypeToken<?> elementToken;
+    private final PluginContainer parent;
+    @Nullable private List<KeyBasedDataListener<?>> listeners;
 
     SpongeKey(SpongeKeyBuilder<?, V> builder) {
         this.valueToken = builder.valueToken;
@@ -46,6 +58,7 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         this.name = builder.name;
         this.query = builder.query;
         this.elementToken = this.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
+        this.parent = PhaseTracker.getInstance().getCurrentContainer();
     }
 
     @Override
@@ -64,6 +77,14 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
     }
 
     @Override
+    public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+        if (this.listeners == null) {
+            this.listeners = new ArrayList<>();
+        }
+        this.listeners.add(new KeyBasedDataListener<>(holderFilter, listener, PhaseTracker.getInstance().getCurrentContainer()));
+    }
+
+    @Override
     public String getId() {
         return this.id;
     }
@@ -71,6 +92,17 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public void registerListeners() {
+        if (this.listeners != null) {
+            for (KeyBasedDataListener<?> listener : this.listeners) {
+                Sponge.getEventManager().registerListener(listener.getOwner(), ChangeDataHolderEvent.ValueChange.class, listener);
+            }
+            // Clean up
+            this.listeners.clear();
+            this.listeners = null;
+        }
     }
 
     @Override
@@ -103,5 +135,9 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
             .add("elementToken", this.elementToken)
             .add("query", this.query)
             .toString();
+    }
+
+    public PluginContainer getParent() {
+        return this.parent;
     }
 }

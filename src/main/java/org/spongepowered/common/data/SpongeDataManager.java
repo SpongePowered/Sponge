@@ -58,6 +58,7 @@ import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataMani
 import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -215,6 +216,7 @@ public final class SpongeDataManager implements DataManager {
     public static void finalizeRegistration() {
         allowRegistrations = false;
         SpongeManipulatorRegistry.getInstance().bake();
+        KeyRegistryModule.getInstance().registerKeyListeners();
     }
 
     @Override

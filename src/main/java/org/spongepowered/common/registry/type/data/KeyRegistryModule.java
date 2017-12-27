@@ -32,15 +32,22 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.google.common.collect.MapMaker;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
+import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeKey;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,6 +72,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     @Override
     public void registerDefaults() {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Attempting to register Keys illegally!");
+        Sponge.getCauseStackManager().pushCause(SpongeImpl.getPlugin());
 
         register("axis", Key.builder().type(TypeTokens.AXIS_VALUE_TOKEN).id("sponge:axis").name("Axis").query(of("Axis")).build());
 
@@ -368,7 +376,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         register("banner_base_color", Key.builder().type(TypeTokens.DYE_COLOR_VALUE_TOKEN).id("sponge:banner_base_color").name("Banner Base Color").query(of("BannerBaseColor")).build());
 
-        this.fieldMap.put("banner_patterns", new PatternKey());
+        register("banner_patterns", Key.builder().type(TypeTokens.PATTERN_LIST_VALUE_TOKEN).id("sponge:banner_patterns").name("Banner Patterns").query(of("BannerPatterns")).build());
 
         register("respawn_locations", Key.builder().type(TypeTokens.MAP_UUID_VECTOR3D_VALUE_TOKEN).id("sponge:respawn_locations").name("Respawn Locations").query(of("RespawnLocations")).build());
 
@@ -577,6 +585,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("sponge:health_scale").name("Health Scale").query(of("HealthScale")).build());
 
+        // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
+        Sponge.getCauseStackManager().popCause();
+
     }
 
     private void register(String fieldName, Key<?> key) {
@@ -588,14 +599,16 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
+        final PluginContainer parent = ((SpongeKey) extraCatalog).getParent();
+        final String pluginId = parent.getId();
         final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
-        checkArgument(!id.startsWith("sponge:"), "A plugin is trying to register custom keys under the sponge id namespace! This is a fake key! " + id);
+        checkArgument(!id.startsWith(pluginId + ":"), "A plugin is trying to register custom keys under a different plugin id namespace! This is unsupported! The provided key: " + id);
         this.keyMap.put(id, extraCatalog);
     }
 
     @Override
     public Optional<Key<?>> getById(String id) {
-        return Optional.ofNullable(this.keyMap.get(id));
+        return Optional.ofNullable(this.keyMap.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -603,46 +616,13 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         return Collections.unmodifiableCollection(this.keyMap.values());
     }
 
-    private static final class PatternKey implements Key<PatternListValue> {
-
-        static final TypeToken<PatternListValue> VALUE_TOKEN = new TypeToken<PatternListValue>() {
-            private static final long serialVersionUID = -1;
-        };
-        static final TypeToken<List<PatternLayer>> ELEMENT_TOKEN = new TypeToken<List<PatternLayer>>() {
-            private static final long serialVersionUID = -1;
-        };
-        private static final DataQuery BANNER_PATTERNS = of("BannerPatterns");
-
-        PatternKey() {
-        }
-
-        @Override
-        public TypeToken<PatternListValue> getValueToken() {
-            return VALUE_TOKEN;
-        }
-
-        @Override
-        public TypeToken<?> getElementToken() {
-            return ELEMENT_TOKEN;
-        }
-
-        @Override
-        public DataQuery getQuery() {
-            return BANNER_PATTERNS;
-        }
-
-        @Override
-        public String getId() {
-            return "sponge:banner_patterns";
-        }
-
-        @Override
-        public String getName() {
-            return "BannerPatterns";
-        }
+    KeyRegistryModule() {
     }
 
-    KeyRegistryModule() {
+    public void registerKeyListeners() {
+        for (Key<?> key : this.keyMap.values()) {
+            ((SpongeKey) key).registerListeners();
+        }
     }
 
     static final class Holder {

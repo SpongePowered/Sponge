@@ -147,6 +147,7 @@ public final class PhaseTracker {
     private List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
     private List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
     private List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
+    private PluginContainer currentContainer;
 
     private PhaseTracker() {
         // We cannot have two instances ever. ever ever.
@@ -857,5 +858,10 @@ public final class PhaseTracker {
 
 
         return false;
+    }
+
+    public PluginContainer getCurrentContainer() {
+        return Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
+            .orElse(SpongeImpl.getMinecraftPlugin());
     }
 }
