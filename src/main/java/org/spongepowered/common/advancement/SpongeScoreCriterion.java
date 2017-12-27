@@ -24,28 +24,36 @@
  */
 package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public class SpongeScoreCriterion implements ScoreAdvancementCriterion, ICriterion {
 
     public static boolean BYPASS_EVENT = false;
-    static final String SUFFIX_BASE = "&score_goal_id=";
+    public static final String INTERNAL_SUFFIX_BASE = "&score_goal_id=";
 
     private final String name;
-    public final List<AdvancementCriterion> internalCriteria;
+    public final List<ICriterion> internalCriteria;
 
-    SpongeScoreCriterion(String name, List<AdvancementCriterion> internalCriteria) {
-        this.internalCriteria = internalCriteria;
+    @SuppressWarnings("ConstantConditions")
+    public SpongeScoreCriterion(String name, int goal, @Nullable ICriterionInstance trigger) {
+        this.internalCriteria = new ArrayList<>(goal);
         this.name = name;
-        for (AdvancementCriterion criterion : internalCriteria) {
+        for (int i = 0; i < goal; i++) {
+            final Criterion criterion = i == 0 ? new Criterion(trigger) : new Criterion();
             ((IMixinCriterion) criterion).setScoreCriterion(this);
+            ((IMixinCriterion) criterion).setName(name + INTERNAL_SUFFIX_BASE + i);
+            this.internalCriteria.add((ICriterion) criterion);
         }
     }
 

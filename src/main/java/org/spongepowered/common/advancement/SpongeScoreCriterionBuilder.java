@@ -27,17 +27,15 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.advancements.Criterion;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Nullable;
 
 public class SpongeScoreCriterionBuilder implements ScoreAdvancementCriterion.Builder {
 
+    @Nullable private FilteredTrigger trigger;
     private int goal;
 
     public SpongeScoreCriterionBuilder() {
@@ -46,19 +44,14 @@ public class SpongeScoreCriterionBuilder implements ScoreAdvancementCriterion.Bu
 
     @Override
     public ScoreAdvancementCriterion.Builder trigger(FilteredTrigger<?> trigger) {
+        this.trigger = trigger;
         return this;
     }
 
     @Override
     public ScoreAdvancementCriterion build(String name) {
         checkNotNull(name, "name");
-        final List<AdvancementCriterion> internalCriteria = new ArrayList<>();
-        for (int i = 0; i < this.goal; i++) {
-            final Criterion criterion = new Criterion();
-            ((IMixinCriterion) criterion).setName(name + SpongeScoreCriterion.SUFFIX_BASE + i);
-            internalCriteria.add((AdvancementCriterion) criterion);
-        }
-        return new SpongeScoreCriterion(name, internalCriteria);
+        return new SpongeScoreCriterion(name, this.goal, (ICriterionInstance) this.trigger);
     }
 
     @Override

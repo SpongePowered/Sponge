@@ -36,4 +36,9 @@ public interface IMixinCriterion {
     SpongeScoreCriterion getScoreCriterion();
 
     void setScoreCriterion(@Nullable SpongeScoreCriterion criterion);
+
+    @Nullable
+    Integer getScoreGoal();
+
+    void setScoreGoal(@Nullable Integer goal);
 }

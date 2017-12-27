@@ -29,15 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.advancements.Criterion;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
-import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -69,58 +65,6 @@ public final class SpongeCriterionHelper {
         }
     }
 
-    public static AdvancementCriterion toCriterion(Map<String, Criterion> criteria, String[][] requirements) {
-        final Map<String, AdvancementCriterion> criteriaMap = new HashMap<>();
-        for (Map.Entry<String, Criterion> entry : criteria.entrySet()) {
-            String name = entry.getKey();
-            ((IMixinCriterion) entry.getValue()).setName(name);
-            final int index = name.indexOf(SpongeScoreCriterion.SUFFIX_BASE);
-            if (index != -1) {
-                final int scoreIndex = Integer.parseInt(name.substring(index + SpongeScoreCriterion.SUFFIX_BASE.length()));
-                name = name.substring(0, index);
-                final SpongeScoreCriterion criterion = (SpongeScoreCriterion) criteriaMap.computeIfAbsent(name,
-                        name1 -> new SpongeScoreCriterion(name1, new ArrayList<>()));
-                while (criterion.internalCriteria.size() < scoreIndex) {
-                    criterion.internalCriteria.add(null);
-                }
-                criterion.internalCriteria.set(scoreIndex, (AdvancementCriterion) entry.getValue());
-                criteriaMap.put(name, criterion);
-            } else {
-                criteriaMap.put(name, (AdvancementCriterion) entry.getValue());
-            }
-        }
-        // Fill up missing criteria in score criteria
-        for (AdvancementCriterion criterion : criteriaMap.values()) {
-            if (criterion instanceof SpongeScoreCriterion) {
-                final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
-                for (int i = 0; i < scoreCriterion.getGoal(); i++) {
-                    if (scoreCriterion.internalCriteria.get(i) == null) {
-                        final Criterion internalCriterion = new Criterion();
-                        final String name = criterion.getName() + SpongeScoreCriterion.SUFFIX_BASE + i;
-                        ((IMixinCriterion) internalCriterion).setName(name);
-                        scoreCriterion.internalCriteria.set(i, (AdvancementCriterion) internalCriterion);
-                        criteria.put(name, internalCriterion);
-                    }
-                }
-            }
-        }
-        final List<AdvancementCriterion> andCriteria = new ArrayList<>();
-        for (String[] array : requirements) {
-            final Set<AdvancementCriterion> orCriteria = new HashSet<>();
-            for (String name : array) {
-                final int index = name.indexOf(SpongeScoreCriterion.SUFFIX_BASE);
-                if (index != -1) {
-                    name = name.substring(0, index);
-                }
-                final AdvancementCriterion criterion = (AdvancementCriterion) criteria.get(name);
-                checkNotNull(criterion, name);
-                orCriteria.add((AdvancementCriterion) criteria.get(name));
-            }
-            andCriteria.add(OrCriterion.of(orCriteria));
-        }
-        return AndCriterion.of(andCriteria);
-    }
-
     static Tuple<Map<String, Criterion>, String[][]> toVanillaCriteriaData(AdvancementCriterion criterion) {
         final Map<String, Criterion> criteria = new HashMap<>();
         if (criterion == SpongeEmptyCriterion.INSTANCE) {
@@ -143,7 +87,7 @@ public final class SpongeCriterionHelper {
             final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
             final String name = criterion.getName();
             for (int i = 0; i < scoreCriterion.getGoal(); i++) {
-                final String id = name + SpongeScoreCriterion.SUFFIX_BASE + i;
+                final String id = name + SpongeScoreCriterion.INTERNAL_SUFFIX_BASE + i;
                 criteria.put(id, (Criterion) scoreCriterion.internalCriteria.get(i));
             }
         } else {

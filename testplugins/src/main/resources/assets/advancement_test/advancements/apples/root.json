@@ -15,7 +15,7 @@
         "test": {
             "trigger": "advancement_test:my_trigger",
             "conditions": {
-                "chance": 0.25
+                "chance": 1
             }
         }
     }

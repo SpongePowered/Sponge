@@ -24,12 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.advancement;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
@@ -47,6 +52,7 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
 
     @Nullable private String name;
     @Nullable private SpongeScoreCriterion scoreCriterion;
+    @Nullable private Integer scoreGoal;
 
     @Override
     public String getName() {
@@ -72,8 +78,28 @@ public class MixinCriterion implements ICriterion, IMixinCriterion {
         this.scoreCriterion = criterion;
     }
 
+    @Nullable
+    @Override
+    public Integer getScoreGoal() {
+        return this.scoreGoal;
+    }
+
+    @Override
+    public void setScoreGoal(@Nullable Integer goal) {
+        this.scoreGoal = goal;
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public Set<FilteredTrigger<?>> getTriggers() {
         return Collections.singleton((FilteredTrigger) this.criterionInstance);
+    }
+
+    @Inject(method = "criterionFromJson", at = @At("RETURN"))
+    private static void onCriterionFromJson(JsonObject json, JsonDeserializationContext context, CallbackInfoReturnable<Criterion> ci) {
+        final Criterion criterion = ci.getReturnValue();
+        if (json.has("trigger_times")) {
+            ((IMixinCriterion) criterion).setScoreGoal(json.get("trigger_times").getAsInt());
+        }
     }
 }

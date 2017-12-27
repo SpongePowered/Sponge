@@ -45,6 +45,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.advancement.IMixinICriterionTriggerListener;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -102,7 +103,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
         final PlayerAdvancements playerAdvancements = ((EntityPlayerMP) player).getAdvancements();
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
         final TypeToken typeToken = TypeToken.of(this.triggerConfigurationClass);
-        for (Listener listener : this.listeners.get(playerAdvancements)) {
+        for (Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
             final IMixinICriterionTriggerListener mixinListener = (IMixinICriterionTriggerListener) listener;
             final Advancement advancement = (Advancement) mixinListener.getAdvancement();
             final AdvancementCriterion advancementCriterion = (AdvancementCriterion)

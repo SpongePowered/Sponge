@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.interfaces.advancement;
 
+import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 
 public interface IMixinCriterionProgress {
 
     void setCriterion(AdvancementCriterion criterion);
+
+    AdvancementProgress getAdvancementProgress();
 }

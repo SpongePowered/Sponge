@@ -31,6 +31,7 @@ import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -45,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
+import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinICriterionTriggerListener;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 
@@ -56,19 +58,23 @@ public class MixinICriterionTriggerListener implements IMixinICriterionTriggerLi
     @Shadow @Final private String criterionName;
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "grantCriterion", at = @At("HEAD"))
+    @Inject(method = "grantCriterion", at = @At("HEAD"), cancellable = true)
     private void onGrantCriterion(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
+        final org.spongepowered.api.advancement.Advancement advancement =
+                (org.spongepowered.api.advancement.Advancement) this.advancement;
+        AdvancementCriterion advancementCriterion = (AdvancementCriterion)
+                this.advancement.getCriteria().get(this.criterionName);
+        final IMixinCriterion mixinCriterion = (IMixinCriterion) advancementCriterion;
+        if (mixinCriterion.getScoreCriterion() != null) {
+            advancementCriterion = mixinCriterion.getScoreCriterion();
+        }
         // Sponge filters are always handled in the trigger method
         if (!(this.criterionInstance instanceof SpongeFilteredTrigger)) {
             final FilteredTrigger filteredTrigger = (FilteredTrigger) this.criterionInstance;
             if (filteredTrigger.getType() instanceof SpongeTrigger) {
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-                final org.spongepowered.api.advancement.Advancement advancement =
-                        (org.spongepowered.api.advancement.Advancement) this.advancement;
                 final Player player = ((IMixinPlayerAdvancements) playerAdvancements).getPlayer();
                 final TypeToken typeToken = TypeToken.of(filteredTrigger.getType().getConfigurationType());
-                final AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                        this.advancement.getCriteria().get(this.criterionName);
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
                 SpongeImpl.postEvent(event);
@@ -79,6 +85,14 @@ public class MixinICriterionTriggerListener implements IMixinICriterionTriggerLi
             }
         }
         SpongeImpl.getCauseStackManager().pushCause(this.criterionInstance);
+        // Handle the score criteria ourselves, with each trigger will
+        // the score be increased by one.
+        if (advancementCriterion instanceof ScoreAdvancementCriterion) {
+            ((IMixinPlayerAdvancements) playerAdvancements).getPlayer().getProgress(advancement)
+                    .get((ScoreAdvancementCriterion) advancementCriterion).get().add(1);
+            ci.cancel();
+            SpongeImpl.getCauseStackManager().popCause();
+        }
     }
 
     @Inject(method = "grantCriterion", at = @At("RETURN"))

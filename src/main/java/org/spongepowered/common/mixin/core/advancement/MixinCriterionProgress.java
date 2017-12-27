@@ -73,6 +73,11 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
     }
 
     @Override
+    public org.spongepowered.api.advancement.AdvancementProgress getAdvancementProgress() {
+        return (org.spongepowered.api.advancement.AdvancementProgress) this.advancementProgress;
+    }
+
+    @Override
     public AdvancementCriterion getCriterion() {
         checkState(this.criterion != null, "The criterion is not yet initialized");
         return this.criterion;
@@ -96,7 +101,7 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
         ((IMixinAdvancementProgress) this.advancementProgress).getPlayerAdvancements()
-                .grantCriterion(advancement, this.criterion.getName());
+                .grantCriterion(advancement, getCriterion().getName());
         return this.obtained.toInstant();
     }
 
@@ -109,7 +114,7 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
         final Advancement advancement = (Advancement) ((org.spongepowered.api.advancement.AdvancementProgress)
                 this.advancementProgress).getAdvancement();
         ((IMixinAdvancementProgress) this.advancementProgress).getPlayerAdvancements()
-                .revokeCriterion(advancement, this.criterion.getName());
+                .revokeCriterion(advancement, getCriterion().getName());
         return Optional.of(instant);
     }
 

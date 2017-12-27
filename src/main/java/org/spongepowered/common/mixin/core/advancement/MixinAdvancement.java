@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.advancement;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
@@ -35,6 +36,9 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.AndCriterion;
+import org.spongepowered.api.advancement.criteria.OrCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,18 +46,24 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeCriterionHelper;
+import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
+import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,13 +76,13 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Shadow @Nullable public Advancement parent;
     @Shadow @Final private ResourceLocation id;
-    @Shadow @Final private String[][] requirements;
-    @Shadow @Final private Map<String, Criterion> criteria;
+    @Shadow private String[][] requirements;
+    @Shadow private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
     @Shadow @Final private ITextComponent displayText;
 
-    @Nullable private AdvancementCriterion criterion;
+    private AdvancementCriterion criterion;
     @Nullable private AdvancementTree tree;
     private List<Text> toastText;
     private Text text;
@@ -81,6 +91,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Nullable private Advancement tempParent;
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
@@ -130,6 +141,45 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             toastText.add(Text.of(getId()));
         }
         this.toastText = toastText.build();
+        final Set<String> scoreCriteria = new HashSet<>();
+        final Map<String, ICriterion> criterionMap = new HashMap<>();
+        for (Map.Entry<String, Criterion> entry : new HashMap<>(criteriaIn).entrySet()) {
+            final IMixinCriterion mixinCriterion = (IMixinCriterion) entry.getValue();
+            final ICriterion criterion;
+            if (mixinCriterion.getScoreGoal() != null) {
+                criterion = new SpongeScoreCriterion(entry.getKey(), mixinCriterion.getScoreGoal(),
+                        entry.getValue().getCriterionInstance());
+                scoreCriteria.add(entry.getKey());
+                ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
+                        criterion1 -> criteriaIn.put(criterion1.getName(), (Criterion) criterion1));
+            } else {
+                criterion = (ICriterion) mixinCriterion;
+                ((IMixinCriterion) criterion).setName(entry.getKey());
+            }
+            criterionMap.put(entry.getKey(), criterion);
+        }
+        final List<String[]> entries = new ArrayList<>();
+        final List<AdvancementCriterion> andCriteria = new ArrayList<>();
+        for (String[] array : requirementsIn) {
+            final Set<AdvancementCriterion> orCriteria = new HashSet<>();
+            for (String name : array) {
+                final ICriterion criterion = criterionMap.get(name);
+                if (criterion instanceof SpongeScoreCriterion) {
+                    ((SpongeScoreCriterion) criterion).internalCriteria.forEach(
+                            criterion1 -> entries.add(new String[] { criterion1.getName() }));
+                } else {
+                    entries.add(new String[] { criterion.getName() });
+                }
+                orCriteria.add(criterion);
+            }
+            andCriteria.add(OrCriterion.of(orCriteria));
+        }
+        this.criterion = AndCriterion.of(andCriteria);
+        if (!scoreCriteria.isEmpty()) {
+            scoreCriteria.forEach(criteriaIn::remove);
+            this.criteria = ImmutableMap.copyOf(criteriaIn);
+            this.requirements = entries.toArray(new String[entries.size()][]);
+        }
     }
 
     @Override
@@ -150,9 +200,6 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public AdvancementCriterion getCriterion() {
-        if (this.criterion == null) {
-            this.criterion = SpongeCriterionHelper.toCriterion(new HashMap<>(this.criteria), this.requirements);
-        }
         return this.criterion;
     }
 
