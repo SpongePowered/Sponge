@@ -212,6 +212,11 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
     public boolean isRegistered() {
         return this.tempParent == null;
     }

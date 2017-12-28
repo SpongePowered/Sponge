@@ -36,6 +36,7 @@ import ninja.leaping.configurate.gson.GsonConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -66,6 +67,8 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     private Class<C> configType;
     private Function<JsonObject, C> constructor;
     @Nullable private Consumer<CriterionEvent.Trigger<C>> eventHandler;
+    private String id;
+    @Nullable private String name;
 
     @Override
     public <T extends FilteredTriggerConfiguration & DataSerializable> Trigger.Builder<T> dataSerializableConfig(Class<T> dataConfigClass) {
@@ -177,23 +180,27 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     }
 
     @Override
-    public Trigger<C> build(String id) {
+    public Trigger.Builder<C> id(String id) {
         checkNotNull(id, "id");
-        checkState(this.configType != null, "configType");
-        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
-        return (Trigger<C>) new SpongeTrigger((Class) this.configType, (Function) this.constructor,
-                new ResourceLocation(plugin.getId(), id), (Consumer) this.eventHandler);
+        this.id = id;
+        return this;
     }
 
     @Override
-    public Trigger.Builder<C> from(Trigger<C> value) {
-        if (!(value instanceof SpongeTrigger)) {
-            throw new IllegalStateException("Unsupported trigger type: " + value.getId());
-        }
-        this.configType = value.getConfigurationType();
-        this.constructor = (Function<JsonObject, C>) ((SpongeTrigger) value).constructor;
-        this.eventHandler = (Consumer) ((SpongeTrigger) value).eventHandler;
+    public Trigger.Builder<C> name(String name) {
+        checkNotNull(name, "name");
+        this.name = name;
         return this;
+    }
+
+    @Override
+    public Trigger<C> build() {
+        checkState(this.id != null, "The id must be set");
+        checkState(this.configType != null, "The configType must be set");
+        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
+        final String name = StringUtils.isNotEmpty(this.name) ? this.name : this.id;
+        return (Trigger<C>) new SpongeTrigger((Class) this.configType, (Function) this.constructor,
+                new ResourceLocation(plugin.getId(), id), (Consumer) this.eventHandler, name);
     }
 
     @Override
@@ -201,6 +208,8 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         this.configType = null;
         this.constructor = null;
         this.eventHandler = null;
+        this.id = null;
+        this.name = null;
         return this;
     }
 }

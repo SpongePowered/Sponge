@@ -118,7 +118,8 @@ public class AdvancementTest {
                     triggerEvent.setResult(value < chance);
                     triggerEvent.getTargetEntity().sendMessage(Text.of(value + " < " + chance + " -> " + triggerEvent.getResult()));
                 })
-                .build("my_trigger");
+                .id("my_trigger")
+                .build();
         event.register(this.trigger);
     }
 
@@ -129,7 +130,8 @@ public class AdvancementTest {
         this.advancementTree = AdvancementTree.builder()
                 .rootAdvancement(this.rootAdvancement)
                 .background("minecraft:textures/blocks/dirt.png")
-                .build("dirt");
+                .id("dirt")
+                .build();
         event.register(this.advancementTree);
     }
 
@@ -143,13 +145,15 @@ public class AdvancementTest {
                         .title(Text.of("Dirt? Dirt!"))
                         .build())
                 .criterion(AdvancementCriterion.DUMMY)
-                .build("dirt");
+                .id("dirt")
+                .build();
         event.register(this.rootAdvancement);
 
         // Create the break dirt advancement and criterion
         this.breakDirtCriterion = ScoreAdvancementCriterion.builder()
                 .goal(10)
-                .build("broken_dirt");
+                .name("broken_dirt")
+                .build();
         this.breakDirtAdvancement = Advancement.builder()
                 .parent(this.rootAdvancement)
                 .displayInfo(DisplayInfo.builder()
@@ -158,7 +162,8 @@ public class AdvancementTest {
                         .description(Text.of("Start digging."))
                         .build())
                 .criterion(this.breakDirtCriterion)
-                .build("dirt_digger");
+                .id("dirt_digger")
+                .build();
         event.register(this.breakDirtAdvancement);
 
         // Create the cook dirt advancement
@@ -171,7 +176,8 @@ public class AdvancementTest {
                         .description(Text.of("Try to cook dirt"))
                         .type(AdvancementTypes.CHALLENGE)
                         .build())
-                .build("dirt_cooker");
+                .id("dirt_cooker")
+                .build();
         event.register(this.cookDirtAdvancement);
 
         this.suicidalAdvancement = null;
@@ -187,7 +193,8 @@ public class AdvancementTest {
                             .type(AdvancementTypes.CHALLENGE)
                             .hidden(true)
                             .build())
-                    .build("suicidal");
+                    .id("suicidal")
+                    .build();
             event.register(this.suicidalAdvancement);
         });
     }

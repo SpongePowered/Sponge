@@ -38,6 +38,8 @@ public interface IMixinAdvancement {
 
     void setCriterion(AdvancementCriterion criterion);
 
+    void setName(String name);
+
     boolean isRegistered();
 
     void setRegistered();

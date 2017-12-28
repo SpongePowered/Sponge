@@ -25,12 +25,14 @@
 package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -57,6 +59,8 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
     @Nullable private Advancement parent;
     private AdvancementCriterion criterion;
     @Nullable private DisplayInfo displayInfo;
+    private String id;
+    @Nullable private String name;
 
     public SpongeAdvancementBuilder() {
         reset();
@@ -82,12 +86,26 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
     }
 
     @Override
-    public Advancement build(String id) {
+    public Advancement.Builder id(String id) {
         checkNotNull(id, "id");
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public Advancement.Builder name(String name) {
+        checkNotNull(name, "name");
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public Advancement build() {
+        checkState(this.id != null, "The id must be set");
         final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
-        final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), id);
+        final ResourceLocation resourceLocation = new ResourceLocation(plugin.getId(), this.id);
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null :
                 (net.minecraft.advancements.DisplayInfo) DisplayInfo.builder().from(this.displayInfo).build(); // Create a copy
         net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
@@ -97,15 +115,10 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
                 resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
         ((IMixinAdvancement) advancement).setCriterion(this.criterion);
+        if (StringUtils.isNotEmpty(this.name)) {
+            ((IMixinAdvancement) advancement).setName(this.name);
+        }
         return advancement;
-    }
-
-    @Override
-    public Advancement.Builder from(Advancement value) {
-        this.displayInfo = value.getDisplayInfo().orElse(null);
-        this.criterion = value.getCriterion();
-        this.parent = value.getParent().orElse(null);
-        return this;
     }
 
     @Override
@@ -113,6 +126,8 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
         this.criterion = AdvancementCriterion.EMPTY;
         this.displayInfo = null;
         this.parent = null;
+        this.id = null;
+        this.name = null;
         return this;
     }
 }

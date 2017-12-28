@@ -24,18 +24,14 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
-import javax.annotation.Nullable;
+public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreAdvancementCriterion, ScoreAdvancementCriterion.Builder>
+        implements ScoreAdvancementCriterion.Builder {
 
-public class SpongeScoreCriterionBuilder implements ScoreAdvancementCriterion.Builder {
-
-    @Nullable private FilteredTrigger trigger;
     private int goal;
 
     public SpongeScoreCriterionBuilder() {
@@ -43,29 +39,20 @@ public class SpongeScoreCriterionBuilder implements ScoreAdvancementCriterion.Bu
     }
 
     @Override
-    public ScoreAdvancementCriterion.Builder trigger(FilteredTrigger<?> trigger) {
-        this.trigger = trigger;
-        return this;
-    }
-
-    @Override
-    public ScoreAdvancementCriterion build(String name) {
-        checkNotNull(name, "name");
-        return new SpongeScoreCriterion(name, this.goal, (ICriterionInstance) this.trigger);
+    ScoreAdvancementCriterion build0() {
+        return new SpongeScoreCriterion(this.name, this.goal, (ICriterionInstance) this.trigger);
     }
 
     @Override
     public ScoreAdvancementCriterion.Builder from(ScoreAdvancementCriterion value) {
-        this.trigger = value.getTrigger().orElse(null);
         this.goal = value.getGoal();
-        return this;
+        return super.from(value);
     }
 
     @Override
     public ScoreAdvancementCriterion.Builder reset() {
-        this.trigger = null;
         this.goal = 1;
-        return this;
+        return super.reset();
     }
 
     @Override

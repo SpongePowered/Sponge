@@ -24,40 +24,54 @@
  */
 package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-public class SpongeAdvancementTree implements AdvancementTree {
+import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
-    private final Advancement rootAdvancement;
-    private final String id;
-    private final String name;
+import javax.annotation.Nullable;
 
-    public SpongeAdvancementTree(Advancement rootAdvancement, String id, String name) {
-        this.rootAdvancement = rootAdvancement;
+public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B extends AdvancementCriterion.BaseBuilder<T, B>>
+        implements ScoreAdvancementCriterion.BaseBuilder<T, B> {
+
+    @Nullable protected FilteredTrigger trigger;
+    protected String name;
+
+    @Override
+    public B trigger(FilteredTrigger<?> trigger) {
+        checkNotNull(trigger, "trigger");
+        this.trigger = trigger;
+        return (B) this;
+    }
+
+    @Override
+    public B name(String name) {
+        checkNotNull(name, "name");
         this.name = name;
-        this.id = id;
+        return (B) this;
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public T build() {
+        checkState(this.name != null, "The name must be set");
+        return build0();
+    }
+
+    abstract T build0();
+
+    @Override
+    public B from(T value) {
+        this.trigger = value.getTrigger().orElse(null);
+        this.name = value.getName();
+        return (B) this;
     }
 
     @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Advancement getRootAdvancement() {
-        return this.rootAdvancement;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public String getBackgroundPath() {
-        return ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).getBackground();
+    public B reset() {
+        this.trigger = null;
+        this.name = null;
+        return (B) this;
     }
 }

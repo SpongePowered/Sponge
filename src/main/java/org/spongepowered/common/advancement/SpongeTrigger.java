@@ -58,19 +58,26 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     private final ResourceLocation id;
     private final Multimap<PlayerAdvancements, Listener> listeners = HashMultimap.create();
     @Nullable final Consumer<CriterionEvent.Trigger> eventHandler;
+    private final String name;
 
     SpongeTrigger(Class<FilteredTriggerConfiguration> triggerConfigurationClass,
             Function<JsonObject, FilteredTriggerConfiguration> constructor,
-            ResourceLocation id, @Nullable Consumer<CriterionEvent.Trigger> eventHandler) {
+            ResourceLocation id, @Nullable Consumer<CriterionEvent.Trigger> eventHandler,
+            String name) {
         this.triggerConfigurationClass = triggerConfigurationClass;
         this.eventHandler = eventHandler;
         this.constructor = constructor;
         this.id = id;
+        this.name = name;
     }
 
     @Override
     public ResourceLocation getId() {
         return this.id;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     @Override

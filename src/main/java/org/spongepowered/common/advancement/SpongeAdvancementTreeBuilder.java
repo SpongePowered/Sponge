@@ -27,7 +27,7 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.util.ResourceLocation;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -37,9 +37,13 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("ConstantConditions")
 public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
 
+    private String id;
+    @Nullable private String name;
     private Advancement rootAdvancement;
     private String background;
 
@@ -67,11 +71,27 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
     }
 
     @Override
-    public AdvancementTree build(String id) {
-        checkState(this.rootAdvancement != null, "Root advancement has not been set");
+    public AdvancementTree.Builder id(String id) {
+        checkNotNull(id, "id");
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public AdvancementTree.Builder name(String name) {
+        checkNotNull(name, "name");
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public AdvancementTree build() {
+        checkState(this.id != null, "The id must be set");
+        checkState(this.rootAdvancement != null, "The root advancement must be set");
         final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
-        final String name = this.rootAdvancement.getDisplayInfo().map(DisplayInfo::getTitle).map(Text::toPlain).orElse(id);
-        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, plugin.getId() + ':' + id, name);
+        final String name = StringUtils.isEmpty(this.name) ? this.rootAdvancement.getDisplayInfo()
+                .map(DisplayInfo::getTitle).map(Text::toPlain).orElse(this.id) : this.name;
+        final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, plugin.getId() + ':' + this.id, name);
         ((IMixinDisplayInfo) this.rootAdvancement.getDisplayInfo().get()).setBackground(this.background);
         ((IMixinAdvancement) this.rootAdvancement).setParent(null);
         applyTree(this.rootAdvancement, advancementTree);
@@ -86,16 +106,11 @@ public class SpongeAdvancementTreeBuilder implements AdvancementTree.Builder {
     }
 
     @Override
-    public AdvancementTree.Builder from(AdvancementTree value) {
-        this.background = value.getBackground();
-        this.rootAdvancement = null;
-        return this;
-    }
-
-    @Override
     public AdvancementTree.Builder reset() {
         this.background = "minecraft:textures/gui/advancements/backgrounds/stone.png";
         this.rootAdvancement = null;
+        this.name = null;
+        this.id = null;
         return this;
     }
 }

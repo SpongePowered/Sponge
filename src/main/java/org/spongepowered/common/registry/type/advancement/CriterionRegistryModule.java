@@ -36,6 +36,6 @@ public class CriterionRegistryModule implements RegistryModule {
     public void registerDefaults() {
         RegistryHelper.setFinalStatic(AdvancementCriterion.class, "EMPTY", SpongeEmptyCriterion.INSTANCE);
         RegistryHelper.setFinalStatic(AdvancementCriterion.class, "DUMMY",
-                new SpongeCriterionBuilder().build("dummy"));
+                new SpongeCriterionBuilder().name("dummy").build());
     }
 }
