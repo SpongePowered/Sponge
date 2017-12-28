@@ -106,16 +106,24 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
                 newGlowing = (Boolean) immutableValue.get();
             }
         }
-
-        originalValue = newIsSneaking ? (byte) (originalValue | CROUCHED_MASK) : (byte) (originalValue & ~CROUCHED_MASK);
-        originalValue = newSprinting ? (byte) (originalValue | SPRINTING_MASK) : (byte) (originalValue & ~SPRINTING_MASK);
-        originalValue = newInvisible ? (byte) (originalValue | INVISIBLE_MASK) : (byte) (originalValue & ~INVISIBLE_MASK);
-        originalValue = newGlowing ? (byte) (originalValue | GLOWING_MASK) : (byte) (originalValue & ~GLOWING_MASK);
-        return originalValue;
+        return flipFlag(
+            flipFlag(
+                flipFlag(
+                    flipFlag(originalValue, newIsSneaking, CROUCHED_MASK),
+                    newSprinting, SPRINTING_MASK),
+                newInvisible, INVISIBLE_MASK),
+            newGlowing, GLOWING_MASK);
     }
 
     private boolean getFlag(byte value, int mask) {
         return (value & mask) != 0;
+    }
+
+    private byte flipFlag(byte flag, boolean value, int mask) {
+        if (value) {
+            return (byte) (flag | mask);
+        }
+        return (byte) (flag & ~mask);
     }
 
     public static final int ON_FIRE_MASK        = 0x01;
