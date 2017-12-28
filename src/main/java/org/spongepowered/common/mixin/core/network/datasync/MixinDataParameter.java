@@ -22,18 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.network.datasync;
+package org.spongepowered.common.mixin.core.network.datasync;
 
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import net.minecraft.network.datasync.DataParameter;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
 
 import java.util.Optional;
 
-public interface IMixinEntityDataManager$DataEntry {
+import javax.annotation.Nullable;
 
-    Optional<Key<?>> getRelatedKey();
+@Mixin(DataParameter.class)
+public class MixinDataParameter<T> implements IMixinDataParameter<T> {
 
-    <T> ImmutableValue<T> createValue(T currentValue);
+    @Nullable private DataParameterConverter<T> converter;
 
-    <T> T getValueFromEvent(ImmutableValue<?> immutableValue);
+
+    @Override
+    public void setConverter(DataParameterConverter<T> converter) {
+        this.converter = converter;
+    }
+
+    @Override
+    public Optional<DataParameterConverter<T>> getConverter() {
+        return Optional.ofNullable(this.converter);
+    }
 }

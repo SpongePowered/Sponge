@@ -28,19 +28,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
-import com.google.common.reflect.TypeToken;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.meta.PatternLayer;
-import org.spongepowered.api.data.value.mutable.PatternListValue;
-import org.spongepowered.api.event.EventListener;
-import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -48,13 +43,20 @@ import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeKey;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>> {
 
@@ -600,9 +602,11 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
         final PluginContainer parent = ((SpongeKey) extraCatalog).getParent();
-        final String pluginId = parent.getId();
+        final String pluginId = parent.getId().toLowerCase(Locale.ENGLISH);
         final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
-        checkArgument(!id.startsWith(pluginId + ":"), "A plugin is trying to register custom keys under a different plugin id namespace! This is unsupported! The provided key: " + id);
+        final String[] split = id.split(":");
+        checkArgument(split.length == 2, "Key id's have to be in two parts! The first part being the plugin id, the second part being the key's individual id. Currently you have: " + Arrays.toString(split));
+        checkArgument(split[0].equals(pluginId),  "A plugin is trying to register custom keys under a different plugin id namespace! This is unsupported! The provided key: " + id);
         this.keyMap.put(id, extraCatalog);
     }
 
@@ -624,6 +628,41 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
             ((SpongeKey) key).registerListeners();
         }
     }
+
+    public void registerForEntityClass(Class<? extends Entity> cls) {
+        try {
+            final Callable<List<DataParameterConverter<?>>> callable = DATA_PARAMETER_FUNCTION_GETTERS.get(cls);
+            if (callable != null) {
+                final List<DataParameterConverter<?>> call = callable.call();
+                // just need to call, the constructor should perform the actual registration to the parameter.
+            }
+            // Then start climbing the hierarchy
+            Class<?> clazz = cls.getSuperclass();
+            do {
+                final Callable<List<DataParameterConverter<?>>> listCallable = DATA_PARAMETER_FUNCTION_GETTERS.get(clazz);
+                if (listCallable != null) {
+                    final List<DataParameterConverter<?>> call = listCallable.call();
+                    // just need to call, the constructor should perform the actual registration to the parameter.
+                }
+                clazz = clazz.getSuperclass();
+            }  while (clazz.getSuperclass() != Object.class);
+        } catch (Exception e) {
+            // we don't care about exceptions
+        }
+    }
+
+    public static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
+        .put(Entity.class, () -> {
+            final ArrayList<DataParameterConverter<?>> objects = new ArrayList<>();
+            objects.add(new EntityFlagsConverter());
+            // TODO
+//            objects.add(new EntityAirConverter());
+//            objects.add(new EntityCustomNameConverter());
+//            objects.add(new EntitySilentConverter());
+//            objects.add(new EntityNoGravityConverter());
+            return objects;
+        })
+        .build();
 
     static final class Holder {
         static final KeyRegistryModule INSTANCE = new KeyRegistryModule();

@@ -22,37 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.datasync;
+package org.spongepowered.common.interfaces.network.datasync;
 
-import net.minecraft.network.datasync.EntityDataManager;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.network.datasync.IMixinEntityDataManager$DataEntry;
-import org.spongepowered.common.registry.type.data.KeyRegistryModule;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+public interface IMixinDataParameter<T> {
 
-@Mixin(EntityDataManager.DataEntry.class)
-public abstract class MixinEntityDataManager$DataEntry implements IMixinEntityDataManager$DataEntry {
+    void setConverter(DataParameterConverter<T> converter);
 
-    @Nullable Key<?> relatedKey = KeyRegistryModule.getInstance().getKeyFromDataEntry();
+    Optional<DataParameterConverter<T>> getConverter();
 
-    @Override
-    public Optional<Key<?>> getRelatedKey() {
-
-        return Optional.empty();
-    }
-
-    @Override
-    public <T> ImmutableValue<T> createValue(T currentValue) {
-        return null;
-    }
-
-    @Override
-    public <T> T getValueFromEvent(ImmutableValue<?> immutableValue) {
-        return null;
-    }
 }

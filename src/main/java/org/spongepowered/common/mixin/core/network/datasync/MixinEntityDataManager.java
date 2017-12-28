@@ -32,8 +32,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -41,8 +39,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.interfaces.network.datasync.IMixinEntityDataManager$DataEntry;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.interfaces.network.datasync.IMixinDataParameter;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Map;
 import java.util.Optional;
@@ -50,8 +49,11 @@ import java.util.Optional;
 @Mixin(EntityDataManager.class)
 public abstract class MixinEntityDataManager {
 
-    @Shadow @Final @Mutable public Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
+    // This overrides the setter for the entries of the
+    // data manager to use a "faster" map.
+    @Shadow @Final @Mutable private Map < Integer, EntityDataManager.DataEntry<? >> entries = new Int2ObjectOpenHashMap<>();
 
+    // The rest is actually used in the overwrite below.
     @Shadow @Final protected Entity entity;
     @Shadow private boolean dirty;
 
@@ -75,34 +77,25 @@ public abstract class MixinEntityDataManager {
         final T currentValue = dataentry.getValue();
         if (ObjectUtils.notEqual(value, currentValue)) { // Sponge - change dataentry.getValue() to use local variable
             // Sponge Start - retrieve the associated key, if available
-            final IMixinEntityDataManager$DataEntry mixinEntry = (IMixinEntityDataManager$DataEntry) dataentry;
-            final Optional<Key<?>> relatedKey = mixinEntry.getRelatedKey();
-            // At this point it is changing
-            if (relatedKey.isPresent()) {
-
-                // Ok, we have a key ready to use
-                final Key<?> spongeKey = relatedKey.get();
-                final DataTransactionResult transaction = DataTransactionResult.builder()
-                    // Use the entry to soft convert the value if necessary,
-                    // sometimes some keys are native to minecraft types and others are not
-                    // like DyeColors are native, but health is oging to be a conversion from
-                    // float -> double
-                    .replace(mixinEntry.createValue(currentValue))
-                    .success(mixinEntry.createValue(value))
-                    .result(DataTransactionResult.Type.SUCCESS)
-                    .build();
-                final ChangeDataHolderEvent.ValueChange
-                    event =
-                    SpongeEventFactory.createChangeDataHolderEventValueChange(Sponge.getCauseStackManager().getCurrentCause(), transaction,
-                        (DataHolder) this.entity);
-                Sponge.getEventManager().post(event);
-                if (event.isCancelled()) {
-                    //If the event is cancelled, well, don't change the underlying value.
-                    return;
-                }
-                for (ImmutableValue<?> immutableValue : event.getEndResult().getSuccessfulData()) {
-                    if (immutableValue.getKey() == spongeKey) {
-                        value = mixinEntry.getValueFromEvent(immutableValue);
+            if (!this.entity.world.isRemote) { // We only want to spam the server world ;)
+                final Optional<DataParameterConverter<T>> converter = ((IMixinDataParameter) key).getConverter();
+                // At this point it is changing
+                if (converter.isPresent()) {
+                    // Ok, we have a key ready to use the converter
+                    final Optional<DataTransactionResult> optional = converter.get().createTransaction(currentValue, value);
+                    if (optional.isPresent()) {
+                        // Only need to make a transaction if there are actual changes necessary.
+                        final DataTransactionResult transaction = optional.get();
+                        final ChangeDataHolderEvent.ValueChange
+                            event =
+                            SpongeEventFactory.createChangeDataHolderEventValueChange(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                                (DataHolder) this.entity);
+                        Sponge.getEventManager().post(event);
+                        if (event.isCancelled()) {
+                            //If the event is cancelled, well, don't change the underlying value.
+                            return;
+                        }
+                        value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
                     }
                 }
             }
