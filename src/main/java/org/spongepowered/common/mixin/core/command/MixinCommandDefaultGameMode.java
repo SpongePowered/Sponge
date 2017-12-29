@@ -22,43 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.command.multiworld;
+package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.CommandDefaultGameMode;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.GameType;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 @Mixin(CommandDefaultGameMode.class)
-public abstract class MixinCommandDefaultGameMode  {
+public abstract class MixinCommandDefaultGameMode {
 
-    /**
-     * @author Minecrell - September 28, 2016
-     * @author dualspiral - December 29, 2017
-     * @reason Change game mode only in the world the command was executed in
-     *         Only apply game mode to those without the override permission
-     */
-    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/CommandDefaultGameMode;"
-            + "setDefaultGameType(Lnet/minecraft/world/GameType;Lnet/minecraft/server/MinecraftServer;)V"))
-    private void onSetDefaultGameType(CommandDefaultGameMode self, GameType type, MinecraftServer server, MinecraftServer server2,
-            ICommandSender sender, String[] args) {
-
-        World world = sender.getEntityWorld();
-        world.getWorldInfo().setGameType(type);
-
-        if (server.getForceGamemode()) {
-            for (EntityPlayer player : world.playerEntities) {
-                if (!((IMixinEntityPlayerMP) player).hasForcedGamemodeOverridePermission()) {
-                    player.setGameType(type);
-                }
-            }
+    @Redirect(method = "setDefaultGameType",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V"))
+    private void onSetGameType(EntityPlayerMP entityPlayerMP, GameType gameType) {
+        if (!((IMixinEntityPlayerMP) entityPlayerMP).hasForcedGamemodeOverridePermission()) {
+            entityPlayerMP.setGameType(gameType);
         }
     }
 
 }
+
