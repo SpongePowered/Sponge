@@ -123,6 +123,7 @@
         "command.MixinBlockCommandBlockSender",
         "command.MixinCommandBase",
         "command.MixinCommandBlockSource",
+        "command.MixinCommandDefaultGameMode",
         "command.MixinCommandExecuteAt",
         "command.MixinCommandHandler",
         "command.MixinCommandScoreboard",

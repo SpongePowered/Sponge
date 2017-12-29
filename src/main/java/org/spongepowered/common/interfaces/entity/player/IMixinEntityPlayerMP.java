@@ -82,4 +82,7 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     void injectScaledHealth(Collection<IAttributeInstance> set, boolean b);
 
     void updateDataManagerForScaledHealth();
+
+    boolean hasForcedGamemodeOverridePermission();
+
 }

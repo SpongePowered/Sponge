@@ -1158,4 +1158,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public CooldownTracker getCooldownTracker() {
         return (CooldownTracker) shadow$getCooldownTracker();
     }
+
+    @Redirect(method = "readEntityFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getForceGamemode()Z"))
+    private boolean onCheckForcedGameMode(MinecraftServer minecraftServer) {
+        return minecraftServer.getForceGamemode() && !hasForcedGamemodeOverridePermission();
+    }
+
+    @Override
+    public boolean hasForcedGamemodeOverridePermission() {
+        return this.hasPermission(getActiveContexts(), "minecraft.force-gamemode.override");
+    }
+
 }
