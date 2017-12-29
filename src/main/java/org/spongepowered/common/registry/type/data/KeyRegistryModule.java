@@ -44,7 +44,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeKey;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
 import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -651,10 +653,13 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         }
     }
 
-    public static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
+    private static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
         .put(Entity.class, () -> {
             final ArrayList<DataParameterConverter<?>> objects = new ArrayList<>();
             objects.add(new EntityFlagsConverter());
+            objects.add(new EntityCustomNameVisibleConverter());
+            objects.add(new EntitySilentConverter());
+            objects.add()
             // TODO
 //            objects.add(new EntityAirConverter());
 //            objects.add(new EntityCustomNameConverter());

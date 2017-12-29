@@ -75,6 +75,7 @@ public abstract class MixinEntityDataManager {
 
         // Sponge Start - set up the current value, so we don't have to retrieve it multiple times
         final T currentValue = dataentry.getValue();
+        final T incomingValue = value;
         if (ObjectUtils.notEqual(value, currentValue)) { // Sponge - change dataentry.getValue() to use local variable
             // Sponge Start - retrieve the associated key, if available
             if (!this.entity.world.isRemote) { // We only want to spam the server world ;)
@@ -95,7 +96,12 @@ public abstract class MixinEntityDataManager {
                             //If the event is cancelled, well, don't change the underlying value.
                             return;
                         }
-                        value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
+                        try {
+                            value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
+                        } catch (Exception e) {
+                            // Worst case scenario, we don't wnat to cause an issue, so we just set the value
+                            value = incomingValue;
+                        }
                     }
                 }
             }
