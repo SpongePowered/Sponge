@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
+import org.h2.mvstore.ConcurrentArrayList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -44,8 +45,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeKey;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.datasync.entity.EntityAirConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
 import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
 import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
 
 import java.lang.reflect.Field;
@@ -633,38 +636,45 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
     public void registerForEntityClass(Class<? extends Entity> cls) {
         try {
+            List<DataParameterConverter<?>> converters = LOADED_CLASSES.computeIfAbsent(cls, k -> new ArrayList<>());
             final Callable<List<DataParameterConverter<?>>> callable = DATA_PARAMETER_FUNCTION_GETTERS.get(cls);
             if (callable != null) {
                 final List<DataParameterConverter<?>> call = callable.call();
+                converters.addAll(call);
                 // just need to call, the constructor should perform the actual registration to the parameter.
             }
             // Then start climbing the hierarchy
             Class<?> clazz = cls.getSuperclass();
             do {
+                List<DataParameterConverter<?>> superConverters = LOADED_CLASSES.computeIfAbsent(clazz, k -> new ArrayList<>());
+
                 final Callable<List<DataParameterConverter<?>>> listCallable = DATA_PARAMETER_FUNCTION_GETTERS.get(clazz);
                 if (listCallable != null) {
                     final List<DataParameterConverter<?>> call = listCallable.call();
+                    superConverters.addAll(call);
+                    converters.addAll(call);
                     // just need to call, the constructor should perform the actual registration to the parameter.
                 }
                 clazz = clazz.getSuperclass();
-            }  while (clazz.getSuperclass() != Object.class);
+            }  while (clazz.getSuperclass() != Object.class && !LOADED_CLASSES.containsKey(clazz));
         } catch (Exception e) {
             // we don't care about exceptions
         }
     }
 
+    // This is to avoid duplication of calling converters and creating them.
+    // Likewise, this will allow us to maybe do some super management
+    // of multiple changes in one go.
+    private static ConcurrentHashMap<Class<?>, List<DataParameterConverter<?>>> LOADED_CLASSES = new ConcurrentHashMap<>();
     private static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
         .put(Entity.class, () -> {
             final ArrayList<DataParameterConverter<?>> objects = new ArrayList<>();
             objects.add(new EntityFlagsConverter());
             objects.add(new EntityCustomNameVisibleConverter());
             objects.add(new EntitySilentConverter());
-            objects.add()
-            // TODO
-//            objects.add(new EntityAirConverter());
-//            objects.add(new EntityCustomNameConverter());
-//            objects.add(new EntitySilentConverter());
-//            objects.add(new EntityNoGravityConverter());
+            objects.add(new EntityAirConverter());
+            objects.add(new EntitySilentConverter());
+            objects.add(new EntityNoGravityConverter());
             return objects;
         })
         .build();
