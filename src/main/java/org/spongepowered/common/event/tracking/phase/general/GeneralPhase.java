@@ -208,10 +208,9 @@ public final class GeneralPhase extends TrackingPhase {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldLocation.getExtent();
             final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
             capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
-                    .spawnItemDataForBlockDrops(items, newBlockSnapshot, unwindingPhaseContext, unwindingState));
+                    .spawnItemDataForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext, unwindingState));
             capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
-                    .spawnItemEntitiesForBlockDrops(items, newBlockSnapshot,
-                        unwindingPhaseContext, unwindingState));
+                    .spawnItemEntitiesForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext, unwindingState));
 
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
             SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
