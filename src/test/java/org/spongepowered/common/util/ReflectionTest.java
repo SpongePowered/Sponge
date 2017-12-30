@@ -29,10 +29,13 @@ import static org.spongepowered.common.util.ReflectionUtil.findConstructor;
 
 import com.google.common.reflect.TypeToken;
 import org.junit.Test;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ReflectionTest {
@@ -125,6 +128,11 @@ public class ReflectionTest {
             @Override
             public DataQuery getQuery() {
                 return DataQuery.of("Herp");
+            }
+
+            @Override
+            public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+
             }
         };
 

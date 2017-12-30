@@ -28,26 +28,40 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.data.DataQuery.of;
-import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
-import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.data.DataQuery;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.datasync.DataParameter;
+import org.h2.mvstore.ConcurrentArrayList;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.meta.PatternLayer;
-import org.spongepowered.api.data.value.mutable.PatternListValue;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeKey;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.datasync.entity.EntityAirConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
+import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
+import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>> {
 
@@ -65,6 +79,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     @Override
     public void registerDefaults() {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Attempting to register Keys illegally!");
+        Sponge.getCauseStackManager().pushCause(SpongeImpl.getPlugin());
 
         register("axis", Key.builder().type(TypeTokens.AXIS_VALUE_TOKEN).id("sponge:axis").name("Axis").query(of("Axis")).build());
 
@@ -368,7 +383,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         register("banner_base_color", Key.builder().type(TypeTokens.DYE_COLOR_VALUE_TOKEN).id("sponge:banner_base_color").name("Banner Base Color").query(of("BannerBaseColor")).build());
 
-        this.fieldMap.put("banner_patterns", new PatternKey());
+        register("banner_patterns", Key.builder().type(TypeTokens.PATTERN_LIST_VALUE_TOKEN).id("sponge:banner_patterns").name("Banner Patterns").query(of("BannerPatterns")).build());
 
         register("respawn_locations", Key.builder().type(TypeTokens.MAP_UUID_VECTOR3D_VALUE_TOKEN).id("sponge:respawn_locations").name("Respawn Locations").query(of("RespawnLocations")).build());
 
@@ -577,6 +592,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("sponge:health_scale").name("Health Scale").query(of("HealthScale")).build());
 
+        // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
+        Sponge.getCauseStackManager().popCause();
+
     }
 
     private void register(String fieldName, Key<?> key) {
@@ -588,14 +606,18 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot register new Keys after Data Registration has completed!");
         checkNotNull(extraCatalog, "Key cannot be null!");
+        final PluginContainer parent = ((SpongeKey) extraCatalog).getParent();
+        final String pluginId = parent.getId().toLowerCase(Locale.ENGLISH);
         final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
-        checkArgument(!id.startsWith("sponge:"), "A plugin is trying to register custom keys under the sponge id namespace! This is a fake key! " + id);
+        final String[] split = id.split(":");
+        checkArgument(split.length == 2, "Key id's have to be in two parts! The first part being the plugin id, the second part being the key's individual id. Currently you have: " + Arrays.toString(split));
+        checkArgument(split[0].equals(pluginId),  "A plugin is trying to register custom keys under a different plugin id namespace! This is unsupported! The provided key: " + id);
         this.keyMap.put(id, extraCatalog);
     }
 
     @Override
     public Optional<Key<?>> getById(String id) {
-        return Optional.ofNullable(this.keyMap.get(id));
+        return Optional.ofNullable(this.keyMap.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -603,47 +625,59 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         return Collections.unmodifiableCollection(this.keyMap.values());
     }
 
-    private static final class PatternKey implements Key<PatternListValue> {
-
-        static final TypeToken<PatternListValue> VALUE_TOKEN = new TypeToken<PatternListValue>() {
-            private static final long serialVersionUID = -1;
-        };
-        static final TypeToken<List<PatternLayer>> ELEMENT_TOKEN = new TypeToken<List<PatternLayer>>() {
-            private static final long serialVersionUID = -1;
-        };
-        private static final DataQuery BANNER_PATTERNS = of("BannerPatterns");
-
-        PatternKey() {
-        }
-
-        @Override
-        public TypeToken<PatternListValue> getValueToken() {
-            return VALUE_TOKEN;
-        }
-
-        @Override
-        public TypeToken<?> getElementToken() {
-            return ELEMENT_TOKEN;
-        }
-
-        @Override
-        public DataQuery getQuery() {
-            return BANNER_PATTERNS;
-        }
-
-        @Override
-        public String getId() {
-            return "sponge:banner_patterns";
-        }
-
-        @Override
-        public String getName() {
-            return "BannerPatterns";
-        }
-    }
-
     KeyRegistryModule() {
     }
+
+    public void registerKeyListeners() {
+        for (Key<?> key : this.keyMap.values()) {
+            ((SpongeKey) key).registerListeners();
+        }
+    }
+
+    public void registerForEntityClass(Class<? extends Entity> cls) {
+        try {
+            List<DataParameterConverter<?>> converters = LOADED_CLASSES.computeIfAbsent(cls, k -> new ArrayList<>());
+            final Callable<List<DataParameterConverter<?>>> callable = DATA_PARAMETER_FUNCTION_GETTERS.get(cls);
+            if (callable != null) {
+                final List<DataParameterConverter<?>> call = callable.call();
+                converters.addAll(call);
+                // just need to call, the constructor should perform the actual registration to the parameter.
+            }
+            // Then start climbing the hierarchy
+            Class<?> clazz = cls.getSuperclass();
+            do {
+                List<DataParameterConverter<?>> superConverters = LOADED_CLASSES.computeIfAbsent(clazz, k -> new ArrayList<>());
+
+                final Callable<List<DataParameterConverter<?>>> listCallable = DATA_PARAMETER_FUNCTION_GETTERS.get(clazz);
+                if (listCallable != null) {
+                    final List<DataParameterConverter<?>> call = listCallable.call();
+                    superConverters.addAll(call);
+                    converters.addAll(call);
+                    // just need to call, the constructor should perform the actual registration to the parameter.
+                }
+                clazz = clazz.getSuperclass();
+            }  while (clazz.getSuperclass() != Object.class && !LOADED_CLASSES.containsKey(clazz));
+        } catch (Exception e) {
+            // we don't care about exceptions
+        }
+    }
+
+    // This is to avoid duplication of calling converters and creating them.
+    // Likewise, this will allow us to maybe do some super management
+    // of multiple changes in one go.
+    private static ConcurrentHashMap<Class<?>, List<DataParameterConverter<?>>> LOADED_CLASSES = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>> DATA_PARAMETER_FUNCTION_GETTERS = ImmutableMap.<Class<? extends Entity>, Callable<List<DataParameterConverter<?>>>>builder()
+        .put(Entity.class, () -> {
+            final ArrayList<DataParameterConverter<?>> objects = new ArrayList<>();
+            objects.add(new EntityFlagsConverter());
+            objects.add(new EntityCustomNameVisibleConverter());
+            objects.add(new EntitySilentConverter());
+            objects.add(new EntityAirConverter());
+            objects.add(new EntitySilentConverter());
+            objects.add(new EntityNoGravityConverter());
+            return objects;
+        })
+        .build();
 
     static final class Holder {
         static final KeyRegistryModule INSTANCE = new KeyRegistryModule();

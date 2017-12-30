@@ -32,6 +32,7 @@ import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Locale;
 
@@ -79,7 +80,9 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
         checkState(this.id != null, "Key id must be set!");
         checkState(this.query != null, "DataQuery not set!");
         checkState(this.name != null, "Name must be set");
-        return new SpongeKey<>(this);
+        final SpongeKey<V> key = new SpongeKey<>(this);
+        KeyRegistryModule.getInstance().registerAdditionalCatalog(key);
+        return key;
     }
 
     @Override
