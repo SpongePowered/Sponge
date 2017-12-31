@@ -78,7 +78,10 @@ public abstract class MixinEntityDataManager {
         final T incomingValue = value;
         if (ObjectUtils.notEqual(value, currentValue)) { // Sponge - change dataentry.getValue() to use local variable
             // Sponge Start - retrieve the associated key, if available
-            if (!this.entity.world.isRemote) { // We only want to spam the server world ;)
+            // Client side can have an entity, because reasons.......
+            // Really silly reasons......
+            // I don't know, ask Grum....
+            if (this.entity != null && this.entity.world != null && !this.entity.world.isRemote) { // We only want to spam the server world ;)
                 final Optional<DataParameterConverter<T>> converter = ((IMixinDataParameter) key).getConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {
