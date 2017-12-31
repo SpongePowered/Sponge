@@ -125,7 +125,7 @@ public class SpongeManipulatorRegistry {
             .concurrencyLevel(4)
             .makeMap();
 
-        private final ConcurrentSkipListSet<DataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
+        private final ConcurrentSkipListSet<SpongeDataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
             Comparator.comparing(DataRegistration::getId));
 
     }
@@ -190,19 +190,13 @@ public class SpongeManipulatorRegistry {
             .collect(Collectors.toList());
     }
 
-    <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerLegacyId(DataRegistration<T, I> registration) {
-        this.legacyRegistrationIds.put(registration.getManipulatorClass().getName(), registration);
-        this.legacyRegistrationIds.put(registration.getImmutableManipulatorClass().getName(), registration);
-
-    }
-
     public Optional<DataRegistration<?, ?>> getRegistrationForLegacyId(String id) {
         return Optional.ofNullable(this.legacyRegistrationIds.get(id));
     }
 
 
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> register(
-        DataRegistration<M, I> registration) {
+        SpongeDataRegistration<M, I> registration) {
         checkState(this.tempRegistry != null);
         if (this.tempRegistry.registrations.contains(registration)) {
             throw new IllegalStateException("Existing DataRegistration exists for id: " + registration);
@@ -370,7 +364,13 @@ public class SpongeManipulatorRegistry {
         this.tempRegistry.registrations.forEach(registration -> {
                 registrationBuilder.add(registration);
                 manipulatorBuilder.put(registration.getManipulatorClass(), registration);
+                if (!registration.getImplementationClass().equals(registration.getManipulatorClass())) {
+                    manipulatorBuilder.put(registration.getImplementationClass(), registration);
+                }
                 immutableBuilder.put(registration.getImmutableManipulatorClass(), registration);
+                if (!registration.getImmutableImplementationClass().equals(registration.getImmutableManipulatorClass())) {
+                    immutableBuilder.put(registration.getImmutableImplementationClass(), registration);
+                }
                 idBuilder.put(registration.getId(), registration);
                 pluginBuilder.put(registration.getPluginContainer(), registration);
             });

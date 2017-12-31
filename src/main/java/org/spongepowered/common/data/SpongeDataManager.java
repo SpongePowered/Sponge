@@ -225,18 +225,6 @@ public final class SpongeDataManager implements DataManager {
         SpongeManipulatorRegistry.getInstance().registerLegacyId(legacyId, registration);
     }
 
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(DataRegistration<T, I> registration) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        final Class<T> manipulatorClass = registration.getManipulatorClass();
-        final Class<I> immutableManipulatorClass = registration.getImmutableManipulatorClass();
-        final DataManipulatorBuilder<T, I> builder = registration.getDataManipulatorBuilder();
-        final String manipulatorId = registration.getId();
-        final PluginContainer pluginContainer = registration.getPluginContainer();
-        final String pluginId = pluginContainer.getId().toLowerCase();
-
-        // TODO ???
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
@@ -301,7 +289,9 @@ public final class SpongeDataManager implements DataManager {
         SpongeDataRegistrationBuilder<M, I> builder) {
         checkState(allowRegistrations);
         final Class<M> manipulatorClass = builder.manipulatorClass;
+        final Class<? extends M> implementationClass = builder.implementationData;
         final Class<I> immutableClass = builder.immutableClass;
+        final Class<? extends I> immutableImplementation = builder.immutableImplementation;
         final DataManipulatorBuilder<M, I> manipulatorBuilder = builder.manipulatorBuilder;
         checkState(!this.builders.containsKey(manipulatorClass), "DataManipulator already registered!");
         checkState(!this.builderMap.containsKey(manipulatorClass), "DataManipulator already registered!");
@@ -310,7 +300,14 @@ public final class SpongeDataManager implements DataManager {
         checkState(!this.immutableBuilderMap.containsKey(immutableClass), "ImmutableDataManipulator already registered!");
         checkState(!this.immutableBuilderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
 
-
+        if (implementationClass != null) {
+            checkState(!this.builders.containsKey(implementationClass), "DataManipulator implementation already registered!");
+            checkState(!this.builderMap.containsKey(implementationClass), "DataManipulator implementation already registered!");
+        }
+        if (immutableImplementation != null) {
+            checkState(!this.builders.containsKey(immutableImplementation), "ImmutableDataManipulator implementation already registered!");
+            checkState(!this.immutableBuilderMap.containsKey(immutableImplementation), "ImmutableDataManipulator implementation already registered!");
+        }
     }
 
     public static boolean areRegistrationsComplete() {
@@ -321,6 +318,13 @@ public final class SpongeDataManager implements DataManager {
         SpongeDataRegistration<M, I> registration) {
         this.builders.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
         this.builderMap.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
+        if (!registration.getImplementationClass().equals(registration.getManipulatorClass())) {
+            this.builders.put(registration.getImplementationClass(), registration.getDataManipulatorBuilder());
+            this.builderMap.put(registration.getImplementationClass(), registration.getDataManipulatorBuilder());
+        }
         this.immutableBuilderMap.put(registration.getImmutableManipulatorClass(), registration.getDataManipulatorBuilder());
+        if (!registration.getImmutableImplementationClass().equals(registration.getImmutableManipulatorClass())) {
+            this.immutableBuilderMap.put(registration.getImmutableImplementationClass(), registration.getDataManipulatorBuilder());
+        }
     }
 }
