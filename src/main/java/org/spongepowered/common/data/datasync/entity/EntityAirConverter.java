@@ -45,6 +45,7 @@ public class EntityAirConverter extends DataParameterConverter<Integer> {
         return Optional.of(DataTransactionResult.builder()
             .replace(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, currentValue, Integer::compareTo, 0, 300))
             .success(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, value, Integer::compareTo, 0, 300))
+            .result(DataTransactionResult.Type.SUCCESS)
             .build()
             );
     }

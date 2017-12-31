@@ -50,6 +50,7 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
         return Optional.of(DataTransactionResult.builder()
             .replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), currentText))
             .success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), newValue))
+            .result(DataTransactionResult.Type.SUCCESS)
             .build());
     }
 
