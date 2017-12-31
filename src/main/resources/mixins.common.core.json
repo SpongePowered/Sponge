@@ -448,6 +448,7 @@
         "util.MixinChatType",
         "util.MixinClassInheritanceMultiMap",
         "util.MixinCooldownTracker",
+        "util.MixinCooldownTrackerServer",
         "util.MixinDamageSource",
         "util.MixinEntityDamageSource",
         "util.MixinEnumHand",
