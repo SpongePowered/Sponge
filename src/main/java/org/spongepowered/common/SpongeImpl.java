@@ -197,6 +197,10 @@ public final class SpongeImpl {
         return Sponge.getEventManager().post(event);
     }
 
+    public static boolean postEvent(Event event, boolean allowClient) {
+        return ((SpongeEventManager) Sponge.getEventManager()).post(event, allowClient);
+    }
+
     public static void postState(GameState state, GameStateEvent event) {
         check(game);
         game.setState(state);

@@ -24,14 +24,14 @@
  */
 package org.spongepowered.test.myhomes.data.friends.impl;
 
-import org.spongepowered.cookbook.myhomes.data.Keys;
-import org.spongepowered.cookbook.myhomes.data.friends.FriendsData;
-import org.spongepowered.cookbook.myhomes.data.friends.ImmutableFriendsData;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.test.myhomes.MyHomes;
+import org.spongepowered.test.myhomes.data.friends.FriendsData;
+import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,8 +57,8 @@ public class FriendsDataBuilder extends AbstractDataBuilder<FriendsData> impleme
 
     @Override
     protected Optional<FriendsData> buildContent(DataView container) throws InvalidDataException {
-        if (container.contains(Keys.FRIENDS)) {
-            List<UUID> friends = container.getObjectList(Keys.FRIENDS.getQuery(), UUID.class).get();
+        if (container.contains(MyHomes.FRIENDS)) {
+            List<UUID> friends = container.getObjectList(MyHomes.FRIENDS.getQuery(), UUID.class).get();
             return Optional.of(new FriendsDataImpl(friends));
         }
 

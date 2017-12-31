@@ -37,6 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameRegistryEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -58,7 +59,7 @@ import org.spongepowered.test.myhomes.data.home.impl.ImmutableHomeDataImpl;
 
 import java.util.UUID;
 
-@Plugin(id = "myhomes")
+@Plugin(id = "myhomes", name = "MyHomes")
 public class MyHomes {
 
     public static Key<Value<Home>> DEFAULT_HOME = DummyObjectProvider.createExtendedFor(Key.class, "DEFAULT_HOME");
@@ -89,6 +90,11 @@ public class MyHomes {
             .name("Friends")
             .query(DataQuery.of("Friends"))
             .build();
+    }
+
+    @Listener
+    public void onGameInit(GameInitializationEvent event) {
+        System.err.println("derp");
     }
 
     @Listener

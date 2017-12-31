@@ -158,6 +158,7 @@ import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyBuilder;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -494,6 +495,7 @@ public final class CommonModuleRegistry {
             .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
             .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
             .registerModule(new CriterionRegistryModule())
+            .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

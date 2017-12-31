@@ -45,6 +45,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
@@ -54,6 +55,8 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -70,7 +73,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @SuppressWarnings({"SuspiciousMethodCalls", "unchecked", "rawtypes"})
-public class SpongeManipulatorRegistry {
+@RegistrationDependency(KeyRegistryModule.class)
+public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistryModule<DataRegistration<?, ?>> {
 
     private static final SpongeManipulatorRegistry INSTANCE = new SpongeManipulatorRegistry();
 
@@ -103,6 +107,32 @@ public class SpongeManipulatorRegistry {
             throw new IllegalStateException("Legacy registration id already registered: id" + legacyId + " for registration: " + registration);
         }
         this.legacyRegistrationIds.put(legacyId, registration);
+    }
+
+    @Override
+    public boolean allowsApiRegistration() {
+        return true;
+    }
+
+    @Override
+    public void registerAdditionalCatalog(DataRegistration<?, ?> extraCatalog) {
+        checkArgument(extraCatalog instanceof SpongeDataRegistration);
+        // Technically, if the registration was not registered, well....
+        // it should have already been registered at this point
+        final SpongeDataRegistration registration = (SpongeDataRegistration) extraCatalog;
+        SpongeDataManager.getInstance().registerInternally(registration);
+        SpongeManipulatorRegistry.getInstance().register(registration);
+    }
+
+    @Override
+    public Optional<DataRegistration<?, ?>> getById(String id) {
+        final DataRegistration<?, ?> dataRegistration = this.registrationMap.get(id);
+        return Optional.ofNullable(dataRegistration);
+    }
+
+    @Override
+    public Collection<DataRegistration<?, ?>> getAll() {
+        return this.registrationMap.values();
     }
 
 

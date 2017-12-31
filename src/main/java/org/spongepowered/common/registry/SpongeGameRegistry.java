@@ -42,6 +42,8 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
@@ -601,7 +603,13 @@ public class SpongeGameRegistry implements GameRegistry {
                 return;
             }
             final AdditionalCatalogRegistryModule registryModule = (AdditionalCatalogRegistryModule) module;
-            SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(Cause.of(EventContext.empty(), this), catalogClass, registryModule));
+            // Since we need plugins to be able to register things that may still be on the client thread, prior
+            // to the game actually starting, or the server actually starting (like custom data), we  need those
+            // to be still thrown.
+            if (catalogClass == DataRegistration.class) {
+                System.err.println("derp");
+            }
+            SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(Cause.of(EventContext.empty(), this), catalogClass, registryModule), true);
 
         }
     }

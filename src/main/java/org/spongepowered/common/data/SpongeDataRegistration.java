@@ -63,6 +63,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
         return this.manipulatorClass;
     }
 
+    @Override
     public Class<? extends M> getImplementationClass() {
         return this.implementationClass;
     }
@@ -72,6 +73,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
         return this.immutableClass;
     }
 
+    @Override
     public Class<? extends I> getImmutableImplementationClass() {
         return this.immutableImplementationClass;
     }
