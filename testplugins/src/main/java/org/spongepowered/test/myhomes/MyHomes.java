@@ -53,6 +53,8 @@ import org.spongepowered.test.myhomes.data.home.HomeData;
 import org.spongepowered.test.myhomes.data.home.ImmutableHomeData;
 import org.spongepowered.test.myhomes.data.home.impl.HomeBuilder;
 import org.spongepowered.test.myhomes.data.home.impl.HomeDataBuilder;
+import org.spongepowered.test.myhomes.data.home.impl.HomeDataImpl;
+import org.spongepowered.test.myhomes.data.home.impl.ImmutableHomeDataImpl;
 
 import java.util.UUID;
 
@@ -64,6 +66,8 @@ public class MyHomes {
     public static Key<ListValue<UUID>> FRIENDS = DummyObjectProvider.createExtendedFor(Key.class, "FRIENDS");
 
     @Inject private PluginContainer container;
+    private DataRegistration<FriendsData, ImmutableFriendsData> FRIENDS_DATA_REGISTRATION;
+    private DataRegistration<HomeData, ImmutableHomeData> HOME_DATA_REGISTRATION;
 
     @Listener
     public void onKeyRegistration(GameRegistryEvent.Register<Key<?>> evnet) {
@@ -95,17 +99,21 @@ public class MyHomes {
         dataManager.registerContentUpdater(Home.class, new HomeBuilder.NameUpdater());
         dataManager.registerContentUpdater(HomeData.class, new HomeDataBuilder.HomesUpdater());
 
-        DataRegistration.builder()
+        this.HOME_DATA_REGISTRATION = DataRegistration.builder()
             .dataClass(HomeData.class)
             .immutableClass(ImmutableHomeData.class)
+            .dataImplementation(HomeDataImpl.class)
+            .immutableImplementation(ImmutableHomeDataImpl.class)
             .dataName("Home Data")
             .manipulatorId("myhomes:home")
             .buildAndRegister(this.container);
 
         // Friends stuff
-        DataRegistration.builder()
+        this.FRIENDS_DATA_REGISTRATION = DataRegistration.builder()
             .dataClass(FriendsData.class)
             .immutableClass(ImmutableFriendsData.class)
+            .dataImplementation(FriendsDataImpl.class)
+            .immutableImplementation(ImmutableFriendsDataImpl.class)
             .dataName("Friends Data")
             .manipulatorId("myhomes:friends")
             .buildAndRegister(this.container);
