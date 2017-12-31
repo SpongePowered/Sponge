@@ -1,0 +1,22 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:apple"
+        },
+        "title": "Apples",
+        "description": "... error 404 ...",
+        "frame": "challenge",
+        "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+        "show_toast": true,
+        "announce_to_chat": false,
+        "hidden": false
+    },
+    "criteria": {
+        "test": {
+            "trigger": "advancement_test:my_trigger",
+            "conditions": {
+                "chance": 1
+            }
+        }
+    }
+}

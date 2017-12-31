@@ -47,6 +47,8 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -88,6 +90,7 @@ import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistry;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
@@ -202,10 +205,7 @@ public class SpongeGameRegistry implements GameRegistry {
                 printer.add(" %s : %s", "CatalogType", module.getFirst().getSimpleName());
 
                 final Collection<? extends CatalogType> all = module.getSecond().getAll();
-                final List<CatalogType> catalogTypes = new ArrayList<>();
-                for (CatalogType o : all) {
-                    catalogTypes.add(o);
-                }
+                final List<CatalogType> catalogTypes = new ArrayList<>(all);
                 catalogTypes.sort(Comparator.comparing(CatalogType::getId));
                 for (CatalogType catalogType : catalogTypes) {
                     printer.add("  -%s", catalogType.getId());
@@ -527,6 +527,7 @@ public class SpongeGameRegistry implements GameRegistry {
             }
             final RegistryModule module = this.classMap.get(moduleClass);
             RegistryModuleLoader.tryModulePhaseRegistration(module);
+            throwRegistryEvent(module);
         }
         registerAdditionalPhase();
     }
@@ -568,5 +569,40 @@ public class SpongeGameRegistry implements GameRegistry {
 
     public void registerAdditionals() {
         registerAdditionalPhase();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void throwRegistryEvent(RegistryModule module) {
+        if (this.phase == RegistrationPhase.INIT
+            && module instanceof AdditionalCatalogRegistryModule
+            && (!(module instanceof SpongeAdditionalCatalogRegistryModule)
+                || ((SpongeAdditionalCatalogRegistryModule) module).allowsApiRegistration())
+            && module.getClass().getAnnotation(CustomRegistrationPhase.class) == null) {
+            Class<? extends CatalogType> catalogClass = null;
+            for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap
+                .entrySet()) {
+                if (entry.getValue() == module) {
+                    catalogClass = entry.getKey();
+                }
+            }
+            if (catalogClass == null) {
+                // This isn't a valid registered registry
+                // We should throw an exception or print out an exception, but otherwise, not going to bother at this moment.
+                new PrettyPrinter(60).centre().add("Unregistered RegistryModule").hr()
+                    .addWrapped(60, "An unknown registry module was added to the ordered set of modules, but the "
+                                    + "module itself is not registered with the GameRegistry!")
+                    .add()
+                    .add("%s : %s", "Registry Module", module.toString())
+                    .add()
+                    .add(new Exception())
+                    .add()
+                    .add("To fix this, the developer providing the module needs to register the module correctly.")
+                    .trace();
+                return;
+            }
+            final AdditionalCatalogRegistryModule registryModule = (AdditionalCatalogRegistryModule) module;
+            SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(Cause.of(EventContext.empty(), this), catalogClass, registryModule));
+
+        }
     }
 }

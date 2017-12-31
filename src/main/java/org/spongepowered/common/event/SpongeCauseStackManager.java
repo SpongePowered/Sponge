@@ -77,8 +77,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     private static boolean isPermittedThread() {
-        return Sponge.getServer().isMainThread()
-            || Thread.currentThread().getName().equals("Server Shutdown Thread");
+        return SpongeImpl.isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
     }
 
     @Override

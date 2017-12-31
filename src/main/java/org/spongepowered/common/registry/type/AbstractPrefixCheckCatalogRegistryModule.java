@@ -63,6 +63,4 @@ public abstract class AbstractPrefixCheckCatalogRegistryModule<T extends Catalog
     protected void register(T catalog) {
         this.catalogTypeMap.put(catalog.getId(), catalog);
     }
-
-
 }
