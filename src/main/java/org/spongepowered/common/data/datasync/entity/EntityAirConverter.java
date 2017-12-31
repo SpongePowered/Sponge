@@ -26,8 +26,10 @@ package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,11 +42,20 @@ public class EntityAirConverter extends DataParameterConverter<Integer> {
 
     @Override
     public Optional<DataTransactionResult> createTransaction(Integer currentValue, Integer value) {
-        return Optional.empty();
+        return Optional.of(DataTransactionResult.builder()
+            .replace(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, currentValue, Integer::compareTo, 0, 300))
+            .success(new ImmutableSpongeBoundedValue<Integer>(Keys.REMAINING_AIR, 300, value, Integer::compareTo, 0, 300))
+            .build()
+            );
     }
 
     @Override
     public Integer getValueFromEvent(Integer originalValue, List<ImmutableValue<?>> immutableValues) {
-        return null;
+        for (ImmutableValue<?> value : immutableValues) {
+            if (value.getKey() == Keys.REMAINING_AIR) {
+                return (Integer) value.get();
+            }
+        }
+        return originalValue;
     }
 }

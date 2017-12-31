@@ -26,8 +26,12 @@ package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,11 +44,26 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
 
     @Override
     public Optional<DataTransactionResult> createTransaction(String currentValue, String value) {
-        return Optional.empty();
+        Text currentText = SpongeTexts.fromLegacy(currentValue);
+        Text newValue = SpongeTexts.fromLegacy(value);
+
+        return Optional.of(DataTransactionResult.builder()
+            .replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), currentText))
+            .success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), newValue))
+            .build());
     }
 
     @Override
     public String getValueFromEvent(String originalValue, List<ImmutableValue<?>> immutableValues) {
-        return null;
+        for (ImmutableValue<?> value : immutableValues) {
+            if (value.getKey() == Keys.DISPLAY_NAME) {
+                try {
+                    return SpongeTexts.toLegacy((Text) value.get());
+                } catch (Exception e) {
+                    return originalValue;
+                }
+            }
+        }
+        return originalValue;
     }
 }
