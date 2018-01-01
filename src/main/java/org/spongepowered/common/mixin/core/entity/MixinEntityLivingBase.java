@@ -57,6 +57,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -897,8 +898,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 //    }
 
     @Override
-    public OptionalValue<Living> lastAttacker() {
-        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.getLastAttackedEntity()));
+    public OptionalValue<EntitySnapshot> lastAttacker() {
+        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable(EntityUtil.createSnapshot(this.getLastAttackedEntity())));
     }
 
     @Override
