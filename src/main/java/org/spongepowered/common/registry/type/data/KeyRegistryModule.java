@@ -570,9 +570,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         // Deprecated
         register("johnny_vindicator", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("sponge:johnny_vindicator").name("Johnny Vindicator").query(of("JohnnyVindicator")).build());
 
-        register("last_attacker", Key.builder().type(TypeTokens.OPTIONAL_ENTITY_SNAPSHOT_VALUE_TOKEN).id("sponge_last_attacker").name("Last Attacker").build());
+        register("last_attacker", Key.builder().type(TypeTokens.OPTIONAL_ENTITY_SNAPSHOT_VALUE_TOKEN).id("sponge:last_attacker").name("Last Attacker").query(of("LastAttacker")).build());
 
-        register("last_damage", Key.builder().type(TypeTokens.OPTIONAL_DOUBLE_VALUE_TOKEN).id("sponge:last_damage").name("Last Damage Taken").build());
+        register("last_damage", Key.builder().type(TypeTokens.OPTIONAL_DOUBLE_VALUE_TOKEN).id("sponge:last_damage").name("Last Damage Taken").query(of("LastDamage")).build());
 
         register("llama_strength", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("sponge:llama_strength").name("Llama Strength").query(of("LlamaStrength")).build());
 
