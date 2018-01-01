@@ -22,40 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
 
-public class IntersectStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Inventory> {
+public final class InventoryTypeQueryOperation extends SpongeQueryOperation<Class<? extends Inventory>> {
 
-    private ImmutableSet<Inventory> inventories;
+    private final Class<? extends Inventory> targetType;
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Inventory> with(ImmutableSet<Inventory> inventories) {
-        this.inventories = inventories;
-        return this;
+    public InventoryTypeQueryOperation(Class<? extends Inventory> targetType) {
+        super(QueryOperationTypes.INVENTORY_TYPE);
+        this.targetType = targetType;
     }
 
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.inventories.isEmpty()) {
-            return false; // Intersect with nothing
-        }
-
-        for (Inventory intersectWith : this.inventories) {
-            for (Inventory slot : intersectWith.slots()) {
-                if (((AbstractInventoryAdapter) slot).getRootLens().equals(lens)) {
-                    return true;
-                }
-            }
-
-        }
-
-        return false;
+    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+        return this.targetType.isAssignableFrom(lens.getAdapterType());
     }
+
 }

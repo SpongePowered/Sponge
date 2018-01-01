@@ -22,38 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 
-import java.util.Set;
+public final class ItemStackExactQueryOperation extends ItemStackQueryOperation<ItemStack> {
 
-public class NameStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Translation> {
-    
-    private Set<Translation> names;
-
-    @Override
-    public QueryStrategy<TInventory, TStack, Translation> with(ImmutableSet<Translation> args) {
-        this.names = ImmutableSet.<Translation>copyOf(args);
-        return this;
+    public ItemStackExactQueryOperation(ItemStack itemStack) {
+        super(QueryOperationTypes.ITEM_STACK_EXACT, itemStack.copy());
     }
-    
+
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.names.isEmpty()) {
-            return true;
-        }
-        for (Translation candidate : this.names) {
-            if (candidate.toString().equals(lens.getName(inventory).toString())) {
-                return true;
-            }
-        }
-        
-        return false;
+    protected boolean matches(ItemStack itemStack, ItemStack arg) {
+        return itemStack.equalTo(arg);
     }
 
 }

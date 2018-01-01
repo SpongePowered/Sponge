@@ -22,46 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-import java.util.Set;
+public final class ItemStackIgnoreQuantityOperation extends ItemStackQueryOperation<ItemStack> {
 
-public class ExactItemStackStrategy<TInventory> extends QueryStrategy<TInventory, ItemStack, ItemStack> {
-    
-    private Set<ItemStack> stacks;
-
-    @Override
-    public QueryStrategy<TInventory, ItemStack, ItemStack> with(ImmutableSet<ItemStack> types) {
-        this.stacks = types;
-        return this;
+    public ItemStackIgnoreQuantityOperation(ItemStack itemStack) {
+        super(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY, itemStack.copy());
     }
-    
+
     @Override
-    public boolean matches(Lens<TInventory, ItemStack> lens, Lens<TInventory, ItemStack> parent, Fabric<TInventory> inventory) {
-        if (this.stacks.isEmpty()) {
-            return true;
-        }
-        
-        if (lens instanceof SlotLens) {
-            ItemStack stack = ((SlotLens<TInventory, ItemStack>)lens).getStack(inventory);
-            if (stack == null) {
-                return false;
-            }
-            for (ItemStack candidate : this.stacks) {
-                if (stack.equalTo(candidate)) {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
+    protected boolean matches(ItemStack itemStack, ItemStack arg) {
+        return ItemStackUtil.compareIgnoreQuantity(itemStack, arg);
     }
 
 }

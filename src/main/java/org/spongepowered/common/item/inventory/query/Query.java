@@ -24,84 +24,23 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensSet;
-import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensSetImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
 import org.spongepowered.common.item.inventory.query.result.QueryResult;
-import org.spongepowered.common.item.inventory.query.strategy.ClassStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.CompoundStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.ExactItemStackStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.GenericStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.IntersectStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.ItemStackStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.ItemTypeStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.LensStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.NameStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.PropertyStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.UnionStrategy;
-import org.spongepowered.common.item.inventory.query.strategy.expression.ExpressionStrategy;
 
-import java.lang.reflect.Constructor;
 import java.util.Collection;
-import java.util.Map;
 
 public class Query<TInventory, TStack> {
-
-    public enum Type {
-
-        CLASS("class", ClassStrategy.class),
-        TYPE("type", ItemTypeStrategy.class),
-        STACK("stack", ItemStackStrategy.class),
-        EXACT_STACK("exact_stack", ExactItemStackStrategy.class),
-        PROPERTIES("property", PropertyStrategy.class),
-        NAME("name", NameStrategy.class),
-        EXPRESSION("expr", ExpressionStrategy.class),
-        GENERIC("args", GenericStrategy.class),
-        COMPOUND("compound", CompoundStrategy.class),
-        INTERSECT("intersect", IntersectStrategy.class),
-        UNION("union", UnionStrategy.class),
-        LENS("lens", LensStrategy.class);
-
-        private final String key;
-
-        private final Class<? extends QueryStrategy<?, ?, ?>> defaultStrategyClass;
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        Type(String key, Class<? extends QueryStrategy> defaultStrategyClass) {
-            this.key = key;
-            this.defaultStrategyClass = (Class<? extends QueryStrategy<?, ?, ?>>) defaultStrategyClass;
-        }
-
-        public String getKey() {
-            return this.key;
-        }
-
-        public Class<? extends QueryStrategy<?, ?, ?>> getDefaultStrategyClass() {
-            return this.defaultStrategyClass;
-        }
-
-    }
 
     public interface ResultAdapterProvider<TInventory, TStack> {
 
@@ -109,15 +48,7 @@ public class Query<TInventory, TStack> {
 
     }
 
-    private static final Map<String, Class<? extends QueryStrategy<?, ?, ?>>> strategies
-            = Maps.<String, Class<? extends QueryStrategy<?, ?, ?>>>newHashMap();
-
-    private static ResultAdapterProvider<?, ?> defaultResultProvider;
-
-    static {
-        Query.registerDefaultStrategies();
-        Query.setDefaultResultProvider(new MinecraftResultAdapterProvider());
-    }
+    private static ResultAdapterProvider<?, ?> defaultResultProvider = new MinecraftResultAdapterProvider();
 
     private final InventoryAdapter<TInventory, TStack> adapter;
 
@@ -125,15 +56,13 @@ public class Query<TInventory, TStack> {
 
     private final Lens<TInventory, TStack> lens;
 
-    private final QueryStrategy<TInventory, TStack, ?> strategy;
+    private final QueryOperation<?>[] queries;
 
-    private Query(InventoryAdapter<TInventory, TStack> adapter, Type type, Object...args) {
-        QueryStrategy<TInventory, TStack, Object> strategy = Query.<TInventory, TStack, Object>getStrategy(type)
-                .with(ImmutableSet.copyOf(args));
+    private Query(InventoryAdapter<TInventory, TStack> adapter, QueryOperation<?>[] queries) {
         this.adapter = adapter;
         this.inventory = adapter.getFabric();
         this.lens = adapter.getRootLens();
-        this.strategy = strategy;
+        this.queries = queries;
     }
 
     @SuppressWarnings("unchecked")
@@ -142,7 +71,7 @@ public class Query<TInventory, TStack> {
     }
 
     public Inventory execute(ResultAdapterProvider<TInventory, TStack> resultProvider) {
-        if (this.strategy.matches(this.lens, null, this.inventory)) {
+        if (this.matches(this.lens, null, this.inventory)) {
             return this.lens.getAdapter(this.inventory, this.adapter);
         }
 
@@ -151,12 +80,11 @@ public class Query<TInventory, TStack> {
 
     @SuppressWarnings("unchecked")
     private Inventory toResult(ResultAdapterProvider<TInventory, TStack> resultProvider, MutableLensSet<TInventory, TStack> matches) {
-        if (matches.size() == 0) {
+        if (matches.isEmpty()) {
             return new EmptyInventoryImpl(this.adapter);
         }
         if (matches.size() == 1) {
-            InventoryAdapter<TInventory, TStack> ada = matches.getLens(0).getAdapter(this.inventory, this.adapter);
-            return ada;
+            return matches.getLens(0).getAdapter(this.inventory, this.adapter);
         }
 
         if (resultProvider != null) {
@@ -173,10 +101,10 @@ public class Query<TInventory, TStack> {
             if (child == null) {
                 continue;
             }
-            if (child.getChildren().size() > 0) {
+            if (!child.getChildren().isEmpty()) {
                 matches.addAll(this.depthFirstSearch(child));
             }
-            if (this.strategy.matches(child, lens, this.inventory)) {
+            if (this.matches(child, lens, this.inventory)) {
                 matches.add(child);
             }
         }
@@ -187,6 +115,15 @@ public class Query<TInventory, TStack> {
         }
 
         return matches;
+    }
+
+    private boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+        for (QueryOperation<?> operation : this.queries) {
+            if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private MutableLensSet<TInventory, TStack> reduce(Lens<TInventory, TStack> lens, MutableLensSet<TInventory, TStack> matches) {
@@ -224,114 +161,12 @@ public class Query<TInventory, TStack> {
         return slots;
     }
 
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Class<?>... types) {
-        return new Query<>(adapter, Type.CLASS, types);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, ItemType... types) {
-        return new Query<>(adapter, Type.TYPE, types);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, ItemStack... types) {
-        return new Query<>(adapter, Type.STACK, types);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compileExact(InventoryAdapter<TInventory, TStack>  adapter, ItemStack... types) {
-        return new Query<>(adapter, Type.EXACT_STACK, types);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, InventoryProperty<?, ?>... props) {
-        return new Query<>(adapter, Type.PROPERTIES, props);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Translation... names) {
-        return new Query<>(adapter, Type.NAME, names);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, String... expression) {
-        return new Query<>(adapter, Type.EXPRESSION, expression);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
-        return new Query<>(adapter, Type.COMPOUND, args);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, Lens<TInventory, TStack>... args) {
-        return new Query<>(adapter, Type.LENS, args);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> intersect(InventoryAdapter<TInventory, TStack> adapter, Object... args) {
-        return new Query<>(adapter, Type.INTERSECT, args);
-    }
-
-    public static <TInventory, TStack> Query<TInventory, TStack> union(InventoryAdapter<TInventory, TStack> adapter, Inventory args) {
-        CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.getRootLens());
-        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) adapter.getFabric(), (MinecraftFabric) ((InventoryAdapter) args).getFabric());
-        CompoundSlotProvider provider = new CompoundSlotProvider().add(adapter);
-        for (Object inv : args) {
-            lensBuilder.add(((InventoryAdapter) inv).getRootLens());
-            provider.add(((InventoryAdapter) inv));
-        }
-        CompoundLens lens = lensBuilder.build(provider);
-        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, adapter);
-
-        return new Query(compoundAdapter, Type.UNION, compoundAdapter);
-    }
-
-    public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(Type type) {
-        return Query.getStrategy(type.getKey());
-    }
-
-    public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(String key) {
-        @SuppressWarnings("unchecked")
-        Class<? extends QueryStrategy<TInventory, TStack, TArgs>> strategyClass = (Class<? extends QueryStrategy<TInventory, TStack, TArgs>>) checkNotNull(Query.strategies.get(key), "The specified query strategy [%s], was not registered", key);
-        try {
-            return strategyClass.newInstance();
-        } catch (Exception ex) {
-            throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass);
-        }
-    }
-
-    public static void registerStrategy(String key, Class<? extends QueryStrategy<?, ?, ?>> strategyClass) {
-        try {
-            @SuppressWarnings({ "unchecked", "unused" })
-            Constructor<QueryStrategy<?, ?, ?>> ctor = (Constructor<QueryStrategy<?, ?, ?>>) checkNotNull(strategyClass, "strategyClass").getConstructor();
-        } catch (Exception ex) {
-            throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass);
-        }
-        Query.strategies.put(key, strategyClass);
+    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, QueryOperation<?>... queries) {
+        return new Query<>(adapter, queries);
     }
 
     public static void setDefaultResultProvider(ResultAdapterProvider<?, ?> defaultResultProvider) {
         Query.defaultResultProvider = defaultResultProvider;
-    }
-
-    public static Query.Type getType(Object argument) {
-        if (argument instanceof Class) {
-            return Type.CLASS;
-        }
-        if (argument instanceof ItemType) {
-            return Type.TYPE;
-        }
-        if (argument instanceof ItemStack) {
-            return Type.STACK; // TODO EXACT_STACK?
-        }
-        if (argument instanceof InventoryProperty) {
-            return Type.PROPERTIES;
-        }
-        if (argument instanceof Translation) {
-            return Type.NAME;
-        }
-        if (argument instanceof String) {
-            return Type.EXPRESSION;
-        }
-        return Type.GENERIC;
-    }
-
-    private static void registerDefaultStrategies() {
-        for (Type type : Query.Type.values()) {
-            Query.registerStrategy(type.getKey(), type.getDefaultStrategyClass());
-        }
     }
 
 }

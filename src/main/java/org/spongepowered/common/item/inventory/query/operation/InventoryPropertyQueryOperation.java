@@ -22,37 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.query.strategy;
+package org.spongepowered.common.item.inventory.query.operation;
 
-import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.query.QueryStrategy;
+import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
 
-import java.util.Set;
+public final class InventoryPropertyQueryOperation extends SpongeQueryOperation<InventoryProperty<?, ?>> {
 
-public class GenericStrategy<TInventory, TStack> extends QueryStrategy<TInventory, TStack, Object> {
-    
-    private Set<Object> args;
+    private final InventoryProperty<?, ?> property;
 
-    @Override
-    public QueryStrategy<TInventory, TStack, Object> with(ImmutableSet<Object> args) {
-        this.args = args;
-        return this;
+    public InventoryPropertyQueryOperation(InventoryProperty<?, ?> property) {
+        super(QueryOperationTypes.INVENTORY_PROPERTY);
+        this.property = property;
     }
-    
+
     @Override
-    public boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
-        if (this.args.isEmpty()) {
-            return true;
+    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+        if (parent == null) {
+            return false;
         }
-        
-        for (Object arg : this.args) {
-            if (arg.equals(lens)) {
+        for (InventoryProperty<?, ?> lensProperty : parent.getProperties(lens)) {
+            if (this.property.matches(lensProperty)) {
                 return true;
             }
         }
-        
         return false;
     }
 

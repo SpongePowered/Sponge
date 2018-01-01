@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl;
 
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
@@ -31,11 +33,18 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.InventoryIterator;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
 import org.spongepowered.common.item.inventory.query.Query;
+import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
+import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -187,65 +196,33 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends Inventory> T query(Class<?>... types) {
-        return (T) Query.compile(this, types).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(ItemType... types) {
-        return (T) Query.compile(this, types).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(ItemStack... types) {
-        return (T) Query.compileExact(this, types).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T queryAny(ItemStack... types) {
-        return (T) Query.compile(this, types).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
-        return (T) Query.compile(this, props).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(Translation... names) {
-        return (T) Query.compile(this, names).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(String... args) {
-        return (T) Query.compile(this, args).execute();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    default <T extends Inventory> T query(Object... args) {
-        return (T) Query.compile(this, args).execute();
+    default <T extends Inventory> T query(QueryOperation<?>... queries) {
+        return (T) Query.compile(this, queries).execute();
     }
 
     @Override
     default Inventory intersect(Inventory inventory) {
-        return Query.intersect(this, inventory).execute();
+        return Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
     }
 
     @Override
     default Inventory union(Inventory inventory) {
-        return Query.union(this, inventory).execute();
+        CompoundLens.Builder lensBuilder = CompoundLens.builder().add(getRootLens());
+        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) getFabric(), (MinecraftFabric) ((InventoryAdapter) inventory).getFabric());
+        CompoundSlotProvider provider = new CompoundSlotProvider().add(this);
+        for (Object inv : inventory) {
+            lensBuilder.add(((InventoryAdapter) inv).getRootLens());
+            provider.add((InventoryAdapter) inv);
+        }
+        CompoundLens lens = lensBuilder.build(provider);
+        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, this);
+
+        return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
     }
 
     @Override
     default boolean containsInventory(Inventory inventory) {
-        Inventory result = Query.compile(this, ((InventoryAdapter) inventory).getRootLens()).execute();
+        Inventory result = Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();
         return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).getRootLens() == ((InventoryAdapter) inventory).getRootLens();
     }
 
