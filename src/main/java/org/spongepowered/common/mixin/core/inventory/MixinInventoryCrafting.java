@@ -52,9 +52,8 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
 
     @Shadow private NonNullList<ItemStack> stackList;
 
-    @Shadow public abstract int getWidth();
-
-    @Shadow public abstract int getHeight();
+    @Shadow private int inventoryWidth;
+    @Shadow private int inventoryHeight;
 
     protected Fabric<IInventory> fabric;
     protected SlotCollection slots;
@@ -72,7 +71,7 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
         if (this.stackList.size() == 0) {
             return new DefaultEmptyLens<>(adapter);
         }
-        return new CraftingGridInventoryLensImpl(0, this.getWidth(), this.getHeight(), this.getWidth(), this.slots);
+        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, this.slots);
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
