@@ -198,7 +198,11 @@ public final class SpongeImpl {
     }
 
     public static boolean postEvent(Event event, boolean allowClient) {
-        return ((SpongeEventManager) Sponge.getEventManager()).post(event, allowClient);
+        // TODO quick and dirty fix (cant cast in UnitTest)
+        if (Sponge.getEventManager() instanceof SpongeEventManager) {
+            return ((SpongeEventManager) Sponge.getEventManager()).post(event, allowClient);
+        }
+        return true;
     }
 
     public static void postState(GameState state, GameStateEvent event) {
