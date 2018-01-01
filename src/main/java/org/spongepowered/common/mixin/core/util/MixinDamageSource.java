@@ -127,6 +127,11 @@ public abstract class MixinDamageSource implements DamageSource {
     }
 
     @Override
+    public double getExhaustion() {
+        return getHungerDamage();
+    }
+
+    @Override
     public DamageType getType() {
         return this.apiDamageType;
     }
