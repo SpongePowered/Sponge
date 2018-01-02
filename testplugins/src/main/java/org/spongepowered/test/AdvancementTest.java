@@ -42,6 +42,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
@@ -104,6 +105,16 @@ public class AdvancementTest {
     @Listener
     public void onRegister3(GameRegistryEvent.Register<? extends Trigger> event) {
         this.logger.info("onRegister<? extends Trigger>: " + event.getCatalogType().getName());
+    }
+
+    @Listener
+    public void onRegisterKeys1(GameRegistryEvent.Register<Key> event) {
+        this.logger.info("onRegister<Key>: " + event.getCatalogType().getName());
+    }
+
+    @Listener
+    public void onRegisterKeys(GameRegistryEvent.Register<Key<?>> event) {
+        this.logger.info("onRegister<Key<?>>: " + event.getCatalogType().getName());
     }
 
     @Listener

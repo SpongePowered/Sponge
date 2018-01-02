@@ -41,9 +41,9 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataRegistration;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
@@ -105,8 +105,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.graph.CyclicGraphException;
 import org.spongepowered.common.util.graph.DirectedGraph;
-import org.spongepowered.common.util.graph.TopologicalOrder;
 import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
+import org.spongepowered.common.util.graph.TopologicalOrder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
 
 import java.awt.image.BufferedImage;
@@ -602,14 +602,8 @@ public class SpongeGameRegistry implements GameRegistry {
                 return;
             }
             final AdditionalCatalogRegistryModule registryModule = (AdditionalCatalogRegistryModule) module;
-            // Since we need plugins to be able to register things that may still be on the client thread, prior
-            // to the game actually starting, or the server actually starting (like custom data), we  need those
-            // to be still thrown.
-            if (catalogClass == DataRegistration.class) {
-                System.err.println("derp");
-            }
-            SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(Cause.of(EventContext.empty(), this), catalogClass, registryModule), true);
-
+            SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent(
+                    Sponge.getCauseStackManager().getCurrentCause(), catalogClass, registryModule));
         }
     }
 }
