@@ -31,6 +31,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.PlayerAdvancements;
 import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.Progressable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
@@ -125,7 +126,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      */
     @Overwrite
     public boolean isDone() {
-        return get(getAdvancement().getCriterion()).get().achieved();
+        return get(getAdvancement().getCriterion()).map(Progressable::achieved).orElse(false);
     }
 
     /**
