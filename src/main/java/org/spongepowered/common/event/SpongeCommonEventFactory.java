@@ -90,6 +90,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
@@ -1036,7 +1037,7 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return;
         }
-        Inventory ordered = inv.query(OrderedInventory.class);
+        Inventory ordered = inv.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
         if (ordered instanceof OrderedInventory) {
             Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
             if (slot.isPresent()) {
@@ -1062,7 +1063,7 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return transaction.get();
         }
-        Inventory ordered = inv.query(OrderedInventory.class);
+        Inventory ordered = inv.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
         if (ordered instanceof OrderedInventory) {
             Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
             if (slot.isPresent()) {

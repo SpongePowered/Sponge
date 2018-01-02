@@ -28,8 +28,12 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
@@ -46,9 +50,9 @@ public interface IMixinSingleBlockCarrier extends SingleBlockCarrier {
         if (thisThing instanceof ISidedInventory) {
             EnumFacing facing = DirectionFacingProvider.getInstance().get(from).get();
             int[] slots = ((ISidedInventory) thisThing).getSlotsForFace(facing);
-            SlotIndex[] indices = new SlotIndex[slots.length];
+            QueryOperation<?>[] indices = new QueryOperation[slots.length];
             for (int i = 0; i < slots.length; i++) {
-                indices[i] = SlotIndex.of(slots[i]);
+                indices[i] = QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(slots[i]));
             }
             return thisThing.getInventory().query(indices);
         }

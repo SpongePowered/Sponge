@@ -36,6 +36,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
@@ -61,7 +62,7 @@ public class InventorySetOpsTest {
     @Listener
     public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
         // Checks if Slots are contained in the hotbar then may transform iron to gold
-        Inventory hotbar = event.getTargetInventory().query(Hotbar.class);
+        Inventory hotbar = event.getTargetInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class));
         boolean nugget = false;
         for (SlotTransaction transaction : event.getTransactions()) {
             if (hotbar.containsInventory(transaction.getSlot())) {
@@ -77,9 +78,9 @@ public class InventorySetOpsTest {
 
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
-        Inventory firstSlots = chest.query(SlotIndex.of(0));
-        Inventory firstRow = chest.query(InventoryRow.class).first();
-        Inventory firstCol = chest.query(InventoryColumn.class).first();
+        Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
+        Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).first();
+        Inventory firstCol = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryColumn.class)).first();
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
         Preconditions.checkState(intersection.capacity() == 1, "This should be the first slot only!");
     }
@@ -87,9 +88,9 @@ public class InventorySetOpsTest {
     private void testUnion() {
 
         Inventory chest = Inventory.builder().build(this);
-        Inventory firstSlots = chest.query(SlotIndex.of(0));
-        Inventory firstRow = chest.query(InventoryRow.class).first();
-        GridInventory grid = chest.query(GridInventory.class);
+        Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
+        Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).first();
+        GridInventory grid = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(GridInventory.class));
         InventoryColumn firstCol = grid.getColumn(0).get();
         InventoryColumn secondCol = grid.getColumn(1).get();
         Inventory union = firstSlots.union(firstCol).union(firstRow);

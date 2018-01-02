@@ -30,7 +30,6 @@ import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -72,7 +71,7 @@ public class HomeTranslator implements DataTranslator<Home> {
 
     @Override
     public DataContainer translate(Home home) throws InvalidDataException {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
                 .set(Home.WORLD_QUERY, home.getTransform().getExtent().getUniqueId())
                 .set(Home.POSITION_QUERY, home.getTransform().getPosition())
                 .set(Home.ROTATION_QUERY, home.getTransform().getRotation())

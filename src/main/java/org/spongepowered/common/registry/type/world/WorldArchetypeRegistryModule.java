@@ -91,11 +91,6 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
                 .dimension(DimensionTypes.THE_END)
                 .build("minecraft:the_end", "The End")
         );
-        this.worldCreationSettingsMap.put("sponge:the_skylands", WorldArchetype.builder()
-                .from(overworld)
-                .generatorModifiers(WorldGeneratorModifiers.SKYLANDS)
-                .build("sponge:the_skylands", "The Skylands")
-        );
         this.worldCreationSettingsMap.put("sponge:the_void", WorldArchetype.builder()
                 .from(overworld)
                 .generatorModifiers(WorldGeneratorModifiers.VOID)

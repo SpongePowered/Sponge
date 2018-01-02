@@ -421,7 +421,7 @@ public final class PhaseTracker {
             .add(context.printCustom(printer));
         printer.hr()
             .add("StackTrace:")
-            .add(new Exception(e));
+            .add(e);
         printer.add(" Phases Remaining:");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add();

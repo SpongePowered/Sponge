@@ -38,6 +38,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -98,7 +99,7 @@ public class OfflineInventoryTest {
         user.getBoots().ifPresent(s -> this.logger.info("Boots: " + s.getType().getId()));
 
         this.logger.info("and a hotbar full of diamonds!");
-        for (Inventory inv : user.getInventory().query(Hotbar.class).slots()) {
+        for (Inventory inv : user.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class)).slots()) {
             inv.offer(ItemStack.of(ItemTypes.DIAMOND, 1));
         }
     }
