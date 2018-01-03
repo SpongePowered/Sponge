@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
@@ -34,6 +33,8 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.FeedAnimalEvent;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -42,6 +43,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -98,17 +100,55 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
-                at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"
+            ),
+            slice = @Slice(
+                    from = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/item/ItemFood;isWolfsFavoriteMeat()Z"
+                    ),
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/entity/EntityLivingBase;heal(F)V"
+                    )
+            ), cancellable = true
+    )
     private void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
-        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventHealing(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
+        Sponge.getCauseStackManager().pushCause(player);
+        FeedAnimalEvent.Healing event = SpongeEventFactory.createFeedAnimalEventHealing(Sponge.getCauseStackManager().getCurrentCause(),
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this);
+        if (SpongeImpl.postEvent(event)) {
+            cir.setReturnValue(true);
+        }
+        Sponge.getCauseStackManager().popCause();
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "FIELD", ordinal = 2, target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"
+            ),
+            slice = @Slice(
+                    from = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/entity/passive/EntityWolf;isAngry()Z"
+                    ),
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/entity/passive/EntityTameable;setTamedBy(Lnet/minecraft/entity/player/EntityPlayer;)V"
+                    )
+            ), cancellable = true
+    )
     private void onTameFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
-        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
+        Sponge.getCauseStackManager().pushCause(player);
+        FeedAnimalEvent.Taming event = SpongeEventFactory.createFeedAnimalEventTaming(Sponge.getCauseStackManager().getCurrentCause(),
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this);
+        if (SpongeImpl.postEvent(event)) {
+            cir.setReturnValue(true);
+        }
+        Sponge.getCauseStackManager().popCause();
     }
 
 }

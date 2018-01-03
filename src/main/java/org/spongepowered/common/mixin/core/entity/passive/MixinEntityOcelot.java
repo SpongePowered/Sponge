@@ -37,6 +37,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.FeedAnimalEvent;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -82,10 +83,16 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
-    private void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
-        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"),
+            cancellable = true)
+    private void onTameFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
+        Sponge.getCauseStackManager().pushCause(player);
+        FeedAnimalEvent.Taming event = SpongeEventFactory.createFeedAnimalEventTaming(Sponge.getCauseStackManager().getCurrentCause(),
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this);
+        if (SpongeImpl.postEvent(event)) {
+            cir.setReturnValue(true);
+        }
+        Sponge.getCauseStackManager().popCause();
     }
 
     @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)

@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(EntityAgeable.class)
 public abstract class MixinEntityAgeable extends MixinEntityCreature implements Ageable {
-
 }

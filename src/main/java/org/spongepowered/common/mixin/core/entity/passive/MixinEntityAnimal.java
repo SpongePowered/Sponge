@@ -28,13 +28,15 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Animal;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.FeedAnimalEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -45,18 +47,56 @@ import java.util.Optional;
 @Mixin(EntityAnimal.class)
 public abstract class MixinEntityAnimal extends MixinEntityAgeable implements Animal {
 
-    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 0,
-            target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"
+            ),
+            slice = @Slice(
+                    from = @At(
+                            value = "FIELD",
+                            target = "Lnet/minecraft/entity/passive/EntityAnimal;inLove:I"
+                    ),
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/entity/passive/EntityAnimal;setInLove(Lnet/minecraft/entity/player/EntityPlayer;)V"
+                    )
+            ), cancellable = true
+    )
     private void onBreedFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
-        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventLove(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
+        Sponge.getCauseStackManager().pushCause(player);
+        FeedAnimalEvent.Love event = SpongeEventFactory.createFeedAnimalEventLove(Sponge.getCauseStackManager().getCurrentCause(),
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this);
+        if (SpongeImpl.postEvent(event)) {
+            cir.setReturnValue(true);
+        }
+        Sponge.getCauseStackManager().popCause();
     }
 
-    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD, at = @At(value = "INVOKE", ordinal = 1,
-            target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"
+            ),
+            slice = @Slice(
+                    from = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/entity/passive/EntityAnimal;isChild()Z"
+                    ),
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/entity/passive/EntityAnimal;ageUp(IZ)V"
+                    )
+            ), cancellable = true
+    )
     private void onAgeFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
-        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventAging(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
+        Sponge.getCauseStackManager().pushCause(player);
+        FeedAnimalEvent.Aging event = SpongeEventFactory.createFeedAnimalEventAging(Sponge.getCauseStackManager().getCurrentCause(),
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this);
+        if (SpongeImpl.postEvent(event)) {
+            cir.setReturnValue(true);
+        }
+        Sponge.getCauseStackManager().popCause();
     }
 
 }
