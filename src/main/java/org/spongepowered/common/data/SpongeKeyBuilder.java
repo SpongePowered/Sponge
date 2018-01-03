@@ -80,9 +80,7 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
         checkState(this.id != null, "Key id must be set!");
         checkState(this.query != null, "DataQuery not set!");
         checkState(this.name != null, "Name must be set");
-        final SpongeKey<V> key = new SpongeKey<>(this);
-        KeyRegistryModule.getInstance().registerAdditionalCatalog(key);
-        return key;
+        return new SpongeKey<>(this);
     }
 
     @Override
