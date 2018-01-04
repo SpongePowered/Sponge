@@ -419,9 +419,10 @@ public final class PhaseTracker {
             ;
         printer
             .add(context.printCustom(printer));
+        Exception exception = new RuntimeException("Unknown Exception During Phase", e);
         printer.hr()
             .add("StackTrace:")
-            .add(new Exception(e));
+            .add(exception);
         printer.add(" Phases Remaining:");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add();
