@@ -232,7 +232,10 @@ public class CustomDataNbtUtil {
                     dataHolder.offer(manipulator);
                 }
                 if (!transaction.failedData.isEmpty()) {
-                    ((IMixinCustomDataHolder) dataHolder).addFailedData(transaction.failedData);
+                    // remove all failed data, then re-add the data that failed in this deserialization attempt
+                    IMixinCustomDataHolder mixinCustomDataHolder = (IMixinCustomDataHolder) dataHolder;
+                    mixinCustomDataHolder.removeFailedData();
+                    mixinCustomDataHolder.addFailedData(transaction.failedData);
                 }
             }
         }

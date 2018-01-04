@@ -178,4 +178,9 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
     public List<DataView> getFailedData() {
         return this.failedData;
     }
+
+    @Override
+    public void removeFailedData() {
+        this.failedData.clear();
+    }
 }

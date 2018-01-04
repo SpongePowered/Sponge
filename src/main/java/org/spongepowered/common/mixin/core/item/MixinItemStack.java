@@ -367,6 +367,12 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         return this.failedData;
     }
 
+    @Override
+    public void removeFailedData() {
+        this.failedData.clear();
+        resyncCustomToTag();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass) {

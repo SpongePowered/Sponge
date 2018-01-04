@@ -85,5 +85,8 @@ public interface IMixinCustomDataHolder {
     }
 
     void addFailedData(ImmutableList<DataView> failedData);
+
     List<DataView> getFailedData();
+
+    void removeFailedData();
 }
