@@ -192,6 +192,7 @@ public class CustomDataNbtUtil {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static void readCustomData(NBTTagCompound compound, DataHolder dataHolder) {
         if (dataHolder instanceof IMixinCustomDataHolder) {
             if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
@@ -224,12 +225,24 @@ public class CustomDataNbtUtil {
                         final NBTTagCompound internal = list.getCompoundTagAt(i);
                         builder.add(NbtTranslator.getInstance().translateFrom(internal));
                     }
+
                 }
+                // We want to attempt to refresh the failed data if it does succeed in getting read.
+                compound.removeTag(NbtDataUtil.FAILED_CUSTOM_DATA);
                 // Re-attempt to deserialize custom data
                 final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(builder.build());
                 final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
+                List<Class<? extends DataManipulator<?, ?>>> classesLoaded = new ArrayList<>();
                 for (DataManipulator<?, ?> manipulator : manipulators) {
-                    dataHolder.offer(manipulator);
+                    if (!classesLoaded.contains(manipulator.getClass())) {
+                        classesLoaded.add((Class<? extends DataManipulator<?, ?>>) manipulator.getClass());
+                        // If for any reason a failed data was not deserialized, but
+                        // there already exists new data, we just simply want to
+                        // ignore the failed data for removal.
+                        if (!((IMixinCustomDataHolder) dataHolder).getCustom(manipulator.getClass()).isPresent()) {
+                            dataHolder.offer(manipulator);
+                        }
+                    }
                 }
                 if (!transaction.failedData.isEmpty()) {
                     ((IMixinCustomDataHolder) dataHolder).addFailedData(transaction.failedData);
