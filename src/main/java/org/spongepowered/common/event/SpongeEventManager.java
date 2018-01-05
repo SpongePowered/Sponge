@@ -373,8 +373,8 @@ public class SpongeEventManager implements EventManager {
     }
 
     @SuppressWarnings("unchecked")
-    protected boolean post(Event event, List<RegisteredListener<?>> handlers) {
-        if (!SpongeImpl.isMainThread()) {
+    private boolean post(Event event, List<RegisteredListener<?>> handlers) {
+        if (!Sponge.getServer().isMainThread()) {
             // If this event is being posted asynchronously then we don't want
             // to do any timing or cause stack changes
             for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
@@ -411,17 +411,22 @@ public class SpongeEventManager implements EventManager {
         if (event instanceof AbstractEvent) {
             ((AbstractEvent) event).currentOrder = null;
         }
-
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
     @Override
     public boolean post(Event event) {
+        // Allow the client thread by default so devs can actually
+        // call their own events inside the init events. Only allowing
+        // this as long that there is no server available
+        return post(event, !Sponge.isServerAvailable());
+    }
+
+    public boolean postServer(Event event) {
+        return post(event, false);
+    }
+
+    public boolean post(Event event, boolean allowClientThread) {
         return post(event, getHandlerCache(event).getListeners());
     }
-
-    public boolean post(Event event, Order order) {
-        return post(event, getHandlerCache(event).getListenersByOrder(order));
-    }
-
 }
