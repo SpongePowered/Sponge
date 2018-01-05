@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.tracking.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -56,7 +57,11 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
 
     @Override
     public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
-        return context.getCapturedEntities().add(entity);
+        if (entity instanceof EntityItem) {
+            return context.getCapturedItems().add((EntityItem) entity);
+        } else {
+            return context.getCapturedEntities().add(entity);
+        }
     }
 
     @Override
