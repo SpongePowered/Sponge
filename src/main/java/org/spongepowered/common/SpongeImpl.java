@@ -208,7 +208,7 @@ public final class SpongeImpl {
     public static void postState(GameState state, GameStateEvent event) {
         check(game);
         game.setState(state);
-        ((SpongeEventManager) game.getEventManager()).post(event, true);
+        postEvent(event, true);
     }
 
     public static void postShutdownEvents() {
