@@ -29,7 +29,7 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorldConfig extends ConfigBase {
+public class WorldConfig extends GeneralConfigBase {
 
     @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
     private List<String> worldModifiers = new ArrayList<>();

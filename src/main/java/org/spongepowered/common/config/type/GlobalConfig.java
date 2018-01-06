@@ -50,7 +50,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public class GlobalConfig extends ConfigBase {
+public class GlobalConfig extends GeneralConfigBase {
 
     @Setting(comment = "Configuration options related to the Sql service, including connection aliases etc")
     private SqlCategory sql = new SqlCategory();

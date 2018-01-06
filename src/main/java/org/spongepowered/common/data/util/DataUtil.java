@@ -84,8 +84,6 @@ public final class DataUtil {
     public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
 
-    private static final Set<String> FAILED_DESERIALIZATION = new ConcurrentSkipListSet<>();
-
     static {
         spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
         spongeDataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
@@ -186,12 +184,8 @@ public final class DataUtil {
     }
 
     private static void addFailedDeserialization(SerializedDataTransaction.Builder builder, DataView view, String dataId, @Nullable Throwable cause) {
-        if (!FAILED_DESERIALIZATION.contains(dataId)) {
-            new InvalidDataException("Could not deserialize " + dataId
-                    + "! Don't worry though, we'll mute future attempts until next restart.", cause).printStackTrace();
-            FAILED_DESERIALIZATION.add(dataId);
-        }
-        builder.failedData(view);
+        SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().addFailedData(dataId, cause);
+        SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().purgeOrAllow(builder, dataId, view);
     }
 
     private static DataView updateDataViewForDataManipulator(DataView dataView) {

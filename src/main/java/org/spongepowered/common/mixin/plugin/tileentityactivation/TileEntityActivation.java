@@ -41,6 +41,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
@@ -220,7 +221,7 @@ public class TileEntityActivation {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
-        SpongeConfig<?> config = ((IMixinWorldServer) world).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
         if (config == null || type == null || !config.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
         }

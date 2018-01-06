@@ -35,6 +35,7 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.type.ConfigBase;
+import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -49,6 +50,7 @@ import java.util.concurrent.ForkJoinPool;
 public class SpongeConfig<T extends ConfigBase> {
 
     public enum Type {
+        CUSTOM_DATA(CustomDataConfig.class),
         GLOBAL(GlobalConfig.class),
         DIMENSION(DimensionConfig.class),
         WORLD(WorldConfig.class);

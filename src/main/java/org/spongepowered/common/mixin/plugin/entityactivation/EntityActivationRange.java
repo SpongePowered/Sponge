@@ -64,6 +64,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -427,7 +428,7 @@ public class EntityActivationRange {
         checkNotNull(world, "world");
         checkNotNull(type, "type");
 
-        SpongeConfig<?> config = ((IMixinWorldServer) world).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
         if (config == null || type == null) {
             return;
         }

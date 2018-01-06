@@ -63,6 +63,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -679,7 +680,7 @@ public final class WorldManager {
 
             // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
-                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
+                final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
                 if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder,
                             dimensionId);

@@ -40,6 +40,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -52,11 +53,11 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
-    SpongeConfig<?> getActiveConfig();
+    SpongeConfig<? extends GeneralConfigBase> getActiveConfig();
 
     SpongeConfig<WorldConfig> getWorldConfig();
 
-    void setActiveConfig(SpongeConfig<?> config);
+    void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config);
 
     Integer getDimensionId();
 

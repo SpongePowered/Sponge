@@ -149,6 +149,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -188,7 +189,6 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -233,7 +233,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
-    private SpongeConfig<?> activeConfig;
+    private SpongeConfig<? extends GeneralConfigBase> activeConfig;
     private long weatherStartTime;
     private Weather prevWeather;
     protected WorldTimingsHandler timings;
@@ -399,12 +399,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
 
     @Override
-    public SpongeConfig<?> getActiveConfig() {
+    public SpongeConfig<? extends GeneralConfigBase> getActiveConfig() {
         return this.activeConfig;
     }
 
     @Override
-    public void setActiveConfig(SpongeConfig<?> config) {
+    public void setActiveConfig(SpongeConfig<? extends GeneralConfigBase> config) {
         this.activeConfig = config;
         // update cached settings
         this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
@@ -2321,7 +2321,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void setViewDistance(final int viewDistance) {
         this.setMemoryViewDistance(viewDistance);
-        final SpongeConfig<?> config = this.getActiveConfig();
+        final SpongeConfig<? extends GeneralConfigBase> config = this.getActiveConfig();
         // don't use the parameter, use the field that has been clamped
         config.getConfig().getWorld().setViewDistance(this.playerChunkMap.playerViewRadius);
         config.save();
