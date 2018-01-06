@@ -24,9 +24,18 @@
  */
 package org.spongepowered.common.config.type;
 
-public class DimensionConfig extends GeneralConfigBase {
+import ninja.leaping.configurate.objectmapping.Setting;
+import org.spongepowered.common.config.category.CustomDataRegistrationCategory;
 
-    public DimensionConfig() {
-        super();
+public class CustomDataConfig extends ConfigBase {
+
+    @Setting(value = "data-registration")
+    private CustomDataRegistrationCategory datalists = new CustomDataRegistrationCategory();
+
+    public CustomDataRegistrationCategory getDataRegistrationConfig() {
+        return this.datalists;
+    }
+
+    public void addFailedData(String dataId, Throwable cause) {
     }
 }

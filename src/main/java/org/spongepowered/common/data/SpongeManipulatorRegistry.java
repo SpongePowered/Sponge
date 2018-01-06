@@ -46,6 +46,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.category.CustomDataRegistrationCategory;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
@@ -410,6 +412,11 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         this.immutableRegistrationMap = immutableBuilder.build();
         this.registrationMap = idBuilder.build();
         this.pluginBasedRegistrations = pluginBuilder.build();
+
+        final CustomDataRegistrationCategory config = SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig();
+        config.populateRegistrations(this.registrations);
+        // Save the list of registered id's, this way the config can be re-understood.
+        SpongeImpl.getDataConfig().save();
 
         this.tempRegistry = null; // Finalizes the registration by setting the temporary object to null
     }

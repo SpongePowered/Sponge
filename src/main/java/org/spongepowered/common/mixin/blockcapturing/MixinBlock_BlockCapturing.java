@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockCapturingCategory;
 import org.spongepowered.common.config.category.BlockCapturingModCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
 
@@ -47,7 +48,7 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
 
     @Override
     public void initializeBlockCapturingState(World worldIn) {
-        SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
         BlockCapturingCategory blockCapturing = activeConfig.getConfig().getBlockCapturing();
         String[] ids = this.getId().split(":");
         String modId = ids[0];

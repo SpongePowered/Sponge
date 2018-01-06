@@ -95,6 +95,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -343,7 +344,7 @@ public final class EntityUtil {
         if (teleporter == null) {
             teleporter = toWorld.getDefaultTeleporter();
         }
-        final SpongeConfig<?> activeConfig = fromMixinWorld.getActiveConfig();
+        final SpongeConfig<? extends GeneralConfigBase> activeConfig = fromMixinWorld.getActiveConfig();
         String worldName = "";
         String teleporterClassName = teleporter.getClass().getName();
 

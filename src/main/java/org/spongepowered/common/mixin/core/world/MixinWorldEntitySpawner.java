@@ -55,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -166,7 +167,7 @@ public abstract class MixinWorldEntitySpawner {
 
             int totalSpawned = 0;
             final long worldTotalTime = worldServerIn.getTotalWorldTime();
-            final SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
+            final SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
 
             labelOuterLoop:
             for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {

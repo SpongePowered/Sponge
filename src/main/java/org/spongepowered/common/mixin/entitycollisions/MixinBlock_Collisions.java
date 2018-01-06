@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
@@ -80,7 +81,7 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
 
     @Override
     public void initializeCollisionState(World worldIn) {
-        SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
         EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
         this.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
         String[] ids = ((BlockType) this).getId().split(":");

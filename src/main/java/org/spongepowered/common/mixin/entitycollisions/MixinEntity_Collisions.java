@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -111,7 +112,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
 
     @Override
     public void initializeCollisionState(World worldObj) {
-        SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldObj).getActiveConfig();
+        SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldObj).getActiveConfig();
         EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
         this.maxCollisions = collisionCat.getMaxEntitiesWithinAABB();
         boolean requiresSave = false;

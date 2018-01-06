@@ -84,6 +84,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
@@ -254,7 +255,7 @@ public class SpongeCommandFactory {
             return process(config, source, args);
         }
 
-        protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+        protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
             return Text.of("Unimplemented");
         }
     }
@@ -335,7 +336,7 @@ public class SpongeCommandFactory {
                 .permission("sponge.command.config")
                 .executor(new ConfigUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
                         final Optional<String> key = args.getOne("key");
                         final Optional<String> value = args.getOne("value");
                         if (config.getSetting(key.get()) == null || config.getSetting(key.get()).isVirtual()) {
@@ -362,7 +363,7 @@ public class SpongeCommandFactory {
                 .permission("sponge.command.reload")
                 .executor(new ConfigUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
                         config.reload();
                         SpongeHooks.refreshActiveConfigs();
                         return Text.of("Reloaded configuration");
@@ -377,7 +378,7 @@ public class SpongeCommandFactory {
                 .permission("sponge.command.save")
                 .executor(new ConfigUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
                         config.save();
                         return Text.of("Saved");
                     }
