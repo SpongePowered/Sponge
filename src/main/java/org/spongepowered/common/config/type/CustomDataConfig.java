@@ -32,10 +32,11 @@ public class CustomDataConfig extends ConfigBase {
     @Setting(value = "data-registration")
     private CustomDataRegistrationCategory datalists = new CustomDataRegistrationCategory();
 
+    public CustomDataConfig() {
+    }
+
     public CustomDataRegistrationCategory getDataRegistrationConfig() {
         return this.datalists;
     }
 
-    public void addFailedData(String dataId, Throwable cause) {
-    }
 }

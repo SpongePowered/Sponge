@@ -103,6 +103,7 @@ import org.spongepowered.common.text.selector.SpongeSelectorFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.LocaleCache;
+import org.spongepowered.common.util.SetSerializer;
 import org.spongepowered.common.util.graph.CyclicGraphException;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
@@ -140,6 +141,7 @@ public class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Text.class), new TextConfigSerializer());
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(BookView.class), new BookViewDataBuilder());
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<?>>() {}, new SetSerializer());
     }
 
     private final SpongePropertyRegistry propertyRegistry;
