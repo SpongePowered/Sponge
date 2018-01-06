@@ -49,7 +49,6 @@ public final class PacketPhaseUtil {
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
                 continue;
             }
-
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
             final int slotNumber = slot.slotNumber;
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();

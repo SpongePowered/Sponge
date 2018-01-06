@@ -45,6 +45,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.server.SPacketOpenWindow;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
@@ -82,6 +83,7 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -89,11 +91,13 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
@@ -107,10 +111,11 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinInventory;
@@ -1021,7 +1026,7 @@ public class SpongeCommonEventFactory {
         return event.isCancelled();
     }
 
-    private static void setSlots(List<SlotTransaction> transactions, Function<SlotTransaction, ItemStackSnapshot> func) {
+    public static void setSlots(List<SlotTransaction> transactions, Function<SlotTransaction, ItemStackSnapshot> func) {
         transactions.forEach(t -> t.getSlot().set(func.apply(t).createStack()));
     }
 
@@ -1089,5 +1094,55 @@ public class SpongeCommonEventFactory {
 
     public static Inventory toInventory(IInventory iinventory) {
         return ((Inventory) iinventory);
+    }
+
+    public static CraftItemEvent.Preview callCraftEventPre(EntityPlayer player, CraftingInventory inventory,
+            SlotTransaction previewTransaction, @Nullable CraftingRecipe recipe, Container container, List<SlotTransaction> transactions) {
+        CraftItemEvent.Preview event = SpongeEventFactory
+                .createCraftItemEventPreview(Sponge.getCauseStackManager().getCurrentCause(), inventory, previewTransaction, Optional.ofNullable(recipe), ((Inventory) container), transactions);
+        SpongeImpl.postEvent(event);
+        PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
+        if (player instanceof EntityPlayerMP) {
+            if (event.getPreview().getCustom().isPresent() || event.isCancelled() || !event.getPreview().isValid()) {
+                ItemStackSnapshot stack = event.getPreview().getFinal();
+                if (event.isCancelled() || !event.getPreview().isValid()) {
+                    stack = event.getPreview().getOriginal();
+                }
+                // Resend modified output
+                ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(0, 0, ItemStackUtil.fromSnapshotToNative(stack)));
+            }
+
+        }
+        return event;
+    }
+
+    public static CraftItemEvent.Craft callCraftEventPost(EntityPlayer player, CraftingInventory inventory, ItemStackSnapshot result,
+           @Nullable CraftingRecipe recipe, Container container, List<SlotTransaction> transactions) {
+        // Get previous cursor if captured
+        ItemStack previousCursor = ((IMixinContainer) container).getPreviousCursor();
+        if (previousCursor == null) {
+            previousCursor = player.inventory.getItemStack(); // or get the current one
+        }
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackUtil.snapshotOf(previousCursor), ItemStackUtil.snapshotOf(player.inventory.getItemStack()));
+        CraftItemEvent.Craft event = SpongeEventFactory
+                .createCraftItemEventCraft(Sponge.getCauseStackManager().getCurrentCause(), result, inventory,
+                        cursorTransaction, Optional.ofNullable(recipe), ((org.spongepowered.api.item.inventory.Container) container), transactions);
+        SpongeImpl.postEvent(event);
+
+        ((IMixinContainer) container).setCaptureInventory(false);
+        // handle slot-transactions
+        PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
+        if (event.isCancelled() || !event.getCursorTransaction().isValid() || event.getCursorTransaction().getCustom().isPresent()) {
+            // handle cursor-transaction
+            ItemStackSnapshot newCursor = event.isCancelled() || event.getCursorTransaction().isValid() ? event.getCursorTransaction().getOriginal() : event.getCursorTransaction().getFinal();
+            player.inventory.setItemStack(ItemStackUtil.fromSnapshotToNative(newCursor));
+            if (player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, player.inventory.getItemStack()));
+            }
+        }
+
+        transactions.clear();
+        ((IMixinContainer) container).setCaptureInventory(true);
+        return event;
     }
 }
