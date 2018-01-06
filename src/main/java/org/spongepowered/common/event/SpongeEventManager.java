@@ -373,7 +373,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean post(Event event, List<RegisteredListener<?>> handlers) {
+    protected boolean post(Event event, List<RegisteredListener<?>> handlers) {
         if (!Sponge.getServer().isMainThread()) {
             // If this event is being posted asynchronously then we don't want
             // to do any timing or cause stack changes
@@ -420,10 +420,6 @@ public class SpongeEventManager implements EventManager {
         // call their own events inside the init events. Only allowing
         // this as long that there is no server available
         return post(event, !Sponge.isServerAvailable());
-    }
-
-    public boolean postServer(Event event) {
-        return post(event, false);
     }
 
     public boolean post(Event event, boolean allowClientThread) {
