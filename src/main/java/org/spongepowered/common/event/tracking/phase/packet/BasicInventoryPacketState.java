@@ -49,6 +49,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -181,7 +182,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
                 mixinContainer.setCaptureInventory(false);
                 return;
-            }if (inventoryEvent != null) {
+            }
+            if (inventoryEvent != null) {
                 // Don't fire inventory drop events when there are no entities
                 if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
                     slotTransactions.clear();

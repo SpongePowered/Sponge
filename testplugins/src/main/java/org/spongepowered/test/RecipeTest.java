@@ -27,21 +27,30 @@ package org.spongepowered.test;
 import static org.spongepowered.api.item.ItemTypes.BED;
 import static org.spongepowered.api.item.ItemTypes.BEDROCK;
 import static org.spongepowered.api.item.ItemTypes.STONE;
+import static org.spongepowered.api.item.ItemTypes.WOOL;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
+import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -60,7 +69,7 @@ public class RecipeTest {
     @Listener
     public void onInit(GamePreInitializationEvent event) {
         final Ingredient s = Ingredient.of(STONE);
-        final Ingredient b = Ingredient.of(BED);
+        final Ingredient b = Ingredient.of(BED, WOOL);
         final ItemStack item = ItemStack.of(BEDROCK, 1);
         final DataTransactionResult trans = item.offer(Keys.ITEM_ENCHANTMENTS, Collections.singletonList(Enchantment.of(EnchantmentTypes.UNBREAKING, 1)));
         if (trans.getType() != DataTransactionResult.Type.SUCCESS) {
@@ -75,4 +84,25 @@ public class RecipeTest {
         Sponge.getRegistry().getCraftingRecipeRegistry().register(recipe);
     }
 
+    @Listener
+    public void onCraftPreview(CraftItemEvent.Preview event) {
+        if (event.getRecipe().isPresent()) {
+            if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
+                ItemStackSnapshot item = event.getPreview().getFinal();
+                List<Text> lore = Arrays.asList(Text.of("Uncraftable"));
+                item = item.with(Keys.ITEM_LORE, lore).get();
+                event.getPreview().setCustom(item);
+            }
+        }
+    }
+
+    @Listener
+    public void onCraft(CraftItemEvent.Craft event, @First Player player) {
+        if (event.getRecipe().isPresent()) {
+            if (event.getRecipe().get().getExemplaryResult().getType() == BEDROCK) {
+                player.sendMessage(Text.of("You tried to craft Bedrock!"));
+                event.setCancelled(true);
+            }
+        }
+    }
 }

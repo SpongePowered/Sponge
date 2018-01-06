@@ -49,6 +49,7 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -75,6 +76,7 @@ import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomContainer;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -245,6 +247,9 @@ public final class ContainerUtil {
         Map<Optional<IInventory>, List<Slot>> viewed = container.inventorySlots.stream()
                 .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
+        Integer craftOutput = null;
+        Integer craftGridBase = null;
+        InventoryCrafting craftGrid = null;
         List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
         for (Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {
             IInventory subInventory = entry.getKey().orElse(null);
@@ -260,6 +265,17 @@ public final class ContainerUtil {
                     } else if (subInventory.getSizeInventory() == 0) {
                         lens = new DefaultEmptyLens<>(((InventoryAdapter) subInventory));
                     } else {
+                        // For Crafting Result we need the Slot to get Filter logic
+                        if (subInventory instanceof InventoryCraftResult) {
+                            Slot slot = entry.getValue().get(0);
+                            adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
+                                    itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
+                            craftOutput = index;
+                        }
+                        if (subInventory instanceof InventoryCrafting) {
+                            craftGridBase = index;
+                            craftGrid = ((InventoryCrafting) subInventory);
+                        }
                         lens = new DelegatingLens(index, adapterLens, slots);
                     }
                 }
@@ -273,10 +289,11 @@ public final class ContainerUtil {
                     || lens.slotCount() != slotCount) { // Inventory size <> Lens size
                 if (subInventory instanceof InventoryCraftResult) { // InventoryCraftResult is a Slot
                     Slot slot = entry.getValue().get(0);
-                    lens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
+                    lens = new CraftingOutputSlotLensImpl(index,
+                            item -> slot.isItemValid(((ItemStack) item)),
                             itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
                 } else if (subInventory instanceof InventoryCrafting) { // InventoryCrafting has width and height and is Input
-                    InventoryCrafting craftGrid = (InventoryCrafting) subInventory;
+                    craftGrid = (InventoryCrafting) subInventory;
                     lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new SlotLensImpl(index);
@@ -308,8 +325,14 @@ public final class ContainerUtil {
             }
             index += slotCount;
         }
+
+        List<Lens<IInventory, ItemStack>> additional = new ArrayList<>();
+        if (craftOutput != null && craftGridBase != null) {
+            additional.add(new CraftingInventoryLensImpl(craftOutput, craftGridBase, craftGrid.getWidth(), craftGrid.getHeight(), slots));
+        }
+
         // Lens containing/delegating to other lenses
-        return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses);
+        return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses, additional);
     }
 
     private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens,
@@ -354,7 +377,18 @@ public final class ContainerUtil {
         if (container instanceof LensProvider) {
             return ((LensProvider) container).slotProvider(fabric, ((InventoryAdapter) container));
         }
-        return new SlotCollection.Builder().add(((MinecraftInventoryAdapter) container).getFabric().getSize()).build();
+
+        SlotCollection.Builder builder = new SlotCollection.Builder();
+        for (Slot slot : container.inventorySlots) {
+            if (slot instanceof SlotCrafting) {
+                builder.add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i,
+                        item -> slot.isItemValid(((ItemStack) item)),
+                        itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)))));
+            } else {
+                builder.add(1);
+            }
+        }
+        return builder.build();
     }
 
     public static InventoryArchetype getArchetype(net.minecraft.inventory.Container container) {

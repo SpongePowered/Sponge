@@ -25,8 +25,10 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.plugin.PluginContainer;
+
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -46,4 +48,11 @@ public interface IMixinContainer extends IMixinInventory {
     Slot getContainerSlot(int slot);
 
     void setPlugin(PluginContainer plugin);
+
+    void setShiftCrafting(boolean flag);
+    boolean isShiftCrafting();
+
+    void setLastCraft(CraftItemEvent.Craft event);
+
+    net.minecraft.item.ItemStack getPreviousCursor();
 }

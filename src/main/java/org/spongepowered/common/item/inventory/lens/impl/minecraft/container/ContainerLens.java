@@ -32,17 +32,27 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ContainerLens extends RealLens {
 
     // The viewed inventories
     protected List<Lens<IInventory, ItemStack>> viewedInventories;
+    private List<Lens<IInventory, ItemStack>> additonal;
 
     public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots,
             List<Lens<IInventory, ItemStack>> lenses) {
+        this(adapter, slots, lenses, Collections.emptyList());
+    }
+
+    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots,
+            List<Lens<IInventory, ItemStack>> lenses, List<Lens<IInventory, ItemStack>> additonal) {
         this(adapter, slots);
         this.viewedInventories = lenses;
+        this.additonal = additonal;
         this.init(slots);
     }
 
@@ -51,6 +61,7 @@ public class ContainerLens extends RealLens {
      */
     public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getFabric().getSize(), adapter, slots);
+        this.additonal = Collections.emptyList();
     }
 
     @Override
@@ -65,5 +76,11 @@ public class ContainerLens extends RealLens {
         for (Lens<IInventory, ItemStack> lens : this.viewedInventories) {
             this.addSpanningChild(lens);
         }
+
+        // Adding additional lenses
+        for (Lens<IInventory, ItemStack> lens : this.additonal) {
+            this.addChild(lens);
+        }
+
     }
 }
