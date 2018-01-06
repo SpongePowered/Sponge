@@ -26,6 +26,7 @@ package org.spongepowered.test.myhomes;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
@@ -37,7 +38,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameRegistryEvent;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -47,6 +47,7 @@ import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
 import org.spongepowered.test.myhomes.data.friends.FriendsData;
 import org.spongepowered.test.myhomes.data.friends.ImmutableFriendsData;
+import org.spongepowered.test.myhomes.data.friends.impl.FriendsDataBuilder;
 import org.spongepowered.test.myhomes.data.friends.impl.FriendsDataImpl;
 import org.spongepowered.test.myhomes.data.friends.impl.ImmutableFriendsDataImpl;
 import org.spongepowered.test.myhomes.data.home.Home;
@@ -67,61 +68,67 @@ public class MyHomes {
     public static Key<ListValue<UUID>> FRIENDS = DummyObjectProvider.createExtendedFor(Key.class, "FRIENDS");
 
     @Inject private PluginContainer container;
-    private DataRegistration<FriendsData, ImmutableFriendsData> FRIENDS_DATA_REGISTRATION;
-    private DataRegistration<HomeData, ImmutableHomeData> HOME_DATA_REGISTRATION;
+    @Inject private Logger logger;
+
+    private DataRegistration<FriendsData, ImmutableFriendsData> friendsDataRegistration;
+    private DataRegistration<HomeData, ImmutableHomeData> homeDataRegistration;
 
     @Listener
-    public void onKeyRegistration(GameRegistryEvent.Register<Key<?>> evnet) {
+    public void onKeyRegistration(GameRegistryEvent.Register<Key<?>> event) {
+        this.logger.info("onKeyRegistration");
         DEFAULT_HOME = Key.builder()
             .type(new TypeToken<Value<Home>>() {})
             .id("myhomes:default_home")
             .name("Default Home")
             .query(DataQuery.of("DefaultHome"))
             .build();
+        event.register(DEFAULT_HOME);
+
         HOMES = Key.builder()
             .type(new TypeToken<MapValue<String, Home>>() {})
             .id("myhomes:homes")
             .name("Homes")
             .query(DataQuery.of("Homes"))
             .build();
+        event.register(HOMES);
+
         FRIENDS = Key.builder()
             .type(new TypeToken<ListValue<UUID>>() {})
             .id("myhomes:friends")
             .name("Friends")
             .query(DataQuery.of("Friends"))
             .build();
-    }
-
-    @Listener
-    public void onGameInit(GameInitializationEvent event) {
-        System.err.println("derp");
+        event.register(FRIENDS);
     }
 
     @Listener
     public void onDataRegistration(GameRegistryEvent.Register<DataRegistration<?, ?>> event) {
+        this.logger.info("onDataRegistration");
         final DataManager dataManager = Sponge.getDataManager();
         // Home stuff
         dataManager.registerBuilder(Home.class, new HomeBuilder());
         dataManager.registerContentUpdater(Home.class, new HomeBuilder.NameUpdater());
         dataManager.registerContentUpdater(HomeData.class, new HomeDataBuilder.HomesUpdater());
 
-        this.HOME_DATA_REGISTRATION = DataRegistration.builder()
+        this.homeDataRegistration = DataRegistration.builder()
             .dataClass(HomeData.class)
             .immutableClass(ImmutableHomeData.class)
             .dataImplementation(HomeDataImpl.class)
             .immutableImplementation(ImmutableHomeDataImpl.class)
+            .builder(new HomeDataBuilder())
             .dataName("Home Data")
-            .manipulatorId("myhomes:home")
+            .manipulatorId("home")
             .buildAndRegister(this.container);
 
         // Friends stuff
-        this.FRIENDS_DATA_REGISTRATION = DataRegistration.builder()
+        this.friendsDataRegistration = DataRegistration.builder()
             .dataClass(FriendsData.class)
             .immutableClass(ImmutableFriendsData.class)
             .dataImplementation(FriendsDataImpl.class)
             .immutableImplementation(ImmutableFriendsDataImpl.class)
+            .builder(new FriendsDataBuilder())
             .dataName("Friends Data")
-            .manipulatorId("myhomes:friends")
+            .manipulatorId("friends")
             .buildAndRegister(this.container);
     }
 
