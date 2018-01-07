@@ -96,16 +96,18 @@ public final class DamageSourceTest {
 
     @Listener(order = Order.POST)
     public void onPlayerDamage(DamageEntityEvent event, @Getter("getTargetEntity") Player player, @Root DamageSource source) {
-        player.sendMessage(Text.of(TextColors.BLUE, "You have been damaged by the following source for " + event.getFinalDamage()));
-        player.sendMessage(Text.of(TextColors.GOLD, "======================================="));
-        player.sendMessage(Text.of(TextColors.GOLD, "Damage type: ", TextColors.GRAY, source.getType().getName()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Affects creative: ", TextColors.GRAY, source.doesAffectCreative()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Exhaustion: ", TextColors.GRAY, source.getExhaustion()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Absolute: ", TextColors.GRAY, source.isAbsolute()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Bypassing armor: ", TextColors.GRAY, source.isBypassingArmor()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Explosive: ", TextColors.GRAY, source.isExplosive()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Magic: ", TextColors.GRAY, source.isMagic()));
-        player.sendMessage(Text.of(TextColors.GOLD, "Scaled by difficulty: ", TextColors.GRAY, source.isScaledByDifficulty()));
+        if (this.activated.contains(player.getUniqueId())) {
+            player.sendMessage(Text.of(TextColors.BLUE, "You have been damaged by the following source for " + event.getFinalDamage()));
+            player.sendMessage(Text.of(TextColors.GOLD, "======================================="));
+            player.sendMessage(Text.of(TextColors.GOLD, "Damage type: ", TextColors.GRAY, source.getType().getName()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Affects creative: ", TextColors.GRAY, source.doesAffectCreative()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Exhaustion: ", TextColors.GRAY, source.getExhaustion()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Absolute: ", TextColors.GRAY, source.isAbsolute()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Bypassing armor: ", TextColors.GRAY, source.isBypassingArmor()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Explosive: ", TextColors.GRAY, source.isExplosive()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Magic: ", TextColors.GRAY, source.isMagic()));
+            player.sendMessage(Text.of(TextColors.GOLD, "Scaled by difficulty: ", TextColors.GRAY, source.isScaledByDifficulty()));
+        }
     }
 
 }
