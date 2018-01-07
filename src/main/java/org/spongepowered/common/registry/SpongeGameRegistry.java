@@ -354,7 +354,6 @@ public class SpongeGameRegistry implements GameRegistry {
         return (T) supplier.get();
     }
 
-    @Override
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {

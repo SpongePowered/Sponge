@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -274,7 +273,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         spongeSettings.fromBuilder(true);
         spongeSettings.setPortalAgentType(this.portalAgentType);
         spongeSettings.setRandomSeed(this.seedRandomized);
-        Sponge.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
+        SpongeImpl.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
         return (WorldArchetype) (Object) settings;
     }
 

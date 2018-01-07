@@ -30,14 +30,17 @@ import com.google.common.collect.Lists;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.util.Collections;
 import java.util.List;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class ConfigurateDataViewTest {
 
     @Test

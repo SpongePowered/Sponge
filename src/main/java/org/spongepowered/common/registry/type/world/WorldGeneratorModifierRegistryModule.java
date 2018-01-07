@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.extra.modifier.empty.VoidWorldGeneratorModifier;
-import org.spongepowered.api.extra.modifier.skylands.SkylandsWorldGeneratorModifier;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -77,7 +76,6 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
 
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(new SkylandsWorldGeneratorModifier());
         registerAdditionalCatalog(new VoidWorldGeneratorModifier());
     }
 

@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
@@ -36,9 +37,11 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.util.Optional;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class NBTTranslationTest {
 
     @Test
