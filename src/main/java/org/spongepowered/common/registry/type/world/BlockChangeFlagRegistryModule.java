@@ -125,7 +125,7 @@ public final class BlockChangeFlagRegistryModule implements RegistryModule {
             } else if (Flags.OBSERVER == i) {
                 register(new SpongeBlockChangeFlag("OBSERVER".toLowerCase(Locale.ENGLISH), i));
             } else if (Flags.NEIGHBOR_PHSYICS == i) {
-                register(new SpongeBlockChangeFlag("NEIGHBOR_PHSYICS".toLowerCase(Locale.ENGLISH), i));
+                register(new SpongeBlockChangeFlag("NEIGHBOR_PHYSICS".toLowerCase(Locale.ENGLISH), i));
             } else if (Flags.NEIGHBOR_OBSERVER == i) {
                 register(new SpongeBlockChangeFlag("NEIGHBOR_OBSERVER".toLowerCase(Locale.ENGLISH), i));
                 // Since the next one is already considered as "ALL", it's not switched in
