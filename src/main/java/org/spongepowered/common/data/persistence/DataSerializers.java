@@ -54,6 +54,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -85,6 +86,7 @@ public final class DataSerializers {
     public static final DataTranslator<LocalDateTime> LOCAL_DATE_TIME_DATA_SERIALIZER;
     public static final DataTranslator<Instant> INSTANT_DATA_SERIALIZER;
     public static final DataTranslator<ZonedDateTime> ZONED_DATE_TIME_DATA_SERIALIZER;
+    public static final DataTranslator<Month> MONTH_DATA_SERIALIZER;
 
     static {
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
@@ -1150,6 +1152,44 @@ public final class DataSerializers {
                 return "JavaInstantTranslator";
             }
         };
+        MONTH_DATA_SERIALIZER = new DataTranslator<Month>() {
+
+            final TypeToken<Month> token = TypeToken.of(Month.class);
+
+            @Override
+            public TypeToken<Month> getToken() {
+                return this.token;
+            }
+
+            @Override
+            public Month translate(DataView view) throws InvalidDataException {
+                final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
+                if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
+                    throw new InvalidDataException("Invalid month of year: " + month);
+                }
+                return Month.of(month);
+            }
+
+            @Override
+            public DataContainer translate(Month obj) throws InvalidDataException {
+                return DataContainer.createNew().set(DataQueries.LOCAL_DATE_MONTH, obj.getValue());
+            }
+
+            @Override
+            public DataView addTo(Month obj, DataView dataView) {
+                return dataView.set(DataQueries.LOCAL_DATE_MONTH, obj.getValue());
+            }
+
+            @Override
+            public String getId() {
+                return "sponge:month";
+            }
+
+            @Override
+            public String getName() {
+                return "JavaMonthTranslator";
+            }
+        };
 
     }
 
@@ -1177,6 +1217,7 @@ public final class DataSerializers {
         dataManager.registerTranslator(Complexf.class, COMPLEXF_DATA_SERIALIZER);
         dataManager.registerTranslator(Quaterniond.class, QUATERNIOND_DATA_SERIALIZER);
         dataManager.registerTranslator(Quaternionf.class, QUATERNIONF_DATA_SERIALIZER);
+        dataManager.registerTranslator(Month.class, MONTH_DATA_SERIALIZER);
         dataManager.registerTranslator(LocalTime.class, LOCAL_TIME_DATA_SERIALIZER);
         dataManager.registerTranslator(LocalDate.class, LOCAL_DATE_DATA_SERIALIZER);
         dataManager.registerTranslator(LocalDateTime.class, LOCAL_DATE_TIME_DATA_SERIALIZER);
