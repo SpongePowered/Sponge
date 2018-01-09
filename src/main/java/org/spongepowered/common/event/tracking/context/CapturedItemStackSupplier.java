@@ -22,39 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.event.tracking.context;
 
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.IPhaseState;
+public final class CapturedItemStackSupplier extends CapturedSupplier<ItemDropData> {
 
-final class CompletePhase extends GeneralState<GeneralizedContext> {
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return true;
-    }
-
-    @Override
-    public GeneralizedContext createPhaseContext() {
-        return new GeneralizedContext(this);
-    }
-
-    @Override
-    public void unwind(GeneralizedContext context) {
-
-    }
-
-    @Override
-    public boolean requiresBlockCapturing() {
-        return false;
-    }
-
-    @Override
-    public boolean requiresBlockPosTracking() {
-        return false;
-    }
-
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
+    public CapturedItemStackSupplier() {
     }
 }

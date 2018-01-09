@@ -22,11 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.context;
 
-public class DefaultPhaseContext extends PhaseContext<DefaultPhaseContext> {
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.math.BlockPos;
 
-    protected DefaultPhaseContext(IPhaseState<? extends DefaultPhaseContext> phaseState) {
-        super(phaseState);
+public final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
+
+    public BlockItemEntityDropsSupplier() {
     }
 }

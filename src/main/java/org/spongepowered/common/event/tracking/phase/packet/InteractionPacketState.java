@@ -49,7 +49,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 final class InteractionPacketState extends BasicPacketState {
 
@@ -122,18 +124,19 @@ final class InteractionPacketState extends BasicPacketState {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(spongePlayer);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-
-            if (!phaseContext.getCapturedBlockSupplier().isEmpty()) {
-                if (!TrackingUtil.processBlockCaptures(phaseContext.getCapturedBlocks(), this, phaseContext)) {
+            final boolean hasBlocks = !phaseContext.getCapturedBlockSupplier().isEmpty();
+            final List<BlockSnapshot> capturedBlcoks = phaseContext.getCapturedBlocks();
+            final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.get(0) : null;
+            if (hasBlocks) {
+                if (!TrackingUtil.processBlockCaptures(capturedBlcoks, this, phaseContext)) {
                     // Stop entities like XP from being spawned
                     return;
                 }
             } else {
                 phaseContext.getBlockItemDropSupplier().acceptIfNotEmpty(map -> {
-                    final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                     if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
 
-                        for (BlockSnapshot blockChange : capturedBlocks) {
+                        for (BlockSnapshot blockChange : capturedBlcoks) {
                             final Location<World> location = blockChange.getLocation().get();
                             final Vector3d position = location.getPosition();
                             final BlockPos blockPos = VecHelper.toBlockPos(position);
@@ -149,7 +152,7 @@ final class InteractionPacketState extends BasicPacketState {
                             }
                         }
                     } else {
-                        for (BlockSnapshot blockChange : capturedBlocks) {
+                        for (BlockSnapshot blockChange : capturedBlcoks) {
                             final Location<World> location = blockChange.getLocation().get();
                             final Vector3d position = location.getPosition();
                             final BlockPos blockPos = VecHelper.toBlockPos(position);
@@ -253,10 +256,15 @@ final class InteractionPacketState extends BasicPacketState {
                 }
                 if (!normalPlacement.isEmpty()) {
                     if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                            normalPlacement);
-                        if (!SpongeImpl.postEvent(event)) {
-                            processSpawnedEntities(player, event);
+                        try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            if (firstBlockChange != null) {
+                                stackFrame.pushCause(firstBlockChange);
+                            }
+                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                                normalPlacement);
+                            if (!SpongeImpl.postEvent(event)) {
+                                processSpawnedEntities(player, event);
+                            }
                         }
                     } else {
                         processEntities(player, normalPlacement);

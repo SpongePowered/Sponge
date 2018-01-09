@@ -22,21 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.context;
 
-public final class MutableWrapper<T> {
+import net.minecraft.entity.item.EntityItem;
 
-    private T obj;
+import java.util.UUID;
 
-    public MutableWrapper(T obj) {
-        this.obj = obj;
-    }
+public final class EntityItemEntityDropsSupplier extends CapturedMultiMapSupplier<UUID, EntityItem> {
 
-    public T getObj() {
-        return this.obj;
-    }
-
-    public void setObj(T obj) {
-        this.obj = obj;
+    public EntityItemEntityDropsSupplier() {
     }
 }

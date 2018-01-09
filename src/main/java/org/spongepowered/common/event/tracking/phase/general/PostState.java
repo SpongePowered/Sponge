@@ -34,7 +34,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 
@@ -45,7 +44,7 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
     public UnwindingPhaseContext createPhaseContext() {
-        return null;
+        throw new UnsupportedOperationException("Use UnwindingPhaseContext#unwind(IPhaseState, PhaseContext)! Cannot create a context based on Post state!");
     }
 
     @Override

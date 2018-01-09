@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -39,9 +38,20 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
+import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
+import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
+import org.spongepowered.common.event.tracking.context.CapturedBlockEntitySpawnSupplier;
+import org.spongepowered.common.event.tracking.context.CapturedBlocksSupplier;
+import org.spongepowered.common.event.tracking.context.CapturedEntitiesSupplier;
+import org.spongepowered.common.event.tracking.context.CapturedItemStackSupplier;
+import org.spongepowered.common.event.tracking.context.CapturedItemsSupplier;
+import org.spongepowered.common.event.tracking.context.CapturedMultiMapSupplier;
+import org.spongepowered.common.event.tracking.context.CapturedSupplier;
+import org.spongepowered.common.event.tracking.context.EntityItemDropsSupplier;
+import org.spongepowered.common.event.tracking.context.EntityItemEntityDropsSupplier;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -77,7 +87,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable protected User notifier;
     private boolean processImmediately;
 
-    private Object source;
+    @Nullable private Object source;
 
     public P source(Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
@@ -125,17 +135,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
-        CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
-        this.blocksSupplier = blocksSupplier;
-        BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
-        BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.blockItemDropsSupplier = blockItemDropsSupplier;
-        CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
-        this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
-
-        CaptureBlockPos blockPos = new CaptureBlockPos();
-        this.captureBlockPos = blockPos;
+        this.blocksSupplier = new CapturedBlocksSupplier();
+        this.blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
+        this.blockItemDropsSupplier = new BlockItemDropsSupplier();
+        this.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        this.captureBlockPos = new CaptureBlockPos();
         return (P) this;
     }
 
@@ -146,21 +150,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
-        CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
-        this.blocksSupplier = blocksSupplier;
-        BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
-        BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.blockItemDropsSupplier = blockItemDropsSupplier;
-        CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        this.capturedItemsSupplier = capturedItemsSupplier;
-        CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.capturedEntitiesSupplier = capturedEntitiesSupplier;
-        CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        this.capturedItemStackSupplier = capturedItemStackSupplier;
+        this.blocksSupplier = new CapturedBlocksSupplier();
+        this.blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
+        this.blockItemDropsSupplier = new BlockItemDropsSupplier();
+        this.capturedItemsSupplier = new CapturedItemsSupplier();
+        this.capturedEntitiesSupplier = new CapturedEntitiesSupplier();
+        this.capturedItemStackSupplier = new CapturedItemStackSupplier();
 
-        CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
-        this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
+        this.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
         return (P) this;
     }
 
@@ -170,12 +167,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
-        CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        this.capturedItemsSupplier = capturedItemsSupplier;
-        CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.capturedEntitiesSupplier = capturedEntitiesSupplier;
-        CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        this.capturedItemStackSupplier = capturedItemStackSupplier;
+        this.capturedItemsSupplier = new CapturedItemsSupplier();
+        this.capturedEntitiesSupplier = new CapturedEntitiesSupplier();
+        this.capturedItemStackSupplier = new CapturedItemStackSupplier();
         return (P) this;
     }
 
@@ -184,15 +178,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         checkState(this.entityItemDropsSupplier == null, "EntityItemDropsSupplier is already set!");
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
 
-        EntityItemDropsSupplier entityItemDropsSupplier = new EntityItemDropsSupplier();
-        this.entityItemDropsSupplier = entityItemDropsSupplier;
-        EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
-        this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
+        this.entityItemDropsSupplier = new EntityItemDropsSupplier();
+        this.entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
         return (P) this;
     }
-
-    // TODO to be moved to listener based phase contexts when gabizou gets to restructuring PhaseContexts...
-
 
     public P buildAndSwitch() {
         this.isCompleted = true;
@@ -256,6 +245,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public List<Entity> getCapturedEntities() throws IllegalStateException {
+        if (this.capturedEntitiesSupplier == null) {
+            throw TrackingUtil.throwWithContext("Intended to capture entity spawns!", this).get();
+        }
         return this.capturedEntitiesSupplier.get();
     }
 
@@ -281,6 +273,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
+        if (this.blocksSupplier == null) {
+            throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
+        }
         return this.blocksSupplier.get();
     }
 
@@ -412,116 +407,4 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedItemsSupplier != null ? this.capturedItemsSupplier.orEmptyList() : Collections.emptyList();
     }
 
-    static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {
-
-        BlockItemDropsSupplier() {
-        }
-
-    }
-
-    static class EntityItemDropsSupplier extends CapturedMultiMapSupplier<UUID, ItemDropData> {
-
-        EntityItemDropsSupplier() {
-        }
-    }
-
-    static final class CapturedItemsSupplier extends CapturedSupplier<EntityItem> {
-
-        CapturedItemsSupplier() {
-        }
-    }
-
-    static final class CapturedItemStackSupplier extends CapturedSupplier<ItemDropData> {
-
-        CapturedItemStackSupplier() {
-        }
-    }
-
-    static final class CapturedBlocksSupplier extends CapturedSupplier<BlockSnapshot> {
-
-        CapturedBlocksSupplier() {
-        }
-    }
-
-    static final class CapturedEntitiesSupplier extends CapturedSupplier<Entity> {
-
-        CapturedEntitiesSupplier() {
-        }
-    }
-
-    static final class EntityItemEntityDropsSupplier extends CapturedMultiMapSupplier<UUID, EntityItem> {
-
-        EntityItemEntityDropsSupplier() {
-        }
-    }
-
-    static final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
-
-        BlockItemEntityDropsSupplier() {
-        }
-    }
-
-    static final class CapturedBlockEntitySpawnSupplier extends CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> {
-
-        CapturedBlockEntitySpawnSupplier() {
-        }
-    }
-
-    public static final class CaptureBlockPos {
-
-        @Nullable private BlockPos pos;
-        @Nullable private WeakReference<IMixinWorldServer> mixinWorldReference;
-
-        public CaptureBlockPos() {
-        }
-
-        public CaptureBlockPos(@Nullable BlockPos pos) {
-            this.pos = pos;
-        }
-
-        public Optional<BlockPos> getPos() {
-            return Optional.ofNullable(this.pos);
-        }
-
-        public void setPos(@Nullable BlockPos pos) {
-            this.pos = pos;
-        }
-
-        public void setWorld(@Nullable IMixinWorldServer world) {
-            if (world == null) {
-                this.mixinWorldReference = null;
-            } else {
-                this.mixinWorldReference = new WeakReference<>(world);
-            }
-        }
-
-        public void setWorld(@Nullable WorldServer world) {
-            if (world == null) {
-                this.mixinWorldReference = null;
-            } else {
-                this.mixinWorldReference = new WeakReference<>((IMixinWorldServer) world);
-            }
-        }
-
-        public Optional<IMixinWorldServer> getMixinWorld() {
-            return this.mixinWorldReference == null ? Optional.empty() : Optional.ofNullable(this.mixinWorldReference.get());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CaptureBlockPos that = (CaptureBlockPos) o;
-            return com.google.common.base.Objects.equal(this.pos, that.pos);
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.pos);
-        }
-    }
 }
