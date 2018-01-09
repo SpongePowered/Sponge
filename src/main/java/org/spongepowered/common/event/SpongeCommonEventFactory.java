@@ -161,9 +161,10 @@ public class SpongeCommonEventFactory {
     public static boolean callPlayerChangeInventoryPickupPreEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
         ItemStack stack = itemToPickup.getItem();
         Sponge.getCauseStackManager().pushCause(player);
+        ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
         ChangeInventoryEvent.Pickup.Pre event =
                 SpongeEventFactory.createChangeInventoryEventPickupPre(Sponge.getCauseStackManager().getCurrentCause(),
-                        Optional.empty(), Collections.singletonList(stack), ItemStackUtil.snapshotOf(stack), ((Item) itemToPickup),
+                        Optional.empty(), Collections.singletonList(snapshot), snapshot, ((Item) itemToPickup),
                         ((Inventory) player.inventory));
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
