@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.GeneralizedContext;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class WorldUnload extends GeneralState<GeneralizedContext> {

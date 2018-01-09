@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.context;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -42,7 +42,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
 
     @Nullable private ListMultimap<K, V> captured;
 
-    CapturedMultiMapSupplier() {
+    protected CapturedMultiMapSupplier() {
     }
 
     @Override

@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhaseContext;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPhaseContext> {
 
     @Nullable
-    static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
+    public static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
         if (!state.requiresPost()) {
             return null;
         }
@@ -68,11 +68,11 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
 
     @SuppressWarnings("unchecked")
     public <T extends PhaseContext<T>> T getUnwindingContext() {
-        return (T) unwindingContext;
+        return (T) this.unwindingContext;
     }
 
     public IPhaseState<?> getUnwindingState() {
-        return unwindingState;
+        return this.unwindingState;
     }
 
     @Override

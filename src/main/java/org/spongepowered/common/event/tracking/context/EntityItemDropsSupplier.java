@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.context;
 
-public class GeneralizedContext extends PhaseContext<GeneralizedContext> {
-    public GeneralizedContext(IPhaseState<? extends GeneralizedContext> state) {
-        super(state);
+import java.util.UUID;
+
+public class EntityItemDropsSupplier extends CapturedMultiMapSupplier<UUID, ItemDropData> {
+
+    public EntityItemDropsSupplier() {
     }
-
-
 }
