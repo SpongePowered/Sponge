@@ -55,7 +55,7 @@ public class ImmutableSpongeFallDistanceData extends AbstractImmutableBoundedCom
 
     @Override
     public FallDistanceData asMutable() {
-        return new SpongeFallDistanceData(this.value);
+        return new SpongeFallDistanceData(this.value, this.lowerBound, this.upperBound);
     }
 
     @Override
