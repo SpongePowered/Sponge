@@ -52,6 +52,8 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
         return state.getPhase() == TrackingPhases.GENERATION
                 || state.getPhase() == TrackingPhases.PLUGIN
                 || state == BlockPhase.State.RESTORING_BLOCKS
+                // Plugins can call commands during event listeners.
+                || state == GeneralPhase.State.COMMAND
                 // Decay can be caused when a block is performing a lot of
                 // changes in place
                 || state == BlockPhase.State.BLOCK_DECAY;
