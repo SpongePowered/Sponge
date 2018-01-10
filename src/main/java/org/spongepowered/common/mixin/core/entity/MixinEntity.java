@@ -296,7 +296,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 0),
             cancellable = true)
     public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> ci) {
-        if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
+        if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             Sponge.getCauseStackManager().pushCause(this);
             if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (Entity) vehicle))) {
                 ci.cancel();
@@ -323,12 +323,12 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public boolean dismountRidingEntity(DismountType type) {
-        if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
+        if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(this);
                 Sponge.getCauseStackManager().addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeImpl.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(Sponge.getCauseStackManager().getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
+                    createRideEntityEventDismount(frame.getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
                     return false;
                 }
             }
