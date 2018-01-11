@@ -134,6 +134,8 @@ public final class SpongePlayerDataHandler {
         try {
             final Path newDatPath = instance.playerDir.resolve(id + ".dat.tmp");
             if (Files.notExists(newDatPath)) {
+                // Ensure that where we want to put this at ALWAYS exists
+                Files.createDirectories(newDatPath.getParent());
                 Files.createFile(newDatPath);
             }
 
