@@ -1191,4 +1191,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public Collection<AdvancementTree> getUnlockedAdvancementTrees() {
         return ((IMixinPlayerAdvancements) this.advancements).getAdvancementTrees();
     }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
+                "as it causes the player to be placed into an undefined state. " +
+                "Consider putting them through the normal death process instead.");
+    }
 }
