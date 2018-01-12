@@ -1194,6 +1194,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void remove() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
+                "as it causes the player to be placed into an undefined state. " +
+                "Consider putting them through the normal death process instead.");
     }
 }
