@@ -27,15 +27,25 @@ package org.spongepowered.common.mixin.core.entity.item;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
+
+import java.util.ArrayList;
 
 @Mixin(EntityMinecart.class)
 public abstract class MixinEntityMinecart extends MixinEntity implements Minecart {
@@ -75,6 +85,18 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z"))
     private boolean onIsRidden(EntityMinecart self) {
         return !this.slowWhenEmpty || isBeingRidden();
+    }
+
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;removePassengers()V"))
+    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(source);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList(), this, 0, amount);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                cir.setReturnValue(true);
+            }
+        }
     }
 
     @Override

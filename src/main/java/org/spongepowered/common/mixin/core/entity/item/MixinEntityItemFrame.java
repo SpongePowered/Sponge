@@ -25,15 +25,24 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.util.DamageSource;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.hanging.ItemFrame;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityHanging;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -49,6 +58,18 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
 
     @Shadow
     public abstract void setItemRotation(int p_82336_1_);
+
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItemFrame;dropItemOrSelf(Lnet/minecraft/entity/Entity;Z)V"))
+    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(source);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList(), this, 0, amount);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                cir.setReturnValue(true);
+            }
+        }
+    }
 
     public Optional<ItemStack> getItem() {
         return Optional.ofNullable(ItemStackUtil.fromNative(getDisplayedItem()));
