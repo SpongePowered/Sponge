@@ -61,7 +61,7 @@ final class SwapHandItemsState extends BasicInventoryPacketState {
             List<SlotTransaction> trans = mixinInventory.getCapturedTransactions();
             ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
             SpongeImpl.postEvent(swapItemEvent);
-            PacketPhaseUtil.handleSlotRestore(player, player.inventoryContainer, swapItemEvent.getTransactions(), swapItemEvent.isCancelled());
+            PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.getTransactions(), swapItemEvent.isCancelled());
             mixinInventory.setCapture(false);
             mixinInventory.getCapturedTransactions().clear();
         }

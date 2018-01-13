@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -42,7 +43,7 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
+    public static void handleSlotRestore(EntityPlayer player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
@@ -53,16 +54,22 @@ public final class PacketPhaseUtil {
             final int slotNumber = slot.slotNumber;
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
-            final Slot nmsSlot = openContainer.getSlot(slotNumber);
-            if (nmsSlot != null) {
-                nmsSlot.putStack(originalStack);
+            if (openContainer == null) {
+                slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
+            } else {
+                final Slot nmsSlot = openContainer.getSlot(slotNumber);
+                if (nmsSlot != null) {
+                    nmsSlot.putStack(originalStack);
+                }
             }
         }
-        openContainer.detectAndSendChanges();
-        // If event is cancelled, always resync with player
-        // we must also validate the player still has the same container open after the event has been processed
-        if (eventCancelled && player.openContainer == openContainer) {
-            player.sendContainerToPlayer(openContainer);
+        if (openContainer != null) {
+            openContainer.detectAndSendChanges();
+            // If event is cancelled, always resync with player
+            // we must also validate the player still has the same container open after the event has been processed
+            if (eventCancelled && player.openContainer == openContainer && player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).sendContainerToPlayer(openContainer);
+            }
         }
     }
 
