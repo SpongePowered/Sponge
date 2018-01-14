@@ -847,7 +847,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Value<Instant> lastPlayed() {
-        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
+        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, SpongePlayerDataHandler.getLastPlayed(this.getUniqueID()).get());
     }
 
     // TODO implement with contextual data
