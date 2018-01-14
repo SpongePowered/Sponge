@@ -36,6 +36,7 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -86,6 +87,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     @Override
     public ScoreObjective addScoreObjective(String name, IScoreCriteria criteria) {
         SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
+        objective.setDisplayMode((ObjectiveDisplayMode) (Object) criteria.getRenderType());
         this.scoreboard$addObjective(objective);
         return objective.getObjectiveFor(this);
     }
