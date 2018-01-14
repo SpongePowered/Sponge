@@ -93,6 +93,17 @@ public final class DataVersions {
 
     }
 
+    public static final class Potion {
+
+        public static final int BROKEN_POTION_ID = 1;
+        public static final int POTION_V2 = 2;
+        public static final int CURRENT_VERSION = POTION_V2;
+
+        private Potion() {
+        }
+
+    }
+
     public static final class Data {
 
         public static final int INVISIBILITY_DATA_PRE_1_9 = 1;
