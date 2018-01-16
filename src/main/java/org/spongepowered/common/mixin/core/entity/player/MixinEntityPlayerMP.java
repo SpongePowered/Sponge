@@ -182,6 +182,7 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.BookFaker;
@@ -242,7 +243,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Used to restore original item received in a packet after canceling an event
     private ItemStack packetItem;
 
-    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
+    private final User user = getUserObject();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -417,7 +418,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public User getUserObject() {
-        return this.user;
+        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (this.isFake) { // Fake players are recogizeable through the field set up with isFake.
+            return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
+        }
+        return service.getOrCreate((GameProfile) this.getGameProfile());
     }
 
     // Post before the player values are updated
@@ -465,6 +470,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void sendMessage(ChatType type, Text message) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         checkNotNull(type, "type");
         checkNotNull(message, "message");
 
@@ -487,26 +496,46 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      */
     @Overwrite
     public void sendMessage(ITextComponent component) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, false);
     }
 
     @Override
     public void sendBookView(BookView bookView) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         BookFaker.fakeBookView(bookView, this);
     }
 
     @Override
     public void sendTitle(Title title) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         ((IMixinTitle) (Object) title).send((EntityPlayerMP) (Object) this);
     }
 
     @Override
     public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
     }
 
     @Override
     public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
+        if (this.isFake) {
+            // Don't bother sending messages to fake players
+            return;
+        }
         checkNotNull(particleEffect, "The particle effect cannot be null!");
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");

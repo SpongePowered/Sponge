@@ -103,6 +103,7 @@ import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -166,6 +167,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
     private boolean dontRecalculateExperience;
+    protected final boolean isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
     public void construct(World worldIn, GameProfile gameProfileIn, CallbackInfo ci) {
@@ -336,7 +338,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
-            if (!this.world.isRemote) {
+            if (!((IMixinWorld) this.world).isFake()) {
                 Sponge.getCauseStackManager().pushCause(this);
                 SpongeImpl.postEvent(SpongeEventFactory.
                         createSleepingEventTick(Sponge.getCauseStackManager().getCurrentCause(),
