@@ -64,6 +64,16 @@ dependencies {
     testCompile 'org.spongepowered:lwts:1.0.0'
 }
 
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.whenConfigured {
+                pom -> pom.dependencies.removeAll { it.groupId == 'org.spongepowered' && it.artifactId == 'testplugins' }
+            }
+        }
+    }
+}
+
 // Include API dependencies in our POM
 ext.shadedDevProject = api
 
