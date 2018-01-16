@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
@@ -319,5 +320,15 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
 
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("tileType", this.tileType)
+            .add("world", this.world)
+            .add("pos", this.pos)
+            .add("blockMetadata", this.blockMetadata)
+            .toString();
     }
 }
