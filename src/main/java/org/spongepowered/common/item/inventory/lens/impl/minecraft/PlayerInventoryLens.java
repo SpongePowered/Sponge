@@ -43,9 +43,6 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 public class PlayerInventoryLens extends RealLens {
 
     private static final int EQUIPMENT = 4;
-    private static final int MAIN_INVENTORY_HEIGHT = 3;
-    private static final int HOTBAR = 1;
-
     private final ArmorEquipable player;
 
     private MainPlayerInventoryLensImpl main;
@@ -73,10 +70,8 @@ public class PlayerInventoryLens extends RealLens {
         }
 
         int base = 0;
-        int INVENTORY_WIDTH = InventoryPlayer.getHotbarSize();
         this.main = new MainPlayerInventoryLensImpl(base, slots, false);
-        base += INVENTORY_WIDTH * HOTBAR;
-        base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
+        base += this.main.slotCount();
         this.equipment = new EquipmentInventoryLensImpl(this.player, base, EQUIPMENT, 1, slots);
         base += EQUIPMENT;
         this.offhand = slots.getSlot(base);
