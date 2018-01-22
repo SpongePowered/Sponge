@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class SpongeSignData extends AbstractListData<Text, SignData, ImmutableSignData> implements SignData {
 
     public SpongeSignData() {
-        this(Lists.newArrayList(Text.of(), Text.of(), Text.of(), Text.of()));
+        this(Lists.newArrayList(Text.empty(), Text.empty(), Text.empty(), Text.of()));
     }
 
     public SpongeSignData(List<Text> lines) {

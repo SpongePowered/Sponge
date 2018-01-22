@@ -77,7 +77,27 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
         addTextColor(TextFormatting.WHITE, Color.WHITE);
         addTextColor(TextFormatting.RESET, Color.WHITE);
 
-        textColorMappings.put("none", TextColors.NONE);
+        textColorMappings.put("none", new TextColor() {
+            @Override
+            public String getName() {
+                return "NONE";
+            }
+
+            @Override
+            public Color getColor() {
+                return Color.BLACK;
+            }
+
+            @Override
+            public String getId() {
+                return "NONE";
+            }
+
+            @Override
+            public String toString() {
+                return this.getId();
+            }
+        });
     }
 
     private static void addTextColor(TextFormatting handle, Color color) {

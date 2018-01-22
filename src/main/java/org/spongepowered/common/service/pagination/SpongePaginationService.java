@@ -238,7 +238,7 @@ public class SpongePaginationService implements PaginationService {
 
         @Override
         public Text getUsage(CommandSource src) {
-            return getKey() == null ? Text.of() : Text.of("[", getKey(), "]");
+            return getKey() == null ? Text.empty() : Text.of("[", getKey(), "]");
         }
     }
 }

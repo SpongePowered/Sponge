@@ -32,29 +32,31 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.format.TextStyleImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@RegisterCatalog(TextStyles.class)
 public final class TextStyleRegistryModule implements AlternateCatalogRegistryModule<TextStyle.Base> {
 
-    @RegisterCatalog(value = TextStyles.class, ignoredFields = "NONE")
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = ImmutableMap.<String, TextStyle.Base>builder()
-        .put("minecraft:bold", SpongeTextStyle.of(TextFormatting.BOLD))
-        .put("minecraft:italic", SpongeTextStyle.of(TextFormatting.ITALIC))
-        .put("minecraft:underline", SpongeTextStyle.of(TextFormatting.UNDERLINE))
-        .put("minecraft:strikethrough", SpongeTextStyle.of(TextFormatting.STRIKETHROUGH))
-        .put("minecraft:obfuscated", SpongeTextStyle.of(TextFormatting.OBFUSCATED))
-        .put("minecraft:reset", SpongeTextStyle.of(TextFormatting.RESET))
-        .put("none", (TextStyle.Base) TextStyles.NONE)
+        .put("minecraft:bold", TextStyleImpl.Real.of(TextFormatting.BOLD))
+        .put("minecraft:italic", TextStyleImpl.Real.of(TextFormatting.ITALIC))
+        .put("minecraft:underline", TextStyleImpl.Real.of(TextFormatting.UNDERLINE))
+        .put("minecraft:strikethrough", TextStyleImpl.Real.of(TextFormatting.STRIKETHROUGH))
+        .put("minecraft:obfuscated", TextStyleImpl.Real.of(TextFormatting.OBFUSCATED))
+        .put("minecraft:reset", TextStyleImpl.Real.of(TextFormatting.RESET))
+        .put("none", new TextStyleImpl.None())
         .build();
 
     @Override
     public Optional<TextStyle.Base> getById(String id) {
-        if (id.equals("NONE")) {
+        id = id.toLowerCase(Locale.ENGLISH);
+        if (id.equals("none")) {
             return Optional.of((TextStyle.Base) TextStyles.NONE);
         }
         return Optional.ofNullable(textStyleMappings.get(Preconditions.checkNotNull(id)));

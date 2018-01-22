@@ -209,7 +209,7 @@ abstract class ActivePagination {
             if (addContinuation && i == maxContentLinesPerPage - 1) {
                 currentPage.add(CONTINUATION_TEXT);
             } else {
-                currentPage.add(0, Text.EMPTY);
+                currentPage.add(0, Text.of());
             }
         }
     }

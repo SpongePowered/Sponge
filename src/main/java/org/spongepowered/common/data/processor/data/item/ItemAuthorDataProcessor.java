@@ -78,12 +78,12 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
 
     @Override
     protected Value<Text> constructValue(Text actualValue) {
-        return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), actualValue);
+        return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.empty(), actualValue);
     }
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), value);
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.empty(), value);
     }
 
 }

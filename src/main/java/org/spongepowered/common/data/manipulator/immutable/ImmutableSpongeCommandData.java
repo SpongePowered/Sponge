@@ -101,7 +101,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
                 .setSuccessCount(this.success)
                 .setStoredCommand(this.storedCommand)
                 .shouldTrackOutput(this.tracks)
-                .setLastOutput(this.lastOutput == null ? Text.of() : this.lastOutput);
+                .setLastOutput(this.lastOutput == null ? Text.empty() : this.lastOutput);
     }
 
     @Override

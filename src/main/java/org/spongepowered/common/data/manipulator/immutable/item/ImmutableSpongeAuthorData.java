@@ -41,7 +41,7 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
 
     public ImmutableSpongeAuthorData(Text value) {
         super(ImmutableAuthorData.class, value, Keys.BOOK_AUTHOR);
-        this.author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), value);
+        this.author = new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.empty(), value);
     }
 
     @Override

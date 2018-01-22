@@ -45,7 +45,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
 
     public ImmutableSpongeDisplayNameData(Text value) {
         super(ImmutableDisplayNameData.class, value, Keys.DISPLAY_NAME);
-        this.nameValue = new ImmutableSpongeValue<>(this.usedKey, Text.of(), value);
+        this.nameValue = new ImmutableSpongeValue<>(this.usedKey, Text.empty(), value);
     }
 
     @Override

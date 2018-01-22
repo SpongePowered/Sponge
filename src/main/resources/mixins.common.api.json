@@ -12,10 +12,6 @@
         "event.cause.damage.MixinAbstractEntityDamageSource",
         "item.merchant.MixinMerchant",
         "text.MixinText",
-        "text.MixinTextLiteral",
-        "text.MixinTextScore",
-        "text.MixinTextSelector",
-        "text.MixinTextTranslatable",
         "text.title.MixinTitle",
         "world.MixinLocation"
     ],

@@ -33,7 +33,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.interfaces.text.IMixinTextComponent;
-import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.impl.TextImpl;
 
 import java.util.List;
 
@@ -72,7 +72,7 @@ public final class SpongeTexts {
     }
 
     public static ITextComponent toComponent(Text text) {
-        return ((IMixinText) text).toComponent();
+        return ((TextImpl) text).asComponentCopy();
     }
 
     public static Text toText(ITextComponent component) {

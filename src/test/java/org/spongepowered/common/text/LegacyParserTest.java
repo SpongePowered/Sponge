@@ -43,7 +43,7 @@ public class LegacyParserTest {
 
     @Test
     public void testPlain() {
-        assertEquals(Text.EMPTY, parse(""));
+        assertEquals(Text.empty(), parse(""));
         assertEquals(Text.of("&&"), parse("&&"));
         assertEquals(Text.of("Sponge"), parse("Sponge"));
         assertEquals(Text.of("Sponge & Water"), parse("Sponge & Water"));
@@ -67,7 +67,7 @@ public class LegacyParserTest {
 
     @Test
     public void testRedundantFormattingCodes() {
-        assertEquals(Text.EMPTY, parse("&c&e&l&f"));
+        assertEquals(Text.empty(), parse("&c&e&l&f"));
         assertEquals(Text.builder("Hello ").append(Text.builder("Sponge").color(TextColors.YELLOW).build()).build(),
                 parse("Hello &a&f&e&eSponge"));
     }

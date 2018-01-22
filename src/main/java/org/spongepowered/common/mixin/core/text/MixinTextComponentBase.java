@@ -39,7 +39,6 @@ import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinTextComponent;
@@ -48,6 +47,7 @@ import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 import org.spongepowered.common.text.ResolvedChatStyle;
 import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.format.SpongeTextColor;
+import org.spongepowered.common.text.format.TextStyleImpl;
 
 import java.util.Iterator;
 import java.util.List;
@@ -199,7 +199,7 @@ public abstract class MixinTextComponentBase implements IMixinTextComponent {
                 builder.color(SpongeTextColor.of(this.style.color));
             }
 
-            builder.style(new TextStyle(this.style.bold, this.style.italic, this.style.underlined, this.style.strikethrough, this.style.obfuscated));
+            builder.style(new TextStyleImpl(this.style.bold, this.style.italic, this.style.underlined, this.style.strikethrough, this.style.obfuscated));
 
             if (this.style.clickEvent != null) {
                 builder.onClick(((IMixinClickEvent) this.style.clickEvent).getHandle());

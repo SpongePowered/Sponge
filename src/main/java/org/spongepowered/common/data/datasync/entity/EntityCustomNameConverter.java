@@ -48,8 +48,8 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
         Text newValue = SpongeTexts.fromLegacy(value);
 
         return Optional.of(DataTransactionResult.builder()
-            .replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), currentText))
-            .success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), newValue))
+            .replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.empty(), currentText))
+            .success(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.empty(), newValue))
             .result(DataTransactionResult.Type.SUCCESS)
             .build());
     }

@@ -114,11 +114,21 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.text.BookView;
+import org.spongepowered.api.text.LiteralText;
+import org.spongepowered.api.text.ScoreText;
+import org.spongepowered.api.text.SelectorText;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TranslatableText;
+import org.spongepowered.api.text.action.ClickAction;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.ShiftClickAction;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.serializer.TextSerializer;
+import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -237,6 +247,15 @@ import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryMod
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
+import org.spongepowered.common.text.action.ClickTextActionImpl;
+import org.spongepowered.common.text.action.HoverTextActionImpl;
+import org.spongepowered.common.text.action.ShiftClickTextActionImpl;
+import org.spongepowered.common.text.impl.BookViewImpl;
+import org.spongepowered.common.text.impl.LiteralTextImpl;
+import org.spongepowered.common.text.impl.ScoreTextImpl;
+import org.spongepowered.common.text.impl.SelectorTextImpl;
+import org.spongepowered.common.text.impl.TitleImpl;
+import org.spongepowered.common.text.impl.TranslatableTextImpl;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
@@ -281,7 +300,25 @@ public final class CommonModuleRegistry {
     }
 
     private void registerDefaultSuppliers(SpongeGameRegistry registry) {
-        registry.registerBuilderSupplier(ItemStack.Builder.class, SpongeItemStackBuilder::new)
+        registry
+            .registerBuilderSupplier(Text.Builder.class, LiteralTextImpl.Builder::new)
+            .registerBuilderSupplier(LiteralText.Builder.class, LiteralTextImpl.Builder::new)
+            .registerBuilderSupplier(TranslatableText.Builder.class, TranslatableTextImpl.Builder::new)
+            .registerBuilderSupplier(ScoreText.Builder.class, ScoreTextImpl.Builder::new)
+            .registerBuilderSupplier(SelectorText.Builder.class, SelectorTextImpl.Builder::new)
+            .registerBuilderSupplier(ClickAction.OpenUrl.Builder.class, ClickTextActionImpl.OpenUrlImpl.Builder::new)
+            .registerBuilderSupplier(ClickAction.RunCommand.Builder.class, ClickTextActionImpl.RunCommandImpl.Builder::new)
+            .registerBuilderSupplier(ClickAction.ChangePage.Builder.class, ClickTextActionImpl.ChangePageImpl.Builder::new)
+            .registerBuilderSupplier(ClickAction.SuggestCommand.Builder.class, ClickTextActionImpl.SuggestCommandImpl.Builder::new)
+            .registerBuilderSupplier(ClickAction.ExecuteCallback.Builder.class, ClickTextActionImpl.ExecuteCallbackImpl.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowText.Builder.class, HoverTextActionImpl.ShowTextImpl.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowItem.Builder.class, HoverTextActionImpl.ShowItemImpl.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowEntity.Builder.class, HoverTextActionImpl.ShowEntityImpl.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowEntity.Ref.Builder.class, HoverTextActionImpl.ShowEntityImpl.Ref.Builder::new)
+            .registerBuilderSupplier(ShiftClickAction.InsertText.Builder.class, ShiftClickTextActionImpl.InsertTextImpl.Builder::new)
+            .registerBuilderSupplier(Title.Builder.class, TitleImpl.BuilderImpl::new)
+            .registerBuilderSupplier(BookView.Builder.class, BookViewImpl.Builder::new)
+            .registerBuilderSupplier(ItemStack.Builder.class, SpongeItemStackBuilder::new)
             .registerBuilderSupplier(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
             .registerBuilderSupplier(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
             .registerBuilderSupplier(PotionEffect.Builder.class, SpongePotionBuilder::new)

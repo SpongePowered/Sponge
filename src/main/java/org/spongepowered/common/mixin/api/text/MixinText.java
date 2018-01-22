@@ -24,116 +24,68 @@
  */
 package org.spongepowered.common.mixin.api.text;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentBase;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.ClickAction;
-import org.spongepowered.api.text.action.HoverAction;
-import org.spongepowered.api.text.action.ShiftClickAction;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextFormat;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
-import org.spongepowered.common.interfaces.text.IMixinText;
-import org.spongepowered.common.text.action.SpongeClickAction;
-import org.spongepowered.common.text.action.SpongeHoverAction;
-import org.spongepowered.common.text.format.SpongeTextColor;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Optional;
+import org.spongepowered.api.text.LiteralText;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.text.impl.LiteralTextImpl;
 
 @Mixin(value = Text.class, remap = false)
-public abstract class MixinText implements IMixinText {
+public interface MixinText {
 
-    @Shadow @Final protected TextFormat format;
-    @Shadow @Final protected ImmutableList<Text> children;
-    @Shadow @Final protected Optional<ClickAction<?>> clickAction;
-    @Shadow @Final protected Optional<HoverAction<?>> hoverAction;
-    @Shadow @Final protected Optional<ShiftClickAction<?>> shiftClickAction;
-
-    private ITextComponent component;
-    private String json;
-
-    protected TextComponentBase createComponent() {
-        throw new UnsupportedOperationException();
+    /**
+     * @author kashike
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static Text of() {
+        return LiteralTextImpl.EMPTY;
     }
 
-    private ITextComponent initializeComponent() {
-        if (this.component == null) {
-            this.component = createComponent();
-            Style style = this.component.getStyle();
+    /**
+     * @author kashike
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static Text empty() {
+        return LiteralTextImpl.EMPTY;
+    }
 
-            if (this.format.getColor() != TextColors.NONE) {
-                style.setColor(((SpongeTextColor) this.format.getColor()).getHandle());
-            }
+    /**
+     * @author kashike
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static Text newLine() {
+        return LiteralTextImpl.NEW_LINE;
+    }
 
-            if (!this.format.getStyle().isEmpty()) {
-                style.setBold(this.format.getStyle().isBold().orElse(null));
-                style.setItalic(this.format.getStyle().isItalic().orElse(null));
-                style.setUnderlined(this.format.getStyle().hasUnderline().orElse(null));
-                style.setStrikethrough(this.format.getStyle().hasStrikethrough().orElse(null));
-                style.setObfuscated(this.format.getStyle().isObfuscated().orElse(null));
-            }
-
-            if (this.clickAction.isPresent()) {
-                style.setClickEvent(SpongeClickAction.getHandle(this.clickAction.get()));
-            }
-
-            if (this.hoverAction.isPresent()) {
-                style.setHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
-            }
-
-            if (this.shiftClickAction.isPresent()) {
-                ShiftClickAction.InsertText insertion = (ShiftClickAction.InsertText) this.shiftClickAction.get();
-                style.setInsertion(insertion.getResult());
-            }
-
-            for (Text child : this.children) {
-                this.component.appendSibling(((IMixinText) child).toComponent());
-            }
+    /**
+     * @author kashike
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static LiteralText of(String content) {
+        checkNotNull(content, "content");
+        if (content.isEmpty()) {
+            return LiteralTextImpl.EMPTY;
+        } else if (content.equals(LiteralTextImpl.NEW_LINE_STRING)) {
+            return LiteralTextImpl.NEW_LINE;
         }
-
-        return this.component;
+        return Text.builder(content).build();
     }
 
-    private ITextComponent getHandle() {
-        return initializeComponent();
-    }
-
-    @Override
-    public ITextComponent toComponent() {
-        return getHandle().createCopy(); // Mutable instances are not nice :(
-    }
-
-    @Override
-    public String toPlain() {
-        return ((IMixinTextComponent) getHandle()).toPlain();
-    }
-
-    @Override
-    public String toPlainSingle() {
-        return getHandle().getUnformattedComponentText();
-    }
-
-    @Override
-    public String toJson() {
-        if (this.json == null) {
-            this.json = ITextComponent.Serializer.componentToJson(getHandle());
+    /**
+     * @author kashike
+     */
+    @Overwrite
+    @SuppressWarnings("deprecation")
+    static LiteralText of(char content) {
+        if (content == LiteralTextImpl.NEW_LINE_CHAR) {
+            return LiteralTextImpl.NEW_LINE;
         }
-
-        return this.json;
-    }
-
-    @Override
-    public String toLegacy(char code) {
-        return ((IMixinTextComponent) getHandle()).toLegacy(code);
-    }
-
-    @Override
-    public String toLegacySingle(char code) {
-        return ((IMixinTextComponent) getHandle()).toLegacySingle(code);
+        return Text.builder(String.valueOf(content)).build();
     }
 }

@@ -22,28 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
-
-import org.spongepowered.api.scoreboard.Score;
-import org.spongepowered.api.text.ScoreText;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.Optional;
-
-@Mixin(value = ScoreText.class, remap = false)
-public abstract class MixinTextScore extends MixinText {
-
-    @Shadow @Final protected Score score;
-    @Shadow @Final protected Optional<String> override;
-
-    /*@Override
-    protected ChatComponentStyle createComponent(Locale locale) {
-        ChatComponentScore component = new ChatComponentScore(null, null); // TODO
-        if (this.override.isPresent()) {
-            component.setValue(this.override.get());
-        }
-        return component;
-    }*/
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.text.action;

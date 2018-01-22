@@ -22,48 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.serializer;
+package org.spongepowered.common.text.impl;
 
-import com.google.gson.JsonParseException;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextParseException;
-import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
-import org.spongepowered.common.text.impl.TextImpl;
+
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import javax.annotation.Nullable;
 
 /**
- * TextSerializer implementation for the json format.
+ * Represents a recursive {@link Iterator} for {@link Text} including the text
+ * itself as well as all children texts.
  */
-public final class JsonTextSerializer implements TextSerializer {
+final class TextIterator implements Iterator<Text> {
 
-    @Override
-    public String getId() {
-        return "minecraft:json";
+    private final TextImpl text;
+    @Nullable private Iterator<Text> children;
+    @Nullable private Iterator<Text> currentChildIterator;
+
+    /**
+     * Constructs a new {@link TextIterator} for the specified {@link Text}.
+     *
+     * @param text The root text for the iterator
+     */
+    TextIterator(final TextImpl text) {
+        this.text = text;
     }
 
     @Override
-    public String getName() {
-        return "JSON";
+    public boolean hasNext() {
+        return this.children == null || (this.currentChildIterator != null && this.currentChildIterator.hasNext()) || this.children.hasNext();
     }
 
     @Override
-    public String serialize(Text text) {
-        return ((TextImpl) text).toJson();
-    }
-
-    @Override
-    public Text deserialize(String input) throws TextParseException {
-        try {
-            ITextComponent component = ITextComponent.Serializer.jsonToComponent(input);
-            if (component == null) {
-                return Text.empty();
-            }
-
-            return ((IMixinTextComponent) component).toText();
-        } catch (JsonParseException e) {
-            throw new TextParseException("Failed to parse JSON", e);
+    public Text next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
         }
+        if (this.children == null) {
+            this.children = this.text.children.iterator();
+            return this.text;
+        } else if (this.currentChildIterator == null || !this.currentChildIterator.hasNext()) {
+            this.currentChildIterator = ((TextImpl) this.children.next()).childrenIterable.iterator();
+        }
+
+        return this.currentChildIterator.next();
     }
 
 }

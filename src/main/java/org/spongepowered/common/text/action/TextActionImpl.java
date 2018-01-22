@@ -22,12 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
+package org.spongepowered.common.text.action;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface IMixinTitle {
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.text.action.TextAction;
 
-    void send(EntityPlayerMP player);
+import javax.annotation.Nullable;
 
+public abstract class TextActionImpl<R> implements TextAction<R> {
+
+    protected final R result;
+
+    protected TextActionImpl(final R result) {
+        this.result = checkNotNull(result, "result");
+    }
+
+    @Override
+    public R getResult() {
+        return this.result;
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+
+        final TextActionImpl<?> that = (TextActionImpl<?>) o;
+        return this.result.equals(that.result);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.result.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .addValue(this.result)
+                .toString();
+    }
 }

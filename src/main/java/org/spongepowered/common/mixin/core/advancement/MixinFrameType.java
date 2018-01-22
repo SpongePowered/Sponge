@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.format.SpongeTextColor;
-import org.spongepowered.common.text.format.SpongeTextStyle;
+import org.spongepowered.common.text.format.TextStyleImpl;
 
 import javax.annotation.Nullable;
 
@@ -69,7 +69,7 @@ public class MixinFrameType {
         if (this.textFormat == null) {
             this.textFormat = TextFormat.of(
                     SpongeTextColor.of(this.format),
-                    SpongeTextStyle.of(this.format));
+                    TextStyleImpl.Real.of(this.format));
         }
         return this.textFormat;
     }

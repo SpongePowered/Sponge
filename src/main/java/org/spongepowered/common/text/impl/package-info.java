@@ -22,22 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
-
-import net.minecraft.util.text.ITextComponent;
-
-public interface IMixinText {
-
-    ITextComponent toComponent();
-
-    String toPlain();
-
-    String toPlainSingle();
-
-    String toJson();
-
-    String toLegacy(char code);
-
-    String toLegacySingle(char code);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.text.impl;

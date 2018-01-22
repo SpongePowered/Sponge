@@ -22,21 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.serializer;
-
-import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
-import org.spongepowered.api.text.serializer.TextSerializerFactory;
-
-public final class SpongeTextSerializerFactory implements TextSerializerFactory {
-
-    public static final TextSerializerFactory INSTANCE = new SpongeTextSerializerFactory();
-
-    private SpongeTextSerializerFactory() {
-    }
-
-    @Override
-    public FormattingCodeTextSerializer getFormattingCodeTextSerializer(char legacyChar) {
-        return new SpongeFormattingCodeTextSerializer(legacyChar);
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.text.serializer.config;

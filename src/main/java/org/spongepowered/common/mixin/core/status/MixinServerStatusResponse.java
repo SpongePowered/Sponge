@@ -55,7 +55,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Shadow private ServerStatusResponse.Version version;
     @Shadow @Nullable private String favicon;
 
-    private Text descriptionText = Text.of();
+    private Text descriptionText = Text.empty();
     @Nullable private ServerStatusResponse.Players playerBackup;
     @Nullable private Favicon faviconHandle;
 
@@ -88,7 +88,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
             this.descriptionText = SpongeTexts.toText(motd);
         } else {
             this.description = new TextComponentString("");
-            this.descriptionText = Text.of();
+            this.descriptionText = Text.empty();
         }
     }
 
