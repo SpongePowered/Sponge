@@ -115,4 +115,9 @@ final class CloseWindowState extends BasicPacketState {
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
     }
+
+    @Override
+    public boolean shouldCaptureEntity() {
+        return true;
+    }
 }
