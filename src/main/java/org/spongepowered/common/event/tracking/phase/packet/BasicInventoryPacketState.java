@@ -205,7 +205,11 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     }
 
                     // Restore cursor
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                    if (inventoryEvent.isCancelled() || !inventoryEvent.getCursorTransaction().isValid()) {
+                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                    } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
+                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
+                    }
 
                     // Restore target slots
                     PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
