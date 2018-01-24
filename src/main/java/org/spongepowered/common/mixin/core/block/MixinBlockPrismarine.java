@@ -34,9 +34,11 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePrismarineData;
 import org.spongepowered.api.data.type.PrismarineType;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePrismarineData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -74,5 +76,10 @@ public abstract class MixinBlockPrismarine extends MixinBlock {
     private ImmutablePrismarineData getPrismarineTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePrismarineData.class,
                 (PrismarineType) (Object) blockState.getValue(BlockPrismarine.VARIANT));
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(this.getUnlocalizedName() + "." + BlockPrismarine.EnumType.ROUGH.getUnlocalizedName() + ".name");
     }
 }
