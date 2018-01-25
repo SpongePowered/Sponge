@@ -24,25 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockConcretePowder;
+import net.minecraft.block.BlockFlowerPot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockConcretePowder.class)
-public abstract class MixinBlockConcretePowder extends MixinBlock implements IMixinDyeableBlock {
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        this.setProperty(BlockConcretePowder.COLOR);
-    }
+@Mixin(BlockFlowerPot.class)
+public abstract class MixinBlockFlowerPot extends MixinBlock {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(getUnlocalizedName() + ".white.name");
+        return new SpongeTranslation("item.flowerPot.name");
     }
 }

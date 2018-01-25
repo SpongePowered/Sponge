@@ -35,10 +35,12 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSeamlessD
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSlabData;
 import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSeamlessData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(value = {BlockDoubleStoneSlabNew.class, BlockDoubleStoneSlab.class})
 public abstract class MixinBlockDoubleStoneSlab extends MixinBlockStoneSlab {
@@ -67,5 +69,13 @@ public abstract class MixinBlockDoubleStoneSlab extends MixinBlockStoneSlab {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.getValue(BlockStoneSlab.SEAMLESS));
         }
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.getValue(BlockStoneSlabNew.SEAMLESS));
+    }
+
+    @Override
+    public Translation getTranslation() {
+        if (getBlockState().getBlock() instanceof BlockDoubleStoneSlabNew) {
+            return new SpongeTranslation(getUnlocalizedName() + ".red_sandstone.name");
+        }
+        return super.getTranslation();
     }
 }
