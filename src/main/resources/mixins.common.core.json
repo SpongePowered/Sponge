@@ -363,6 +363,7 @@
         "item.inventory.MixinContainerCrafting",
         "item.inventory.MixinContainerHorseChest",
         "item.inventory.MixinContainerPlayer",
+        "item.inventory.MixinContainerRepair",
         "item.inventory.MixinContainerWorkbench",
         "item.inventory.MixinCustomInventory",
         "item.inventory.MixinCustomContainer",
