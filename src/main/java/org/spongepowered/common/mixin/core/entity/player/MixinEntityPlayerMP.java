@@ -345,6 +345,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 }
             }
 
+            this.spawnShoulderEntities();
+
             // Ignore keepInventory GameRule instead use keepInventory from Event
             if (!event.getKeepInventory() && !this.isSpectator()) {
                 this.destroyVanishingCursedItems();
@@ -391,8 +393,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean keepInventory(GameRules gameRules, String key, EntityPlayerMP that, boolean keepEverything) {
-        return ((IMixinEntityPlayer) that).keepInventory();
+    private boolean keepInventory(GameRules gameRules, String key, EntityPlayerMP corpse, boolean keepEverything) {
+        boolean keep = ((IMixinEntityPlayer) corpse).keepInventory(); // Override Keep Inventory GameRule?
+        if (!keep) {
+            // Copy corpse inventory to respawned player
+            this.inventory.copyInventory(corpse.inventory);
+            // Clear corpse so that mods do not copy from it again
+            corpse.inventory.clear();
+        }
+        return keep;
     }
 
     @Override
