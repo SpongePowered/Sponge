@@ -976,8 +976,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         org.spongepowered.api.item.inventory.Slot slot = ((Inventory) this.inventoryContainer)
                 .query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class))
                 .query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(this.inventory.currentItem)));
+        final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(currentItem);
         ItemStack itemToDrop = this.inventory.decrStackSize(this.inventory.currentItem, dropAll && !currentItem.isEmpty() ? currentItem.getCount() : 1);
-        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(currentItem), ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
+        ((IMixinContainer) this.inventoryContainer).getCapturedTransactions().add(new SlotTransaction(slot, originalItem, ItemStackUtil.snapshotOf(this.inventory.getCurrentItem())));
 
         return this.dropItem(itemToDrop, false, true);
     }

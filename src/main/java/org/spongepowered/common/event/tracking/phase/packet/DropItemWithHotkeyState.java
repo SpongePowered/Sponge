@@ -100,10 +100,11 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                         .createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton);
 
                     SpongeImpl.postEvent(dropItemEvent);
-                    if (!dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
-                        processSpawnedEntities(player, dropItemEvent);
-                    } else {
+                    if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(dropItemEvent.getTransactions())) {
                         ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
+                        PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(), true);
+                    } else {
+                        processSpawnedEntities(player, dropItemEvent);
                     }
                     slotTrans.clear();
                     mixinContainer.setCaptureInventory(false);
