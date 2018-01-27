@@ -163,6 +163,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void addScore(int scoreIn);
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
+    @Shadow protected abstract void spawnShoulderEntities();
+
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
