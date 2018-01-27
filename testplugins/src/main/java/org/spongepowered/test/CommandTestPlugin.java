@@ -101,6 +101,16 @@ public class CommandTestPlugin {
                             .build(), "test")
                     .childArgumentParseExceptionFallback(false)
                     .build(), "commandelementtest");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                    .child(CommandSpec.builder()
+                            .executor(((src, args) -> {
+                                src.sendMessage(Text.of("Command Child Executed"));
+
+                                return CommandResult.success();
+                            }))
+                            .arguments(new TestCommandElement(Text.of("test")))
+                            .build(), "test").build(), "commandwithnofallback");
     }
 
     @NonnullByDefault
