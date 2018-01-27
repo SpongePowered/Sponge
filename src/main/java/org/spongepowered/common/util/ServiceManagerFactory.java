@@ -22,45 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin;
+package org.spongepowered.common.util;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.common.util.ServiceManagerFactory;
+import org.spongepowered.api.service.SimpleServiceManager;
+import org.spongepowered.common.SpongeImpl;
 
-import javax.annotation.Nullable;
+public final class ServiceManagerFactory {
 
-public abstract class AbstractPluginContainer implements PluginContainer {
-
-    @Nullable private ServiceManager serviceManager;
-
-    protected AbstractPluginContainer() {
+    private ServiceManagerFactory() {
     }
 
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return MoreObjects.toStringHelper("Plugin")
-                .omitNullValues()
-                .add("id", getId())
-                .add("name", getName())
-                .add("version", getVersion().orElse(null))
-                .add("description", getDescription().orElse(null))
-                .add("url", getUrl().orElse(null))
-                .add("authors", getAuthors().isEmpty() ? null : getAuthors())
-                .add("source", getSource().orElse(null));
-    }
-
-    @Override
-    public final String toString() {
-        return toStringHelper().toString();
-    }
-
-    @Override
-    public ServiceManager getServiceManager() {
-        if (this.serviceManager == null) {
-            this.serviceManager = ServiceManagerFactory.createServiceManager();
-        }
-
-        return this.serviceManager;
+    public static ServiceManager createServiceManager() {
+        return new SimpleServiceManager(SpongeImpl.getGame().getPluginManager());
     }
 }
