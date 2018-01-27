@@ -55,7 +55,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     private WrapperCommandSource(ICommandSender sender) {
         this.sender = sender;
         this.service = SpongeImpl.getGame().getServiceManager().provideUnchecked(PermissionService.class);
-        this.data = new MemorySubjectData(this.service);
+        this.data = new MemorySubjectData(((IMixinCommandSender) this.service).asCommandSource());
         CommandPermissions.populateMinecraftPermissions(sender, data);
     }
 

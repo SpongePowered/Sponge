@@ -50,7 +50,7 @@ public final class AndPermissionLevelSubject extends SpongeBaseSubject {
     public AndPermissionLevelSubject(ICommandSender opLevelSubject, CommandSource delegate) {
         this.delegate = delegate;
         this.service = SpongeImpl.getGame().getServiceManager().provideUnchecked(PermissionService.class);
-        this.opLevelData = new FixedParentMemorySubjectData(this.service, delegate.asSubjectReference());
+        this.opLevelData = new FixedParentMemorySubjectData(this, delegate.asSubjectReference());
         CommandPermissions.populateMinecraftPermissions(opLevelSubject, this.opLevelData);
         for (Map.Entry<String, Boolean> permission : ImmutableSet.copyOf(this.opLevelData.getPermissions(SubjectData.GLOBAL_CONTEXT).entrySet())) {
             if (permission.getValue()) {

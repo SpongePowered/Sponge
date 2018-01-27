@@ -87,7 +87,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         public OpLevelSubject(final SpongePermissionService service, final int level) {
             this.service = service;
             this.level = level;
-            this.data = new GlobalMemorySubjectData(service) {
+            this.data = new GlobalMemorySubjectData(this) {
 
                 @Override
                 public List<SubjectReference> getParents(Set<Context> contexts) {

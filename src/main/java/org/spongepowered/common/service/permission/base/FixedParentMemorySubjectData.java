@@ -27,7 +27,7 @@ package org.spongepowered.common.service.permission.base;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.List;
@@ -43,10 +43,11 @@ public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      *
-     * @param service The service to request subjects from
+     * @param subject The subject in question
+     * @param parent The fixed parent
      */
-    public FixedParentMemorySubjectData(PermissionService service, SubjectReference parent) {
-        super(service);
+    public FixedParentMemorySubjectData(Subject subject, SubjectReference parent) {
+        super(subject);
         this.forcedParent = parent;
     }
 

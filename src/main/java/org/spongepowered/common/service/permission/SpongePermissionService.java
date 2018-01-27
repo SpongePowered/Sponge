@@ -76,15 +76,16 @@ public class SpongePermissionService implements PermissionService {
 
     public SpongePermissionService(Game game) {
         this.game = game;
+        this.defaultData = new OpLevelCollection.OpLevelSubject(this, 0);
         this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = newCollection(SUBJECTS_DEFAULT)));
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
         this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
-                s -> new FixedParentMemorySubjectData(this, getGroupForOpLevel(2).asSubjectReference()), NO_COMMAND_SOURCE));
+                s -> new FixedParentMemorySubjectData(this.defaultData, getGroupForOpLevel(2).asSubjectReference()), NO_COMMAND_SOURCE));
 
         this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
-                s -> new FixedParentMemorySubjectData(this, getGroupForOpLevel(4).asSubjectReference()),
+                s -> new FixedParentMemorySubjectData(this.defaultData, getGroupForOpLevel(4).asSubjectReference()),
                 s -> {
                     if (s.equals("Server")) {
                         return SpongeImpl.getGame().getServer().getConsole();
@@ -94,7 +95,6 @@ public class SpongePermissionService implements PermissionService {
                     return null;
                 }));
 
-        this.defaultData = getDefaultCollection().get(SUBJECTS_DEFAULT);
     }
 
     static UserListOps getOps() {
@@ -120,7 +120,10 @@ public class SpongePermissionService implements PermissionService {
     }
 
     private SpongeSubjectCollection newCollection(String identifier) {
-        return new DataFactoryCollection(identifier, this, s -> new GlobalMemorySubjectData(SpongePermissionService.this), NO_COMMAND_SOURCE);
+        return new DataFactoryCollection(identifier,
+                this,
+                s -> new GlobalMemorySubjectData(SpongePermissionService.this.defaultData),
+                NO_COMMAND_SOURCE);
     }
 
     public SpongeSubjectCollection get(String identifier) {

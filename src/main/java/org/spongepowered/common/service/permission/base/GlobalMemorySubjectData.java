@@ -27,7 +27,7 @@ package org.spongepowered.common.service.permission.base;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
-import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 
@@ -41,10 +41,10 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      *
-     * @param service The service to request subject references from
+     * @param subject The subject to create the data for
      */
-    public GlobalMemorySubjectData(PermissionService service) {
-        super(service);
+    public GlobalMemorySubjectData(Subject subject) {
+        super(subject);
     }
 
 
