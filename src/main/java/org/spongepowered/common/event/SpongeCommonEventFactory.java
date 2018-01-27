@@ -642,7 +642,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static boolean callDestructEntityEventDeath(EntityLivingBase entity, DamageSource source) {
+    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, DamageSource source) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;
         MessageChannel channel;
@@ -680,13 +680,13 @@ public class SpongeCommonEventFactory {
             final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
             DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
                 originalChannel, Optional.of(channel), formatter,
-                (Living) entity, messageCancelled);
+                (Living) entity, entity.world.getGameRules().getBoolean("keepInventory"), messageCancelled);
             SpongeImpl.postEvent(event);
             Text message = event.getMessage();
             if (!event.isMessageCancelled() && !message.isEmpty()) {
                 event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
             }
-            return true;
+            return event;
         }
     }
 

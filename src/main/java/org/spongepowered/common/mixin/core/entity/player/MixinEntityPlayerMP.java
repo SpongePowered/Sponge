@@ -109,6 +109,7 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
@@ -177,6 +178,7 @@ import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
@@ -285,6 +287,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
+    private boolean keepInventory = false;
+
+    @Override
+    public boolean keepInventory() {
+        return this.keepInventory;
+    }
 
     /**
      * @author blood - May 12th, 2016
@@ -296,9 +304,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Overwrite
     public void onDeath(DamageSource cause) {
         // Sponge start
-        if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
-            return;
-        }
+        DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause);
         // Double check that the PhaseTracker is already capturing the Death phase
         final PhaseTracker phaseTracker;
         final boolean tracksEntityDeaths;
@@ -339,7 +345,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 }
             }
 
-            if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            // Ignore keepInventory GameRule instead use keepInventory from Event
+            if (!event.getKeepInventory() && !this.isSpectator()) {
                 this.destroyVanishingCursedItems();
                 this.inventory.dropAllItems();
             }
@@ -366,6 +373,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.extinguish();
             this.setFlag(0, false);
             this.getCombatTracker().reset();
+
+            this.keepInventory = event.getKeepInventory();
         } // Sponge - brackets
     }
 
@@ -379,6 +388,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
             this.readFromNbt(this.getSpongeData());
         }
+    }
+
+    @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean keepInventory(GameRules gameRules, String key, EntityPlayerMP that, boolean keepEverything) {
+        return ((IMixinEntityPlayer) that).keepInventory();
     }
 
     @Override
