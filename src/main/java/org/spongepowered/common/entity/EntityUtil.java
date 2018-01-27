@@ -696,11 +696,21 @@ public final class EntityUtil {
                 // Vanilla behaviour - Delete the known bed location if invalid
                 bedPos = null; // null = remove location
             }
-            // Set the new bed location for the new dimension
-            int prevDim = playerIn.dimension; // Temporarily for setSpawnPoint
+
+            // First revision: Xakep_SDK, 28.01.18. MC Version: 1.12.2, API version: 7.1.0
+            // START REVISION
+            // This calls
+            // MixinEntityPlayer#onSetSpawnPoint(BlockPos pos, boolean forced, CallbackInfo ci);
+            // so bedPos will be set for target world.
+            // If we don't do this, MixinPlayerList#recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd)
+            // will get wrong bedPos when calls playerIn.getBedLocation()
+            // I'm not removing this, because this can be a part of bigger kludge-system.
+            // I don't know, why we're doing this. Actual spawn point
+            int prevDim = playerIn.dimension;
             playerIn.dimension = targetDimensionId;
             playerIn.setSpawnPoint(bedPos, forceBedSpawn);
             playerIn.dimension = prevDim;
+            // END REVISION
         }
         return new Location<>((World) targetWorld, targetSpawnVec);
     }
