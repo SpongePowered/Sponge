@@ -45,4 +45,6 @@ public interface IMixinEntityPlayer extends IMixinEntity {
     UUID getCollidingEntityUuid();
 
     void setSpawnLocations(EntityPlayer oldPlayer);
+
+    boolean keepInventory();
 }
