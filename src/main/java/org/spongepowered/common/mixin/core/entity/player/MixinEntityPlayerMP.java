@@ -313,14 +313,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
-            if (!tracksEntityDeaths) {
-                ;
-            }
         } else {
             phaseTracker = null;
             tracksEntityDeaths = false;
         }
-        try (PhaseContext<?> context = tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()
+        try (PhaseContext<?> context = !tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()
             .source(this)
             .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
             .buildAndSwitch() : null) {
