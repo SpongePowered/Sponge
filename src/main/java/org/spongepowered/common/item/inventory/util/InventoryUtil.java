@@ -56,15 +56,13 @@ public final class InventoryUtil {
     }
 
     public static InventoryCrafting toNativeInventory(CraftingGridInventory inv) {
-        Fabric<IInventory> fabric = ((CraftingInventoryAdapter) inv).getFabric();
-        Iterator<IInventory> inventories = fabric.allInventories().iterator();
-        InventoryCrafting inventoryCrafting = (InventoryCrafting) inventories.next();
-
-        if (inventories.hasNext()) {
-            throw new IllegalStateException("Another inventory found: " + inventories.next());
+        Fabric<IInventory> fabric = ((CraftingGridInventoryAdapter) inv).getFabric();
+        for (IInventory inventory : fabric.allInventories()) {
+            if (inventory instanceof InventoryCrafting) {
+                return ((InventoryCrafting) inventory);
+            }
         }
-
-        return inventoryCrafting;
+        throw new IllegalStateException("Invalid CraftingGridInventory. Could not find InventoryCrafting.");
     }
 
     public static Optional<Inventory> getDoubleChestInventory(TileEntityChest chest) {
