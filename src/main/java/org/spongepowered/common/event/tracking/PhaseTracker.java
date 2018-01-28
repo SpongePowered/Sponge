@@ -79,17 +79,24 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 
 /**
- * A helper object that is hard attached to a {@link World} that acts as a
- * proxy object entering and processing between different states of the
- * world and its objects.
+ * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
+ * various {@link IPhaseState}s.
  */
 @SuppressWarnings("unchecked")
 public final class PhaseTracker {
 
+    private static final PhaseTracker INSTANCE = new PhaseTracker();
+
+    public static PhaseTracker getInstance() {
+        return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
+    }
+
     private static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
 
+    private static final boolean CAPTURE_ENTITIES_ASYNC = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().captureEntitiesAsync();
+
     @SuppressWarnings("unused")
-    public static final Task ASYNC_TO_SYNC_SPAWNER = Task.builder()
+    private static final Task ASYNC_TO_SYNC_SPAWNER = Task.builder()
         .name("Sponge Async To Sync Entity Spawn Task")
         .intervalTicks(1)
         .execute(() -> {
@@ -112,7 +119,7 @@ public final class PhaseTracker {
         })
         .submit(SpongeImpl.getPlugin());
 
-    static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
+    private static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer);
 
     private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
@@ -134,29 +141,15 @@ public final class PhaseTracker {
 
     private final PhaseStack stack = new PhaseStack();
 
-    @Nullable private PhaseData currentProcessingState = null;
-
     public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
     public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
-    public static final boolean CAPTURE_ENTITIES_ASYNC = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().captureEntitiesAsync();
     private boolean hasPrintedEmptyOnce = false;
     private boolean hasPrintedAboutRunnawayPhases = false;
     private boolean hasPrintedAsyncEntities = false;
-    private List<IPhaseState<?>> printedExceptionsForBlocks = new ArrayList<>();
-    private List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
-    private List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
-    private List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
-
-    private PhaseTracker() {
-        // We cannot have two instances ever. ever ever.
-        checkState(INSTANCE == null, "More than one PhaseTracker instance is being created!!! Two cannot exist at once!");
-    }
-
-    private static final PhaseTracker INSTANCE = new PhaseTracker();
-
-    public static PhaseTracker getInstance() {
-        return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
-    }
+    private final List<IPhaseState<?>> printedExceptionsForBlocks = new ArrayList<>();
+    private final List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
+    private final List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
+    private final List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
 
     // ----------------- STATE ACCESS ----------------------------------
 
@@ -170,11 +163,11 @@ public final class PhaseTracker {
             if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
-                printRunawayPhase(state, phaseContext);
+                this.printRunawayPhase(state, phaseContext);
             }
             if (!currentState.canSwitchTo(state) && state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
                 // This is to detect incompatible phase switches.
-                printPhaseIncompatibility(currentState, state);
+                this.printPhaseIncompatibility(currentState, state);
             }
         }
 
@@ -198,12 +191,12 @@ public final class PhaseTracker {
         if (isEmpty) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            printEmptyStackOnCompletion();
+            this.printEmptyStackOnCompletion();
             return;
         }
 
         if (prevState != state) {
-            printIncorrectPhaseCompletion(prevState, state);
+            this.printIncorrectPhaseCompletion(prevState, state);
 
             // The phase on the top of the stack was most likely never completed.
             // Since we don't know when and where completePhase was intended to be called for it,
@@ -215,7 +208,7 @@ public final class PhaseTracker {
         if (this.isVerbose && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
-            printRunnawayPhaseCompletion(state);
+            this.printRunnawayPhaseCompletion(state);
         }
         this.stack.pop();
         // If pop is called, the Deque will already throw an exception if there is no element
@@ -228,16 +221,12 @@ public final class PhaseTracker {
             // it already automaticaly pushes onto the phase stack, along with
             // a new list of capture lists
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
-                this.currentProcessingState = currentPhaseData;
                 ((IPhaseState) state).unwind(context);
-                this.currentProcessingState = null;
-            } catch (Exception | NoClassDefFoundError e) {
-                printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
-                this.currentProcessingState = null;
+            } catch (Exception e) {
+                this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
-        } catch (Exception | NoClassDefFoundError e) {
-            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
-            this.currentProcessingState = null;
+        } catch (Exception e) {
+            this.printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
         }
     }
 
@@ -248,7 +237,7 @@ public final class PhaseTracker {
         }
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Completing Phase").centre().hr();
-        printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.addWrapped(60, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
         printer.add();
         printer.addWrapped(60, "%s : %s", "Completing phase", state);
         printer.add(" Phases Remaining:");
@@ -256,7 +245,7 @@ public final class PhaseTracker {
         printer.add("Stacktrace:");
         printer.add(new Exception("Stack trace"));
         printer.add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!this.isVerbose) {
             this.hasPrintedAboutRunnawayPhases = true;
@@ -296,7 +285,7 @@ public final class PhaseTracker {
         printer.add(" Phases Remaining:");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!this.isVerbose) {
             this.completedIncorrectStates.add(new Tuple<>(prevState, state));
@@ -312,7 +301,7 @@ public final class PhaseTracker {
             return;
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpectedly Completing An Empty Stack").centre().hr()
-                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
+                .addWrapped(60, "Sponge's tracking system is very dependent on knowing when"
                                 + " a change to any world takes place, however, we have been told"
                                 + " to complete a \"phase\" without having entered any phases."
                                 + " This is an error usually on Sponge's part, so a report"
@@ -320,7 +309,7 @@ public final class PhaseTracker {
                 .add("StackTrace:")
                 .add(new Exception())
                 .add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!this.isVerbose) {
             this.hasPrintedEmptyOnce = true;
@@ -332,9 +321,9 @@ public final class PhaseTracker {
             // Avoiding spam logs.
             return;
         }
-        final PrettyPrinter printer = new PrettyPrinter(40);
+        final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Switching Phase").centre().hr();
-        printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.addWrapped(60, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
         printer.add("  %s : %s", "Entering Phase", state.getPhase());
         printer.add("  %s : %s", "Entering State", state);
         CONTEXT_PRINTER.accept(printer, context);
@@ -343,7 +332,7 @@ public final class PhaseTracker {
         printer.add("  %s :", "Printing stack trace")
                 .add(new Exception("Stack trace"));
         printer.add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!this.isVerbose) {
             this.hasPrintedAboutRunnawayPhases = true;
@@ -361,7 +350,7 @@ public final class PhaseTracker {
                 }
             }
         }
-        PrettyPrinter printer = new PrettyPrinter(80);
+        PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Switching Phase").centre().hr();
         printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
         printer.add("  %s : %s", "Current Phase", currentState.getPhase());
@@ -373,7 +362,7 @@ public final class PhaseTracker {
         printer.add("  %s :", "Printing stack trace");
         printer.add(new Exception("Stack trace"));
         printer.add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!this.isVerbose) {
             this.completedIncorrectStates.add(Tuple.of(currentState, incompatibleState));
@@ -385,17 +374,17 @@ public final class PhaseTracker {
     }
 
     private void printMessageWithCaughtException(String header, String subHeader, IPhaseState<?> state, PhaseContext<?> context, Throwable t) {
-        final PrettyPrinter printer = new PrettyPrinter(40);
+        final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
-                .addWrapped(40, "%s :", "PhaseContext");
+                .addWrapped(60, "%s :", "PhaseContext");
         CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:")
                 .add(t);
         printer.add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
@@ -407,31 +396,26 @@ public final class PhaseTracker {
                 }
             }
         }
-        PrettyPrinter printer = new PrettyPrinter(60).add("Exception occurred during a PhaseState").centre().hr()
-            .addWrapped("Sponge's tracking system is very dependent on NOT throwing exceptions randomly,"
-                        + "sometimes it is inevitable. Unfortunately, an exception being printed now can"
-                        + "be very spammy, and as a result, cause logs to reach several hundred megabytes"
-                        + "in size. Since there is an exception being thrown, it is advisable to report this"
-                        + "log to Sponge on GitHub.").hr()
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Exception occurred during a PhaseState").centre().hr()
+            .addWrapped("Sponge's tracking system makes a best effort to not throw exceptions randomly but sometimes it is inevitable. In most "
+                    + "cases, something else triggered this exception and Sponge prevented a crash by catching it. The following stacktrace can be "
+                    + "used to help pinpoint the cause.").hr()
             .add("The PhaseState having an exception: %s", context.state)
             .add("The PhaseContext:")
             ;
         printer
             .add(context.printCustom(printer));
-        Exception exception = new RuntimeException("Unknown Exception During Phase", e);
         printer.hr()
             .add("StackTrace:")
-            .add(exception);
+            .add(e);
         printer.add(" Phases Remaining:");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add();
-        generateVersionInfo(printer);
+        this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         if (!this.isVerbose) {
             this.printedExceptionsForState.add(context.state);
         }
-
-
     }
 
     private void printBlockTrackingException(PhaseData phaseData, IPhaseState<?> phaseState, Throwable e) {
@@ -441,7 +425,7 @@ public final class PhaseTracker {
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
-        printer.addWrapped(40, "%s :", "PhaseContext");
+        printer.addWrapped(60, "%s :", "PhaseContext");
         CONTEXT_PRINTER.accept(printer, phaseData.context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
@@ -457,7 +441,7 @@ public final class PhaseTracker {
         if (!this.isVerbose) {
             return;
         }
-        new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
+        new PrettyPrinter(60).add("Unexpected World Change Detected!").centre().hr()
             .add("Sponge's tracking system is very dependent on knowing when\n"
                  + "a change to any world takes place, however there are chances\n"
                  + "where Sponge does not know of changes that mods may perform.\n"
@@ -469,13 +453,13 @@ public final class PhaseTracker {
     }
 
     private void printExceptionSpawningEntity(PhaseContext<?> context, Throwable e) {
-        if (!this.isVerbose && this.printedExceptionsForEntities.isEmpty()) {
+        if (!this.isVerbose && !this.printedExceptionsForEntities.isEmpty()) {
             if (this.printedExceptionsForEntities.contains(context.state)) {
                 return;
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
-        printer.addWrapped(40, "%s :", "PhaseContext");
+        printer.addWrapped(60, "%s :", "PhaseContext");
         CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
@@ -521,7 +505,7 @@ public final class PhaseTracker {
      * Replacement of {@link net.minecraft.world.World#neighborChanged(BlockPos, Block, BlockPos)}
      * that adds tracking into play.
      *
-     * @param mixinWorld
+     * @param mixinWorld THe world
      * @param notifyPos The original notification position
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
@@ -565,7 +549,7 @@ public final class PhaseTracker {
      * @return True if the block was successfully set (or captured)
      */
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final int flags) {
-        return setBlockState(mixinWorld, pos, newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
+        return this.setBlockState(mixinWorld, pos, newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
     }
 
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, BlockChangeFlag flag) {
@@ -595,7 +579,7 @@ public final class PhaseTracker {
         if (this.isVerbose && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            printUnexpectedBlockChange();
+            this.printUnexpectedBlockChange();
         }
         if (phaseState.requiresBlockCapturing()) {
             try {
@@ -603,7 +587,7 @@ public final class PhaseTracker {
                 // of the original method where true means it successfully changed.
                 return TrackingUtil.trackBlockChange(this, mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context, phaseState);
             } catch (Exception | NoClassDefFoundError e) {
-                printBlockTrackingException(phaseData, phaseState, e);
+                this.printBlockTrackingException(phaseData, phaseState, e);
                 return false;
             }
         }
@@ -664,7 +648,6 @@ public final class PhaseTracker {
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState<?> phaseState = phaseData.state;
         final PhaseContext<?> context = phaseData.context;
-        final TrackingPhase phase = phaseState.getPhase();
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         // Certain phases disallow entity spawns (such as block restoration)
@@ -723,7 +706,7 @@ public final class PhaseTracker {
                 } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
-                    printExceptionSpawningEntity(context, e);
+                    this.printExceptionSpawningEntity(context, e);
                     return false;
                 }
             }
@@ -739,9 +722,9 @@ public final class PhaseTracker {
      * The core implementation of {@link World#spawnEntity(Entity)} that
      * bypasses any sort of cause tracking and throws an event directly
      *
-     * @param world
-     * @param entity
-     * @return
+     * @param world The world
+     * @param entity The entity
+     * @return True if entity was spawned, false if not
      */
     public boolean spawnEntityWithCause(World world, Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
@@ -844,7 +827,7 @@ public final class PhaseTracker {
             .add()
             .add("Delayed spawning is ENABLED for Sponge.")
             .add("The entity is safely captured by Sponge while off the main")
-            .add("server thread, and therefor will be spawned the next tick.")
+            .add("server thread, and therefore will be spawned the next tick.")
             .add("Some cases where a mod is expecting the entity back while")
             .add("async can cause issues with said mod.")
             .add()

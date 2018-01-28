@@ -311,7 +311,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void addNotifierToBlockEvent(C context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
-    default void associateNeighborStateNotifier(C unwindingContext, BlockPos sourcePos, Block block, BlockPos notifyPos,
+    default void associateNeighborStateNotifier(C unwindingContext, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
