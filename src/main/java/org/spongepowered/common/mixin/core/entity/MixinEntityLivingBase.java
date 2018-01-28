@@ -184,6 +184,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return false; // SHADOWED
     }
     @Shadow public abstract AbstractAttributeMap getAttributeMap();
+    @Shadow protected abstract int getExperiencePoints(EntityPlayer attackingPlayer);
 
     @Shadow @Nullable public abstract EntityLivingBase getRevengeTarget();
 
@@ -850,6 +851,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public void onSpongeDeathUpdate() {
         this.onDeathUpdate();
+    }
+
+    @Redirect(method = "onDeathUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getExperiencePoints(Lnet/minecraft/entity/player/EntityPlayer;)I"))
+    private int onGetExperiencePoints(EntityLivingBase entity, EntityPlayer attackingPlayer) {
+        if (entity instanceof IMixinEntityPlayerMP) {
+            if (((IMixinEntityPlayerMP) entity).keepInventory()) {
+                return 0;
+            }
+        }
+        return this.getExperiencePoints(attackingPlayer);
     }
 
     @Inject(method = "onItemPickup", at = @At("HEAD"))
