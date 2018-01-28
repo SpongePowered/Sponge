@@ -738,9 +738,6 @@ public final class TrackingUtil {
         Sponge.getCauseStackManager().popCause();
         SpongeImpl.postEvent(dropItemEventPre);
         if (dropItemEventPre.isCancelled()) {
-            itemStacks.clear();
-        }
-        if (itemStacks.isEmpty()) {
             return;
         }
         final World world = oldBlockSnapshot.getLocation().get().getExtent();
