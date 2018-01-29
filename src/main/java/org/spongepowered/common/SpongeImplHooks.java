@@ -75,6 +75,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpawnerSpawnType;
@@ -382,5 +383,13 @@ public final class SpongeImplHooks {
 
     public static void setShouldLoadSpawn(net.minecraft.world.DimensionType dimensionType, boolean keepSpawnLoaded) {
         // This is only used in SpongeForge
+    }
+
+    public static BlockPos getBedLocation(EntityPlayerMP playerIn, int dimension) {
+        return ((IMixinEntityPlayer) playerIn).getBedLocation(dimension);
+    }
+
+    public static boolean isSpawnForced(EntityPlayerMP playerIn, int dimension) {
+        return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
     }
 }

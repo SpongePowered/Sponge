@@ -475,8 +475,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
         WorldServer worldServer = this.mcServer.getWorld(targetDimension);
-        targetDimension = ((IMixinWorldServer) worldServer).getDimensionId();
         Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
+        targetDimension = ((IMixinWorldServer) toTransform.getExtent()).getDimensionId();
         Location<World> location = toTransform.getLocation();
 
         // If coming from end, fire a teleport event for plugins
@@ -506,6 +506,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.getWorld(playerIn.dimension).removeEntityDangerously(playerIn);
+        final BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDimension);
 
         // ### PHASE 3 ### Reset player (if applicable)
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
@@ -529,8 +530,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
         // before respawning the player, so we know what dimension to spawn them into. This means that the bed location must be copied
         // over to the new player
-        if (playerIn.getBedLocation() != null) {
-            newPlayer.setSpawnPoint(playerIn.getBedLocation(), playerIn.isSpawnForced());
+        if (bedPos != null) {
+            newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
         for (String s : playerIn.getTags()) {
