@@ -534,13 +534,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
-        // Always copy dim0 bedspawn over to new player
-        int tmp = newPlayer.dimension;
-        newPlayer.dimension = 0;
-        BlockPos bedPosDim0 = SpongeImplHooks.getBedLocation(playerIn, 0);
-        newPlayer.setSpawnPoint(bedPosDim0, playerIn.isSpawnForced());
-        newPlayer.dimension = tmp;
-
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
         }
