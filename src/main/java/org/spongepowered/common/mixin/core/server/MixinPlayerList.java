@@ -87,6 +87,7 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
@@ -458,12 +459,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {
         // ### PHASE 1 ### Get the location to spawn
 
-        // Vanilla will always use overworld, set to the world the player was in
-        // UNLESS comming back from the end.
-        if (!conqueredEnd && targetDimension == 0) {
-            targetDimension = playerIn.dimension;
-        }
-
         if (playerIn.isBeingRidden()) {
             playerIn.removePassengers();
         }
@@ -475,7 +470,13 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
         WorldServer worldServer = this.mcServer.getWorld(targetDimension);
-        targetDimension = ((IMixinWorldServer) worldServer).getDimensionId();
+
+        Dimension dim = (Dimension) worldServer.provider;
+        if(!dim.allowsPlayerRespawns()) {
+            targetDimension = SpongeImplHooks.getRespawnDimension(worldServer.provider, playerIn);
+            worldServer = this.mcServer.getWorld(targetDimension);
+        }
+
         Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
 
@@ -529,9 +530,31 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
         // before respawning the player, so we know what dimension to spawn them into. This means that the bed location must be copied
         // over to the new player
+        // [Extended, Revised, 28.01.2018, MC 1.12.2, API 7.1.0] Fix for: https://github.com/SpongePowered/SpongeCommon/issues/1719
+        // First revision: Xakep_SDK, 28.01.18. MC Version: 1.12.2, API version: 7.1.0
+        // START REVISION
+        // This gets target world bed spawn location
+        // and saves original player dimension for RespawnPlayerEvent event.
+        // We're getting target world because of:
+        // 1. When we're calling
+        /** @see EntityUtil#getPlayerRespawnLocation(EntityPlayerMP, WorldServer) */
+        // at the end of the method we have if(bedPos != null) ...
+        // blockPos - actual bed location for target world, that we got here.
+        // At the end of the if we can see:
+        // 1. Change player dim to target world dim
+        // 2. Change player bedPos to actual one (i don't know, why this happens, maybe a bigger kludge-system)
+        // 3. Reset player dim to old one
+        // This changes bedPos for TARGET world given here
+        // then we can get right bed position here(if present)
+        // and set it to new player's bed position
+        int tmp = playerIn.dimension;
+        playerIn.dimension = targetDimension;
         if (playerIn.getBedLocation() != null) {
             newPlayer.setSpawnPoint(playerIn.getBedLocation(), playerIn.isSpawnForced());
         }
+        // Set player dim back from the RespawnPlayerEvent
+        playerIn.dimension = tmp;
+        // END REVISION
 
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
