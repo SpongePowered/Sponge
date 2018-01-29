@@ -684,9 +684,9 @@ public final class EntityUtil {
         }
 
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
-        BlockPos bedPos = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimensionId);
+        BlockPos bedPos = SpongeImplHooks.getBedLocation(playerIn, targetDimensionId);
         if (bedPos != null) { // Player has a bed
-            boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimensionId);
+            boolean forceBedSpawn = SpongeImplHooks.isSpawnForced(playerIn, targetDimensionId);
             BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
             if (bedSpawnLoc != null) { // The bed exists and is not obstructed
                 tempIsBedSpawn = true;
