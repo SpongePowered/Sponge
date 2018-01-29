@@ -385,11 +385,11 @@ public final class SpongeImplHooks {
         // This is only used in SpongeForge
     }
 
-    public static BlockPos getBedLocation(EntityPlayerMP playerIn, int dimension) {
+    public static BlockPos getBedLocation(EntityPlayer playerIn, int dimension) {
         return ((IMixinEntityPlayer) playerIn).getBedLocation(dimension);
     }
 
-    public static boolean isSpawnForced(EntityPlayerMP playerIn, int dimension) {
+    public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
         return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
     }
 }
