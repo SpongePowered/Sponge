@@ -699,13 +699,12 @@ public final class EntityUtil {
 
             // First revision: Xakep_SDK, 28.01.18. MC Version: 1.12.2, API version: 7.1.0
             // START REVISION
-            // This calls
-            // MixinEntityPlayer#onSetSpawnPoint(BlockPos pos, boolean forced, CallbackInfo ci);
+            // This calls SpongeVanilla's (i don't know, hot this handled in SpongeForge)
+            /** @see org.spongepowered.server.mixin.core.entity.player.MixinEntityPlayer#onSetSpawnPoint(BlockPos pos, boolean forced, CallbackInfo ci); */
             // so bedPos will be set for target world.
             // If we don't do this, MixinPlayerList#recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd)
             // will get wrong bedPos when calls playerIn.getBedLocation()
-            // I'm not removing this, because this can be a part of bigger kludge-system.
-            // I don't know, why we're doing this. Actual spawn point
+            // I'm not removing code inside revision block, because this can be a part of bigger kludge-system.
             int prevDim = playerIn.dimension;
             playerIn.dimension = targetDimensionId;
             playerIn.setSpawnPoint(bedPos, forceBedSpawn);
