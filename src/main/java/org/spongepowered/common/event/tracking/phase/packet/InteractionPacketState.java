@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.network.Packet;
@@ -198,6 +199,7 @@ final class InteractionPacketState extends BasicPacketState {
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> projectiles = new ArrayList<>(entities.size());
                 final List<Entity> spawnEggs = new ArrayList<>(entities.size());
+                final List<Entity> xpOrbs = new ArrayList<>(entities.size());
                 final List<Entity> normalPlacement = new ArrayList<>(entities.size());
                 final List<Entity> items = new ArrayList<>(entities.size());
                 for (Entity entity : entities) {
@@ -207,6 +209,8 @@ final class InteractionPacketState extends BasicPacketState {
                         spawnEggs.add(entity);
                     } else if (entity instanceof EntityItem) {
                         items.add(entity);
+                    } else if (entity instanceof EntityXPOrb) {
+                        xpOrbs.add(entity);
                     } else {
                         normalPlacement.add(entity);
                     }
@@ -252,6 +256,23 @@ final class InteractionPacketState extends BasicPacketState {
                         }
                     } else {
                         processEntities(player, items);
+                    }
+                }
+                if (!xpOrbs.isEmpty()) {
+                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                        try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            if (firstBlockChange != null) {
+                                stackFrame.pushCause(firstBlockChange);
+                            }
+                            stackFrame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                                    xpOrbs);
+                            if (!SpongeImpl.postEvent(event)) {
+                                processSpawnedEntities(player, event);
+                            }
+                        }
+                    } else {
+                        processEntities(player, xpOrbs);
                     }
                 }
                 if (!normalPlacement.isEmpty()) {
