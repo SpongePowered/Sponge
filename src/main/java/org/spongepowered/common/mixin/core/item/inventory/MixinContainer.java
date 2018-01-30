@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
@@ -38,7 +36,6 @@ import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -63,7 +60,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -129,7 +125,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
     @Nullable private PluginContainer plugin = null;
 
-    private void init() {
+    /*
+    Named specifically for sponge to avoid potential illegal access errors when a mod container
+    implements an interface that adds a defaulted method. Due to the JVM and compiled bytecode,
+    this could be called in the event the interface with the defaulted method doesn't get
+    overridden in the subclass, and therefor, will call the superclass (this class) method, and
+    then bam... error.
+    More specifically fixes: https://github.com/BuildCraft/BuildCraft/issues/4005
+     */
+    private void spongeInit() {
         if (this.initialized && !this.dirty) {
             return;
         }
@@ -154,7 +158,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public InventoryArchetype getArchetype() {
-        this.init();
+        this.spongeInit();
         return this.archetype;
     }
 
@@ -193,7 +197,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public void detectAndSendChanges(boolean captureOnly) {
-        this.init();
+        this.spongeInit();
 
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
@@ -247,7 +251,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
     public void onPutStackInSlot(int slotId, ItemStack itemstack, CallbackInfo ci) {
         if (this.captureInventory) {
-            this.init();
+            this.spongeInit();
 
             final Slot slot = getSlot(slotId);
             if (slot != null) {
@@ -271,7 +275,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             // This is to prevent infinite loops when a client mod re-requests the recipe result after we modified/cancelled it
             return;
         }
-        this.init();
+        this.spongeInit();
         this.capturedCraftPreviewTransactions.clear();
 
         ItemStackSnapshot orig = ItemStackUtil.snapshotOf(output.getStackInSlot(index));
@@ -325,7 +329,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private ItemStack redirectOnTakeThrow(Slot slot, EntityPlayer player, ItemStack stackOnCursor) {
         this.lastCraft = null;
         ItemStack result = slot.onTake(player, stackOnCursor);
-        if (lastCraft != null) {
+        if (this.lastCraft != null) {
             if (slot instanceof SlotCrafting) {
                 if (this.lastCraft.isCancelled()) {
                     stackOnCursor.setCount(0); // do not drop crafted item when cancelled
@@ -353,7 +357,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.lastCraft = null;
         this.shiftCraft = true;
         ItemStack result = thisContainer.transferStackInSlot(player, slotId);
-        if (lastCraft != null) {
+        if (this.lastCraft != null) {
             if (this.lastCraft.isCancelled()) {
                 result = ItemStack.EMPTY; // Return empty to stop shift-crafting
             }
@@ -399,17 +403,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        this.init();
+        this.spongeInit();
         return this.slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        this.init();
+        this.spongeInit();
         return this.lens;
     }
 
     public Fabric<IInventory> inventory$getFabric() {
-        this.init();
+        this.spongeInit();
         return this.fabric;
     }
 
