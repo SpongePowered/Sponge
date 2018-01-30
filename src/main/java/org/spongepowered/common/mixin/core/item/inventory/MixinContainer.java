@@ -273,6 +273,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (!this.captureInventory) {
             // Capture Inventory is true when caused by a vanilla inventory packet
             // This is to prevent infinite loops when a client mod re-requests the recipe result after we modified/cancelled it
+            output.setInventorySlotContents(index, itemstack);
             return;
         }
         this.spongeInit();
