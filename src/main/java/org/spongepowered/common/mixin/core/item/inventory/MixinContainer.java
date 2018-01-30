@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
@@ -36,6 +39,7 @@ import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -62,6 +66,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
@@ -94,6 +99,9 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private boolean spectatorChest;
     private boolean dirty = true;
     private boolean crafting = false;
+    private boolean dropCancelled = false;
+    @Nullable private ItemStackSnapshot itemStackSnapshot;
+    @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
 
     @Shadow
@@ -264,6 +272,70 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 0))
+    public EntityItem onDragDrop(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
+        final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
+        final EntityItem entityItem = player.dropItem(itemStackIn, unused);
+        if (entityItem  == null) {
+            this.dropCancelled = true;
+            PacketPhaseUtil.handleCustomCursor((EntityPlayerMP) player, original);
+        }
+        return entityItem;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 1))
+    public EntityItem onDragDropSplit(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
+        final EntityItem entityItem = player.dropItem(itemStackIn, unused);
+        if (entityItem  == null) {
+            ItemStack original = null;
+            if (player.inventory.getItemStack().isEmpty()) {
+                original = itemStackIn;
+            } else {
+                player.inventory.getItemStack().grow(1);
+                original = player.inventory.getItemStack();
+            }
+            player.inventory.setItemStack(original);
+            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, original));
+        }
+        return entityItem;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 1))
+    public void onDragCursorClear(InventoryPlayer inventoryPlayer, ItemStack itemStackIn) {
+        if (!this.dropCancelled) {
+            inventoryPlayer.setItemStack(itemStackIn);
+        }
+        this.dropCancelled = false;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Slot;canTakeStack(Lnet/minecraft/entity/player/EntityPlayer;)Z", ordinal = 4))
+    public boolean onCanTakeStack(Slot slot, EntityPlayer playerIn) {
+        final boolean result = slot.canTakeStack(playerIn);
+        if (result) {
+            this.itemStackSnapshot = ItemStackUtil.snapshotOf(slot.getStack());
+            this.lastSlotUsed = slot;
+        } else {
+            this.itemStackSnapshot = null;
+            this.lastSlotUsed = null;
+        }
+        return result;
+    }
+
+    @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 3))
+    public EntityItem onThrowClick(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
+        final EntityItem entityItem = player.dropItem(itemStackIn, true);
+        if (entityItem == null) {
+            final ItemStack original = ItemStackUtil.toNative(this.itemStackSnapshot.createStack());
+            this.lastSlotUsed.putStack(original);
+            player.openContainer.detectAndSendChanges();
+            ((EntityPlayerMP) player).isChangingQuantityOnly = false;
+            ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, this.lastSlotUsed.slotNumber, original));
+        }
+        this.itemStackSnapshot = null;
+        this.lastSlotUsed = null;
+        return entityItem;
     }
 
     @Redirect(method = "slotChangedCraftingGrid",
