@@ -286,7 +286,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             this.dropCancelled = true;
             PacketPhaseUtil.handleCustomCursor((EntityPlayerMP) player, original);
         }
-        ((IMixinEntityPlayer) player).shouldRestoreInventory(false);
         return entityItem;
     }
 
@@ -316,6 +315,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (!this.dropCancelled || !((IMixinEntityPlayer) inventoryPlayer.player).shouldRestoreInventory()) {
             inventoryPlayer.setItemStack(itemStackIn);
         }
+        ((IMixinEntityPlayer) inventoryPlayer.player).shouldRestoreInventory(false);
         this.dropCancelled = false;
     }
 
