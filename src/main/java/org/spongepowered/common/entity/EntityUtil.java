@@ -204,6 +204,7 @@ public final class EntityUtil {
         if (event == null || event.isCancelled()) {
             return entityPlayerMP;
         }
+        entityPlayerMP.invulnerableDimensionChange = true;
 
         boolean sameDimension = entityPlayerMP.dimension == suggestedDimensionId;
         // If leaving The End via End's Portal
