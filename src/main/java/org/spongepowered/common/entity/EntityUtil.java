@@ -191,7 +191,7 @@ public final class EntityUtil {
      * A relative copy paste of {@link EntityPlayerMP#changeDimension(int)} where instead we direct all processing
      * to the appropriate areas for throwing events and capturing world changes during the transfer.
      *
-     * @param mixinEntityPlayerMP The player being teleported
+     * @param entityPlayerMP The player being teleported
      * @param suggestedDimensionId The suggested dimension
      * @return The player object, not re-created
      */
@@ -317,6 +317,8 @@ public final class EntityUtil {
         final IPhaseState state = peek.state;
         final PhaseContext<?> context = peek.context;
 
+        Sponge.getCauseStackManager().pushCause(entityIn);
+
         MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
         return event;
@@ -382,14 +384,14 @@ public final class EntityUtil {
             Sponge.getCauseStackManager().pushCause(mixinEntity);
 
             Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
-    
+
             if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
                 fromWorld.profiler.startSection("placing");
                 // need to use placeInPortal to support mods
                 teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
                 fromWorld.profiler.endSection();
             }
-    
+
             // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
 
             // Grab the exit location of entity after being placed into portal
@@ -452,7 +454,7 @@ public final class EntityUtil {
                 && !TrackingUtil.processBlockCaptures(capturedBlocks, EntityPhase.State.CHANGING_DIMENSION, context)) {
                 toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
             }
-    
+
             if (!event.getKeepsVelocity()) {
                 entityIn.motionX = 0;
                 entityIn.motionY = 0;
@@ -928,7 +930,7 @@ public final class EntityUtil {
             if (dropEvent.isCancelled()) {
                 return null;
             }
-    
+
             // SECOND throw the ConstructEntityEvent
             Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + offsetY, posZ));
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -942,11 +944,11 @@ public final class EntityUtil {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
             final PhaseContext<?> phaseContext = peek.context;
-    
+
             if (item.isEmpty()) {
                 return null;
             }
-    
+
             if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -964,7 +966,7 @@ public final class EntityUtil {
             }
             EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
             entityitem.setDefaultPickupDelay();
-    
+
             // FIFTH - Capture the entity maybe?
             if (currentState.doesCaptureEntityDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
@@ -1005,7 +1007,7 @@ public final class EntityUtil {
             if (dropEvent.isCancelled()) {
                 return null;
             }
-    
+
             // SECOND throw the ConstructEntityEvent
             Transform<World> suggested = new Transform<>(mixinPlayer.getWorld(), new Vector3d(posX, adjustedPosY, posZ));
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
@@ -1018,7 +1020,7 @@ public final class EntityUtil {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
             final PhaseContext<?> phaseContext = peek.context;
-    
+
             if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 final Collection<ItemDropData> itemStacks;
                 if (currentState.tracksEntitySpecificDrops()) {
@@ -1036,14 +1038,14 @@ public final class EntityUtil {
                         .build());
                 return null;
             }
-    
+
             EntityItem entityitem = new EntityItem(player.world, posX, adjustedPosY, posZ, droppedItem);
             entityitem.setPickupDelay(40);
-    
+
             if (traceItem) {
                 entityitem.setThrower(player.getName());
             }
-    
+
             final Random random = mixinPlayer.getRandom();
             if (dropAround) {
                 float f = random.nextFloat() * 0.5F;
@@ -1075,15 +1077,15 @@ public final class EntityUtil {
                 return entityitem;
             }
             ItemStack itemstack = dropItemAndGetStack(player, entityitem);
-    
+
             if (traceItem) {
                 if (!itemstack.isEmpty()) {
                     player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
                 }
-    
+
                 player.addStat(StatList.DROP);
             }
-    
+
             return entityitem;
         }
     }
