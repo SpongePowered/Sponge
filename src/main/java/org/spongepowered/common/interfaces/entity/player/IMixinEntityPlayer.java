@@ -49,4 +49,8 @@ public interface IMixinEntityPlayer extends IMixinEntity {
     boolean keepInventory();
 
     void setOverworldSpawnPoint(@Nullable BlockPos pos);
+
+    void shouldRestoreInventory(boolean flag);
+
+    boolean shouldRestoreInventory();
 }

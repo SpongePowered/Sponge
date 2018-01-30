@@ -169,6 +169,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
     private boolean dontRecalculateExperience;
+    private boolean shouldRestoreInventory = false;
     protected final boolean isFake = SpongeImplHooks.isFakePlayer((EntityPlayer) (Object) this);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
@@ -820,5 +821,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }
+    }
+
+    @Override
+    public void shouldRestoreInventory(boolean restore) {
+        this.shouldRestoreInventory = restore;
+    }
+
+    @Override
+    public boolean shouldRestoreInventory() {
+        return this.shouldRestoreInventory;
     }
 }

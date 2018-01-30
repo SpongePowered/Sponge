@@ -68,6 +68,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -278,16 +279,23 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     public EntityItem onDragDrop(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
         final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
         final EntityItem entityItem = player.dropItem(itemStackIn, unused);
+        if (!((IMixinEntityPlayer) player).shouldRestoreInventory()) {
+            return entityItem;
+        }
         if (entityItem  == null) {
             this.dropCancelled = true;
             PacketPhaseUtil.handleCustomCursor((EntityPlayerMP) player, original);
         }
+        ((IMixinEntityPlayer) player).shouldRestoreInventory(false);
         return entityItem;
     }
 
     @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 1))
     public EntityItem onDragDropSplit(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
         final EntityItem entityItem = player.dropItem(itemStackIn, unused);
+        if (!((IMixinEntityPlayer) player).shouldRestoreInventory()) {
+            return entityItem;
+        }
         if (entityItem  == null) {
             ItemStack original = null;
             if (player.inventory.getItemStack().isEmpty()) {
@@ -299,12 +307,13 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             player.inventory.setItemStack(original);
             ((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(-1, -1, original));
         }
+        ((IMixinEntityPlayer) player).shouldRestoreInventory(false);
         return entityItem;
     }
 
     @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;setItemStack(Lnet/minecraft/item/ItemStack;)V", ordinal = 1))
     public void onDragCursorClear(InventoryPlayer inventoryPlayer, ItemStack itemStackIn) {
-        if (!this.dropCancelled) {
+        if (!this.dropCancelled || !((IMixinEntityPlayer) inventoryPlayer.player).shouldRestoreInventory()) {
             inventoryPlayer.setItemStack(itemStackIn);
         }
         this.dropCancelled = false;
@@ -326,7 +335,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Redirect(method = "slotClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;dropItem(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 3))
     public EntityItem onThrowClick(EntityPlayer player, ItemStack itemStackIn, boolean unused) {
         final EntityItem entityItem = player.dropItem(itemStackIn, true);
-        if (entityItem == null) {
+        if (entityItem == null && ((IMixinEntityPlayer) player).shouldRestoreInventory()) {
             final ItemStack original = ItemStackUtil.toNative(this.itemStackSnapshot.createStack());
             this.lastSlotUsed.putStack(original);
             player.openContainer.detectAndSendChanges();
@@ -335,6 +344,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         }
         this.itemStackSnapshot = null;
         this.lastSlotUsed = null;
+        ((IMixinEntityPlayer) player).shouldRestoreInventory(false);
         return entityItem;
     }
 
