@@ -907,7 +907,7 @@ public final class EntityUtil {
      */
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY) {
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
-
+        final IMixinEntityPlayer mixinPlayer = entity instanceof Player ? (IMixinEntityPlayer) entity : null;
         // Now the real fun begins.
         final ItemStack item;
         final double posX = entity.posX;
@@ -926,6 +926,12 @@ public final class EntityUtil {
                     ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
+                return null;
+            }
+            if (dropEvent.getDroppedItems().isEmpty()) {
                 return null;
             }
     
@@ -937,6 +943,9 @@ public final class EntityUtil {
             SpongeImpl.postEvent(event);
             item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
             if (item == null) {
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
                 return null;
             }
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
