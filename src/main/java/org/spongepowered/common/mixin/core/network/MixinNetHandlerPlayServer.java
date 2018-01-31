@@ -119,6 +119,7 @@ import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -595,7 +596,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             int size = stack.getCount();
             item = this.player.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
-            if (item == null) {
+            if (item == null && ((IMixinEntityPlayer) player).shouldRestoreInventory()) {
                 Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, this.player.inventory.currentItem);
                 int windowId = this.player.openContainer.windowId;
                 stack.setCount(size);

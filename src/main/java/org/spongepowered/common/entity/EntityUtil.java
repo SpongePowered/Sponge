@@ -908,7 +908,7 @@ public final class EntityUtil {
      */
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY) {
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
-
+        final IMixinEntityPlayer mixinPlayer = entity instanceof Player ? (IMixinEntityPlayer) entity : null;
         // Now the real fun begins.
         final ItemStack item;
         final double posX = entity.posX;
@@ -927,6 +927,12 @@ public final class EntityUtil {
                     ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
+                return null;
+            }
+            if (dropEvent.getDroppedItems().isEmpty()) {
                 return null;
             }
     
@@ -938,6 +944,9 @@ public final class EntityUtil {
             SpongeImpl.postEvent(event);
             item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
             if (item == null) {
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
                 return null;
             }
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
@@ -986,6 +995,7 @@ public final class EntityUtil {
 
     @Nullable
     public static EntityItem playerDropItem(IMixinEntityPlayer mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        mixinPlayer.shouldRestoreInventory(false);
         final EntityPlayer player = EntityUtil.toNative(mixinPlayer);
 
         final double posX = player.posX;
@@ -1004,6 +1014,10 @@ public final class EntityUtil {
                     ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
+                mixinPlayer.shouldRestoreInventory(true);
+                return null;
+            }
+            if (dropEvent.getDroppedItems().isEmpty()) {
                 return null;
             }
     
@@ -1012,8 +1026,14 @@ public final class EntityUtil {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, suggested);
             SpongeImpl.postEvent(event);
-            item = event.isCancelled() || dropEvent.getDroppedItems().isEmpty() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+            if (event.isCancelled()) {
+                mixinPlayer.shouldRestoreInventory(true);
+                return null;
+            }
+
+            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
             if (item == null) {
+                mixinPlayer.shouldRestoreInventory(true);
                 return null;
             }
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
