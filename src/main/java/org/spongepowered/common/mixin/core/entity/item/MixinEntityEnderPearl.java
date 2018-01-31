@@ -28,6 +28,7 @@ import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -46,9 +47,8 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
 
     public double damageAmount;
 
-    @ModifyArg(method = "onImpact", at =
-            @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
-        )
+    @ModifyArg(method = "onImpact",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     private float onAttackEntityFrom(float damage) {
         return (float) this.damageAmount;
     }
@@ -59,8 +59,9 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
             return true;
         }
 
-        try(CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
+            frame.addContext(EventContextKeys.THROWER, (Player) player).getCurrentCause();
 
             MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, this.getLocation());
             if (event.isCancelled()) {

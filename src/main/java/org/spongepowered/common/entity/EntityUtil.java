@@ -321,6 +321,7 @@ public final class EntityUtil {
 
         MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
         return event;
     }
 
