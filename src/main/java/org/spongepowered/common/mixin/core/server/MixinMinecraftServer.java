@@ -713,7 +713,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     public void saveAllWorlds(boolean dontLog) {
-        if (!enableSaving) {
+        if (!this.enableSaving) {
             return;
         }
         for (WorldServer worldserver : this.worlds) {
