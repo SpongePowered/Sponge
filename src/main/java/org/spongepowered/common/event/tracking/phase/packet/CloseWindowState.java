@@ -60,14 +60,17 @@ final class CloseWindowState extends BasicPacketState {
         final Container container = context.getOpenContainer();
         ItemStackSnapshot lastCursor = context.getCursor();
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
-        Sponge.getCauseStackManager().pushCause(player);
-        InteractInventoryEvent.Close event =
-            SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
-        if (event.isCancelled()) {
+        if (lastCursor != null) {
+            Sponge.getCauseStackManager().pushCause(player);
+            InteractInventoryEvent.Close event =
+                    SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
+            if (event.isCancelled()) {
+                Sponge.getCauseStackManager().popCause();
+                return;
+            }
             Sponge.getCauseStackManager().popCause();
-            return;
         }
-        Sponge.getCauseStackManager().popCause();
+
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);// Non-merged
