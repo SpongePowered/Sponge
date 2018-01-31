@@ -537,13 +537,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.enableSaving = enabled;
     }
 
-    @Inject(method = "saveAllWorlds(Z)V", at = @At("HEAD"), cancellable = true)
-    private void onSaveWorlds(boolean dontLog, CallbackInfo ci) {
-        if (!this.enableSaving) {
-            ci.cancel();
-        }
-    }
-
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
@@ -720,8 +713,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     public void saveAllWorlds(boolean dontLog) {
+        if (!this.enableSaving) {
+            return;
+        }
         for (WorldServer worldserver : this.worlds) {
-            if (worldserver != null) {
+            if (worldserver != null && !worldserver.disableLevelSaving) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
