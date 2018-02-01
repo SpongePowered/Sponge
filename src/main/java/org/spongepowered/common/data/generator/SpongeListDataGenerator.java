@@ -52,7 +52,7 @@ public class SpongeListDataGenerator<E, M extends ListData<E, M, I>, I extends I
     @Override
     public <NE> ListDataGenerator<NE, ? extends ListData<NE, ?, ?>, ? extends ImmutableListData<NE, ?, ?>> key(Key<? extends ListValue<NE>> key) {
         checkNotNull(key, "key");
-        this.key = (Key<ListValue<E>>) key;
+        this.key = (Key) key;
         return (ListDataGenerator<NE, ? extends ListData<NE, ?, ?>, ? extends ImmutableListData<NE, ?, ?>>) this;
     }
 

@@ -54,7 +54,7 @@ public class SpongeMappedDataGenerator<K, V, M extends MappedData<K, V, M, I>, I
     public <NK, NV> MappedDataGenerator<NK, NV, ? extends MappedData<NK, NV, ?, ?>, ? extends ImmutableMappedData<NK, NV, ?, ?>> key(
             Key<? extends MapValue<NK, NV>> key) {
         checkNotNull(key, "key");
-        this.key = (Key<MapValue<K, V>>) key;
+        this.key = (Key) key;
         return (MappedDataGenerator<NK, NV, ? extends MappedData<NK, NV, ?, ?>, ? extends ImmutableMappedData<NK, NV, ?, ?>>) this;
     }
 

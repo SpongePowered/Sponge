@@ -51,7 +51,7 @@ public class SpongeVariantDataGenerator<V, M extends VariantData<V, M, I>, I ext
     public <NV> VariantDataGenerator<NV, ? extends VariantData<NV, ?, ?>, ? extends ImmutableVariantData<NV, ?, ?>> key(
             Key<? extends Value<NV>> key) {
         checkNotNull(key, "key");
-        this.key = (Key<Value<V>>) key;
+        this.key = (Key) key;
         return (VariantDataGenerator<NV, ? extends VariantData<NV, ?, ?>, ? extends ImmutableVariantData<NV, ?, ?>>) this;
     }
 

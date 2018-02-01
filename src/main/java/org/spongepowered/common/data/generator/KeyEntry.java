@@ -27,16 +27,33 @@ package org.spongepowered.common.data.generator;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 
+import javax.annotation.Nullable;
+
 public class KeyEntry<V extends BaseValue<E>, E> {
 
     final Key<V> key;
     final E defaultValue;
 
-    String keyFieldName;
-    String valueFieldName;
+    public String keyFieldName;
+    public String keyFieldDescriptor;
+    @Nullable public String keyFieldSignature; // With generics, if present
+
+    public Class<?> valueClass;
+    public String valueTypeName;
+    public String valueFieldName;
+    public String valueFieldDescriptor;
+    @Nullable public String valueFieldSignature; // With generics, if present
+    // The boxed value descriptor, can be equal to valueFieldDescriptor
+    // if there isn't a primitive variant
+    public Class<?> boxedValueClass;
+    public String boxedValueDescriptor;
+    @Nullable public String boxedValueFieldSignature; // With generics, if present
+
+    // Descriptor and signatures are the same as the actual value field
+    public String defaultValueFieldName;
 
     public KeyEntry(Key<V> key, E defaultValue) {
-        this.key = key;
         this.defaultValue = defaultValue;
+        this.key = key;
     }
 }

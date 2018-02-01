@@ -41,4 +41,8 @@ public class BoundedKeyEntry<V extends BoundedValue<E>, E> extends KeyEntry<V, E
         this.maximum = maximum;
         this.comparator = comparator;
     }
+
+    public boolean ret() {
+        return true;
+    }
 }
