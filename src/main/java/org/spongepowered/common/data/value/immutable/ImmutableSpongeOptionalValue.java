@@ -41,21 +41,32 @@ import javax.annotation.Nullable;
 public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Optional<E>> implements ImmutableOptionalValue<E> {
 
     public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key) {
-        super(key, Optional.<E>empty());
+        this(key, Optional.empty());
     }
 
     public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> actualValue) {
-        super(key, Optional.<E>empty(), actualValue);
+        this(key, Optional.empty(), actualValue);
+    }
+
+    // DO NOT MODIFY THE SIGNATURE
+    public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue) {
+        this(key, defaultValue, actualValue, null);
+    }
+
+    // A constructor to avoid unnecessary copies
+    protected ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue,
+            @Nullable Void nothing) {
+        super(key, defaultValue, actualValue);
     }
 
     @Override
     public ImmutableOptionalValue<E> with(Optional<E> value) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), checkNotNull(value));
+        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, checkNotNull(value), null);
     }
 
     @Override
     public ImmutableOptionalValue<E> transform(Function<Optional<E>, Optional<E>> function) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), checkNotNull(function.apply(get())));
+        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, checkNotNull(function.apply(get())), null);
     }
 
     @Override
@@ -65,7 +76,7 @@ public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Option
 
     @Override
     public ImmutableOptionalValue<E> instead(@Nullable E value) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), Optional.ofNullable(value));
+        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, Optional.ofNullable(value), null);
     }
 
     @Override

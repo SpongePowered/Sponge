@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListValue<E>, ImmutableListValue<E>> implements ListValue<E> {
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key) {
-        super(key, Lists.<E>newArrayList());
+        super(key, Lists.newArrayList());
     }
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> defaultList, List<E> actualList) {
@@ -51,7 +51,7 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
     }
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> actualValue) {
-        this(key, Lists.<E>newArrayList(), actualValue);
+        this(key, Lists.newArrayList(), actualValue);
     }
 
     @Override

@@ -44,7 +44,6 @@ public abstract class SpongeCollectionValue<Element,
     ImmutableType extends ImmutableCollectionValue<Element, CollectionType, ImmutableType, CollectionValueType>>
     extends SpongeValue<CollectionType> implements CollectionValue<Element, CollectionType, CollectionValueType, ImmutableType> {
 
-
     public SpongeCollectionValue(Key<? extends BaseValue<CollectionType>> key, CollectionType defaultValue) {
         super(key, defaultValue);
     }

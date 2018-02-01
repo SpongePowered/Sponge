@@ -47,7 +47,13 @@ import java.util.function.Predicate;
 public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<PatternLayer> implements ImmutablePatternListValue {
 
     public ImmutableSpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key, List<PatternLayer> actualValue) {
-        super(key, ImmutableList.copyOf(actualValue));
+        super(key, actualValue);
+    }
+
+    // DO NOT MODIFY THE SIGNATURE
+    public ImmutableSpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key,
+            List<PatternLayer> defaultValue, List<PatternLayer> actualValue) {
+        super(key, defaultValue, actualValue);
     }
 
     @Override

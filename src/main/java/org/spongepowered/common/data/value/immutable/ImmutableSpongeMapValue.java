@@ -44,16 +44,21 @@ import java.util.function.Predicate;
 public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V>> implements ImmutableMapValue<K, V> {
 
     public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key) {
-        this(key, ImmutableMap.<K, V>of());
+        this(key, ImmutableMap.of());
     }
 
     public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
-        super(key, ImmutableMap.<K, V>of(), ImmutableMap.copyOf(actualValue));
+        super(key, ImmutableMap.of(), ImmutableMap.copyOf(actualValue));
+    }
+
+    // DO NOT MODIFY THE SIGNATURE
+    public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultValue, Map<K, V> actualValue) {
+        super(key, ImmutableMap.copyOf(defaultValue), ImmutableMap.copyOf(actualValue));
     }
 
     @Override
     public ImmutableMapValue<K, V> with(Map<K, V> value) {
-        return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(value));
+        return new ImmutableSpongeMapValue<>(getKey(), getDefault(), checkNotNull(value));
     }
 
     @Override
@@ -63,9 +68,7 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
 
     @Override
     public MapValue<K, V> asMutable() {
-        final Map<K, V> map = Maps.newHashMap();
-        map.putAll(this.actualValue);
-        return new SpongeMapValue<>(getKey(), map);
+        return new SpongeMapValue<>(getKey(), this.actualValue);
     }
 
     @Override
@@ -75,8 +78,8 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
 
     @Override
     public ImmutableMapValue<K, V> with(K key, V value) {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key),
-                                                                                                                 checkNotNull(value)).build());
+        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue)
+                .put(checkNotNull(key), checkNotNull(value)).build());
     }
 
     @Override

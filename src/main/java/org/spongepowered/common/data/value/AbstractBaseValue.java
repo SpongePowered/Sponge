@@ -36,7 +36,7 @@ import java.util.Optional;
 public abstract class AbstractBaseValue<E> implements BaseValue<E> {
 
     private final Key<? extends BaseValue<E>> key;
-    private final E defaultValue;
+    protected final E defaultValue;
     protected E actualValue;
 
     public AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue) {

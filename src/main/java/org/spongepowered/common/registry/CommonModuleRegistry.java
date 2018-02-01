@@ -45,6 +45,10 @@ import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.generator.GenericDataGenerator;
+import org.spongepowered.api.data.generator.ListDataGenerator;
+import org.spongepowered.api.data.generator.MappedDataGenerator;
+import org.spongepowered.api.data.generator.VariantDataGenerator;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -160,6 +164,10 @@ import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.data.generator.SpongeGenericDataGenerator;
+import org.spongepowered.common.data.generator.SpongeListDataGenerator;
+import org.spongepowered.common.data.generator.SpongeMappedDataGenerator;
+import org.spongepowered.common.data.generator.SpongeVariantDataGenerator;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -370,6 +378,10 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
             .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
             .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
+            .registerBuilderSupplier(GenericDataGenerator.class, SpongeGenericDataGenerator::new)
+            .registerBuilderSupplier(VariantDataGenerator.class, SpongeVariantDataGenerator::new)
+            .registerBuilderSupplier(ListDataGenerator.class, SpongeListDataGenerator::new)
+            .registerBuilderSupplier(MappedDataGenerator.class, SpongeMappedDataGenerator::new)
         ;
     }
 

@@ -28,10 +28,13 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
 
@@ -40,6 +43,11 @@ public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
     }
 
     public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
+        super(key, InternalCopies.mutableCopy(defaultValue), InternalCopies.mutableCopy(actualValue));
+    }
+
+    // A constructor to avoid unnecessary copies
+    protected SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, @Nullable Void nothing) {
         super(key, defaultValue, actualValue);
     }
 
@@ -57,6 +65,6 @@ public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
 
     @Override
     public ImmutableValue<E> asImmutable() {
-        return ImmutableSpongeValue.cachedOf(this.getKey(), this.getDefault(), this.actualValue);
+        return ImmutableSpongeValue.cachedOf(getKey(), this.defaultValue, this.actualValue);
     }
 }

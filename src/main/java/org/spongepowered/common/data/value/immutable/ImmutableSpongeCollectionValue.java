@@ -33,8 +33,10 @@ import org.spongepowered.api.data.value.mutable.CollectionValue;
 import java.util.Collection;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>, I extends ImmutableCollectionValue<E, V, I, L>,
-    L extends CollectionValue<E, V, L, I>> extends ImmutableSpongeValue<V> implements ImmutableCollectionValue<E, V, I, L> {
+        L extends CollectionValue<E, V, L, I>> extends ImmutableSpongeValue<V> implements ImmutableCollectionValue<E, V, I, L> {
 
     protected ImmutableSpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue) {
         super(key, defaultValue);
@@ -42,6 +44,11 @@ public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>,
 
     protected ImmutableSpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue, V actualValue) {
         super(key, defaultValue, actualValue);
+    }
+
+    // A constructor to avoid unnecessary copies.
+    protected ImmutableSpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue, V actualValue, @Nullable Void nothing) {
+        super(key, defaultValue, actualValue, nothing);
     }
 
     @Override
@@ -62,7 +69,6 @@ public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>,
     public boolean isEmpty() {
         return this.actualValue.isEmpty();
     }
-
 
     @Override
     public boolean contains(E element) {

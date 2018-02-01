@@ -31,10 +31,13 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.value.AbstractBaseValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements ImmutableValue<E> {
 
@@ -52,26 +55,45 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
     }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {
-        super(key, defaultValue, defaultValue);
+        super(key, InternalCopies.immutableCopy(defaultValue));
     }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
+        super(key, InternalCopies.immutableCopy(defaultValue), InternalCopies.immutableCopy(actualValue));
+    }
+
+    // A constructor to avoid unnecessary copies
+    protected ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, @Nullable Void nothing) {
         super(key, defaultValue, actualValue);
     }
 
     @Override
+    public E getDefault() {
+        // Prevent people from modifying possible mutable default values, like ItemStacks
+        return InternalCopies.immutableCopy(super.getDefault());
+    }
+
+    @Override
+    public E get() {
+        // Prevent people from modifying possible mutable actual values, like ItemStacks
+        return InternalCopies.immutableCopy(super.get());
+    }
+
+    @Override
     public ImmutableValue<E> with(E value) {
-        return new ImmutableSpongeValue<>(this.getKey(), getDefault(), value);
+        return new ImmutableSpongeValue<>(getKey(), this.defaultValue, InternalCopies.immutableCopy(value), null);
     }
 
     @Override
     public ImmutableValue<E> transform(Function<E, E> function) {
         final E value = checkNotNull(function).apply(get());
-        return new ImmutableSpongeValue<>(this.getKey(), getDefault(), value);
+        return new ImmutableSpongeValue<>(getKey(), this.defaultValue, InternalCopies.immutableCopy(value), null);
     }
 
     @Override
     public Value<E> asMutable() {
-        return new SpongeValue<>(getKey(), getDefault(), get());
+        return new SpongeValue<>(getKey(),
+                InternalCopies.mutableCopy(this.defaultValue),
+                InternalCopies.mutableCopy(this.actualValue));
     }
 }

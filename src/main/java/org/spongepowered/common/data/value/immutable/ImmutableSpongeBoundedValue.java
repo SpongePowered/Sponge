@@ -40,8 +40,8 @@ import java.util.function.Function;
 
 public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> implements ImmutableBoundedValue<E> {
 
-    public static <T> ImmutableBoundedValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue, Comparator<T>
-            comparator, T minimum, T maximum) {
+    public static <T> ImmutableBoundedValue<T> cachedOf(Key<? extends BaseValue<T>> key, T defaultValue, T actualValue,
+            Comparator<T> comparator, T minimum, T maximum) {
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, key, defaultValue, actualValue, comparator, minimum, maximum);
     }
 
@@ -57,7 +57,9 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         checkState(comparator.compare(maximum, minimum) >= 0);
     }
 
-    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+    // DO NOT MODIFY THE SIGNATURE
+    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue,
+            Comparator<E> comparator, E minimum, E maximum) {
         super(key, defaultValue, actualValue);
         this.comparator = checkNotNull(comparator);
         this.minimum = checkNotNull(minimum);
