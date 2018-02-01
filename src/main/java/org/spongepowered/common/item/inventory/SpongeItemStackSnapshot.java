@@ -331,7 +331,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("itemType", this.itemType)
+                .add("itemType", this.itemType.getId())
                 .add("quantity", this.quantity)
                 .toString();
     }
