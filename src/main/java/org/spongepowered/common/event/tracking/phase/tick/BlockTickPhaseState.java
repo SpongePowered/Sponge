@@ -29,6 +29,7 @@ import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -145,9 +146,13 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
             }
             final List<Entity> nonExpEntities = new ArrayList<>(1);
             nonExpEntities.add(entity);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            if (entity instanceof FallingBlock) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.FALLING_BLOCK);
+            } else {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            }
             final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
+                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), nonExpEntities);
             SpongeImpl.postEvent(spawnEntityEvent);
             if (!spawnEntityEvent.isCancelled()) {
                 for (Entity anEntity : spawnEntityEvent.getEntities()) {
