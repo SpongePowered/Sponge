@@ -317,12 +317,13 @@ public final class EntityUtil {
         final IPhaseState state = peek.state;
         final PhaseContext<?> context = peek.context;
 
-        Sponge.getCauseStackManager().pushCause(entityIn);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entityIn);
 
-        MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
-        SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
-        return event;
+            MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
+            SpongeImpl.postEvent(event);
+            return event;
+        }
     }
 
     @Nullable
