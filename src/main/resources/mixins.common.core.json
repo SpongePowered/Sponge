@@ -7,8 +7,9 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "MixinBootstrapAnonInner10",
-        "MixinBootstrapAnonInner11",
+        "init.MixinBootstrap",
+        "init.MixinBootstrapAnonInner10",
+        "init.MixinBootstrapAnonInner11",
         "advancement.MixinAdvancement",
         "advancement.MixinAdvancementList",
         "advancement.MixinAdvancementManager",

@@ -22,27 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core;
+package org.spongepowered.common.mixin.core.init;
 
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @NonnullByDefault
-@Mixin(targets = "net/minecraft/init/Bootstrap$10")
-public class MixinBootstrapAnonInner10 {
+@Mixin(targets = "net/minecraft/init/Bootstrap$11")
+public class MixinBootstrapAnonInner11 {
 
     @Redirect(method = "dispenseStack(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
-    public boolean onspawnEntity(World world, Entity firework, IBlockSource source, ItemStack stack) {
-        ((Firework) firework).setShooter(source.getBlockTileEntity());
-        return world.spawnEntity(firework);
+    public boolean onspawnEntity(World world, Entity smallFireball, IBlockSource source, ItemStack stack) {
+        ((SmallFireball) smallFireball).setShooter(source.getBlockTileEntity());
+        return world.spawnEntity(smallFireball);
     }
 
 }

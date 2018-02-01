@@ -22,24 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.advancement;
+package org.spongepowered.common.mixin.core.init;
 
-import com.google.inject.Singleton;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.common.advancement.SpongeCriterionBuilder;
-import org.spongepowered.common.advancement.SpongeEmptyCriterion;
-import org.spongepowered.common.registry.RegistryHelper;
+import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
+import org.spongepowered.api.entity.projectile.Firework;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Singleton
-public final class CriterionRegistryModule implements RegistryModule {
+@NonnullByDefault
+@Mixin(targets = "net/minecraft/init/Bootstrap$10")
+public class MixinBootstrapAnonInner10 {
 
-    public static final CriterionRegistryModule instance = new CriterionRegistryModule();
-
-    @Override
-    public void registerDefaults() {
-        RegistryHelper.setFinalStatic(AdvancementCriterion.class, "EMPTY", SpongeEmptyCriterion.INSTANCE);
-        RegistryHelper.setFinalStatic(AdvancementCriterion.class, "DUMMY",
-                new SpongeCriterionBuilder().name("dummy").build());
+    @Redirect(method = "dispenseStack(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
+    public boolean onspawnEntity(World world, Entity firework, IBlockSource source, ItemStack stack) {
+        ((Firework) firework).setShooter(source.getBlockTileEntity());
+        return world.spawnEntity(firework);
     }
+
 }
