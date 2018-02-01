@@ -83,7 +83,7 @@ public final class SpongeBootstrap {
 
     public static void initEarlyBootstrap() {
         // Advancement criteria is loaded super early, need to do this as soon as possible.
-        CriterionRegistryModule.instance.registerDefaults();
+        CriterionRegistryModule.getInstance().registerEarlyBootstrap();
 
     }
 

@@ -499,6 +499,7 @@ public final class CommonModuleRegistry {
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
 
             // Miscellaneous Registries
+            .registerModule(CriterionRegistryModule.getInstance())
             .registerModule(DungeonMobRegistryModule.getInstance())
             ;
     }

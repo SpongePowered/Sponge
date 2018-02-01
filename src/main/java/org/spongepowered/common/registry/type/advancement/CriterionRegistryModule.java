@@ -34,12 +34,17 @@ import org.spongepowered.common.registry.RegistryHelper;
 @Singleton
 public final class CriterionRegistryModule implements RegistryModule {
 
-    public static final CriterionRegistryModule instance = new CriterionRegistryModule();
+    public static CriterionRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
-    @Override
-    public void registerDefaults() {
+    public void registerEarlyBootstrap() {
         RegistryHelper.setFinalStatic(AdvancementCriterion.class, "EMPTY", SpongeEmptyCriterion.INSTANCE);
         RegistryHelper.setFinalStatic(AdvancementCriterion.class, "DUMMY",
                 new SpongeCriterionBuilder().name("dummy").build());
+    }
+
+    private static final class Holder {
+        static final CriterionRegistryModule INSTANCE = new CriterionRegistryModule();
     }
 }
