@@ -44,6 +44,7 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +112,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             phaseContext.getCapturedItemStackSupplier()
                     .acceptAndClearIfNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
-                                .map(drop -> drop.create(mixinWorld.asMinecraftWorld()))
+                                .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
                                 .collect(Collectors.toList());
                         final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {

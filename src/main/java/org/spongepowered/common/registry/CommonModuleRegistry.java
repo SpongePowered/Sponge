@@ -402,7 +402,7 @@ public final class CommonModuleRegistry {
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
             .registerModule(DataFormat.class, new DataFormatRegistryModule())
             .registerModule(DataTranslator.class, DataTranslatorRegistryModule.getInstance())
-            .registerModule(Difficulty.class, new DifficultyRegistryModule())
+            .registerModule(Difficulty.class, DifficultyRegistryModule.getInstance())
             .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())

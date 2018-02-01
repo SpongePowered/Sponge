@@ -72,5 +72,6 @@ public interface IMixinWorldSettings {
 
     void setRandomSeed(boolean state);
 
+    @Nullable
     Boolean internalKeepSpawnLoaded();
 }

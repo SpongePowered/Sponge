@@ -51,6 +51,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -298,7 +299,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
-        final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
+        final Chunk chunk = WorldUtil.asNative(mixinWorld).getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);

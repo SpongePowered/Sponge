@@ -63,6 +63,7 @@ public final class NbtDataUtil {
     public static final String BANNER_BASE = "Base";
     public static final String BANNER_PATTERNS = "Patterns";
     public static final String FAILED_CUSTOM_DATA = "FailedData";
+    public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
 
     private NbtDataUtil() {
     }

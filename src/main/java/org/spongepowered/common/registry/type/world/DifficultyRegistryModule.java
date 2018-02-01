@@ -42,6 +42,10 @@ import java.util.Optional;
 
 public final class DifficultyRegistryModule implements AlternateCatalogRegistryModule<Difficulty> {
 
+    public static DifficultyRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
     @RegisterCatalog(Difficulties.class)
     private final Map<String, Difficulty> difficultyMappings = new HashMap<>();
 
@@ -80,8 +84,13 @@ public final class DifficultyRegistryModule implements AlternateCatalogRegistryM
     public void additional() {
         for (EnumDifficulty difficulty : EnumDifficulty.values()) {
             if (!this.difficultyMappings.containsValue(difficulty)) {
+                // TODO This doesn't have the modid...
                 this.difficultyMappings.put(difficulty.name(), (Difficulty) (Object) difficulty);
             }
         }
+    }
+
+    private static final class Holder {
+        static final DifficultyRegistryModule INSTANCE = new DifficultyRegistryModule();
     }
 }

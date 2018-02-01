@@ -49,6 +49,7 @@ import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketRespawn;
+import net.minecraft.network.play.server.SPacketServerDifficulty;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
@@ -261,6 +262,7 @@ public final class EntityUtil {
             }
         }
         playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+        playerIn.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
         SpongeImpl.getServer().getPlayerList().updatePermissionLevel(playerIn);
         fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
@@ -839,6 +841,7 @@ public final class EntityUtil {
             entityPlayerMP.connection.sendPacket(
                     new SPacketRespawn(toDimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
                             entityPlayerMP.interactionManager.getGameType()));
+            entityPlayerMP.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
             entity.setWorld(toWorld);
             entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);

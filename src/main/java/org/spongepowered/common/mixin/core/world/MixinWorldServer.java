@@ -63,6 +63,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
@@ -182,6 +183,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -195,6 +197,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
@@ -292,7 +295,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.worldInfo = info;
         this.timings = new WorldTimingsHandler((WorldServer) (Object) this);
         this.dimensionId = dimensionId;
-        this.prevWeather = getWeather();
+        this.prevWeather = this.getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
         PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
@@ -307,7 +310,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         // Turn on capturing
-        updateWorldGenerator();
+        this.updateWorldGenerator();
         // Need to set the active config before we call it.
         this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
@@ -430,7 +433,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean isLoaded() {
-        return WorldManager.getWorldByDimensionId(getDimensionId()).isPresent();
+        return WorldManager.getWorldByDimensionId(this.getDimensionId()).isPresent();
     }
 
     @Override
@@ -540,16 +543,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public WorldGenerator getWorldGenerator() {
         return this.spongegen;
-    }
-
-    @Override
-    public WorldServer asMinecraftWorld() {
-        return (WorldServer) (Object) this;
-    }
-
-    @Override
-    public org.spongepowered.api.world.World asSpongeWorld() {
-        return this;
     }
 
     /**
@@ -771,6 +764,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.timings.updateBlocksRandomTick.stopTiming(); // Sponge - Stop random block timing
         // this.profiler.endSection(); // Sponge - Don't use the profiler
         // } // Sponge- Remove unecessary else
+    }
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setDifficulty(Lnet/minecraft/world/EnumDifficulty;)V"))
+    private void syncDifficultyDueToHardcore(WorldInfo worldInfo, EnumDifficulty newDifficulty) {
+        WorldManager.adjustWorldForDifficulty(WorldUtil.asNative((IMixinWorldServer) this), newDifficulty, false);
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))

@@ -590,6 +590,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
         newPlayer.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
                 .getWorldInfo().getTerrainType(), newPlayer.interactionManager.getGameType()));
+        newPlayer.connection.sendPacket(new SPacketServerDifficulty(worldServer.getDifficulty(), worldServer.getWorldInfo().isDifficultyLocked()));
         newPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 (float) toTransform.getYaw(), (float) toTransform.getPitch());
 

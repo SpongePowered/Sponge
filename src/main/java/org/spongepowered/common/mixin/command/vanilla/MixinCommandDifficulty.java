@@ -22,33 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.command.multiworld;
+package org.spongepowered.common.mixin.command.vanilla;
 
 import net.minecraft.command.CommandDifficulty;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.world.WorldManager;
 
 @Mixin(CommandDifficulty.class)
 public abstract class MixinCommandDifficulty {
 
-    /**
-     * @author Minecrell - September 28, 2016
-     * @author Zidane - January 31, 2018
-     * @reason Change difficulty only in the world the command was executed in
-     * @reason Redirect to the WorldManager
-     */
-    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;"
-            + "setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
-    private void onSetDifficulty(MinecraftServer server, EnumDifficulty difficulty, MinecraftServer server2, ICommandSender sender, String[] args) {
-        World world = sender.getEntityWorld();
-
-        WorldManager.adjustWorldForDifficulty((WorldServer) world, difficulty, true);
+  /**
+   * @author Minecrell - September 28, 2016
+   * @author Zidane - January 31, 2018
+   * @reason Change difficulty only in the world the command was executed in
+   * @reason Redirect to the WorldManager
+   */
+  @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;"
+    + "setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
+  private void onSetDifficulty(MinecraftServer server, EnumDifficulty difficulty, MinecraftServer server2, ICommandSender sender, String[] args) {
+    for (final WorldServer world : SpongeImpl.getServer().worlds) {
+      WorldManager.adjustWorldForDifficulty(world, difficulty, true);
     }
+  }
 }

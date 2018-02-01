@@ -130,7 +130,7 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
         return provided;
     }
 
-    WorldArchetypeRegistryModule() {}
+    private WorldArchetypeRegistryModule() {}
 
     private static final class Holder {
 

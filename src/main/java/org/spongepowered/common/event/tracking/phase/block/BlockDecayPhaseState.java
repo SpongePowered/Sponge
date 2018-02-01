@@ -41,6 +41,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.WorldUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,7 +97,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             context.getCapturedItemStackSupplier()
                     .acceptAndClearIfNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
-                                .map(drop -> drop.create(mixinWorld.asMinecraftWorld()))
+                                .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
                                 .collect(Collectors.toList());
                         final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {

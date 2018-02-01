@@ -123,7 +123,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -141,7 +140,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private Thread serverThread;
     @Shadow @Final private DataFixer dataFixer;
 
-    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void sendMessage(ITextComponent message);
     @Shadow public abstract void initiateShutdown();
     @Shadow public abstract boolean isServerInOnlineMode();
@@ -329,7 +327,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         SpongeCommonEventFactory.convertingMapFormat = false;
         this.setUserMessage("menu.loadingLevel");
 
-        WorldManager.loadAllWorlds(worldName, seed, type, generatorOptions);
+        WorldManager.loadAllWorlds(seed, type, generatorOptions);
 
         this.getPlayerList().setPlayerManager(this.worlds);
         this.setDifficultyForAllWorlds(this.getDifficulty());
@@ -788,5 +786,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
         report.makeCategory("Sponge PhaseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
+    }
+
+    @Overwrite
+    public void setDifficultyForAllWorlds(EnumDifficulty difficulty) {
+        WorldManager.updateServerDifficulty();
     }
 }
