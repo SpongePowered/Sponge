@@ -33,6 +33,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -179,6 +180,8 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
             frame.pushCause(player);
             if (entity instanceof ExperienceOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+            } else if (entity instanceof Projectile) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
             } else {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             }
