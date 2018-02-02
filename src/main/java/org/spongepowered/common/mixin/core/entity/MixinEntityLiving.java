@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -41,6 +43,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.GoalTypes;
+import org.spongepowered.api.entity.ai.navigation.Navigator;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -49,6 +52,9 @@ import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -78,6 +84,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(EntityLiving.class)
+@Implements(@Interface(iface = Agent.class, prefix = "agent$"))
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
     private static final String GET_CLOSEST_PLAYER =
@@ -89,6 +96,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow public abstract boolean isAIDisabled();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashHolder();
     @Shadow protected abstract void initEntityAI();
+    @Shadow public abstract PathNavigate shadow$getNavigator();
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
@@ -276,12 +284,17 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Override
     public AgentData getAgentData() {
-        return new SpongeAgentData(!this.isAIDisabled());
+        return new SpongeAgentData(!this.isAIDisabled(), this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).getBaseValue());
     }
 
     @Override
     public Value<Boolean> aiEnabled() {
         return new SpongeValue<>(Keys.AI_ENABLED, true, !this.isAIDisabled());
+    }
+
+    @Intrinsic
+    public Navigator agent$getNavigator() {
+        return (Navigator) shadow$getNavigator();
     }
 
     @Override

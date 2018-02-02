@@ -390,6 +390,7 @@
         "network.datasync.MixinDataParameter",
         "network.datasync.IMixinEntityDataManager",
         "network.datasync.MixinEntityDataManager",
+        "pathfinder.MixinPathNavigate",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "profiler.MixinProfiler",

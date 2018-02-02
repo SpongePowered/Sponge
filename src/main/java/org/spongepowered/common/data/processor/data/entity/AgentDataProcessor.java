@@ -24,56 +24,63 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.SharedMonsterAttributes;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
-import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.util.DataUtil;
 
+import java.util.Map;
 import java.util.Optional;
 
-public class AgentDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityLiving, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
+public class AgentDataProcessor extends AbstractEntityDataProcessor<EntityLiving, AgentData, ImmutableAgentData> {
 
     public AgentDataProcessor() {
-        super(EntityLiving.class, Keys.AI_ENABLED);
+        super(EntityLiving.class);
     }
 
     @Override
-    protected boolean set(EntityLiving entity, Boolean value) {
-        entity.setNoAI(!value);
+    protected boolean doesDataExist(EntityLiving dataHolder) {
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityLiving entity) {
-        return Optional.of(!entity.isAIDisabled());
+    protected boolean set(EntityLiving dataHolder, Map<Key<?>, Object> keyValues) {
+        dataHolder.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue((Double) keyValues.get(Keys.FOLLOW_RANGE));
+        dataHolder.setNoAI(!((boolean) keyValues.get(Keys.AI_ENABLED)));
+        return true;
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, value);
+    protected Map<Key<?>, ?> getValues(EntityLiving dataHolder) {
+        return ImmutableMap.of(Keys.AI_ENABLED, !dataHolder.isAIDisabled(), Keys.FOLLOW_RANGE,
+            dataHolder.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).getBaseValue());
+    }
+
+    @Override
+    public Optional<AgentData> fill(DataContainer container, AgentData agentData) {
+        if (container.contains(Keys.AI_ENABLED.getQuery()) && container.contains(Keys.FOLLOW_RANGE.getQuery())) {
+            agentData.set(Keys.AI_ENABLED, DataUtil.getData(container, Keys.AI_ENABLED));
+            agentData.set(Keys.FOLLOW_RANGE, DataUtil.getData(container, Keys.FOLLOW_RANGE));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionResult.failNoData();
     }
 
     @Override
     protected AgentData createManipulator() {
         return new SpongeAgentData();
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.AI_ENABLED, true, actualValue);
-    }
-
-    @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
     }
 }

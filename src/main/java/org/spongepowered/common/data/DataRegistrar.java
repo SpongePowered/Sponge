@@ -262,6 +262,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(MovementSpeedData.class, SpongeMovementSpeedData.class, ImmutableMovementSpeedData.class,
                 ImmutableSpongeMovementSpeedData.class, new MovementSpeedDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
+            ImmutableSpongeAgentData.class, new AgentDataProcessor());
+
         DataUtil.registerDualProcessor(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
                 new SlimeDataProcessor());
 
@@ -288,9 +291,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
                 new WolfWetDataProcessor());
-
-        DataUtil.registerDualProcessor(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
-                ImmutableSpongeAgentData.class, new AgentDataProcessor());
 
         DataUtil.registerDualProcessor(ChargedData.class, SpongeChargedData.class, ImmutableChargedData.class,
                 ImmutableSpongeChargedData.class, new ChargedDataProcessor());

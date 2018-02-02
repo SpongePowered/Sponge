@@ -27,18 +27,59 @@ package org.spongepowered.common.data.manipulator.immutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAgentData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
+import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeAgentData extends AbstractImmutableBooleanData<ImmutableAgentData, AgentData> implements ImmutableAgentData {
+import java.util.Comparator;
 
-    public ImmutableSpongeAgentData(Boolean value) {
-        super(ImmutableAgentData.class, value, Keys.AI_ENABLED, SpongeAgentData.class, true);
+public final class ImmutableSpongeAgentData extends AbstractImmutableData<ImmutableAgentData, AgentData> implements ImmutableAgentData {
+
+    private final boolean aiEnabled;
+    private final double followRange;
+
+    public ImmutableSpongeAgentData(boolean aiEnabled, double followRange) {
+        super(ImmutableAgentData.class);
+        this.aiEnabled = aiEnabled;
+        this.followRange = followRange;
     }
+
+    public ImmutableSpongeAgentData() {
+        this(true, 32.0D);
+    }
+
     @Override
     public ImmutableValue<Boolean> aiEnabled() {
-        return getValueGetter();
+        return ImmutableSpongeValue.cachedOf(Keys.AI_ENABLED, true, this.aiEnabled);
     }
 
+    @Override
+    public ImmutableBoundedValue<Double> followRange() {
+        return ImmutableSpongeBoundedValue.cachedOf(Keys.FOLLOW_RANGE, 32.0, this.followRange, Comparator.naturalOrder(), 0D, 2048D);
+    }
+
+    public boolean isAiEnabled() {
+        return this.aiEnabled;
+    }
+
+    public double getFollowRange() {
+        return this.followRange;
+    }
+
+    @Override
+    protected void registerGetters() {
+        registerFieldGetter(Keys.AI_ENABLED, this::isAiEnabled);
+        registerKeyValue(Keys.AI_ENABLED, this::aiEnabled);
+
+        registerFieldGetter(Keys.FOLLOW_RANGE, this::getFollowRange);
+        registerKeyValue(Keys.FOLLOW_RANGE, this::followRange);
+    }
+
+    @Override
+    public AgentData asMutable() {
+        return new SpongeAgentData(this.aiEnabled, this.followRange);
+    }
 }
