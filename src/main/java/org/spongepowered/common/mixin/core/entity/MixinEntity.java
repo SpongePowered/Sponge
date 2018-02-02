@@ -507,7 +507,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     // Close open containers
                     final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (Object) this;
                     if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                        entityPlayerMP.closeContainer();
+                        ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                     }
                 }
                 EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
@@ -526,7 +526,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     if (isTeleporting) {
                         // Close open containers
                         if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
-                            entityPlayerMP.closeContainer();
+                            ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                         }
 
                         ((WorldServer) location.getExtent()).getChunkProvider()
