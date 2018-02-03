@@ -43,6 +43,10 @@ public abstract class MixinEntityEnderman extends MixinEntityMob implements Ende
 
     @Redirect(method = "teleportTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEnderman;attemptTeleport(DDD)Z"))
     public boolean redirectTeleportTo(EntityEnderman entityEnderman, double x, double y, double z) {
+        if (entityEnderman.world.isRemote) {
+            return entityEnderman.attemptTeleport(x, y, z);
+        }
+        
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
             return attemptTeleport(x, y, z);
