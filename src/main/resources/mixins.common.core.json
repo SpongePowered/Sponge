@@ -114,6 +114,7 @@
         "block.MixinBlockStainedGlassPane",
         "block.MixinBlockStairs",
         "block.MixinBlockStandingSign",
+        "block.MixinBlockStaticLiquid",
         "block.MixinBlockStem",
         "block.MixinBlockStone",
         "block.MixinBlockStoneBrick",
