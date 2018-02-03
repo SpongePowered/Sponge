@@ -151,14 +151,11 @@ public class HomeDataImpl extends AbstractData<HomeData, ImmutableHomeData> impl
     }
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
+    protected DataContainer fillContainer(DataContainer dataContainer) {
         // This is the simplest, but use whatever structure you want!
         if(this.defaultHome != null) {
-            container.set(MyHomes.DEFAULT_HOME, this.defaultHome);
+            dataContainer.set(MyHomes.DEFAULT_HOME, this.defaultHome);
         }
-        container.set(MyHomes.HOMES, this.homes);
-
-        return container;
+        return dataContainer.set(MyHomes.HOMES, this.homes);
     }
 }
