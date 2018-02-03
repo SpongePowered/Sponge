@@ -52,8 +52,6 @@ import org.spongepowered.common.text.format.SpongeTextColor;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 @Mixin(TextComponentBase.class)
 public abstract class MixinTextComponentBase implements IMixinTextComponent {
 
@@ -194,14 +192,10 @@ public abstract class MixinTextComponentBase implements IMixinTextComponent {
 
     @Override
     public Text toText() {
-        Text.Builder builder = this.createBuilder();
+        Text.Builder builder = createBuilder();
 
         if (this.style != null) {
             if (this.style.color != null) {
-                final SpongeTextColor spongeColor = SpongeTextColor.of(this.style.color);
-                if (spongeColor != null) {
-                    builder.color(spongeColor);
-                }
                 builder.color(SpongeTextColor.of(this.style.color));
             }
 

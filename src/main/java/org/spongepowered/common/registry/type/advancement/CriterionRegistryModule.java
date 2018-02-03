@@ -24,17 +24,13 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
-import com.google.inject.Singleton;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.common.advancement.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeEmptyCriterion;
 import org.spongepowered.common.registry.RegistryHelper;
 
-@Singleton
-public final class CriterionRegistryModule implements RegistryModule {
-
-    public static final CriterionRegistryModule instance = new CriterionRegistryModule();
+public class CriterionRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {

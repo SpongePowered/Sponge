@@ -496,6 +496,7 @@ public final class CommonModuleRegistry {
             .registerModule(AdvancementTree.class, AdvancementTreeRegistryModule.getInstance())
             .registerModule(AdvancementType.class, new AdvancementTypeRegistryModule())
             .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
+            .registerModule(new CriterionRegistryModule())
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
 
             // Miscellaneous Registries

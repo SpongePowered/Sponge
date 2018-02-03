@@ -39,7 +39,6 @@ import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.SpongeCommandFactory;
-import org.spongepowered.common.registry.type.advancement.CriterionRegistryModule;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
@@ -79,12 +78,6 @@ public final class SpongeBootstrap {
         commandManager.register(SpongeImpl.getPlugin(), SpongeCommandFactory.createSpongeCommand(), "sponge", "sp");
         commandManager.register(SpongeImpl.getPlugin(), SpongeCommandFactory.createHelpCommand(), "help", "?");
         commandManager.register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
-    }
-
-    public static void initEarlyBootstrap() {
-        // Advancement criteria is loaded super early, need to do this as soon as possible.
-        CriterionRegistryModule.instance.registerDefaults();
-
     }
 
     private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {
