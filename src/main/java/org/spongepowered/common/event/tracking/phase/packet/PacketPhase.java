@@ -64,6 +64,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStartState;
+import org.spongepowered.common.event.tracking.phase.packet.drag.MiddleDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
 
@@ -119,12 +120,15 @@ public final class PacketPhase extends TrackingPhase {
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START = new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", DRAG_MODE_PRIMARY_BUTTON);
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_START = new DragInventoryStartState("SECONDARY_DRAG_INVENTORY_START", DRAG_MODE_SECONDARY_BUTTON);
+        public static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_START = new DragInventoryStartState("MIDDLE_DRAG_INVENTORY_START", DRAG_MODE_MIDDLE_BUTTON);
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("PRIMARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_PRIMARY_BUTTON);
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("SECONDARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_SECONDARY_BUTTON);
+        public static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("MIDDLE_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_MIDDLE_BUTTON);
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_STOP = new PrimaryDragInventoryStopState();
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
+        public static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_STOP = new MiddleDragInventoryStopState();
 
         public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
         public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
@@ -148,12 +152,15 @@ public final class PacketPhase extends TrackingPhase {
 
                 .add(PRIMARY_DRAG_INVENTORY_START)
                 .add(SECONDARY_DRAG_INVENTORY_START)
+                .add(MIDDLE_DRAG_INVENTORY_START)
 
                 .add(PRIMARY_DRAG_INVENTORY_ADDSLOT)
                 .add(SECONDARY_DRAG_INVENTORY_ADDSLOT)
+                .add(MIDDLE_DRAG_INVENTORY_ADDSLOT)
 
                 .add(PRIMARY_DRAG_INVENTORY_STOP)
                 .add(SECONDARY_DRAG_INVENTORY_STOP)
+                .add(MIDDLE_DRAG_INVENTORY_STOP)
 
                 .add(SWITCH_HOTBAR_SCROLL)
                 .add(OPEN_INVENTORY)
