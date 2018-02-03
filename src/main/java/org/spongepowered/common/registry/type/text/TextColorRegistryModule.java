@@ -47,7 +47,18 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
     public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();
     public static final Map<TextFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(TextFormatting.class);
 
-    static {
+    @Override
+    public Optional<TextColor> getById(String id) {
+        return Optional.ofNullable(textColorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Collection<TextColor> getAll() {
+        return ImmutableList.copyOf(textColorMappings.values());
+    }
+
+    @Override
+    public void registerDefaults() {
         addTextColor(TextFormatting.BLACK, Color.BLACK);
         addTextColor(TextFormatting.DARK_BLUE, Color.ofRgb(0x0000AA));
         addTextColor(TextFormatting.DARK_GREEN, Color.ofRgb(0x00AA00));
@@ -67,16 +78,6 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
         addTextColor(TextFormatting.RESET, Color.WHITE);
 
         textColorMappings.put("none", TextColors.NONE);
-    }
-
-    @Override
-    public Optional<TextColor> getById(String id) {
-        return Optional.ofNullable(textColorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<TextColor> getAll() {
-        return ImmutableList.copyOf(textColorMappings.values());
     }
 
     private static void addTextColor(TextFormatting handle, Color color) {
