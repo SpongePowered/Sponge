@@ -235,4 +235,9 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
         }
         return false;
     }
+
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
 }
