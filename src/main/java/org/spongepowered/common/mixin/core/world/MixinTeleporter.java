@@ -36,6 +36,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -47,6 +48,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -235,6 +237,24 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         double zTarget = portalLocation.getZ() + 0.5D;
         BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.world, blockPos);
         boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
+
+        // Sponge start
+        // Workaround for https://github.com/SpongePowered/SpongeForge/issues/1973
+        // Before a player touches a nether portal, entityIn.getLastPortalVec()
+        // and entityIn.getTeleportDirection()
+        // So, if the player isn't in a portal, pretend that the last portal is where we are standing
+        if (!((IMixinEntity) entityIn).inPortal()) {
+
+            // Update the position based on the player's current position to populate/update the required
+            // fields
+            entityIn.setPortal(entityIn.getPosition());
+
+            // Prevent the game server from trying to teleport the player itself because it thinks it
+            // it in a portal.
+            ((IMixinEntity) entityIn).setInPortal(false);
+        }
+        // Sponge end
+
         double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
                 : (double) blockpattern$patternhelper.getFrontTopLeft().getX();
         yTarget = blockpattern$patternhelper.getFrontTopLeft().getY() + 1
