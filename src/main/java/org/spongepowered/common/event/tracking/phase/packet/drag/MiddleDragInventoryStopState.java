@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet;
+package org.spongepowered.common.event.tracking.phase.packet.drag;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
@@ -33,19 +33,20 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 
 import java.util.List;
 
-final class MiddleInventoryClickState extends BasicInventoryPacketState {
+public final class MiddleDragInventoryStopState extends DragInventoryStopState {
 
-    MiddleInventoryClickState() {
-        super(PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_MIDDLE | PacketPhase.CLICK_INSIDE_WINDOW | PacketPhase.CLICK_OUTSIDE_WINDOW);
+    public MiddleDragInventoryStopState() {
+        super("MIDDLE_DRAG_INVENTORY_STOP", PacketPhase.DRAG_MODE_MIDDLE_BUTTON);
     }
 
     @Override
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
-        return SpongeEventFactory.createClickInventoryEventMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
+        return SpongeEventFactory.createClickInventoryEventDragMiddle(Sponge.getCauseStackManager().getCurrentCause(), transaction, openContainer, slotTransactions);
     }
 
 }
