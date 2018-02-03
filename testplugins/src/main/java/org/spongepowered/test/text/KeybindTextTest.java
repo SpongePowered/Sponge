@@ -22,21 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.test.text;
 
-import net.minecraft.util.text.TextComponentKeybind;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
+import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.KeybindText;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(TextComponentKeybind.class)
-public abstract class MixinTextComponentKeybind extends MixinTextComponentBase {
+import javax.inject.Inject;
 
-    @Final @Shadow private String keybind;
+@Plugin(id = "keybind-text-test", authors = "kashike")
+public class KeybindTextTest {
+    private final CommandManager cm;
 
-    @Override
-    protected KeybindText.Builder createBuilder() {
-        return KeybindText.builder().keybind(this.keybind);
+    @Inject
+    private KeybindTextTest(final CommandManager cm) {
+        this.cm = cm;
+    }
+
+    @Listener
+    public void starting(final GameStartingServerEvent event) {
+        this.cm.register(this, CommandSpec.builder()
+                .executor((src, args) -> {
+                    src.sendMessage(KeybindText.builder().keybind("key.jump").build());
+                    return CommandResult.success();
+                })
+                .build());
     }
 }

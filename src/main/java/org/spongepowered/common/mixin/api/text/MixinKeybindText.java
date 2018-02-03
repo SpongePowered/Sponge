@@ -22,21 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.common.mixin.api.text;
 
+import net.minecraft.util.text.TextComponentBase;
 import net.minecraft.util.text.TextComponentKeybind;
 import org.spongepowered.api.text.KeybindText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(TextComponentKeybind.class)
-public abstract class MixinTextComponentKeybind extends MixinTextComponentBase {
+@Mixin(value = KeybindText.class, remap = false)
+public class MixinKeybindText extends MixinText {
 
-    @Final @Shadow private String keybind;
+    @Final @Shadow String keybind;
 
     @Override
-    protected KeybindText.Builder createBuilder() {
-        return KeybindText.builder().keybind(this.keybind);
+    protected TextComponentBase createComponent() {
+        return new TextComponentKeybind(this.keybind);
     }
 }
