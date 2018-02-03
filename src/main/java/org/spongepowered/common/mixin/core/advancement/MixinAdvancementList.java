@@ -60,19 +60,19 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     @Inject(method = "loadAdvancements", at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
             target = "Ljava/util/Map;size()I"))
     private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
-//        AdvancementRegistryModule.INSIDE_REGISTER_EVENT = true;
-//        SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
-//                org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance()));
-//        AdvancementRegistryModule.INSIDE_REGISTER_EVENT = false;
+        AdvancementRegistryModule.INSIDE_REGISTER_EVENT = true;
+        SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
+                org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance()));
+        AdvancementRegistryModule.INSIDE_REGISTER_EVENT = false;
     }
 
     @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
     private void onLoadAdvancementForTrees(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
-//        AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = true;
-//        SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
-//                org.spongepowered.api.advancement.AdvancementTree.class, AdvancementTreeRegistryModule.getInstance()));
-//        AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = false;
-//        LOGGER.info("Loaded " + this.roots.size() + " advancement trees");
+        AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = true;
+        SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
+                org.spongepowered.api.advancement.AdvancementTree.class, AdvancementTreeRegistryModule.getInstance()));
+        AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = false;
+        LOGGER.info("Loaded " + this.roots.size() + " advancement trees");
     }
 
     @Override
