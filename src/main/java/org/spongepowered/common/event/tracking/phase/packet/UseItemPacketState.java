@@ -33,7 +33,9 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -44,6 +46,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -51,6 +54,9 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -70,8 +76,13 @@ class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
+    public boolean shouldCaptureEntity() {
+        return true;
+    }
+
+    @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
-        BasicPacketContext context) {
+            BasicPacketContext context) {
         Player player = context.getSpongePlayer();
         BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation().get()).getBlockPos();
         IMixinChunk spongeChunk = (IMixinChunk) EntityUtil.getMinecraftWorld(player).getChunkFromBlockCoords(pos);
@@ -91,27 +102,43 @@ class UseItemPacketState extends BasicPacketState {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(snapshot);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE,
-                itemStack.getType() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
+                    itemStack.getType() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        processSpawnedEntities(player, spawnEntityEvent);
-                    }
-                });
+                    .acceptAndClearIfNotEmpty(entities -> {
+                        List<Projectile> projectiles = new ArrayList<>();
+                        List<Entity> rest = new ArrayList<>();
+                        for (Entity entity : entities) {
+                            if (entity instanceof Projectile) {
+                                projectiles.add((Projectile) entity);
+                            } else {
+                                rest.add(entity);
+                            }
+                        }
+
+                        if (!rest.isEmpty() && ShouldFire.SPAWN_ENTITY_EVENT) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, itemStack.getType() == ItemTypes.SPAWN_EGG
+                                    ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
+                            SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), projectiles);
+                            if (!SpongeImpl.postEvent(spawnEntityEvent)) {
+                                processSpawnedEntities(player, spawnEntityEvent);
+                            }
+                        }
+
+                        if (!projectiles.isEmpty()) {
+                            PacketPhaseUtil.fireProjectileLaunchEvent(frame, player, projectiles);
+                        }
+                    });
         }
         context.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(
-                originalBlocks -> {
-                    boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
-                    if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                        Sponge.getCauseStackManager().pushCause(player);
-                        EnumHand hand = ((CPacketPlayerTryUseItem) context.getPacket()).getHand();
-                        PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
-                    }
-                });
+                .acceptAndClearIfNotEmpty(
+                        originalBlocks -> {
+                            boolean success = TrackingUtil.processBlockCaptures(originalBlocks, this, context);
+                            if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                                Sponge.getCauseStackManager().pushCause(player);
+                                EnumHand hand = ((CPacketPlayerTryUseItem) context.getPacket()).getHand();
+                                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                            }
+                        });
 
     }
 }

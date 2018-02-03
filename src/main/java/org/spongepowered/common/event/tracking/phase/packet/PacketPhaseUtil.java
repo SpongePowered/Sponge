@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import static org.spongepowered.common.event.tracking.phase.packet.PacketState.processEntities;
+import static org.spongepowered.common.event.tracking.phase.packet.PacketState.processSpawnedEntities;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -32,12 +35,25 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 
@@ -123,5 +139,42 @@ public final class PacketPhaseUtil {
         }
 
         return true;
+    }
+
+    /**
+     * Common method to fire a LaunchProjectileEvent and populate its context, then calls SpawnEntityEvent.
+     *
+     * This must be called in the main thread.
+     *
+     * @param frame a frame to populate the context and use for the event.
+     * @param player the player who launched the projectiles.
+     * @param projectiles the projectiles to fire.
+     */
+    public static void fireProjectileLaunchEvent(CauseStackManager.StackFrame frame, EntityPlayerMP player, List<Projectile> projectiles) {
+        if(!SpongeImpl.isMainThread()) {
+            SpongeImpl.getLogger().error("handleProjectileLaunch called outside of the main thread");
+            return;
+        }
+
+        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
+        frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
+        frame.addContext(EventContextKeys.THROWER, (ProjectileSource) player);
+
+        LaunchProjectileEvent
+                launchProjectileEvent = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);
+        if (SpongeImpl.postEvent(launchProjectileEvent)) {
+            projectiles.clear();
+            IMixinContainer playerMixinContainer = (IMixinContainer) player.openContainer;
+            handleSlotRestore(player, (Container) playerMixinContainer, playerMixinContainer.getCapturedTransactions(), true);
+        } else {
+            if(ShouldFire.SPAWN_ENTITY_EVENT) {
+                SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), projectiles);
+                if(!SpongeImpl.postEvent(spawnEntityEvent)) {
+                    processSpawnedEntities(player, spawnEntityEvent);
+                }
+            } else {
+                processEntities(player, (List<Entity>) (List<?>) projectiles);
+            }
+        }
     }
 }

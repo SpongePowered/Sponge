@@ -78,6 +78,8 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -163,7 +165,9 @@ public class ProjectileLauncher {
     }
 
     static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile) {
-        LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
+        List<P> projectiles = new ArrayList<>();
+        projectiles.add(projectile);
+        LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);
         SpongeImpl.getGame().getEventManager().post(event);
         if (!event.isCancelled() && extent.spawnEntity(projectile)) {
             return Optional.of(projectile);

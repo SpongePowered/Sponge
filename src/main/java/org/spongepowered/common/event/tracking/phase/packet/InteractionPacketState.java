@@ -50,8 +50,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
@@ -117,7 +117,6 @@ final class InteractionPacketState extends BasicPacketState {
 
     @Override
     public void unwind(BasicPacketContext phaseContext) {
-
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
         final ItemStack usedStack = phaseContext.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
@@ -145,7 +144,7 @@ final class InteractionPacketState extends BasicPacketState {
                             if (!entityItems.isEmpty()) {
                                 final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                                 final DropItemEvent.Destruct event =
-                                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
+                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     processSpawnedEntities(player, event);
@@ -168,34 +167,34 @@ final class InteractionPacketState extends BasicPacketState {
             }
 
             phaseContext.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (EntityItem item : items) {
-                        entities.add(EntityUtil.fromNative(item));
-                    }
-                    final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dispense);
-                    if (!dispense.isCancelled()) {
-                        processSpawnedEntities(player, dispense);
-                    }
-                });
-            phaseContext.getCapturedEntityDropSupplier()
-                .acceptIfNotEmpty(map -> {
-                    if (map.isEmpty()) {
-                        return;
-                    }
-                    final PrettyPrinter printer = new PrettyPrinter(80);
-                    printer.add("Processing Interaction").centre().hr();
-                    printer.add("The item stacks captured are: ");
-                    for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
-                        printer.add("  - Entity with UUID: %s", entry.getKey());
-                        for (ItemDropData stack : entry.getValue()) {
-                            printer.add("    - %s", stack);
+                    .acceptAndClearIfNotEmpty(items -> {
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
                         }
-                    }
-                    printer.trace(System.err);
-                });
+                        final DropItemEvent.Dispense dispense =
+                                SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeImpl.postEvent(dispense);
+                        if (!dispense.isCancelled()) {
+                            processSpawnedEntities(player, dispense);
+                        }
+                    });
+            phaseContext.getCapturedEntityDropSupplier()
+                    .acceptIfNotEmpty(map -> {
+                        if (map.isEmpty()) {
+                            return;
+                        }
+                        final PrettyPrinter printer = new PrettyPrinter(80);
+                        printer.add("Processing Interaction").centre().hr();
+                        printer.add("The item stacks captured are: ");
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
+                            printer.add("  - Entity with UUID: %s", entry.getKey());
+                            for (ItemDropData stack : entry.getValue()) {
+                                printer.add("    - %s", stack);
+                            }
+                        }
+                        printer.trace(System.err);
+                    });
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> projectiles = new ArrayList<>(entities.size());
                 final List<Entity> spawnEggs = new ArrayList<>(entities.size());
@@ -237,8 +236,8 @@ final class InteractionPacketState extends BasicPacketState {
                             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
                             Sponge.getCauseStackManager().pushCause(usedSnapshot);
                             final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                                    spawnEggs);
+                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                                            spawnEggs);
                             if (!SpongeImpl.postEvent(event)) {
                                 processSpawnedEntities(player, event);
                             }
@@ -250,7 +249,7 @@ final class InteractionPacketState extends BasicPacketState {
                 if (!items.isEmpty()) {
                     if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
                         final DropItemEvent.Dispense dispense = SpongeEventFactory
-                            .createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), items);
+                                .createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), items);
                         if (!SpongeImpl.postEvent(dispense)) {
                             processSpawnedEntities(player, dispense);
                         }
@@ -265,8 +264,9 @@ final class InteractionPacketState extends BasicPacketState {
                                 stackFrame.pushCause(firstBlockChange);
                             }
                             stackFrame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                                    xpOrbs);
+                            final SpawnEntityEvent event =
+                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                                            xpOrbs);
                             if (!SpongeImpl.postEvent(event)) {
                                 processSpawnedEntities(player, event);
                             }
@@ -281,8 +281,9 @@ final class InteractionPacketState extends BasicPacketState {
                             if (firstBlockChange != null) {
                                 stackFrame.pushCause(firstBlockChange);
                             }
-                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                                normalPlacement);
+                            final SpawnEntityEvent event =
+                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                                            normalPlacement);
                             if (!SpongeImpl.postEvent(event)) {
                                 processSpawnedEntities(player, event);
                             }
