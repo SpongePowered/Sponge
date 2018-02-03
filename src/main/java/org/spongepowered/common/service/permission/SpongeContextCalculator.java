@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.RemoteSource;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
@@ -39,6 +40,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -49,24 +52,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A context calculator handling world contexts.
  */
 public class SpongeContextCalculator implements ContextCalculator<Subject> {
-    private final LoadingCache<RemoteSource, Set<Context>> remoteIpCache = buildAddressCache(Context.REMOTE_IP_KEY,
-                                                                                             input -> input.getConnection().getAddress().getAddress());
 
-    private final LoadingCache<RemoteSource, Set<Context>> localIpCache = buildAddressCache(Context.LOCAL_IP_KEY,
-                                                                                            input -> input.getConnection().getVirtualHost().getAddress());
+    private final LoadingCache<RemoteSource, Set<Context>> remoteIpCache = buildAddressCache(Context.REMOTE_IP_KEY, rs -> getAddress(rs, RemoteConnection::getAddress));
+    private final LoadingCache<RemoteSource, Set<Context>> localIpCache = buildAddressCache(Context.LOCAL_IP_KEY, rs -> getAddress(rs, RemoteConnection::getVirtualHost));
+
+    private static InetAddress getAddress(RemoteSource input, Function<RemoteConnection, InetSocketAddress> func) {
+        InetSocketAddress socket = func.apply(input.getConnection());
+        if (!socket.isUnresolved()) {
+            return socket.getAddress();
+        }
+        try {
+            return InetAddress.getByName(socket.getHostName());
+        } catch (UnknownHostException e) {
+            return null;
+        }
+    }
 
     private LoadingCache<RemoteSource, Set<Context>> buildAddressCache(final String contextKey, final Function<RemoteSource, InetAddress> function) {
         return CacheBuilder.newBuilder()
             .weakKeys()
             .build(new CacheLoader<RemoteSource, Set<Context>>() {
                 @Override
-                public Set<Context> load(RemoteSource key) throws Exception {
+                public Set<Context> load(RemoteSource key) {
                     ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
-                    final InetAddress addr = checkNotNull(function.apply(key), "addr");
+                    final InetAddress addr = function.apply(key);
+                    if (addr == null) {
+                        return builder.build();
+                    }
                     builder.add(new Context(contextKey, addr.getHostAddress()));
-                    for (String set : Maps.filterValues(SpongeImpl.getGlobalConfig().getConfig().getIpSets(), input -> {
-                        return input.apply(addr);
-                    }).keySet()) {
+                    for (String set : Maps.filterValues(SpongeImpl.getGlobalConfig().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
                         builder.add(new Context(contextKey, set));
                     }
                     return builder.build();
