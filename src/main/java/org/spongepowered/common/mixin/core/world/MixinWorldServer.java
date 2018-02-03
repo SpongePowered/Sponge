@@ -106,6 +106,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -654,10 +655,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                             transform);
                                 SpongeImpl.postEvent(lightning);
                                 if (!lightning.isCancelled()) {
-                                    // Sponge End
-                                    this.addWeatherEffect(
-                                        new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
-                                            (double) blockpos.getZ(), true));
+                                    LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
+                                    if (!SpongeImpl.postEvent(lightningPre)) {
+                                        // Sponge End
+                                        this.addWeatherEffect(new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
+                                                (double) blockpos.getZ(), true));
+                                    }
                                 } // Sponge - Brackets.
                             }
                         } else {
@@ -671,10 +674,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                         EntityTypes.LIGHTNING, transform);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
-                                    // Sponge End
-                                    this.addWeatherEffect(
-                                        new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
-                                            (double) blockpos.getZ(), false));
+                                    LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
+                                    if (!SpongeImpl.postEvent(lightningPre)) {
+                                        // Sponge End
+                                        this.addWeatherEffect(new EntityLightningBolt(world, (double) blockpos.getX(), (double) blockpos.getY(),
+                                                (double) blockpos.getZ(), true));
+                                    }
                                 } // Sponge - Brackets.
                             }
                         }
