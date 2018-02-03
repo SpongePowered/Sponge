@@ -43,6 +43,7 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -100,6 +101,11 @@ public abstract class MixinCommandSummon extends CommandBase {
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 ci.cancel();
+            } else {
+                LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
+                if (SpongeImpl.postEvent(lightningPre)) {
+                    ci.cancel();
+                }
             }
         }
     }
