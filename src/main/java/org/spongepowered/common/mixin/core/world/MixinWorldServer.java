@@ -1214,7 +1214,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             final double x = mcExplosion.x;
             final double y = mcExplosion.y;
             final double z = mcExplosion.z;
-            final boolean damagesTerrain = mcExplosion.damagesTerrain;
+            final boolean damagesTerrain = explosion.shouldBreakBlocks();
             final float strength = explosion.getRadius();
 
             // Set up the pre event
