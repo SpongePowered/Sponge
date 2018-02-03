@@ -54,29 +54,38 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actualValue);
     }
 
-    public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {
-        super(key, InternalCopies.immutableCopy(defaultValue));
+    public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E actualValue) {
+        this(key, InternalCopies.immutableCopy(actualValue), (Void) null);
     }
 
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
-        super(key, InternalCopies.immutableCopy(defaultValue), InternalCopies.immutableCopy(actualValue));
+        this(key, InternalCopies.immutableCopy(defaultValue), InternalCopies.immutableCopy(actualValue), null);
     }
 
-    // A constructor to avoid unnecessary copies
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    protected ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E actualValue, @Nullable Void nothing) {
+        this(key, actualValue, actualValue, nothing);
+    }
+
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
     protected ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, @Nullable Void nothing) {
         super(key, defaultValue, actualValue);
     }
 
+    @Nullable
     @Override
-    public E getDefault() {
-        // Prevent people from modifying possible mutable default values, like ItemStacks
-        return InternalCopies.immutableCopy(super.getDefault());
+    public E getNullable() {
+        // Prevent people from modifying possible mutable actual values, like ItemStacks
+        return this.actualValue != null ? InternalCopies.immutableCopy(this.actualValue) : null;
     }
 
     @Override
-    public E get() {
-        // Prevent people from modifying possible mutable actual values, like ItemStacks
-        return InternalCopies.immutableCopy(super.get());
+    public E getDefault() {
+        return InternalCopies.immutableCopy(this.defaultValue);
     }
 
     @Override

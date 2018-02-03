@@ -33,27 +33,28 @@ import org.spongepowered.api.data.value.BaseValue;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public abstract class AbstractBaseValue<E> implements BaseValue<E> {
 
     private final Key<? extends BaseValue<E>> key;
     protected final E defaultValue;
     protected E actualValue;
 
-    public AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue) {
-        this.key = checkNotNull(key);
-        this.defaultValue = checkNotNull(defaultValue);
-        this.actualValue = defaultValue;
-    }
-
     protected AbstractBaseValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
-        this.key = checkNotNull(key);
-        this.defaultValue = checkNotNull(defaultValue);
-        this.actualValue = checkNotNull(actualValue);
+        this.defaultValue = defaultValue;
+        this.actualValue = actualValue;
+        this.key = key;
     }
 
     @Override
     public E get() {
-        return this.actualValue == null ? this.defaultValue : this.actualValue;
+        return exists() ? checkNotNull(getNullable()) : getDefault();
+    }
+
+    @Nullable
+    protected E getNullable() {
+        return this.actualValue;
     }
 
     @Override
@@ -62,13 +63,8 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
     }
 
     @Override
-    public E getDefault() {
-        return this.defaultValue;
-    }
-
-    @Override
     public Optional<E> getDirect() {
-        return Optional.ofNullable(this.actualValue);
+        return Optional.ofNullable(getNullable());
     }
 
     @Override

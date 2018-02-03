@@ -31,9 +31,16 @@ import java.util.Comparator;
 
 public class BoundedKeyEntry<V extends BoundedValue<E>, E> extends KeyEntry<V, E> {
 
-    final E minimum;
-    final E maximum;
-    final Comparator<E> comparator;
+    public final E minimum;
+    public final E maximum;
+    public final Comparator<E> comparator;
+
+    public String minimumFieldName;
+    public String maximumFieldName;
+
+    public String comparatorFieldName;
+    public String comparatorFieldDescriptor;
+    public String comparatorFieldSignature;
 
     public BoundedKeyEntry(Key<V> key, E defaultValue, E minimum, E maximum, Comparator<E> comparator) {
         super(key, defaultValue);
@@ -42,7 +49,4 @@ public class BoundedKeyEntry<V extends BoundedValue<E>, E> extends KeyEntry<V, E
         this.comparator = comparator;
     }
 
-    public boolean ret() {
-        return true;
-    }
 }

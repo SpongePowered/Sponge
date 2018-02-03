@@ -44,11 +44,11 @@ import java.util.function.Predicate;
 public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapValue<K, V> {
 
     public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key) {
-        this(key, Maps.<K, V>newHashMap());
+        this(key, Maps.newHashMap());
     }
 
     public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
-        this(key, ImmutableMap.<K, V>of(), actualValue);
+        this(key, ImmutableMap.of(), actualValue);
     }
 
     public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultMap, Map<K, V> actualMap) {

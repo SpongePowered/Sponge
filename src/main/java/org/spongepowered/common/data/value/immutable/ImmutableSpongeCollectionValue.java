@@ -46,7 +46,9 @@ public abstract class ImmutableSpongeCollectionValue<E, V extends Collection<E>,
         super(key, defaultValue, actualValue);
     }
 
-    // A constructor to avoid unnecessary copies.
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
     protected ImmutableSpongeCollectionValue(Key<? extends BaseValue<V>> key, V defaultValue, V actualValue, @Nullable Void nothing) {
         super(key, defaultValue, actualValue, nothing);
     }

@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
@@ -41,34 +40,56 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V>> implements ImmutableMapValue<K, V> {
 
-    public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key) {
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static <K, V> ImmutableSpongeMapValue<K, V> constructUnsafe(
+            Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultValue, Map<K, V> actualValue) {
+        return new ImmutableSpongeMapValue<>(key, defaultValue, actualValue, null);
+    }
+
+    public ImmutableSpongeMapValue(
+            Key<? extends BaseValue<Map<K, V>>> key) {
         this(key, ImmutableMap.of());
     }
 
-    public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
+    public ImmutableSpongeMapValue(
+            Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
         super(key, ImmutableMap.of(), ImmutableMap.copyOf(actualValue));
     }
 
     // DO NOT MODIFY THE SIGNATURE
-    public ImmutableSpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultValue, Map<K, V> actualValue) {
+    public ImmutableSpongeMapValue(
+            Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultValue, Map<K, V> actualValue) {
         super(key, ImmutableMap.copyOf(defaultValue), ImmutableMap.copyOf(actualValue));
+    }
+
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    protected ImmutableSpongeMapValue(
+            Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultValue, Map<K, V> actualValue, @Nullable Void nothing) {
+        super(key, defaultValue, actualValue, nothing);
     }
 
     @Override
     public ImmutableMapValue<K, V> with(Map<K, V> value) {
-        return new ImmutableSpongeMapValue<>(getKey(), getDefault(), checkNotNull(value));
+        return constructUnsafe(getKey(), this.defaultValue, ImmutableMap.copyOf(checkNotNull(value)));
     }
 
     @Override
     public ImmutableMapValue<K, V> transform(Function<Map<K, V>, Map<K, V>> function) {
-        return new ImmutableSpongeMapValue<>(getKey(), checkNotNull(checkNotNull(function).apply(this.actualValue)));
+        return constructUnsafe(getKey(), this.defaultValue,
+                ImmutableMap.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
     }
 
     @Override
     public MapValue<K, V> asMutable() {
-        return new SpongeMapValue<>(getKey(), this.actualValue);
+        return new SpongeMapValue<>(getKey(), this.defaultValue, this.actualValue);
     }
 
     @Override
@@ -78,40 +99,42 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
 
     @Override
     public ImmutableMapValue<K, V> with(K key, V value) {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue)
-                .put(checkNotNull(key), checkNotNull(value)).build());
+        return constructUnsafe(getKey(), this.defaultValue,
+                ImmutableMap.<K, V>builder().putAll(this.actualValue).put(checkNotNull(key), checkNotNull(value)).build());
     }
 
     @Override
     public ImmutableMapValue<K, V> withAll(Map<K, V> map) {
-        return new ImmutableSpongeMapValue<>(getKey(), ImmutableMap.<K, V>builder().putAll(this.actualValue).putAll(map).build());
+        return constructUnsafe(getKey(), this.defaultValue,
+                ImmutableMap.<K, V>builder().putAll(this.actualValue).putAll(map).build());
     }
 
     @Override
     public ImmutableMapValue<K, V> without(K key) {
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
         this.actualValue.entrySet().stream()
-            .filter(entry -> !entry.getKey().equals(key))
-            .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
+                .filter(entry -> !entry.getKey().equals(key))
+                .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
     public ImmutableMapValue<K, V> withoutAll(Iterable<K> keys) {
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
         this.actualValue.entrySet().stream()
-            .filter(entry -> !Iterables.contains(keys, entry.getKey()))
-            .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
+                .filter(entry -> !Iterables.contains(keys, entry.getKey()))
+                .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
     public ImmutableMapValue<K, V> withoutAll(Predicate<Map.Entry<K, V>> predicate) {
+        checkNotNull(predicate, "predicate");
         final ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
         this.actualValue.entrySet().stream()
-            .filter(entry -> checkNotNull(predicate).test(entry))
-            .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return new ImmutableSpongeMapValue<>(getKey(), builder.build());
+                .filter(predicate)
+                .forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
@@ -137,5 +160,10 @@ public class ImmutableSpongeMapValue<K, V> extends ImmutableSpongeValue<Map<K, V
     @Override
     public ImmutableCollection<V> values() {
         return (ImmutableCollection<V>) this.actualValue.values();
+    }
+
+    @Override
+    public Map<K, V> getNullable() {
+        return this.actualValue; // Faster?
     }
 }

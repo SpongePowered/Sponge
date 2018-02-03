@@ -29,6 +29,7 @@ import static org.objectweb.asm.Opcodes.GETFIELD;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.spongepowered.api.util.generator.GeneratorUtils;
 import org.spongepowered.common.data.generator.GeneratorHelper;
 import org.spongepowered.common.data.generator.KeyEntry;
 import org.spongepowered.common.data.generator.method.MethodEntry;
@@ -43,11 +44,18 @@ public class GetterMethodEntry extends MethodEntry {
 
     @Override
     public void visit(MethodVisitor mv, String implClassDescriptor, String mutableImplClassName) {
+        // Load "this"
         mv.visitVarInsn(ALOAD, 0);
         final Class<?> returnType = this.keyEntry.valueClass;
+        // Get the field value from "this"
         mv.visitFieldInsn(GETFIELD, implClassDescriptor,
                 this.keyEntry.valueFieldName, Type.getDescriptor(returnType));
-        mv.visitInsn(GeneratorHelper.getReturnOpcode(this.keyEntry.valueClass));
+        if (this.keyEntry.boxedValueClass.equals(returnType)) {
+            // Box the primitive value, if it's a primitive
+            GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
+        }
+        // Return the value
+        GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);
         mv.visitMaxs(1, 1);
     }
 }

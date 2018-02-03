@@ -59,6 +59,9 @@ public class TestDataImpl implements TestData    {
     // TODO: Inline strings?
     public static String default_value$my_string;
     // TODO: Inline primitives
+    public static Comparable<Integer> value_comparator$my_int;
+    public static int minimum_value$my_int;
+    public static int maximum_value$my_int;
     public static int default_value$my_int;
     public static Optional<Double> default_value$my_opt_double;
 

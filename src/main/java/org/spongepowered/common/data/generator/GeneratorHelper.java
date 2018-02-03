@@ -24,18 +24,31 @@
  */
 package org.spongepowered.common.data.generator;
 
+import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.BIPUSH;
+import static org.objectweb.asm.Opcodes.DCONST_0;
+import static org.objectweb.asm.Opcodes.DCONST_1;
+import static org.objectweb.asm.Opcodes.DRETURN;
+import static org.objectweb.asm.Opcodes.FCONST_0;
+import static org.objectweb.asm.Opcodes.FCONST_1;
+import static org.objectweb.asm.Opcodes.FCONST_2;
+import static org.objectweb.asm.Opcodes.FRETURN;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ICONST_2;
 import static org.objectweb.asm.Opcodes.ICONST_3;
 import static org.objectweb.asm.Opcodes.ICONST_4;
 import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.LCONST_0;
+import static org.objectweb.asm.Opcodes.LCONST_1;
+import static org.objectweb.asm.Opcodes.LRETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.SIPUSH;
 
 import com.google.common.reflect.TypeToken;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureVisitor;
 import org.objectweb.asm.signature.SignatureWriter;
@@ -68,28 +81,17 @@ public final class GeneratorHelper {
         }
     }
 
-    public static int getReturnOpcode(Class<?> clazz) {
-        if (clazz == byte.class ||
-                clazz == boolean.class ||
-                clazz == short.class ||
-                clazz == char.class ||
-                clazz == int.class) {
-            return Opcodes.IRETURN;
-        } else if (clazz == double.class) {
-            return Opcodes.DRETURN;
-        } else if (clazz == float.class) {
-            return Opcodes.FRETURN;
-        } else if (clazz == long.class) {
-            return Opcodes.LRETURN;
-        } else if (clazz == void.class) {
-            return Opcodes.RETURN;
-        } else {
-            return Opcodes.ARETURN;
-        }
-    }
-
-    public static void visitIntInsn(MethodVisitor mv, int value) {
-        if (value == 0) {
+    /**
+     * Visits the {@link MethodVisitor} to push a
+     * constant integer value to the stack.
+     *
+     * @param mv The method visitor
+     * @param value The integer
+     */
+    public static void visitPushInt(MethodVisitor mv, int value) {
+        if (value == -1) {
+            mv.visitInsn(ICONST_M1);
+        } else if (value == 0) {
             mv.visitInsn(ICONST_0);
         } else if (value == 1) {
             mv.visitInsn(ICONST_1);
@@ -107,6 +109,87 @@ public final class GeneratorHelper {
             mv.visitIntInsn(SIPUSH, value);
         } else {
             mv.visitLdcInsn(value);
+        }
+    }
+
+    /**
+     * Visits the {@link MethodVisitor} to push a
+     * constant long value to the stack.
+     *
+     * @param mv The method visitor
+     * @param value The long
+     */
+    public static void visitPushLong(MethodVisitor mv, long value) {
+        if (value == 0) {
+            mv.visitInsn(LCONST_0);
+        } else if (value == 1) {
+            mv.visitInsn(LCONST_1);
+        } else {
+            mv.visitLdcInsn(value);
+        }
+    }
+
+    /**
+     * Visits the {@link MethodVisitor} to push a
+     * constant float value to the stack.
+     *
+     * @param mv The method visitor
+     * @param value The float
+     */
+    public static void visitPushFloat(MethodVisitor mv, float value) {
+        if (value == 0.0f) {
+            mv.visitInsn(FCONST_0);
+        } else if (value == 1.0f) {
+            mv.visitInsn(FCONST_1);
+        } else if (value == 2.0f) {
+            mv.visitInsn(FCONST_2);
+        } else {
+            mv.visitLdcInsn(value);
+        }
+    }
+
+    /**
+     * Visits the {@link MethodVisitor} to push a
+     * constant double value to the stack.
+     *
+     * @param mv The method visitor
+     * @param value The double
+     */
+    public static void visitPushDouble(MethodVisitor mv, double value) {
+        if (value == 0.0) {
+            mv.visitInsn(DCONST_0);
+        } else if (value == 1.0) {
+            mv.visitInsn(DCONST_1);
+        } else {
+            mv.visitLdcInsn(value);
+        }
+    }
+
+    /**
+     * Visits the {@link MethodVisitor} to apply the return
+     * operation for the given return {@link Type}.
+     *
+     * @param mv The method visitor
+     * @param type The return type
+     */
+    public static void visitReturn(MethodVisitor mv, Type type) {
+        final int sort = type.getSort();
+        if (sort == Type.BYTE ||
+                sort == Type.BOOLEAN ||
+                sort == Type.SHORT ||
+                sort == Type.CHAR ||
+                sort == Type.INT) {
+            mv.visitInsn(IRETURN);
+        } else if (sort == Type.DOUBLE) {
+            mv.visitInsn(DRETURN);
+        } else if (sort == Type.FLOAT) {
+            mv.visitInsn(FRETURN);
+        } else if (sort == Type.LONG) {
+            mv.visitInsn(LRETURN);
+        } else if (sort == Type.VOID) {
+            mv.visitInsn(RETURN);
+        } else {
+            mv.visitInsn(ARETURN);
         }
     }
 

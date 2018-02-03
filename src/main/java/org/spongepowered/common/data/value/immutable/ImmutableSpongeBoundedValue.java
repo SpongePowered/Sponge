@@ -33,10 +33,13 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Comparator;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> implements ImmutableBoundedValue<E> {
 
@@ -57,10 +60,19 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         checkState(comparator.compare(maximum, minimum) >= 0);
     }
 
-    // DO NOT MODIFY THE SIGNATURE
+    // DO NOT MODIFY THE SIGNATURE OR REMOVE THE CONSTRUCTOR
     public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue,
             Comparator<E> comparator, E minimum, E maximum) {
-        super(key, defaultValue, actualValue);
+        this(key, InternalCopies.immutableCopy(defaultValue),
+                InternalCopies.immutableCopy(actualValue), comparator,
+                InternalCopies.immutableCopy(minimum),
+                InternalCopies.immutableCopy(maximum), null);
+    }
+
+    // A constructor to avoid unnecessary copies
+    protected ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue,
+            Comparator<E> comparator, E minimum, E maximum, @Nullable Void nothing) {
+        super(key, defaultValue, actualValue, nothing);
         this.comparator = checkNotNull(comparator);
         this.minimum = checkNotNull(minimum);
         this.maximum = checkNotNull(maximum);
@@ -70,7 +82,7 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     @Override
     public ImmutableBoundedValue<E> with(E value) {
         if (this.comparator.compare(value, this.minimum) >= 0 && this.comparator.compare(value, this.maximum) <= 0) {
-            return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), value,  getComparator(), getMinValue(), getMaxValue());
+            return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), value, getComparator(), getMinValue(), getMaxValue());
         }
         return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue());
     }
@@ -94,12 +106,12 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
 
     @Override
     public E getMinValue() {
-        return this.minimum;
+        return InternalCopies.immutableCopy(this.minimum); // Safely copy the object, if needed
     }
 
     @Override
     public E getMaxValue() {
-        return this.maximum;
+        return InternalCopies.immutableCopy(this.maximum); // Safely copy the object, if needed
     }
 
     @Override

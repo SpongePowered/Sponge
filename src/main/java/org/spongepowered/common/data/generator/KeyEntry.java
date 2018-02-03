@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.generator;
 
+import org.objectweb.asm.Type;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 
@@ -39,6 +40,7 @@ public class KeyEntry<V extends BaseValue<E>, E> {
     @Nullable public String keyFieldSignature; // With generics, if present
 
     public Class<?> valueClass;
+    public Type valueType;
     public String valueTypeName;
     public String valueFieldName;
     public String valueFieldDescriptor;

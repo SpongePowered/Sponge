@@ -54,7 +54,6 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
         checkState(comparator.compare(maximum, minimum) >= 0);
     }
 
-
     @Override
     public E getMinValue() {
         return this.minimum;

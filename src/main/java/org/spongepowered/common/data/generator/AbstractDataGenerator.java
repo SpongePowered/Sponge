@@ -74,26 +74,34 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
+import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutablePatternListValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.generator.GeneratorUtils;
 import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.generator.method.MethodEntry;
-import org.spongepowered.common.data.generator.method.getter.BoxedPrimitiveGetterMethodEntry;
 import org.spongepowered.common.data.generator.method.getter.GetterMethodEntry;
 import org.spongepowered.common.data.generator.method.getter.UnboxedOptionalGetterMethodEntry;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 import org.spongepowered.common.util.TypeTokenHelper;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -207,6 +215,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             // Generate the descriptor and signature of the value
             final TypeToken<?> elementType = keyEntry.key.getElementToken();
             keyEntry.valueClass = elementType.getRawType();
+            keyEntry.valueType = Type.getType(keyEntry.valueClass);
             keyEntry.valueTypeName = Type.getInternalName(keyEntry.valueClass);
             keyEntry.boxedValueDescriptor = Type.getDescriptor(keyEntry.valueClass);
             keyEntry.boxedValueFieldSignature = GeneratorHelper.toSignature(elementType);
@@ -222,6 +231,18 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             // No need for the signature, the descriptor is specific enough
             if (keyEntry.valueFieldSignature.equals(keyEntry.valueFieldDescriptor)) {
                 keyEntry.valueFieldSignature = null;
+            }
+            if (keyEntry instanceof BoundedKeyEntry) {
+                final BoundedKeyEntry bounded = (BoundedKeyEntry) keyEntry;
+                // The minimum value field, uses the same signature/descriptor as the value field
+                bounded.minimumFieldName = "minimum_value$" + underscoreId;
+                // The maximum value field, uses the same signature/descriptor as the value field
+                bounded.maximumFieldName = "maximum_value$" + underscoreId;
+                // The comparator field
+                bounded.comparatorFieldName = "value_comparator$" + underscoreId;
+                bounded.comparatorFieldDescriptor = Type.getDescriptor(Comparator.class);
+                bounded.comparatorFieldSignature = String.format("L%s<%s>;",
+                        Type.getInternalName(Comparator.class), bounded.boxedValueFieldSignature);
             }
         }
 
@@ -537,7 +558,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitCode();
             // return 5;
             // Load the content version
-            GeneratorHelper.visitIntInsn(mv, this.contentVersion);
+            GeneratorHelper.visitPushInt(mv, this.contentVersion);
             // And return it
             mv.visitInsn(IRETURN);
             mv.visitMaxs(1, 1);
@@ -602,41 +623,133 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         }
     }
 
-    static void visitImmutableValueCreation0(MethodVisitor mv, KeyEntry keyEntry,
+    private static void visitImmutableValueCreation0(MethodVisitor mv, KeyEntry keyEntry,
             String targetInternalName, String mutableInternalName) throws NoSuchMethodException {
         final Class<?> rawType = keyEntry.key.getValueToken().getRawType();
+        // So many different value types
+        final Constructor<?> constructor;
         final Class<?> valueClass;
-        // The value type that will be created
-        final String valueType;
-        final String constructorDesc;
         if (rawType.isAssignableFrom(PatternListValue.class) ||
                 rawType.isAssignableFrom(ImmutablePatternListValue.class)) {
             valueClass = ImmutableSpongePatternListValue.class;
-            constructorDesc = Type.getConstructorDescriptor(
-                    ImmutableSpongePatternListValue.class.getConstructor(Key.class, List.class, List.class));
+            constructor = ImmutableSpongePatternListValue.class.getConstructor(
+                    Key.class, List.class, List.class);
         } else if (rawType.isAssignableFrom(ListValue.class) ||
                 rawType.isAssignableFrom(ImmutableListValue.class)) {
             valueClass = ImmutableSpongeListValue.class;
-            constructorDesc = Type.getConstructorDescriptor(
-                    ImmutableSpongeListValue.class.getConstructor(Key.class, List.class, List.class));
+            constructor = ImmutableSpongeListValue.class.getConstructor(
+                    Key.class, List.class, List.class);
         } else if (rawType.isAssignableFrom(MapValue.class) ||
                 rawType.isAssignableFrom(ImmutableMapValue.class)) {
             valueClass = ImmutableSpongeMapValue.class;
-            constructorDesc = Type.getConstructorDescriptor(
-                    ImmutableSpongeMapValue.class.getConstructor(Key.class, Map.class, Map.class));
+            constructor = ImmutableSpongeMapValue.class.getConstructor(
+                    Key.class, Map.class, Map.class);
+        } else if (rawType.isAssignableFrom(OptionalValue.class) ||
+                rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
+            valueClass = ImmutableSpongeOptionalValue.class;
+            constructor = ImmutableSpongeMapValue.class.getConstructor(
+                    Key.class, Map.class, Map.class);
         } else if (keyEntry instanceof BoundedKeyEntry) {
-
+            valueClass = ImmutableSpongeBoundedValue.class;
+            constructor = ImmutableSpongeBoundedValue.class.getConstructor(
+                    Key.class, Object.class, Object.class, Comparator.class, Object.class, Object.class);
+        } else {
+            valueClass = ImmutableSpongeValue.class;
+            constructor = ImmutableSpongeValue.class.getConstructor(
+                    Key.class, Object.class, Object.class);
         }
-        mv.visitTypeInsn(NEW, "org/spongepowered/common/data/value/immutable/ImmutableSpongeValue");
+        // TODO: Use cached methods if possible
+        // TODO: WeightedTableValue support
+        visitBaseValueCreation(mv, keyEntry, targetInternalName, mutableInternalName, constructor, valueClass);
+    }
+
+    static void visitValueCreation(MethodVisitor mv, KeyEntry keyEntry,
+            String targetInternalName, String mutableInternalName) {
+        try {
+            visitValueCreation0(mv, keyEntry, targetInternalName, mutableInternalName);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static void visitValueCreation0(MethodVisitor mv, KeyEntry keyEntry,
+            String targetInternalName, String mutableInternalName) throws NoSuchMethodException {
+        final Class<?> rawType = keyEntry.key.getValueToken().getRawType();
+        // So many different value types
+        final Constructor<?> constructor;
+        final Class<?> valueClass;
+        if (rawType.isAssignableFrom(PatternListValue.class) ) {
+            valueClass = SpongePatternListValue.class;
+            constructor = SpongePatternListValue.class.getConstructor(
+                    Key.class, List.class, List.class);
+        } else if (rawType.isAssignableFrom(ImmutablePatternListValue.class)) {
+            valueClass = ImmutableSpongePatternListValue.class;
+            constructor = ImmutableSpongePatternListValue.class.getConstructor(
+                    Key.class, List.class, List.class);
+        } else if (rawType.isAssignableFrom(ListValue.class)) {
+            valueClass = SpongeListValue.class;
+            constructor = SpongeListValue.class.getConstructor(
+                    Key.class, List.class, List.class);
+        } else if (rawType.isAssignableFrom(ImmutableListValue.class)) {
+            valueClass = ImmutableSpongeListValue.class;
+            constructor = ImmutableSpongeListValue.class.getConstructor(
+                    Key.class, List.class, List.class);
+        } else if (rawType.isAssignableFrom(MapValue.class) ||
+                rawType.isAssignableFrom(ImmutableMapValue.class)) {
+            valueClass = SpongeMapValue.class;
+            constructor = SpongeMapValue.class.getConstructor(
+                    Key.class, Map.class, Map.class);
+        } else if (rawType.isAssignableFrom(ImmutableMapValue.class)) {
+            valueClass = ImmutableSpongeMapValue.class;
+            constructor = ImmutableSpongeMapValue.class.getConstructor(
+                    Key.class, Map.class, Map.class);
+        } else if (rawType.isAssignableFrom(OptionalValue.class) ||
+                rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
+            valueClass = ImmutableSpongeOptionalValue.class;
+            constructor = ImmutableSpongeMapValue.class.getConstructor(
+                    Key.class, Map.class, Map.class);
+        } else if (keyEntry instanceof BoundedKeyEntry) {
+            valueClass = ImmutableSpongeBoundedValue.class;
+            constructor = ImmutableSpongeBoundedValue.class.getConstructor(
+                    Key.class, Object.class, Object.class, Comparator.class, Object.class, Object.class);
+        } else {
+            valueClass = ImmutableSpongeValue.class;
+            constructor = ImmutableSpongeValue.class.getConstructor(
+                    Key.class, Object.class, Object.class);
+        }
+        // TODO: WeightedTableValue support
+        visitBaseValueCreation(mv, keyEntry, targetInternalName, mutableInternalName, constructor, valueClass);
+    }
+
+    private static void visitBaseValueCreation(MethodVisitor mv, KeyEntry keyEntry,
+            String targetInternalName, String mutableInternalName, Constructor<?> constructor, Class<?> valueClass) {
+        // The value type that will be created
+        final String valueType = Type.getInternalName(valueClass);
+        final String constructorDesc = Type.getConstructorDescriptor(constructor);
+        mv.visitTypeInsn(NEW, valueType);
         mv.visitInsn(DUP);
-        mv.visitFieldInsn(GETSTATIC, "org/spongepowered/common/data/generator/test/TestDataImpl", "key$my_string",
-                "Lorg/spongepowered/api/data/key/Key;");
-        mv.visitFieldInsn(GETSTATIC, "org/spongepowered/common/data/generator/test/TestDataImpl", "default_value$my_string",
-                "Ljava/lang/String;");
+        mv.visitFieldInsn(GETSTATIC, mutableInternalName, keyEntry.keyFieldName, keyEntry.keyFieldDescriptor);
+        mv.visitFieldInsn(GETSTATIC, mutableInternalName, keyEntry.defaultValueFieldName, keyEntry.valueFieldDescriptor);
+        // Load "this"
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, "org/spongepowered/common/data/generator/test/TestDataImpl", "value$my_string", "Ljava/lang/String;");
-        mv.visitMethodInsn(INVOKESPECIAL, "org/spongepowered/common/data/value/immutable/ImmutableSpongeValue", "<init>",
-                "(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;Ljava/lang/Object;)V", false);
+        // Get the value from "this"
+        mv.visitFieldInsn(GETFIELD, targetInternalName, keyEntry.valueFieldName, keyEntry.valueFieldDescriptor);
+        // Box the value, if it's a primitive
+        GeneratorUtils.visitBoxingMethod(mv, keyEntry.valueType);
+        if (keyEntry instanceof BoundedKeyEntry) {
+            // TODO: Inline min/max constants? For ints, doubles, etc...
+            final BoundedKeyEntry bounded = (BoundedKeyEntry) keyEntry;
+            mv.visitFieldInsn(GETSTATIC, mutableInternalName, bounded.comparatorFieldName, bounded.comparatorFieldDescriptor);
+            // Load the minimum value
+            mv.visitFieldInsn(GETSTATIC, mutableInternalName, bounded.minimumFieldName, bounded.valueFieldDescriptor);
+            // Box the minimum value, if it's a primitive
+            GeneratorUtils.visitBoxingMethod(mv, keyEntry.valueType);
+            // Load the maximum value
+            mv.visitFieldInsn(GETSTATIC, mutableInternalName, bounded.maximumFieldName, bounded.valueFieldDescriptor);
+            // Box the maximum value, if it's a primitive
+            GeneratorUtils.visitBoxingMethod(mv, keyEntry.valueType);
+        }
+        mv.visitMethodInsn(INVOKESPECIAL, valueType, "<init>", constructorDesc, false);
     }
 
     static void visitFields(ClassVisitor cv, List<KeyEntry> keyEntries, boolean applyStaticFields) {
@@ -659,6 +772,21 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, entry.defaultValueFieldName,
                         entry.valueFieldDescriptor, entry.valueFieldSignature, null);
                 fv.visitEnd();
+                if (entry instanceof BoundedKeyEntry) {
+                    final BoundedKeyEntry bounded = (BoundedKeyEntry) entry;
+                    // Visit the comparator field
+                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.comparatorFieldName,
+                            bounded.comparatorFieldDescriptor, bounded.comparatorFieldSignature, null);
+                    fv.visitEnd();
+                    // Visit the minimum value field
+                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.minimumFieldName,
+                            bounded.valueFieldDescriptor, bounded.valueFieldSignature, null);
+                    fv.visitEnd();
+                    // Visit the maximum value field
+                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.maximumFieldName,
+                            bounded.valueFieldDescriptor, bounded.valueFieldSignature, null);
+                    fv.visitEnd();
+                }
             }
             // Visit the value field, not private, so we still have field access between the mutable and immutable classes
             fv = cv.visitField(ACC_PUBLIC, entry.defaultValueFieldName,
@@ -695,12 +823,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                             methodEntries.add(new UnboxedOptionalGetterMethodEntry(method, keyEntry));
                             continue;
                         }
-                    }
-                    // Check for primitives
-                    if (keyEntry.valueClass != keyEntry.boxedValueClass &&
-                            keyEntry.boxedValueClass.equals(returnType)) {
-                        methodEntries.add(new BoxedPrimitiveGetterMethodEntry(method, keyEntry));
-                        continue;
                     }
                     // Must be compatible at this point, no more special cases
                     checkState(compatible, "The key type %s is not assignable to the return type %s in the method %s",

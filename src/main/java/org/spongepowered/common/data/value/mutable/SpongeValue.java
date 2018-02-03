@@ -38,15 +38,17 @@ import javax.annotation.Nullable;
 
 public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
 
-    public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue) {
-        this(key, defaultValue, defaultValue);
+    public SpongeValue(Key<? extends BaseValue<E>> key, E actualValue) {
+        this(key, actualValue, actualValue);
     }
 
     public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
-        super(key, InternalCopies.mutableCopy(defaultValue), InternalCopies.mutableCopy(actualValue));
+        this(key, InternalCopies.mutableCopy(defaultValue), InternalCopies.mutableCopy(actualValue), null);
     }
 
-    // A constructor to avoid unnecessary copies
+    /**
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
     protected SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, @Nullable Void nothing) {
         super(key, defaultValue, actualValue);
     }
@@ -61,6 +63,12 @@ public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
     public Value<E> transform(Function<E, E> function) {
         this.actualValue = function.apply(this.actualValue);
         return this;
+    }
+
+    @Override
+    public E getDefault() {
+        // Prevent people from modifying possible mutable default values, like ItemStacks
+        return InternalCopies.mutableCopy(this.defaultValue);
     }
 
     @Override

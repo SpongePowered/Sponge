@@ -46,6 +46,14 @@ import javax.annotation.Nullable;
 public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<E, List<E>, ImmutableListValue<E>, ListValue<E>>
         implements ImmutableListValue<E> {
 
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static <E> ImmutableSpongeListValue<E> constructUnsafe(
+            Key<? extends BaseValue<List<E>>> key, List<E> defaultValue, List<E> actualValue) {
+        return new ImmutableSpongeListValue<>(key, defaultValue, actualValue, null);
+    }
+
     public ImmutableSpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> actualValue) {
         super(key, actualValue);
     }
@@ -54,22 +62,24 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
         super(key, defaultValue, actualValue);
     }
 
-    // A constructor to avoid unnecessary copies
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
     protected ImmutableSpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> defaultValue, List<E> actualValue, @Nullable Void nothing) {
         super(key, defaultValue, actualValue, nothing);
     }
 
     @Override
     public ImmutableListValue<E> with(List<E> value) {
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue,
-                InternalCopies.immutableCopy(checkNotNull(value)), null);
+        return constructUnsafe(getKey(), this.defaultValue,
+                InternalCopies.immutableCopy(checkNotNull(value)));
     }
 
     @Override
     public ImmutableListValue<E> transform(Function<List<E>, List<E>> function) {
         final List<E> value = checkNotNull(checkNotNull(function).apply(this.actualValue));
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue,
-                InternalCopies.immutableCopy(value), null);
+        return constructUnsafe(getKey(), this.defaultValue,
+                InternalCopies.immutableCopy(value));
     }
 
     @Override
@@ -79,28 +89,28 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
 
     @Override
     public ImmutableListValue<E> withElement(E elements) {
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue,
-                ImmutableList.<E>builder().addAll(this.actualValue).add(elements).build(), null);
+        return constructUnsafe(getKey(), this.defaultValue,
+                ImmutableList.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public ImmutableListValue<E> withAll(Iterable<E> elements) {
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue,
-                ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build(), null);
+        return constructUnsafe(getKey(), this.defaultValue,
+                ImmutableList.<E>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
     public ImmutableListValue<E> without(E element) {
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
     public ImmutableListValue<E> withoutAll(Iterable<E> elements) {
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
@@ -108,7 +118,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
         checkNotNull(predicate, "predicate");
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         this.actualValue.stream().filter(predicate).forEach(builder::add);
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
@@ -132,7 +142,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
@@ -144,7 +154,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
             }
             builder.add(iterator.next());
         }
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
@@ -155,7 +165,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override
@@ -169,7 +179,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, builder.build(), null);
+        return constructUnsafe(getKey(), this.defaultValue, builder.build());
     }
 
     @Override

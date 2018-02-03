@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -52,6 +54,7 @@ public final class InternalCopies {
      */
     // DO NOT MODIFY THE SIGNATURE
     public static <E> E mutableCopy(E object) {
+        checkNotNull(object, "object");
         if (object instanceof List) {
             return (E) new ArrayList<>((List) object);
         } else if (object instanceof Map) {
@@ -74,6 +77,7 @@ public final class InternalCopies {
      */
     // DO NOT MODIFY THE SIGNATURE
     public static <E> E immutableCopy(E object) {
+        checkNotNull(object, "object");
         if (object instanceof List) {
             return (E) ImmutableList.copyOf((List) object);
         } else if (object instanceof Map) {
