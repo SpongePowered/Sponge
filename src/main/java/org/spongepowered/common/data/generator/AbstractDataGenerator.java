@@ -37,8 +37,6 @@ import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.F_APPEND;
-import static org.objectweb.asm.Opcodes.F_SAME;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.IFEQ;
@@ -58,7 +56,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.primitives.Primitives;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -88,9 +85,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.generator.GeneratorUtils;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.InternalCopies;
-import org.spongepowered.common.data.generator.method.MethodEntry;
-import org.spongepowered.common.data.generator.method.getter.GetterMethodEntry;
-import org.spongepowered.common.data.generator.method.getter.UnboxedOptionalGetterMethodEntry;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
@@ -184,6 +178,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         return (G) this;
     }
 
+    private static final GeneratorUtils.LocalClassLoader classLoader =
+            new GeneratorUtils.LocalClassLoader(AbstractDataGenerator.class.getClassLoader());
     private static final TypeVariable<Class<Optional>> optionalVariable = Optional.class.getTypeParameters()[0];
     private static final String keysFieldName = "keys";
 
@@ -276,26 +272,50 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         final String immutableInternalName = immutableClassName.replace('.', '/');
 
         // Generate the classes
-        final ClassWriter cv = new ClassWriter(0);
+        final byte[] mutableClassBytes = generateClass(mutableInternalName, immutableInternalName, mutableMethodEntries, true);
+        final Class<?> mutableClass = classLoader.defineClass(mutableClassName, mutableClassBytes);
+        final byte[] immutableClassBytes = generateClass(mutableInternalName, immutableInternalName, immutableMethodEntries, false);
+        final Class<?> immutableClass = classLoader.defineClass(immutableClassName, immutableClassBytes);
+
+        return null;
+    }
+
+    private byte[] generateClass(String mutableInternalName, String immutableInternalName,
+            Set<MethodEntry> methodEntries, boolean generateMutable) {
+        // Generate the classes
+        final ClassWriter cv = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
         final String interf;
-        String interfSignature;
+        final String interfSignature;
+        final String targetInternalName = generateMutable ? mutableInternalName : immutableInternalName;
 
-        // Check if interfaces were provided, isn't required
-        if (this.mutableInterface != null) {
-            checkState(this.immutableInterface != null); // Should never happen
+        checkState((this.mutableInterface == null) == (this.immutableInterface == null)); // Should never happen
 
-            interfSignature = null; // No signature is needed, the interface should have defined all the generics
-            interf = Type.getInternalName(this.mutableInterface);
+        if (generateMutable) {
+            if (this.mutableInterface != null) {
+                interfSignature = null; // No signature is needed, the interface should have defined all the generics
+                interf = Type.getInternalName(this.mutableInterface);
+            } else {
+                // TODO: Add ListData, MappedData and VariantData support
+
+                interfSignature = String.format("Lorg/spongepowered/api/data/manipulator/DataManipulator<L%s;L%s;>;",
+                        mutableInternalName, immutableInternalName);
+                interf = "org/spongepowered/api/data/manipulator/DataManipulator";
+            }
         } else {
-            // TODO: Add ListData, MappedData and VariantData support
+            if (this.immutableInterface != null) {
+                interfSignature = null; // No signature is needed, the interface should have defined all the generics
+                interf = Type.getInternalName(this.immutableInterface);
+            } else {
+                // TODO: Add ImmutableListData, ImmutableMappedData and ImmutableVariantData support
 
-            interfSignature = String.format("Lorg/spongepowered/api/data/manipulator/DataManipulator<L%s;L%s;>;",
-                    mutableInternalName, immutableInternalName);
-            interf = "org/spongepowered/api/data/manipulator/DataManipulator";
+                interfSignature = String.format("Lorg/spongepowered/api/data/manipulator/ImmutableDataManipulator<L%s;L%s;>;",
+                        immutableInternalName, mutableInternalName);
+                interf = "org/spongepowered/api/data/manipulator/ImmutableDataManipulator";
+            }
         }
 
-        cv.visit(V1_8, ACC_PUBLIC | ACC_SUPER, mutableInternalName, interfSignature,
+        cv.visit(V1_8, ACC_PUBLIC | ACC_SUPER, targetInternalName, interfSignature,
                 "java/lang/Object", new String[] { interf });
 
         // Define the inner immutable class
@@ -306,8 +326,48 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 "com/google/common/collect/ImmutableSet", "Builder", ACC_PUBLIC | ACC_STATIC);
 
         // Generate the fields
-        visitFields(cv, this.keyEntries, false);
+        FieldVisitor fv;
+        if (generateMutable) {
+            fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, keysFieldName, "Lcom/google/common/collect/ImmutableSet;",
+                    "Lcom/google/common/collect/ImmutableSet<Lorg/spongepowered/api/data/key/Key<*>;>;", null);
+            fv.visitEnd();
+        }
+        for (KeyEntry entry : keyEntries) {
+            // Check if the mutable class is being generated, this is the
+            // only class that will hold the static fields, the immutable
+            // version will be a inner class.
+            if (generateMutable) {
+                // Visit the key field
+                fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, entry.keyFieldName,
+                        "Lorg/spongepowered/api/data/key/Key;", entry.keyFieldSignature, null);
+                fv.visitEnd();
+                // Visit the default value field
+                fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, entry.defaultValueFieldName,
+                        entry.valueFieldDescriptor, entry.valueFieldSignature, null);
+                fv.visitEnd();
+                if (entry instanceof BoundedKeyEntry) {
+                    final BoundedKeyEntry bounded = (BoundedKeyEntry) entry;
+                    // Visit the comparator field
+                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.comparatorFieldName,
+                            bounded.comparatorFieldDescriptor, bounded.comparatorFieldSignature, null);
+                    fv.visitEnd();
+                    // Visit the minimum value field
+                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.minimumFieldName,
+                            bounded.valueFieldDescriptor, bounded.valueFieldSignature, null);
+                    fv.visitEnd();
+                    // Visit the maximum value field
+                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.maximumFieldName,
+                            bounded.valueFieldDescriptor, bounded.valueFieldSignature, null);
+                    fv.visitEnd();
+                }
+            }
+            // Visit the value field, not private, so we still have field access between the mutable and immutable classes
+            fv = cv.visitField(ACC_PUBLIC, entry.defaultValueFieldName,
+                    entry.valueFieldDescriptor, entry.valueFieldSignature, null);
+            fv.visitEnd();
+        }
 
+        // Generate the methods
         MethodVisitor mv;
         {
             // Generate the <init> method (constructor)
@@ -322,112 +382,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 // The static fields are inside the mutable class
                 mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.defaultValueFieldName, entry.valueFieldDescriptor);
                 // Put the value in the object
-                mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitFieldInsn(PUTFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
             }
             mv.visitInsn(RETURN);
-            mv.visitMaxs(2, 1);
-            mv.visitEnd();
-        }
-        {
-            // Generate the fill method
-            mv = cv.visitMethod(ACC_PUBLIC, "fill",
-                    "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)Ljava/util/Optional;",
-                    "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)Ljava/util/Optional<" + interfSignature
-                            + ">;",
-                    null);
-            mv.visitCode();
-            // final Optional<TestData> optData = dataHolder.get(TestData.class);
-            mv.visitVarInsn(ALOAD, 1);
-            mv.visitLdcInsn(interf);
-            mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/DataHolder", "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
-            mv.visitVarInsn(ASTORE, 3);
-            // Start of: if (optData.isPresent()) {}
-            mv.visitVarInsn(ALOAD, 3);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
-            Label jumpLabel = new Label();
-            mv.visitJumpInsn(IFEQ, jumpLabel);
-            // TestDataImpl data = (TestDataImpl) overlap.merge(this, optData.get());
-            mv.visitVarInsn(ALOAD, 2);
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitVarInsn(ALOAD, 3);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
-            mv.visitTypeInsn(CHECKCAST, "org/spongepowered/api/data/value/ValueContainer");
-            mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/merge/MergeFunction", "merge",
-                    "(Lorg/spongepowered/api/data/value/ValueContainer;Lorg/spongepowered/api/data/value/ValueContainer;)Lorg/spongepowered/api/data/value/ValueContainer;",
-                    true);
-            mv.visitTypeInsn(CHECKCAST, mutableInternalName);
-            mv.visitVarInsn(ASTORE, 4);
-            // Transfer the contents from the retrieved container to this container
-            for (KeyEntry entry : this.keyEntries) {
-                // Load this
-                mv.visitVarInsn(ALOAD, 0);
-                // Load the 4th local variable, "data"
-                mv.visitVarInsn(ALOAD, 4);
-                // Retrieve from the other container
-                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                // Put into this container
-                mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-            }
-            // End of: if (optData.isPresent()) {}
-            mv.visitLabel(jumpLabel);
-            mv.visitFrame(F_APPEND, 1, new Object[]{"java/util/Optional"}, 0, null);
-            // return Optional.of(this);
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "of", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
-            mv.visitInsn(ARETURN);
-            // The end
-            mv.visitMaxs(3, 5);
-            mv.visitEnd();
-        }
-        {
-            // public <E> TestDataImpl set(Key<? extends BaseValue<E>> key, E value) {}
-            mv = cv.visitMethod(ACC_PUBLIC, "set",
-                    String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", interf),
-                    String.format("<E:Ljava/lang/Object;>(Lorg/spongepowered/api/data/key/Key<+Lorg/spongepowered/api/data/value/BaseValue<TE;>;>;"
-                                    + "TE;)%s", interfSignature), null);
-            mv.visitCode();
-            // checkNotNull(key, "key");
-            mv.visitVarInsn(ALOAD, 1);
-            mv.visitLdcInsn("key");
-            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
-                    "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
-            mv.visitInsn(POP);
-            // checkNotNull(value, "value");
-            mv.visitVarInsn(ALOAD, 2);
-            mv.visitLdcInsn("value");
-            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
-                    "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
-            mv.visitInsn(POP);
-            for (KeyEntry entry : this.keyEntries) {
-                // Start of: if ((Key) key == key$my_string) {}
-                mv.visitVarInsn(ALOAD, 1);
-                mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
-                final Label jumpLabel = new Label();
-                mv.visitJumpInsn(IF_ACMPNE, jumpLabel);
-                // this.value$my_string = (String) InternalCopies.mutableCopy(value);
-                // this.value$my_int = (Integer) value; // No internal copy for primitives
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitVarInsn(ALOAD, 2);
-                // Primitives need to be unboxed and other objects may need to be cloned
-                if (entry.boxedValueClass != entry.valueClass) { // Primitive
-                    GeneratorUtils.visitUnboxingMethod(mv, Type.getType(entry.valueClass));
-                } else {
-                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class), "mutableCopy",
-                            "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-                    mv.visitTypeInsn(CHECKCAST, entry.valueTypeName);
-                }
-                mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                // return this;
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitInsn(ARETURN);
-                // End of: if ((Key) key == key$my_string) {}
-                mv.visitLabel(jumpLabel);
-                mv.visitFrame(F_SAME, 0, null, 0, null);
-            }
-            // return this;
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitInsn(ARETURN);
-            mv.visitMaxs(2, 3);
             mv.visitEnd();
         }
         {
@@ -445,20 +402,20 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             for (KeyEntry entry : this.keyEntries) {
                 // Start of: if ((Key) key == key$my_string) {}
                 mv.visitVarInsn(ALOAD, 1);
-                mv.visitFieldInsn(GETSTATIC, mutableClassName, entry.keyFieldName, entry.keyFieldDescriptor);
+                mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
                 final Label jumpLabel = new Label();
                 mv.visitJumpInsn(IF_ACMPNE, jumpLabel);
                 // return Optional.of((E) InternalCopies.mutableCopy(this.value$my_string));
                 // Load this
                 mv.visitVarInsn(ALOAD, 0);
                 // Load the field from this
-                mv.visitFieldInsn(GETFIELD, mutableClassName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
                 // Primitives need to be boxed and other objects may need to be cloned
                 if (entry.boxedValueClass != entry.valueClass) { // Primitive
                     GeneratorUtils.visitBoxingMethod(mv, Type.getType(entry.valueClass));
                 } else {
-                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class), "mutableCopy",
-                            "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
+                            generateMutable ? "mutableCopy" : "immutableCopy", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
                 }
                 // Put the object into a Optional
                 mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "of", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
@@ -466,13 +423,11 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitInsn(ARETURN);
                 // End of: if ((Key) key == key$my_string) {}
                 mv.visitLabel(jumpLabel);
-                mv.visitFrame(F_SAME, 0, null, 0, null);
             }
             // return Optional.empty();
             mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "empty", "()Ljava/util/Optional;", false);
             mv.visitInsn(ARETURN);
             // End
-            mv.visitMaxs(2, 2);
             mv.visitEnd();
         }
         {
@@ -487,13 +442,12 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
             mv.visitInsn(POP);
             // return keys.contains(key);
-            mv.visitFieldInsn(GETSTATIC, mutableInternalName, "keys",
+            mv.visitFieldInsn(GETSTATIC, mutableInternalName, keysFieldName,
                     "Lcom/google/common/collect/ImmutableSet;");
             mv.visitVarInsn(ALOAD, 1);
             mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/collect/ImmutableSet", "contains", "(Ljava/lang/Object;)Z", false);
             mv.visitInsn(IRETURN);
             // End
-            mv.visitMaxs(2, 2);
             mv.visitEnd();
         }
         {
@@ -501,65 +455,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv = cv.visitMethod(ACC_PUBLIC, "getKeys", "()Ljava/util/Set;", "()Ljava/util/Set<Lorg/spongepowered/api/data/key/Key<*>;>;", null);
             mv.visitCode();
             // return keys;
-            mv.visitFieldInsn(GETSTATIC, "org/spongepowered/common/data/generator/test/TestDataImpl", "keys",
-                    "Lcom/google/common/collect/ImmutableSet;");
+            mv.visitFieldInsn(GETSTATIC, mutableInternalName, keysFieldName, "Lcom/google/common/collect/ImmutableSet;");
             mv.visitInsn(ARETURN);
             // End
-            mv.visitMaxs(1, 1);
-            mv.visitEnd();
-        }
-        {
-            // public TestData copy() {}
-            mv = cv.visitMethod(ACC_PUBLIC, "copy", "()Lorg/spongepowered/common/data/generator/test/TestData;", null, null);
-            mv.visitCode();
-            // TestDataImpl copy = new TestDataImpl();
-            mv.visitTypeInsn(NEW, mutableInternalName);
-            mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, mutableInternalName, "<init>", "()V", false);
-            mv.visitVarInsn(ASTORE, 1);
-            // copy.value$my_int = this.value$my_int;
-            for (KeyEntry entry : this.keyEntries) {
-                // Load "copy"
-                mv.visitVarInsn(ALOAD, 1);
-                // Load this
-                mv.visitVarInsn(ALOAD, 0);
-                // Get the value from this
-                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                // Put the value into "copy"
-                mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-            }
-            // return copy;
-            mv.visitVarInsn(ALOAD, 1);
-            mv.visitInsn(ARETURN);
-            // End
-            mv.visitMaxs(2, 2);
-            mv.visitEnd();
-        }
-        {
-            // public Immutable asImmutable() {}
-            mv = cv.visitMethod(ACC_PUBLIC, "asImmutable", String.format("()L%s;", immutableInternalName), null, null);
-            mv.visitCode();
-            // Immutable immutable = new Immutable();
-            mv.visitTypeInsn(NEW, immutableInternalName);
-            mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, immutableInternalName, "<init>", "()V", false);
-            mv.visitVarInsn(ASTORE, 1);
-            // immutable.value$my_string = this.value$my_string;
-            for (KeyEntry entry : this.keyEntries) {
-                // Load "immutable"
-                mv.visitVarInsn(ALOAD, 1);
-                // Load this
-                mv.visitVarInsn(ALOAD, 0);
-                // Get the value from this
-                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                // Put the value into "immutable"
-                mv.visitFieldInsn(PUTFIELD, immutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-            }
-            // return immutable;
-            mv.visitVarInsn(ALOAD, 1);
-            mv.visitInsn(ARETURN);
-            // End
-            mv.visitMaxs(2, 2);
             mv.visitEnd();
         }
         {
@@ -571,57 +469,315 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             GeneratorHelper.visitPushInt(mv, this.contentVersion);
             // And return it
             mv.visitInsn(IRETURN);
-            mv.visitMaxs(1, 1);
-            mv.visitEnd();
-        }
-        // TODO: Generate more synthetic bridges if methods get overridden?
-        {
-            mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "asImmutable",
-                    "()Lorg/spongepowered/api/data/manipulator/ImmutableDataManipulator;", null, null);
-            mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "asImmutable",
-                    String.format("()L%s;", immutableInternalName), false);
-            mv.visitInsn(ARETURN);
-            mv.visitMaxs(1, 1);
             mv.visitEnd();
         }
         {
-            mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy",
-                    "()Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
+            // public Set<ImmutableValue<?>> getValues() {}
+            mv = cv.visitMethod(ACC_PUBLIC, "getValues", "()Ljava/util/Set;",
+                    "()Ljava/util/Set<Lorg/spongepowered/api/data/value/immutable/ImmutableValue<*>;>;", null);
             mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
-                    String.format("()L%s;", mutableInternalName), false);
-            mv.visitInsn(ARETURN);
-            mv.visitMaxs(1, 1);
-            mv.visitEnd();
-        }
-        {
-            mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "set",
-                    "(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
-            mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
+            // ImmutableSet.Builder<ImmutableValue<?>> values = ImmutableSet.builder();
+            // Create a ImmutableSet builder
+            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/collect/ImmutableSet", "builder",
+                    "()Lcom/google/common/collect/ImmutableSet$Builder;", false);
+            // Store it into "values"
+            mv.visitVarInsn(ASTORE, 1);
+            for (KeyEntry keyEntry : this.keyEntries) {
+                // values.add(new ImmutableSpongeValue<>(key$my_string, default_value$my_string, this.value$my_string));
+                // Load "values"
+                mv.visitVarInsn(ALOAD, 1);
+                // Create the value
+                visitImmutableValueCreation(mv, keyEntry, targetInternalName, mutableInternalName);
+                // Put it inside the set builder
+                mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/collect/ImmutableSet$Builder", "add",
+                        "(Ljava/lang/Object;)Lcom/google/common/collect/ImmutableSet$Builder;", false);
+                mv.visitInsn(POP);
+            }
+            // return values.build();
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitVarInsn(ALOAD, 2);
-            mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "set",
-                    String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", mutableInternalName), false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/collect/ImmutableSet$Builder",
+                    "build", "()Lcom/google/common/collect/ImmutableSet;", false);
             mv.visitInsn(ARETURN);
-            mv.visitMaxs(3, 3);
             mv.visitEnd();
         }
         {
-            mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy", "()Lorg/spongepowered/api/data/value/ValueContainer;", null, null);
+            // public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {}
+            mv = cv.visitMethod(ACC_PUBLIC, "getValue", "(Lorg/spongepowered/api/data/key/Key;)Ljava/util/Optional;",
+                    "<E:Ljava/lang/Object;V::Lorg/spongepowered/api/data/value/BaseValue<TE;>;>(Lorg/spongepowered/api/data/key/Key<TV;>;)Ljava/util/Optional<TV;>;",
+                    null);
             mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
-                    String.format("()L%s;", mutableInternalName), false);
+            // checkNotNull(key, "key");
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitLdcInsn("key");
+            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                    "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+            mv.visitInsn(POP);
+            for (KeyEntry entry : this.keyEntries) {
+                // Start of: if (key == key$my_string) {
+                // Load "key"
+                mv.visitVarInsn(ALOAD, 1);
+                // Load the key field value
+                mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
+                final Label jumpLabel = new Label();
+                mv.visitJumpInsn(IF_ACMPNE, jumpLabel);
+                // Create the mutable value
+                if (generateMutable) {
+                    visitValueCreation(mv, entry, targetInternalName, mutableInternalName);
+                } else {
+                    visitImmutableValueCreation(mv, entry, targetInternalName, mutableInternalName);
+                }
+                // Put it in a Optional
+                mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "of", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
+                // Return it
+                mv.visitInsn(ARETURN);
+                // End of: if (key == key$my_string) {
+                mv.visitLabel(jumpLabel);
+            }
+            // return Optional.empty();
+            mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "empty", "()Ljava/util/Optional;", false);
             mv.visitInsn(ARETURN);
-            mv.visitMaxs(1, 1);
+            // The End
             mv.visitEnd();
         }
-
-        return null;
+        if (generateMutable) {
+            {
+                // Generate the fill method
+                mv = cv.visitMethod(ACC_PUBLIC, "fill",
+                        "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)Ljava/util/Optional;",
+                        "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)Ljava/util/Optional<" + interfSignature
+                                + ">;",
+                        null);
+                mv.visitCode();
+                // final Optional<TestData> optData = dataHolder.get(TestData.class);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitLdcInsn(interf);
+                mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/DataHolder", "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
+                mv.visitVarInsn(ASTORE, 3);
+                // Start of: if (optData.isPresent()) {}
+                mv.visitVarInsn(ALOAD, 3);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
+                Label jumpLabel = new Label();
+                mv.visitJumpInsn(IFEQ, jumpLabel);
+                // TestDataImpl data = (TestDataImpl) overlap.merge(this, optData.get());
+                mv.visitVarInsn(ALOAD, 2);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 3);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
+                mv.visitTypeInsn(CHECKCAST, "org/spongepowered/api/data/value/ValueContainer");
+                mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/merge/MergeFunction", "merge",
+                        "(Lorg/spongepowered/api/data/value/ValueContainer;Lorg/spongepowered/api/data/value/ValueContainer;)Lorg/spongepowered/api/data/value/ValueContainer;",
+                        true);
+                mv.visitTypeInsn(CHECKCAST, mutableInternalName);
+                mv.visitVarInsn(ASTORE, 4);
+                // Transfer the contents from the retrieved container to this container
+                for (KeyEntry entry : this.keyEntries) {
+                    // Load this
+                    mv.visitVarInsn(ALOAD, 0);
+                    // Load the 4th local variable, "data"
+                    mv.visitVarInsn(ALOAD, 4);
+                    // Retrieve from the other container
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    // Put into this container
+                    mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                }
+                // End of: if (optData.isPresent()) {}
+                mv.visitLabel(jumpLabel);
+                // return Optional.of(this);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "of", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
+                mv.visitInsn(ARETURN);
+                // The end
+                mv.visitEnd();
+            }
+            {
+                // public <E> TestDataImpl set(Key<? extends BaseValue<E>> key, E value) {}
+                mv = cv.visitMethod(ACC_PUBLIC, "set",
+                        String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", interf),
+                        String.format("<E:Ljava/lang/Object;>(Lorg/spongepowered/api/data/key/Key<+Lorg/spongepowered/api/data/value/BaseValue<TE;>;>;"
+                                + "TE;)%s", interfSignature), null);
+                mv.visitCode();
+                // checkNotNull(key, "key");
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitLdcInsn("key");
+                mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                mv.visitInsn(POP);
+                // checkNotNull(value, "value");
+                mv.visitVarInsn(ALOAD, 2);
+                mv.visitLdcInsn("value");
+                mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                mv.visitInsn(POP);
+                for (KeyEntry entry : this.keyEntries) {
+                    // Start of: if ((Key) key == key$my_string) {}
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
+                    final Label jumpLabel = new Label();
+                    mv.visitJumpInsn(IF_ACMPNE, jumpLabel);
+                    // this.value$my_string = (String) InternalCopies.mutableCopy(value);
+                    // this.value$my_int = (Integer) value; // No internal copy for primitives
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 2);
+                    // Primitives need to be unboxed and other objects may need to be cloned
+                    if (entry.boxedValueClass != entry.valueClass) { // Primitive
+                        GeneratorUtils.visitUnboxingMethod(mv, Type.getType(entry.valueClass));
+                    } else {
+                        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class), "mutableCopy",
+                                "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                        mv.visitTypeInsn(CHECKCAST, entry.valueTypeName);
+                    }
+                    mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    // return this;
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    // End of: if ((Key) key == key$my_string) {}
+                    mv.visitLabel(jumpLabel);
+                }
+                // return this;
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitInsn(ARETURN);
+                mv.visitEnd();
+            }
+            {
+                // public TestData copy() {}
+                mv = cv.visitMethod(ACC_PUBLIC, "copy", String.format("()L%s;", mutableInternalName), null, null);
+                mv.visitCode();
+                // TestDataImpl copy = new TestDataImpl();
+                mv.visitTypeInsn(NEW, mutableInternalName);
+                mv.visitInsn(DUP);
+                mv.visitMethodInsn(INVOKESPECIAL, mutableInternalName, "<init>", "()V", false);
+                mv.visitVarInsn(ASTORE, 1);
+                // copy.value$my_int = this.value$my_int;
+                for (KeyEntry entry : this.keyEntries) {
+                    // Load "copy"
+                    mv.visitVarInsn(ALOAD, 1);
+                    // Load this
+                    mv.visitVarInsn(ALOAD, 0);
+                    // Get the value from this
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    // Put the value into "copy"
+                    mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                }
+                // return copy;
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitInsn(ARETURN);
+                // End
+                mv.visitEnd();
+            }
+            {
+                // public Immutable asImmutable() {}
+                mv = cv.visitMethod(ACC_PUBLIC, "asImmutable", String.format("()L%s;", immutableInternalName), null, null);
+                mv.visitCode();
+                // Immutable immutable = new Immutable();
+                mv.visitTypeInsn(NEW, immutableInternalName);
+                mv.visitInsn(DUP);
+                mv.visitMethodInsn(INVOKESPECIAL, immutableInternalName, "<init>", "()V", false);
+                mv.visitVarInsn(ASTORE, 1);
+                // immutable.value$my_string = this.value$my_string;
+                for (KeyEntry entry : this.keyEntries) {
+                    // Load "immutable"
+                    mv.visitVarInsn(ALOAD, 1);
+                    // Load this
+                    mv.visitVarInsn(ALOAD, 0);
+                    // Get the value from this
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    // Put the value into "immutable"
+                    mv.visitFieldInsn(PUTFIELD, immutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                }
+                // return immutable;
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitInsn(ARETURN);
+                // End
+                mv.visitEnd();
+            }
+            // TODO: Generate more synthetic bridges if methods get overridden?
+            {
+                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "asImmutable",
+                        "()Lorg/spongepowered/api/data/manipulator/ImmutableDataManipulator;", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "asImmutable",
+                        String.format("()L%s;", immutableInternalName), false);
+                mv.visitInsn(ARETURN);
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy",
+                        "()Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
+                        String.format("()L%s;", mutableInternalName), false);
+                mv.visitInsn(ARETURN);
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "set",
+                        "(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitVarInsn(ALOAD, 2);
+                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "set",
+                        String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", mutableInternalName), false);
+                mv.visitInsn(ARETURN);
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy",
+                        "()Lorg/spongepowered/api/data/value/ValueContainer;", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
+                        String.format("()L%s;", mutableInternalName), false);
+                mv.visitInsn(ARETURN);
+                mv.visitEnd();
+            }
+        } else {
+            {
+                // public TestDataImpl asMutable() {}
+                mv = cv.visitMethod(ACC_PUBLIC, "asMutable", String.format("()L%s;", mutableInternalName), null, null);
+                mv.visitCode();
+                // TestDataImpl mutable = new TestDataImpl();
+                mv.visitTypeInsn(NEW, mutableInternalName);
+                mv.visitInsn(DUP);
+                mv.visitMethodInsn(INVOKESPECIAL, mutableInternalName, "<init>", "()V", false);
+                mv.visitVarInsn(ASTORE, 1);
+                // mutable.value$my_string = this.value$my_string;
+                for (KeyEntry entry : this.keyEntries) {
+                    // Load "mutable"
+                    mv.visitVarInsn(ALOAD, 1);
+                    // Load this
+                    mv.visitVarInsn(ALOAD, 0);
+                    // Get the value from this
+                    mv.visitFieldInsn(GETFIELD, immutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    // Put the value into "immutable"
+                    mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                }
+                // return mutable;
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitInsn(ARETURN);
+                // End
+                mv.visitEnd();
+            }
+            // TODO: Generate more synthetic bridges if methods get overridden?
+            {
+                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "asMutable",
+                        "()Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKEVIRTUAL, immutableInternalName, "asMutable",
+                        String.format("()L%s;", mutableInternalName), false);
+                mv.visitInsn(ARETURN);
+                mv.visitEnd();
+            }
+        }
+        // Apply the custom interface methods
+        for (MethodEntry methodEntry : methodEntries) {
+            methodEntry.visit(cv, targetInternalName, mutableInternalName);
+        }
+        cv.visitEnd();
+        return cv.toByteArray();
     }
 
     static void visitImmutableValueCreation(MethodVisitor mv, KeyEntry keyEntry,
@@ -783,49 +939,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             GeneratorUtils.visitBoxingMethod(mv, keyEntry.valueType);
         }
         mv.visitMethodInsn(INVOKESPECIAL, valueType, "<init>", constructorDesc, false);
-    }
-
-    static void visitFields(ClassVisitor cv, List<KeyEntry> keyEntries, boolean applyStaticFields) {
-        FieldVisitor fv;
-        if (applyStaticFields) {
-            fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, keysFieldName, "Lcom/google/common/collect/ImmutableSet;",
-                    "Lcom/google/common/collect/ImmutableSet<Lorg/spongepowered/api/data/key/Key<*>;>;", null);
-            fv.visitEnd();
-        }
-        for (KeyEntry entry : keyEntries) {
-            // Check if the mutable class is being generated, this is the
-            // only class that will hold the static fields, the immutable
-            // version will be a inner class.
-            if (applyStaticFields) {
-                // Visit the key field
-                fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, entry.keyFieldName,
-                        "Lorg/spongepowered/api/data/key/Key;", entry.keyFieldSignature, null);
-                fv.visitEnd();
-                // Visit the default value field
-                fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, entry.defaultValueFieldName,
-                        entry.valueFieldDescriptor, entry.valueFieldSignature, null);
-                fv.visitEnd();
-                if (entry instanceof BoundedKeyEntry) {
-                    final BoundedKeyEntry bounded = (BoundedKeyEntry) entry;
-                    // Visit the comparator field
-                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.comparatorFieldName,
-                            bounded.comparatorFieldDescriptor, bounded.comparatorFieldSignature, null);
-                    fv.visitEnd();
-                    // Visit the minimum value field
-                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.minimumFieldName,
-                            bounded.valueFieldDescriptor, bounded.valueFieldSignature, null);
-                    fv.visitEnd();
-                    // Visit the maximum value field
-                    fv = cv.visitField(ACC_PUBLIC | ACC_STATIC, bounded.maximumFieldName,
-                            bounded.valueFieldDescriptor, bounded.valueFieldSignature, null);
-                    fv.visitEnd();
-                }
-            }
-            // Visit the value field, not private, so we still have field access between the mutable and immutable classes
-            fv = cv.visitField(ACC_PUBLIC, entry.defaultValueFieldName,
-                    entry.valueFieldDescriptor, entry.valueFieldSignature, null);
-            fv.visitEnd();
-        }
     }
 
     static void collectMethodEntries(Class<?> targetClass,

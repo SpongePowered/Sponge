@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.generator.method.getter;
+package org.spongepowered.common.data.generator;
 
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -33,31 +33,28 @@ import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.common.data.generator.KeyEntry;
-import org.spongepowered.common.data.generator.method.MethodEntry;
 
 import java.lang.reflect.Method;
 
-public class UnboxedOptionalGetterMethodEntry extends MethodEntry {
+final class UnboxedOptionalGetterMethodEntry extends MethodEntry {
 
-    public UnboxedOptionalGetterMethodEntry(Method method, KeyEntry keyEntry) {
+    UnboxedOptionalGetterMethodEntry(Method method, KeyEntry keyEntry) {
         super(method, keyEntry);
     }
 
     @Override
-    public void preVisit(MethodVisitor mv, String implClassDescriptor, String mutableImplClassName) {
+    void preVisit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         // Add the nullable annotation, is forced to be present in the interfaces
         mv.visitAnnotation("Ljavax/annotation/Nullable;", true).visitEnd();
     }
 
     @Override
-    public void visit(MethodVisitor mv, String implClassDescriptor, String mutableImplClassName) {
+    void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, implClassDescriptor, this.keyEntry.valueFieldName, "Ljava/util/Optional;");
+        mv.visitFieldInsn(GETFIELD, targetInternalName, this.keyEntry.valueFieldName, "Ljava/util/Optional;");
         mv.visitInsn(ACONST_NULL);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "orElse", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(this.method.getReturnType()));
         mv.visitInsn(ARETURN);
-        mv.visitMaxs(2, 1);
     }
 }

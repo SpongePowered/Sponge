@@ -29,24 +29,23 @@ import org.spongepowered.api.data.value.BoundedValue;
 
 import java.util.Comparator;
 
-public class BoundedKeyEntry<V extends BoundedValue<E>, E> extends KeyEntry<V, E> {
+class BoundedKeyEntry<V extends BoundedValue<E>, E> extends KeyEntry<V, E> {
 
-    public final E minimum;
-    public final E maximum;
-    public final Comparator<E> comparator;
+    final E minimum;
+    final E maximum;
+    final Comparator<E> comparator;
 
-    public String minimumFieldName;
-    public String maximumFieldName;
+    String minimumFieldName;
+    String maximumFieldName;
 
-    public String comparatorFieldName;
-    public String comparatorFieldDescriptor;
-    public String comparatorFieldSignature;
+    String comparatorFieldName;
+    String comparatorFieldDescriptor;
+    String comparatorFieldSignature;
 
-    public BoundedKeyEntry(Key<V> key, E defaultValue, E minimum, E maximum, Comparator<E> comparator) {
+    BoundedKeyEntry(Key<V> key, E defaultValue, E minimum, E maximum, Comparator<E> comparator) {
         super(key, defaultValue);
         this.minimum = minimum;
         this.maximum = maximum;
         this.comparator = comparator;
     }
-
 }

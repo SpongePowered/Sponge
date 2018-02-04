@@ -22,38 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.generator.method;
+package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.GETFIELD;
 
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.common.data.generator.KeyEntry;
+import org.spongepowered.api.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Method;
 
-public abstract class MethodEntry {
+final class GetterMethodEntry extends MethodEntry {
 
-    protected final Method method;
-    protected final KeyEntry keyEntry;
-
-    public MethodEntry(Method method, KeyEntry keyEntry) {
-        this.keyEntry = keyEntry;
-        this.method = method;
+    GetterMethodEntry(Method method, KeyEntry keyEntry) {
+        super(method, keyEntry);
     }
 
-    public void visit(ClassVisitor classVisitor, String implClassName, String mutableImplClassName) {
-        final MethodVisitor mv = classVisitor.visitMethod(ACC_PUBLIC, this.method.getName(),
-                Type.getMethodDescriptor(this.method), null, null);
-        preVisit(mv, implClassName, mutableImplClassName);
-        mv.visitCode();
-        visit(mv, implClassName, mutableImplClassName);
-        mv.visitEnd();
+    @Override
+    void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
+        // Load "this"
+        mv.visitVarInsn(ALOAD, 0);
+        final Class<?> returnType = this.keyEntry.valueClass;
+        // Get the field value from "this"
+        mv.visitFieldInsn(GETFIELD, targetInternalName,
+                this.keyEntry.valueFieldName, Type.getDescriptor(returnType));
+        if (this.keyEntry.boxedValueClass.equals(returnType)) {
+            // Box the primitive value, if it's a primitive
+            GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
+        }
+        // Return the value
+        GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);
     }
-
-    public void preVisit(MethodVisitor mv, String implClassName, String mutableImplClassName) {
-    }
-
-    public abstract void visit(MethodVisitor methodVisitor, String implClassDescriptor, String mutableImplClassName);
 }

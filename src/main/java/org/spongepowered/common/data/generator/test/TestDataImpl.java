@@ -46,7 +46,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class TestDataImpl implements TestData    {
+public class TestDataImpl implements TestData {
 
     // Static values will be injected through reflection
     // All fields are public to avoid synthetic bridges
@@ -255,7 +255,7 @@ public class TestDataImpl implements TestData    {
         public Optional<Double> value$my_opt_double;
 
         @Override
-        public TestData asMutable() {
+        public TestDataImpl asMutable() {
             TestDataImpl mutable = new TestDataImpl();
             mutable.value$my_string = this.value$my_string;
             mutable.value$my_int = this.value$my_int;
@@ -278,7 +278,7 @@ public class TestDataImpl implements TestData    {
         public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
             checkNotNull(key, "key");
             if ((Key) key == key$my_string) {
-                return Optional.of((E) InternalCopies.mutableCopy(this.value$my_string));
+                return Optional.of((E) InternalCopies.immutableCopy(this.value$my_string));
             }
             if ((Key) key == key$my_int) {
                 return Optional.of((E) (Object) this.value$my_int);

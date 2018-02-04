@@ -22,40 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.generator.method.getter;
+package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.util.generator.GeneratorUtils;
-import org.spongepowered.common.data.generator.GeneratorHelper;
-import org.spongepowered.common.data.generator.KeyEntry;
-import org.spongepowered.common.data.generator.method.MethodEntry;
 
 import java.lang.reflect.Method;
 
-public class GetterMethodEntry extends MethodEntry {
+abstract class MethodEntry {
 
-    public GetterMethodEntry(Method method, KeyEntry keyEntry) {
-        super(method, keyEntry);
+    final Method method;
+    final KeyEntry keyEntry;
+
+    MethodEntry(Method method, KeyEntry keyEntry) {
+        this.keyEntry = keyEntry;
+        this.method = method;
     }
 
-    @Override
-    public void visit(MethodVisitor mv, String implClassDescriptor, String mutableImplClassName) {
-        // Load "this"
-        mv.visitVarInsn(ALOAD, 0);
-        final Class<?> returnType = this.keyEntry.valueClass;
-        // Get the field value from "this"
-        mv.visitFieldInsn(GETFIELD, implClassDescriptor,
-                this.keyEntry.valueFieldName, Type.getDescriptor(returnType));
-        if (this.keyEntry.boxedValueClass.equals(returnType)) {
-            // Box the primitive value, if it's a primitive
-            GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
-        }
-        // Return the value
-        GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);
-        mv.visitMaxs(1, 1);
+    public void visit(ClassVisitor classVisitor, String targetInternalName, String mutableInternalName) {
+        final MethodVisitor mv = classVisitor.visitMethod(ACC_PUBLIC, this.method.getName(),
+                Type.getMethodDescriptor(this.method), null, null);
+        preVisit(mv, targetInternalName, mutableInternalName);
+        mv.visitCode();
+        visit(mv, targetInternalName, mutableInternalName);
+        mv.visitEnd();
     }
+
+    void preVisit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
+    }
+
+    abstract void visit(MethodVisitor methodVisitor, String targetInternalName, String mutableInternalName);
 }
