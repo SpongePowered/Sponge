@@ -41,6 +41,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -73,6 +74,7 @@ import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
@@ -188,6 +190,12 @@ public class DataRegistrar {
         dataManager.registerContentUpdater(ImmutableInvisibilityData.class, invisibilityUpdater);
         dataManager.registerContentUpdater(SpongeInvisibilityData.class, invisibilityUpdater);
         dataManager.registerContentUpdater(ImmutableSpongeInvisibilityData.class, invisibilityUpdater);
+        final PotionEffectContentUpdater potionUpdater = new PotionEffectContentUpdater();
+        dataManager.registerContentUpdater(PotionEffect.class, potionUpdater);
+        dataManager.registerContentUpdater(PotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ImmutablePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(SpongePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ImmutableSpongePotionEffectData.class, potionUpdater);
 
         // Content Updaters for Custom Data
         dataManager.registerContentUpdater(DataManipulator.class, new LegacyCustomDataClassContentUpdater());
