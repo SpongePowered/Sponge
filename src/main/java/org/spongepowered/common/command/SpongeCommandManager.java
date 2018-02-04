@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.inject.Singleton;
+import net.minecraft.entity.player.EntityPlayer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
@@ -59,6 +60,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -318,6 +320,10 @@ public class SpongeCommandManager implements CommandManager {
                          .addCaptures()
                          .addEntityDropCaptures()
                          .buildAndSwitch()) {
+                if (source instanceof EntityPlayer) {
+                    // Enable player inventory capture
+                    ((IMixinInventoryPlayer) ((EntityPlayer) source).inventory).setCapture(true);
+                }
                 Sponge.getCauseStackManager().pushCause(source);
                 final CommandResult result = this.dispatcher.process(source, commandLine);
                 return result;
