@@ -51,6 +51,9 @@ public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<Tabl
         super(key, EMPTY_TABLE, actualValue);
     }
 
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public SpongeWeightedCollectionValue(
             Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> defaultValue, WeightedTable<E> actualValue) {
         super(key, defaultValue, actualValue);

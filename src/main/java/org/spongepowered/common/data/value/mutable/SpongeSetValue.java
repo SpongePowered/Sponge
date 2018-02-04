@@ -49,6 +49,9 @@ public class SpongeSetValue<E> extends SpongeCollectionValue<E, Set<E>, SetValue
         this(key, Collections.emptySet(), actualValue);
     }
 
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public SpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> defaultSet, Set<E> actualValue) {
         super(key, defaultSet, actualValue);
     }

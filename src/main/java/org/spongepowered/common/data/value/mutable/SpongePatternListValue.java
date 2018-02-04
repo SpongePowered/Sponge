@@ -48,7 +48,9 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
         super(key, actualValue);
     }
 
-    // DO NOT MODIFY THE SIGNATURE OR REMOVE THE CONSTRUCTOR
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     @SuppressWarnings("unused")
     public SpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key, List<PatternLayer> defaultValue, List<PatternLayer> actualValue) {
         super(key, defaultValue, actualValue);

@@ -27,7 +27,6 @@ package org.spongepowered.common.data.value;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ValueFactory;
@@ -44,6 +43,7 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class SpongeValueFactory implements ValueFactory {
 
     @Override
     public <E> ListValue<E> createListValue(Key<ListValue<E>> key, List<E> elements) {
-        return new SpongeListValue<>(checkNotNull(key, "key"), Lists.<E>newArrayList(), Lists.newArrayList(elements));
+        return new SpongeListValue<>(checkNotNull(key, "key"), Collections.emptyList(), elements);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SpongeValueFactory implements ValueFactory {
 
     @Override
     public <E> OptionalValue<E> createOptionalValue(Key<OptionalValue<E>> key, @Nullable E element) {
-        return new SpongeOptionalValue<>(checkNotNull(key, "key"), Optional.<E>empty(), Optional.ofNullable(element));
+        return new SpongeOptionalValue<>(checkNotNull(key, "key"), Optional.empty(), Optional.ofNullable(element));
     }
 
     @Override
@@ -181,7 +181,7 @@ public class SpongeValueFactory implements ValueFactory {
             if (this.value == null) {
                 return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum);
             }
-            return new SpongeBoundedValue<>(this.key, this.defaultValue, this.comparator, this.minimum, this.maximum, this.value);
+            return new SpongeBoundedValue<>(this.key, this.defaultValue, this.value, this.comparator, this.minimum, this.maximum);
         }
     }
 }

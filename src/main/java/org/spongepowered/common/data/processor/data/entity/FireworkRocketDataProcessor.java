@@ -90,7 +90,7 @@ public class FireworkRocketDataProcessor extends
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer value) {
-        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE, value);
+        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, value, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
     }
 
     @Override

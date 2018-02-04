@@ -44,16 +44,16 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
     private final E minimum;
     private final E maximum;
 
-    public SpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum) {
-        this(key, defaultValue, comparator, minimum, maximum, defaultValue);
+    public SpongeBoundedValue(Key<? extends BaseValue<E>> key, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+        this(key, actualValue, actualValue, comparator, minimum, maximum);
     }
 
-    public SpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum, E actualValue) {
+    public SpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
         super(key, defaultValue, actualValue);
-        this.comparator = checkNotNull(comparator);
-        this.minimum = checkNotNull(minimum);
-        this.maximum = checkNotNull(maximum);
         checkState(comparator.compare(maximum, minimum) >= 0);
+        this.comparator = checkNotNull(comparator);
+        this.minimum = InternalCopies.mutableCopy(checkNotNull(minimum));
+        this.maximum = InternalCopies.mutableCopy(checkNotNull(maximum));
     }
 
     @Override
@@ -73,8 +73,10 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
 
     @Override
     public MutableBoundedValue<E> set(E value) {
-        if (this.comparator.compare(value, this.minimum) >= 0 && this.comparator.compare(value, this.maximum) <= 0) {
-            this.actualValue = checkNotNull(value);
+        checkNotNull(value);
+        if (this.comparator.compare(value, this.minimum) >= 0 &&
+                this.comparator.compare(value, this.maximum) <= 0) {
+            this.actualValue = value;
         }
         return this;
     }

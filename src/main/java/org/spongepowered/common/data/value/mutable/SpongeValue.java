@@ -34,23 +34,17 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 public class SpongeValue<E> extends AbstractBaseValue<E> implements Value<E> {
 
     public SpongeValue(Key<? extends BaseValue<E>> key, E actualValue) {
         this(key, actualValue, actualValue);
     }
 
-    public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
-        this(key, InternalCopies.mutableCopy(defaultValue), InternalCopies.mutableCopy(actualValue), null);
-    }
-
-    /**
-     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
      */
-    protected SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, @Nullable Void nothing) {
-        super(key, defaultValue, actualValue);
+    public SpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
+        super(key, InternalCopies.mutableCopy(defaultValue), InternalCopies.mutableCopy(actualValue));
     }
 
     @Override

@@ -27,7 +27,6 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -48,9 +47,12 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapV
     }
 
     public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> actualValue) {
-        this(key, ImmutableMap.of(), actualValue);
+        this(key, Collections.emptyMap(), actualValue);
     }
 
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public SpongeMapValue(Key<? extends BaseValue<Map<K, V>>> key, Map<K, V> defaultMap, Map<K, V> actualMap) {
         super(key, defaultMap, actualMap);
     }

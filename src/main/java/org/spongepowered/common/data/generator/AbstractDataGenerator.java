@@ -72,16 +72,21 @@ import org.spongepowered.api.data.generator.KeyValue;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutablePatternListValue;
+import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.generator.GeneratorUtils;
+import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.generator.method.MethodEntry;
 import org.spongepowered.common.data.generator.method.getter.GetterMethodEntry;
@@ -92,9 +97,14 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongePatternListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedCollectionValue;
+import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Constructor;
@@ -647,8 +657,13 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         } else if (rawType.isAssignableFrom(OptionalValue.class) ||
                 rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
             valueClass = ImmutableSpongeOptionalValue.class;
-            constructor = ImmutableSpongeMapValue.class.getConstructor(
-                    Key.class, Map.class, Map.class);
+            constructor = ImmutableSpongeOptionalValue.class.getConstructor(
+                    Key.class, Optional.class, Optional.class);
+        } else if (rawType.isAssignableFrom(WeightedCollectionValue.class) ||
+                rawType.isAssignableFrom(ImmutableWeightedCollectionValue.class)) {
+            valueClass = ImmutableSpongeWeightedCollectionValue.class;
+            constructor = ImmutableSpongeWeightedCollectionValue.class.getConstructor(
+                    Key.class, WeightedTable.class, WeightedTable.class);
         } else if (keyEntry instanceof BoundedKeyEntry) {
             valueClass = ImmutableSpongeBoundedValue.class;
             constructor = ImmutableSpongeBoundedValue.class.getConstructor(
@@ -659,7 +674,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     Key.class, Object.class, Object.class);
         }
         // TODO: Use cached methods if possible
-        // TODO: WeightedTableValue support
         visitBaseValueCreation(mv, keyEntry, targetInternalName, mutableInternalName, constructor, valueClass);
     }
 
@@ -694,8 +708,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             valueClass = ImmutableSpongeListValue.class;
             constructor = ImmutableSpongeListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(MapValue.class) ||
-                rawType.isAssignableFrom(ImmutableMapValue.class)) {
+        } else if (rawType.isAssignableFrom(MapValue.class)) {
             valueClass = SpongeMapValue.class;
             constructor = SpongeMapValue.class.getConstructor(
                     Key.class, Map.class, Map.class);
@@ -703,21 +716,41 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             valueClass = ImmutableSpongeMapValue.class;
             constructor = ImmutableSpongeMapValue.class.getConstructor(
                     Key.class, Map.class, Map.class);
-        } else if (rawType.isAssignableFrom(OptionalValue.class) ||
-                rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
+        } else if (rawType.isAssignableFrom(OptionalValue.class)) {
+            valueClass = SpongeOptionalValue.class;
+            constructor = SpongeOptionalValue.class.getConstructor(
+                    Key.class, Optional.class, Optional.class);
+        } else if (rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
             valueClass = ImmutableSpongeOptionalValue.class;
-            constructor = ImmutableSpongeMapValue.class.getConstructor(
-                    Key.class, Map.class, Map.class);
+            constructor = ImmutableSpongeOptionalValue.class.getConstructor(
+                    Key.class, Optional.class, Optional.class);
+        } else if (rawType.isAssignableFrom(WeightedCollectionValue.class)) {
+            valueClass = SpongeWeightedCollectionValue.class;
+            constructor = SpongeWeightedCollectionValue.class.getConstructor(
+                    Key.class, WeightedTable.class, WeightedTable.class);
+        } else if (rawType.isAssignableFrom(ImmutableWeightedCollectionValue.class)) {
+            valueClass = ImmutableSpongeWeightedCollectionValue.class;
+            constructor = ImmutableSpongeWeightedCollectionValue.class.getConstructor(
+                    Key.class, WeightedTable.class, WeightedTable.class);
         } else if (keyEntry instanceof BoundedKeyEntry) {
-            valueClass = ImmutableSpongeBoundedValue.class;
-            constructor = ImmutableSpongeBoundedValue.class.getConstructor(
-                    Key.class, Object.class, Object.class, Comparator.class, Object.class, Object.class);
+            if (rawType.isAssignableFrom(BoundedValue.class)) {
+                valueClass = SpongeBoundedValue.class;
+                constructor = SpongeBoundedValue.class.getConstructor(
+                        Key.class, Object.class, Object.class, Comparator.class, Object.class, Object.class);
+            } else {
+                valueClass = ImmutableSpongeBoundedValue.class;
+                constructor = ImmutableSpongeBoundedValue.class.getConstructor(
+                        Key.class, Object.class, Object.class, Comparator.class, Object.class, Object.class);
+            }
+        } else if (rawType.isAssignableFrom(Value.class)) {
+            valueClass = SpongeValue.class;
+            constructor = SpongeValue.class.getConstructor(
+                    Key.class, Object.class, Object.class);
         } else {
             valueClass = ImmutableSpongeValue.class;
             constructor = ImmutableSpongeValue.class.getConstructor(
                     Key.class, Object.class, Object.class);
         }
-        // TODO: WeightedTableValue support
         visitBaseValueCreation(mv, keyEntry, targetInternalName, mutableInternalName, constructor, valueClass);
     }
 

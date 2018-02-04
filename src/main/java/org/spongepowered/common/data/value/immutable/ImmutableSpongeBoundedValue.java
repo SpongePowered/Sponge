@@ -49,16 +49,22 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeBoundedValue.class, key, defaultValue, actualValue, comparator, minimum, maximum);
     }
 
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static <E> ImmutableSpongeBoundedValue<E> constructUnsafe(
+            Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+        return new ImmutableSpongeBoundedValue<>(key, defaultValue, actualValue, comparator, minimum, maximum, null);
+    }
+
     private final Comparator<E> comparator;
     private final E minimum;
     private final E maximum;
 
-    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, Comparator<E> comparator, E minimum, E maximum) {
-        super(key, defaultValue);
-        this.comparator = checkNotNull(comparator);
-        this.minimum = checkNotNull(minimum);
-        this.maximum = checkNotNull(maximum);
-        checkState(comparator.compare(maximum, minimum) >= 0);
+    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+        this(key, InternalCopies.immutableCopy(actualValue), comparator,
+                InternalCopies.immutableCopy(minimum),
+                InternalCopies.immutableCopy(maximum), null);
     }
 
     // DO NOT MODIFY THE SIGNATURE OR REMOVE THE CONSTRUCTOR
@@ -68,6 +74,11 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
                 InternalCopies.immutableCopy(actualValue), comparator,
                 InternalCopies.immutableCopy(minimum),
                 InternalCopies.immutableCopy(maximum), null);
+    }
+
+    protected ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E actualValue,
+            Comparator<E> comparator, E minimum, E maximum, @Nullable Void nothing) {
+        this(key, actualValue, actualValue, comparator, minimum, maximum, nothing);
     }
 
     // A constructor to avoid unnecessary copies
@@ -81,11 +92,17 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     }
 
     @Override
+    protected ImmutableSpongeBoundedValue<E> withValueUnsafe(E value) {
+        return constructUnsafe(getKey(), this.defaultValue, value, this.comparator, this.minimum, this.maximum);
+    }
+
+    @Override
     public ImmutableBoundedValue<E> with(E value) {
-        if (this.comparator.compare(value, this.minimum) >= 0 && this.comparator.compare(value, this.maximum) <= 0) {
-            return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), value, getComparator(), getMinValue(), getMaxValue());
+        if (this.comparator.compare(value, this.minimum) >= 0 &&
+                this.comparator.compare(value, this.maximum) <= 0) {
+            return withValueUnsafe(InternalCopies.immutableCopy(value));
         }
-        return new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue());
+        return withValueUnsafe(this.defaultValue);
     }
 
     @Override

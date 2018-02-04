@@ -50,6 +50,9 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
         this(key, Optional.empty(), actualValue);
     }
 
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue) {
         super(key, defaultValue, actualValue);
     }

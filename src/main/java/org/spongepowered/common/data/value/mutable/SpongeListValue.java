@@ -44,15 +44,18 @@ import java.util.stream.Collectors;
 public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListValue<E>, ImmutableListValue<E>> implements ListValue<E> {
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key) {
-        super(key, Lists.newArrayList());
-    }
-
-    public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> defaultList, List<E> actualList) {
-        super(key, defaultList, actualList);
+        super(key, Collections.emptyList());
     }
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> actualValue) {
         this(key, Collections.emptyList(), actualValue);
+    }
+
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
+    public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> defaultList, List<E> actualList) {
+        super(key, defaultList, actualList);
     }
 
     @Override
