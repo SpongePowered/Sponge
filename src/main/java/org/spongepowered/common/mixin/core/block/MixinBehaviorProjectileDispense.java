@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.BehaviorProjectileDispense;
 import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -59,7 +60,8 @@ public class MixinBehaviorProjectileDispense extends BehaviorDefaultDispenseItem
 
     @Inject(method = "dispenseStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
-    public void onspawnEntity(IBlockSource source, ItemStack stack, CallbackInfoReturnable<ItemStack> cir, EnumFacing enumfacing, IProjectile iprojectile) {
+    public void onspawnEntity(IBlockSource source, ItemStack stack, CallbackInfoReturnable<ItemStack> cir,
+            World world, IPosition position, EnumFacing enumfacing, IProjectile iprojectile) {
         TileEntity tileEntity = source.getBlockTileEntity();
         if (tileEntity instanceof ProjectileSource) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -68,8 +70,7 @@ public class MixinBehaviorProjectileDispense extends BehaviorDefaultDispenseItem
                 ((Projectile) iprojectile).setShooter((ProjectileSource) tileEntity);
                 List<Projectile> projectiles = new ArrayList<>();
                 projectiles.add((Projectile) iprojectile);
-                LaunchProjectileEvent event =
-                        SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);
+                LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);
                 if (SpongeImpl.postEvent(event)) {
                     cir.setReturnValue(stack);
                 }
