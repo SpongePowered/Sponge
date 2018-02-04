@@ -36,10 +36,12 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthDat
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableStoneData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -94,5 +96,10 @@ public abstract class MixinBlockSapling extends MixinBlock {
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockSapling.STAGE), 0, 1);
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(this.getUnlocalizedName() + "." + BlockPlanks.EnumType.OAK.getUnlocalizedName() + ".name");
     }
 }

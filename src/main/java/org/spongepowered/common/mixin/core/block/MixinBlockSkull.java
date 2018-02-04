@@ -34,12 +34,14 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDropData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDropData;
 import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -89,5 +91,10 @@ public abstract class MixinBlockSkull extends MixinBlock {
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
                 DirectionResolver.getFor(blockState.getValue(BlockSkull.FACING)));
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation("item.skull.skeleton.name");
     }
 }
