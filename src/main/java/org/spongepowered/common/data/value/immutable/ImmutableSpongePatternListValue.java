@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -44,65 +43,90 @@ import java.util.ListIterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<PatternLayer> implements ImmutablePatternListValue {
 
-    public ImmutableSpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key, List<PatternLayer> actualValue) {
-        super(key, actualValue);
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static ImmutableSpongePatternListValue constructUnsafe(
+            Key<? extends BaseValue<List<PatternLayer>>> key, List<PatternLayer> defaultValue, List<PatternLayer> actualValue) {
+        return new ImmutableSpongePatternListValue(key, defaultValue, actualValue, null);
     }
 
-    // DO NOT MODIFY THE SIGNATURE
+    public ImmutableSpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key,
+            List<PatternLayer> actualValue) {
+        super(key, ImmutableList.of(), actualValue);
+    }
+
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
+    @SuppressWarnings("unused")
     public ImmutableSpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key,
             List<PatternLayer> defaultValue, List<PatternLayer> actualValue) {
         super(key, defaultValue, actualValue);
     }
 
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    protected ImmutableSpongePatternListValue(Key<? extends BaseValue<List<PatternLayer>>> key,
+            List<PatternLayer> defaultValue, List<PatternLayer> actualValue, @Nullable Void nothing) {
+        super(key, defaultValue, actualValue, nothing);
+    }
+
+    @Override
+    protected ImmutableSpongePatternListValue withValueUnsafe(List<PatternLayer> value) {
+        return constructUnsafe(getKey(), this.defaultValue, value);
+    }
+
     @Override
     public ImmutablePatternListValue with(List<PatternLayer> value) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.copyOf(checkNotNull(value)));
+        return withValueUnsafe(ImmutableList.copyOf(checkNotNull(value)));
     }
 
     @Override
     public ImmutablePatternListValue transform(Function<List<PatternLayer>, List<PatternLayer>> function) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
+        return withValueUnsafe(ImmutableList.copyOf(checkNotNull(checkNotNull(function).apply(this.actualValue))));
     }
 
     @Override
     public PatternListValue asMutable() {
-        final List<PatternLayer> list = Lists.newArrayList();
-        list.addAll(this.actualValue);
-        return new SpongePatternListValue(getKey(), list);
+        return new SpongePatternListValue(getKey(), this.actualValue); // SpongePatternListValue will make the list mutable
     }
 
     @Override
     public ImmutablePatternListValue withElement(PatternLayer elements) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).add(elements).build());
+        return withValueUnsafe(ImmutableList.<PatternLayer>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public ImmutablePatternListValue withAll(Iterable<PatternLayer> elements) {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.<PatternLayer>builder().addAll(this.actualValue).addAll(elements).build());
+        return withValueUnsafe(ImmutableList.<PatternLayer>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
     public ImmutablePatternListValue without(PatternLayer element) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existingElement -> !existingElement.equals(element)).forEach(builder::add);
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
-
+        return withValueUnsafe(builder.build());
     }
 
     @Override
     public ImmutablePatternListValue withoutAll(Iterable<PatternLayer> elements) {
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
         this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override
     public ImmutablePatternListValue withoutAll(Predicate<PatternLayer> predicate) {
+        checkNotNull(predicate, "predicate");
         final ImmutableList.Builder<PatternLayer> builder = ImmutableList.builder();
-        this.actualValue.stream().filter(existing -> checkNotNull(predicate).test(existing)).forEach(builder::add);
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        this.actualValue.stream().filter(predicate).forEach(builder::add);
+        return withValueUnsafe(builder.build());
     }
 
     @Override
@@ -116,7 +140,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override
@@ -128,7 +152,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
             }
             builder.add(iterator.next());
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override
@@ -139,7 +163,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override
@@ -153,7 +177,7 @@ public class ImmutableSpongePatternListValue extends ImmutableSpongeListValue<Pa
                 builder.add(iterator.next());
             }
         }
-        return new ImmutableSpongePatternListValue(getKey(), builder.build());
+        return withValueUnsafe(builder.build());
    }
 
     @Override

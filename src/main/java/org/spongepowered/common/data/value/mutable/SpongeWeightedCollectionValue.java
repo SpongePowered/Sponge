@@ -30,6 +30,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionVal
 import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.util.weighted.TableEntry;
+import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedCollectionValue;
 
 import java.util.List;
@@ -39,21 +40,30 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("unchecked")
 public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<TableEntry<E>,
-    WeightedTable<E>, WeightedCollectionValue<E>, ImmutableWeightedCollectionValue<E>> implements WeightedCollectionValue<E> {
+        WeightedTable<E>, WeightedCollectionValue<E>, ImmutableWeightedCollectionValue<E>> implements WeightedCollectionValue<E> {
 
-    public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
-        super(key, new WeightedTable<>(), actualValue.stream().collect(Collectors.toCollection(WeightedTable<E>::new)));
+    private static final WeightedTable EMPTY_TABLE = new WeightedTable();
+
+    public SpongeWeightedCollectionValue(
+            Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
+        super(key, EMPTY_TABLE, actualValue);
+    }
+
+    public SpongeWeightedCollectionValue(
+            Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> defaultValue, WeightedTable<E> actualValue) {
+        super(key, defaultValue, actualValue);
     }
 
     @Override
     public WeightedCollectionValue<E> filter(Predicate<? super TableEntry<E>> predicate) {
-        return set(get().stream().filter(predicate).collect(Collectors.toCollection(WeightedTable<E>::new)));
+        return set(get().stream().filter(predicate).collect(Collectors.toCollection(WeightedTable::new)));
     }
 
     @Override
     public WeightedTable<E> getAll() {
-        return get().stream().collect(Collectors.toCollection(WeightedTable<E>::new));
+        return InternalCopies.copy(this.actualValue);
     }
 
     @Override
@@ -64,6 +74,6 @@ public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<Tabl
     @Nullable
     @Override
     public List<E> get(Random random) {
-        return this.get().get(random);
+        return get().get(random);
     }
 }

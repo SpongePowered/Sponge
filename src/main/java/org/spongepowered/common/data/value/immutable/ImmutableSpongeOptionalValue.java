@@ -31,6 +31,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.common.data.SpongeKey;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 
 import java.util.Optional;
@@ -38,7 +39,16 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Optional<E>> implements ImmutableOptionalValue<E> {
+
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static <E> ImmutableSpongeOptionalValue<E> constructUnsafe(
+            Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue) {
+        return new ImmutableSpongeOptionalValue<>(key, defaultValue, actualValue, null);
+    }
 
     public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key) {
         this(key, Optional.empty());
@@ -48,25 +58,34 @@ public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Option
         this(key, Optional.empty(), actualValue);
     }
 
-    // DO NOT MODIFY THE SIGNATURE
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue) {
         this(key, defaultValue, actualValue, null);
     }
 
-    // A constructor to avoid unnecessary copies
-    protected ImmutableSpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue,
-            @Nullable Void nothing) {
-        super(key, defaultValue, actualValue);
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    protected ImmutableSpongeOptionalValue(
+            Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue, @Nullable Void nothing) {
+        super(key, defaultValue, actualValue, nothing);
+    }
+
+    @Override
+    protected ImmutableSpongeOptionalValue<E> withValueUnsafe(Optional<E> value) {
+        return constructUnsafe(getKey(), this.defaultValue, value);
     }
 
     @Override
     public ImmutableOptionalValue<E> with(Optional<E> value) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, checkNotNull(value), null);
+        return withValueUnsafe(checkNotNull(value));
     }
 
     @Override
     public ImmutableOptionalValue<E> transform(Function<Optional<E>, Optional<E>> function) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, checkNotNull(function.apply(get())), null);
+        return withValueUnsafe(checkNotNull(function.apply(get())));
     }
 
     @Override
@@ -76,11 +95,14 @@ public class ImmutableSpongeOptionalValue<E> extends ImmutableSpongeValue<Option
 
     @Override
     public ImmutableOptionalValue<E> instead(@Nullable E value) {
-        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, Optional.ofNullable(value), null);
+        return withValueUnsafe(Optional.ofNullable(value));
     }
 
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
-    public ImmutableValue<E> or(E value) { // TODO actually construct a new key for this kind...
-        return new ImmutableSpongeValue<>(null, get().isPresent() ? get().get() : checkNotNull(value));
+    public ImmutableValue<E> or(E value) {
+        checkNotNull(value);
+        value = get().orElse(value);
+        return new ImmutableSpongeValue<E>(((SpongeKey) getKey()).getOptionalUnwrappedKey(), value, value);
     }
 }

@@ -60,6 +60,9 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
         super(key, actualValue);
     }
 
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public ImmutableSpongeSetValue(Key<? extends BaseValue<Set<E>>> key, Set<E> defaultValue, Set<E> actualValue) {
         super(key, defaultValue, actualValue);
     }
@@ -72,40 +75,42 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
     }
 
     @Override
+    protected ImmutableSpongeSetValue<E> withValueUnsafe(Set<E> value) {
+        return constructUnsafe(getKey(), this.defaultValue, value);
+    }
+
+    @Override
     public ImmutableSetValue<E> with(Set<E> value) {
-        return constructUnsafe(getKey(), this.defaultValue, ImmutableSet.copyOf(value));
+        return withValueUnsafe(ImmutableSet.copyOf(value));
     }
 
     @Override
     public ImmutableSetValue<E> transform(Function<Set<E>, Set<E>> function) {
-        return constructUnsafe(getKey(), this.defaultValue,
-                checkNotNull(checkNotNull(function).apply(this.actualValue)));
+        return withValueUnsafe(checkNotNull(checkNotNull(function).apply(this.actualValue)));
     }
 
     @Override
     public ImmutableSetValue<E> withElement(E elements) {
-        return constructUnsafe(getKey(), this.defaultValue,
-                ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
+        return withValueUnsafe(ImmutableSet.<E>builder().addAll(this.actualValue).add(elements).build());
     }
 
     @Override
     public ImmutableSetValue<E> withAll(Iterable<E> elements) {
-        return constructUnsafe(getKey(), this.defaultValue,
-                ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
+        return withValueUnsafe(ImmutableSet.<E>builder().addAll(this.actualValue).addAll(elements).build());
     }
 
     @Override
     public ImmutableSetValue<E> without(E element) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existing -> !existing.equals(element)).forEach(builder::add);
-        return constructUnsafe(getKey(), this.defaultValue, builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override
     public ImmutableSetValue<E> withoutAll(Iterable<E> elements) {
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(existingElement -> !Iterables.contains(elements, existingElement)).forEach(builder::add);
-        return constructUnsafe(getKey(), this.defaultValue, builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override
@@ -113,7 +118,7 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
         checkNotNull(predicate, "predicate");
         final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
         this.actualValue.stream().filter(predicate).forEach(builder::add);
-        return constructUnsafe(getKey(), this.defaultValue, builder.build());
+        return withValueUnsafe(builder.build());
     }
 
     @Override

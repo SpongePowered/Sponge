@@ -94,10 +94,13 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
 
     @Override
     public String toString() {
+        return toStringHelper().toString();
+    }
+
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
-            .add("key", this.key)
-            .add("defaultValue", this.defaultValue)
-            .add("actualValue", this.actualValue)
-            .toString();
+                .add("key", this.key)
+                .add("defaultValue", this.defaultValue)
+                .add("actualValue", this.actualValue);
     }
 }

@@ -25,12 +25,15 @@
 package org.spongepowered.common.data;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -56,11 +59,20 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
     private final PluginContainer parent;
     @Nullable private List<KeyBasedDataListener<?>> listeners;
 
+    // Optional key related stuff
+    @Nullable private SpongeKey<Value<?>> optionalUnwrappedKey;
+    @Nullable private SpongeKey<OptionalValue<?>> optionalWrappedKey;
+
     SpongeKey(SpongeKeyBuilder<?, V> builder) {
-        this.valueToken = builder.valueToken;
+        this(builder, builder.valueToken, builder.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]));
+    }
+
+    @SuppressWarnings("unchecked")
+    private SpongeKey(SpongeKeyBuilder<?, V> builder, TypeToken<V> valueToken, TypeToken<?> elementToken) {
+        this.valueToken = valueToken;
         this.name = builder.name;
         this.query = builder.query;
-        this.elementToken = this.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
+        this.elementToken = elementToken;
         this.parent = getCurrentContainer();
         final String id = builder.id;
         if (id.indexOf(':') == -1) {
@@ -73,11 +85,22 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
                         + "current PluginContainer in the cause stack. ");
             }
         }
+        // Optional values also have a non optional variant key
+        if (valueToken.getRawType().isAssignableFrom(OptionalValue.class)) {
+            final TypeToken<?> optionalElementToken = valueToken.resolveType(OptionalValue.class.getTypeParameters()[0]);
+            final TypeToken<?> unwrappedValueToken = createValueToken(optionalElementToken);
+            this.optionalUnwrappedKey = new SpongeKey(builder, unwrappedValueToken, optionalElementToken);
+            this.optionalUnwrappedKey.optionalWrappedKey = (SpongeKey<OptionalValue<?>>) this;
+        }
+    }
+
+    private static <E> TypeToken<Value<E>> createValueToken(TypeToken<E> typeToken) {
+        return new TypeToken<Value<E>>() {}.where(new TypeParameter<E>() {}, typeToken);
     }
 
     public static PluginContainer getCurrentContainer() {
         return Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
-            .orElse(SpongeImpl.getMinecraftPlugin());
+                .orElse(SpongeImpl.getMinecraftPlugin());
     }
 
     @Override
@@ -158,5 +181,15 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
     public PluginContainer getParent() {
         return this.parent;
+    }
+
+    @Nullable
+    public Key<Value<?>> getOptionalUnwrappedKey() {
+        return this.optionalUnwrappedKey;
+    }
+
+    @Nullable
+    public Key<OptionalValue<?>> getOptionalWrappedKey() {
+        return this.optionalWrappedKey;
     }
 }

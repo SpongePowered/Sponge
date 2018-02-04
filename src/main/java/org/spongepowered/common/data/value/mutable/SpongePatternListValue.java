@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.value.mutable;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -140,6 +139,6 @@ public class SpongePatternListValue extends SpongeListValue<PatternLayer> implem
 
     @Override
     public ImmutablePatternListValue asImmutable() {
-        return new ImmutableSpongePatternListValue(getKey(), ImmutableList.copyOf(this.actualValue));
+        return new ImmutableSpongePatternListValue(getKey(), this.actualValue);
     }
 }

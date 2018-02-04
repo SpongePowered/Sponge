@@ -29,8 +29,9 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
 import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
-import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.util.weighted.TableEntry;
+import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 
 import java.util.List;
@@ -41,39 +42,72 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("unchecked")
 public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCollectionValue<TableEntry<E>,
-    WeightedTable<E>, ImmutableWeightedCollectionValue<E>, WeightedCollectionValue<E>> implements ImmutableWeightedCollectionValue<E> {
+        WeightedTable<E>, ImmutableWeightedCollectionValue<E>, WeightedCollectionValue<E>> implements ImmutableWeightedCollectionValue<E> {
 
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static <E> ImmutableSpongeWeightedCollectionValue<E> constructUnsafe(
+            Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> defaultValue, WeightedTable<E> actualValue) {
+        return new ImmutableSpongeWeightedCollectionValue<>(key, defaultValue, actualValue, null);
+    }
 
-    public ImmutableSpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
-        super(key, new WeightedTable<>(), actualValue.stream().collect(Collectors.toCollection(WeightedTable<E>::new)));
+    private static final WeightedTable EMPTY_TABLE = new WeightedTable();
+
+    public ImmutableSpongeWeightedCollectionValue(
+            Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
+        super(key, EMPTY_TABLE, actualValue);
+    }
+
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
+    @SuppressWarnings("unused")
+    public ImmutableSpongeWeightedCollectionValue(
+            Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> defaultValue, WeightedTable<E> actualValue) {
+        super(key, defaultValue, actualValue);
+    }
+
+    /*
+     * A constructor to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    protected ImmutableSpongeWeightedCollectionValue(
+            Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> defaultValue, WeightedTable<E> actualValue, @Nullable Void nothing) {
+        super(key, defaultValue, actualValue, nothing);
+    }
+
+    @Override
+    protected ImmutableSpongeWeightedCollectionValue<E> withValueUnsafe(WeightedTable<E> value) {
+        return constructUnsafe(getKey(), this.defaultValue, value);
     }
 
     @Override
     public ImmutableWeightedCollectionValue<E> with(WeightedTable<E> value) {
-        return new ImmutableSpongeWeightedCollectionValue<>(getKey(), value);
+        return withValueUnsafe(InternalCopies.copy(value));
     }
 
     @Override
     public ImmutableWeightedCollectionValue<E> withElement(TableEntry<E> elements) {
-        WeightedTable<E> table = new WeightedTable<>();
+        final WeightedTable<E> table = new WeightedTable<>();
         table.addAll(this.actualValue);
         table.add(elements);
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), table);
+        return withValueUnsafe(table);
     }
 
     @Override
     public ImmutableWeightedCollectionValue<E> transform(Function<WeightedTable<E>, WeightedTable<E>> function) {
         final WeightedTable<E> table = getAll();
-        final WeightedTable<E> functionTable = function.apply(table);
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), functionTable);
+        final WeightedTable<E> functionTable = function.apply(table); // Does this need to copied? do we trust people?
+        return withValueUnsafe(InternalCopies.copy(functionTable));
     }
 
     @Override
     public ImmutableWeightedCollectionValue<E> withAll(Iterable<TableEntry<E>> elements) {
         final WeightedTable<E> newTable = getAll();
         elements.forEach(newTable::add);
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), newTable);
+        return withValueUnsafe(newTable);
     }
 
     @Override
@@ -82,36 +116,35 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
                 .filter(entry -> !entry.equals(element))
                 .map(entry -> element)
                 .collect(Collectors.toCollection(WeightedTable::new));
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), newTable);
+        return withValueUnsafe(newTable);
     }
 
     @Override
     public ImmutableWeightedCollectionValue<E> withoutAll(Iterable<TableEntry<E>> elements) {
         final WeightedTable<E> newTable = new WeightedTable<>();
         this.actualValue.stream()
-            .filter(entry -> !Iterables.contains(elements, entry))
-            .forEach(newTable::add);
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), newTable);
+                .filter(entry -> !Iterables.contains(elements, entry))
+                .forEach(newTable::add);
+        return withValueUnsafe(newTable);
     }
 
     @Override
     public ImmutableWeightedCollectionValue<E> withoutAll(Predicate<TableEntry<E>> predicate) {
         final WeightedTable<E> newTable = this.actualValue.stream()
-            .filter(predicate)
-            .collect(Collectors.toCollection(WeightedTable::new));
-        return new ImmutableSpongeWeightedCollectionValue<>(this.getKey(), newTable);
+                .filter(predicate)
+                .collect(Collectors.toCollection(WeightedTable::new));
+        return withValueUnsafe(newTable);
     }
 
     @Override
     public WeightedTable<E> getAll() {
-        final WeightedTable<E> newTable = new WeightedTable<>();
-        newTable.addAll(this.actualValue);
-        return newTable;
+        return InternalCopies.copy(this.actualValue);
     }
 
     @Override
     public WeightedCollectionValue<E> asMutable() {
-        return new SpongeWeightedCollectionValue<>(this.getKey(), getAll());
+        return new SpongeWeightedCollectionValue<>(
+                getKey(), this.defaultValue, this.actualValue); // SpongeWeightedCollectionValue will create a copy of the value
     }
 
     @Nullable

@@ -34,6 +34,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Copyable;
+import org.spongepowered.api.util.weighted.WeightedTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class InternalCopies {
 
@@ -55,12 +57,15 @@ public final class InternalCopies {
     // DO NOT MODIFY THE SIGNATURE
     public static <E> E mutableCopy(E object) {
         checkNotNull(object, "object");
+        // TODO: Copy mutable objects in collections/maps? Like a List of ItemStacks.
         if (object instanceof List) {
             return (E) new ArrayList<>((List) object);
         } else if (object instanceof Map) {
             return (E) new HashMap<>((Map) object);
         } else if (object instanceof Set) {
             return (E) new HashSet<>((Set) object);
+        } else if (object instanceof WeightedTable) {
+            return (E) copy((WeightedTable) object);
         } else if (object instanceof Copyable) {
             return (E) ((Copyable) object).copy();
         }
@@ -78,15 +83,22 @@ public final class InternalCopies {
     // DO NOT MODIFY THE SIGNATURE
     public static <E> E immutableCopy(E object) {
         checkNotNull(object, "object");
+        // TODO: Copy mutable objects in collections/maps? Like a List of ItemStacks.
         if (object instanceof List) {
             return (E) ImmutableList.copyOf((List) object);
         } else if (object instanceof Map) {
             return (E) ImmutableMap.copyOf((Map) object);
         } else if (object instanceof Set) {
             return (E) ImmutableSet.copyOf((Set) object);
+        } else if (object instanceof WeightedTable) {
+            return (E) copy((WeightedTable) object);
         } else if (object instanceof Copyable) {
             return (E) ((Copyable) object).copy();
         }
         return object;
+    }
+
+    public static <E> WeightedTable<E> copy(WeightedTable<E> weightedTable) {
+        return weightedTable.stream().collect(Collectors.toCollection(WeightedTable::new));
     }
 }

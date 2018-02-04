@@ -26,7 +26,6 @@ package org.spongepowered.common.data.value.mutable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -34,6 +33,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -47,11 +48,11 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
     }
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> defaultList, List<E> actualList) {
-        super(key, Lists.newArrayList(defaultList), Lists.newArrayList(actualList));
+        super(key, defaultList, actualList);
     }
 
     public SpongeListValue(Key<? extends BaseValue<List<E>>> key, List<E> actualValue) {
-        this(key, Lists.newArrayList(), actualValue);
+        this(key, Collections.emptyList(), actualValue);
     }
 
     @Override
@@ -62,19 +63,20 @@ public class SpongeListValue<E> extends SpongeCollectionValue<E, List<E>, ListVa
 
     @Override
     public ListValue<E> filter(Predicate<? super E> predicate) {
-        final List<E> list = Lists.newArrayList();
-        list.addAll(this.actualValue.stream().filter(element -> checkNotNull(predicate).test(element)).collect(Collectors.toList()));
+        checkNotNull(predicate);
+        final List<E> list = new ArrayList<>();
+        list.addAll(this.actualValue.stream().filter(predicate).collect(Collectors.toList()));
         return new SpongeListValue<>(getKey(), list);
     }
 
     @Override
     public List<E> getAll() {
-        return Lists.newArrayList(this.actualValue);
+        return new ArrayList<>(this.actualValue);
     }
 
     @Override
     public ImmutableListValue<E> asImmutable() {
-        return new ImmutableSpongeListValue<>(getKey(), ImmutableList.copyOf(this.actualValue));
+        return new ImmutableSpongeListValue<>(getKey(), this.defaultValue, this.actualValue);
     }
 
     @Override

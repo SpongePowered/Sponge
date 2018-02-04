@@ -27,10 +27,12 @@ package org.spongepowered.common.data.value.mutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.common.data.InternalCopies;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 import java.util.Comparator;
@@ -56,12 +58,12 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
 
     @Override
     public E getMinValue() {
-        return this.minimum;
+        return InternalCopies.mutableCopy(this.minimum);
     }
 
     @Override
     public E getMaxValue() {
-        return this.maximum;
+        return InternalCopies.mutableCopy(this.maximum);
     }
 
     @Override
@@ -84,7 +86,13 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
 
     @Override
     public ImmutableBoundedValue<E> asImmutable() {
-        return new ImmutableSpongeBoundedValue<>(getKey(), this.getDefault(), this.actualValue, this.comparator, this.minimum, this.maximum);
+        return new ImmutableSpongeBoundedValue<>(getKey(), this.defaultValue, this.actualValue, this.comparator, this.minimum, this.maximum);
     }
 
+    @Override
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("minimum", this.maximum)
+                .add("maximum", this.maximum);
+    }
 }

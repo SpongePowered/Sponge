@@ -54,10 +54,21 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
         return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, key, defaultValue, actualValue);
     }
 
+    /*
+     * A constructor method to avoid unnecessary copies. INTERNAL USE ONLY!
+     */
+    private static <E> ImmutableSpongeValue<E> constructUnsafe(
+            Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
+        return new ImmutableSpongeValue<>(key, defaultValue, actualValue, null);
+    }
+
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E actualValue) {
         this(key, InternalCopies.immutableCopy(actualValue), (Void) null);
     }
 
+    /*
+     * DO NOT MODIFY THE SIGNATURE/REMOVE THE CONSTRUCTOR
+     */
     public ImmutableSpongeValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue) {
         this(key, InternalCopies.immutableCopy(defaultValue), InternalCopies.immutableCopy(actualValue), null);
     }
@@ -76,6 +87,10 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
         super(key, defaultValue, actualValue);
     }
 
+    protected ImmutableSpongeValue<E> withValueUnsafe(E value) {
+        return constructUnsafe(getKey(), this.defaultValue, value);
+    }
+
     @Nullable
     @Override
     public E getNullable() {
@@ -90,13 +105,13 @@ public class ImmutableSpongeValue<E> extends AbstractBaseValue<E> implements Imm
 
     @Override
     public ImmutableValue<E> with(E value) {
-        return new ImmutableSpongeValue<>(getKey(), this.defaultValue, InternalCopies.immutableCopy(value), null);
+        return withValueUnsafe(InternalCopies.immutableCopy(value));
     }
 
     @Override
     public ImmutableValue<E> transform(Function<E, E> function) {
         final E value = checkNotNull(function).apply(get());
-        return new ImmutableSpongeValue<>(getKey(), this.defaultValue, InternalCopies.immutableCopy(value), null);
+        return withValueUnsafe(InternalCopies.immutableCopy(value));
     }
 
     @Override

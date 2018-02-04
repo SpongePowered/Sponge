@@ -27,6 +27,7 @@ package org.spongepowered.common.data.value.immutable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.BoundedValue;
@@ -96,12 +97,12 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     @Override
     public MutableBoundedValue<E> asMutable() {
         return SpongeValueFactory.boundedBuilder((Key<? extends BoundedValue<E>>) getKey())
-            .defaultValue(getDefault())
-            .minimum(getMinValue())
-            .maximum(getMaxValue())
-            .actualValue(get())
-            .comparator(getComparator())
-            .build();
+                .defaultValue(getDefault())
+                .minimum(getMinValue())
+                .maximum(getMaxValue())
+                .actualValue(get())
+                .comparator(getComparator())
+                .build();
     }
 
     @Override
@@ -117,5 +118,12 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
     @Override
     public Comparator<E> getComparator() {
         return this.comparator;
+    }
+
+    @Override
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("minimum", this.maximum)
+                .add("maximum", this.maximum);
     }
 }

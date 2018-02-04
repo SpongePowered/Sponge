@@ -31,6 +31,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.SpongeKey;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 
 import java.util.Optional;
@@ -38,6 +39,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements OptionalValue<E> {
 
     public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key) {
@@ -45,7 +47,7 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
     }
 
     public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> actualValue) {
-        this(key, Optional.<E>empty(), actualValue);
+        this(key, Optional.empty(), actualValue);
     }
 
     public SpongeOptionalValue(Key<? extends BaseValue<Optional<E>>> key, Optional<E> defaultValue, Optional<E> actualValue) {
@@ -66,7 +68,7 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
 
     @Override
     public ImmutableOptionalValue<E> asImmutable() {
-        return new ImmutableSpongeOptionalValue<>(getKey(), this.actualValue);
+        return new ImmutableSpongeOptionalValue<>(getKey(), this.defaultValue, this.actualValue);
     }
 
     @Override
@@ -74,8 +76,11 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
         return set(Optional.ofNullable(value));
     }
 
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
-    public Value<E> or(E defaultValue) { // TODO actually construct the keys
-        return new SpongeValue<>(null, null, get().isPresent() ? get().get() : checkNotNull(defaultValue));
+    public Value<E> or(E value) {
+        checkNotNull(value);
+        value = get().orElse(value);
+        return new SpongeValue<>(((SpongeKey) getKey()).getOptionalUnwrappedKey(), value, value);
     }
 }
