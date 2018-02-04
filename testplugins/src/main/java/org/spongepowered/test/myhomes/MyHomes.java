@@ -116,8 +116,8 @@ public class MyHomes {
             .dataImplementation(HomeDataImpl.class)
             .immutableImplementation(ImmutableHomeDataImpl.class)
             .builder(new HomeDataBuilder())
-            .dataName("Home Data")
-            .manipulatorId("home")
+            .name("Home Data")
+            .id("home")
             .buildAndRegister(this.container);
 
         // Friends stuff
@@ -127,8 +127,8 @@ public class MyHomes {
             .dataImplementation(FriendsDataImpl.class)
             .immutableImplementation(ImmutableFriendsDataImpl.class)
             .builder(new FriendsDataBuilder())
-            .dataName("Friends Data")
-            .manipulatorId("friends")
+            .name("Friends Data")
+            .id("friends")
             .buildAndRegister(this.container);
     }
 

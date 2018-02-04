@@ -1,10 +1,37 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package org.spongepowered.test.data;
 
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.generator.GenericDataGenerator;
+import org.spongepowered.api.data.generator.VariantDataGenerator;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
+import org.spongepowered.api.data.manipulator.mutable.VariantData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -23,8 +50,11 @@ public class DataTest {
     public static Key<ListValue<String>> LINES_KEY = DummyObjectProvider.createFor(Key.class, "LINES_KEY");
     public static Key<Value<String>> AUTHOR_KEY = DummyObjectProvider.createFor(Key.class, "AUTHOR_KEY");
     public static Key<OptionalValue<String>> PUBLISHER_KEY = DummyObjectProvider.createFor(Key.class, "PUBLISHER_KEY");
+    public static Key<Value<Integer>> REVISIONS_KEY = DummyObjectProvider.createFor(Key.class, "REVISIONS_KEY");
+    public static Key<Value<Boolean>> MY_BOOLEAN_KEY = DummyObjectProvider.createFor(Key.class, "MY_BOOLEAN_KEY");
 
     public static DataRegistration<BookData, ImmutableBookData> MY_BOOK_DATA;
+    public static DataRegistration<? extends VariantData<Boolean, ?, ?>, ? extends ImmutableVariantData<Boolean, ?, ?>> MY_BOOLEAN_DATA;
 
     @Listener
     public void onRegisterKeys(GameRegistryEvent.Register<Key<?>> event) {
@@ -55,6 +85,24 @@ public class DataTest {
                 .build();
         // Register the key
         event.register(PUBLISHER_KEY);
+        // Create the key
+        REVISIONS_KEY = Key.builder()
+                .type(new TypeToken<Value<Integer>>() {})
+                .query(DataQuery.of("Revisions"))
+                .name("Revisions")
+                .id("revisions")
+                .build();
+        // Register the key
+        event.register(REVISIONS_KEY);
+        // Create the key
+        MY_BOOLEAN_KEY = Key.builder()
+                .type(new TypeToken<Value<Boolean>>() {})
+                .query(DataQuery.of("MyBoolean"))
+                .name("MyBoolean")
+                .id("my_boolean")
+                .build();
+        // Register the key
+        event.register(MY_BOOLEAN_KEY);
     }
 
     @Listener
@@ -63,10 +111,12 @@ public class DataTest {
                 .key(LINES_KEY, new ArrayList<>())
                 .key(AUTHOR_KEY, "Unknown")
                 .key(PUBLISHER_KEY, Optional.empty())
+                .key(REVISIONS_KEY, 1)
                 .interfaces(BookData.class, ImmutableBookData.class)
                 .id("book_data")
                 .name("Book Data")
                 .build();
+
         final BookData bookData = MY_BOOK_DATA.getDataManipulatorBuilder().create();
         System.out.println("DEFAULT AUTHOR: " + bookData.getAuthor());
         System.out.println("DEFAULT PUBLISHER: " + bookData.getPublisher());
@@ -76,5 +126,21 @@ public class DataTest {
         System.out.println("NEW PUBLISHER: " + bookData.getPublisher());
 
         event.register(MY_BOOK_DATA);
+
+        MY_BOOLEAN_DATA = VariantDataGenerator.builder()
+                .key(MY_BOOLEAN_KEY)
+                .defaultValue(false)
+                .id("my_boolean_data")
+                .name("My Boolean Data")
+                .build();
+
+        final VariantData<Boolean, ?, ?> booleanData = MY_BOOLEAN_DATA.getDataManipulatorBuilder().create();
+        System.out.println("DEFAULT BOOLEAN: " + booleanData.type().get());
+        booleanData.set(MY_BOOLEAN_KEY, true);
+        System.out.println("NEW BOOLEAN: " + booleanData.type().get());
+        booleanData.set(MY_BOOLEAN_KEY, false);
+        System.out.println("NEW BOOLEAN 2: " + booleanData.get(MY_BOOLEAN_KEY).orElse(null));
+
+        event.register(MY_BOOLEAN_DATA);
     }
 }

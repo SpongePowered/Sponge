@@ -67,7 +67,7 @@ public class TestDataImpl implements TestData {
 
     public String value$my_string = default_value$my_string;
     public int value$my_int = default_value$my_int;
-    public Optional<Double> value$my_opt_double = default_value$my_opt_double;
+    public Optional<Double> value$my_opt_double = InternalCopies.mutableCopy(default_value$my_opt_double);
 
     @Override
     public Optional<TestData> fill(DataHolder dataHolder, MergeFunction overlap) {
@@ -253,7 +253,7 @@ public class TestDataImpl implements TestData {
 
         public String value$my_string;
         public int value$my_int;
-        public Optional<Double> value$my_opt_double;
+        public Optional<Double> value$my_opt_double = InternalCopies.mutableCopy(default_value$my_opt_double);
 
         @Override
         public TestDataImpl asMutable() {

@@ -70,6 +70,12 @@ import org.spongepowered.api.data.generator.KeyValue;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableListData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMappedData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
+import org.spongepowered.api.data.manipulator.mutable.ListData;
+import org.spongepowered.api.data.manipulator.mutable.MappedData;
+import org.spongepowered.api.data.manipulator.mutable.VariantData;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
@@ -103,10 +109,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 import org.spongepowered.common.util.TypeTokenHelper;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
@@ -188,6 +190,10 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
     private static final GeneratorUtils.LocalClassLoader classLoader =
             new GeneratorUtils.LocalClassLoader(AbstractDataGenerator.class.getClassLoader());
     private static final TypeVariable<Class<Optional>> optionalVariable = Optional.class.getTypeParameters()[0];
+    private static final TypeVariable<Class<ListValue>> listValueElement = ListValue.class.getTypeParameters()[0];
+    private static final TypeVariable<Class<MapValue>> mapValueKey = MapValue.class.getTypeParameters()[0];
+    private static final TypeVariable<Class<MapValue>> mapValueValue = MapValue.class.getTypeParameters()[1];
+    private static final TypeVariable<Class<Value>> valueElement = Value.class.getTypeParameters()[0];
     private static final String keysFieldName = "keys";
 
     @Override
@@ -227,23 +233,25 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
 
             // Generate the descriptor and signature of the value
             final TypeToken<?> elementType = keyEntry.key.getElementToken();
-            keyEntry.valueClass = elementType.getRawType();
+            keyEntry.valueClass = Primitives.unwrap(elementType.getRawType());
             keyEntry.valueType = Type.getType(keyEntry.valueClass);
             keyEntry.valueTypeName = Type.getInternalName(keyEntry.valueClass);
-            keyEntry.boxedValueDescriptor = Type.getDescriptor(keyEntry.valueClass);
+            keyEntry.valueFieldDescriptor = Type.getDescriptor(keyEntry.valueClass);
+            if (!elementType.isPrimitive()) {
+                keyEntry.valueFieldSignature = GeneratorHelper.toSignature(elementType);
+                // No need for the signature, the descriptor is specific enough
+                if (keyEntry.valueFieldSignature.equals(keyEntry.valueFieldDescriptor)) {
+                    keyEntry.valueFieldSignature = null;
+                }
+            }
+            // Unbox the element type, the unboxed
+            // version will be used as field type
+            keyEntry.boxedValueClass = elementType.getRawType();
+            keyEntry.boxedValueDescriptor = Type.getDescriptor(keyEntry.boxedValueClass);
             keyEntry.boxedValueFieldSignature = GeneratorHelper.toSignature(elementType);
             // No need for the signature, the descriptor is specific enough
             if (keyEntry.boxedValueFieldSignature.equals(keyEntry.boxedValueDescriptor)) {
                 keyEntry.boxedValueFieldSignature = null;
-            }
-            // Unbox the element type, the unboxed
-            // version will be used as field type
-            keyEntry.boxedValueClass = Primitives.unwrap(keyEntry.valueClass);
-            keyEntry.valueFieldDescriptor = Type.getDescriptor(keyEntry.boxedValueClass);
-            keyEntry.valueFieldSignature = GeneratorHelper.toSignature(elementType);
-            // No need for the signature, the descriptor is specific enough
-            if (keyEntry.valueFieldSignature.equals(keyEntry.valueFieldDescriptor)) {
-                keyEntry.valueFieldSignature = null;
             }
             if (keyEntry instanceof BoundedKeyEntry) {
                 final BoundedKeyEntry bounded = (BoundedKeyEntry) keyEntry;
@@ -281,27 +289,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         // Generate the classes
         final byte[] mutableClassBytes = generateClass(mutableInternalName, immutableInternalName, mutableMethodEntries, true);
         final byte[] immutableClassBytes = generateClass(mutableInternalName, immutableInternalName, immutableMethodEntries, false);
-
-        try {
-            File file = new File(mutableInternalName + ".class");
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                fos.write(mutableClassBytes);
-                fos.flush();
-            }
-            file = new File(immutableInternalName + ".class");
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
-            }
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                fos.write(immutableClassBytes);
-                fos.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         // Define them
         final Class<?> mutableClass = classLoader.defineClass(mutableClassName, mutableClassBytes);
@@ -353,27 +340,55 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             if (this.mutableInterface != null) {
                 interfSignature = null; // No signature is needed, the interface should have defined all the generics
                 interf = Type.getInternalName(this.mutableInterface);
-            } else {
-                // TODO: Add ListData, MappedData and VariantData support
-
-                interfSignature = String.format("Lorg/spongepowered/api/data/manipulator/DataManipulator<L%s;L%s;>;",
+            } else if (this instanceof SpongeListDataGenerator) {
+                final TypeToken<?> valueToken = ((SpongeMappedDataGenerator) this).key.getValueToken();
+                final TypeToken<?> listElementType = valueToken.resolveType(listValueElement);
+                interf = Type.getInternalName(ListData.class);
+                interfSignature = String.format("L%s<L%s;L%s;L%s;>;", interf, GeneratorHelper.toSignature(listElementType),
                         mutableInternalName, immutableInternalName);
-                interf = "org/spongepowered/api/data/manipulator/DataManipulator";
+            } else if (this instanceof SpongeMappedDataGenerator) {
+                final TypeToken<?> valueToken = ((SpongeMappedDataGenerator) this).key.getValueToken();
+                final TypeToken<?> keyElementType = valueToken.resolveType(mapValueKey);
+                final TypeToken<?> valueElementType = valueToken.resolveType(mapValueValue);
+                interf = Type.getInternalName(MappedData.class);
+                interfSignature = String.format("L%s<L%s;L%s;L%s;L%s;>;", interf, GeneratorHelper.toSignature(keyElementType),
+                        GeneratorHelper.toSignature(valueElementType), mutableInternalName, immutableInternalName);
+            } else if (this instanceof SpongeVariantDataGenerator) {
+                final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
+                interf = Type.getInternalName(VariantData.class);
+                interfSignature = String.format("L%s<L%s;L%s;L%s;>;", interf, GeneratorHelper.toSignature(elementType),
+                        mutableInternalName, immutableInternalName);
+            } else {
+                interf = Type.getInternalName(DataManipulator.class);
+                interfSignature = String.format("L%s<L%s;L%s;>;", interf, mutableInternalName, immutableInternalName);
             }
         } else {
             if (this.immutableInterface != null) {
                 interfSignature = null; // No signature is needed, the interface should have defined all the generics
                 interf = Type.getInternalName(this.immutableInterface);
-            } else {
-                // TODO: Add ImmutableListData, ImmutableMappedData and ImmutableVariantData support
-
-                interfSignature = String.format("Lorg/spongepowered/api/data/manipulator/ImmutableDataManipulator<L%s;L%s;>;",
+            } else if (this instanceof SpongeListDataGenerator) {
+                final TypeToken<?> valueToken = ((SpongeMappedDataGenerator) this).key.getValueToken();
+                final TypeToken<?> listElementType = valueToken.resolveType(listValueElement);
+                interf = Type.getInternalName(ImmutableListData.class);
+                interfSignature = String.format("L%s<%sL%s;L%s;>;", interf, GeneratorHelper.toSignature(listElementType),
                         immutableInternalName, mutableInternalName);
-                interf = "org/spongepowered/api/data/manipulator/ImmutableDataManipulator";
+            } else if (this instanceof SpongeMappedDataGenerator) {
+                final TypeToken<?> valueToken = ((SpongeMappedDataGenerator) this).key.getValueToken();
+                final TypeToken<?> keyElementType = valueToken.resolveType(mapValueKey);
+                final TypeToken<?> valueElementType = valueToken.resolveType(mapValueValue);
+                interf = Type.getInternalName(ImmutableMappedData.class);
+                interfSignature = String.format("L%s<%s%sL%s;L%s;>;", interf, GeneratorHelper.toSignature(keyElementType),
+                        GeneratorHelper.toSignature(valueElementType), immutableInternalName, mutableInternalName);
+            } else if (this instanceof SpongeVariantDataGenerator) {
+                final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
+                interf = Type.getInternalName(ImmutableVariantData.class);
+                interfSignature = String.format("L%s<%sL%s;L%s;>;", interf, GeneratorHelper.toSignature(elementType),
+                        immutableInternalName, mutableInternalName);
+            } else {
+                interf = Type.getInternalName(ImmutableDataManipulator.class);
+                interfSignature = String.format("L%s<L%s;L%s;>;", interf, immutableInternalName, mutableInternalName);
             }
         }
-        final Type interfType = Type.getType(this.mutableInterface);
-
         cv.visit(V1_8, ACC_PUBLIC | ACC_SUPER, targetInternalName, interfSignature,
                 "java/lang/Object", new String[] { interf });
 
@@ -470,10 +485,10 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitVarInsn(ALOAD, 0);
                 // Load the field from this
                 mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                // Primitives need to be boxed and other objects may need to be cloned
-                if (entry.boxedValueClass != entry.valueClass) { // Primitive
-                    GeneratorUtils.visitBoxingMethod(mv, Type.getType(entry.valueClass));
-                } else {
+                // Primitives need to be boxed
+                GeneratorUtils.visitBoxingMethod(mv, entry.valueType);
+                // Non primitives need to be cloned, to avoid modifications
+                if (!entry.valueClass.isPrimitive()) {
                     mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
                             generateMutable ? "mutableCopy" : "immutableCopy", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
                 }
@@ -607,6 +622,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitEnd();
         }
         if (generateMutable) {
+            final Type interfType = this.mutableInterface != null ?
+                    Type.getType(this.mutableInterface) : Type.getType('L' + mutableInternalName + ';');
             {
                 // Generate the fill method
                 mv = cv.visitMethod(ACC_PUBLIC, "fill",
@@ -690,7 +707,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitVarInsn(ALOAD, 2);
                     // Primitives need to be unboxed and other objects may need to be cloned
-                    if (entry.boxedValueClass != entry.valueClass) { // Primitive
+                    if (entry.valueClass.isPrimitive()) { // Primitive
                         GeneratorUtils.visitUnboxingMethod(mv, Type.getType(entry.valueClass));
                     } else {
                         mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class), "mutableCopy",
@@ -816,6 +833,47 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
+            // Generator specific methods
+            if (this instanceof SpongeVariantDataGenerator) {
+                final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
+                mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/mutable/Value;", String.format(
+                        "()Lorg/spongepowered/api/data/value/mutable/Value<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                mv.visitCode();
+                // Create a value
+                visitValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
+                // Return it
+                mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            } else if (this instanceof SpongeListDataGenerator) {
+                final TypeToken<?> elementType = ((SpongeListDataGenerator) this).key
+                        .getValueToken().resolveType(listValueElement);
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/mutable/ListValue;", String.format(
+                            "()Lorg/spongepowered/api/data/value/mutable/ListValue<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                    mv.visitCode();
+                    // Create a value
+                    visitValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
+                    // Return it
+                    mv.visitInsn(ARETURN);
+                    // End
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "asList", "()Ljava/util/List;",
+                            String.format("()Ljava/util/List<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                    mv.visitCode();
+                    final KeyEntry entry = this.keyEntries.get(0);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitInsn(ARETURN);
+                    // End
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+            }
         } else {
             {
                 // public TestDataImpl asMutable() {}
@@ -856,6 +914,49 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 // End
                 mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
+            }
+            if (this instanceof SpongeVariantDataGenerator) {
+                final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
+                mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/immutable/ImmutableValue;", String.format(
+                            "()Lorg/spongepowered/api/data/value/immutable/ImmutableValue<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                mv.visitCode();
+                // Create a value
+                visitImmutableValueCreation(mv, this.keyEntries.get(0), immutableInternalName, mutableInternalName);
+                // Return it
+                mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            } else if (this instanceof SpongeListDataGenerator) {
+                final TypeToken<?> elementType = ((SpongeListDataGenerator) this).key
+                        .getValueToken().resolveType(listValueElement);
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "getListValue", "()Lorg/spongepowered/api/data/value/immutable/ImmutableListValue;", String.format(
+                            "()Lorg/spongepowered/api/data/value/immutable/ImmutableListValue<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                    mv.visitCode();
+                    // Create a value
+                    visitImmutableValueCreation(mv, this.keyEntries.get(0), immutableInternalName, mutableInternalName);
+                    // Return it
+                    mv.visitInsn(ARETURN);
+                    // End
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "asList", "()Ljava/util/List;",
+                            String.format("()Ljava/util/List<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                    mv.visitCode();
+                    mv.visitTypeInsn(NEW, "java/util/ArrayList");
+                    mv.visitInsn(DUP);
+                    final KeyEntry entry = this.keyEntries.get(0);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V", false);
+                    mv.visitInsn(ARETURN);
+                    // End
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
             }
         }
         // Apply the custom interface methods
@@ -1005,6 +1106,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         mv.visitInsn(DUP);
         mv.visitFieldInsn(GETSTATIC, mutableInternalName, keyEntry.keyFieldName, keyEntry.keyFieldDescriptor);
         mv.visitFieldInsn(GETSTATIC, mutableInternalName, keyEntry.defaultValueFieldName, keyEntry.valueFieldDescriptor);
+        // Box the value, if it's a primitive
+        GeneratorUtils.visitBoxingMethod(mv, keyEntry.valueType);
         // Load "this"
         mv.visitVarInsn(ALOAD, 0);
         // Get the value from "this"
@@ -1029,6 +1132,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
 
     private static void collectMethodEntries(Class<?> targetClass,
             Map<String, KeyEntry> keysById, Set<MethodEntry> methodEntries) {
+        if (targetClass == null) {
+            return;
+        }
         for (Method method : targetClass.getMethods()) {
             final KeyValue keyValue = method.getAnnotation(KeyValue.class);
             if (keyValue != null) {
