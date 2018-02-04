@@ -41,21 +41,23 @@ import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayer player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
+    public static void handleSlotRestore(EntityPlayer player, @Nullable Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
                 continue;
             }
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-            final int slotNumber = slot.slotNumber;
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
             if (openContainer == null) {
                 slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
             } else {
+                final int slotNumber = slot.slotNumber;
                 final Slot nmsSlot = openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
                     nmsSlot.putStack(originalStack);

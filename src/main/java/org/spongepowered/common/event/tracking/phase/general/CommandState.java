@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -36,7 +37,10 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -44,7 +48,9 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.WorldManager;
 
@@ -90,6 +96,19 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public void unwind(CommandPhaseContext phaseContext) {
+        Optional<EntityPlayer> playerSource = phaseContext.getSource(EntityPlayer.class);
+        if (playerSource.isPresent()) {
+            // Post event for inventory changes
+            ((IMixinInventoryPlayer) playerSource.get().inventory).setCapture(false);
+            List<SlotTransaction> list = ((IMixinInventoryPlayer) playerSource.get().inventory).getCapturedTransactions();
+            if (!list.isEmpty()) {
+                ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                        ((Inventory) playerSource.get().inventory), list);
+                SpongeImpl.postEvent(event);
+                PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
+                list.clear();
+            }
+        }
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
