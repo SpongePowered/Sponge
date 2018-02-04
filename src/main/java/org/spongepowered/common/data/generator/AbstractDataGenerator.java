@@ -622,19 +622,19 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitEnd();
         }
         if (generateMutable) {
-            final Type interfType = this.mutableInterface != null ?
+            final Type genericMutableType = this.mutableInterface != null ?
                     Type.getType(this.mutableInterface) : Type.getType('L' + mutableInternalName + ';');
+            final String genericMutableName = this.mutableInterface != null ? interf : mutableInternalName;
             {
                 // Generate the fill method
                 mv = cv.visitMethod(ACC_PUBLIC, "fill",
                         "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)Ljava/util/Optional;",
-                        "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)Ljava/util/Optional<" + interfSignature
-                                + ">;",
-                        null);
+                        "(Lorg/spongepowered/api/data/DataHolder;Lorg/spongepowered/api/data/merge/MergeFunction;)"
+                                + "Ljava/util/Optional<" + interfSignature + ">;", null);
                 mv.visitCode();
                 // final Optional<TestData> optData = dataHolder.get(TestData.class);
                 mv.visitVarInsn(ALOAD, 1);
-                mv.visitLdcInsn(interfType);
+                mv.visitLdcInsn(genericMutableType);
                 mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/DataHolder", "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
                 mv.visitVarInsn(ASTORE, 3);
                 // Start of: if (optData.isPresent()) {}
@@ -649,8 +649,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
                 mv.visitTypeInsn(CHECKCAST, "org/spongepowered/api/data/value/ValueContainer");
                 mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/merge/MergeFunction", "merge",
-                        "(Lorg/spongepowered/api/data/value/ValueContainer;Lorg/spongepowered/api/data/value/ValueContainer;)Lorg/spongepowered/api/data/value/ValueContainer;",
-                        true);
+                        "(Lorg/spongepowered/api/data/value/ValueContainer;Lorg/spongepowered/api/data/value/ValueContainer;)"
+                                + "Lorg/spongepowered/api/data/value/ValueContainer;", true);
                 mv.visitTypeInsn(CHECKCAST, mutableInternalName);
                 mv.visitVarInsn(ASTORE, 4);
                 // Transfer the contents from the retrieved container to this container
@@ -680,9 +680,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             {
                 // public <E> TestDataImpl set(Key<? extends BaseValue<E>> key, E value) {}
                 mv = cv.visitMethod(ACC_PUBLIC, "set",
-                        String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", interf),
-                        String.format("<E:Ljava/lang/Object;>(Lorg/spongepowered/api/data/key/Key<+Lorg/spongepowered/api/data/value/BaseValue<TE;>;>;"
-                                + "TE;)%s", interfSignature), null);
+                        String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", genericMutableName),
+                        String.format("<E:Ljava/lang/Object;>(Lorg/spongepowered/api/data/key/Key"
+                                + "<+Lorg/spongepowered/api/data/value/BaseValue<TE;>;>;TE;)%s", interfSignature), null);
                 mv.visitCode();
                 // checkNotNull(key, "key");
                 mv.visitVarInsn(ALOAD, 1);
