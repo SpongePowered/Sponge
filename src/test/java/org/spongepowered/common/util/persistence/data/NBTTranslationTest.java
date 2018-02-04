@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.util.persistence.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
 import net.minecraft.nbt.NBTTagCompound;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +37,9 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 @RunWith(LaunchWrapperTestRunner.class)
 public class NBTTranslationTest {
@@ -65,5 +65,8 @@ public class NBTTranslationTest {
         DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
         assertEquals(container, translatedContainer);
     }
+
+
+
 
 }

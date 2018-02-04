@@ -53,12 +53,20 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
+
+    private static Map<String, Class<? extends Enum>> knownEnumMap = new ConcurrentHashMap<>();
 
     private static final NbtTranslator instance = new NbtTranslator();
     private static final TypeToken<NBTTagCompound> TOKEN = TypeToken.of(NBTTagCompound.class);
     public static final String BOOLEAN_IDENTIFER = "$Boolean";
+    public static final String ENUM_IDENTIFIER = "$Enum(%s)%s";
+    public static final Pattern ENUM_CLASS_PATTERN = Pattern.compile("\\$Enum\\((.*?)\\)");
 
     public static NbtTranslator getInstance() {
         return instance;
@@ -87,6 +95,9 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 compound.setTag(key, inner);
             } else if (value instanceof Boolean) {
                 compound.setTag(key + BOOLEAN_IDENTIFER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
+            } else if (value instanceof Enum) {
+                Enum enum_ = (Enum) value;
+                compound.setTag(key, new NBTTagString(String.format(ENUM_IDENTIFIER, enum_.getClass().getName(), enum_.name())));
             } else {
                 compound.setTag(key, getBaseFromObject(value));
             }
@@ -112,6 +123,9 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             return new NBTTagDouble((Double) value);
         } else if (value instanceof String) {
             return new NBTTagString((String) value);
+        } else if (value instanceof Enum){
+            Enum enum_ = (Enum) value;
+            return new NBTTagString(String.format(ENUM_IDENTIFIER, enum_.getClass().getName(), enum_.name()));
         } else if (value.getClass().isArray()) {
             if (value instanceof byte[]) {
                 return new NBTTagByteArray((byte[]) value);
@@ -205,7 +219,25 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 view.set(of(key), ((NBTTagByteArray) base).getByteArray());
                 break;
             case NbtDataUtil.TAG_STRING:
-                view.set(of(key), ((NBTTagString) base).getString());
+                String str = ((NBTTagString) base).getString();
+                Matcher matcher = ENUM_CLASS_PATTERN.matcher(str);
+                if (matcher.find()) {
+                    String classname = matcher.group(1);
+                    try {
+                        Class<? extends Enum> aClass = knownEnumMap.get(classname);
+                        if (aClass == null) {
+                            aClass = (Class<? extends Enum>) Class.forName(classname);
+                            knownEnumMap.put(classname, aClass);
+                        }
+                        view.set(of(key), Enum.valueOf(aClass, str.substring(str.lastIndexOf(")") + 1)));
+                    } catch (ClassNotFoundException e) {
+                        //do not re-throw exception, if someone refractors their code
+                        //reference to the enum class will become invalid. populate data as-is for data recovery
+                        view.set(of(key), ((NBTTagString) base).getString());
+                    }
+                } else {
+                    view.set(of(key), ((NBTTagString) base).getString());
+                }
                 break;
             case NbtDataUtil.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;
@@ -256,6 +288,22 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case NbtDataUtil.TAG_BYTE_ARRAY:
                 return ((NBTTagByteArray) base).getByteArray();
             case NbtDataUtil.TAG_STRING:
+                String str = ((NBTTagString) base).getString();
+                Matcher matcher = ENUM_CLASS_PATTERN.matcher(str);
+                if (matcher.find()) {
+                    String classname = matcher.group(1);
+                    try {
+                        Class<? extends Enum> aClass = knownEnumMap.get(classname);
+                        if (aClass == null) {
+                            aClass = (Class<? extends Enum>) Class.forName(classname);
+                            knownEnumMap.put(classname, aClass);
+                        }
+                        return Enum.valueOf(aClass, str.substring(str.lastIndexOf(")") + 1));
+                    } catch (ClassNotFoundException e) {
+                        //do not re-throw exception, if someone refractors their code
+                        //reference to the enum class will become invalid. populate data as-is for data recovery
+                    }
+                }
                 return ((NBTTagString) base).getString();
             case NbtDataUtil.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;

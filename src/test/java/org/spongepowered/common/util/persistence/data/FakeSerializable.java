@@ -29,6 +29,9 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.Queries;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class FakeSerializable implements DataSerializable {
 
     public final String foo;
@@ -36,13 +39,16 @@ public class FakeSerializable implements DataSerializable {
     public final double theDouble;
     public final String nestedCompound;
     public final boolean aBoolean;
-
+    public final List<RandomEnum> randomEnumList;
+    public final RandomEnum randomEnum;
     public FakeSerializable(String foo, int myInt, double theDouble, String nestedCompound) {
         this.foo = foo;
         this.myInt = myInt;
         this.theDouble = theDouble;
         this.nestedCompound = nestedCompound;
         this.aBoolean = false;
+        randomEnum = RandomEnum.FOO;
+        randomEnumList = Arrays.asList(RandomEnum.FOO, RandomEnum.BAR, RandomEnum.BAR, RandomEnum.FOO);
     }
 
     @Override
@@ -59,6 +65,8 @@ public class FakeSerializable implements DataSerializable {
         container.set(DataQuery.of("theDouble"), this.theDouble);
         container.set(DataQuery.of("nested", "compound"), this.nestedCompound);
         container.set(DataQuery.of("MyBoolean"), this.aBoolean);
+        container.set(DataQuery.of("singleEnum"), this.randomEnum);
+        container.set(DataQuery.of("randomEnumList"), this.randomEnumList);
         return container;
     }
 }
