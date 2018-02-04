@@ -37,6 +37,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperien
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Map;
@@ -71,7 +72,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
     protected Map<Key<?>, ?> getValues(EntityPlayer entity) {
         final int level = entity.experienceLevel;
         final int totalExp = entity.experienceTotal;
-        final int expSinceLevel = (int) (entity.experience * entity.xpBarCap());
+        final int expSinceLevel = ((IMixinEntityPlayer) entity).getExperienceSinceLevel();
         final int expBetweenLevels = entity.xpBarCap();
         return ImmutableMap.<Key<?>, Object>of(Keys.EXPERIENCE_LEVEL, level,
                 Keys.TOTAL_EXPERIENCE, totalExp,

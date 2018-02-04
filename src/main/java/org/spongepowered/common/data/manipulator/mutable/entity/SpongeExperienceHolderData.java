@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperienceHolderData;
@@ -120,11 +122,7 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     public void setLevel(int level) {
         this.level = level;
-        int totalExp = 0;
-        for (int i = 0; i < level; i++) {
-            totalExp += ExperienceHolderUtils.getExpBetweenLevels(i);
-        }
-        this.totalExp = totalExp;
+        this.totalExp = ExperienceHolderUtils.xpAtLevel(level);
         this.expSinceLevel = 0;
         this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(level);
     }
@@ -135,18 +133,9 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
 
     public void setTotalExp(int totalExp) {
         this.totalExp = totalExp;
-        int level = 0;
-        while (true) {
-            int expToNextLevel = ExperienceHolderUtils.getExpBetweenLevels(level);
-            if (totalExp < expToNextLevel) {
-                this.expSinceLevel = totalExp;
-                this.expBetweenLevels = expToNextLevel;
-                this.level = level;
-                break;
-            }
-            totalExp -= expToNextLevel;
-            level++;
-        }
+        this.level = ExperienceHolderUtils.getLevelForExp(totalExp);
+        this.expSinceLevel = totalExp - ExperienceHolderUtils.xpAtLevel(this.level);
+        this.expBetweenLevels = ExperienceHolderUtils.getExpBetweenLevels(this.level);
     }
 
     public int getExpSinceLevel() {
@@ -154,9 +143,8 @@ public class SpongeExperienceHolderData extends AbstractData<ExperienceHolderDat
     }
 
     public void setExpSinceLevel(int expSinceLevel) {
-        while (expSinceLevel >= this.expBetweenLevels) {
-            expSinceLevel -= this.expBetweenLevels;
-        }
+        checkArgument(0 <= expSinceLevel && expSinceLevel <= this.expBetweenLevels,
+                "expSinceLevel (" + expSinceLevel + ") must be between 0 and expBetweenLevels (" + this.expBetweenLevels + ")");
         this.expSinceLevel = expSinceLevel;
     }
 

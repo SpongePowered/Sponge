@@ -49,11 +49,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
         if (supports(container)) {
             final EntityPlayer player = (EntityPlayer) container;
             final Integer oldValue = player.experienceLevel;
-            int totalExp = 0;
-            for (int i = 0; i < value; i++) {
-                totalExp += ExperienceHolderUtils.getExpBetweenLevels(i);
-            }
-            player.experienceTotal = totalExp;
+            player.experienceTotal = ExperienceHolderUtils.xpAtLevel(value);
             player.experience = 0;
             player.experienceLevel = value;
             ((IMixinEntityPlayerMP) container).refreshExp();

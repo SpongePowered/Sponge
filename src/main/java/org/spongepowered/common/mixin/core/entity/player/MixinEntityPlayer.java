@@ -182,44 +182,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         ci.setReturnValue(LegacyTexts.parseComponent((TextComponentString) ci.getReturnValue(), SpongeTexts.COLOR_CHAR));
     }
 
-    // utility method for getting the total experience at an arbitrary level
-    // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()
-    private int xpAtLevel(int level) {
-        if (level > 30) {
-            return (int) (4.5 * Math.pow(level, 2) - 162.5 * level + 2220);
-        } else if (level > 15) {
-            return (int) (2.5 * Math.pow(level, 2) - 40.5 * level + 360);
-        } else {
-            return (int) (Math.pow(level, 2) + 6 * level);
-        }
-    }
-
+    @Override
     public int getExperienceSinceLevel() {
-        return this.getTotalExperience() - xpAtLevel(this.getLevel());
+        return this.experienceTotal - ExperienceHolderUtils.xpAtLevel(this.experienceLevel);
     }
 
+    @Override
     public void setExperienceSinceLevel(int experience) {
-        this.setTotalExperience(xpAtLevel(this.experienceLevel) + experience);
-    }
-
-    public int getExperienceBetweenLevels() {
-        return this.xpBarCap();
-    }
-
-    public int getLevel() {
-        return this.experienceLevel;
-    }
-
-    public void setLevel(int level) {
-        this.experienceLevel = level;
-    }
-
-    public int getTotalExperience() {
-        return this.experienceTotal;
-    }
-
-    public void setTotalExperience(int exp) {
-        this.experienceTotal = exp;
+        this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
+        this.experience = (float) experience / this.xpBarCap();
     }
 
     /**
@@ -229,7 +200,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private void recalculateTotalExperience() {
         if (!this.dontRecalculateExperience) {
             int newExperienceInLevel = (int) (this.experience * this.xpBarCap());
-            this.experienceTotal = this.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
+            this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
             this.experience = (float) newExperienceInLevel / this.xpBarCap();
         }
     }
@@ -254,29 +225,16 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             amount = i;
         }
 
-        // Sponge start - completely rewritten for more accurate calculations
+        // Sponge start - completely rewritten for integer-based calculations
         // this.experience += (float)amount / (float)this.xpBarCap();
 
         // for (this.experienceTotal += amount; this.experience >= 1.0F; this.experience /= (float)this.xpBarCap()) {
             // this.experience = (this.experience - 1.0F) * (float)this.xpBarCap();
             // this.addExperienceLevel(1);
         // }
-        this.experienceTotal += amount;
 
-        // Based on recalculateTotalExperience() this should be
-        // approximately a whole number. Round in case of minor errors
-        // (although those are much more minor than those of the original
-        // algorithm).
-        int xpToDistribute = Math.round(this.experience * this.xpBarCap()) + amount;
-        // If this looks confusing, imagine "this.experience = 0;" here.
-        // That XP is incorporated into xpToDistribute.
-
-        int finalLevel = this.experienceLevel;
-        while (xpToDistribute >= ExperienceHolderUtils.getExpBetweenLevels(finalLevel)) {
-            xpToDistribute -= ExperienceHolderUtils.getExpBetweenLevels(finalLevel);
-            finalLevel++;
-        }
-
+        int finalExperience = this.experienceTotal + amount;
+        int finalLevel = ExperienceHolderUtils.getLevelForExp(finalExperience);
         if (finalLevel != this.experienceLevel) {
             this.dontRecalculateExperience = true;
             try {
@@ -285,7 +243,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 this.dontRecalculateExperience = false;
             }
         }
-        this.experience = (float) xpToDistribute / this.xpBarCap();
+        this.experience = (float) (finalExperience - ExperienceHolderUtils.xpAtLevel(finalLevel))
+                / ExperienceHolderUtils.getExpBetweenLevels(finalLevel);
+        this.experienceTotal = finalExperience;
+        this.experienceLevel = finalLevel;
         // Sponge end
     }
 
