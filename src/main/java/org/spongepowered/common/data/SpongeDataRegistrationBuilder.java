@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataAlreadyRegisteredException;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
@@ -59,7 +60,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
 
     @SuppressWarnings("unchecked")
     @Override
-    public  <D extends DataManipulator<D, C>, C extends ImmutableDataManipulator<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
+    public <D extends DataManipulator<D, C>, C extends ImmutableDataManipulator<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
         this.manipulatorClass = (Class<M>) checkNotNull(manipulatorClass, "DataManipulator class cannot be null!");
         return (SpongeDataRegistrationBuilder<D, C>) this;
     }
@@ -72,7 +73,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> manipulatorId(String id) {
+    public SpongeDataRegistrationBuilder<M, I> id(String id) {
         this.id = checkNotNull(id);
         checkArgument(!this.id.contains(":"), "Data ID must be formatted correctly!");
         checkArgument(!this.id.isEmpty(), "Data ID cannot be empty!");
@@ -82,7 +83,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     }
 
     @Override
-    public SpongeDataRegistrationBuilder<M, I> dataName(String name) {
+    public SpongeDataRegistrationBuilder<M, I> name(String name) {
         this.name = checkNotNull(name);
         checkArgument(!this.name.isEmpty(), "Name cannot be empty!");
         return this;
@@ -152,20 +153,31 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
         return this;
     }
 
-    @Override
-    public DataRegistration<M, I> buildAndRegister(PluginContainer container)
-        throws IllegalStateException, IllegalArgumentException, DataAlreadyRegisteredException {
-        checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations cannot take place at this time!");
+    private void validate() {
         checkState(this.manipulatorBuilder != null, "ManipulatorBuilder cannot be null!");
         checkState(this.manipulatorClass != null, "DataManipulator class cannot be null!");
         checkState(this.immutableClass != null, "ImmutableDataManipulator class cannot be null!");
         checkState(this.id != null, "Data ID cannot be null!");
+    }
+
+    @Override
+    public DataRegistration<M, I> buildAndRegister(PluginContainer container)
+            throws IllegalStateException, IllegalArgumentException, DataAlreadyRegisteredException {
+        checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations cannot take place at this time!");
+        validate();
         this.container = container;
-        SpongeManipulatorRegistry.getInstance().validateRegistration(this);
+        SpongeManipulatorRegistry.getInstance().validateRegistrationId(this.id);
         SpongeDataManager.getInstance().validateRegistration(this);
         final SpongeDataRegistration<M, I> registration = new SpongeDataRegistration<>(this);
         SpongeDataManager.getInstance().registerInternally(registration);
         SpongeManipulatorRegistry.getInstance().register(registration);
         return registration;
+    }
+
+    @Override
+    public DataRegistration<M, I> build() {
+        validate();
+        this.container = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
+        return new SpongeDataRegistration<>(this);
     }
 }

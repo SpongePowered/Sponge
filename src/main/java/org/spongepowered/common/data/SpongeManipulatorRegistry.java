@@ -121,11 +121,15 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     @Override
     public void registerAdditionalCatalog(DataRegistration<?, ?> extraCatalog) {
         checkArgument(extraCatalog instanceof SpongeDataRegistration);
-        // Technically, if the registration was not registered, well....
-        // it should have already been registered at this point
+        checkState(this.tempRegistry != null);
+        validateRegistrationId(extraCatalog.getId());
+        SpongeDataManager.getInstance().validateRegistration(
+                ((DataRegistration) extraCatalog).getManipulatorClass(), ((DataRegistration) extraCatalog).getImplementationClass(),
+                ((DataRegistration) extraCatalog).getImmutableManipulatorClass(), ((DataRegistration) extraCatalog).getImmutableImplementationClass(),
+                ((DataRegistration) extraCatalog).getDataManipulatorBuilder());
         final SpongeDataRegistration registration = (SpongeDataRegistration) extraCatalog;
         SpongeDataManager.getInstance().registerInternally(registration);
-        SpongeManipulatorRegistry.getInstance().register(registration);
+        register(registration);
     }
 
     @Override
@@ -138,7 +142,6 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     public Collection<DataRegistration<?, ?>> getAll() {
         return this.registrationMap.values();
     }
-
 
     private static final class TemporaryRegistry {
 
@@ -207,9 +210,8 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         return Optional.ofNullable((DataRegistration<M, I>) dataRegistration);
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
+    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistrationId(String dataId) {
         checkState(this.tempRegistry != null);
-        final String dataId = builder.id;
         this.tempRegistry.registrations.stream()
             .filter(registration -> registration.getId().equalsIgnoreCase(dataId))
             .findFirst()
@@ -227,7 +229,6 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     public Optional<DataRegistration<?, ?>> getRegistrationForLegacyId(String id) {
         return Optional.ofNullable(this.legacyRegistrationIds.get(id));
     }
-
 
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> register(
         SpongeDataRegistration<M, I> registration) {

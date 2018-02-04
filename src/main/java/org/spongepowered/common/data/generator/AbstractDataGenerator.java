@@ -53,6 +53,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_8;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
 import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
@@ -85,6 +86,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.generator.GeneratorUtils;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.InternalCopies;
+import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
@@ -101,10 +103,15 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 import org.spongepowered.common.util.TypeTokenHelper;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -262,9 +269,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         // Step 3: Start generating things?
 
         // Assuming that people use the lower underscore format? Replace - with _ just in case.
-        final String mutableClassName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
-                plugin.getId().replace('-', '_') + '.' +
-                        this.id.replace('-', '_'));
+        final String mutableClassName = "org.spongepowered.data." +
+                CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, plugin.getId().replace('-', '_')) + '.' +
+                        CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, this.id.replace('-', '_'));
         final String immutableClassName = mutableClassName + "$Immutable"; // Inner class
 
         // Convert to internal names
@@ -273,11 +280,62 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
 
         // Generate the classes
         final byte[] mutableClassBytes = generateClass(mutableInternalName, immutableInternalName, mutableMethodEntries, true);
-        final Class<?> mutableClass = classLoader.defineClass(mutableClassName, mutableClassBytes);
         final byte[] immutableClassBytes = generateClass(mutableInternalName, immutableInternalName, immutableMethodEntries, false);
+
+        try {
+            File file = new File(mutableInternalName + ".class");
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(mutableClassBytes);
+                fos.flush();
+            }
+            file = new File(immutableInternalName + ".class");
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(immutableClassBytes);
+                fos.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Define them
+        final Class<?> mutableClass = classLoader.defineClass(mutableClassName, mutableClassBytes);
         final Class<?> immutableClass = classLoader.defineClass(immutableClassName, immutableClassBytes);
 
-        return null;
+        final ImmutableSet.Builder<Key<?>> keys = ImmutableSet.builder();
+
+        // Inject the static parameters
+        try {
+            for (KeyEntry entry : this.keyEntries) {
+                mutableClass.getField(entry.keyFieldName).set(null, entry.key);
+                mutableClass.getField(entry.defaultValueFieldName).set(null, entry.defaultValue);
+                if (entry instanceof BoundedKeyEntry) {
+                    final BoundedKeyEntry bounded = (BoundedKeyEntry) entry;
+                    mutableClass.getField(bounded.comparatorFieldName).set(null, bounded.comparator);
+                    mutableClass.getField(bounded.minimumFieldName).set(null, bounded.minimum);
+                    mutableClass.getField(bounded.maximumFieldName).set(null, bounded.maximum);
+                }
+                keys.add(entry.key);
+            }
+            mutableClass.getField(keysFieldName).set(null, keys.build());
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new IllegalStateException(e);
+        }
+
+        return new SpongeDataRegistrationBuilder()
+                .id(this.id)
+                .name(this.name == null ? this.id : this.name)
+                .dataClass(this.mutableInterface == null ? mutableClass : this.mutableInterface)
+                .dataImplementation(mutableClass)
+                .immutableClass(this.immutableInterface == null ? immutableClass : this.immutableInterface)
+                .immutableImplementation(immutableClass)
+                .builder(new ReflectiveDataManipulatorBuilder(mutableClass))
+                .build();
     }
 
     private byte[] generateClass(String mutableInternalName, String immutableInternalName,
@@ -314,6 +372,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 interf = "org/spongepowered/api/data/manipulator/ImmutableDataManipulator";
             }
         }
+        final Type interfType = Type.getType(this.mutableInterface);
 
         cv.visit(V1_8, ACC_PUBLIC | ACC_SUPER, targetInternalName, interfSignature,
                 "java/lang/Object", new String[] { interf });
@@ -332,7 +391,11 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     "Lcom/google/common/collect/ImmutableSet<Lorg/spongepowered/api/data/key/Key<*>;>;", null);
             fv.visitEnd();
         }
-        for (KeyEntry entry : keyEntries) {
+        for (KeyEntry entry : this.keyEntries) {
+            // Visit the value field, not private, so we still have field access between the mutable and immutable classes
+            fv = cv.visitField(ACC_PUBLIC, entry.valueFieldName,
+                    entry.valueFieldDescriptor, entry.valueFieldSignature, null);
+            fv.visitEnd();
             // Check if the mutable class is being generated, this is the
             // only class that will hold the static fields, the immutable
             // version will be a inner class.
@@ -361,10 +424,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     fv.visitEnd();
                 }
             }
-            // Visit the value field, not private, so we still have field access between the mutable and immutable classes
-            fv = cv.visitField(ACC_PUBLIC, entry.defaultValueFieldName,
-                    entry.valueFieldDescriptor, entry.valueFieldSignature, null);
-            fv.visitEnd();
         }
 
         // Generate the methods
@@ -385,6 +444,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitFieldInsn(PUTFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
             }
             mv.visitInsn(RETURN);
+            mv.visitMaxs(0, 0); // Will be calculated
             mv.visitEnd();
         }
         {
@@ -427,6 +487,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             // return Optional.empty();
             mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "empty", "()Ljava/util/Optional;", false);
             mv.visitInsn(ARETURN);
+            mv.visitMaxs(0, 0); // Will be calculated
             // End
             mv.visitEnd();
         }
@@ -447,6 +508,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitVarInsn(ALOAD, 1);
             mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/collect/ImmutableSet", "contains", "(Ljava/lang/Object;)Z", false);
             mv.visitInsn(IRETURN);
+            mv.visitMaxs(0, 0); // Will be calculated
             // End
             mv.visitEnd();
         }
@@ -457,6 +519,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             // return keys;
             mv.visitFieldInsn(GETSTATIC, mutableInternalName, keysFieldName, "Lcom/google/common/collect/ImmutableSet;");
             mv.visitInsn(ARETURN);
+            mv.visitMaxs(0, 0); // Will be calculated
             // End
             mv.visitEnd();
         }
@@ -469,6 +532,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             GeneratorHelper.visitPushInt(mv, this.contentVersion);
             // And return it
             mv.visitInsn(IRETURN);
+            mv.visitMaxs(0, 0); // Will be calculated
             mv.visitEnd();
         }
         {
@@ -498,6 +562,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/collect/ImmutableSet$Builder",
                     "build", "()Lcom/google/common/collect/ImmutableSet;", false);
             mv.visitInsn(ARETURN);
+            // The end
+            mv.visitMaxs(0, 0); // Will be calculated
             mv.visitEnd();
         }
         {
@@ -537,6 +603,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "empty", "()Ljava/util/Optional;", false);
             mv.visitInsn(ARETURN);
             // The End
+            mv.visitMaxs(0, 0); // Will be calculated
             mv.visitEnd();
         }
         if (generateMutable) {
@@ -550,7 +617,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitCode();
                 // final Optional<TestData> optData = dataHolder.get(TestData.class);
                 mv.visitVarInsn(ALOAD, 1);
-                mv.visitLdcInsn(interf);
+                mv.visitLdcInsn(interfType);
                 mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/DataHolder", "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
                 mv.visitVarInsn(ASTORE, 3);
                 // Start of: if (optData.isPresent()) {}
@@ -580,13 +647,17 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     // Put into this container
                     mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
                 }
-                // End of: if (optData.isPresent()) {}
-                mv.visitLabel(jumpLabel);
                 // return Optional.of(this);
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "of", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
                 mv.visitInsn(ARETURN);
+                // End of: if (optData.isPresent()) {}
+                mv.visitLabel(jumpLabel);
+                // return Optional.empty();
+                mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "empty", "()Ljava/util/Optional;", false);
+                mv.visitInsn(ARETURN);
                 // The end
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             {
@@ -636,6 +707,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 // return this;
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             {
@@ -662,6 +735,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitInsn(ARETURN);
                 // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             {
@@ -688,6 +762,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitInsn(ARETURN);
                 // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             // TODO: Generate more synthetic bridges if methods get overridden?
@@ -699,6 +774,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "asImmutable",
                         String.format("()L%s;", immutableInternalName), false);
                 mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             {
@@ -709,6 +786,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
                         String.format("()L%s;", mutableInternalName), false);
                 mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             {
@@ -721,6 +800,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "set",
                         String.format("(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)L%s;", mutableInternalName), false);
                 mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             {
@@ -731,6 +812,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
                         String.format("()L%s;", mutableInternalName), false);
                 mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
         } else {
@@ -758,6 +841,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitInsn(ARETURN);
                 // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
             // TODO: Generate more synthetic bridges if methods get overridden?
@@ -769,6 +853,8 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMethodInsn(INVOKEVIRTUAL, immutableInternalName, "asMutable",
                         String.format("()L%s;", mutableInternalName), false);
                 mv.visitInsn(ARETURN);
+                // End
+                mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
         }
@@ -780,7 +866,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         return cv.toByteArray();
     }
 
-    static void visitImmutableValueCreation(MethodVisitor mv, KeyEntry keyEntry,
+    private static void visitImmutableValueCreation(MethodVisitor mv, KeyEntry keyEntry,
             String targetInternalName, String mutableInternalName) {
         try {
             visitImmutableValueCreation0(mv, keyEntry, targetInternalName, mutableInternalName);
@@ -795,28 +881,28 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         // So many different value types
         final Constructor<?> constructor;
         final Class<?> valueClass;
-        if (rawType.isAssignableFrom(PatternListValue.class) ||
-                rawType.isAssignableFrom(ImmutablePatternListValue.class)) {
+        if (PatternListValue.class.isAssignableFrom(rawType) ||
+                ImmutablePatternListValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongePatternListValue.class;
             constructor = ImmutableSpongePatternListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(ListValue.class) ||
-                rawType.isAssignableFrom(ImmutableListValue.class)) {
+        } else if (ListValue.class.isAssignableFrom(rawType) ||
+                ImmutableListValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeListValue.class;
             constructor = ImmutableSpongeListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(MapValue.class) ||
-                rawType.isAssignableFrom(ImmutableMapValue.class)) {
+        } else if (MapValue.class.isAssignableFrom(rawType) ||
+                ImmutableMapValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeMapValue.class;
             constructor = ImmutableSpongeMapValue.class.getConstructor(
                     Key.class, Map.class, Map.class);
-        } else if (rawType.isAssignableFrom(OptionalValue.class) ||
-                rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
+        } else if (OptionalValue.class.isAssignableFrom(rawType) ||
+                ImmutableOptionalValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeOptionalValue.class;
             constructor = ImmutableSpongeOptionalValue.class.getConstructor(
                     Key.class, Optional.class, Optional.class);
-        } else if (rawType.isAssignableFrom(WeightedCollectionValue.class) ||
-                rawType.isAssignableFrom(ImmutableWeightedCollectionValue.class)) {
+        } else if (WeightedCollectionValue.class.isAssignableFrom(rawType) ||
+                ImmutableWeightedCollectionValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeWeightedCollectionValue.class;
             constructor = ImmutableSpongeWeightedCollectionValue.class.getConstructor(
                     Key.class, WeightedTable.class, WeightedTable.class);
@@ -833,7 +919,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         visitBaseValueCreation(mv, keyEntry, targetInternalName, mutableInternalName, constructor, valueClass);
     }
 
-    static void visitValueCreation(MethodVisitor mv, KeyEntry keyEntry,
+    private static void visitValueCreation(MethodVisitor mv, KeyEntry keyEntry,
             String targetInternalName, String mutableInternalName) {
         try {
             visitValueCreation0(mv, keyEntry, targetInternalName, mutableInternalName);
@@ -848,43 +934,43 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         // So many different value types
         final Constructor<?> constructor;
         final Class<?> valueClass;
-        if (rawType.isAssignableFrom(PatternListValue.class) ) {
+        if (PatternListValue.class.isAssignableFrom(rawType) ) {
             valueClass = SpongePatternListValue.class;
             constructor = SpongePatternListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(ImmutablePatternListValue.class)) {
+        } else if (ImmutablePatternListValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongePatternListValue.class;
             constructor = ImmutableSpongePatternListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(ListValue.class)) {
+        } else if (ListValue.class.isAssignableFrom(rawType)) {
             valueClass = SpongeListValue.class;
             constructor = SpongeListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(ImmutableListValue.class)) {
+        } else if (ImmutableListValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeListValue.class;
             constructor = ImmutableSpongeListValue.class.getConstructor(
                     Key.class, List.class, List.class);
-        } else if (rawType.isAssignableFrom(MapValue.class)) {
+        } else if (MapValue.class.isAssignableFrom(rawType)) {
             valueClass = SpongeMapValue.class;
             constructor = SpongeMapValue.class.getConstructor(
                     Key.class, Map.class, Map.class);
-        } else if (rawType.isAssignableFrom(ImmutableMapValue.class)) {
+        } else if (ImmutableMapValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeMapValue.class;
             constructor = ImmutableSpongeMapValue.class.getConstructor(
                     Key.class, Map.class, Map.class);
-        } else if (rawType.isAssignableFrom(OptionalValue.class)) {
+        } else if (OptionalValue.class.isAssignableFrom(rawType)) {
             valueClass = SpongeOptionalValue.class;
             constructor = SpongeOptionalValue.class.getConstructor(
                     Key.class, Optional.class, Optional.class);
-        } else if (rawType.isAssignableFrom(ImmutableOptionalValue.class)) {
+        } else if (ImmutableOptionalValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeOptionalValue.class;
             constructor = ImmutableSpongeOptionalValue.class.getConstructor(
                     Key.class, Optional.class, Optional.class);
-        } else if (rawType.isAssignableFrom(WeightedCollectionValue.class)) {
+        } else if (WeightedCollectionValue.class.isAssignableFrom(rawType)) {
             valueClass = SpongeWeightedCollectionValue.class;
             constructor = SpongeWeightedCollectionValue.class.getConstructor(
                     Key.class, WeightedTable.class, WeightedTable.class);
-        } else if (rawType.isAssignableFrom(ImmutableWeightedCollectionValue.class)) {
+        } else if (ImmutableWeightedCollectionValue.class.isAssignableFrom(rawType)) {
             valueClass = ImmutableSpongeWeightedCollectionValue.class;
             constructor = ImmutableSpongeWeightedCollectionValue.class.getConstructor(
                     Key.class, WeightedTable.class, WeightedTable.class);
@@ -898,7 +984,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 constructor = ImmutableSpongeBoundedValue.class.getConstructor(
                         Key.class, Object.class, Object.class, Comparator.class, Object.class, Object.class);
             }
-        } else if (rawType.isAssignableFrom(Value.class)) {
+        } else if (Value.class.isAssignableFrom(rawType)) {
             valueClass = SpongeValue.class;
             constructor = SpongeValue.class.getConstructor(
                     Key.class, Object.class, Object.class);
@@ -941,7 +1027,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         mv.visitMethodInsn(INVOKESPECIAL, valueType, "<init>", constructorDesc, false);
     }
 
-    static void collectMethodEntries(Class<?> targetClass,
+    private static void collectMethodEntries(Class<?> targetClass,
             Map<String, KeyEntry> keysById, Set<MethodEntry> methodEntries) {
         for (Method method : targetClass.getMethods()) {
             final KeyValue keyValue = method.getAnnotation(KeyValue.class);
@@ -950,14 +1036,37 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 checkState(keyEntry != null, "Cannot find a mapping for the KeyValue value: %s", keyValue.value());
                 final Class<?> returnType = method.getReturnType();
                 if (returnType.equals(void.class)) { // Setter?
-
+                    // Setters have exactly one parameter
+                    checkState(method.getParameterCount() == 1,
+                            "The method %s has multiple parameters?", method.getName());
+                    final TypeToken<?> paramTypeToken = TypeToken.of(method.getGenericParameterTypes()[0]);
+                    // Check if the object can be "casted", just "compatible" generics
+                    boolean compatible = TypeTokenHelper.isAssignable(keyEntry.key.getElementToken(), paramTypeToken) ||
+                            (keyEntry.valueClass.isPrimitive() && paramTypeToken.getRawType().equals(keyEntry.valueClass)); // Check for primitive
+                    // Optionals support unboxed return types if annotated with @Nullable
+                    if (!compatible && keyEntry.key.getElementToken().isSubtypeOf(Optional.class)) {
+                        final TypeToken<?> genericType = paramTypeToken.resolveType(optionalVariable);
+                        compatible = TypeTokenHelper.isAssignable(genericType, paramTypeToken);
+                        // Force a @Nullable annotation on unboxed fields
+                        if (compatible) {
+                            checkState(Arrays.stream(method.getParameterAnnotations()[0]).anyMatch(a -> a instanceof Nullable),
+                                    "A unboxed optional setter method (%s) requires a @Nullable annotation on the parameter.", method.getName());
+                            methodEntries.add(new BoxedOptionalSetterMethodEntry(method, keyEntry));
+                            continue;
+                        }
+                    }
+                    // Must be compatible at this point, no more special cases
+                    checkState(compatible, "The key type %s is not assignable to the return type %s in the method %s",
+                            keyEntry.key.getElementToken(), paramTypeToken, method.getName());
+                    methodEntries.add(new SetterMethodEntry(method, keyEntry));
                 } else { // Getter?
                     // Getters don't have parameter counts
                     checkState(method.getParameterCount() == 0,
                             "The method %s has a return type (not void) and parameters?", method.getName());
                     final TypeToken<?> returnTypeToken = TypeToken.of(method.getGenericReturnType());
                     // Check if the object can be "casted", just "compatible" generics
-                    boolean compatible = TypeTokenHelper.isAssignable(keyEntry.key.getElementToken(), returnTypeToken);
+                    boolean compatible = TypeTokenHelper.isAssignable(keyEntry.key.getElementToken(), returnTypeToken) ||
+                            (keyEntry.valueClass.isPrimitive() && returnTypeToken.getRawType().equals(keyEntry.valueClass)); // Check for primitive
                     // Optionals support unboxed return types if annotated with @Nullable
                     if (!compatible && keyEntry.key.getElementToken().isSubtypeOf(Optional.class)) {
                         final TypeToken<?> genericType = returnTypeToken.resolveType(optionalVariable);

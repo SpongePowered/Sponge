@@ -48,6 +48,7 @@ abstract class MethodEntry {
         preVisit(mv, targetInternalName, mutableInternalName);
         mv.visitCode();
         visit(mv, targetInternalName, mutableInternalName);
+        mv.visitMaxs(0, 0); // Will be calculated
         mv.visitEnd();
     }
 

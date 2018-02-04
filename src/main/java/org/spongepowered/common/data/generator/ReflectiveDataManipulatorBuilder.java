@@ -24,34 +24,24 @@
  */
 package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.GETFIELD;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.spongepowered.api.util.generator.GeneratorUtils;
+public class ReflectiveDataManipulatorBuilder<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>>
+        extends AbstractDataManipulatorBuilder<T, I> {
 
-import java.lang.reflect.Method;
+    private final Class<T> mutableClass;
 
-final class GetterMethodEntry extends MethodEntry {
-
-    GetterMethodEntry(Method method, KeyEntry keyEntry) {
-        super(method, keyEntry);
+    public ReflectiveDataManipulatorBuilder(Class<T> mutableClass) {
+        this.mutableClass = mutableClass;
     }
 
     @Override
-    void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
-        // Load "this"
-        mv.visitVarInsn(ALOAD, 0);
-        final Class<?> returnType = this.method.getReturnType();
-        // Get the field value from "this"
-        mv.visitFieldInsn(GETFIELD, targetInternalName,
-                this.keyEntry.valueFieldName, Type.getDescriptor(returnType));
-        if (this.keyEntry.boxedValueClass.equals(returnType)) {
-            // Box the primitive value, if it's a primitive
-            GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
+    public T create() {
+        try {
+            return this.mutableClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
-        // Return the value
-        GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);
     }
 }

@@ -24,34 +24,27 @@
  */
 package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.GETFIELD;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.spongepowered.api.util.generator.GeneratorUtils;
+import java.util.Optional;
 
-import java.lang.reflect.Method;
+public abstract class AbstractDataManipulatorBuilder<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>>
+        implements DataManipulatorBuilder<T, I> {
 
-final class GetterMethodEntry extends MethodEntry {
-
-    GetterMethodEntry(Method method, KeyEntry keyEntry) {
-        super(method, keyEntry);
+    @Override
+    public Optional<T> createFrom(DataHolder dataHolder) {
+        return create().fill(dataHolder);
     }
 
     @Override
-    void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
-        // Load "this"
-        mv.visitVarInsn(ALOAD, 0);
-        final Class<?> returnType = this.method.getReturnType();
-        // Get the field value from "this"
-        mv.visitFieldInsn(GETFIELD, targetInternalName,
-                this.keyEntry.valueFieldName, Type.getDescriptor(returnType));
-        if (this.keyEntry.boxedValueClass.equals(returnType)) {
-            // Box the primitive value, if it's a primitive
-            GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
-        }
-        // Return the value
-        GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);
+    public Optional<T> build(DataView container) throws InvalidDataException {
+        return create().from(container instanceof DataContainer ? (DataContainer) container :
+                container.copy(DataView.SafetyMode.NO_DATA_CLONED));
     }
 }

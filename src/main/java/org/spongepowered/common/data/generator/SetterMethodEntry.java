@@ -24,37 +24,37 @@
  */
 package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
+import org.spongepowered.api.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Method;
 
-final class UnboxedOptionalGetterMethodEntry extends MethodEntry {
+final class SetterMethodEntry extends MethodEntry {
 
-    UnboxedOptionalGetterMethodEntry(Method method, KeyEntry keyEntry) {
+    SetterMethodEntry(Method method, KeyEntry keyEntry) {
         super(method, keyEntry);
     }
 
     @Override
-    void preVisit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
-        // Add the nullable annotation, is forced to be present in the interfaces
-        mv.visitAnnotation("Ljavax/annotation/Nullable;", true).visitEnd();
-    }
-
-    @Override
     void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
+        // Load "this"
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
-        mv.visitInsn(ACONST_NULL);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "orElse", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(this.method.getReturnType()));
-        mv.visitInsn(ARETURN);
+        final Class<?> paramType = this.method.getParameterTypes()[0];
+        // Load the parameter
+        mv.visitVarInsn(ALOAD, 1);
+        if (this.keyEntry.boxedValueClass.equals(paramType)) {
+            // Check if it's null, will be skipped for primitives
+            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions",
+                    "checkNotNull", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+            // Unbox the value, if it's a primitive
+            GeneratorUtils.visitUnboxingMethod(mv, this.keyEntry.valueType);
+        }
+        mv.visitFieldInsn(PUTFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
+        mv.visitInsn(RETURN);
     }
 }

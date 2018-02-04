@@ -86,7 +86,7 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
             }
         }
         // Optional values also have a non optional variant key
-        if (valueToken.getRawType().isAssignableFrom(OptionalValue.class)) {
+        if (OptionalValue.class.isAssignableFrom(valueToken.getRawType())) {
             final TypeToken<?> optionalElementToken = valueToken.resolveType(OptionalValue.class.getTypeParameters()[0]);
             final TypeToken<?> unwrappedValueToken = createValueToken(optionalElementToken);
             this.optionalUnwrappedKey = new SpongeKey(builder, unwrappedValueToken, optionalElementToken);

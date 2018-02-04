@@ -24,37 +24,37 @@
  */
 package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
 
 import java.lang.reflect.Method;
 
-final class UnboxedOptionalGetterMethodEntry extends MethodEntry {
+class BoxedOptionalSetterMethodEntry extends MethodEntry {
 
-    UnboxedOptionalGetterMethodEntry(Method method, KeyEntry keyEntry) {
+    BoxedOptionalSetterMethodEntry(Method method, KeyEntry keyEntry) {
         super(method, keyEntry);
     }
 
     @Override
     void preVisit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         // Add the nullable annotation, is forced to be present in the interfaces
-        mv.visitAnnotation("Ljavax/annotation/Nullable;", true).visitEnd();
+        mv.visitParameterAnnotation(0, "Ljavax/annotation/Nullable;", true).visitEnd();
     }
 
     @Override
     void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
+        // Load "this"
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitFieldInsn(GETFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
-        mv.visitInsn(ACONST_NULL);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "orElse", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(this.method.getReturnType()));
-        mv.visitInsn(ARETURN);
+        // Load the parameter
+        mv.visitVarInsn(ALOAD, 1);
+        // Put the parameter into a optional
+        mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
+        // Put it in the field
+        mv.visitFieldInsn(PUTFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
+        mv.visitInsn(RETURN);
     }
 }

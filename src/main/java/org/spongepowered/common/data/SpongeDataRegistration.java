@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.plugin.PluginContainer;
 
 public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-    implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
+        implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
 
     private final Class<M> manipulatorClass;
     private final Class<? extends M> implementationClass;
@@ -85,14 +85,6 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     @Override
     public PluginContainer getPluginContainer() {
         return this.container;
-    }
-
-    @Override public M constructManipulator() {
-        return null;
-    }
-
-    @Override public I constructImmutableManipulator() {
-        return null;
     }
 
     @Override

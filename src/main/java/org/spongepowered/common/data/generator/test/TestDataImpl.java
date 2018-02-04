@@ -76,8 +76,9 @@ public class TestDataImpl implements TestData {
             final TestDataImpl data = (TestDataImpl) overlap.merge(this, optData.get());
             this.value$my_string = data.value$my_string;
             this.value$my_int = data.value$my_int;
+            return Optional.of(this);
         }
-        return Optional.of(this);
+        return Optional.empty();
     }
 
     @Override
