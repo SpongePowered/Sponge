@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
+import io.netty.util.collection.LongObjectHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -52,12 +53,14 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketEntityAttach;
+import net.minecraft.network.play.server.SPacketKeepAlive;
 import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
@@ -94,6 +97,7 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.Location;
@@ -111,14 +115,15 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -128,10 +133,9 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
 import java.net.InetSocketAddress;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
@@ -167,10 +171,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
+    @Shadow protected abstract long currentTimeMillis();
+
+    // Appears to be the last keep-alive packet ID. Currently the same as
+    // field_194402_f, but _f is time (which the ID just so happens to match).
+    @Shadow private long field_194404_h;
     private boolean justTeleported = false;
     @Nullable private Location<World> lastMoveLocation = null;
 
-    private final Deque<SPacketResourcePackSend> resourcePackRequests = new LinkedList<>();
+    private final AtomicInteger numResourcePacksInTransit = new AtomicInteger();
+    @Nullable private ResourcePack lastReceivedPack, lastAcceptedPack;
+    private final LongObjectHashMap<Runnable> customKeepAliveCallbacks = new LongObjectHashMap<>();
 
     // Store the last block right-clicked
     @Nullable private Item lastItem;
@@ -178,11 +189,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Override
     public void captureCurrentPlayerPosition() {
         this.captureCurrentPosition();
-    }
-
-    @Override
-    public Deque<SPacketResourcePackSend> getPendingResourcePackQueue() {
-        return this.resourcePackRequests;
     }
 
     @Override
@@ -233,6 +239,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
+    @Inject(method = "processKeepAlive", at = @At("HEAD"), cancellable = true)
+    private void checkSpongeKeepAlive(CPacketKeepAlive packetIn, CallbackInfo ci) {
+        Runnable callback = this.customKeepAliveCallbacks.get(packetIn.getKey());
+        if (callback != null) {
+            PacketThreadUtil.checkThreadAndEnqueue(packetIn, (INetHandlerPlayServer) this, this.player.getServerWorld());
+            this.customKeepAliveCallbacks.remove(packetIn.getKey());
+            callback.run();
+            ci.cancel();
+        }
+    }
+
     /**
      * This method wraps packets being sent to perform any additional actions,
      * such as rewriting data in the packet.
@@ -248,20 +265,19 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         // Update the tab list data
         if (packetIn instanceof SPacketPlayerListItem) {
             ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
-        }
-        // Store the resource pack for use when processing resource pack statuses
-        else if (packetIn instanceof SPacketResourcePackSend) {
-            SPacketResourcePackSend packet = (SPacketResourcePackSend) packetIn;
-            if (this.resourcePackRequests.isEmpty()) {
-                this.resourcePackRequests.add(packet);
-                return packet;
+        } else if (packetIn instanceof SPacketResourcePackSend) {
+            // Send a custom keep-alive packet that doesn't match vanilla.
+            long now = this.currentTimeMillis() - 1;
+            while (now == this.field_194404_h || this.customKeepAliveCallbacks.containsKey(now)) {
+                now--;
             }
-            if (this.resourcePackRequests.contains(packet)) {
-                // This must be a resend.
-                return packet;
-            }
-            this.resourcePackRequests.add(packet);
-            return null;
+            final ResourcePack resourcePack = ((IMixinPacketResourcePackSend) packetIn).getResourcePack();
+            this.numResourcePacksInTransit.incrementAndGet();
+            this.customKeepAliveCallbacks.put(now, () -> {
+                this.lastReceivedPack = resourcePack; // TODO do something with the old value
+                this.numResourcePacksInTransit.decrementAndGet();
+            });
+            this.netManager.sendPacket(new SPacketKeepAlive(now));
         }
 
         return packetIn;
@@ -795,10 +811,28 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Override
     public void resendLatestResourcePackRequest() {
-        // The vanilla client doesn't send any resource pack status if the user presses Escape to close the prompt.
-        // If the user moves around, they must have closed the GUI, so resend it to get a real answer.
-        if (!this.resourcePackRequests.isEmpty()) {
-            this.sendPacket(this.resourcePackRequests.peek());
+        ResourcePack pack = this.lastReceivedPack;
+        if (this.numResourcePacksInTransit.get() > 0 || pack == null) {
+            return;
         }
+        this.lastReceivedPack = null;
+        ((Player) this.player).sendResourcePack(pack);
+    }
+
+    @Override
+    public ResourcePack popReceivedResourcePack(boolean markAccepted) {
+        ResourcePack pack = this.lastReceivedPack;
+        this.lastReceivedPack = null;
+        if (markAccepted) {
+            this.lastAcceptedPack = pack; // TODO do something with the old value
+        }
+        return pack;
+    }
+
+    @Override
+    public ResourcePack popAcceptedResourcePack() {
+        ResourcePack pack = this.lastAcceptedPack;
+        this.lastAcceptedPack = null;
+        return pack;
     }
 }
