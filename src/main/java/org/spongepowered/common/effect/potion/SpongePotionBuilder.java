@@ -36,6 +36,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataVersions;
 
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     private boolean showParticles;
 
     public SpongePotionBuilder() {
-        super(PotionEffect.class, 1);
+        super(PotionEffect.class, DataVersions.Potion.CURRENT_VERSION);
     }
 
     @Override
