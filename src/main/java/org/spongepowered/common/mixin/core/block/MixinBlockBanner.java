@@ -34,9 +34,11 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAttachedData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -71,5 +73,10 @@ public abstract class MixinBlockBanner extends MixinBlock {
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getBlock() instanceof BlockBannerHanging);
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation("item.banner.white.name");
     }
 }

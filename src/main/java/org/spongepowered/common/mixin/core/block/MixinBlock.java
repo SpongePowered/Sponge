@@ -119,6 +119,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract boolean shadow$getTickRandomly();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
 
+    @Shadow public abstract BlockStateContainer getBlockState();
+
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
         // Determine which blocks can avoid executing un-needed event logic

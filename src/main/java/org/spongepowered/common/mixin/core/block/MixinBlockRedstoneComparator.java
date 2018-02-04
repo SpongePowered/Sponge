@@ -35,10 +35,12 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableComparato
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.type.ComparatorType;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeComparatorData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -92,5 +94,10 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlock {
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockRedstoneComparator.POWERED));
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation("item.comparator.name");
     }
 }
