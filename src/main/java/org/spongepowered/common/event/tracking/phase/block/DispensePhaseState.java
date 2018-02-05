@@ -24,23 +24,35 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.interfaces.block.tile.IMixinBlockDispenser;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
+import java.util.List;
 
 final class DispensePhaseState extends BlockPhaseState {
 
@@ -50,9 +62,9 @@ final class DispensePhaseState extends BlockPhaseState {
     @Override
     public GeneralizedContext createPhaseContext() {
         return super.createPhaseContext()
-            .addBlockCaptures()
-            .addEntityCaptures()
-            .addEntityDropCaptures();
+                .addBlockCaptures()
+                .addEntityCaptures()
+                .addEntityDropCaptures();
     }
 
     @Override
@@ -83,20 +95,62 @@ final class DispensePhaseState extends BlockPhaseState {
                     });
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent
-                                event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                if (user != null) {
-                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                        List<Projectile> projectiles = new ArrayList<>();
+                        List<Entity> rest = new ArrayList<>();
+                        for (Entity entity : entities) {
+                            if (entity instanceof Projectile) {
+                                projectiles.add((Projectile) entity);
+                            } else {
+                                rest.add(entity);
+                            }
+                        }
+
+                        if (!rest.isEmpty() && ShouldFire.SPAWN_ENTITY_EVENT) {
+                            fireSpawnEntityEvent(phaseContext, frame, rest);
+                        }
+
+                        if (!projectiles.isEmpty()) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
+                            Dispenser dispenser = (Dispenser) blockSnapshot.getLocation().get().getExtent().getTileEntity(blockSnapshot.getLocation().get().getPosition().toInt()).get();
+                            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, dispenser);
+                            frame.addContext(EventContextKeys.THROWER, dispenser);
+
+                            LaunchProjectileEvent launchProjectileEvent =
+                                    SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);
+                            if (SpongeImpl.postEvent(launchProjectileEvent)) {
+                                projectiles.clear();
+                                Vector3d position = dispenser.getLocation().getPosition();
+                                BlockSourceImpl blockSource = new BlockSourceImpl(((World) dispenser.getWorld()), new BlockPos(position.getX(), position.getY(), position.getZ()));
+                                TileEntityDispenser tileDispenser = blockSource.getBlockTileEntity();
+                                ((IMixinBlockDispenser) tileDispenser.getBlockType()).restoreDispensedItem();
+                            } else {
+                                fireSpawnEntityEvent(phaseContext, frame, (List<Entity>) (List<?>) projectiles);
                             }
                         }
                     });
+        }
+    }
+
+    private void fireSpawnEntityEvent(GeneralizedContext phaseContext, CauseStackManager.StackFrame frame, List<Entity> projectiles) {
+        if(ShouldFire.SPAWN_ENTITY_EVENT) {
+            SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), projectiles);
+            if(!SpongeImpl.postEvent(spawnEntityEvent)) {
+                final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
+                for (Entity entity : spawnEntityEvent.getEntities()) {
+                    if (user != null) {
+                        EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
+                    }
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                }
+            }
+        } else {
+            final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
+            for (Entity entity : projectiles) {
+                if (user != null) {
+                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
+                }
+                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+            }
         }
     }
 }

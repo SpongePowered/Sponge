@@ -62,6 +62,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinBlockDispenser;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -72,8 +73,10 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(BlockDispenser.class)
-public abstract class MixinBlockDispenser extends MixinBlock {
+public abstract class MixinBlockDispenser extends MixinBlock implements IMixinBlockDispenser {
 
+    private ItemStack originalStack;
+    private int originalStackSize;
     private ItemStackSnapshot originalItem;
     private PhaseContext<?> context;
 
@@ -129,6 +132,8 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Redirect(method = "dispense", at = @At(value = "INVOKE", target = "Lnet/minecraft/dispenser/IBehaviorDispenseItem;dispense(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;"))
     public ItemStack onSpongeDispense(IBehaviorDispenseItem ibehaviordispenseitem, IBlockSource source, ItemStack stack) {
+        this.originalStack = stack;
+        this.originalStackSize = stack.getCount();
         this.originalItem = ItemStackUtil.snapshotOf(stack);
         return ibehaviordispenseitem.dispense(source, stack);
     }
@@ -164,4 +169,8 @@ public abstract class MixinBlockDispenser extends MixinBlock {
         }
     }
 
+    @Override
+    public void restoreDispensedItem() {
+        this.originalStack.setCount(this.originalStackSize);
+    }
 }

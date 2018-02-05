@@ -94,11 +94,13 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                         final SpawnEntityEvent spawnEntityEvent =
                                 SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
                         SpongeImpl.postEvent(spawnEntityEvent);
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (entityCreator != null) {
-                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                        if(!spawnEntityEvent.isCancelled()) {
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                if (entityCreator != null) {
+                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                }
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
-                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     });
         }

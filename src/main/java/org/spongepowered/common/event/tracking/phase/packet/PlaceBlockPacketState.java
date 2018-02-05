@@ -36,12 +36,14 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
@@ -50,6 +52,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -59,8 +62,10 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,6 +85,10 @@ class PlaceBlockPacketState extends BasicPacketState {
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
         context.itemUsed(itemstack);
 
+    }
+
+    @Override public boolean shouldCaptureEntity() {
+        return true;
     }
 
     @Override
@@ -114,24 +123,39 @@ class PlaceBlockPacketState extends BasicPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
 
-        // Note - CPacketPlayerTryUseItem is swapped with
-        // CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> {
-                try (@SuppressWarnings("unused") CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().pushCause(player);
-                    Sponge.getCauseStackManager().pushCause(snapshot);
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        processSpawnedEntities(player, spawnEntityEvent);
+                .acceptAndClearIfNotEmpty(entities -> {
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        List<Projectile> projectiles = new ArrayList<>();
+                        List<Entity> rest = new ArrayList<>();
+                        for (Entity entity : entities) {
+                            if (entity instanceof Projectile) {
+                                projectiles.add((Projectile) entity);
+                            } else {
+                                rest.add(entity);
+                            }
+                        }
+
+                        if (!rest.isEmpty()) {
+                            if(ShouldFire.SPAWN_ENTITY_EVENT) {
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, itemStack.getType() == ItemTypes.SPAWN_EGG
+                                        ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT);
+                                SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), rest);
+                                if (!SpongeImpl.postEvent(spawnEntityEvent)) {
+                                    processSpawnedEntities(player, spawnEntityEvent);
+                                }
+                            } else {
+                                processEntities(player, rest);
+                            }
+                        }
+
+                        if (!projectiles.isEmpty()) {
+                            PacketPhaseUtil.fireProjectileLaunchEvent(frame, player, projectiles);
+                        }
                     }
-                }
-            });
+                });
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(
                 originalBlocks -> {
