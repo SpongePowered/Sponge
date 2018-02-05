@@ -144,6 +144,11 @@ public class DataTest {
         System.out.println("NEW AUTHOR: " + bookData.getAuthor());
         System.out.println("NEW PUBLISHER: " + bookData.getPublisher());
         System.out.println("NEW PUBLISHER VALUE: " + bookData.publisher());
+        System.out.println("CONTAINER: " + bookData.toContainer());
+        final BookData loadedData = MY_BOOK_DATA.getDataManipulatorBuilder().create();
+        loadedData.from(bookData.toContainer());
+        System.out.println("LOADED: " + bookData);
+        System.out.println("CONTAINER: " + bookData.toContainer());
 
         final ImmutableBookData immutableBookData = bookData.asImmutable();
         final ImmutableBookData immutableBookData1 = immutableBookData.setAuthor("Test");

@@ -622,6 +622,57 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             mv.visitMaxs(0, 0); // Will be calculated
             mv.visitEnd();
         }
+        {
+            mv = cv.visitMethod(ACC_PUBLIC, "toContainer", "()Lorg/spongepowered/api/data/DataContainer;", null, null);
+            mv.visitCode();
+            mv.visitMethodInsn(INVOKESTATIC, "org/spongepowered/api/data/DataContainer",
+                    "createNew", "()Lorg/spongepowered/api/data/DataContainer;", true);
+            mv.visitVarInsn(ASTORE, 1);
+            for (KeyEntry entry : this.keyEntries) {
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
+                mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/key/Key",
+                        "getQuery", "()Lorg/spongepowered/api/data/DataQuery;", true);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                GeneratorUtils.visitBoxingMethod(mv, entry.valueType);
+                mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
+                mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/key/Key",
+                        "getElementToken", "()Lcom/google/common/reflect/TypeToken;", true);
+                mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(DataSerializer.class), "serialize",
+                        "(Ljava/lang/Object;Lcom/google/common/reflect/TypeToken;)Ljava/lang/Object;", false);
+                mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/DataContainer", "set",
+                        "(Lorg/spongepowered/api/data/DataQuery;Ljava/lang/Object;)Lorg/spongepowered/api/data/DataContainer;", true);
+                mv.visitInsn(POP);
+            }
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitInsn(ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
+        {
+            mv = cv.visitMethod(ACC_PUBLIC, "toString", "()Ljava/lang/String;", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/MoreObjects", "toStringHelper",
+                    "(Ljava/lang/Object;)Lcom/google/common/base/MoreObjects$ToStringHelper;", false);
+            mv.visitVarInsn(ASTORE, 1);
+            for (KeyEntry entry : this.keyEntries) {
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitLdcInsn(entry.key.getId());
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                GeneratorUtils.visitBoxingMethod(mv, entry.valueType);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/base/MoreObjects$ToStringHelper", "add",
+                        "(Ljava/lang/String;Ljava/lang/Object;)Lcom/google/common/base/MoreObjects$ToStringHelper;", false);
+                mv.visitInsn(POP);
+            }
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "com/google/common/base/MoreObjects$ToStringHelper", "toString", "()Ljava/lang/String;", false);
+            mv.visitInsn(ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
         if (generateMutable) {
             final Type genericMutableType = this.mutableInterface != null ?
                     Type.getType(this.mutableInterface) : Type.getType('L' + mutableInternalName + ';');
@@ -781,6 +832,41 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitInsn(ARETURN);
                 // End
                 mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC, "from", "(Lorg/spongepowered/api/data/DataContainer;)Ljava/util/Optional;",
+                        String.format("(Lorg/spongepowered/api/data/DataContainer;)Ljava/util/Optional<L%s;>;", genericMutableName), null);
+                mv.visitCode();
+                for (KeyEntry entry : this.keyEntries) {
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/key/Key",
+                            "getQuery", "()Lorg/spongepowered/api/data/DataQuery;", true);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/DataContainer", "get",
+                            "(Lorg/spongepowered/api/data/DataQuery;)Ljava/util/Optional;", true);
+                    mv.visitVarInsn(ASTORE, 2);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
+                    final Label jumpLabel = new Label();
+                    mv.visitJumpInsn(IFEQ, jumpLabel);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
+                    mv.visitFieldInsn(GETSTATIC, mutableInternalName, entry.keyFieldName, entry.keyFieldDescriptor);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "org/spongepowered/api/data/key/Key", "getElementToken",
+                            "()Lcom/google/common/reflect/TypeToken;", true);
+                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(DataSerializer.class), "deserialize",
+                            "(Ljava/lang/Object;Lcom/google/common/reflect/TypeToken;)Ljava/lang/Object;", false);
+                    GeneratorUtils.visitUnboxingMethod(mv, entry.valueType);
+                    mv.visitFieldInsn(PUTFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitLabel(jumpLabel);
+                }
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "of",
+                        "(Ljava/lang/Object;)Ljava/util/Optional;", false);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0);
                 mv.visitEnd();
             }
             // TODO: Generate more synthetic bridges if methods get overridden?
@@ -1525,9 +1611,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                             keyEntry.key.getElementToken(), paramTypeToken, method.getName());
                     methodEntries.add(new SetterMethodEntry(method, keyEntry));
                 } else if (method.getParameterCount() == 0) { // Getter?
-                    // Getters don't have parameter counts
-                    checkState(method.getParameterCount() == 0,
-                            "The method %s has a return type (not void) and parameters?", method.getName());
                     final TypeToken<?> returnTypeToken = TypeToken.of(method.getGenericReturnType());
                     final boolean returnValue = TypeTokenHelper.isAssignable(keyEntry.key.getValueToken(), returnTypeToken);
                     // Check if the object can be "casted", just "compatible" generics

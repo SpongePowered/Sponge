@@ -26,7 +26,9 @@ package org.spongepowered.common.data.generator.test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.key.Key;
@@ -36,6 +38,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.InternalCopies;
+import org.spongepowered.common.data.generator.DataSerializer;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -83,8 +86,9 @@ public class TestDataImpl implements TestData {
 
     @Override
     public Optional<TestData> from(DataContainer container) {
-        if (container.contains(key$my_string.getQuery())) {
-            this.value$my_string = container.getString(key$my_string.getQuery()).get();
+        final Optional<Object> optObj = container.get(key$my_string.getQuery());
+        if (optObj.isPresent()) {
+            this.value$my_string = (String) DataSerializer.deserialize(optObj.get(), (TypeToken) key$my_string.getElementToken());
         }
         if (container.contains(key$my_int.getQuery())) {
             this.value$my_int = container.getInt(key$my_int.getQuery()).get();
@@ -192,9 +196,8 @@ public class TestDataImpl implements TestData {
         DataContainer dataContainer = DataContainer.createNew();
         dataContainer.set(key$my_string, this.value$my_string);
         dataContainer.set(key$my_int, this.value$my_int);
-        if (this.value$my_opt_double.isPresent()) {
-            dataContainer.set(key$my_opt_double.getQuery(), this.value$my_opt_double.get());
-        }
+        dataContainer.set(key$my_opt_double.getQuery(),
+                DataSerializer.serialize(this.value$my_opt_double, (TypeToken) key$my_opt_double.getElementToken()));
         return dataContainer;
     }
 
@@ -253,6 +256,13 @@ public class TestDataImpl implements TestData {
     @Override
     public OptionalValue<Double> doubleValue() {
         return new SpongeOptionalValue<Double>(null, null, null);
+    }
+
+    @Override
+    public String toString() {
+        MoreObjects.ToStringHelper toStringHelper = MoreObjects.toStringHelper(this);
+        toStringHelper.add("my_string", this.value$my_string);
+        return toStringHelper.toString();
     }
 
     public static class Immutable implements ImmutableTestData {
