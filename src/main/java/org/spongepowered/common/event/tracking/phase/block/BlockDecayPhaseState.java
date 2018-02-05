@@ -69,7 +69,6 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                     // Nothing happens here yet for some reason.
                 });
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(locatable);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             context.addNotifierAndOwnerToCauseStack();
             context.getCapturedEntitySupplier()
