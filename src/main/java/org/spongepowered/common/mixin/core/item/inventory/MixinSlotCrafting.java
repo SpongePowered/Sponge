@@ -103,7 +103,7 @@ public abstract class MixinSlotCrafting extends Slot {
 
         Container container = thePlayer.openContainer;
         Inventory craftInv = ((Inventory) container).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
-        if (!(craftInv instanceof SlotCrafting)) {
+        if (!(craftInv instanceof CraftingInventory)) {
             SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;
         }
