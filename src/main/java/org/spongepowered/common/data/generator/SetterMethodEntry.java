@@ -33,16 +33,14 @@ import org.spongepowered.api.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Method;
 
-final class SetterMethodEntry extends MethodEntry {
+final class SetterMethodEntry extends AbstractSetterMethodEntry {
 
     SetterMethodEntry(Method method, KeyEntry keyEntry) {
         super(method, keyEntry);
     }
 
     @Override
-    void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
-        // Load "this"
-        mv.visitVarInsn(ALOAD, 0);
+    void visit0(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         final Class<?> paramType = this.method.getParameterTypes()[0];
         // Load the parameter
         mv.visitVarInsn(ALOAD, 1);
@@ -54,7 +52,5 @@ final class SetterMethodEntry extends MethodEntry {
             GeneratorUtils.visitUnboxingMethod(mv, this.keyEntry.valueType);
         }
         mv.visitFieldInsn(PUTFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
-        // Visit setter return
-        visitSetterEnd(mv);
     }
 }

@@ -24,8 +24,32 @@
  */
 package org.spongepowered.test.data;
 
+import org.spongepowered.api.data.generator.KeyValue;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
+
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public interface ImmutableBookData extends ImmutableDataManipulator<ImmutableBookData, BookData> {
 
+    @KeyValue("lines")
+    List<String> getLines();
+
+    @KeyValue("author")
+    String getAuthor();
+
+    @KeyValue("author")
+    ImmutableBookData setAuthor(String author);
+
+    @KeyValue("publisher")
+    Optional<String> getPublisher();
+
+    @KeyValue("publisher")
+    ImmutableBookData setPublisher(@Nullable String publisher);
+
+    @KeyValue("publisher")
+    OptionalValue<String> publisher();
 }

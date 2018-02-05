@@ -25,16 +25,13 @@
 package org.spongepowered.common.data.generator;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.RETURN;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 abstract class MethodEntry {
 
@@ -46,12 +43,12 @@ abstract class MethodEntry {
         this.method = method;
     }
 
-    public void visit(ClassVisitor classVisitor, String targetInternalName, String mutableInternalName) {
+    public void visit(ClassVisitor classVisitor, String targetInternalName, String mutableInternalName, List<KeyEntry> keyEntries) {
         final MethodVisitor mv = classVisitor.visitMethod(ACC_PUBLIC, this.method.getName(),
                 Type.getMethodDescriptor(this.method), null, null);
         preVisit(mv, targetInternalName, mutableInternalName);
         mv.visitCode();
-        visit(mv, targetInternalName, mutableInternalName);
+        visit(mv, targetInternalName, mutableInternalName, keyEntries);
         mv.visitMaxs(0, 0); // Will be calculated
         mv.visitEnd();
     }
@@ -59,14 +56,10 @@ abstract class MethodEntry {
     void preVisit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
     }
 
-    abstract void visit(MethodVisitor methodVisitor, String targetInternalName, String mutableInternalName);
+    void visit(MethodVisitor methodVisitor, String targetInternalName, String mutableInternalName, List<KeyEntry> keyEntries) {
+        visit(methodVisitor, targetInternalName, mutableInternalName);
+    }
 
-    void visitSetterEnd(MethodVisitor mv) {
-        if (DataManipulator.class.isAssignableFrom(this.method.getReturnType())) {
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitInsn(ARETURN);
-        } else {
-            mv.visitInsn(RETURN);
-        }
+    void visit(MethodVisitor methodVisitor, String targetInternalName, String mutableInternalName) {
     }
 }

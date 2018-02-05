@@ -32,7 +32,7 @@ import org.objectweb.asm.MethodVisitor;
 
 import java.lang.reflect.Method;
 
-class BoxedOptionalSetterMethodEntry extends MethodEntry {
+final class BoxedOptionalSetterMethodEntry extends AbstractSetterMethodEntry {
 
     BoxedOptionalSetterMethodEntry(Method method, KeyEntry keyEntry) {
         super(method, keyEntry);
@@ -45,16 +45,12 @@ class BoxedOptionalSetterMethodEntry extends MethodEntry {
     }
 
     @Override
-    void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
-        // Load "this"
-        mv.visitVarInsn(ALOAD, 0);
+    void visit0(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         // Load the parameter
         mv.visitVarInsn(ALOAD, 1);
         // Put the parameter into a optional
         mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
         // Put it in the field
         mv.visitFieldInsn(PUTFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
-        // Visit setter return
-        visitSetterEnd(mv);
     }
 }

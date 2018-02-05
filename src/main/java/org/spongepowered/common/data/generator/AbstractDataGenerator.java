@@ -1270,7 +1270,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     mv.visitEnd();
                 }
                 {
-                    mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "putAll",
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "putAll",
                             "(Ljava/util/Map;)Lorg/spongepowered/api/data/manipulator/mutable/MappedData;", null, null);
                     mv.visitCode();
                     mv.visitVarInsn(ALOAD, 0);
@@ -1282,7 +1282,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     mv.visitEnd();
                 }
                 {
-                    mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "put",
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "put",
                             "(Ljava/lang/Object;Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/MappedData;", null, null);
                     mv.visitCode();
                     mv.visitVarInsn(ALOAD, 0);
@@ -1302,7 +1302,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                             String.format("()Lorg/spongepowered/api/data/value/immutable/ImmutableMapValue<%s%s>;",
                                     keyElementSign, valueElementSign), null);
                     mv.visitCode();
-                    visitImmutableValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
+                    visitImmutableValueCreation(mv, entry, mutableInternalName, mutableInternalName);
                     mv.visitInsn(ARETURN);
                     mv.visitMaxs(0, 0); // Will be calculated
                     mv.visitEnd();
@@ -1314,7 +1314,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         ////////////////////////////////////
         // Apply the custom interface methods
         for (MethodEntry methodEntry : methodEntries) {
-            methodEntry.visit(cv, targetInternalName, mutableInternalName);
+            methodEntry.visit(cv, targetInternalName, mutableInternalName, this.keyEntries);
         }
         cv.visitEnd();
         return cv.toByteArray();
@@ -1493,15 +1493,16 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             if (keyValue != null) {
                 final KeyEntry keyEntry = keysById.get(keyValue.value());
                 checkState(keyEntry != null, "Cannot find a mapping for the KeyValue value: %s", keyValue.value());
+                checkState(method.getParameterCount() <= 1,
+                        "The method %s has multiple parameters?", method.getName());
                 final Class<?> returnType = method.getReturnType();
-                if (returnType.equals(void.class) ||
-                        DataManipulator.class.isAssignableFrom(returnType)) { // Setter?
-                    // Setters have exactly one parameter
-                    checkState(method.getParameterCount() == 1,
-                            "The method %s has multiple parameters?", method.getName());
-                    // The current data manipulator can be returned
-                    if (DataManipulator.class.isAssignableFrom(returnType)) {
-                        checkState(returnType.isAssignableFrom(targetClass), "Invalid DataManipulator return type.");
+                if (method.getParameterCount() == 1) { // Setter?
+                    if (DataManipulator.class.isAssignableFrom(targetClass)) {
+                        checkState(returnType.isAssignableFrom(targetClass) || returnType.equals(void.class),
+                                "Invalid DataManipulator return type: %s", returnType.getName());
+                    } else {
+                        checkState(returnType.isAssignableFrom(targetClass),
+                                "Invalid ImmutableDataManipulator return type. (Note: This can never be void): %s", returnType.getName());
                     }
                     final TypeToken<?> paramTypeToken = TypeToken.of(method.getGenericParameterTypes()[0]);
                     // Check if the object can be "casted", just "compatible" generics
@@ -1523,7 +1524,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     checkState(compatible, "The key type %s is not assignable to the return type %s in the method %s",
                             keyEntry.key.getElementToken(), paramTypeToken, method.getName());
                     methodEntries.add(new SetterMethodEntry(method, keyEntry));
-                } else { // Getter?
+                } else if (method.getParameterCount() == 0) { // Getter?
                     // Getters don't have parameter counts
                     checkState(method.getParameterCount() == 0,
                             "The method %s has a return type (not void) and parameters?", method.getName());

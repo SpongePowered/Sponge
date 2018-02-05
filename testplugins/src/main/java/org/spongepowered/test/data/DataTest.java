@@ -145,6 +145,13 @@ public class DataTest {
         System.out.println("NEW PUBLISHER: " + bookData.getPublisher());
         System.out.println("NEW PUBLISHER VALUE: " + bookData.publisher());
 
+        final ImmutableBookData immutableBookData = bookData.asImmutable();
+        final ImmutableBookData immutableBookData1 = immutableBookData.setAuthor("Test");
+        System.out.println("EQUAL: " + (immutableBookData == immutableBookData1));
+        System.out.println("NEW AUTHOR: " + immutableBookData1.getAuthor());
+        System.out.println("NEW PUBLISHER: " + immutableBookData1.getPublisher());
+        System.out.println("NEW PUBLISHER VALUE: " + immutableBookData1.publisher());
+
         MY_BOOLEAN_DATA = VariantDataGenerator.builder()
                 .key(MY_BOOLEAN_KEY)
                 .defaultValue(false)
@@ -159,7 +166,6 @@ public class DataTest {
         System.out.println("NEW BOOLEAN: " + booleanData.type().get());
         booleanData.set(MY_BOOLEAN_KEY, false);
         System.out.println("NEW BOOLEAN 2: " + booleanData.get(MY_BOOLEAN_KEY).orElse(null));
-
 
         MY_STRING_TO_BOOLEAN_DATA = MappedDataGenerator.builder()
                 .key(MY_STRING_TO_BOOLEAN_KEY)
