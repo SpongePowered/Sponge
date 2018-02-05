@@ -27,7 +27,6 @@ package org.spongepowered.common.data.generator;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
-import static org.objectweb.asm.Opcodes.RETURN;
 
 import org.objectweb.asm.MethodVisitor;
 
@@ -55,6 +54,7 @@ class BoxedOptionalSetterMethodEntry extends MethodEntry {
         mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
         // Put it in the field
         mv.visitFieldInsn(PUTFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
-        mv.visitInsn(RETURN);
+        // Visit setter return
+        visitSetterEnd(mv);
     }
 }

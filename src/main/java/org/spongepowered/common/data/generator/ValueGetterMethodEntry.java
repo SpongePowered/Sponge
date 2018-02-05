@@ -24,37 +24,26 @@
  */
 package org.spongepowered.common.data.generator;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.ARETURN;
 
 import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.api.util.generator.GeneratorUtils;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
 import java.lang.reflect.Method;
 
-final class SetterMethodEntry extends MethodEntry {
+public class ValueGetterMethodEntry extends MethodEntry {
 
-    SetterMethodEntry(Method method, KeyEntry keyEntry) {
+    ValueGetterMethodEntry(Method method, KeyEntry keyEntry) {
         super(method, keyEntry);
     }
 
     @Override
     void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
-        // Load "this"
-        mv.visitVarInsn(ALOAD, 0);
-        final Class<?> paramType = this.method.getParameterTypes()[0];
-        // Load the parameter
-        mv.visitVarInsn(ALOAD, 1);
-        if (this.keyEntry.boxedValueClass.equals(paramType)) {
-            // Check if it's null, will be skipped for primitives
-            mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions",
-                    "checkNotNull", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-            // Unbox the value, if it's a primitive
-            GeneratorUtils.visitUnboxingMethod(mv, this.keyEntry.valueType);
+        if (ImmutableValue.class.isAssignableFrom(this.method.getReturnType())) {
+            AbstractDataGenerator.visitImmutableValueCreation(mv, this.keyEntry, targetInternalName, mutableInternalName);
+        } else {
+            AbstractDataGenerator.visitValueCreation(mv, this.keyEntry, targetInternalName, mutableInternalName);
         }
-        mv.visitFieldInsn(PUTFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
-        // Visit setter return
-        visitSetterEnd(mv);
+        mv.visitInsn(ARETURN);
     }
 }

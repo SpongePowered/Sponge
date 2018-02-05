@@ -245,8 +245,14 @@ public class TestDataImpl implements TestData {
     }
 
     @Override
-    public void setDouble(double value) {
+    public TestData setDouble(double value) {
         this.value$my_opt_double = Optional.of(value);
+        return this;
+    }
+
+    @Override
+    public OptionalValue<Double> doubleValue() {
+        return new SpongeOptionalValue<Double>(null, null, null);
     }
 
     public static class Immutable implements ImmutableTestData {

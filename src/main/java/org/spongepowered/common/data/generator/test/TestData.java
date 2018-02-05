@@ -26,6 +26,8 @@ package org.spongepowered.common.data.generator.test;
 
 import org.spongepowered.api.data.generator.KeyValue;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 
 import java.util.Optional;
 
@@ -62,5 +64,8 @@ public interface TestData extends DataManipulator<TestData, ImmutableTestData> {
     void setDouble(Optional<Double> value);
 
     @KeyValue("test_opt_double")
-    void setDouble(double value);
+    TestData setDouble(double value);
+
+    @KeyValue("test_opt_double")
+    OptionalValue<Double> doubleValue();
 }

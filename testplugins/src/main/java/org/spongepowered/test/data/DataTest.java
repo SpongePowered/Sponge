@@ -139,10 +139,11 @@ public class DataTest {
         final BookData bookData = MY_BOOK_DATA.getDataManipulatorBuilder().create();
         System.out.println("DEFAULT AUTHOR: " + bookData.getAuthor());
         System.out.println("DEFAULT PUBLISHER: " + bookData.getPublisher());
-        bookData.setAuthor("Cybermaxke");
-        bookData.setPublisher("Cybermaxke");
+        System.out.println("DEFAULT PUBLISHER VALUE: " + bookData.publisher());
+        bookData.setAuthor("Cybermaxke").setPublisher("Cybermaxke");
         System.out.println("NEW AUTHOR: " + bookData.getAuthor());
         System.out.println("NEW PUBLISHER: " + bookData.getPublisher());
+        System.out.println("NEW PUBLISHER VALUE: " + bookData.publisher());
 
         MY_BOOLEAN_DATA = VariantDataGenerator.builder()
                 .key(MY_BOOLEAN_KEY)

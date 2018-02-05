@@ -25,10 +25,14 @@
 package org.spongepowered.common.data.generator;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 
 import java.lang.reflect.Method;
 
@@ -56,4 +60,13 @@ abstract class MethodEntry {
     }
 
     abstract void visit(MethodVisitor methodVisitor, String targetInternalName, String mutableInternalName);
+
+    void visitSetterEnd(MethodVisitor mv) {
+        if (DataManipulator.class.isAssignableFrom(this.method.getReturnType())) {
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitInsn(ARETURN);
+        } else {
+            mv.visitInsn(RETURN);
+        }
+    }
 }

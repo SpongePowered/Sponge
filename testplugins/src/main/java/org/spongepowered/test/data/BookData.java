@@ -26,6 +26,7 @@ package org.spongepowered.test.data;
 
 import org.spongepowered.api.data.generator.KeyValue;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,11 +42,14 @@ public interface BookData extends DataManipulator<BookData, ImmutableBookData> {
     String getAuthor();
 
     @KeyValue("author")
-    void setAuthor(String author);
+    BookData setAuthor(String author);
 
     @KeyValue("publisher")
     Optional<String> getPublisher();
 
     @KeyValue("publisher")
-    void setPublisher(@Nullable String publisher);
+    BookData setPublisher(@Nullable String publisher);
+
+    @KeyValue("publisher")
+    OptionalValue<String> publisher();
 }

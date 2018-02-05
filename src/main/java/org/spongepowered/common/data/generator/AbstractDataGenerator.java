@@ -1320,7 +1320,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         return cv.toByteArray();
     }
 
-    private static void visitImmutableValueCreation(MethodVisitor mv, KeyEntry keyEntry,
+    static void visitImmutableValueCreation(MethodVisitor mv, KeyEntry keyEntry,
             String targetInternalName, String mutableInternalName) {
         try {
             visitImmutableValueCreation0(mv, keyEntry, targetInternalName, mutableInternalName);
@@ -1373,7 +1373,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
         visitBaseValueCreation(mv, keyEntry, targetInternalName, mutableInternalName, constructor, valueClass);
     }
 
-    private static void visitValueCreation(MethodVisitor mv, KeyEntry keyEntry,
+    static void visitValueCreation(MethodVisitor mv, KeyEntry keyEntry,
             String targetInternalName, String mutableInternalName) {
         try {
             visitValueCreation0(mv, keyEntry, targetInternalName, mutableInternalName);
@@ -1494,10 +1494,15 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 final KeyEntry keyEntry = keysById.get(keyValue.value());
                 checkState(keyEntry != null, "Cannot find a mapping for the KeyValue value: %s", keyValue.value());
                 final Class<?> returnType = method.getReturnType();
-                if (returnType.equals(void.class)) { // Setter?
+                if (returnType.equals(void.class) ||
+                        DataManipulator.class.isAssignableFrom(returnType)) { // Setter?
                     // Setters have exactly one parameter
                     checkState(method.getParameterCount() == 1,
                             "The method %s has multiple parameters?", method.getName());
+                    // The current data manipulator can be returned
+                    if (DataManipulator.class.isAssignableFrom(returnType)) {
+                        checkState(returnType.isAssignableFrom(targetClass), "Invalid DataManipulator return type.");
+                    }
                     final TypeToken<?> paramTypeToken = TypeToken.of(method.getGenericParameterTypes()[0]);
                     // Check if the object can be "casted", just "compatible" generics
                     boolean compatible = TypeTokenHelper.isAssignable(keyEntry.key.getElementToken(), paramTypeToken) ||
@@ -1523,8 +1528,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     checkState(method.getParameterCount() == 0,
                             "The method %s has a return type (not void) and parameters?", method.getName());
                     final TypeToken<?> returnTypeToken = TypeToken.of(method.getGenericReturnType());
+                    final boolean returnValue = TypeTokenHelper.isAssignable(keyEntry.key.getValueToken(), returnTypeToken);
                     // Check if the object can be "casted", just "compatible" generics
-                    boolean compatible = TypeTokenHelper.isAssignable(keyEntry.key.getElementToken(), returnTypeToken) ||
+                    boolean compatible = TypeTokenHelper.isAssignable(keyEntry.key.getElementToken(), returnTypeToken) || returnValue ||
                             (keyEntry.valueClass.isPrimitive() && returnTypeToken.getRawType().equals(keyEntry.valueClass)); // Check for primitive
                     // Optionals support unboxed return types if annotated with @Nullable
                     if (!compatible && keyEntry.key.getElementToken().isSubtypeOf(Optional.class)) {
@@ -1539,9 +1545,14 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                         }
                     }
                     // Must be compatible at this point, no more special cases
-                    checkState(compatible, "The key type %s is not assignable to the return type %s in the method %s",
-                            keyEntry.key.getElementToken(), returnTypeToken, method.getName());
-                    methodEntries.add(new GetterMethodEntry(method, keyEntry));
+                    checkState(compatible, "The key element type %s and value type %s are not "
+                                    + "assignable to the return type %s in the method %s",
+                            keyEntry.key.getElementToken(), keyEntry.key.getValueToken(), returnTypeToken, method.getName());
+                    if (returnValue) {
+                        methodEntries.add(new ValueGetterMethodEntry(method, keyEntry));
+                    } else {
+                        methodEntries.add(new GetterMethodEntry(method, keyEntry));
+                    }
                 }
             }
         }
