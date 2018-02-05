@@ -43,4 +43,11 @@ public final class CollectionHelper {
             collection.add(checkNotNull(element));
         }
     }
+
+    public static <E> void removeAllNonNull(Collection<E> collection, Iterable<E> iterable) {
+        checkNotNull(iterable, "iterable");
+        for (E element : iterable) {
+            collection.remove(checkNotNull(element));
+        }
+    }
 }

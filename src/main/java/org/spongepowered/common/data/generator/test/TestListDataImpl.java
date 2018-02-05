@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 public class TestListDataImpl implements TestListData {
 
@@ -194,6 +195,31 @@ public class TestListDataImpl implements TestListData {
     @Override
     public TestListData addElements(Iterable<Boolean> elements) {
         CollectionHelper.addAllNonNull(this.value$my_boolean, elements);
+        return this;
+    }
+
+    @Override
+    public TestListDataImpl remove(int index) {
+        this.value$my_boolean.remove(index);
+        return this;
+    }
+
+    @Override
+    public TestListDataImpl remove(Boolean element) {
+        this.value$my_boolean.remove(checkNotNull(element, "element"));
+        return this;
+    }
+
+    @Override
+    public TestListDataImpl removeAll(Iterable<Boolean> elements) {
+        CollectionHelper.removeAllNonNull(this.value$my_boolean, elements);
+        return this;
+    }
+
+    @Override
+    public TestListData removeAll(Predicate<Boolean> predicate) {
+        checkNotNull(predicate, "predicate");
+        this.value$my_boolean.removeIf(predicate);
         return this;
     }
 

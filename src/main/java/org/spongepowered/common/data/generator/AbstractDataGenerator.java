@@ -1149,6 +1149,70 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     mv.visitMaxs(0, 0);
                     mv.visitEnd();
                 }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "remove", String.format("(I)L%s;", mutableInternalName), null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ILOAD, 1);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "remove", "(I)Ljava/lang/Object;", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "remove", String.format("(%s)L%s;",
+                            elementDesc, mutableInternalName), null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitLdcInsn("element");
+                    mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "remove", "(Ljava/lang/Object;)Z", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "removeAll", String.format("(Ljava/lang/Iterable;)L%s;", mutableInternalName),
+                            String.format("(Ljava/lang/Iterable<%s>;)L%s;", elementDesc, mutableInternalName), null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CollectionHelper.class), "removeAllNonNull",
+                            "(Ljava/util/Collection;Ljava/lang/Iterable;)V", false);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "removeAll", String.format("(Ljava/util/function/Predicate;)L%s;", mutableInternalName),
+                            String.format("(Ljava/util/function/Predicate<%s>;)L%s;", elementDesc, mutableInternalName), null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitLdcInsn("predicate");
+                    mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List",
+                            "removeIf", "(Ljava/util/function/Predicate;)Z", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
                 // Synthetic bridges...
                 {
                     mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "addElement",
@@ -1211,6 +1275,55 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     mv.visitVarInsn(ALOAD, 1);
                     mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "setElements",
                             String.format("(Ljava/util/List;)L%s;", mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "remove",
+                            "(I)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ILOAD, 1);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "remove",
+                            String.format("(I)L%s;", mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "remove",
+                            "(Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitTypeInsn(CHECKCAST, elementName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "remove",
+                            String.format("(%s)L%s;", elementDesc, mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "removeAll",
+                            "(Ljava/lang/Iterable;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "removeAll",
+                            String.format("(Ljava/lang/Iterable;)L%s;", mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "removeAll",
+                            "(Ljava/util/function/Predicate;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "removeAll",
+                            String.format("(Ljava/util/function/Predicate;)L%s;", mutableInternalName), false);
                     mv.visitInsn(ARETURN);
                     mv.visitMaxs(0, 0);
                     mv.visitEnd();
