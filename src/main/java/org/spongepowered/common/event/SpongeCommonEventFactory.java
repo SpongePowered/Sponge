@@ -393,7 +393,7 @@ public class SpongeCommonEventFactory {
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(source);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
             if (owner != null) {
                 Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
             }
