@@ -80,6 +80,7 @@ public final class EventContextKeysModule
         createKey("sponge:dismount_type", "Dimension Type", DismountType.class);
         createKey("sponge:igniter", "Igniter", User.class);
         createKey("sponge:last_damage_source", "Last Damage Source", DamageSource.class);
+        createKey("sponge:liquid_break", "Liquid Break", World.class);
         createKey("sponge:liquid_mix", "Liquid Mix", World.class);
         createKey("sponge:notifier", "Notifier", User.class);
         createKey("sponge:owner", "Owner", User.class);

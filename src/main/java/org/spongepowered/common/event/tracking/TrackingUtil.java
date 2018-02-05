@@ -38,6 +38,7 @@ import net.minecraft.block.BlockRedstoneLight;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
@@ -151,16 +152,18 @@ public final class TrackingUtil {
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
         ) {
-            Sponge.getCauseStackManager().pushCause(entityIn);
             mixinEntity.getNotifierUser()
                     .ifPresent(notifier -> {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
+                        frame.addContext(EventContextKeys.NOTIFIER, notifier);
                         context.notifier(notifier);
                     });
             mixinEntity.getCreatorUser()
-                    .ifPresent(notifier -> {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, notifier);
-                        context.owner(notifier);
+                    .ifPresent(owner -> {
+                        if (mixinEntity instanceof EntityFallingBlock) {
+                            frame.pushCause(owner);
+                        }
+                        frame.addContext(EventContextKeys.OWNER, owner);
+                        context.owner(owner);
                     });
             context.buildAndSwitch();
             entityIn.onUpdate();
