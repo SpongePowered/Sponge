@@ -796,18 +796,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitEnd();
             }
             {
-                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy",
-                        "()Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
-                mv.visitCode();
-                mv.visitVarInsn(ALOAD, 0);
-                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
-                        String.format("()L%s;", mutableInternalName), false);
-                mv.visitInsn(ARETURN);
-                // End
-                mv.visitMaxs(0, 0); // Will be calculated
-                mv.visitEnd();
-            }
-            {
                 mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "set",
                         "(Lorg/spongepowered/api/data/key/Key;Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
                 mv.visitCode();
@@ -821,9 +809,13 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
-            {
+            for (String desc : new String[] {
+                    "()Lorg/spongepowered/api/data/value/ValueContainer;",
+                    "()Lorg/spongepowered/api/data/manipulator/DataManipulator;",
+                    "()Lorg/spongepowered/api/util/Copyable;"
+            }) {
                 mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy",
-                        "()Lorg/spongepowered/api/data/value/ValueContainer;", null, null);
+                        desc, null, null);
                 mv.visitCode();
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "copy",
@@ -954,6 +946,171 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V", false);
                     mv.visitInsn(ARETURN);
                     // End
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+            }
+        }
+        if (this instanceof SpongeMappedDataGenerator) {
+            final TypeToken<?> valueToken = ((SpongeMappedDataGenerator) this).key.getValueToken();
+            final TypeToken<?> keyElementType = valueToken.resolveType(mapValueKey);
+            final TypeToken<?> valueElementType = valueToken.resolveType(mapValueValue);
+            final String keyElementName = Type.getInternalName(keyElementType.getRawType());
+            final String valueElementName = Type.getInternalName(valueElementType.getRawType());
+            final String keyElementDesc = Type.getDescriptor(keyElementType.getRawType());
+            final String valueElementDesc = Type.getDescriptor(valueElementType.getRawType());
+            final String keyElementSign = GeneratorHelper.toSignature(keyElementType);
+            final String valueElementSign = GeneratorHelper.toSignature(valueElementType);
+            final KeyEntry entry = this.keyEntries.get(0);
+            {
+                mv = cv.visitMethod(ACC_PUBLIC, "get",
+                        String.format("(%s)Ljava/util/Optional;", keyElementDesc),
+                        String.format("(%s)Ljava/util/Optional<%s>;", keyElementSign, valueElementSign), null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
+                mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC, "getMapKeys", "()Ljava/util/Set;", "()Ljava/util/Set<Ljava/lang/String;>;", null);
+                mv.visitCode();
+                mv.visitTypeInsn(NEW, "java/util/HashSet");
+                mv.visitInsn(DUP);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "keySet", "()Ljava/util/Set;", true);
+                mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashSet", "<init>", "(Ljava/util/Collection;)V", false);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            // Woohoo, synthetic bridges...
+            {
+                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "get",
+                        "(Ljava/lang/Object;)Ljava/util/Optional;", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitTypeInsn(CHECKCAST, keyElementName);
+                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "get",
+                        String.format("(%s)Ljava/util/Optional;", keyElementDesc), false);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            // Mutable related methods
+            if (generateMutable) {
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "getMapValue", "()Lorg/spongepowered/api/data/value/mutable/MapValue;",
+                            String.format("()Lorg/spongepowered/api/data/value/mutable/MapValue<%s%s>;",
+                                    keyElementSign, valueElementSign), null);
+                    mv.visitCode();
+                    visitValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    final String desc = String.format("(%s%s)L%s;", keyElementDesc, valueElementDesc, mutableInternalName);
+                    final String sign = String.format("(%s%s)L%s;", keyElementSign, valueElementSign, mutableInternalName);
+                    mv = cv.visitMethod(ACC_PUBLIC, "put", desc, desc.equals(sign) ? null : sign, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "put",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "putAll", String.format("(Ljava/util/Map;)L%s;", mutableInternalName),
+                            String.format("(Ljava/util/Map<+%s+%s>;)L%s;", keyElementSign, valueElementSign, mutableInternalName), null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "putAll",
+                            "(Ljava/util/Map;)V", true);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    final String desc = String.format("(%s)L%s;", keyElementDesc, mutableInternalName);
+                    final String sign = String.format("(%s)L%s;", keyElementSign, mutableInternalName);
+                    mv = cv.visitMethod(ACC_PUBLIC, "remove", desc, desc.equals(sign) ? null : sign, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "remove",
+                            "(Ljava/lang/Object;)Ljava/lang/Object;", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                // Woohoo, synthetic bridges...
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "remove",
+                            "(Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/MappedData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitTypeInsn(CHECKCAST, keyElementName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "remove",
+                            String.format("(%s)L%s;", keyElementDesc, mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "putAll",
+                            "(Ljava/util/Map;)Lorg/spongepowered/api/data/manipulator/mutable/MappedData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "putAll",
+                            String.format("(Ljava/util/Map;)L%s;", mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "put",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/MappedData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitTypeInsn(CHECKCAST, keyElementName);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitTypeInsn(CHECKCAST, valueElementName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "put",
+                            String.format("(%s%s)L%s;", keyElementDesc, valueElementDesc, mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0); // Will be calculated
+                    mv.visitEnd();
+                }
+            } else {
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "getMapValue", "()Lorg/spongepowered/api/data/value/immutable/ImmutableMapValue;",
+                            String.format("()Lorg/spongepowered/api/data/value/immutable/ImmutableMapValue<%s%s>;",
+                                    keyElementSign, valueElementSign), null);
+                    mv.visitCode();
+                    visitImmutableValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
+                    mv.visitInsn(ARETURN);
                     mv.visitMaxs(0, 0); // Will be calculated
                     mv.visitEnd();
                 }
