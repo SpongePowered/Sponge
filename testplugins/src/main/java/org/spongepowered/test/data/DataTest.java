@@ -28,11 +28,15 @@ import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.generator.GenericDataGenerator;
+import org.spongepowered.api.data.generator.MappedDataGenerator;
 import org.spongepowered.api.data.generator.VariantDataGenerator;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMappedData;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
+import org.spongepowered.api.data.manipulator.mutable.MappedData;
 import org.spongepowered.api.data.manipulator.mutable.VariantData;
 import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.Listener;
@@ -41,68 +45,82 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 @Plugin(id = "data_test", name = "Data Test", description = "A plugin to custom data.")
 public class DataTest {
 
-    public static Key<ListValue<String>> LINES_KEY = DummyObjectProvider.createFor(Key.class, "LINES_KEY");
-    public static Key<Value<String>> AUTHOR_KEY = DummyObjectProvider.createFor(Key.class, "AUTHOR_KEY");
-    public static Key<OptionalValue<String>> PUBLISHER_KEY = DummyObjectProvider.createFor(Key.class, "PUBLISHER_KEY");
-    public static Key<Value<Integer>> REVISIONS_KEY = DummyObjectProvider.createFor(Key.class, "REVISIONS_KEY");
-    public static Key<Value<Boolean>> MY_BOOLEAN_KEY = DummyObjectProvider.createFor(Key.class, "MY_BOOLEAN_KEY");
+    public static Key<ListValue<String>> LINES_KEY =
+            DummyObjectProvider.createFor(Key.class, "LINES_KEY");
+    public static Key<Value<String>> AUTHOR_KEY =
+            DummyObjectProvider.createFor(Key.class, "AUTHOR_KEY");
+    public static Key<OptionalValue<String>> PUBLISHER_KEY =
+            DummyObjectProvider.createFor(Key.class, "PUBLISHER_KEY");
+    public static Key<Value<Integer>> REVISIONS_KEY =
+            DummyObjectProvider.createFor(Key.class, "REVISIONS_KEY");
+    public static Key<Value<Boolean>> MY_BOOLEAN_KEY =
+            DummyObjectProvider.createFor(Key.class, "MY_BOOLEAN_KEY");
+    public static Key<MapValue<String, Boolean>> MY_STRING_TO_BOOLEAN_KEY =
+            DummyObjectProvider.createFor(Key.class, "MY_STRING_TO_BOOLEAN_KEY");
 
-    public static DataRegistration<BookData, ImmutableBookData> MY_BOOK_DATA;
-    public static DataRegistration<? extends VariantData<Boolean, ?, ?>, ? extends ImmutableVariantData<Boolean, ?, ?>> MY_BOOLEAN_DATA;
+    public static DataRegistration<BookData, ImmutableBookData> MY_BOOK_DATA =
+            DummyObjectProvider.createFor(DataRegistration.class, "MY_BOOK_DATA");
+    public static DataRegistration<? extends VariantData<Boolean, ?, ?>, ? extends ImmutableVariantData<Boolean, ?, ?>> MY_BOOLEAN_DATA =
+            DummyObjectProvider.createFor(DataRegistration.class, "MY_BOOLEAN_DATA");
+    public static DataRegistration<? extends MappedData<String, Boolean, ?, ?>, ? extends ImmutableMappedData<String, Boolean, ?, ?>> MY_STRING_TO_BOOLEAN_DATA =
+            DummyObjectProvider.createFor(DataRegistration.class, "MY_STRING_TO_BOOLEAN_DATA");
 
     @Listener
     public void onRegisterKeys(GameRegistryEvent.Register<Key<?>> event) {
-        // Create the key
         LINES_KEY = Key.builder()
                 .type(new TypeToken<ListValue<String>>() {})
                 .query(DataQuery.of("Lines"))
                 .name("Lines")
                 .id("lines")
                 .build();
-        // Register the key
         event.register(LINES_KEY);
-        // Create the key
+
         AUTHOR_KEY = Key.builder()
                 .type(new TypeToken<Value<String>>() {})
                 .query(DataQuery.of("Author"))
                 .name("Author")
                 .id("author")
                 .build();
-        // Register the key
         event.register(AUTHOR_KEY);
-        // Create the key
+
         PUBLISHER_KEY = Key.builder()
                 .type(new TypeToken<OptionalValue<String>>() {})
                 .query(DataQuery.of("Publisher"))
                 .name("Publisher")
                 .id("publisher")
                 .build();
-        // Register the key
         event.register(PUBLISHER_KEY);
-        // Create the key
+
         REVISIONS_KEY = Key.builder()
                 .type(new TypeToken<Value<Integer>>() {})
                 .query(DataQuery.of("Revisions"))
                 .name("Revisions")
                 .id("revisions")
                 .build();
-        // Register the key
         event.register(REVISIONS_KEY);
-        // Create the key
+
         MY_BOOLEAN_KEY = Key.builder()
                 .type(new TypeToken<Value<Boolean>>() {})
                 .query(DataQuery.of("MyBoolean"))
                 .name("MyBoolean")
                 .id("my_boolean")
                 .build();
-        // Register the key
         event.register(MY_BOOLEAN_KEY);
+
+        MY_STRING_TO_BOOLEAN_KEY = Key.builder()
+                .type(new TypeToken<MapValue<String, Boolean>>() {})
+                .query(DataQuery.of("MyStringToBooleanMap"))
+                .name("MyStringToBooleanMap")
+                .id("my_string_to_boolean_map")
+                .build();
+        event.register(MY_STRING_TO_BOOLEAN_KEY);
     }
 
     @Listener
@@ -116,6 +134,7 @@ public class DataTest {
                 .id("book_data")
                 .name("Book Data")
                 .build();
+        event.register(MY_BOOK_DATA);
 
         final BookData bookData = MY_BOOK_DATA.getDataManipulatorBuilder().create();
         System.out.println("DEFAULT AUTHOR: " + bookData.getAuthor());
@@ -125,14 +144,13 @@ public class DataTest {
         System.out.println("NEW AUTHOR: " + bookData.getAuthor());
         System.out.println("NEW PUBLISHER: " + bookData.getPublisher());
 
-        event.register(MY_BOOK_DATA);
-
         MY_BOOLEAN_DATA = VariantDataGenerator.builder()
                 .key(MY_BOOLEAN_KEY)
                 .defaultValue(false)
                 .id("my_boolean_data")
                 .name("My Boolean Data")
                 .build();
+        event.register(MY_BOOLEAN_DATA);
 
         final VariantData<Boolean, ?, ?> booleanData = MY_BOOLEAN_DATA.getDataManipulatorBuilder().create();
         System.out.println("DEFAULT BOOLEAN: " + booleanData.type().get());
@@ -141,6 +159,24 @@ public class DataTest {
         booleanData.set(MY_BOOLEAN_KEY, false);
         System.out.println("NEW BOOLEAN 2: " + booleanData.get(MY_BOOLEAN_KEY).orElse(null));
 
-        event.register(MY_BOOLEAN_DATA);
+
+        MY_STRING_TO_BOOLEAN_DATA = MappedDataGenerator.builder()
+                .key(MY_STRING_TO_BOOLEAN_KEY)
+                .defaultValue(new HashMap<>())
+                .id("my_string_to_boolean_data")
+                .name("My String To Boolean Data")
+                .build();
+        event.register(MY_STRING_TO_BOOLEAN_DATA);
+
+        MappedData<String, Boolean, ?, ?> myStringToBooleanData = MY_STRING_TO_BOOLEAN_DATA.getDataManipulatorBuilder().create();
+        System.out.println("PRESENT: " + myStringToBooleanData.get("Test").isPresent());
+        myStringToBooleanData.put("Test", true);
+        System.out.println("VALUE: " + myStringToBooleanData.get("Test").orElse(null));
+        myStringToBooleanData.put("Test", false);
+        System.out.println("MAP_VALUE: " + myStringToBooleanData.getMapValue());
+        System.out.println("VALUE: " + myStringToBooleanData.get("Test").orElse(null));
+        myStringToBooleanData.remove("Test");
+        System.out.println("PRESENT: " + myStringToBooleanData.get("Test").isPresent());
+        System.out.println("MAP_VALUE: " + myStringToBooleanData.getMapValue());
     }
 }
