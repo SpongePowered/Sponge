@@ -34,7 +34,6 @@ import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.network.play.server.SPacketSetSlot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -49,6 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -102,7 +102,11 @@ public abstract class MixinSlotCrafting extends Slot {
         ((IMixinContainer) thePlayer.openContainer).setCaptureInventory(false);
 
         Container container = thePlayer.openContainer;
-        CraftingInventory craftInv = ((Inventory) container).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        Inventory craftInv = ((Inventory) container).query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
+        if (!(craftInv instanceof SlotCrafting)) {
+            SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
+            return;
+        }
 
         // retain only last slot-transactions on output slot
         SlotTransaction last = null;
@@ -124,7 +128,7 @@ public abstract class MixinSlotCrafting extends Slot {
             craftedItem = ItemStackUtil.snapshotOf(this.getStack());
         }
 
-        CraftItemEvent.Craft event = SpongeCommonEventFactory.callCraftEventPost(thePlayer, craftInv,
+        CraftItemEvent.Craft event = SpongeCommonEventFactory.callCraftEventPost(thePlayer, ((CraftingInventory) craftInv),
                 craftedItem, this.lastRecipe, container, capturedTransactions);
 
         ((IMixinContainer) container).setLastCraft(event);
