@@ -52,7 +52,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureVisitor;
 import org.objectweb.asm.signature.SignatureWriter;
-import org.spongepowered.api.util.generator.GeneratorUtils;
 
 import java.lang.reflect.ParameterizedType;
 

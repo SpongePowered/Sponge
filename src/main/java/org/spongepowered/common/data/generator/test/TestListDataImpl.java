@@ -26,7 +26,9 @@ package org.spongepowered.common.data.generator.test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.key.Key;
@@ -37,6 +39,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.InternalCopies;
+import org.spongepowered.common.data.generator.CollectionHelper;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -147,6 +150,51 @@ public class TestListDataImpl implements TestListData {
     @Override
     public List<Boolean> asList() {
         return this.value$my_boolean;
+    }
+
+    @Override
+    public Optional<Boolean> get(int index) {
+        return Optional.ofNullable(this.value$my_boolean.get(index));
+    }
+
+    @Override
+    public boolean contains(Boolean element) {
+        checkNotNull(element, "element");
+        return this.value$my_boolean.contains(element);
+    }
+
+    @Override
+    public TestListDataImpl setElement(int index, Boolean element) {
+        checkNotNull(element, "element");
+        this.value$my_boolean.set(index, element);
+        return this;
+    }
+
+    @Override
+    public TestListData addElement(Boolean element) {
+        checkNotNull(element, "element");
+        this.value$my_boolean.add(element);
+        return this;
+    }
+
+    @Override
+    public TestListDataImpl setElements(List<Boolean> elements) {
+        CollectionHelper.checkNonNull(elements);
+        this.value$my_boolean = new ArrayList<>(elements);
+        return this;
+    }
+
+    @Override
+    public TestListData addElement(int index, Boolean element) {
+        checkNotNull(element, "element");
+        this.value$my_boolean.add(index, element);
+        return this;
+    }
+
+    @Override
+    public TestListData addElements(Iterable<Boolean> elements) {
+        CollectionHelper.addAllNonNull(this.value$my_boolean, elements);
+        return this;
     }
 
     public static class Immutable implements ImmutableTestListData {

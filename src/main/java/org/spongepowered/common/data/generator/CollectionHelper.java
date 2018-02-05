@@ -22,10 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.generator.test;
+package org.spongepowered.common.data.generator;
 
-import org.spongepowered.api.data.manipulator.immutable.ImmutableListData;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface ImmutableTestListData extends ImmutableListData<Boolean, ImmutableTestListData, TestListData> {
+import java.util.Collection;
 
+public final class CollectionHelper {
+
+    public static <E> void checkNonNull(Iterable<E> iterable) {
+        checkNotNull(iterable, "iterable");
+        for (E element : iterable) {
+            checkNotNull(element);
+        }
+    }
+
+    public static <E> void addAllNonNull(Collection<E> collection, Iterable<E> iterable) {
+        checkNotNull(iterable, "iterable");
+        for (E element : iterable) {
+            collection.add(checkNotNull(element));
+        }
+    }
 }

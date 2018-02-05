@@ -41,6 +41,7 @@ import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IF_ACMPNE;
+import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
@@ -814,7 +815,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                     "()Lorg/spongepowered/api/data/manipulator/DataManipulator;",
                     "()Lorg/spongepowered/api/util/Copyable;"
             }) {
-                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "copy",
+                mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "copy",
                         desc, null, null);
                 mv.visitCode();
                 mv.visitVarInsn(ALOAD, 0);
@@ -824,47 +825,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 // End
                 mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
-            }
-            // Generator specific methods
-            if (this instanceof SpongeVariantDataGenerator) {
-                final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
-                mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/mutable/Value;", String.format(
-                        "()Lorg/spongepowered/api/data/value/mutable/Value<%s>;", GeneratorHelper.toSignature(elementType)), null);
-                mv.visitCode();
-                // Create a value
-                visitValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
-                // Return it
-                mv.visitInsn(ARETURN);
-                // End
-                mv.visitMaxs(0, 0); // Will be calculated
-                mv.visitEnd();
-            } else if (this instanceof SpongeListDataGenerator) {
-                final TypeToken<?> elementType = ((SpongeListDataGenerator) this).key
-                        .getValueToken().resolveType(listValueElement);
-                {
-                    mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/mutable/ListValue;", String.format(
-                            "()Lorg/spongepowered/api/data/value/mutable/ListValue<%s>;", GeneratorHelper.toSignature(elementType)), null);
-                    mv.visitCode();
-                    // Create a value
-                    visitValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
-                    // Return it
-                    mv.visitInsn(ARETURN);
-                    // End
-                    mv.visitMaxs(0, 0); // Will be calculated
-                    mv.visitEnd();
-                }
-                {
-                    mv = cv.visitMethod(ACC_PUBLIC, "asList", "()Ljava/util/List;",
-                            String.format("()Ljava/util/List<%s>;", GeneratorHelper.toSignature(elementType)), null);
-                    mv.visitCode();
-                    final KeyEntry entry = this.keyEntries.get(0);
-                    mv.visitVarInsn(ALOAD, 0);
-                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                    mv.visitInsn(ARETURN);
-                    // End
-                    mv.visitMaxs(0, 0); // Will be calculated
-                    mv.visitEnd();
-                }
             }
         } else {
             {
@@ -896,7 +856,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             }
             // TODO: Generate more synthetic bridges if methods get overridden?
             {
-                mv = cv.visitMethod(ACC_PUBLIC + ACC_BRIDGE + ACC_SYNTHETIC, "asMutable",
+                mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "asMutable",
                         "()Lorg/spongepowered/api/data/manipulator/DataManipulator;", null, null);
                 mv.visitCode();
                 mv.visitVarInsn(ALOAD, 0);
@@ -907,50 +867,283 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
             }
-            if (this instanceof SpongeVariantDataGenerator) {
-                final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
-                mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/immutable/ImmutableValue;", String.format(
-                            "()Lorg/spongepowered/api/data/value/immutable/ImmutableValue<%s>;", GeneratorHelper.toSignature(elementType)), null);
+        }
+        ///////////////////////////////////////
+        /// Variant Data Generator Specific ///
+        ///////////////////////////////////////
+        if (this instanceof SpongeVariantDataGenerator) {
+            final TypeToken<?> elementType = ((SpongeVariantDataGenerator) this).key.getElementToken();
+            final String elementSign = GeneratorHelper.toSignature(elementType);
+            if (generateMutable) {
+                mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/mutable/Value;", String.format(
+                        "()Lorg/spongepowered/api/data/value/mutable/Value<%s>;", elementSign), null);
                 mv.visitCode();
-                // Create a value
-                visitImmutableValueCreation(mv, this.keyEntries.get(0), immutableInternalName, mutableInternalName);
-                // Return it
+                visitValueCreation(mv, this.keyEntries.get(0), mutableInternalName, mutableInternalName);
                 mv.visitInsn(ARETURN);
-                // End
                 mv.visitMaxs(0, 0); // Will be calculated
                 mv.visitEnd();
-            } else if (this instanceof SpongeListDataGenerator) {
-                final TypeToken<?> elementType = ((SpongeListDataGenerator) this).key
-                        .getValueToken().resolveType(listValueElement);
+            } else {
+                mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/immutable/ImmutableValue;", String.format(
+                        "()Lorg/spongepowered/api/data/value/immutable/ImmutableValue<%s>;", elementSign), null);
+                mv.visitCode();
+                visitImmutableValueCreation(mv, this.keyEntries.get(0), immutableInternalName, mutableInternalName);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+        }
+        ////////////////////////////////////
+        /// List Data Generator Specific ///
+        ////////////////////////////////////
+        if (this instanceof SpongeListDataGenerator) {
+            final TypeToken<?> elementType = ((SpongeListDataGenerator) this).key
+                    .getValueToken().resolveType(listValueElement);
+            final String elementName = Type.getInternalName(elementType.getRawType());
+            final String elementDesc = Type.getDescriptor(elementType.getRawType());
+            final String elementSign = GeneratorHelper.toSignature(elementType);
+            final KeyEntry entry = this.keyEntries.get(0);
+            {
+                mv = cv.visitMethod(ACC_PUBLIC, "asList", "()Ljava/util/List;",
+                        String.format("()Ljava/util/List<%s>;", elementSign), null);
+                mv.visitCode();
+                mv.visitTypeInsn(NEW, "java/util/ArrayList");
+                mv.visitInsn(DUP);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V", false);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC, "get", "(I)Ljava/util/Optional;",
+                        String.format("(I)Ljava/util/Optional<%s>;", elementSign), null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitVarInsn(ILOAD, 1);
+                mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
+                mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
+                mv.visitInsn(ARETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            {
+                mv = cv.visitMethod(ACC_PUBLIC, "contains", String.format("(%s)Z", elementDesc), null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitLdcInsn("element");
+                mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                mv.visitInsn(POP);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "contains", "(Ljava/lang/Object;)Z", true);
+                mv.visitInsn(IRETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            // Synthetic bridges...
+            {
+                mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC,
+                        "contains", "(Ljava/lang/Object;)Z", null, null);
+                mv.visitCode();
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitVarInsn(ALOAD, 1);
+                mv.visitTypeInsn(CHECKCAST, elementName);
+                mv.visitMethodInsn(INVOKEVIRTUAL, targetInternalName, "contains",
+                        String.format("(%s)Z", elementDesc), false);
+                mv.visitInsn(IRETURN);
+                mv.visitMaxs(0, 0); // Will be calculated
+                mv.visitEnd();
+            }
+            // Class specific methods
+            if (generateMutable) {
                 {
-                    mv = cv.visitMethod(ACC_PUBLIC, "getListValue", "()Lorg/spongepowered/api/data/value/immutable/ImmutableListValue;", String.format(
-                            "()Lorg/spongepowered/api/data/value/immutable/ImmutableListValue<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                    mv = cv.visitMethod(ACC_PUBLIC, "type", "()Lorg/spongepowered/api/data/value/mutable/ListValue;",
+                            String.format("()Lorg/spongepowered/api/data/value/mutable/ListValue<%s>;", elementSign), null);
                     mv.visitCode();
-                    // Create a value
-                    visitImmutableValueCreation(mv, this.keyEntries.get(0), immutableInternalName, mutableInternalName);
-                    // Return it
+                    visitValueCreation(mv, entry, mutableInternalName, mutableInternalName);
                     mv.visitInsn(ARETURN);
-                    // End
                     mv.visitMaxs(0, 0); // Will be calculated
                     mv.visitEnd();
                 }
                 {
-                    mv = cv.visitMethod(ACC_PUBLIC, "asList", "()Ljava/util/List;",
-                            String.format("()Ljava/util/List<%s>;", GeneratorHelper.toSignature(elementType)), null);
+                    final String desc = String.format("(%s)L%s;", elementDesc, mutableInternalName);
+                    final String sign = String.format("(%s)L%s;", elementSign, mutableInternalName);
+                    mv = cv.visitMethod(ACC_PUBLIC, "addElement", desc, desc.equals(sign) ? null : sign, null);
                     mv.visitCode();
-                    mv.visitTypeInsn(NEW, "java/util/ArrayList");
-                    mv.visitInsn(DUP);
-                    final KeyEntry entry = this.keyEntries.get(0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitLdcInsn("element");
+                    mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    mv.visitInsn(POP);
                     mv.visitVarInsn(ALOAD, 0);
                     mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
-                    mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V", false);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
                     mv.visitInsn(ARETURN);
-                    // End
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    final String desc = String.format("(I%s)L%s;", elementDesc, mutableInternalName);
+                    final String sign = String.format("(I%s)L%s;", elementSign, mutableInternalName);
+                    mv = cv.visitMethod(ACC_PUBLIC, "addElement", desc, desc.equals(sign) ? null : sign, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitLdcInsn("element");
+                    mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ILOAD, 1);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(ILjava/lang/Object;)V", true);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "addElements", String.format("(Ljava/lang/Iterable;)L%s;", mutableInternalName),
+                            String.format("(Ljava/lang/Iterable<%s>;)L%s;", elementSign, mutableInternalName), null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CollectionHelper.class), "addAllNonNull",
+                            "(Ljava/util/Collection;Ljava/lang/Iterable;)V", false);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    final String desc = String.format("(I%s)L%s;", elementDesc, mutableInternalName);
+                    final String sign = String.format("(I%s)L%s;", elementSign, mutableInternalName);
+                    mv = cv.visitMethod(ACC_PUBLIC, "setElement", desc, desc.equals(sign) ? null : sign, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitLdcInsn("element");
+                    mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions", "checkNotNull",
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ILOAD, 1);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List",
+                            "set", "(ILjava/lang/Object;)Ljava/lang/Object;", true);
+                    mv.visitInsn(POP);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "setElements", String.format("(Ljava/util/List;)L%s;" , mutableInternalName),
+                            String.format("(Ljava/util/List<%s>;)L%s;", elementDesc, mutableInternalName), null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(CollectionHelper.class),
+                            "checkNonNull", "(Ljava/lang/Iterable;)V", false);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitTypeInsn(NEW, "java/util/ArrayList");
+                    mv.visitInsn(DUP);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V", false);
+                    mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                // Synthetic bridges...
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "addElement",
+                            "(Ljava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitTypeInsn(CHECKCAST, elementName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "addElement",
+                            String.format("(%s)L%s;", elementDesc, mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "addElement",
+                            "(ILjava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ILOAD, 1);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitTypeInsn(CHECKCAST, elementName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "addElement",
+                            String.format("(I%s)L%s;", elementDesc, mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "addElements",
+                            "(Ljava/lang/Iterable;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "addElements",
+                            String.format("(Ljava/lang/Iterable;)L%s;", mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "setElement",
+                            "(ILjava/lang/Object;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ILOAD, 1);
+                    mv.visitVarInsn(ALOAD, 2);
+                    mv.visitTypeInsn(CHECKCAST, elementName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "setElement",
+                            String.format("(I%s)L%s;", elementDesc, mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC | ACC_BRIDGE | ACC_SYNTHETIC, "setElements",
+                            "(Ljava/util/List;)Lorg/spongepowered/api/data/manipulator/mutable/ListData;", null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    mv.visitVarInsn(ALOAD, 1);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "setElements",
+                            String.format("(Ljava/util/List;)L%s;", mutableInternalName), false);
+                    mv.visitInsn(ARETURN);
+                    mv.visitMaxs(0, 0);
+                    mv.visitEnd();
+                }
+            } else {
+                {
+                    mv = cv.visitMethod(ACC_PUBLIC, "getListValue", "()Lorg/spongepowered/api/data/value/immutable/ImmutableListValue;",
+                            String.format("()Lorg/spongepowered/api/data/value/immutable/ImmutableListValue<%s>;", elementSign), null);
+                    mv.visitCode();
+                    visitImmutableValueCreation(mv, entry, immutableInternalName, mutableInternalName);
+                    mv.visitInsn(ARETURN);
                     mv.visitMaxs(0, 0); // Will be calculated
                     mv.visitEnd();
                 }
             }
         }
+        //////////////////////////////////////
+        /// Mapped Data Generator Specific ///
+        //////////////////////////////////////
         if (this instanceof SpongeMappedDataGenerator) {
             final TypeToken<?> valueToken = ((SpongeMappedDataGenerator) this).key.getValueToken();
             final TypeToken<?> keyElementType = valueToken.resolveType(mapValueKey);
@@ -968,7 +1161,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                         String.format("(%s)Ljava/util/Optional<%s>;", keyElementSign, valueElementSign), null);
                 mv.visitCode();
                 mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
                 mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
@@ -982,7 +1175,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitTypeInsn(NEW, "java/util/HashSet");
                 mv.visitInsn(DUP);
                 mv.visitVarInsn(ALOAD, 0);
-                mv.visitFieldInsn(GETFIELD, mutableInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
+                mv.visitFieldInsn(GETFIELD, targetInternalName, entry.valueFieldName, entry.valueFieldDescriptor);
                 mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "keySet", "()Ljava/util/Set;", true);
                 mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashSet", "<init>", "(Ljava/util/Collection;)V", false);
                 mv.visitInsn(ARETURN);
@@ -997,7 +1190,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitTypeInsn(CHECKCAST, keyElementName);
-                mv.visitMethodInsn(INVOKEVIRTUAL, mutableInternalName, "get",
+                mv.visitMethodInsn(INVOKEVIRTUAL, targetInternalName, "get",
                         String.format("(%s)Ljava/util/Optional;", keyElementDesc), false);
                 mv.visitInsn(ARETURN);
                 mv.visitMaxs(0, 0); // Will be calculated
@@ -1116,6 +1309,9 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
                 }
             }
         }
+        ////////////////////////////////////
+        /// Custom Setter/Getter Methods ///
+        ////////////////////////////////////
         // Apply the custom interface methods
         for (MethodEntry methodEntry : methodEntries) {
             methodEntry.visit(cv, targetInternalName, mutableInternalName);
