@@ -78,6 +78,7 @@ final class InteractionPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+        ContainerUtil.toMixin(playerMP.inventoryContainer).setCaptureInventory(true);
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
             context.itemUsed(stack);
@@ -118,6 +119,8 @@ final class InteractionPacketState extends BasicPacketState {
     @Override
     public void unwind(BasicPacketContext phaseContext) {
         final EntityPlayerMP player = phaseContext.getPacketPlayer();
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.inventoryContainer);
+        mixinContainer.detectAndSendChanges(false);
         final ItemStack usedStack = phaseContext.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
@@ -294,7 +297,6 @@ final class InteractionPacketState extends BasicPacketState {
                 }
             });
 
-            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
             mixinContainer.setCaptureInventory(false);
             mixinContainer.getCapturedTransactions().clear();
         }

@@ -80,6 +80,7 @@ class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+        ContainerUtil.toMixin(playerMP.inventoryContainer).setCaptureInventory(true);
         final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
         final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
@@ -121,6 +122,8 @@ class PlaceBlockPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final Packet<?> packet = context.getPacket();
         final EntityPlayerMP player = context.getPacketPlayer();
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.inventoryContainer);
+        mixinContainer.detectAndSendChanges(false);
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
 
         final ItemStack itemStack = context.getItemUsed();
@@ -190,7 +193,6 @@ class PlaceBlockPacketState extends BasicPacketState {
 
         });
 
-        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
         mixinContainer.setCaptureInventory(false);
         mixinContainer.getCapturedTransactions().clear();
     }

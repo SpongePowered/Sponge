@@ -49,7 +49,9 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -69,6 +71,7 @@ class UseItemPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, BasicPacketContext context) {
+        ContainerUtil.toMixin(playerMP.inventoryContainer).setCaptureInventory(true);
         final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
@@ -96,6 +99,8 @@ class UseItemPacketState extends BasicPacketState {
     @Override
     public void unwind(BasicPacketContext context) {
         final EntityPlayerMP player = context.getPacketPlayer();
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.inventoryContainer);
+        mixinContainer.detectAndSendChanges(false);
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -139,6 +144,9 @@ class UseItemPacketState extends BasicPacketState {
                                 PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
                             }
                         });
+
+        mixinContainer.setCaptureInventory(false);
+        mixinContainer.getCapturedTransactions().clear();
 
     }
 }
