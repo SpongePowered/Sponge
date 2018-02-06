@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -196,21 +197,23 @@ public class MemoryDataView implements DataView {
             if (this.safety == SafetyMode.ALL_DATA_CLONED) {
                 if (object.getClass().isArray()) {
                     if (object instanceof byte[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((byte[]) object));
+                        return Optional.of(ArrayUtils.clone((byte[]) object));
                     } else if (object instanceof short[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((short[]) object));
+                        return Optional.of(ArrayUtils.clone((short[]) object));
                     } else if (object instanceof int[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((int[]) object));
+                        return Optional.of(ArrayUtils.clone((int[]) object));
                     } else if (object instanceof long[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((long[]) object));
+                        return Optional.of(ArrayUtils.clone((long[]) object));
                     } else if (object instanceof float[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((float[]) object));
+                        return Optional.of(ArrayUtils.clone((float[]) object));
                     } else if (object instanceof double[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((double[]) object));
+                        return Optional.of(ArrayUtils.clone((double[]) object));
                     } else if (object instanceof boolean[]) {
-                        return Optional.<Object>of(ArrayUtils.clone((boolean[]) object));
+                        return Optional.of(ArrayUtils.clone((boolean[]) object));
+                    } else if (object instanceof char[]) {
+                        return Optional.of(ArrayUtils.clone((char[]) object));
                     } else {
-                        return Optional.<Object>of(ArrayUtils.clone((Object[]) object));
+                        return Optional.of(ArrayUtils.clone((Object[]) object));
                     }
                 }
             }
@@ -222,7 +225,12 @@ public class MemoryDataView implements DataView {
         }
         DataView subView = subViewOptional.get();
         return subView.get(path.popFirst());
+    }
 
+    @Override
+    public <E> Optional<E> get(DataQuery path, TypeToken<E> typeToken) {
+        // TODO
+        return Optional.empty();
     }
 
     @Override
@@ -294,6 +302,8 @@ public class MemoryDataView implements DataView {
                     this.map.put(key, ArrayUtils.clone((double[]) value));
                 } else if (value instanceof boolean[]) {
                     this.map.put(key, ArrayUtils.clone((boolean[]) value));
+                } else if (value instanceof char[]) {
+                    this.map.put(key, ArrayUtils.clone((char[]) value));
                 } else {
                     this.map.put(key, ArrayUtils.clone((Object[]) value));
                 }
@@ -303,6 +313,11 @@ public class MemoryDataView implements DataView {
         } else {
             this.map.put(key, value);
         }
+        return this;
+    }
+
+    @Override
+    public <E> DataView set(DataQuery path, E value, TypeToken<E> typeToken) { // TODO
         return this;
     }
 

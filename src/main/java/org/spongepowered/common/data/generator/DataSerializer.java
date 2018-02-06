@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.generator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
@@ -34,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.util.Coerce;
 import org.spongepowered.api.util.weighted.WeightedTable;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +100,25 @@ public final class DataSerializer {
             return ((CatalogType) object).getId();
         } else if (Enum.class.isAssignableFrom(raw)) {
             return ((Enum) object).name();
+        } else if (raw.isArray()) {
+            if (byte[].class.isAssignableFrom(raw) ||
+                    short[].class.isAssignableFrom(raw) ||
+                    int[].class.isAssignableFrom(raw) ||
+                    float[].class.isAssignableFrom(raw) ||
+                    long[].class.isAssignableFrom(raw) ||
+                    double[].class.isAssignableFrom(raw) ||
+                    boolean[].class.isAssignableFrom(raw) ||
+                    char[].class.isAssignableFrom(raw)) {
+                return object;
+            }
+            final TypeToken componentType = typeToken.getComponentType();
+            checkNotNull(componentType);
+            final Object[] array = (Object[]) object;
+            final List list = new ArrayList<>();
+            for (Object obj : array) {
+                list.add(serialize(obj, componentType));
+            }
+            return list;
         } else if (DataSerializable.class.isAssignableFrom(raw)) {
             return ((DataSerializable) object).toContainer();
         } else {
@@ -105,7 +127,6 @@ public final class DataSerializer {
                 return dataTranslator.get().translate(object);
             }
         }
-        // TODO: Array support?
         throw new IllegalStateException("Cannot serialize " + object + " to " + typeToken);
     }
 
@@ -192,6 +213,24 @@ public final class DataSerializer {
                     .filter(value -> ((Enum) value).name().equalsIgnoreCase(name) || value.toString().equalsIgnoreCase(name))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("Failed to find a enum value with name: " + name));
+        } else if (raw.isArray()) {
+            if (byte[].class.isAssignableFrom(raw) ||
+                    short[].class.isAssignableFrom(raw) ||
+                    int[].class.isAssignableFrom(raw) ||
+                    float[].class.isAssignableFrom(raw) ||
+                    long[].class.isAssignableFrom(raw) ||
+                    double[].class.isAssignableFrom(raw) ||
+                    boolean[].class.isAssignableFrom(raw) ||
+                    char[].class.isAssignableFrom(raw)) {
+                return (E) object;
+            }
+            final TypeToken<?> componentType = typeToken.getComponentType();
+            final List<?> list = (List<?>) object;
+            final Object[] array = (Object[]) Array.newInstance(componentType.getRawType(), list.size());
+            for (int i = 0; i < list.size(); i++) {
+                array[i] = deserialize(list.get(i), componentType);
+            }
+            return (E) array;
         } else if (DataSerializable.class.isAssignableFrom(raw)) {
             final Optional<DataBuilder<DataSerializable>> builder =
                     Sponge.getDataManager().getBuilder((Class<DataSerializable>) raw);
@@ -218,7 +257,6 @@ public final class DataSerializer {
                 return (E) dataTranslator.get().translate(dataView);
             }
         }
-        // TODO: Array support?
         throw new IllegalStateException("Cannot convert " + object + " to " + typeToken);
     }
 

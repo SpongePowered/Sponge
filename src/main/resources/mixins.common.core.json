@@ -386,6 +386,7 @@
         "item.recipe.smelting.MixinFurnaceRecipes",
         "item.merchant.MixinMerchantRecipe",
         "nbt.MixinNBTTagCompound",
+        "nbt.MixinNBTTagLongArray",
         "network.MixinNetHandlerPlayServer",
         "network.MixinNetworkManager",
         "network.MixinPacketBuffer",

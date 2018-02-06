@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.data.persistence;
 
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
@@ -41,6 +38,7 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
 import org.spongepowered.api.data.DataContainer;
@@ -49,266 +47,510 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.InvalidDataFormatException;
+import org.spongepowered.common.data.MemoryDataContainer;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.nbt.IMixinNBTTagLongArray;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
+/**
+ * A translator to convert between {@link DataView}s and {@link NBTTagCompound}s. This
+ * translator also introduces extended nbt data tag support. This translator should remain
+ * compatible with the following library, which also introduces these changes:
+ * <a href="https://github.com/LanternPowered/LanternNBT">LanternNBT</a>
+ */
 public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     private static final NbtTranslator instance = new NbtTranslator();
-    private static final TypeToken<NBTTagCompound> TOKEN = TypeToken.of(NBTTagCompound.class);
-    public static final String BOOLEAN_IDENTIFER = "$Boolean";
+    private static final TypeToken<NBTTagCompound> token = TypeToken.of(NBTTagCompound.class);
 
     public static NbtTranslator getInstance() {
         return instance;
     }
 
-    private NbtTranslator() { } // #NOPE
+    enum NbtType {
+        // Official types
+        END                     (NbtDataUtil.TAG_END),
+        BYTE                    (NbtDataUtil.TAG_BYTE),
+        SHORT                   (NbtDataUtil.TAG_SHORT),
+        INT                     (NbtDataUtil.TAG_INT),
+        LONG                    (NbtDataUtil.TAG_LONG),
+        FLOAT                   (NbtDataUtil.TAG_FLOAT),
+        DOUBLE                  (NbtDataUtil.TAG_DOUBLE),
+        BYTE_ARRAY              (NbtDataUtil.TAG_BYTE_ARRAY),
+        STRING                  (NbtDataUtil.TAG_STRING),
+        LIST                    (NbtDataUtil.TAG_LIST),
+        COMPOUND                (NbtDataUtil.TAG_COMPOUND),
+        INT_ARRAY               (NbtDataUtil.TAG_INT_ARRAY),
+        LONG_ARRAY              (NbtDataUtil.TAG_LONG_ARRAY),
 
-    private static NBTTagCompound containerToCompound(final DataView container) {
-        checkNotNull(container);
-        NBTTagCompound compound = new NBTTagCompound();
-        containerToCompound(container, compound);
-        return compound;
-    }
+        // Sponge and lantern types, but remaining
+        // compatible with the official ones.
+        BOOLEAN                 (NbtDataUtil.TAG_BYTE, "Boolean"), // Boolean was used before, so still uppercase
+        BOOLEAN_ARRAY           (NbtDataUtil.TAG_BYTE_ARRAY, "boolean[]"),
+        SHORT_ARRAY             (NbtDataUtil.TAG_LIST, "short[]"),
+        FLOAT_ARRAY             (NbtDataUtil.TAG_LIST, "float[]"),
+        DOUBLE_ARRAY            (NbtDataUtil.TAG_LIST, "double[]"),
+        STRING_ARRAY            (NbtDataUtil.TAG_LIST, "string[]"),
+        CHAR                    (NbtDataUtil.TAG_STRING, "char"),
+        CHAR_ARRAY              (NbtDataUtil.TAG_STRING, "char[]"),
+        COMPOUND_ARRAY          (NbtDataUtil.TAG_LIST, "compound[]"),
 
-    private static void containerToCompound(final DataView container, final NBTTagCompound compound) {
-        // We don't need to get deep values since all nested DataViews will be found
-        // from the instance of checks.
-        checkNotNull(container);
-        checkNotNull(compound);
-        for (Map.Entry<DataQuery, Object> entry : container.getValues(false).entrySet()) {
-            Object value = entry.getValue();
-            String key = entry.getKey().asString('.');
-            if (value instanceof DataView) {
-                NBTTagCompound inner = new NBTTagCompound();
-                containerToCompound(container.getView(entry.getKey()).get(), inner);
-                compound.setTag(key, inner);
-            } else if (value instanceof Boolean) {
-                compound.setTag(key + BOOLEAN_IDENTIFER, new NBTTagByte(((Boolean) value) ? (byte) 1 : 0));
-            } else {
-                compound.setTag(key, getBaseFromObject(value));
+        UNKNOWN                 (99),
+        ;
+
+        static final Map<String, NbtType> bySuffix = new HashMap<>();
+        static final Int2ObjectMap<NbtType> byIndex = new Int2ObjectOpenHashMap<>();
+
+        final int type;
+        @Nullable final String suffix;
+
+        NbtType(int type) {
+            this(type, null);
+        }
+
+        NbtType(int type, @Nullable String suffix) {
+            this.suffix = suffix;
+            this.type = type;
+        }
+
+        static {
+            for (NbtType nbtType : values()) {
+                bySuffix.put(nbtType.suffix, nbtType);
+                if (nbtType.suffix == null) {
+                    byIndex.put(nbtType.type, nbtType);
+                }
             }
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static NBTBase getBaseFromObject(Object value) {
-        checkNotNull(value);
-        if (value instanceof Boolean) {
-            return new NBTTagByte((Boolean) value ? (byte) 1 : 0);
-        } else if (value instanceof Byte) {
-            return new NBTTagByte((Byte) value);
-        } else if (value instanceof Short) {
-            return new NBTTagShort((Short) value);
-        } else if (value instanceof Integer) {
-            return new NBTTagInt((Integer) value);
-        } else if (value instanceof Long) {
-            return new NBTTagLong((Long) value);
-        } else if (value instanceof Float) {
-            return new NBTTagFloat((Float) value);
-        } else if (value instanceof Double) {
-            return new NBTTagDouble((Double) value);
-        } else if (value instanceof String) {
-            return new NBTTagString((String) value);
-        } else if (value.getClass().isArray()) {
-            if (value instanceof byte[]) {
-                return new NBTTagByteArray((byte[]) value);
-            } else if (value instanceof Byte[]) {
-                byte[] array = new byte[((Byte[]) value).length];
-                int counter = 0;
-                for (Byte data : (Byte[]) value) {
-                    array[counter++] = data;
+    private static NBTBase toTag(NbtType nbtType, Object object) {
+        NBTTagList tagList;
+        switch (nbtType) {
+            case BYTE:
+                return new NBTTagByte((Byte) object);
+            case BYTE_ARRAY:
+                return new NBTTagByteArray((byte[]) object);
+            case SHORT:
+                return new NBTTagShort((Short) object);
+            case SHORT_ARRAY:
+                final short[] shortArray = (short[]) object;
+                tagList = new NBTTagList();
+                for (short shortValue : shortArray) {
+                    tagList.appendTag(new NBTTagShort(shortValue));
                 }
-                return new NBTTagByteArray(array);
-            } else if (value instanceof int[]) {
-                return new NBTTagIntArray((int[]) value);
-            } else if (value instanceof Integer[]) {
-                int[] array = new int[((Integer[]) value).length];
-                int counter = 0;
-                for (Integer data : (Integer[]) value) {
-                    array[counter++] = data;
+                return tagList;
+            case CHAR:
+                return new NBTTagString(object.toString());
+            case CHAR_ARRAY:
+                return new NBTTagString(new String((char[]) object));
+            case INT:
+                return new NBTTagInt((Integer) object);
+            case INT_ARRAY:
+                return new NBTTagIntArray((int[]) object);
+            case LONG:
+                return new NBTTagLong((Long) object);
+            case LONG_ARRAY:
+                return new NBTTagLongArray((long[]) object);
+            case FLOAT:
+                return new NBTTagFloat((Float) object);
+            case FLOAT_ARRAY:
+                final float[] floatArray = (float[]) object;
+                tagList = new NBTTagList();
+                for (float floatValue : floatArray) {
+                    tagList.appendTag(new NBTTagFloat(floatValue));
                 }
-                return new NBTTagIntArray(array);
-            }
-        } else if (value instanceof List) {
-            NBTTagList list = new NBTTagList();
-            for (Object object : (List) value) {
-                // Oh hey, we already have a translation already
-                // since DataView only supports some primitive types anyways...
-                list.appendTag(getBaseFromObject(object));
-            }
-            return list;
-        } else if (value instanceof Map) {
-            NBTTagCompound compound = new NBTTagCompound();
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
-                if (entry.getKey() instanceof DataQuery) {
-                    if (entry.getValue() instanceof Boolean) {
-                        compound.setBoolean(((DataQuery) entry.getKey()).asString('.') + BOOLEAN_IDENTIFER, (Boolean) entry.getValue());
-                    } else {
-                        compound.setTag(((DataQuery) entry.getKey()).asString('.'), getBaseFromObject(entry.getValue()));
+                return tagList;
+            case DOUBLE:
+                return new NBTTagDouble((Double) object);
+            case DOUBLE_ARRAY:
+                final double[] doubleArray = (double[]) object;
+                tagList = new NBTTagList();
+                for (double doubleValue : doubleArray) {
+                    tagList.appendTag(new NBTTagDouble(doubleValue));
+                }
+                return tagList;
+            case STRING:
+                return new NBTTagString((String) object);
+            case STRING_ARRAY:
+                final String[] stringArray = (String[]) object;
+                tagList = new NBTTagList();
+                for (String string : stringArray) {
+                    tagList.appendTag(new NBTTagString(string));
+                }
+                return tagList;
+            case BOOLEAN:
+                return new NBTTagByte((byte) ((Boolean) object ? 1 : 0));
+            case BOOLEAN_ARRAY:
+                final boolean[] booleanArray = (boolean[]) object;
+                int length = booleanArray.length / 8;
+                if (booleanArray.length % 8 != 0) {
+                    length++;
+                }
+                final int offset = 2; // 2 bytes for the amount of bits
+                final byte[] bytes = new byte[length + offset];
+                bytes[0] = (byte) (length >> 8);
+                bytes[1] = (byte) (length & 0xff);
+                int j = 0;
+                for (int i = 0; i < length; i++) {
+                    byte value = 0;
+                    while (j < booleanArray.length) {
+                        final int k = j % 8;
+                        if (booleanArray[j++]) {
+                            value |= 1 << k;
+                        }
                     }
-                } else if (entry.getKey() instanceof String) {
-                    compound.setTag((String) entry.getKey(), getBaseFromObject(entry.getValue()));
+                    bytes[i + offset] = value;
+                }
+                return new NBTTagByteArray(bytes);
+            case LIST:
+                return toListTag(nbtType, (List<Object>) object);
+            case COMPOUND:
+                return toCompoundTag(object);
+            case COMPOUND_ARRAY:
+                final Object[] dataViews = (Object[]) object;
+                tagList = new NBTTagList();
+                for (Object dataView : dataViews) {
+                    tagList.appendTag(toCompoundTag(dataView));
+                }
+                return tagList;
+            default:
+                throw new IllegalStateException("Attempted to serialize a unsupported object type: " + object.getClass().getName());
+        }
+    }
+
+    private static NBTTagCompound toCompoundTag(Object object) {
+        final NBTTagCompound tagCompound = new NBTTagCompound();
+        // Convert the object in something we can serialize
+        if (object instanceof DataView) {
+            object = ((DataView) object).getValues(false);
+        } else if (object instanceof DataSerializable) {
+            object = ((DataSerializable) object).toContainer().getValues(false);
+        }
+        for (Map.Entry<DataQuery, Object> entry : ((Map<DataQuery, Object>) object).entrySet()) {
+            // The base path
+            String key = entry.getKey().last().toString();
+            // The base nbt type
+            NbtType nbtType = typeFor(object);
+            // The nbt tag that will be put in the compound
+            final NBTBase nbtBase;
+            if (nbtType == NbtType.LIST) {
+                final List<Object> list = (List<Object>) object;
+                if (list.isEmpty()) {
+                    nbtType = NbtType.END;
                 } else {
-                    compound.setTag(entry.getKey().toString(), getBaseFromObject(entry.getValue()));
+                    nbtType = typeFor(list.get(0));
+                    if (nbtType.suffix != null) {
+                        key += "$List$" + nbtType.suffix;
+                    }
+                }
+                nbtBase = toListTag(nbtType, list);
+            } else {
+                if (nbtType.suffix != null) {
+                    key += '$' + nbtType.suffix;
+                }
+                try {
+                    nbtBase = toTag(nbtType, object);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Exception while serializing key: " + key, e);
                 }
             }
-            return compound;
-        } else if (value instanceof DataSerializable) {
-            return containerToCompound(((DataSerializable) value).toContainer());
-        } else if (value instanceof DataView) {
-            return containerToCompound((DataView) value);
+            tagCompound.setTag(key, nbtBase);
         }
-        throw new IllegalArgumentException("Unable to translate object to NBTBase: " + value);
+        return tagCompound;
     }
 
-    private static DataContainer getViewFromCompound(NBTTagCompound compound) {
-        checkNotNull(compound);
-        DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        NbtTranslator.getInstance().addTo(compound, container);
-        return container;
+    private static NBTTagList toListTag(NbtType elementNbtType, List<Object> list) {
+        final NBTTagList tagList = new NBTTagList();
+        for (Object object : list) {
+            tagList.appendTag(toTag(elementNbtType, object));
+        }
+        return tagList;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void setInternal(NBTBase base, byte type, DataView view, String key) {
-        checkNotNull(base);
-        checkNotNull(view);
-        checkNotNull(key);
-        checkArgument(!key.isEmpty());
-        checkArgument(type > NbtDataUtil.TAG_END && type <= NbtDataUtil.TAG_INT_ARRAY);
-        switch (type) {
-            case NbtDataUtil.TAG_BYTE:
-                if (key.contains(BOOLEAN_IDENTIFER)) {
-                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTTagByte) base).getByte() != 0));
-                } else {
-                    view.set(of(key), ((NBTTagByte) base).getByte());
+    private static NbtType typeFor(Object object) {
+        if (object instanceof Boolean) {
+            return NbtType.BOOLEAN;
+        } else if (object instanceof boolean[]) {
+            return NbtType.BOOLEAN_ARRAY;
+        } else if (object instanceof Byte) {
+            return NbtType.BYTE;
+        } else if (object instanceof byte[]) {
+            return NbtType.BYTE_ARRAY;
+        } else if (object instanceof Map ||
+                object instanceof DataView ||
+                object instanceof DataSerializable) {
+            return NbtType.COMPOUND;
+        } else if (object instanceof Double) {
+            return NbtType.DOUBLE;
+        } else if (object instanceof double[]) {
+            return NbtType.DOUBLE_ARRAY;
+        } else if (object instanceof Float) {
+            return NbtType.FLOAT;
+        } else if (object instanceof float[]) {
+            return NbtType.FLOAT_ARRAY;
+        } else if (object instanceof Integer) {
+            return NbtType.INT;
+        } else if (object instanceof int[]) {
+            return NbtType.INT_ARRAY;
+        } else if (object instanceof List) {
+            return NbtType.LIST;
+        } else if (object instanceof Long) {
+            return NbtType.LONG;
+        } else if (object instanceof long[]) {
+            return NbtType.LONG_ARRAY;
+        } else if (object instanceof Short) {
+            return NbtType.SHORT;
+        } else if (object instanceof short[]) {
+            return NbtType.SHORT_ARRAY;
+        } else if (object instanceof String) {
+            return NbtType.STRING;
+        } else if (object instanceof String[]) {
+            return NbtType.STRING_ARRAY;
+        } else if (object instanceof Character) {
+            return NbtType.CHAR;
+        } else if (object instanceof char[]) {
+            return NbtType.CHAR_ARRAY;
+        } else if (object.getClass().isArray() &&
+                DataView.class.isAssignableFrom(object.getClass().getComponentType())) {
+            return NbtType.COMPOUND_ARRAY;
+        }
+        return NbtType.UNKNOWN;
+    }
+
+    private static NbtEntry tagAndNameToEntry(String name, NBTBase tag) {
+        final byte type = tag.getId();
+        if (type == NbtType.END.type) {
+            throw new IllegalStateException("Did not expect a END tag.");
+        }
+        int index = name.lastIndexOf('$');
+        NbtType nbtType = NbtType.byIndex.get(type);
+        if (nbtType == null) {
+            throw new IllegalStateException("Unknown NBT Type with id: " + type);
+        }
+        NbtType listNbtType = null;
+        if (index != -1) {
+            final String suffix = name.substring(index + 1);
+            name = name.substring(0, index);
+            final NbtType nbtType1 = NbtType.bySuffix.get(suffix);
+            if (nbtType1 != null) {
+                if (nbtType == NbtType.LIST) {
+                    index = name.lastIndexOf('$');
+                    if (index != -1) {
+                        final String li = name.substring(index + 1);
+                        if (li.equals("List")) {
+                            name = name.substring(0, index);
+                            listNbtType = nbtType1;
+                        }
+                    }
                 }
-                break;
-            case NbtDataUtil.TAG_SHORT:
-                view.set(of(key), ((NBTTagShort) base).getShort());
-                break;
-            case NbtDataUtil.TAG_INT:
-                view.set(of(key), ((NBTTagInt) base).getInt());
-                break;
-            case NbtDataUtil.TAG_LONG:
-                view.set(of(key), ((NBTTagLong) base).getLong());
-                break;
-            case NbtDataUtil.TAG_FLOAT:
-                view.set(of(key), ((NBTTagFloat) base).getFloat());
-                break;
-            case NbtDataUtil.TAG_DOUBLE:
-                view.set(of(key), ((NBTTagDouble) base).getDouble());
-                break;
-            case NbtDataUtil.TAG_BYTE_ARRAY:
-                view.set(of(key), ((NBTTagByteArray) base).getByteArray());
-                break;
-            case NbtDataUtil.TAG_STRING:
-                view.set(of(key), ((NBTTagString) base).getString());
-                break;
-            case NbtDataUtil.TAG_LIST:
-                NBTTagList list = (NBTTagList) base;
-                byte listType = (byte) list.getTagType();
-                int count = list.tagCount();
-                List objectList = Lists.newArrayListWithCapacity(count);
-                for (int i = 0; i < count; i++) {
-                    objectList.add(fromTagBase(list.get(i), listType));
+                if (listNbtType == null) {
+                    nbtType = nbtType1;
                 }
-                view.set(of(key), objectList);
-                break;
-            case NbtDataUtil.TAG_COMPOUND:
-                DataView internalView = view.createView(of(key));
-                NBTTagCompound compound = (NBTTagCompound) base;
-                for (String internalKey : compound.getKeySet()) {
-                    NBTBase internalBase = compound.getTag(internalKey);
-                    byte internalType = internalBase.getId();
-                    // Basically.... more recursion.
-                    // Reasoning: This avoids creating a new DataContainer which would
-                    // then be copied in to the owning DataView anyways. We can internally
-                    // set the actual data directly to the child view instead.
-                    setInternal(internalBase, internalType, internalView, internalKey);
+            }
+        }
+        return new NbtEntry(name, nbtType, listNbtType, tag);
+    }
+
+    private static Object fromTag(NBTBase tag) throws InvalidDataFormatException {
+        return fromTag(null, NbtType.byIndex.get(tag.getId()), null, tag);
+    }
+
+    private static Object fromEntry(@Nullable DataView container, NbtEntry entry) throws InvalidDataFormatException {
+        return fromTag(container, entry.type, entry.listType, entry.tag);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static Object fromTag(@Nullable DataView container, NbtType nbtType, @Nullable NbtType listNbtType, NBTBase tag)
+            throws InvalidDataFormatException {
+        NBTTagList tagList;
+        switch (nbtType) {
+            case BYTE:
+                return ((NBTTagByte) tag).getByte();
+            case BYTE_ARRAY:
+                return ((NBTTagByteArray) tag).getByteArray();
+            case SHORT:
+                return ((NBTTagShort) tag).getShort();
+            case SHORT_ARRAY:
+                tagList = (NBTTagList) tag;
+                if (tagList.getTagType() == NbtType.END.type) {
+                    return new short[tagList.tagCount()];
+                } else if (tagList.getTagType() != NbtType.SHORT.type) {
+                    throw new IllegalStateException("Attempted to deserialize a Short Array (List) but the list type wasn't a short.");
                 }
-                break;
-            case NbtDataUtil.TAG_INT_ARRAY:
-                view.set(of(key), ((NBTTagIntArray) base).getIntArray());
-                break;
+                final short[] shortArray = new short[tagList.tagCount()];
+                for (int i = 0; i < shortArray.length; i++) {
+                    shortArray[i] = ((NBTTagShort) tagList.get(i)).getShort();
+                }
+                return shortArray;
+            case CHAR:
+                return ((NBTTagString) tag).getString().charAt(0);
+            case CHAR_ARRAY:
+                return ((NBTTagString) tag).getString().toCharArray();
+            case INT:
+                return ((NBTTagInt) tag).getInt();
+            case INT_ARRAY:
+                return ((NBTTagIntArray) tag).getIntArray();
+            case LONG:
+                return ((NBTTagLong) tag).getLong();
+            case LONG_ARRAY:
+                return ((IMixinNBTTagLongArray) tag).getLongArray();
+            case FLOAT:
+                return ((NBTTagFloat) tag).getFloat();
+            case FLOAT_ARRAY:
+                tagList = (NBTTagList) tag;
+                if (tagList.getTagType() == NbtType.END.type) {
+                    return new float[tagList.tagCount()];
+                } else if (tagList.getTagType() != NbtType.FLOAT.type) {
+                    throw new IllegalStateException("Attempted to deserialize a Float Array (List) but the list type wasn't a float.");
+                }
+                final float[] floatArray = new float[tagList.tagCount()];
+                for (int i = 0; i < floatArray.length; i++) {
+                    floatArray[i] = ((NBTTagFloat) tagList.get(i)).getFloat();
+                }
+                return floatArray;
+            case DOUBLE:
+                return ((NBTTagDouble) tag).getDouble();
+            case DOUBLE_ARRAY:
+                tagList = (NBTTagList) tag;
+                if (tagList.getTagType() == NbtType.END.type) {
+                    return new double[tagList.tagCount()];
+                } else if (tagList.getTagType() != NbtType.DOUBLE.type) {
+                    throw new IllegalStateException("Attempted to deserialize a Double Array (List) but the list type wasn't a double.");
+                }
+                final double[] doubleArray = new double[tagList.tagCount()];
+                for (int i = 0; i < doubleArray.length; i++) {
+                    doubleArray[i] = ((NBTTagDouble) tagList.get(i)).getDouble();
+                }
+                return doubleArray;
+            case STRING:
+                return ((NBTTagString) tag).getString();
+            case STRING_ARRAY:
+                tagList = (NBTTagList) tag;
+                if (tagList.getTagType() == NbtType.END.type) {
+                    return new String[tagList.tagCount()];
+                } else if (tagList.getTagType() != NbtType.STRING.type) {
+                    throw new IllegalStateException("Attempted to deserialize a String Array (List) but the list type wasn't a string.");
+                }
+                final String[] stringArray = new String[tagList.tagCount()];
+                for (int i = 0; i < stringArray.length; i++) {
+                    stringArray[i] = ((NBTTagString) tagList.get(i)).getString();
+                }
+                return stringArray;
+            case BOOLEAN:
+                return ((NBTTagByte) tag).getByte() != 0;
+            case BOOLEAN_ARRAY:
+                final byte[] bytes = ((NBTTagByteArray) tag).getByteArray();
+                final int offset = 2; // 2 bytes for the amount of bits
+                int bitBytes = bytes.length - offset;
+                final boolean[] booleanArray = new boolean[(bytes[0] & 0xff) << 8 | bytes[1] & 0xff];
+                int j = 0;
+                for (int i = 0; i < bitBytes; i++) {
+                    final byte value = bytes[offset + i];
+                    while (j < booleanArray.length) {
+                        final int k = j % 8;
+                        booleanArray[j++] = (value & (1 << k)) != 0;
+                    }
+                }
+                return booleanArray;
+            case LIST:
+                tagList = (NBTTagList) tag;
+                final int listType = tagList.getTagType();
+                if (listNbtType == null) {
+                    listNbtType = NbtType.byIndex.get(listType);
+                    if (listNbtType == null) {
+                        throw new IllegalStateException("Unknown NBT Type with id: " + listType);
+                    }
+                }
+                final List<Object> list = Lists.newArrayListWithExpectedSize(tagList.tagCount());
+                if (tagList.tagCount() == 0 || listNbtType == NbtType.END) {
+                    return list;
+                }
+                for (int i = 0; i < tagList.tagCount(); i++) {
+                    list.add(fromTag(null, listNbtType, null, tagList.get(i)));
+                }
+                return list;
+            case COMPOUND:
+                if (container == null) {
+                    container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+                }
+                final NBTTagCompound tagCompound = (NBTTagCompound) tag;
+                for (String key : tagCompound.getKeySet()) {
+                    final NBTBase entryTag = tagCompound.getTag(key);
+                    final NbtEntry entry = tagAndNameToEntry(key, entryTag);
+                    if (entry.type == NbtType.COMPOUND) {
+                        fromEntry(container.createView(DataQuery.of(key)), entry);
+                    } else {
+                        container.set(DataQuery.of(entry.name), fromEntry(null, entry));
+                    }
+                }
+                return container;
+            case COMPOUND_ARRAY:
+                tagList = (NBTTagList) tag;
+                if (tagList.getTagType() == NbtType.END.type) {
+                    return new DataView[tagList.tagCount()];
+                } else if (tagList.getTagType() != NbtType.COMPOUND.type) {
+                    throw new IllegalStateException("Attempted to deserialize a DataView Array (List) but the list type wasn't a data view.");
+                }
+                final DataView[] dataViewArray = new DataView[tagList.tagCount()];
+                for (int i = 0; i < dataViewArray.length; i++) {
+                    dataViewArray[i] = (DataView) fromTag(null, NbtType.COMPOUND, null, tagList.get(i));
+                }
+                return dataViewArray;
             default:
-                throw new IllegalArgumentException("Unknown NBT type " + type);
+                throw new InvalidDataFormatException("Attempt to deserialize a unknown nbt tag type: " + nbtType);
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object fromTagBase(NBTBase base, byte type) {
-        switch (type) {
-            case NbtDataUtil.TAG_BYTE:
-                return ((NBTTagByte) base).getByte();
-            case NbtDataUtil.TAG_SHORT:
-                return (((NBTTagShort) base)).getShort();
-            case NbtDataUtil.TAG_INT:
-                return ((NBTTagInt) base).getInt();
-            case NbtDataUtil.TAG_LONG:
-                return ((NBTTagLong) base).getLong();
-            case NbtDataUtil.TAG_FLOAT:
-                return ((NBTTagFloat) base).getFloat();
-            case NbtDataUtil.TAG_DOUBLE:
-                return ((NBTTagDouble) base).getDouble();
-            case NbtDataUtil.TAG_BYTE_ARRAY:
-                return ((NBTTagByteArray) base).getByteArray();
-            case NbtDataUtil.TAG_STRING:
-                return ((NBTTagString) base).getString();
-            case NbtDataUtil.TAG_LIST:
-                NBTTagList list = (NBTTagList) base;
-                byte listType = (byte) list.getTagType();
-                int count = list.tagCount();
-                List objectList = Lists.newArrayListWithCapacity(count);
-                for (int i = 0; i < list.tagCount(); i++) {
-                    objectList.add(fromTagBase(list.get(i), listType));
-                }
-                return objectList;
-            case NbtDataUtil.TAG_COMPOUND:
-                return getViewFromCompound((NBTTagCompound) base);
-            case NbtDataUtil.TAG_INT_ARRAY:
-                return ((NBTTagIntArray) base).getIntArray();
-            default :
-                return null;
+    static class NbtEntry {
+
+        private final String name;
+        private final NbtType type;
+        @Nullable private final NbtType listType;
+        private final NBTBase tag;
+
+        NbtEntry(String name, NbtType type, @Nullable NbtType listType, NBTBase tag) {
+            this.listType = listType;
+            this.name = name;
+            this.type = type;
+            this.tag = tag;
         }
+    }
+
+    private NbtTranslator() {
     }
 
     public NBTTagCompound translateData(DataView container) {
-        return NbtTranslator.containerToCompound(container);
-    }
-
-    public void translateContainerToData(NBTTagCompound node, DataView container) {
-        NbtTranslator.containerToCompound(container, node);
+        return toCompoundTag(container);
     }
 
     public DataContainer translateFrom(NBTTagCompound node) {
-        return NbtTranslator.getViewFromCompound(node);
+        return (DataContainer) fromTag(node);
     }
 
     @Override
     public TypeToken<NBTTagCompound> getToken() {
-        return TOKEN;
+        return token;
     }
 
     @Override
     public NBTTagCompound translate(DataView view) throws InvalidDataException {
-        return containerToCompound(view);
+        return translateData(view);
     }
 
     @Override
     public DataContainer translate(NBTTagCompound obj) throws InvalidDataException {
-        return getViewFromCompound(obj);
+        return translateFrom(obj);
     }
 
     @Override
     public DataView addTo(NBTTagCompound compound, DataView container) {
-        for (String key : compound.getKeySet()) {
-            NBTBase base = compound.getTag(key);
-            byte type = base.getId();
-            setInternal(base, type, container, key); // gotta love recursion
-        }
+        fromTag(container, NbtType.COMPOUND, null, compound);
         return container;
     }
 

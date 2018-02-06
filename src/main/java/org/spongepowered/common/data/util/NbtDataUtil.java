@@ -138,6 +138,7 @@ public final class NbtDataUtil {
     public static final byte TAG_LIST = 9;
     public static final byte TAG_COMPOUND = 10;
     public static final byte TAG_INT_ARRAY = 11;
+    public static final byte TAG_LONG_ARRAY = 12;
     public static final byte TAG_ANY_NUMERIC = 99;
 
     // These are Sponge's NBT tag keys
