@@ -410,21 +410,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 }
                 return false;
             } else if (entity instanceof Projectile) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
-                final List<Entity> projectile = new ArrayList<Entity>(1);
-                projectile.add(entity);
-                final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity anEntity : event.getEntities()) {
-                        if (entityCreator != null) {
-                            anEntity.setCreator(entityCreator.getUniqueId());
-                        }
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                    }
-                    return true;
-                }
-                return false;
+                context.getCapturedEntities().add(entity);
+                return true;
             }
             final List<Entity> nonExp = new ArrayList<Entity>(1);
             nonExp.add(entity);
