@@ -177,7 +177,8 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     @Override
     public DataRegistration<M, I> build() {
         validate();
-        this.container = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
+        this.container = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
+                .orElseThrow(() -> new IllegalStateException("Cannot find a PluginContainer in the current Cause."));
         return new SpongeDataRegistration<>(this);
     }
 }

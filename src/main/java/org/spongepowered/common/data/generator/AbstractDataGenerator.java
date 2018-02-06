@@ -194,14 +194,13 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
     private static final TypeVariable<Class<ListValue>> listValueElement = ListValue.class.getTypeParameters()[0];
     private static final TypeVariable<Class<MapValue>> mapValueKey = MapValue.class.getTypeParameters()[0];
     private static final TypeVariable<Class<MapValue>> mapValueValue = MapValue.class.getTypeParameters()[1];
-    private static final TypeVariable<Class<Value>> valueElement = Value.class.getTypeParameters()[0];
     private static final String keysFieldName = "keys";
 
     @Override
     public DataRegistration<M, I> build() {
         checkState(this.id != null, "The id must be set");
-        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause()
-                .first(PluginContainer.class).get();
+        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
+                .orElseThrow(() -> new IllegalStateException("Cannot find a PluginContainer in the current Cause."));
 
         // Apply builder specific settings, validations, etc...
         preBuild();
@@ -297,7 +296,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
 
         final ImmutableSet.Builder<Key<?>> keys = ImmutableSet.builder();
 
-        // Inject the static parameters
+        // Step 4: Inject the static parameters
         try {
             for (KeyEntry entry : this.keyEntries) {
                 mutableClass.getField(entry.keyFieldName).set(null, entry.key);
@@ -315,6 +314,7 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
             throw new IllegalStateException(e);
         }
 
+        // Step 5: Build the registration
         return new SpongeDataRegistrationBuilder()
                 .id(this.id)
                 .name(this.name == null ? this.id : this.name)
