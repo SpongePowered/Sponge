@@ -61,7 +61,8 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
-            frame.addContext(EventContextKeys.THROWER, (Player) player).getCurrentCause();
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
+            frame.addContext(EventContextKeys.THROWER, (Player) player);
 
             MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, this.getLocation());
             if (event.isCancelled()) {
