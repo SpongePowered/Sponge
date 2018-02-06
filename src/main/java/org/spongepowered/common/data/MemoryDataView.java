@@ -196,25 +196,7 @@ public class MemoryDataView implements DataView {
             }
             if (this.safety == SafetyMode.ALL_DATA_CLONED) {
                 if (object.getClass().isArray()) {
-                    if (object instanceof byte[]) {
-                        return Optional.of(ArrayUtils.clone((byte[]) object));
-                    } else if (object instanceof short[]) {
-                        return Optional.of(ArrayUtils.clone((short[]) object));
-                    } else if (object instanceof int[]) {
-                        return Optional.of(ArrayUtils.clone((int[]) object));
-                    } else if (object instanceof long[]) {
-                        return Optional.of(ArrayUtils.clone((long[]) object));
-                    } else if (object instanceof float[]) {
-                        return Optional.of(ArrayUtils.clone((float[]) object));
-                    } else if (object instanceof double[]) {
-                        return Optional.of(ArrayUtils.clone((double[]) object));
-                    } else if (object instanceof boolean[]) {
-                        return Optional.of(ArrayUtils.clone((boolean[]) object));
-                    } else if (object instanceof char[]) {
-                        return Optional.of(ArrayUtils.clone((char[]) object));
-                    } else {
-                        return Optional.of(ArrayUtils.clone((Object[]) object));
-                    }
+                    return Optional.of(InternalCopies.copyArray(object));
                 }
             }
             return Optional.of(object);
@@ -288,25 +270,7 @@ public class MemoryDataView implements DataView {
             setMap(key, (Map) value);
         } else if (value.getClass().isArray()) {
             if (this.safety == SafetyMode.ALL_DATA_CLONED || this.safety == SafetyMode.CLONED_ON_SET) {
-                if (value instanceof byte[]) {
-                    this.map.put(key, ArrayUtils.clone((byte[]) value));
-                } else if (value instanceof short[]) {
-                    this.map.put(key, ArrayUtils.clone((short[]) value));
-                } else if (value instanceof int[]) {
-                    this.map.put(key, ArrayUtils.clone((int[]) value));
-                } else if (value instanceof long[]) {
-                    this.map.put(key, ArrayUtils.clone((long[]) value));
-                } else if (value instanceof float[]) {
-                    this.map.put(key, ArrayUtils.clone((float[]) value));
-                } else if (value instanceof double[]) {
-                    this.map.put(key, ArrayUtils.clone((double[]) value));
-                } else if (value instanceof boolean[]) {
-                    this.map.put(key, ArrayUtils.clone((boolean[]) value));
-                } else if (value instanceof char[]) {
-                    this.map.put(key, ArrayUtils.clone((char[]) value));
-                } else {
-                    this.map.put(key, ArrayUtils.clone((Object[]) value));
-                }
+                this.map.put(key, InternalCopies.copyArray(value));
             } else {
                 this.map.put(key, value);
             }

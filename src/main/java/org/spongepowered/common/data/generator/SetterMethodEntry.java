@@ -29,7 +29,9 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.spongepowered.api.util.generator.GeneratorUtils;
+import org.spongepowered.common.data.InternalCopies;
 
 import java.lang.reflect.Method;
 
@@ -48,6 +50,10 @@ final class SetterMethodEntry extends AbstractSetterMethodEntry {
             // Check if it's null, will be skipped for primitives
             mv.visitMethodInsn(INVOKESTATIC, "com/google/common/base/Preconditions",
                     "checkNotNull", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+            // Create a copy before setting the object
+            mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
+                    mutableInternalName.equals(targetInternalName) ? "mutableCopy" : "immutableCopy",
+                    "(Ljava/lang/Object;)Ljava/lang/Object;", false);
             // Unbox the value, if it's a primitive
             GeneratorUtils.visitUnboxingMethod(mv, this.keyEntry.valueType);
         }

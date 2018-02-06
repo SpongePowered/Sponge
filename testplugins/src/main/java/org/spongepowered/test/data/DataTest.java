@@ -45,6 +45,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -64,6 +65,8 @@ public class DataTest {
             DummyObjectProvider.createFor(Key.class, "MY_BOOLEAN_KEY");
     public static Key<MapValue<String, Boolean>> MY_STRING_TO_BOOLEAN_KEY =
             DummyObjectProvider.createFor(Key.class, "MY_STRING_TO_BOOLEAN_KEY");
+    public static Key<Value<int[]>> MY_INT_ARRAY_KEY =
+            DummyObjectProvider.createFor(Key.class, "MY_INT_ARRAY_KEY");
 
     public static DataRegistration<BookData, ImmutableBookData> MY_BOOK_DATA =
             DummyObjectProvider.createFor(DataRegistration.class, "MY_BOOK_DATA");
@@ -71,6 +74,8 @@ public class DataTest {
             DummyObjectProvider.createFor(DataRegistration.class, "MY_BOOLEAN_DATA");
     public static DataRegistration<? extends MappedData<String, Boolean, ?, ?>, ? extends ImmutableMappedData<String, Boolean, ?, ?>> MY_STRING_TO_BOOLEAN_DATA =
             DummyObjectProvider.createFor(DataRegistration.class, "MY_STRING_TO_BOOLEAN_DATA");
+    public static DataRegistration<? extends VariantData<int[], ?, ?>, ? extends ImmutableVariantData<int[], ?, ?>> MY_INT_ARRAY_DATA =
+            DummyObjectProvider.createFor(DataRegistration.class, "MY_INT_ARRAY_DATA");
 
     @Listener
     public void onRegisterKeys(GameRegistryEvent.Register<Key<?>> event) {
@@ -121,6 +126,14 @@ public class DataTest {
                 .id("my_string_to_boolean_map")
                 .build();
         event.register(MY_STRING_TO_BOOLEAN_KEY);
+
+        MY_INT_ARRAY_KEY = Key.builder()
+                .type(new TypeToken<Value<int[]>>() {})
+                .query(DataQuery.of("MyIntArray"))
+                .name("MyIntArray")
+                .id("my_int_array_key")
+                .build();
+        event.register(MY_INT_ARRAY_KEY);
     }
 
     @Listener
@@ -190,5 +203,18 @@ public class DataTest {
         myStringToBooleanData.remove("Test");
         System.out.println("PRESENT: " + myStringToBooleanData.get("Test").isPresent());
         System.out.println("MAP_VALUE: " + myStringToBooleanData.getMapValue());
+
+        MY_INT_ARRAY_DATA = VariantDataGenerator.builder()
+                .key(MY_INT_ARRAY_KEY)
+                .defaultValue(new int[0])
+                .id("my_int_array_data")
+                .name("My Int Array Data")
+                .build();
+        event.register(MY_INT_ARRAY_DATA);
+
+        final VariantData<int[], ?, ?> intArrayData = MY_INT_ARRAY_DATA.getDataManipulatorBuilder().create();
+        System.out.println("ORIGINAL INT ARRAY: " + Arrays.toString(intArrayData.get(MY_INT_ARRAY_KEY).get()));
+        intArrayData.set(MY_INT_ARRAY_KEY, new int[] { 0, 5, 6, 7 });
+        System.out.println("NEW INT ARRAY: " + Arrays.toString(intArrayData.get(MY_INT_ARRAY_KEY).get()));
     }
 }

@@ -157,7 +157,7 @@ public class TestDataImpl implements TestData {
     @Override
     public TestDataImpl copy() {
         TestDataImpl copy = new TestDataImpl();
-        copy.value$my_int = this.value$my_int;
+        copy.value$my_int = InternalCopies.mutableCopy(this.value$my_int);
         copy.value$my_string = this.value$my_string;
         copy.value$my_opt_double = this.value$my_opt_double;
         return copy;
@@ -180,7 +180,7 @@ public class TestDataImpl implements TestData {
     @Override
     public Immutable asImmutable() {
         Immutable immutable = new Immutable();
-        immutable.value$my_string = this.value$my_string;
+        immutable.value$my_string = InternalCopies.immutableCopy(this.value$my_string);
         immutable.value$my_int = this.value$my_int;
         immutable.value$my_opt_double = this.value$my_opt_double;
         return immutable;
@@ -269,12 +269,12 @@ public class TestDataImpl implements TestData {
 
         public String value$my_string;
         public int value$my_int;
-        public Optional<Double> value$my_opt_double = InternalCopies.mutableCopy(default_value$my_opt_double);
+        public Optional<Double> value$my_opt_double = InternalCopies.immutableCopy(default_value$my_opt_double);
 
         @Override
         public TestDataImpl asMutable() {
             TestDataImpl mutable = new TestDataImpl();
-            mutable.value$my_string = this.value$my_string;
+            mutable.value$my_string = InternalCopies.mutableCopy(this.value$my_string);
             mutable.value$my_int = this.value$my_int;
             return mutable;
         }

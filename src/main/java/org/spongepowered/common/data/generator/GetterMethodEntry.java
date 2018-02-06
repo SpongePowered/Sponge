@@ -26,10 +26,12 @@ package org.spongepowered.common.data.generator;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.util.generator.GeneratorUtils;
+import org.spongepowered.common.data.InternalCopies;
 
 import java.lang.reflect.Method;
 
@@ -50,6 +52,11 @@ final class GetterMethodEntry extends MethodEntry {
         if (this.keyEntry.boxedValueClass.equals(returnType)) {
             // Box the primitive value, if it's a primitive
             GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
+        } else {
+            // Create a copy before returning the object
+            mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
+                    mutableInternalName.equals(targetInternalName) ? "mutableCopy" : "immutableCopy",
+                    "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         }
         // Return the value
         GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);

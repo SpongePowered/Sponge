@@ -29,6 +29,8 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
+import org.spongepowered.common.data.InternalCopies;
 
 import java.lang.reflect.Method;
 
@@ -48,6 +50,10 @@ final class BoxedOptionalSetterMethodEntry extends AbstractSetterMethodEntry {
     void visit0(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         // Load the parameter
         mv.visitVarInsn(ALOAD, 1);
+        // Create a copy before setting the object
+        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
+                mutableInternalName.equals(targetInternalName) ? "mutableCopyNullable" : "immutableCopyNullable",
+                "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         // Put the parameter into a optional
         mv.visitMethodInsn(INVOKESTATIC, "java/util/Optional", "ofNullable", "(Ljava/lang/Object;)Ljava/util/Optional;", false);
         // Put it in the field

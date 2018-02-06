@@ -29,10 +29,12 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.spongepowered.common.data.InternalCopies;
 
 import java.lang.reflect.Method;
 
@@ -54,6 +56,10 @@ final class UnboxedOptionalGetterMethodEntry extends MethodEntry {
         mv.visitFieldInsn(GETFIELD, targetInternalName, this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
         mv.visitInsn(ACONST_NULL);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "orElse", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+        // Create a copy before getting the object
+        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
+                mutableInternalName.equals(targetInternalName) ? "mutableCopyNullable" : "immutableCopyNullable",
+                "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(this.method.getReturnType()));
         mv.visitInsn(ARETURN);
     }
