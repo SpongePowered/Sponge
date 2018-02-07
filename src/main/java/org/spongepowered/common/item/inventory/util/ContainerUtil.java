@@ -272,10 +272,12 @@ public final class ContainerUtil {
                                     itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
                             craftOutput = index;
                             if (slot instanceof SlotCrafting) {
-                                // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
-                                // e.g. for IC2 ContainerIndustrialWorkbench
-                                craftGridBase = index + 1;
-                                craftGrid = ((SlotCrafting) slot).craftMatrix;
+                                if (craftGridBase == null) {
+                                    // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
+                                    // e.g. for IC2 ContainerIndustrialWorkbench
+                                    craftGridBase = index + 1;
+                                    craftGrid = ((SlotCrafting) slot).craftMatrix;
+                                }
                             }
                         }
                         if (subInventory instanceof InventoryCrafting) {
