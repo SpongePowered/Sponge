@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.generator;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
@@ -45,18 +46,21 @@ final class GetterMethodEntry extends MethodEntry {
     void visit(MethodVisitor mv, String targetInternalName, String mutableInternalName) {
         // Load "this"
         mv.visitVarInsn(ALOAD, 0);
-        final Class<?> returnType = this.method.getReturnType();
         // Get the field value from "this"
         mv.visitFieldInsn(GETFIELD, targetInternalName,
-                this.keyEntry.valueFieldName, Type.getDescriptor(returnType));
-        if (this.keyEntry.boxedValueClass.equals(returnType)) {
-            // Box the primitive value, if it's a primitive
-            GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
-        } else {
-            // Create a copy before returning the object
-            mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
-                    mutableInternalName.equals(targetInternalName) ? "mutableCopy" : "immutableCopy",
-                    "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                this.keyEntry.valueFieldName, this.keyEntry.valueFieldDescriptor);
+        final Class<?> returnType = this.method.getReturnType();
+        if (!returnType.isPrimitive()) {
+            if (this.keyEntry.valueClass.isPrimitive()) {
+                // Box the primitive value, if it's a primitive
+                GeneratorUtils.visitBoxingMethod(mv, this.keyEntry.valueType);
+            } else {
+                // Create a copy before returning the object
+                mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(InternalCopies.class),
+                        mutableInternalName.equals(targetInternalName) ? "mutableCopy" : "immutableCopy",
+                        "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                mv.visitTypeInsn(CHECKCAST, Type.getInternalName(returnType));
+            }
         }
         // Return the value
         GeneratorHelper.visitReturn(mv, this.keyEntry.valueType);
