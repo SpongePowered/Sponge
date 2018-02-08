@@ -57,10 +57,6 @@ public interface IMixinEntityLivingBase {
 
     boolean hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
 
-    default boolean properlyOverridesOnDeathForCauseTrackerCompletion() {
-        return false;
-    }
-
     double getLastDamageTaken();
 
     void setRevengeTarget(EntityLivingBase entityLivingBase);
