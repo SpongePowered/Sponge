@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
@@ -62,7 +63,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.VecHelper;
 
 @Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
@@ -111,8 +111,9 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final ItemStack oldStack = stack.copy();
 
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack, VecHelper.toVector3d(pos.add
-                (hitX, hitY, hitZ)), currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack,
+                new Vector3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ),
+                currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
