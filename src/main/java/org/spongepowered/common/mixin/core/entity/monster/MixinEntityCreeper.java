@@ -31,7 +31,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -42,8 +41,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 
@@ -75,26 +72,6 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     private boolean interactPrimeCancelled;
     private boolean stateDirty;
     private boolean detonationCancelled;
-
-    private boolean isCorrectlyOverridden;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void onCreeperConstructedVerifyDeathCompletion(CallbackInfo callbackInfo) {
-        this.isCorrectlyOverridden = ((EntityCreeper) (Object) this).getClass() == EntityCreeper.class;
-    }
-
-    @Inject(method = "onDeath", at = @At("RETURN"))
-    private void onDeath(DamageSource damageSource, CallbackInfo ci) {
-        if (!this.world.isRemote && this.tracksEntityDeaths) {
-            PhaseTracker.getInstance().completePhase(EntityPhase.State.DEATH);
-            this.tracksEntityDeaths = false;
-        }
-    }
-
-    @Override
-    public boolean properlyOverridesOnDeathForCauseTrackerCompletion() {
-        return this.isCorrectlyOverridden;
-    }
 
     // FusedExplosive Impl
 

@@ -30,7 +30,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 public final class EntityPhase extends TrackingPhase {
 
     public static final class State {
-        public static final IPhaseState<BasicEntityContext> DEATH = new DeathPhase();
+        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
         public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
         public static final IPhaseState<TeleportingContext> CHANGING_DIMENSION = new ChangingToDimensionState();
         public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
