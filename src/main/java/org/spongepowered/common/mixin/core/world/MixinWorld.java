@@ -119,6 +119,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
@@ -1142,8 +1143,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         entity.updateRidden();
     }
 
-    @Redirect(method = "addTileEntity", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1, remap = false))
-    public boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
+    @Redirect(method = "addTileEntity",
+            at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),
+            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
+                           to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
+    private boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
         if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
             return false;
         }
