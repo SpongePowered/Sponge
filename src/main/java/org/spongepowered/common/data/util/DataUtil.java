@@ -186,6 +186,12 @@ public final class DataUtil {
     private static void addFailedDeserialization(SerializedDataTransaction.Builder builder, DataView view, String dataId, @Nullable Throwable cause) {
         SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().addFailedData(dataId, cause);
         SpongeImpl.getDataConfig().getConfig().getDataRegistrationConfig().purgeOrAllow(builder, dataId, view);
+        try {
+            // we need to save the config with the updated values.
+            SpongeImpl.getDataConfig().save();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static DataView updateDataViewForDataManipulator(DataView dataView) {
