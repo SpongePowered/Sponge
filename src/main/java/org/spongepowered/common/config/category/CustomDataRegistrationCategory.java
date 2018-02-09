@@ -89,6 +89,12 @@ public class CustomDataRegistrationCategory extends ConfigCategory {
                                                 + "every load.")
     private Set<String> purgeDatas = new ConcurrentSkipListSet<>();
 
+    @Setting(value = "print-on-discovery", comment = "In the cases where there is already previously discovered data\n"
+                                                     + "we don't want to spam the log on each discovery in certain\n"
+                                                     + "contexts. If it is required, we still can emit the log warning\n"
+                                                     + "when necessary.")
+    private boolean printFailedDataOnDiscovery = false;
+
 
     public void populateRegistrations(Collection<DataRegistration<?, ?>> registrations) {
         this.registeredDataIds.clear();
@@ -98,7 +104,7 @@ public class CustomDataRegistrationCategory extends ConfigCategory {
     }
 
     public void addFailedData(String dataId, Throwable cause) {
-        if (this.discoveredFailedDatas.add(dataId)) {
+        if (this.discoveredFailedDatas.add(dataId) && this.printFailedDataOnDiscovery) {
             new PrettyPrinter(60).add("Failed Data Discovery").centre().hr()
                 .addWrapped("Sponge found an unregistered DataRegistration id. Don't worry though!"
                             + "Sponge will attempt to persist the failed data for future attempts, unless"
