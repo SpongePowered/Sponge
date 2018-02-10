@@ -65,12 +65,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-<<<<<<< HEAD
-            Sponge.getCauseStackManager().pushCause(locatable);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-=======
             frame.pushCause(locatable);
->>>>>>> 6e7cfa2ee... Fix saplings (and apples) not dropping from decaying leaves and change the addition order of EventContextKeys
             context.addNotifierAndOwnerToCauseStack();
 
             context.getCapturedBlockSupplier()
