@@ -711,7 +711,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     // Is interaction allowed with item in hand
                     if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
                                     .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
-                            entity, hand, VecHelper.toVector3d(packetIn.getHitVec())).isCancelled()) {
+                            entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
                         // Restore held item in hand
                         int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
                         Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
