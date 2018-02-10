@@ -34,6 +34,7 @@ import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.network.play.server.SPacketSetSlot;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -42,11 +43,13 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -66,11 +69,16 @@ public abstract class MixinSlotCrafting extends Slot {
     @Shadow @Final private EntityPlayer player;
 
     @Shadow @Final private InventoryCrafting craftMatrix;
-    @Nullable private CraftingRecipe lastRecipe;
+    @Shadow private int amountCrafted;
 
     public MixinSlotCrafting(IInventory inventoryIn, int index, int xPosition, int yPosition) {
         super(inventoryIn, index, xPosition, yPosition);
     }
+    @Nullable private CraftingRecipe lastRecipe;
+
+    // When shift-crafting the input stack is always empty, we use this to know how much was actually crafted
+    @Nullable private ItemStack craftedStack;
+    private int craftedStackQuantity;
 
     @Override
     public void putStack(@Nullable ItemStack stack) {
@@ -80,6 +88,11 @@ public abstract class MixinSlotCrafting extends Slot {
         }
     }
 
+    @Inject(method = "onCrafting(Lnet/minecraft/item/ItemStack;)V", at = @At("HEAD"))
+    private void onCraftingHead(ItemStack itemStack, CallbackInfo ci) {
+        this.craftedStackQuantity = this.amountCrafted; // Remember for shift-crafting
+    }
+
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(EntityPlayer thePlayer, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
         this.lastRecipe = ((CraftingRecipe) CraftingManager.findMatchingRecipe(this.craftMatrix, thePlayer.world));
@@ -87,6 +100,19 @@ public abstract class MixinSlotCrafting extends Slot {
             ((IMixinContainer) thePlayer.openContainer).detectAndSendChanges(true);
             ((IMixinContainer) thePlayer.openContainer).setShiftCrafting(false);
         }
+        ((IMixinContainer) thePlayer.openContainer).setFirePreview(false);
+
+        // When shift-crafting the crafted item was reduced to quantity 0
+        // Grow the stack to copy it
+        stack.grow(1);
+        this.craftedStack = stack.copy();
+        // set the correct amount
+        if (this.amountCrafted != 0) {
+            this.craftedStackQuantity = this.amountCrafted;
+        }
+        this.craftedStack.setCount(this.craftedStackQuantity);
+        // shrink the stack back so we do not modify the return value
+        stack.shrink(1);
     }
 
     /**
@@ -99,6 +125,8 @@ public abstract class MixinSlotCrafting extends Slot {
         if (((IMixinWorld) thePlayer.world).isFake()) {
             return;
         }
+        ((IMixinContainer) thePlayer.openContainer).detectAndSendChanges(true);
+
         ((IMixinContainer) thePlayer.openContainer).setCaptureInventory(false);
 
         Container container = thePlayer.openContainer;
@@ -109,28 +137,49 @@ public abstract class MixinSlotCrafting extends Slot {
         }
 
         // retain only last slot-transactions on output slot
-        SlotTransaction last = null;
+        SlotTransaction first = null;
         List<SlotTransaction> capturedTransactions = ((IMixinContainer) container).getCapturedTransactions();
         for (Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             SlotTransaction trans = iterator.next();
             Optional<SlotIndex> slotIndex = trans.getSlot().getInventoryProperty(SlotIndex.class);
             if (slotIndex.isPresent() && slotIndex.get().getValue() == 0) {
                 iterator.remove();
-                last = trans;
+                if (first == null) {
+                    first = trans;
+                }
             }
         }
 
         ItemStackSnapshot craftedItem;
-        if (last != null) {
-            capturedTransactions.add(last);
-            craftedItem = last.getOriginal().copy();
+        // if we got a transaction on the crafting-slot use this
+        if (first != null) {
+            capturedTransactions.add(first);
+            craftedItem = first.getOriginal().copy();
         } else {
-            craftedItem = ItemStackUtil.snapshotOf(this.getStack());
+            if (stack.isEmpty()) {
+                // if stack is empty this was probably shift-crafting so we use the captured itemstack instead
+                craftedItem = ItemStackUtil.snapshotOf(this.craftedStack);
+            } else {
+                craftedItem = ItemStackUtil.snapshotOf(stack);
+            }
         }
 
-        CraftItemEvent.Craft event = SpongeCommonEventFactory.callCraftEventPost(thePlayer, ((CraftingInventory) craftInv),
+        CraftingInventory craftingInventory = (CraftingInventory) craftInv;
+        CraftItemEvent.Craft event = SpongeCommonEventFactory.callCraftEventPost(thePlayer, craftingInventory,
                 craftedItem, this.lastRecipe, container, capturedTransactions);
 
         ((IMixinContainer) container).setLastCraft(event);
+        ((IMixinContainer) container).setFirePreview(true);
+        this.craftedStack = null;
+
+
+        SlotTransaction last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(this.getStack()));
+
+        List<SlotTransaction> previewTransactions = ((IMixinContainer) container).getPreviewTransactions();
+        CraftingRecipe newRecipe = Sponge.getRegistry().getCraftingRecipeRegistry()
+                .findMatchingRecipe(craftingInventory.getCraftingGrid(), ((World) player.world)).orElse(null);
+        SpongeCommonEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, newRecipe, container, previewTransactions);
+        previewTransactions.clear();
+
     }
 }
