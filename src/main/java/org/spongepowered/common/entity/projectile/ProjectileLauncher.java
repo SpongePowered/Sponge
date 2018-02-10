@@ -41,6 +41,7 @@ import net.minecraft.entity.projectile.EntityLlamaSpit;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.projectile.EntitySpectralArrow;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.entity.projectile.EntityWitherSkull;
@@ -65,6 +66,8 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.api.entity.projectile.ThrownExpBottle;
 import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
+import org.spongepowered.api.entity.projectile.arrow.SpectralArrow;
 import org.spongepowered.api.entity.projectile.arrow.TippedArrow;
 import org.spongepowered.api.entity.projectile.explosive.DragonFireball;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
@@ -179,6 +182,25 @@ public class ProjectileLauncher {
             @Override
             protected Optional<TippedArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
                 TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.world, source);
+                ((EntityTippedArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                return doLaunch(loc.getExtent(), arrow);
+            }
+        });
+        registerProjectileLogic(SpectralArrow.class, new SimpleItemLaunchLogic<SpectralArrow>(SpectralArrow.class, Items.ARROW) {
+
+            @Override
+            protected Optional<SpectralArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
+                SpectralArrow arrow = (SpectralArrow) new EntitySpectralArrow(source.world, source);
+                ((EntitySpectralArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                return doLaunch(loc.getExtent(), arrow);
+            }
+        });
+        registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.ARROW) {
+
+            @Override
+            protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
+                SpongeImpl.getLogger().warn("An Arrow will be launched. Arrow is not what you should use, maybe you want to use TippedArrow instead");
+                Arrow arrow = (Arrow) new EntityTippedArrow(source.world, source);
                 ((EntityTippedArrow) arrow).shoot(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
                 return doLaunch(loc.getExtent(), arrow);
             }
