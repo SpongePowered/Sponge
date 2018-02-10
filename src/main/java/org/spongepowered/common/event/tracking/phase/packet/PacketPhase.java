@@ -45,6 +45,7 @@ import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketKeepAlive;
+import net.minecraft.network.play.client.CPacketPlaceRecipe;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerAbilities;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
@@ -135,6 +136,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
         public static final BasicInventoryPacketState SWAP_HAND_ITEMS = new SwapHandItemsState();
 
+        public static final BasicInventoryPacketState PLACE_RECIPE = new PlaceRecipePacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
                 .add(INVENTORY)
@@ -355,6 +357,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketCustomPayload.class, packet -> General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketSpectate.class, packet -> General.IGNORED);
         this.packetTranslationMap.put(CPacketResourcePackStatus.class, packet -> General.RESOURCE_PACK);
+        this.packetTranslationMap.put(CPacketPlaceRecipe.class, packet -> Inventory.PLACE_RECIPE);
     }
 
     private static final ImmutableMap<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPhaseState<? extends PacketContext<?>>>builder()

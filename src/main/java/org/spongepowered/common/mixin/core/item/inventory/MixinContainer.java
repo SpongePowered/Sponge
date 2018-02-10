@@ -99,11 +99,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow protected List<IContainerListener> listeners;
     private boolean spectatorChest;
     private boolean dirty = true;
-    private boolean crafting = false;
     private boolean dropCancelled = false;
     @Nullable private ItemStackSnapshot itemStackSnapshot;
     @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
+    private boolean firePreview;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -373,7 +373,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
     private void afterSlotChangedCraftingGrid(World world, EntityPlayer player, InventoryCrafting craftingInventory, InventoryCraftResult output, CallbackInfo ci)
     {
-        if (!this.capturedCraftPreviewTransactions.isEmpty()) {
+        if (this.firePreview && !this.capturedCraftPreviewTransactions.isEmpty()) {
             Inventory inv = this.query(QueryOperationTypes.INVENTORY_TYPE.of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
                 SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + this.getClass().getName());
@@ -471,8 +471,18 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     @Override
+    public List<SlotTransaction> getPreviewTransactions() {
+        return this.capturedCraftPreviewTransactions;
+    }
+
+    @Override
     public void setLastCraft(CraftItemEvent.Craft event) {
         this.lastCraft = event;
+    }
+
+    @Override
+    public void setFirePreview(boolean firePreview) {
+        this.firePreview = firePreview;
     }
 
     @Override
