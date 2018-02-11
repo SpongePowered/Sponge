@@ -54,6 +54,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -66,6 +67,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -104,6 +106,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
     private boolean firePreview;
+    @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -539,5 +542,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public void setPlugin(PluginContainer plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public Location<org.spongepowered.api.world.World> getOpenLocation() {
+        return this.lastOpenLocation;
+    }
+
+    @Override
+    public void setOpenLocation(Location<org.spongepowered.api.world.World> loc) {
+        this.lastOpenLocation = loc;
     }
 }

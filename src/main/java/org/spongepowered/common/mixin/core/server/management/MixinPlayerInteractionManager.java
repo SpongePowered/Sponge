@@ -61,6 +61,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
@@ -219,10 +220,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
     @Override
     public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result) {
-
         if (lastOpenContainer != player.openContainer) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
+            ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
             if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
                 result = EnumActionResult.FAIL;
                 SpongeCommonEventFactory.interactBlockEventCancelled = true;
