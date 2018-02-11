@@ -498,7 +498,6 @@ public final class ContainerUtil {
                         }
                     };
                 }
-                return null;
             }
         }
 
