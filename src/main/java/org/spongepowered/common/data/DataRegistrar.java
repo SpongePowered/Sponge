@@ -27,6 +27,7 @@ package org.spongepowered.common.data;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.tileentity.*;
 import org.spongepowered.api.block.tileentity.carrier.*;
 import org.spongepowered.api.data.key.Keys;
@@ -72,6 +73,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.common.block.SpongeBlockStateMatcherBuilder;
 import org.spongepowered.common.text.serializer.config.BookViewDataBuilder;
 import org.spongepowered.common.text.serializer.config.TextConfigSerializer;
 import org.spongepowered.api.util.Color;
@@ -175,6 +177,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
         dataManager.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
         dataManager.registerBuilderAndImpl(ImmutableTreeData.class, ImmutableSpongeTreeData.class, new ImmutableSpongeTreeDataBuilder());
+        dataManager.registerBuilder(BlockStateMatcher.class, new SpongeBlockStateMatcherBuilder());
 
         // Entity stuff
         dataManager.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());

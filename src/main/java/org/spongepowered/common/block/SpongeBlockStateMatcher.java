@@ -31,6 +31,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 
 import java.util.List;
 import java.util.Optional;
@@ -84,6 +86,24 @@ public class SpongeBlockStateMatcher implements BlockStateMatcher {
             this.compatibleStates = computeCompatibleStates();
         }
         return this.compatibleStates;
+    }
+
+    @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = DataContainer.createNew();
+        container.set(DataQuery.of("blockType"), type);
+        for (int i = 0; i < this.traits.length; i++) {
+            final BlockTrait<?> trait = this.traits[i];
+            final Object value = this.values[i];
+            container.set(DataQuery.of(trait.getKey().toString()), value);
+        }
+
+        return container;
     }
 
     @Override

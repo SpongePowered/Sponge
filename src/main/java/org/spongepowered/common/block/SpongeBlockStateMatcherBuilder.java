@@ -31,16 +31,26 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.block.BlockStateMatcher;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder {
+public class SpongeBlockStateMatcherBuilder extends AbstractDataBuilder<BlockStateMatcher> implements BlockStateMatcher.Builder {
 
     @Nullable private BlockType type;
     private ArrayList<BlockTrait<?>> traits = new ArrayList<>();
     private ArrayList<Object> values = new ArrayList<>();
+
+    public SpongeBlockStateMatcherBuilder() {
+        super(BlockStateMatcher.class, 1);
+    }
 
     @Override
     public SpongeBlockStateMatcherBuilder type(BlockType type) {
@@ -84,5 +94,29 @@ public class SpongeBlockStateMatcherBuilder implements BlockStateMatcher.Builder
         this.traits.clear();
         this.values.clear();
         return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Optional<BlockStateMatcher> buildContent(DataView container) throws InvalidDataException {
+        reset();
+        Map<DataQuery, Object> entries = container.getValues(false);
+        BlockType blockType = container.getCatalogType(DataQuery.of("blockType"), BlockType.class).orElseThrow(
+                () -> new InvalidDataException("Invalid BlockType"));
+        type(blockType);
+
+        for (Map.Entry<DataQuery, Object> entry : entries.entrySet()) {
+            String traitId = entry.getKey().last().asString("");
+            Object obj = entry.getValue();
+
+            if (obj instanceof Comparable) {
+                blockType.getTrait(traitId).ifPresent(t -> trait((BlockTrait)t, (Comparable)obj));
+            }
+            else {
+                throw new InvalidDataException("Invalid trait value");
+            }
+        }
+
+        return Optional.of(build());
     }
 }
