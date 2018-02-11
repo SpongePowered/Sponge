@@ -74,7 +74,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinSingleBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomContainer;
@@ -500,7 +499,20 @@ public final class ContainerUtil {
                 }
             }
         }
+        Location<org.spongepowered.api.world.World> loc = ((IMixinContainer) container).getOpenLocation();
+        if (loc != null) {
+            return new IMixinSingleBlockCarrier() {
+                @Override
+                public Location<org.spongepowered.api.world.World> getLocation() {
+                    return loc;
+                }
 
+                @Override
+                public CarriedInventory<?> getInventory() {
+                    return ((CarriedInventory) container);
+                }
+            };
+        }
         return null;
     }
 
