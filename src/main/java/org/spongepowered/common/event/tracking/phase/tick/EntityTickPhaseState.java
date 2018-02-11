@@ -152,7 +152,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         if (!projectile.isEmpty()) {
                             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
                             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) tickingEntity);
-                            frame.addContext(EventContextKeys.THROWER, (ProjectileSource) tickingEntity);
 
                             LaunchProjectileEvent
                                     launchProjectileEvent = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectile);

@@ -158,7 +158,6 @@ public final class PacketPhaseUtil {
 
         frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
         frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
-        frame.addContext(EventContextKeys.THROWER, (ProjectileSource) player);
 
         LaunchProjectileEvent
                 launchProjectileEvent = SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);

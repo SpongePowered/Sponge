@@ -113,7 +113,6 @@ final class DispensePhaseState extends BlockPhaseState {
                             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
                             Dispenser dispenser = (Dispenser) blockSnapshot.getLocation().get().getExtent().getTileEntity(blockSnapshot.getLocation().get().getPosition().toInt()).get();
                             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, dispenser);
-                            frame.addContext(EventContextKeys.THROWER, dispenser);
 
                             LaunchProjectileEvent launchProjectileEvent =
                                     SpongeEventFactory.createLaunchProjectileEvent(Sponge.getCauseStackManager().getCurrentCause(), projectiles);

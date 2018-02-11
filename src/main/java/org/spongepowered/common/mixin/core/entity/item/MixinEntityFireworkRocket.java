@@ -156,7 +156,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         // post an event regardless and if the radius is zero the explosion
         // won't be triggered (the default behavior).
         Sponge.getCauseStackManager().pushCause(this);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+        Sponge.getCauseStackManager().addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
         detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(getLocation())
@@ -170,7 +170,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(this);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+                Sponge.getCauseStackManager().addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
                 postPrime();
             }
         }

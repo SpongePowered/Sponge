@@ -66,7 +66,6 @@ public class MixinBehaviorProjectileDispense extends BehaviorDefaultDispenseItem
         if (tileEntity instanceof ProjectileSource) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) tileEntity);
-                frame.addContext(EventContextKeys.THROWER, (ProjectileSource) tileEntity);
                 ((Projectile) iprojectile).setShooter((ProjectileSource) tileEntity);
                 List<Projectile> projectiles = new ArrayList<>();
                 projectiles.add((Projectile) iprojectile);

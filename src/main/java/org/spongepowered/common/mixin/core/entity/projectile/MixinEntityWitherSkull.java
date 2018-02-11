@@ -124,7 +124,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
         boolean griefer = ((IMixinGriefer) this).canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(this);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+            Sponge.getCauseStackManager().addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
             Sponge.getCauseStackManager().pushCause(getShooter());
             return detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
