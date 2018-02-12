@@ -157,19 +157,24 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private ServerScoreboard scoreboard;
     private PortalAgentType portalAgentType;
 
+    // Flag to indicate that construction is complete to save operations
+    // Fixes file locking issues, see https://github.com/SpongePowered/SpongeForge/issues/1991
+    private boolean isConstructed = false;
+
     //     protected WorldInfo()
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstruction(CallbackInfo ci) {
-        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        onConstructionCommon();
+        this.isConstructed = true;
     }
 
     //     public WorldInfo(NBTTagCompound nbt)
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
         if (!SpongeCommonEventFactory.convertingMapFormat) {
-            onConstruction(ci);
+            onConstructionCommon();
         }
+        this.isConstructed = true;
     }
 
     //     public WorldInfo(WorldSettings settings, String name)
@@ -177,10 +182,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
         if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
             this.isValid = false;
+            this.isConstructed = true;
             return;
         }
 
-        onConstruction(ci);
+        onConstructionCommon();
 
         final WorldArchetype archetype = (WorldArchetype) (Object) settings;
         setDimensionType(archetype.getDimensionType());
@@ -203,18 +209,26 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
         setSerializationBehavior(archetype.getSerializationBehavior());
         this.getOrCreateWorldConfig().save();
+        this.isConstructed = true;
     }
 
     //     public WorldInfo(WorldInfo worldInformation)
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
         // TODO Since we're making a WorldInfo from a WorldInfo, perhaps we should clone the Sponge data here? Currently this is done in WorldManager.
-        onConstruction(ci);
+        onConstructionCommon();
 
         // TODO Zidane needs to fix this
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
         this.portalAgentType = info.portalAgentType;
+        this.isConstructed = true;
         this.setDimensionType(info.dimensionType);
+    }
+
+    // used in all init methods
+    private void onConstructionCommon() {
+        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
@@ -610,9 +624,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setLoadOnStartup(boolean state) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setLoadOnStartup(state);
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            this.getOrCreateWorldConfig().save();
-        }
+        saveConfig();
     }
 
     @Override
@@ -640,9 +652,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setKeepSpawnLoaded(boolean loaded) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setKeepSpawnLoaded(loaded);
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            this.getOrCreateWorldConfig().save();
-        }
+        saveConfig();
     }
 
     @Override
@@ -668,9 +678,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setGenerateSpawnOnLoad(boolean state) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            this.getOrCreateWorldConfig().save();
-        }
+        saveConfig();
     }
 
     @Override
@@ -878,5 +886,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         NBTTagCompound additionalProperties = this.spongeRootLevelNbt.copy();
         additionalProperties.removeTag(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
+    }
+
+    private void saveConfig() {
+        // this.isConstructed is checked so that we don't continuously save until
+        // object construction is complete.
+        if (this.isConstructed && this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            getOrCreateWorldConfig().save();
+        }
     }
 }
