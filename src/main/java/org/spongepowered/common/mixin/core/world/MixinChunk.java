@@ -432,7 +432,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public int getHighestYAt(int x, int z) {
-        return this.sponge_world.getHighestYAt(this.x << 4 + (x & 15), this.z << 4 + (z & 15));
+        return this.sponge_world.getHighestYAt((this.x << 4) + (x & 15), (this.z << 4) + (z & 15));
     }
 
     @Override
