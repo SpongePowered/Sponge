@@ -72,6 +72,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
+    private StackTraceElement[] stackTrace;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;
     @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
@@ -185,6 +186,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P buildAndSwitch() {
         this.isCompleted = true;
+        this.stackTrace = new Exception("Debug Trace").getStackTrace();
         PhaseTracker.getInstance().switchToPhase(this.state, this);
         return (P) this;
     }
@@ -407,4 +409,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedItemsSupplier != null ? this.capturedItemsSupplier.orEmptyList() : Collections.emptyList();
     }
 
+    public void printTrace(PrettyPrinter printer) {
+        printer.add("Entrypoint:")
+            .add(this.stackTrace);
+    }
 }

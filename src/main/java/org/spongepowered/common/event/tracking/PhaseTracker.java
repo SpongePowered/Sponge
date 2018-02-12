@@ -126,17 +126,7 @@ public final class PhaseTracker {
         printer.add("  - Phase: %s", data.state);
         printer.add("    Context:");
         data.context.printCustom(printer);
-        /*
-        data.context.getExtraContext().entrySet().forEach(namedCause -> {
-            printer.add("    - Name: %s", namedCause.getKey());
-            final Object causeObject = namedCause.getValue();
-            if (causeObject instanceof PhaseContext) {
-                CONTEXT_PRINTER.accept(printer, (PhaseContext<?>) causeObject);
-            } else {
-                printer.addWrapped(100, "      Object: %s", causeObject);
-            }
-        });
-        */
+        data.context.printTrace(printer);
     };
 
     private final PhaseStack stack = new PhaseStack();
@@ -146,6 +136,7 @@ public final class PhaseTracker {
     private boolean hasPrintedEmptyOnce = false;
     private boolean hasPrintedAboutRunnawayPhases = false;
     private boolean hasPrintedAsyncEntities = false;
+    private int printRunawayCount = 0;
     private final List<IPhaseState<?>> printedExceptionsForBlocks = new ArrayList<>();
     private final List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
     private final List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
@@ -231,23 +222,26 @@ public final class PhaseTracker {
     }
 
     private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
-        if (!this.isVerbose && !this.hasPrintedAboutRunnawayPhases) {
+        if (!this.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
         }
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Completing Phase").centre().hr();
-        printer.addWrapped(60, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.addWrapped(60, "Detecting a runaway phase! Potentially a problem "
+                               + "where something isn't completing a phase!!! Sponge will stop printing"
+                               + "after three more times to avoid generating extra logs");
         printer.add();
         printer.addWrapped(60, "%s : %s", "Completing phase", state);
         printer.add(" Phases Remaining:");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add();
         printer.add("Stacktrace:");
         printer.add(new Exception("Stack trace"));
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (this.printRunawayCount++ > 3) {
             this.hasPrintedAboutRunnawayPhases = true;
         }
     }
@@ -293,7 +287,7 @@ public final class PhaseTracker {
     }
 
     private void printEmptyStackOnCompletion() {
-        if (!this.isVerbose && this.hasPrintedEmptyOnce) {
+        if (this.hasPrintedEmptyOnce) {
             // We want to only mention it once that we are completing an
             // empty state, of course something is bound to break, but
             // we don't want to spam megabytes worth of log files just
