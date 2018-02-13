@@ -93,8 +93,6 @@ public final class PhaseTracker {
 
     private static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
 
-    private static final boolean CAPTURE_ENTITIES_ASYNC = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().captureEntitiesAsync();
-
     @SuppressWarnings("unused")
     private static final Task ASYNC_TO_SYNC_SPAWNER = Task.builder()
         .name("Sponge Async To Sync Entity Spawn Task")
@@ -131,8 +129,6 @@ public final class PhaseTracker {
 
     private final PhaseStack stack = new PhaseStack();
 
-    public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
-    public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
     private boolean hasPrintedEmptyOnce = false;
     private boolean hasPrintedAboutRunnawayPhases = false;
     private boolean hasPrintedAsyncEntities = false;
@@ -150,7 +146,7 @@ public final class PhaseTracker {
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState<?> currentState = this.stack.peek().state;
-        if (this.isVerbose) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
@@ -196,7 +192,7 @@ public final class PhaseTracker {
 
         }
 
-        if (this.isVerbose && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
             this.printRunnawayPhaseCompletion(state);
@@ -222,7 +218,7 @@ public final class PhaseTracker {
     }
 
     private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
-        if (!this.hasPrintedAboutRunnawayPhases) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
         }
@@ -241,7 +237,7 @@ public final class PhaseTracker {
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (this.printRunawayCount++ > 3) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.printRunawayCount++ > 3) {
             this.hasPrintedAboutRunnawayPhases = true;
         }
     }
@@ -255,7 +251,7 @@ public final class PhaseTracker {
     }
 
     private void printIncorrectPhaseCompletion(IPhaseState<?> prevState, IPhaseState<?> state) {
-        if (!this.isVerbose && !this.completedIncorrectStates.isEmpty()) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.completedIncorrectStates.isEmpty()) {
             for (Tuple<IPhaseState<?>, IPhaseState<?>> tuple : this.completedIncorrectStates) {
                 if ((tuple.getFirst().equals(prevState)
                         && tuple.getSecond().equals(state))) {
@@ -281,7 +277,7 @@ public final class PhaseTracker {
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.completedIncorrectStates.add(new Tuple<>(prevState, state));
         }
     }
@@ -305,13 +301,13 @@ public final class PhaseTracker {
                 .add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.hasPrintedEmptyOnce = true;
         }
     }
 
     private void printRunawayPhase(IPhaseState<?> state, PhaseContext<?> context) {
-        if (!this.isVerbose && !this.hasPrintedAboutRunnawayPhases) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
         }
@@ -323,18 +319,19 @@ public final class PhaseTracker {
         CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add();
         printer.add("  %s :", "Printing stack trace")
                 .add(new Exception("Stack trace"));
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.printRunawayCount++ > SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().getMaximumRunawayCount()) {
             this.hasPrintedAboutRunnawayPhases = true;
         }
     }
 
     private void printPhaseIncompatibility(IPhaseState<?> currentState, IPhaseState<?> incompatibleState) {
-        if (!this.isVerbose && !this.completedIncorrectStates.isEmpty()) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.completedIncorrectStates.isEmpty()) {
             for (Tuple<IPhaseState<?>, IPhaseState<?>> tuple : this.completedIncorrectStates) {
                 if ((tuple.getFirst().equals(currentState)
                         && tuple.getSecond().equals(incompatibleState))) {
@@ -358,7 +355,7 @@ public final class PhaseTracker {
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.completedIncorrectStates.add(Tuple.of(currentState, incompatibleState));
         }
     }
@@ -383,7 +380,7 @@ public final class PhaseTracker {
     }
 
     public void printExceptionFromPhase(Throwable e, PhaseContext<?> context) {
-        if (!this.isVerbose && !this.printedExceptionsForState.isEmpty()) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.printedExceptionsForState.isEmpty()) {
             for (IPhaseState<?> iPhaseState : this.printedExceptionsForState) {
                 if (context.state == iPhaseState) {
                     return;
@@ -407,13 +404,13 @@ public final class PhaseTracker {
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForState.add(context.state);
         }
     }
 
     private void printBlockTrackingException(PhaseData phaseData, IPhaseState<?> phaseState, Throwable e) {
-        if (!this.isVerbose && !this.printedExceptionsForBlocks.isEmpty()) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.printedExceptionsForBlocks.isEmpty()) {
             if (this.printedExceptionsForBlocks.contains(phaseState)) {
                 return;
             }
@@ -426,13 +423,13 @@ public final class PhaseTracker {
         printer.add("Stacktrace:");
         printer.add(e);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForBlocks.add(phaseState);
         }
     }
 
     private void printUnexpectedBlockChange() {
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             return;
         }
         new PrettyPrinter(60).add("Unexpected World Change Detected!").centre().hr()
@@ -447,7 +444,7 @@ public final class PhaseTracker {
     }
 
     private void printExceptionSpawningEntity(PhaseContext<?> context, Throwable e) {
-        if (!this.isVerbose && !this.printedExceptionsForEntities.isEmpty()) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && !this.printedExceptionsForEntities.isEmpty()) {
             if (this.printedExceptionsForEntities.contains(context.state)) {
                 return;
             }
@@ -460,7 +457,7 @@ public final class PhaseTracker {
         printer.add("Stacktrace:");
         printer.add(e);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-        if (!this.isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForEntities.add(context.state);
         }
     }
@@ -570,7 +567,7 @@ public final class PhaseTracker {
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState<?> phaseState = phaseData.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        if (this.isVerbose && isComplete) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             this.printUnexpectedBlockChange();
@@ -773,14 +770,14 @@ public final class PhaseTracker {
         }
         // We aren't in the server thread at this point, and an entity is spawning on the server....
         // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
-        if (!CAPTURE_ENTITIES_ASYNC) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().captureEntitiesAsync()) {
             // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
-            if (!PhaseTracker.getInstance().isVerbose) {
+            if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
                 return false;
             }
             // Just checking if we've already printed once about it.
             // If we have, we don't want to print any more times.
-            if (!PhaseTracker.getInstance().verboseErrors && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
+            if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().verboseErrors() && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
                 return false;
             }
             // Otherwise, let's print out either the first time, or several more times.
@@ -806,12 +803,12 @@ public final class PhaseTracker {
         ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
         // At this point we can print an exception about it, if we are told to.
         // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
-        if (!PhaseTracker.getInstance().isVerbose) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             return false;
         }
         // Just checking if we've already printed once about it.
         // If we have, we don't want to print any more times.
-        if (!PhaseTracker.getInstance().verboseErrors && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().verboseErrors() && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
             return false;
         }
         // Otherwise, let's print out either the first time, or several more times.

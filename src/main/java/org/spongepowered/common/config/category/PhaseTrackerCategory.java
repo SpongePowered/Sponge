@@ -28,28 +28,19 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 @ConfigSerializable
-public class CauseTrackerCategory extends ConfigCategory {
+public class PhaseTrackerCategory extends ConfigCategory {
 
     @Setting(value = "verbose", comment = "If true, the phase tracker will print out when there are too many phases\n"
                                           + "being entered, usually considered as an issue of phase re-entrance and\n"
                                           + "indicates an unexpected issue of tracking phases not to complete.\n"
                                           + "If this is not reported yet, please report to Sponge. If it has been\n"
                                           + "reported, you may disable this.")
-    boolean isVerbose = true;
+    private boolean isVerbose = true;
 
     @Setting(value = "verbose-errors", comment = "If true, the phase tracker will dump extra information about the current phases"
                                                 + "when certain non-PhaseTracker related exceptions occur. This is usually not necessary, as the information "
                                                 + "in the exception itself can normally be used to determine the cause of the issue")
-    boolean verboseErrors = false;
-
-    @Setting(value = "report-different-world-changes", comment = "If true, when a mod changes a world that is different\n"
-                                                                 + "from an expected world during a WorldTick event, the\n"
-                                                                 + "phase tracker will identify both the expected changed\n"
-                                                                 + "world and the actual changed world. This does not mean\n"
-                                                                 + "that the changes are being dropped, simply it means that\n"
-                                                                 + "a mod is possibly unknowingly changing a world other\n"
-                                                                 + "than what is expected.")
-    boolean reportWorldTickDifferentWorlds = false;
+    private boolean verboseErrors = false;
 
     @Setting(value = "capture-async-spawning-entities", comment = "If true, when a mod or plugin attempts to spawn an entity\n"
                                                                   + "off the main server thread, Sponge will automatically\n"
@@ -60,14 +51,26 @@ public class CauseTrackerCategory extends ConfigCategory {
                                                                   + "conditions they may cause. If this is set to false, \n"
                                                                   + "Sponge will politely ignore the entity being spawned,\n"
                                                                   + "and emit a warning about said spawn anyways.")
-    boolean captureAndSpawnEntitiesSync = true;
+    private boolean captureAndSpawnEntitiesSync = true;
+
+    @Setting(value = "generate-stacktrace-per-phase", comment = "If true, enables some more thorough debugging for PhaseStates\n"
+                                                                + "such that a StackTrace is created every time a PhaseState\n"
+                                                                + "switches, allowing for more fine grained troubleshooting\n"
+                                                                + "in the cases of runaway phase states. Note that this is \n"
+                                                                + "not extremely performant and may have some associated costs\n"
+                                                                + "with generating the stack traces constantly.")
+    private boolean generateStackTracePerStateEntry = false;
+
+    @Setting(value = "maximum-printed-runaway-counts", comment = "If verbose is not enabled, this restricts the amount of \n"
+                                                                 + "runaway phase state printouts, usually happens on a server\n"
+                                                                 + "where a PhaseState is not completing. Although rare, it should\n"
+                                                                 + "never happen, but when it does, sometimes it can continuously print\n"
+                                                                 + "more and more. This attempts to placate that while a fix can be worked on\n"
+                                                                 + "to resolve the runaway. If verbose is enabled, they will always print.")
+    private int maxRunawayCount = 3;
 
     public boolean isVerbose() {
         return this.isVerbose;
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.isVerbose = verbose;
     }
 
     public boolean verboseErrors() {
@@ -78,11 +81,11 @@ public class CauseTrackerCategory extends ConfigCategory {
         return this.captureAndSpawnEntitiesSync;
     }
 
-    public boolean reportWorldTickDifferences() {
-        return this.reportWorldTickDifferentWorlds;
+    public boolean generateStackTracePerStateEntry() {
+        return this.generateStackTracePerStateEntry;
     }
 
-    public void setReportWorldTickDifferentWorlds(boolean reportWorldTickDifferentWorlds) {
-        this.reportWorldTickDifferentWorlds = reportWorldTickDifferentWorlds;
+    public int getMaximumRunawayCount() {
+        return this.maxRunawayCount;
     }
 }
