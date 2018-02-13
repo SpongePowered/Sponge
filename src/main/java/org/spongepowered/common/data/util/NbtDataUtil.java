@@ -26,14 +26,22 @@ package org.spongepowered.common.data.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.ColorUtil;
@@ -43,6 +51,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 /**
  * A standard utility class for interacting and manipulating {@link ItemStack}s
@@ -414,6 +424,39 @@ public final class NbtDataUtil {
         }
 
         return nbttaglist;
+    }
+
+    public static Optional<TileEntity> getTileEntity(ItemStack stack) {
+        if (!(stack.getItem() instanceof ItemBlock)) {
+            return Optional.empty();
+        }
+
+        NBTTagCompound nbttagcompound = stack.getSubCompound(BLOCK_ENTITY_TAG);
+        if (nbttagcompound == null) {
+            return Optional.empty();
+        }
+
+        ItemBlock itemBlock = (ItemBlock) stack.getItem();
+        Block block = itemBlock.getBlock();
+        IBlockState state = block.getDefaultState();
+        if (block instanceof ITileEntityProvider) {
+            // TODO check if we really need a world here
+            TileEntity te = ((ITileEntityProvider) block).createNewTileEntity(null, block.getMetaFromState(state));
+
+            nbttagcompound.setInteger("x", -1);
+            nbttagcompound.setInteger("y", -1);
+            nbttagcompound.setInteger("z", -1);
+
+            te.readFromNBT(nbttagcompound);
+            te.setWorld(((net.minecraft.world.World) Sponge.getServer().getWorlds().iterator().next()));
+            ((IMixinTileEntity) te).setFake(); // TODO disable all saving etc. for fakes
+
+            return Optional.of(te);
+        }
+
+        return Optional.empty();
+
+
     }
 
 }

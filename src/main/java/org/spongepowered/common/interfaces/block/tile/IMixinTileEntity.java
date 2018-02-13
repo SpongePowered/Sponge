@@ -111,4 +111,6 @@ public interface IMixinTileEntity {
     void setActiveChunk(IMixinChunk chunk);
 
     boolean shouldTick();
+
+    void setFake();
 }

@@ -26,10 +26,14 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntityLockableLoot;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 @Mixin(TileEntityLockableLoot.class)
@@ -51,6 +55,13 @@ public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockabl
             container.set(of("CustomName"), this.customName);
         }
         return container;
+    }
+
+    @Inject(method = "isUsableByPlayer", cancellable = true, at = @At("HEAD"))
+    private void onIsUsableByPlayer(EntityPlayer player, CallbackInfoReturnable<Boolean> cir) {
+        if (this.fake) {
+            cir.setReturnValue(true);
+        }
     }
 
 }

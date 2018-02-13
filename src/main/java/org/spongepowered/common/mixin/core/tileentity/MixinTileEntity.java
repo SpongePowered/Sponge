@@ -93,6 +93,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow protected net.minecraft.world.World world;
     @Shadow private int blockMetadata;
     @Shadow protected BlockPos pos;
+    protected boolean fake;
 
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
@@ -320,6 +321,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
 
         return true;
+    }
+
+    @Override
+    public void setFake() {
+        this.fake = true;
     }
 
     @Override

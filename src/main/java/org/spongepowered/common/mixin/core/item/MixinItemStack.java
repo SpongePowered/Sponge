@@ -38,6 +38,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -91,6 +92,11 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemstack$"))
 public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMixinCustomDataHolder {
 
+    // TODO only for testing
+    public Optional<TileEntity> itemstack$getTE() {
+        return NbtDataUtil.getTileEntity(((net.minecraft.item.ItemStack) (Object)this)).map(te -> ((TileEntity) te));
+    }
+
     private List<DataView> failedData = new ArrayList<>();
 
     @Shadow public abstract int getCount();
@@ -106,7 +112,6 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
-
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
