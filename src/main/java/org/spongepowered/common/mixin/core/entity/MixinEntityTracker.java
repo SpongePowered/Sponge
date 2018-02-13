@@ -67,7 +67,7 @@ public abstract class MixinEntityTracker {
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At("HEAD"), cancellable = true)
     public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
+        if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
@@ -78,7 +78,7 @@ public abstract class MixinEntityTracker {
 
     @Inject(method = "untrack", at = @At("HEAD"), cancellable = true)
     public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
+        if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
                     + "This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"

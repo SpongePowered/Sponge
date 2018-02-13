@@ -768,7 +768,7 @@ public final class PhaseTracker {
      * @return True if the entity spawn is on the main thread.
      */
     public static boolean validateEntitySpawn(IMixinWorldServer mixinWorldServer, Entity entity) {
-        if (Sponge.isServerAvailable() && Sponge.getServer().isMainThread()) {
+        if (Sponge.isServerAvailable() && (Sponge.getServer().isMainThread() || SpongeImpl.getServer().isServerStopped())) {
             return true;
         }
         // We aren't in the server thread at this point, and an entity is spawning on the server....
