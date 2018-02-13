@@ -38,6 +38,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -72,7 +73,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
-    private StackTraceElement[] stackTrace;
+    // Only used in hard debugging instances.
+    @Nullable private StackTraceElement[] stackTrace;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;
     @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
@@ -186,7 +188,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P buildAndSwitch() {
         this.isCompleted = true;
-        this.stackTrace = new Exception("Debug Trace").getStackTrace();
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+            this.stackTrace = new Exception("Debug Trace").getStackTrace();
+        }
         PhaseTracker.getInstance().switchToPhase(this.state, this);
         return (P) this;
     }
@@ -410,7 +414,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public void printTrace(PrettyPrinter printer) {
-        printer.add("Entrypoint:")
-            .add(this.stackTrace);
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+            printer.add("Entrypoint:")
+                .add(this.stackTrace);
+        }
     }
 }

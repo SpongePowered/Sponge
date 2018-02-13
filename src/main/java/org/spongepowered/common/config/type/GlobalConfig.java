@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
 import org.spongepowered.common.config.category.BungeeCordCategory;
-import org.spongepowered.common.config.category.CauseTrackerCategory;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
 import org.spongepowered.common.config.category.ExploitCategory;
 import org.spongepowered.common.config.category.GlobalGeneralCategory;
@@ -80,7 +80,7 @@ public class GlobalConfig extends GeneralConfigBase {
     protected GlobalWorldCategory world = new GlobalWorldCategory();
 
     @Setting(value = "cause-tracker")
-    protected CauseTrackerCategory causeTracker = new CauseTrackerCategory();
+    private PhaseTrackerCategory causeTracker = new PhaseTrackerCategory();
 
     @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
@@ -147,7 +147,7 @@ public class GlobalConfig extends GeneralConfigBase {
         return true;
     }
 
-    public CauseTrackerCategory getCauseTracker() {
+    public PhaseTrackerCategory getPhaseTracker() {
         return this.causeTracker;
     }
 
