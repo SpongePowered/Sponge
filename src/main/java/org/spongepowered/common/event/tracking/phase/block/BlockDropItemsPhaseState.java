@@ -127,4 +127,9 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                     });
         }
     }
+
+    @Override
+    public boolean tracksBlockSpecificDrops() {
+        return true;
+    }
 }
