@@ -33,7 +33,7 @@ import java.util.Map;
 @ConfigSerializable
 public class EntityActivationModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If disabled, entity activation rules for this mod will be ignored and always tick.")
+    @Setting(value = "enabled", comment = "If 'false', entity activation rules for this mod will be ignored and always tick.")
     private boolean isEnabled = true;
     @Setting(value = "defaults")
     private Map<String, Integer> defaultRanges = new HashMap<>();

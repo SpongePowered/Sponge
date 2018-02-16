@@ -33,7 +33,7 @@ import java.util.Map;
 @ConfigSerializable
 public class EntityCollisionCategory extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If enabled, newly discovered entities/blocks will be added to this config with a default value.")
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered entities/blocks will be added to this config with a default value.")
     private boolean autoPopulate = false;
     @Setting(value = "max-entities-within-aabb", comment = "Maximum amount of entities any given entity or block can collide with. This improves \n"
                                                          + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"

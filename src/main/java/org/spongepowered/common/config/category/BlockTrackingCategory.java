@@ -33,7 +33,7 @@ import java.util.List;
 @ConfigSerializable
 public class BlockTrackingCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If enabled, adds player tracking support for block positions. \n"
+    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
                                         + "Note: This should only be disabled if you do not care who caused a block to change.")
     private boolean enabled = true;
 

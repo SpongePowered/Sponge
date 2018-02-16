@@ -30,19 +30,19 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class PhaseTrackerCategory extends ConfigCategory {
 
-    @Setting(value = "verbose", comment = "If true, the phase tracker will print out when there are too many phases \n"
+    @Setting(value = "verbose", comment = "If 'true', the phase tracker will print out when there are too many phases \n"
                                         + "being entered, usually considered as an issue of phase re-entrance and \n"
                                         + "indicates an unexpected issue of tracking phases not to complete. \n"
                                         + "If this is not reported yet, please report to Sponge. If it has been \n"
                                         + "reported, you may disable this.")
     private boolean isVerbose = true;
 
-    @Setting(value = "verbose-errors", comment = "If true, the phase tracker will dump extra information about the current phases \n"
+    @Setting(value = "verbose-errors", comment = "If 'true', the phase tracker will dump extra information about the current phases \n"
                                                + "when certain non-PhaseTracker related exceptions occur. This is usually not necessary, as the information \n"
                                                + "in the exception itself can normally be used to determine the cause of the issue")
     private boolean verboseErrors = false;
 
-    @Setting(value = "capture-async-spawning-entities", comment = "If true, when a mod or plugin attempts to spawn an entity \n"
+    @Setting(value = "capture-async-spawning-entities", comment = "If set to 'true', when a mod or plugin attempts to spawn an entity \n"
                                                                 + "off the main server thread, Sponge will automatically \n"
                                                                 + "capture said entity to spawn it properly on the main \n"
                                                                 + "server thread. The catch to this is that some mods are \n"
@@ -53,7 +53,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
                                                                 + "and emit a warning about said spawn anyways.")
     private boolean captureAndSpawnEntitiesSync = true;
 
-    @Setting(value = "generate-stacktrace-per-phase", comment = "If true, enables some more thorough debugging for PhaseStates \n"
+    @Setting(value = "generate-stacktrace-per-phase", comment = "If 'true', more thorough debugging for PhaseStates \n"
                                                               + "such that a StackTrace is created every time a PhaseState \n"
                                                               + "switches, allowing for more fine grained troubleshooting \n"
                                                               + "in the cases of runaway phase states. Note that this is \n"

@@ -38,7 +38,7 @@ public class GlobalWorldCategory extends WorldCategory {
                                                           + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
     private int autoPlayerSaveInterval = 900;
 
-    @Setting(value = "leaf-decay", comment = "Enable to allow natural leaf decay.")
+    @Setting(value = "leaf-decay", comment = "If 'true', natural leaf decay is allowed.")
     private boolean leafDecay = true;
 
     @Setting(value = "gameprofile-lookup-batch-size", comment = "The amount of GameProfile requests to make against Mojang's session server. (Default: 1) \n"

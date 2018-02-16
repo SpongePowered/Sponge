@@ -33,7 +33,7 @@ import java.io.IOException;
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
 
-    private static final String PRE_MERGE_COMMENT = "If enabled, block item drops are pre-processed to avoid \n"
+    private static final String PRE_MERGE_COMMENT = "If 'true', block item drops are pre-processed to avoid \n"
                                                   + "having to spawn extra entities that will be merged post spawning. \n"
                                                   + "Usually, Sponge is smart enough to determine when to attempt an item pre-merge \n"
                                                   + "and when not to, however, in certain cases, some mods rely on items not being \n"
@@ -54,10 +54,10 @@ public class OptimizationCategory extends ConfigCategory {
                                                  + "Warning: disabling structure saving will break the vanilla locate command.")
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
 
-    @Setting(value = "async-lighting", comment = "Runs lighting updates asynchronous.")
+    @Setting(value = "async-lighting", comment = "Runs lighting updates asynchronously.")
     private AsyncLightingCategory asyncLightingCategory = new AsyncLightingCategory();
 
-    @Setting(value = "panda-redstone", comment = "If enabled, uses Panda4494's redstone implementation which improves performance. \n"
+    @Setting(value = "panda-redstone", comment = "If 'true', uses Panda4494's redstone implementation which improves performance. \n"
                                                + "See https://bugs.mojang.com/browse/MC-11193 for more information. \n"
                                                + "Note: This optimization has a few issues which are explained in the bug report.")
     private boolean pandaRedstone = false;

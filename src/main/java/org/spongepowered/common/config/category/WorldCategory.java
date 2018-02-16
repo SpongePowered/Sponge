@@ -50,19 +50,19 @@ public class WorldCategory extends ConfigCategory {
                                                 + "This value is capped to the current view distance setting in server.properties")
     protected int mobSpawnRange = 4;
 
-    @Setting(value = "world-enabled", comment = "Enable if this world should be registered.")
+    @Setting(value = "world-enabled", comment = "If 'true', this world will be registered.")
     protected boolean worldEnabled = true;
 
-    @Setting(value = "load-on-startup", comment = "Enable if this world should be loaded on startup.")
+    @Setting(value = "load-on-startup", comment = "If 'true', this world will load on startup.")
     protected Boolean loadOnStartup;
 
-    @Setting(value = "generate-spawn-on-load", comment = "Enable if you want the world to generate spawn the moment its loaded.")
+    @Setting(value = "generate-spawn-on-load", comment = "If 'true', this world will generate its spawn the moment its loaded.")
     protected Boolean generateSpawnOnLoad;
 
-    @Setting(value = "keep-spawn-loaded", comment = "Enable if this world's spawn should remain loaded with no players.")
+    @Setting(value = "keep-spawn-loaded", comment = "If 'true', this worlds spawn will remain loaded with no players.")
     protected Boolean keepSpawnLoaded;
 
-    @Setting(value = "pvp-enabled", comment = "Enable if this world allows PVP combat.")
+    @Setting(value = "pvp-enabled", comment = "If 'true', this world will allow PVP combat.")
     protected boolean pvpEnabled = true;
 
     @Setting(value = "portal-agents", comment = "A list of all detected portal agents used in this world. \n"
@@ -70,9 +70,9 @@ public class WorldCategory extends ConfigCategory {
                                               + "Note: If world is not found, it will fallback to default.")
     private Map<String, String> portalAgents = new HashMap<>();
 
-    @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply \n"
+    @Setting(value = "deny-chunk-requests", comment = "If 'true', any request for a chunk not currently loaded will be denied (exceptions apply \n"
                                                     + "for things like world gen and player movement). \n"
-                                                    + "Note: As this is an experimental setting for performance gain, if you encounter any issues \n"
+                                                    + "Warning: As this is an experimental setting for performance gain, if you encounter any issues \n"
                                                     + "then we recommend disabling it.")
     private boolean denyChunkRequests = false;
 
@@ -105,10 +105,10 @@ public class WorldCategory extends ConfigCategory {
                                                   + "areas for more items. Setting to a negative value is not supported!")
     private double itemMergeRadius = 2.5D;
 
-    @Setting(value = "weather-thunder", comment = "Enable to initiate thunderstorms in supported biomes.")
+    @Setting(value = "weather-thunder", comment = "If 'true', thunderstorms will be initiated in supported biomes.")
     private boolean weatherThunder = true;
 
-    @Setting(value = "weather-ice-and-snow", comment = "Enable to allow the natural formation of ice and snow in supported biomes.")
+    @Setting(value = "weather-ice-and-snow", comment = "If 'true', natural formation of ice and snow in supported biomes will be allowed.")
     private boolean weatherIceAndSnow = true;
 
     public static final int USE_SERVER_VIEW_DISTANCE = -1;

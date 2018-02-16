@@ -33,7 +33,7 @@ import java.util.Map;
 @ConfigSerializable
 public class BlockCapturingCategory extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If enabled, newly discovered blocks will be added to this config with a default value.")
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with a default value.")
     private boolean autoPopulate = false;
 
     @Setting(value = "mods", comment = "Per-mod block id mappings for controlling capturing behavior")

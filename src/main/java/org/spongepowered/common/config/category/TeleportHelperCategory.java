@@ -33,7 +33,7 @@ import java.util.List;
 @ConfigSerializable
 public class TeleportHelperCategory extends ConfigCategory {
 
-    @Setting(value = "force-blacklist", comment = "If enabled, this blacklist will always be respected, otherwise, plugins can choose whether \n"
+    @Setting(value = "force-blacklist", comment = "If 'true', this blacklist will always be respected, otherwise, plugins can choose whether \n"
                                                 + "or not to respect it.")
     private boolean forceBlacklistOn = false;
 

@@ -30,7 +30,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class DebugCategory extends ConfigCategory {
 
-    @Setting(value = "thread-contention-monitoring", comment = "Enable Java's thread contention monitoring for thread dumps")
+    @Setting(value = "thread-contention-monitoring", comment = "If 'true', Java's thread contention monitoring for thread dumps is enabled.")
     private boolean enableThreadContentionMonitoring = false;
     @Setting(value = "dump-chunks-on-deadlock", comment = "Dump chunks in the event of a deadlock")
     private boolean dumpChunksOnDeadlock = false;
@@ -40,8 +40,8 @@ public class DebugCategory extends ConfigCategory {
     private boolean dumpThreadsOnWarn = false;
 
     @Setting(value = "concurrent-entity-checks", comment = "Detect and prevent certain attempts to use entities concurrently. \n"
-                                                         + "WARNING: May drastically decrease server performance. Only enable this to debug a "
-                                                         + "pre-existing issue.")
+                                                         + "WARNING: May drastically decrease server performance. Only set this to 'true' "
+                                                         + "to debug a pre-existing issue.")
     private boolean concurrentChecks = false;
 
     public boolean doConcurrentChecks() {
