@@ -33,9 +33,10 @@ import java.util.Map;
 @ConfigSerializable
 public class BlockCapturingModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "Set to false if you want to ignore all specific rules for this mod")
+    @Setting(value = "enabled", comment = "If disabled, all specific rules for this mod will be ignored.")
     private boolean isEnabled = true;
-    @Setting(value = "block-tick-capturing", comment = "Set to true to perform individual capturing (i.e. skip bulk capturing) for scheduled ticks for a block type")
+    @Setting(value = "block-tick-capturing", comment = "If enabled, individual capturing (i.e. skip bulk capturing) for scheduled ticks for \n"
+                                                     + "a block type will be performed.")
     private Map<String, Boolean> blockMap = new HashMap<>();
 
     public BlockCapturingModCategory() {

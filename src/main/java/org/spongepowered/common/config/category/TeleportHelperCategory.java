@@ -33,17 +33,18 @@ import java.util.List;
 @ConfigSerializable
 public class TeleportHelperCategory extends ConfigCategory {
 
-    @Setting(value = "force-blacklist", comment = "If enabled, this blacklist will always be respected, otherwise, plugins can choose whether"
-            + "or not to respect it.")
+    @Setting(value = "force-blacklist", comment = "If enabled, this blacklist will always be respected, otherwise, plugins can choose whether \n"
+                                                + "or not to respect it.")
     private boolean forceBlacklistOn = false;
 
-    @Setting(value = "unsafe-floor-block-ids", comment = "Block IDs that are listed here will not be selected by Sponge's safe "
-            + "teleport routine as a safe floor block.")
+    @Setting(value = "unsafe-floor-block-ids", comment = "Block IDs that are listed here will not be selected by Sponge's safe \n"
+                                                       + "teleport routine as a safe floor block.")
     private List<String> unsafeFloorBlockIds = new ArrayList<>();
 
-    @Setting(value = "unsafe-body-block-ids", comment = "Block IDs that are listed here will not be selected by Sponge's safe teleport routine as a "
-            + "safe block for players to warp into.\nYou should only list blocks here that are incorrectly selected, solid blocks that prevent "
-            + "movement are automatically excluded.")
+    @Setting(value = "unsafe-body-block-ids", comment = "Block IDs that are listed here will not be selected by Sponge's safe teleport routine as \n"
+                                                      + "a safe block for players to warp into. \n"
+                                                      + "You should only list blocks here that are incorrectly selected, solid blocks that prevent \n"
+                                                      + "movement are automatically excluded.")
     private List<String> unsafeBlockBlockIds = new ArrayList<>();
 
     public boolean isForceBlacklistOn() {

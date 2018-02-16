@@ -24,16 +24,20 @@
  */
 package org.spongepowered.common.config.category;
 
+import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
 public class WorldCategory extends ConfigCategory {
 
-    @Setting(value = "auto-save-interval", comment = "The auto-save tick interval used to save all loaded chunks in a world. \nSet to 0 to disable. (Default: 900) \nNote: 20 ticks is equivalent to 1 second.")
+    @Setting(value = "auto-save-interval", comment = "The auto-save tick interval used to save all loaded chunks in a world. \n"
+                                                   + "Set to 0 to disable. (Default: 900) \n"
+                                                   + "Note: 20 ticks is equivalent to 1 second.")
     private int autoSaveInterval = 900;
 
     @Setting(value = "infinite-water-source", comment = "Vanilla water source behavior - is infinite")
@@ -42,8 +46,8 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "flowing-lava-decay", comment = "Lava behaves like vanilla water when source block is removed")
     private boolean flowingLavaDecay = false;
 
-    @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \nThis value is capped to "
-            + "the current view distance setting in server.properties")
+    @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \n"
+                                                + "This value is capped to the current view distance setting in server.properties")
     protected int mobSpawnRange = 4;
 
     @Setting(value = "world-enabled", comment = "Enable if this world should be registered.")
@@ -61,41 +65,44 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "pvp-enabled", comment = "Enable if this world allows PVP combat.")
     protected boolean pvpEnabled = true;
 
-    @Setting(value = "portal-agents", comment = "A list of all detected portal agents used in this world. "
-            + "\nIn order to override, change the target world name to any other valid world. "
-            + "\nNote: If world is not found, it will fallback to default.")
+    @Setting(value = "portal-agents", comment = "A list of all detected portal agents used in this world. \n"
+                                              + "In order to override, change the target world name to any other valid world. \n"
+                                              + "Note: If world is not found, it will fallback to default.")
     private Map<String, String> portalAgents = new HashMap<>();
 
-    @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply for things like world gen and player movement). \nNote: As this is an experimental setting for performance gain, if you encounter any issues then we recommend disabling it.")
-    private boolean denyChunkRequests = true;
+    @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply \n"
+                                                    + "for things like world gen and player movement). \n"
+                                                    + "Note: As this is an experimental setting for performance gain, if you encounter any issues \n"
+                                                    + "then we recommend disabling it.")
+    private boolean denyChunkRequests = false;
 
-    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks that have leaked in a world. "
-                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 600)")
+    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks that have leaked in a world. \n"
+                                                       + "Set to 0 to disable which restores vanilla handling. (Default: 600)")
     private int chunkGCTickInterval = 600;
 
-    @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. "
-                                                             + "\nNote: With the chunk gc enabled, this setting only applies to the ticks "
-                                                             + "\nwhere the gc runs (controlled by 'chunk-gc-tick-interval')"
-                                                             + "\nNote: If the max unloads is too low, too many chunks may remain"
-                                                             + "\nloaded on the world and increases the chance for a drop in tps. (Default: 100)")
+    @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. \n"
+                                                           + "Note: With the chunk gc enabled, this setting only applies to the ticks \n"
+                                                           + "where the gc runs (controlled by 'chunk-gc-tick-interval') \n"
+                                                           + "Note: If the maximum unloads is too low, too many chunks may remain \n"
+                                                           + "loaded on the world and increases the chance for a drop in tps. (Default: 100)")
     private int maxChunkUnloads = 100;
 
-    @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. "
-                                                          + "\nNote: When triggered, the loaded chunk threshold will reset and start incrementing. "
-                                                          + "\nDisabled by default.")
+    @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. \n"
+                                                        + "Note: When triggered, the loaded chunk threshold will reset and start incrementing. \n"
+                                                        + "Disabled by default.")
     private int chunkGCLoadThreshold = 0;
 
-    @Setting(value = "chunk-unload-delay", comment = "The number of seconds to delay a chunk unload once marked inactive. (Default: 15)"
-                                                     + "\nNote: This gets reset if the chunk becomes active again.")
+    @Setting(value = "chunk-unload-delay", comment = "The number of seconds to delay a chunk unload once marked inactive. (Default: 15) \n"
+                                                   + "Note: This gets reset if the chunk becomes active again.")
     private int chunkUnloadDelay = 15;
 
-    @Setting(value = "item-merge-radius", comment = "The defined merge radius for Item entities such that when two items are"
-                                                    + "\nwithin the defined radius of each other, they will attempt to merge. Usually,"
-                                                    + "\nthe default radius is set to 0.5 in Vanilla, however, for performance reasons"
-                                                    + "\n2.5 is generally acceptable."
-                                                    + "\nNote: Increasing the radius higher will likely cause performance degradation"
-                                                    + "\nwith larger amount of items as they attempt to merge and search nearby"
-                                                    + "\nareas for more items. Setting to a negative value is not supported!")
+    @Setting(value = "item-merge-radius", comment = "The defined merge radius for Item entities such that when two items are \n"
+                                                  + "within the defined radius of each other, they will attempt to merge. Usually, \n"
+                                                  + "the default radius is set to 0.5 in Vanilla, however, for performance reasons \n"
+                                                  + "2.5 is generally acceptable. \n"
+                                                  + "Note: Increasing the radius higher will likely cause performance degradation \n"
+                                                  + "with larger amount of items as they attempt to merge and search nearby \n"
+                                                  + "areas for more items. Setting to a negative value is not supported!")
     private double itemMergeRadius = 2.5D;
 
     @Setting(value = "weather-thunder", comment = "Enable to initiate thunderstorms in supported biomes.")
@@ -107,15 +114,23 @@ public class WorldCategory extends ConfigCategory {
     public static final int USE_SERVER_VIEW_DISTANCE = -1;
     @Setting(
             value = "view-distance",
-            comment = "The view distance."
-                    + "\nThe value must be greater than or equal to 3 and less than or equal to 32"
-                    + "\nThe server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + "."
+            comment = "Override world distance per world/dimension \n"
+                    + "The value must be greater than or equal to 3 and less than or equal to 32 \n"
+                    + "The server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + "."
     )
     private int viewDistance = USE_SERVER_VIEW_DISTANCE;
     
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");
+
+        try {
+            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
+            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
+            this.denyChunkRequests = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getAutoSaveInterval() {

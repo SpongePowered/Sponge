@@ -36,8 +36,8 @@ public class ModuleCategory extends ConfigCategory {
     @Setting(value = "entity-activation-range")
     private boolean pluginEntityActivation = true;
 
-    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities.\n"
-            + "Use with caution as this can break intended functionality.")
+    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities. \n"
+                                                      + "Use with caution as this can break intended functionality.")
     private boolean pluginTileEntityActivation = false;
 
     @Setting(value = "entity-collisions")

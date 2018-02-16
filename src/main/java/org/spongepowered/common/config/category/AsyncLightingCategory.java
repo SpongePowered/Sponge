@@ -30,7 +30,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class AsyncLightingCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If enabled, runs lighting updates async.")
+    @Setting(value = "enabled", comment = "If enabled, runs lighting updates asynchronous.")
     private boolean enabled = true;
 
     @Setting(value = "num-threads", comment = "The amount of threads to dedicate for async lighting updates. (Default: 2)")
