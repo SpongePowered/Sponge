@@ -33,16 +33,18 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
-import java.util.Iterator;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class InventoryUtil {
 
@@ -88,4 +90,24 @@ public final class InventoryUtil {
         return Optional.empty();
     }
 
+    // Utility
+    public static Inventory toInventory(Object inventory, @Nullable Object fallback) {
+        if (inventory instanceof TileEntityChest) {
+            inventory = getDoubleChestInventory(((TileEntityChest) inventory)).orElse(((Inventory) inventory));
+        }
+        if (inventory instanceof Inventory) {
+            return ((Inventory) inventory);
+        }
+        if (fallback instanceof Inventory) {
+            return ((Inventory) fallback);
+        }
+        return SpongeImplHooks.toInventory(inventory, fallback);
+    }
+
+    public static IMixinInventory forCapture(Object toCapture) {
+        if (toCapture instanceof IMixinInventory) {
+            return ((IMixinInventory) toCapture);
+        }
+        return null;
+    }
 }

@@ -217,6 +217,12 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         }
     }
 
+
+    @Redirect(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntityHopper;putStackInInventoryAllSlots(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/item/ItemStack;"))
+    private static ItemStack onPutStackInInventoryAllSlots(IInventory source, IInventory destination, ItemStack stack, EnumFacing direction, IInventory s2, IInventory d2, EntityItem entity) {
+        return SpongeCommonEventFactory.callInventoryPickupEvent(destination, entity, stack);
+    }
+
     private static @Nullable IMixinInventory forCapture(Object toCapture) {
         if (toCapture instanceof IMixinInventory) {
             return ((IMixinInventory) toCapture);

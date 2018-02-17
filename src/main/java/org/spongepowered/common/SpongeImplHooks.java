@@ -63,6 +63,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -391,5 +392,10 @@ public final class SpongeImplHooks {
 
     public static boolean isSpawnForced(EntityPlayer playerIn, int dimension) {
         return ((IMixinEntityPlayer) playerIn).isSpawnForced(dimension);
+    }
+
+    public static Inventory toInventory(Object inventory, @Nullable Object fallback) {
+        SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        return null;
     }
 }
