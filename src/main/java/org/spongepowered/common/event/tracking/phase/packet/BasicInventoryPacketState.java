@@ -178,7 +178,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
             // Some mods may override container detectAndSendChanges method and prevent captures
             // If this happens and we captured no entities, avoid firing events
-            if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
+            if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty() && transaction.getOriginal().equals(transaction.getFinal())) {
                 mixinContainer.setCaptureInventory(false);
                 return;
             }
