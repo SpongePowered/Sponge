@@ -46,6 +46,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
@@ -125,6 +126,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -136,6 +138,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -180,6 +183,7 @@ public class SpongeCommonEventFactory {
         if (event.getCustom().isPresent()) {
             List<ItemStackSnapshot> list = event.getCustom().get();
             if (list.isEmpty()) {
+                itemToPickup.getItem().setCount(0);
                 return false;
             }
 
@@ -202,8 +206,9 @@ public class SpongeCommonEventFactory {
                 }
                 return false;
             }
-
-            callPlayerChangeInventoryPickupEvent(player, capture);
+            if (!callPlayerChangeInventoryPickupEvent(player, capture)) {
+                return false;
+            }
             itemToPickup.getItem().setCount(0);
         }
         return true;
@@ -220,6 +225,90 @@ public class SpongeCommonEventFactory {
         Sponge.getCauseStackManager().popCause();
         applyTransactions(event);
         inventory.getCapturedTransactions().clear();
+        return !event.isCancelled();
+    }
+
+    public static ItemStack callInventoryPickupEvent(IInventory inventory, EntityItem item, ItemStack stack) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(inventory);
+
+            ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+            ChangeInventoryEvent.Pickup.Pre event =
+                    SpongeEventFactory.createChangeInventoryEventPickupPre(frame.getCurrentCause(),
+                            Optional.empty(), Collections.singletonList(snapshot), snapshot, ((Item) item),
+                            ((Inventory) inventory));
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return stack;
+            }
+
+            int size = inventory.getSizeInventory();
+            ItemStack[] prevInventory = new ItemStack[size];
+            for (int i = 0; i < size; i++) {
+                prevInventory[i] = inventory.getStackInSlot(i);
+            }
+
+            if (event.getCustom().isPresent()) {
+                if (event.getCustom().get().isEmpty()) {
+                    return ItemStack.EMPTY;
+                }
+
+                boolean fullTransfer = true;
+                for (ItemStackSnapshot snap : event.getCustom().get()) {
+                    ItemStack stackToAdd = ItemStackUtil.fromSnapshotToNative(snap);
+                    ItemStack remaining = TileEntityHopper.putStackInInventoryAllSlots(null, inventory, stackToAdd, null);
+                    if (!remaining.isEmpty()) {
+                        fullTransfer = false;
+                        break;
+                    }
+                }
+                if (!fullTransfer) {
+                    for (int i = 0; i < prevInventory.length; i++) {
+                        inventory.setInventorySlotContents(i, prevInventory[i]);
+                    }
+                    return stack;
+                }
+
+                if (callInventoryPickupEvent(inventory, prevInventory)) {
+                    return ItemStack.EMPTY;
+                }
+                return stack;
+            } else {
+                ItemStack remainder = TileEntityHopper.putStackInInventoryAllSlots(null, inventory, stack, null);
+                if (callInventoryPickupEvent(inventory, prevInventory)) {
+                    return remainder;
+                }
+                return stack;
+            }
+        }
+    }
+
+    private static List<SlotTransaction> generateTransactions(@Nullable Inventory inv, IInventory inventory, ItemStack[] previous) {
+        if (inv == null) {
+            return Collections.emptyList();
+        }
+        List<SlotTransaction> trans = new ArrayList<>();
+        Iterator<Inventory> it = inv.slots().iterator();
+        for (int i = 0; i < inventory.getSizeInventory(); i++) {
+            org.spongepowered.api.item.inventory.Slot slot = (org.spongepowered.api.item.inventory.Slot) it.next();
+            ItemStack newStack = inventory.getStackInSlot(i);
+            ItemStack prevStack = previous[i];
+            if (!ItemStack.areItemStacksEqual(newStack, prevStack)) {
+                trans.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(prevStack), ItemStackUtil.snapshotOf(newStack)));
+            }
+        }
+        return trans;
+    }
+
+    public static boolean callInventoryPickupEvent(IInventory inventory, ItemStack[] prevInventory) {
+        Inventory spongeInventory = InventoryUtil.toInventory(inventory, null);
+        List<SlotTransaction> trans = generateTransactions(spongeInventory, inventory, prevInventory);
+        if (trans.isEmpty()) {
+            return true;
+        }
+        ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Sponge.getCauseStackManager().getCurrentCause(), spongeInventory, trans);
+        SpongeImpl.postEvent(event);
+        applyTransactions(event);
         return !event.isCancelled();
     }
 

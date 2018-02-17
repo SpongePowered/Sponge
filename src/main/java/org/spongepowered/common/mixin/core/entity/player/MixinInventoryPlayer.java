@@ -88,6 +88,10 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Shadow protected abstract int addResource(int p_191973_1_, ItemStack p_191973_2_);
 
+    @Shadow public static int getHotbarSize() {
+        throw new AbstractMethodError("Shadow");
+    }
+
     private List<SlotTransaction> capturedTransactions = new ArrayList<>();
     private boolean doCapture = false;
 
@@ -272,11 +276,19 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         return this.doCapture;
     }
 
+    public Slot getSpongeSlot(int index) {
+        if (index < getHotbarSize()) {
+            return this.getMain().getHotbar().getSlot(SlotIndex.of(index)).get();
+        }
+        index -= getHotbarSize();
+        return this.getMain().getGrid().getSlot(SlotIndex.of(index)).get();
+    }
+
     @Inject(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
     public void onAdd(int index, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         if (this.doCapture) {
             // Capture "damaged" items picked up
-            Slot slot = this.getMain().getSlot(SlotIndex.of(index)).get();
+            Slot slot = getSpongeSlot(index);
             this.capturedTransactions.add(new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(stack)));
         }
     }
@@ -285,7 +297,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     public int onAdd(InventoryPlayer inv, int index, ItemStack stack) {
         if (this.doCapture) {
             // Capture items getting picked up
-            Slot slot = index == 40 ? this.getOffhand() : this.getMain().getSlot(SlotIndex.of(index)).get();
+            Slot slot = index == 40 ? this.getOffhand() : getSpongeSlot(index);
             ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
             int result = this.addResource(index, stack);
             ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.getStackInSlot(index));
