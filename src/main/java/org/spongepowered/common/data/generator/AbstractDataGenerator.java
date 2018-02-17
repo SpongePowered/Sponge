@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.generator;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.objectweb.asm.Opcodes.ACC_BRIDGE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -64,7 +63,6 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.generator.DataGenerator;
 import org.spongepowered.api.data.generator.KeyValue;
@@ -122,7 +120,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -135,7 +132,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
 
     protected String id;
     @Nullable protected String name;
-    protected Predicate<? extends DataHolder> dataHolderPredicate;
     protected int contentVersion;
     protected final List<KeyEntry> keyEntries = new ArrayList<>();
     @Nullable protected Class<M> mutableInterface;
@@ -154,7 +150,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
     public R reset() {
         this.id = null;
         this.name = null;
-        this.dataHolderPredicate = dataHolder -> true;
         this.contentVersion = 1;
         this.keyEntries.clear();
         return (R) this;
@@ -171,13 +166,6 @@ public class AbstractDataGenerator<M extends DataManipulator<M, I>,
     public G version(int contentVersion) {
         checkArgument(contentVersion > 0, "content version must be greater then zero");
         this.contentVersion = contentVersion;
-        return (G) this;
-    }
-
-    @Override
-    public G predicate(Predicate<? extends DataHolder> predicate) {
-        checkNotNull(predicate, "predicate");
-        this.dataHolderPredicate = predicate;
         return (G) this;
     }
 
