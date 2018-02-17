@@ -386,8 +386,12 @@ public final class EntityUtil {
     
             if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
                 fromWorld.profiler.startSection("placing");
-                // need to use placeInPortal to support mods
-                teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
+                // placeInPortal must be used to support mods
+                // Only place entity in portal if it collided with a portal block
+                // Note: To verify if this is true, entityIn.getLastPortalVec() should not be null
+                if (entityIn.getLastPortalVec() != null) {
+                    teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
+                }
                 fromWorld.profiler.endSection();
             }
     
