@@ -57,6 +57,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -254,6 +255,10 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
 
     @Shadow private boolean invulnerable;
+
+    @Shadow protected Vec3d lastPortalVec;
+
+    @Shadow protected boolean inPortal;
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
@@ -1360,4 +1365,15 @@ public abstract class MixinEntity implements IMixinEntity {
     public void setInvulnerable(boolean value) {
         this.invulnerable = value;
     }
+
+    @Override
+    public boolean inPortal() {
+        return this.inPortal;
+    }
+
+    @Override
+    public void setInPortal(boolean inPortal) {
+        this.inPortal = inPortal;
+    }
+
 }

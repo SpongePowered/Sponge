@@ -29,6 +29,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
@@ -148,5 +149,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     boolean shouldTick();
 
     void setInvulnerable(boolean value);
+
+    boolean inPortal();
+
+    void setInPortal(boolean inPortal);
 
 }
