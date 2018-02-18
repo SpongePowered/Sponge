@@ -63,6 +63,18 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
     }
 
     /**
+     * If not empty, activates the consumer then clears all captures.
+     * 
+     * @param consumer The consumer to activate
+     */
+    public final void acceptAndClearIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
+        if (!this.isEmpty()) {
+            consumer.accept(this.captured);
+            this.captured.clear();
+        }
+    }
+
+    /**
      * If not empty, activates the {@link BiConsumer} with captures.
      * 
      * @param biConsumer The consumer to activate

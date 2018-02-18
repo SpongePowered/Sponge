@@ -699,7 +699,7 @@ public final class TrackingUtil {
         return noCancelledTransactions;
     }
 
-    public static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, SpongeBlockSnapshot newBlockSnapshot,
+    public static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, BlockSnapshot newBlockSnapshot,
                                                       PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
@@ -728,7 +728,7 @@ public final class TrackingUtil {
         }
     }
 
-    public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot,
+    public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, BlockSnapshot oldBlockSnapshot,
                                                   PhaseContext<?> phaseContext, IPhaseState<?> state) {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
@@ -781,7 +781,7 @@ public final class TrackingUtil {
         }
     }
 
-    public static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, SpongeBlockSnapshot newBlockSnapshot,
+    public static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, BlockSnapshot newBlockSnapshot,
                                              PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
