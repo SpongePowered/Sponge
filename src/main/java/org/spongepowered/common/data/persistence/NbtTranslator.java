@@ -100,9 +100,14 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         CHAR                    (NbtDataUtil.TAG_STRING, "char"),
         CHAR_ARRAY              (NbtDataUtil.TAG_STRING, "char[]"),
         COMPOUND_ARRAY          (NbtDataUtil.TAG_LIST, "compound[]"),
+        MAP                     (NbtDataUtil.TAG_LIST, "map"),
+        MAP_ARRAY               (NbtDataUtil.TAG_LIST, "map[]"),
 
         UNKNOWN                 (99),
         ;
+
+        static final String mapKeyName = "K";
+        static final String mapValueName = "V";
 
         static final Map<String, NbtType> bySuffix = new HashMap<>();
         static final Int2ObjectMap<NbtType> byIndex = new Int2ObjectOpenHashMap<>();
@@ -219,11 +224,21 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                     tagList.appendTag(toCompoundTag(dataView));
                 }
                 return tagList;
+            case MAP:
+                return toListTag((Map<Object, Object>) object);
+            case MAP_ARRAY:
+                final Object[] mapArray = (Object[]) object;
+                tagList = new NBTTagList();
+                for (Object map : mapArray) {
+                    tagList.appendTag(toListTag((Map<Object, Object>) map));
+                }
+                return tagList;
             default:
                 throw new IllegalStateException("Attempted to serialize a unsupported object type: " + object.getClass().getName());
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static NBTTagCompound toCompoundTag(Object object) {
         final NBTTagCompound tagCompound = new NBTTagCompound();
         // Convert the object in something we can serialize
@@ -231,38 +246,54 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             object = ((DataView) object).getValues(false);
         } else if (object instanceof DataSerializable) {
             object = ((DataSerializable) object).toContainer().getValues(false);
+        } else {
+            throw new IllegalStateException();
         }
         for (Map.Entry<DataQuery, Object> entry : ((Map<DataQuery, Object>) object).entrySet()) {
-            // The base path
-            String key = entry.getKey().last().toString();
-            // The base nbt type
-            NbtType nbtType = typeFor(object);
-            // The nbt tag that will be put in the compound
-            final NBTBase nbtBase;
-            if (nbtType == NbtType.LIST) {
-                final List<Object> list = (List<Object>) object;
-                if (list.isEmpty()) {
-                    nbtType = NbtType.END;
-                } else {
-                    nbtType = typeFor(list.get(0));
-                    if (nbtType.suffix != null) {
-                        key += "$List$" + nbtType.suffix;
-                    }
-                }
-                nbtBase = toListTag(nbtType, list);
-            } else {
-                if (nbtType.suffix != null) {
-                    key += '$' + nbtType.suffix;
-                }
-                try {
-                    nbtBase = toTag(nbtType, object);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Exception while serializing key: " + key, e);
-                }
-            }
-            tagCompound.setTag(key, nbtBase);
+            addEntry(tagCompound, entry.getKey().last().toString(), entry.getValue());
         }
         return tagCompound;
+    }
+
+    private static NBTTagList toListTag(Map<Object, Object> map) {
+        final NBTTagList tagList = new NBTTagList();
+        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            final NBTTagCompound compoundEntry = new NBTTagCompound();
+            addEntry(compoundEntry, NbtType.mapKeyName, entry.getKey());
+            addEntry(compoundEntry, NbtType.mapValueName, entry.getValue());
+            tagList.appendTag(compoundEntry);
+        }
+        return tagList;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void addEntry(NBTTagCompound tagCompound, String key, Object value) {
+        // The base nbt type
+        NbtType nbtType = typeFor(value);
+        // The nbt tag that will be put in the compound
+        final NBTBase nbtBase;
+        if (nbtType == NbtType.LIST) {
+            final List<Object> list = (List<Object>) value;
+            if (list.isEmpty()) {
+                nbtType = NbtType.END;
+            } else {
+                nbtType = typeFor(list.get(0));
+                if (nbtType.suffix != null) {
+                    key += "$List$" + nbtType.suffix;
+                }
+            }
+            nbtBase = toListTag(nbtType, list);
+        } else {
+            if (nbtType.suffix != null) {
+                key += '$' + nbtType.suffix;
+            }
+            try {
+                nbtBase = toTag(nbtType, value);
+            } catch (Exception e) {
+                throw new IllegalStateException("Exception while serializing key: " + key, e);
+            }
+        }
+        tagCompound.setTag(key, nbtBase);
     }
 
     private static NBTTagList toListTag(NbtType elementNbtType, List<Object> list) {
@@ -282,8 +313,11 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             return NbtType.BYTE;
         } else if (object instanceof byte[]) {
             return NbtType.BYTE_ARRAY;
-        } else if (object instanceof Map ||
-                object instanceof DataView ||
+        } else if (object instanceof Map) {
+            return NbtType.MAP;
+        } else if (object instanceof Map[]) {
+            return NbtType.MAP_ARRAY;
+        } else if (object instanceof DataView ||
                 object instanceof DataSerializable) {
             return NbtType.COMPOUND;
         } else if (object instanceof Double) {
@@ -357,6 +391,13 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         return new NbtEntry(name, nbtType, listNbtType, tag);
     }
 
+    private static final DataView[] emptyDataViewArray = new DataView[0];
+    private static final Map[] emptyMapArray = new Map[0];
+    private static final String[] emptyStringArray = new String[0];
+    private static final double[] emptyDoubleArray = new double[0];
+    private static final float[] emptyFloatArray = new float[0];
+    private static final float[] emptyShortArray = new float[0];
+
     private static Object fromTag(NBTBase tag) throws InvalidDataFormatException {
         return fromTag(null, NbtType.byIndex.get(tag.getId()), null, tag);
     }
@@ -379,7 +420,10 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case SHORT_ARRAY:
                 tagList = (NBTTagList) tag;
                 if (tagList.getTagType() == NbtType.END.type) {
-                    return new short[tagList.tagCount()];
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return emptyShortArray;
                 } else if (tagList.getTagType() != NbtType.SHORT.type) {
                     throw new IllegalStateException("Attempted to deserialize a Short Array (List) but the list type wasn't a short.");
                 }
@@ -405,7 +449,10 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case FLOAT_ARRAY:
                 tagList = (NBTTagList) tag;
                 if (tagList.getTagType() == NbtType.END.type) {
-                    return new float[tagList.tagCount()];
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return emptyFloatArray;
                 } else if (tagList.getTagType() != NbtType.FLOAT.type) {
                     throw new IllegalStateException("Attempted to deserialize a Float Array (List) but the list type wasn't a float.");
                 }
@@ -419,7 +466,10 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case DOUBLE_ARRAY:
                 tagList = (NBTTagList) tag;
                 if (tagList.getTagType() == NbtType.END.type) {
-                    return new double[tagList.tagCount()];
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return emptyDoubleArray;
                 } else if (tagList.getTagType() != NbtType.DOUBLE.type) {
                     throw new IllegalStateException("Attempted to deserialize a Double Array (List) but the list type wasn't a double.");
                 }
@@ -433,7 +483,10 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case STRING_ARRAY:
                 tagList = (NBTTagList) tag;
                 if (tagList.getTagType() == NbtType.END.type) {
-                    return new String[tagList.tagCount()];
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return emptyStringArray;
                 } else if (tagList.getTagType() != NbtType.STRING.type) {
                     throw new IllegalStateException("Attempted to deserialize a String Array (List) but the list type wasn't a string.");
                 }
@@ -493,15 +546,66 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case COMPOUND_ARRAY:
                 tagList = (NBTTagList) tag;
                 if (tagList.getTagType() == NbtType.END.type) {
-                    return new DataView[tagList.tagCount()];
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return emptyDataViewArray;
                 } else if (tagList.getTagType() != NbtType.COMPOUND.type) {
-                    throw new IllegalStateException("Attempted to deserialize a DataView Array (List) but the list type wasn't a data view.");
+                    throw new IllegalStateException("Attempted to deserialize a DataView Array (List) but the list type wasn't a compound.");
                 }
                 final DataView[] dataViewArray = new DataView[tagList.tagCount()];
                 for (int i = 0; i < dataViewArray.length; i++) {
                     dataViewArray[i] = (DataView) fromTag(null, NbtType.COMPOUND, null, tagList.get(i));
                 }
                 return dataViewArray;
+            case MAP:
+                tagList = (NBTTagList) tag;
+                final Map<Object, Object> map = new HashMap<>();
+                if (tagList.getTagType() == NbtType.END.type) {
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return map;
+                } else if (tagList.getTagType() != NbtType.COMPOUND.type) {
+                    throw new IllegalStateException("Attempted to deserialize a Map (List) but the list type wasn't a compound.");
+                }
+                for (int i = 0; i < tagList.tagCount(); i++) {
+                    final NBTTagCompound entry = tagList.getCompoundTagAt(i);
+                    Object key = null;
+                    Object value = null;
+                    for (String keyEntry : entry.getKeySet()) {
+                        final NBTBase entryTag = entry.getTag(keyEntry);
+                        final NbtEntry nbtEntry = tagAndNameToEntry(keyEntry, entryTag);
+                        if (nbtEntry.name.equals(NbtType.mapKeyName)) {
+                            key = fromEntry(null, nbtEntry);
+                        }
+                        if (nbtEntry.name.equals(NbtType.mapValueName)) {
+                            value = fromEntry(null, nbtEntry);
+                        }
+                    }
+                    if (key == null) {
+                        throw new IllegalStateException("Map entry was missing a key entry.");
+                    } else if (value == null) {
+                        throw new IllegalStateException("Map entry was missing a value entry.");
+                    }
+                    map.put(key, value);
+                }
+                return map;
+            case MAP_ARRAY:
+                tagList = (NBTTagList) tag;
+                if (tagList.getTagType() == NbtType.END.type) {
+                    if (tagList.tagCount() != 0) {
+                        throw new IllegalStateException("Got a list tag with end tags which isn't empty.");
+                    }
+                    return emptyMapArray;
+                } else if (tagList.getTagType() != NbtType.LIST.type) {
+                    throw new IllegalStateException("Attempted to deserialize a Map Array (List) but the list type wasn't a list.");
+                }
+                final Map[] mapArray = new Map[tagList.tagCount()];
+                for (int i = 0; i < mapArray.length; i++) {
+                    mapArray[i] = (Map) fromTag(null, NbtType.MAP, null, tagList.get(i));
+                }
+                return mapArray;
             default:
                 throw new InvalidDataFormatException("Attempt to deserialize a unknown nbt tag type: " + nbtType);
         }
