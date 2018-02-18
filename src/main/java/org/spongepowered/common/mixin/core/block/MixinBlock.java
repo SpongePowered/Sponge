@@ -284,8 +284,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final IPhaseState currentState = phaseTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !currentState.alreadyCapturingItemSpawns() && !currentState.isWorldGeneration();
+            final IPhaseState<?> currentState = phaseTracker.getCurrentState();
+            final boolean shouldEnterBlockDropPhase = !phaseTracker.getCurrentContext().isCapturingBlockItemDrops() && !currentState.alreadyCapturingItemSpawns() && !currentState.isWorldGeneration();
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
@@ -312,8 +312,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final IPhaseState currentState = phaseTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !currentState.alreadyCapturingItemSpawns() && !currentState.isWorldGeneration();
+            final IPhaseState<?> currentState = phaseTracker.getCurrentState();
+            final boolean shouldEnterBlockDropPhase = !phaseTracker.getCurrentContext().isCapturingBlockItemDrops() && !currentState.alreadyCapturingItemSpawns() && !currentState.isWorldGeneration();
             if (shouldEnterBlockDropPhase) {
                 phaseTracker.completePhase(BlockPhase.State.BLOCK_DROP_ITEMS);
             }
@@ -332,10 +332,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         final boolean allowTileDrops = gameRules.getBoolean(argument);
         if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
             final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState currentState = currentPhase.state;
+            final IPhaseState<?> currentState = currentPhase.state;
             if (canCaptureItems && currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext<?> context = currentPhase.context;
-                final Multimap<BlockPos, ItemDropData> multimap = context.getCapturedBlockDrops();
+                final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
                 final Collection<ItemDropData> itemStacks = multimap.get(pos);
                 SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(stack).position(VecHelper.toVector3d(pos)).build());
                 return false;

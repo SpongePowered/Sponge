@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
@@ -292,13 +291,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.blocksSupplier;
     }
 
-    public Multimap<BlockPos, ItemDropData> getCapturedBlockDrops() throws IllegalStateException {
-        if (this.blockItemDropsSupplier == null) {
-            throw TrackingUtil.throwWithContext("Expected to be capturing block drops!", this).get();
-        }
-        return this.blockItemDropsSupplier.get();
-    }
-
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {
         if (this.blockItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Expected to be capturing block drops!", this).get();
@@ -411,6 +403,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public List<EntityItem> getCapturedItemsOrEmptyList() {
         return this.capturedItemsSupplier != null ? this.capturedItemsSupplier.orEmptyList() : Collections.emptyList();
+    }
+
+    public boolean isCapturingBlockItemDrops() {
+        return this.blockItemDropsSupplier != null;
     }
 
     public void printTrace(PrettyPrinter printer) {

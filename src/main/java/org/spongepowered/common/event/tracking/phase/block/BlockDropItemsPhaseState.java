@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -39,6 +40,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -125,6 +127,15 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                         drops.clear();
 
                     });
+            phaseContext.getBlockDropSupplier()
+                .acceptAndClearIfNotEmpty(drops -> {
+                    for (BlockPos key : drops.asMap().keySet()) {
+                        final List<ItemDropData> values = drops.get(key);
+                        if (!values.isEmpty()) {
+                            TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, phaseContext, this);
+                        }
+                    }
+                });
         }
     }
 
