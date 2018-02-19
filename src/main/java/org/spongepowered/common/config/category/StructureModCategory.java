@@ -33,7 +33,7 @@ import java.util.Map;
 @ConfigSerializable
 public class StructureModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "Set to false if you want mod to never save structures.")
+    @Setting(value = "enabled", comment = "If 'false', this mod will never save its structures.")
     private boolean isEnabled = true;
     @Setting(value = "structures")
     private Map<String, Boolean> structureList = new HashMap<>();
