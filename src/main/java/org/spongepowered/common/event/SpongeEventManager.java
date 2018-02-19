@@ -51,6 +51,8 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Field;
@@ -395,7 +397,10 @@ public class SpongeEventManager implements EventManager {
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             Sponge.getCauseStackManager().pushCause(handler.getPlugin());
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+                 final PhaseContext<?> context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
+                            .source(handler.getPlugin())
+                            .buildAndSwitch()) {
                 handler.getTimingsHandler().startTimingIfSync();
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
