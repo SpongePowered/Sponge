@@ -58,9 +58,6 @@ public class ModuleCategory extends ConfigCategory {
     @Setting("tracking")
     private boolean tracking = true;
 
-    @Setting("game-fixes")
-    private boolean gameFixes = false;
-
     @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")
     private boolean pluginRealTime = false;
 
@@ -127,16 +124,8 @@ public class ModuleCategory extends ConfigCategory {
         this.tracking = tracking;
     }
 
-    public boolean applyGameFixes() {
-        return this.gameFixes;
-    }
-
     public boolean useMovementChecks() {
         return this.movementChecks;
-    }
-
-    public void setGameFixes(boolean gameFixes) {
-        this.gameFixes = gameFixes;
     }
 
     public boolean usePluginRealTime() {

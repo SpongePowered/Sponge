@@ -30,7 +30,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class EntityCategory extends ConfigCategory {
 
-    @Setting(value = "max-bounding-box-size", comment = "Maximum size of an entities bounding box before removing it. Set to 0 to disable")
+    @Setting(value = "max-bounding-box-size", comment = "Maximum size of an entity's bounding box before removing it. Set to 0 to disable")
     private int maxBoundingBoxSize = 1000;
     @Setting(value = "collision-warn-size",
     comment = "Number of colliding entities in one spot before logging a warning. Set to 0 to disable")
