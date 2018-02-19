@@ -26,6 +26,8 @@ package org.spongepowered.test;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.entity.living.animal.Llama;
@@ -38,6 +40,8 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -184,16 +188,39 @@ public class CustomInventoryTest {
         });
     }
 
+    private final AnnoyingListener listener = new AnnoyingListener();
+    private boolean registered = false;
+
     @Listener
-    public void onInventoryClick(ClickInventoryEvent event, @First Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
-        container.getInventoryProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
-        for (SlotTransaction trans : event.getTransactions()) {
-            Slot slot = trans.getSlot();
-            Slot realSlot = slot.transform();
-            Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
-            player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
+    public void onInit(GameInitializationEvent event) {
+        Sponge.getCommandManager().register(this,
+                CommandSpec.builder().executor((source, context) -> {
+                    if (this.registered) {
+                        this.registered = false;
+                        Sponge.getEventManager().unregisterListeners(this.listener);
+                    } else {
+                        this.registered = true;
+                        Sponge.getEventManager().registerListeners(this, this.listener);
+                    }
+                    return CommandResult.success();
+                }).build(), "togglesuperannoyinginventorymessage");
+    }
+
+    public static class AnnoyingListener {
+
+        @Listener
+        public void onInventoryClick(ClickInventoryEvent event, @First Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
+            container.getInventoryProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
+            for (SlotTransaction trans : event.getTransactions()) {
+                Slot slot = trans.getSlot();
+                Slot realSlot = slot.transform();
+                Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
+                player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
+            }
         }
     }
+
+
 
     private static class BasicCarrier implements Carrier {
 
