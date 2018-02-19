@@ -41,6 +41,7 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     public static final class Listener {
+        public static final IPhaseState<ListenerPhaseContext> GENERAL_LISTENER = new EventListenerPhaseState();
         public static final IPhaseState<ListenerPhaseContext> PRE_WORLD_TICK_LISTENER = new PreWorldTickListenerState();
         public static final IPhaseState<ListenerPhaseContext> POST_WORLD_TICK_LISTENER = new PostWorldTickListenerState();
         public static final IPhaseState<ListenerPhaseContext> PRE_SERVER_TICK_LISTENER = new PreServerTickListenerState();
