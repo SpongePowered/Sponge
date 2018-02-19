@@ -105,6 +105,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,6 +234,13 @@ public final class ContainerUtil {
         return generateLens(container, slots);
     }
 
+
+    private static class CraftingInventoryData {
+        @Nullable private Integer out;
+        @Nullable private Integer base;
+        @Nullable private InventoryCrafting grid;
+    }
+
     /**
      * Generates a fallback lens for given Container
      *
@@ -246,70 +254,31 @@ public final class ContainerUtil {
         Map<Optional<IInventory>, List<Slot>> viewed = container.inventorySlots.stream()
                 .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
-        Integer craftOutput = null;
-        Integer craftGridBase = null;
-        InventoryCrafting craftGrid = null;
+        CraftingInventoryData crafting = new CraftingInventoryData();
         List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
         for (Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {
+            List<Slot> slotList = entry.getValue();
+            int slotCount = slotList.size();
             IInventory subInventory = entry.getKey().orElse(null);
-            int slotCount = entry.getValue().size();
-            Lens<IInventory, ItemStack> lens = null;
-            boolean playerLens = false;
-            if (subInventory instanceof InventoryAdapter) { // Check if sub-inventory is Adapter
-                // TODO the lenses in "slots" are not used in this lens and thus cannot be found later
-                Lens<IInventory, ItemStack> adapterLens = ((InventoryAdapter) subInventory).getRootLens();
-                if (adapterLens != null) {
-                    if (adapterLens instanceof PlayerInventoryLens) {
-                        playerLens = true;
-                    } else if (subInventory.getSizeInventory() == 0) {
-                        lens = new DefaultEmptyLens<>(((InventoryAdapter) subInventory));
-                    } else {
-                        // For Crafting Result we need the Slot to get Filter logic
-                        if (subInventory instanceof InventoryCraftResult) {
-                            Slot slot = entry.getValue().get(0);
-                            adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
-                                    itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
-                            craftOutput = index;
-                            if (slot instanceof SlotCrafting) {
-                                if (craftGridBase == null) {
-                                    // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
-                                    // e.g. for IC2 ContainerIndustrialWorkbench
-                                    craftGridBase = index + 1;
-                                    craftGrid = ((SlotCrafting) slot).craftMatrix;
-                                }
-                            }
-                        }
-                        if (subInventory instanceof InventoryCrafting) {
-                            craftGridBase = index;
-                            craftGrid = ((InventoryCrafting) subInventory);
-                        }
-                        lens = new DelegatingLens(index, adapterLens, slots);
-                    }
-                }
-            }
-            if (lens == null && subInventory instanceof LensProvider) // Check if sub-inventory is LensProvider
-            {
+            // Generate Lens based on existing InventoryAdapter
+            Lens<IInventory, ItemStack> lens = generateAdapterLens(slots, index, crafting, slotList, subInventory);
+            // Check if sub-inventory is LensProvider
+            if (lens == null && subInventory instanceof LensProvider) {
                 Fabric<IInventory> keyFabric = MinecraftFabric.of(subInventory);
                 lens = ((LensProvider) subInventory).rootLens(keyFabric, new VanillaAdapter(keyFabric, container));
             }
-            if (lens == null // Unknown Inventory or
-                    || lens.slotCount() != slotCount) { // Inventory size <> Lens size
+            // Unknown Inventory or Inventory size <> Lens size
+            if (lens == null || lens.slotCount() != slotCount) {
                 if (subInventory instanceof InventoryCraftResult) { // InventoryCraftResult is a Slot
-                    Slot slot = entry.getValue().get(0);
+                    Slot slot = slotList.get(0);
                     lens = new CraftingOutputSlotLensImpl(index,
                             item -> slot.isItemValid(((ItemStack) item)),
                             itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
                 } else if (subInventory instanceof InventoryCrafting) { // InventoryCrafting has width and height and is Input
-                    craftGrid = (InventoryCrafting) subInventory;
+                    InventoryCrafting craftGrid = (InventoryCrafting) subInventory;
                     lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new SlotLensImpl(index);
-                } else if ((lens instanceof PlayerInventoryLens || playerLens) && slotCount == 36) { // Player
-                    // Player Inventory + Hotbar
-                    lenses.add(new DelegatingLens(index, new MainPlayerInventoryLensImpl(index, slots, true), slots));
-                    //lenses.add(new GridInventoryLensImpl(index, 9, 3, 9, slots));
-                    //lenses.add(new HotbarLensImpl(index + 27, 9, slots));
-                    lens = null;
                 }
                 else if (subInventory instanceof InventoryBasic && subInventory.getClass().isAnonymousClass()) {
                     // Anonymous InventoryBasic -> Check for Vanilla Containers:
@@ -327,19 +296,63 @@ public final class ContainerUtil {
                     lens = new OrderedInventoryLensImpl(index, slotCount, 1, slots);
                 }
             }
-            if (lens != null) {
-                lenses.add(lens);
-            }
+            lenses.add(lens);
             index += slotCount;
         }
 
+
         List<Lens<IInventory, ItemStack>> additional = new ArrayList<>();
-        if (craftOutput != null && craftGridBase != null) {
-            additional.add(new CraftingInventoryLensImpl(craftOutput, craftGridBase, craftGrid.getWidth(), craftGrid.getHeight(), slots));
+        try {
+            if (crafting.out != null && crafting.base != null && crafting.grid != null) {
+                additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+            }
+        } catch (Exception e) {
+            SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl for " + container.getClass().getName(), e);
         }
 
         // Lens containing/delegating to other lenses
         return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses, additional);
+    }
+
+    private static @Nullable Lens<IInventory, ItemStack> generateAdapterLens(SlotProvider<IInventory, ItemStack> slots, int index,
+            CraftingInventoryData crafting, List<Slot> slotList, @Nullable IInventory subInventory) {
+        if (!(subInventory instanceof InventoryAdapter)) {
+            return null;
+        }
+        Lens<IInventory, ItemStack> adapterLens = ((InventoryAdapter) subInventory).getRootLens();
+        if (adapterLens == null) {
+            return null;
+        }
+        if (subInventory.getSizeInventory() == 0) {
+            return new DefaultEmptyLens<>(((InventoryAdapter) subInventory));
+        }
+
+        if (adapterLens instanceof PlayerInventoryLens) {
+            if (slotList.size() == 36) {
+                return new DelegatingLens(index, new MainPlayerInventoryLensImpl(index, slots, true), slots);
+            }
+            return null;
+        }
+        // For Crafting Result we need the Slot to get Filter logic
+        if (subInventory instanceof InventoryCraftResult) {
+            Slot slot = slotList.get(0);
+            adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
+                    itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
+            crafting.out = index;
+            if (slot instanceof SlotCrafting) {
+                if (crafting.base == null) {
+                    // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
+                    // e.g. for IC2 ContainerIndustrialWorkbench
+                    crafting.base = index + 1;
+                    crafting.grid = ((SlotCrafting) slot).craftMatrix;
+                }
+            }
+        }
+        if (subInventory instanceof InventoryCrafting) {
+            crafting.base = index;
+            crafting.grid = ((InventoryCrafting) subInventory);
+        }
+        return new DelegatingLens(index, adapterLens, slots);
     }
 
     private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens,
