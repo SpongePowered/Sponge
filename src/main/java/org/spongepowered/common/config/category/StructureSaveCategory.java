@@ -35,7 +35,7 @@ public class StructureSaveCategory extends ConfigCategory {
 
     @Setting(value = "enabled")
     private boolean isEnabled = false;
-    @Setting(value = "auto-populate", comment = "If enabled, newly discovered structures will be added to this config with a default value.")
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered structures will be added to this config with a default value.")
     private boolean autoPopulate = false;
     @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, StructureModCategory> modList = new HashMap<>();

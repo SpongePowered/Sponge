@@ -42,7 +42,8 @@ public class GeneralConfigBase extends ConfigBase {
 
     @Setting
     protected WorldCategory world = new WorldCategory();
-    @Setting(value = "config-enabled", comment =  "This setting does nothing in the global config. In dimension/world configs, it allows the config to override config(s) that it inherits from")
+    @Setting(value = "config-enabled", comment = "This setting does nothing in the global config. In dimension/world configs, it allows the config \n"
+                                               + "to override config(s) that it inherits from")
     protected boolean configEnabled = false;
     @Setting(value = "block-tracking")
     private BlockTrackingCategory blockTracking = new BlockTrackingCategory();
@@ -60,8 +61,8 @@ public class GeneralConfigBase extends ConfigBase {
     private GeneralCategory general = new GeneralCategory();
     @Setting
     private LoggingCategory logging = new LoggingCategory();
-    @Setting(value = "spawner", comment = "Used to control spawn limits around players.\n"
-                                          + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
+    @Setting(value = "spawner", comment = "Used to control spawn limits around players. \n"
+                                        + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
     private SpawnerCategory spawner = new SpawnerCategory();
     @Setting(value = "tileentity-activation")
     private TileEntityActivationCategory tileEntityActivationCategory = new TileEntityActivationCategory();

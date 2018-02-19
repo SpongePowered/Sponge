@@ -30,7 +30,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class BungeeCordCategory extends ConfigCategory {
 
-    @Setting(value = "ip-forwarding", comment = "If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server")
+    @Setting(value = "ip-forwarding", comment = "If 'true', allows BungeeCord to forward IP address, UUID, and Game Profile to this server.")
     private boolean ipForwarding = false;
 
     public boolean getIpForwarding() {
