@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.test.inject;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -51,12 +52,15 @@ public class TestImplementationModule extends SpongeImplementationModule {
 
         this.bind(Server.class).to(TestServer.class);
         this.bind(SpongeGame.class).to(TestGame.class);
-        this.bind(Platform.class).to(SpongePlatform.class);
+        Platform platform = mock(Platform.class);
+        PluginContainer mock = mock(PluginContainer.class);
+        when(platform.getContainer(any())).thenReturn(mock);
+        this.bind(Platform.class).toInstance(platform);
 
         PluginManager manager = mock(PluginManager.class);
-        PluginContainer mock = mock(PluginContainer.class);
         when(mock.getId()).thenReturn("sponge");
         when(manager.getPlugin(anyString())).thenReturn(Optional.of(mock));
+        when(manager.fromInstance(any())).thenReturn(Optional.of(mock));
         this.bind(PluginManager.class).toInstance(manager);
 
 

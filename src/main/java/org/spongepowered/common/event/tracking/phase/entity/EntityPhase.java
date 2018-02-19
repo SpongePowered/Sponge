@@ -35,6 +35,7 @@ public final class EntityPhase extends TrackingPhase {
         public static final IPhaseState<TeleportingContext> CHANGING_DIMENSION = new ChangingToDimensionState();
         public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
+        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
 
         private State() {
         }

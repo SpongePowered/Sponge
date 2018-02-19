@@ -38,15 +38,15 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMultimap<K, V>> {
+public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayListMultimap<K, V>> {
 
-    @Nullable private ListMultimap<K, V> captured;
+    @Nullable private ArrayListMultimap<K, V> captured;
 
     protected CapturedMultiMapSupplier() {
     }
 
     @Override
-    public ListMultimap<K, V> get() {
+    public ArrayListMultimap<K, V> get() {
         if (this.captured == null) {
             this.captured = ArrayListMultimap.create();
         }
