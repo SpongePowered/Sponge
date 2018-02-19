@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -79,7 +80,8 @@ import javax.annotation.Nullable;
         InventoryBasic.class,
         SpongeUserInventory.class,
         InventoryCrafting.class,
-        InventoryCraftResult.class
+        InventoryCraftResult.class,
+        EntityMinecartContainer.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class MixinTraitInventory implements MinecraftInventoryAdapter<IInventory> {
