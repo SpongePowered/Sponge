@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -38,11 +39,24 @@ import javax.annotation.Nullable;
 
 final class EventListenerPhaseState extends ListenerPhaseState {
 
+    private boolean hasPrintedEntities = false;
+
     EventListenerPhaseState() {
     }
 
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
+        phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
+            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
+        });
+
+        // TODO - determine if entities are needed to be captured.
+        phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities ->  {
+            if (!this.hasPrintedEntities) {
+                SpongeImpl.getLogger().warn("Unexpected entities captured during a plugin listener. If this message pops up, please let sponge developers know");
+                this.hasPrintedEntities = true;
+            }
+        });
 
     }
 
