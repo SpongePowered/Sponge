@@ -595,13 +595,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("sponge:health_scale").name("Health Scale").query(of("HealthScale")).build());
 
+        register("ignore_sleeping", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("sponge:ignore_sleeping").name("Ignore Sleeping").query(of("IgnoreSleeping")).build());
+
         // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
         Sponge.getCauseStackManager().popCause();
-        this.fieldMap.put("ignore_sleeping", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IgnoreSleeping"), "sponge:ignore_sleeping", "Ignore Sleeping"));
-
-        for (Key<?> key : this.fieldMap.values()) {
-            this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
-        }
 
     }
 
