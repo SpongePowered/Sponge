@@ -248,6 +248,7 @@ import org.spongepowered.common.world.gen.builders.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class CommonModuleRegistry {
@@ -498,6 +499,7 @@ public final class CommonModuleRegistry {
             .registerModule(Trigger.class, TriggerTypeRegistryModule.getInstance())
             .registerModule(new CriterionRegistryModule())
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
+            .registerModule(new ItemStackComparatorRegistryModule())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())
