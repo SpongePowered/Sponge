@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -94,7 +95,9 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     public void associateNeighborStateNotifier(P unwindingContext, BlockPos sourcePos, Block block, BlockPos notifyPos, WorldServer minecraftWorld,
         PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
-        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
+        Chunk chunk = minecraftWorld.getChunkFromBlockCoords(notifyPos);
+        ((IMixinChunk) chunk).setBlockCreator(notifyPos, player.getUniqueId());
+        ((IMixinChunk) chunk).setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, P context) {
