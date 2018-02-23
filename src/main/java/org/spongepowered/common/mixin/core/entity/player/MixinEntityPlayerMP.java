@@ -137,7 +137,10 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -204,6 +207,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -1251,5 +1255,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
                 "as it causes the player to be placed into an undefined state. " +
                 "Consider putting them through the normal death process instead.");
+    }
+
+    @Override
+    public Optional<UUID> getWorldUniqueId() {
+        return Optional.of(this.getWorld().getUniqueId());
+    }
+
+    @Override
+    public boolean setLocation(Vector3d position, UUID world) {
+        WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
+        World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
+        return this.setLocation(new Location<>(loaded, position));
     }
 }
