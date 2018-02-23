@@ -66,6 +66,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(WorldSettings.class)
 @Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
@@ -88,6 +90,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
+    @Nullable
     private Boolean keepSpawnLoaded = null;
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
@@ -327,7 +330,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean state) {
+    public void setKeepSpawnLoaded(@Nullable Boolean state) {
         this.keepSpawnLoaded = state;
     }
 
