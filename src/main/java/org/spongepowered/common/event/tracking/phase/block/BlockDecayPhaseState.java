@@ -65,7 +65,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            frame.pushCause(locatable);
             context.addNotifierAndOwnerToCauseStack();
 
             context.getCapturedBlockSupplier()
