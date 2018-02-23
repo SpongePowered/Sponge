@@ -35,6 +35,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
@@ -88,7 +89,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
-    private Boolean keepSpawnLoaded = null;
+    private Tristate keepSpawnLoaded = Tristate.UNDEFINED;
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
@@ -109,7 +110,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
             this.generatorSettings = properties.getGeneratorSettings().copy();
             this.isEnabled = properties.isEnabled();
             this.loadOnStartup = properties.loadOnStartup();
-            this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+            this.keepSpawnLoaded = Tristate.fromBoolean(properties.doesKeepSpawnLoaded());
             this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
             this.pvpEnabled = properties.isPVPEnabled();
             this.generateBonusChest = properties.doesGenerateBonusChest();
@@ -224,10 +225,10 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        if (this.keepSpawnLoaded == null) {
-            this.keepSpawnLoaded = this.dimensionType == DimensionTypes.OVERWORLD;
+        if (this.keepSpawnLoaded == Tristate.UNDEFINED) {
+            return this.dimensionType == DimensionTypes.OVERWORLD;
         }
-        return this.keepSpawnLoaded;
+        return this.keepSpawnLoaded.asBoolean();
     }
 
     @Override
@@ -327,7 +328,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean state) {
+    public void setKeepSpawnLoaded(Tristate state) {
         this.keepSpawnLoaded = state;
     }
 
@@ -357,7 +358,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public Boolean internalKeepSpawnLoaded() {
+    public Tristate internalKeepSpawnLoaded() {
         return this.keepSpawnLoaded;
     }
 }

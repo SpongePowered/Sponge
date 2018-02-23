@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -54,7 +55,7 @@ public interface IMixinWorldSettings {
 
     void setLoadOnStartup(boolean state);
 
-    void setKeepSpawnLoaded(boolean state);
+    void setKeepSpawnLoaded(Tristate state);
 
     void setGenerateSpawnOnLoad(boolean state);
 
@@ -70,5 +71,5 @@ public interface IMixinWorldSettings {
 
     void setRandomSeed(boolean state);
 
-    Boolean internalKeepSpawnLoaded();
+    Tristate internalKeepSpawnLoaded();
 }

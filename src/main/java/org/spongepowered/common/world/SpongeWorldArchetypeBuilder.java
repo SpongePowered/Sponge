@@ -34,6 +34,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.CatalogTypeAlreadyRegisteredException;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
@@ -65,7 +66,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     private boolean hardcore;
     private boolean worldEnabled;
     private boolean loadOnStartup;
-    private Boolean keepSpawnLoaded;
+    private Tristate keepSpawnLoaded;
     private boolean generateSpawnOnLoad;
     private boolean pvpEnabled;
     private boolean commandsAllowed;
@@ -143,6 +144,12 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 
     @Override
     public SpongeWorldArchetypeBuilder keepsSpawnLoaded(boolean state) {
+        this.keepSpawnLoaded = Tristate.fromBoolean(state);
+        return this;
+    }
+
+    @Override
+    public WorldArchetype.Builder keepsSpawnLoaded(Tristate state) {
         this.keepSpawnLoaded = state;
         return this;
     }
@@ -211,7 +218,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.hardcore = value.isHardcore();
         this.worldEnabled = value.isEnabled();
         this.loadOnStartup = value.loadOnStartup();
-        this.keepSpawnLoaded = value.doesKeepSpawnLoaded();
+        this.keepSpawnLoaded = value.getKeepSpawnLoaded();
         this.generatorSettings = value.getGeneratorSettings();
         this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());
         this.pvpEnabled = value.isPVPEnabled();
@@ -236,7 +243,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.hardcore = value.isHardcore();
         this.worldEnabled = value.isEnabled();
         this.loadOnStartup = value.loadOnStartup();
-        this.keepSpawnLoaded = value.doesKeepSpawnLoaded();
+        this.keepSpawnLoaded = Tristate.fromBoolean(value.doesKeepSpawnLoaded());
         this.generatorSettings = value.getGeneratorSettings();
         this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());
         this.pvpEnabled = value.isPVPEnabled();
@@ -290,7 +297,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.hardcore = false;
         this.worldEnabled = true;
         this.loadOnStartup = true;
-        this.keepSpawnLoaded = null;
+        this.keepSpawnLoaded = Tristate.UNDEFINED;
         this.generateSpawnOnLoad = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
         this.generatorSettings = DataContainer.createNew();
         this.generatorModifiers = ImmutableList.of();
