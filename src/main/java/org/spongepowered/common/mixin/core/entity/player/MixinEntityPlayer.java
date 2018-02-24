@@ -99,7 +99,10 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -781,6 +784,22 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(SlotIndex.of(slotIn.getIndex())).get();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
+        }
+    }
+
+    @Redirect(method = "setDead", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/inventory/Container;onContainerClosed(Lnet/minecraft/entity/player/EntityPlayer;)V"))
+    private void onOnContainerClosed(Container container, EntityPlayer player) {
+        try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
+                .source(player)
+                .packetPlayer(player instanceof EntityPlayerMP ? ((EntityPlayerMP) player) : null)
+                .openContainer(container)
+                // intentionally missing the lastCursor to not double throw close event
+                .buildAndSwitch();
+                StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
+            ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
+            container.onContainerClosed(player);
+            SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, ItemStackSnapshot.NONE, false);
         }
     }
 
