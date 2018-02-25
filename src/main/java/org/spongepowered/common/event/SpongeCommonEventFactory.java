@@ -964,7 +964,7 @@ public class SpongeCommonEventFactory {
             } else if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
-            if (!clientSource) {
+            if (!clientSource && player.openContainer != null && player.connection != null) {
                 player.closeScreen();
             }
         }
