@@ -439,7 +439,6 @@ public final class PhaseTracker {
                  + "In cases like this, it is best to report to Sponge to get this\n"
                  + "change tracked correctly and accurately.").hr()
             .add("StackTrace:")
-            .add(new Exception())
             .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
