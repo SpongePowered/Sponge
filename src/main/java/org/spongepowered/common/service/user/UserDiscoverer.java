@@ -185,6 +185,7 @@ class UserDiscoverer {
     private static User getOnlinePlayer(UUID uniqueId) {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
         final PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+        Preconditions.checkNotNull(playerList, "Server is not fully initialized yet! (Try a later event)");
 
         // Although the player itself could be returned here (as Player extends
         // User), a plugin is more likely to cache the User object and we don't
