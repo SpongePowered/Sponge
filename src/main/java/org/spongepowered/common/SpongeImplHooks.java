@@ -398,4 +398,8 @@ public final class SpongeImplHooks {
         SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;
     }
+
+    public static void onTileEntityInvalidate(TileEntity te) {
+        te.invalidate();
+    }
 }

@@ -34,6 +34,8 @@ public final class BlockPhase extends TrackingPhase {
         public static final IPhaseState<?> RESTORING_BLOCKS = new RestoringBlockPhaseState();
         public static final IPhaseState<?> DISPENSE = new DispensePhaseState();
         public static final IPhaseState<?> BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
+        public static final IPhaseState<?> TILE_ENTITY_INVALIDATING = new TileEntityInvalidatingPhaseState();
+
         /**
          * Specifically for Forge environments where a TileEntity may need to perform block
          * changes or entity spawns as a chunk unloads.

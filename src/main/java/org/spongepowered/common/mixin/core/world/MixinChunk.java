@@ -1253,6 +1253,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
+    @Redirect(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At(target =
+            "Lnet/minecraft/tileentity/TileEntity;invalidate()V", value = "INVOKE"))
+    private void redirectInvalidate(TileEntity te) {
+        SpongeImplHooks.onTileEntityInvalidate(te);
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
