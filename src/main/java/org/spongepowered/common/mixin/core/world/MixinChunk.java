@@ -96,6 +96,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -634,12 +636,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
         // Sponge end
 
-        extendedblockstorage.set(xPos, yPos & 15, zPos, newState);
+        final int modifiedY = yPos & 15;
+        extendedblockstorage.set(xPos, modifiedY, zPos, newState);
 
         // Sponge Start
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData peek = phaseTracker.getCurrentPhaseData();
+        final boolean requiresCapturing = peek.state.requiresBlockCapturing();
         // if (block1 != block) // Sponge - Forge removes this change.
         {
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote && !requiresCapturing) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
                     currentBlock.breakBlock(this.world, pos, currentState);
@@ -661,7 +667,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        if (extendedblockstorage.get(xPos, yPos & 15, zPos).getBlock() != newBlock) {
+        final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
+        if (blockAfterSet.getBlock() != newBlock) {
             return null;
         }
         // Sponge Start - Slight modifications
@@ -692,9 +699,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when
             // cancelled.
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final boolean requiresCapturing = peek.state.requiresBlockCapturing();
+
             if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
