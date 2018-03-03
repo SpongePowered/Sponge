@@ -636,16 +636,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
         // Sponge end
 
+        // Sponge Start
         final int modifiedY = yPos & 15;
         extendedblockstorage.set(xPos, modifiedY, zPos, newState);
 
-        // Sponge Start
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final boolean requiresCapturing = peek.state.requiresBlockCapturing();
         // if (block1 != block) // Sponge - Forge removes this change.
         {
-            if (!this.world.isRemote && !requiresCapturing) {
+            if (!this.world.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
                     currentBlock.breakBlock(this.world, pos, currentState);
@@ -661,7 +661,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
                 if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.world, pos, currentState, newState)) {
-                    // Sponge End
                     this.world.removeTileEntity(pos);
                 }
             }
@@ -671,7 +670,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (blockAfterSet.getBlock() != newBlock) {
             return null;
         }
-        // Sponge Start - Slight modifications
+
         // } else { // Sponge - remove unnecessary else
         if (requiresNewLightCalculations) {
             this.generateSkylightMap();
@@ -697,13 +696,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         if (!this.world.isRemote && currentBlock != newBlock) {
             // Sponge start - Ignore block activations during block placement captures unless it's
-            // a BlockContainer. Prevents blocks such as TNT from activating when
-            // cancelled.
-
+            // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
-                if (newBlockSnapshot == null && flag.performBlockPhysics()) {
+                if (flag.performBlockPhysics()) {
                     newBlock.onBlockAdded(this.world, pos, newState);
                 }
             }
