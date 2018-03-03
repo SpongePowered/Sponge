@@ -25,7 +25,6 @@
 package org.spongepowered.test;
 
 import com.flowpowered.math.vector.Vector3d;
-import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -43,8 +42,6 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.inject.Inject;
 
 /**
  * Test for User(Offline-Player) Location and Rotation
