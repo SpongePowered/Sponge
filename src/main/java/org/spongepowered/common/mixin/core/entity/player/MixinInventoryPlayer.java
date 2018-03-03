@@ -39,6 +39,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
@@ -63,6 +64,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -128,8 +130,13 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
                 this.slots = new SlotCollection.Builder()
                         .add(this.mainInventory.size())
                         .add(this.offHandInventory.size())
-                        .add(this.armorInventory.size(), EquipmentSlotAdapter.class)
+                        // TODO predicates for ItemStack/ItemType?
+                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
+                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
+                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
+                        .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
                         // for mods providing bigger inventories
+                        .add(this.armorInventory.size() - 4, EquipmentSlotAdapter.class)
                         .add(this.getSizeInventory() - this.mainInventory.size() - this.offHandInventory.size() - this.armorInventory.size())
                         .build();
                 this.lens = new PlayerInventoryLens(this, this.slots);

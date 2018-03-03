@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item.inventory;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -38,6 +39,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
 @Mixin(ContainerPlayer.class)
 public abstract class MixinContainerPlayer extends MixinContainer implements LensProvider<IInventory, ItemStack> {
@@ -52,7 +54,12 @@ public abstract class MixinContainerPlayer extends MixinContainer implements Len
         SlotCollection.Builder builder = new SlotCollection.Builder()
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
                 .add(4)
-                .add(4, EquipmentSlotAdapter.class)
+                // TODO predicates for ItemStack/ItemType?
+                // order for equipment is reversed in containers
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.HEADWEAR))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.CHESTPLATE))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
                 .add(36)
                 .add(1);
         builder.add(this.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
