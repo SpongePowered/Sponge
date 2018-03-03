@@ -72,7 +72,7 @@ public class PlayerInventoryLens extends RealLens {
         int base = 0;
         this.main = new MainPlayerInventoryLensImpl(base, slots, false);
         base += this.main.slotCount();
-        this.equipment = new EquipmentInventoryLensImpl(this.player, base, EQUIPMENT, 1, slots);
+        this.equipment = new EquipmentInventoryLensImpl(this.player, base, EQUIPMENT, 1, slots, false);
         base += EQUIPMENT;
         this.offhand = slots.getSlot(base);
 
