@@ -77,6 +77,7 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -1578,7 +1579,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.builder.notifier(notifier.get());
         }
         if (state.getBlock() instanceof ITileEntityProvider) {
-            net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
+            // We MUST only check to see if a TE exists to avoid creating a new one.
+            final net.minecraft.tileentity.TileEntity te = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             if (te != null) {
                 TileEntity tile = (TileEntity) te;
                 for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
