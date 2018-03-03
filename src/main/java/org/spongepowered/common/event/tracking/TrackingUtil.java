@@ -629,7 +629,7 @@ public final class TrackingUtil {
                                                 PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
-        final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
+        // final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
         final CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         final CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = phaseContext.getBlockItemDropSupplier();
         final CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> capturedBlockEntitySpawns = phaseContext.getBlockEntitySpawnSupplier();
@@ -668,23 +668,12 @@ public final class TrackingUtil {
             final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
-            // We call two parts of the block physics systems here:
-            // Sponge - Forge adds this change for block changes to only fire events when necessary
-            if (originalState.getBlock() != newState.getBlock()) {
-                originalState.getBlock().breakBlock(worldServer, pos, originalState);
-            }
-            // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
-            // still work by themselves in vanilla.
-            net.minecraft.tileentity.TileEntity te = worldServer.getChunkFromBlockCoords(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-            if (te != null && SpongeImplHooks.shouldRefresh(te, worldServer, pos, originalState, newState)) {
-                worldServer.removeTileEntity(pos);
-            }
 
-            // We call onBlockAdded here for both TE blocks (BlockContainer's) and other blocks.
-            // MixinChunk#setBlockState will only call onBlockAdded for BlockContainers when it's passed a null newBlockSnapshot,
-            // which only happens when capturing is not being done.
+            // We call onBlockAdded here for blocks without a TileEntity.
+            // MixinChunk#setBlockState will call onBlockAdded for blocks 
+            // with a TileEntity or when capturing is not being done.
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock()) {
+            if (!SpongeImplHooks.hasBlockTileEntity(newState.getBlock(), newState) && changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock()) {
                 newState.getBlock().onBlockAdded(worldServer, pos, newState);
                 final PhaseData peek = phaseTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
@@ -692,7 +681,7 @@ public final class TrackingUtil {
                 }
             }
 
-            proxyBlockAccess.proceed();
+            //proxyBlockAccess.proceed();
             ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
             if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
