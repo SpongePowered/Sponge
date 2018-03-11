@@ -71,7 +71,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
             throw new IllegalStateException(String.format(
                     "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                     ThreadUtil.getDescription(Thread.currentThread()),
-                    ThreadUtil.getDescription(SpongeImpl.getServer().getServerThread())
+                    ThreadUtil.getDescription(SpongeImpl.getServer().serverThread)
             ));
         }
     }
