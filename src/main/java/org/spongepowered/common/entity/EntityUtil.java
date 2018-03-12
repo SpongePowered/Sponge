@@ -94,8 +94,6 @@ import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -118,6 +116,8 @@ import org.spongepowered.common.world.WorldManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -346,19 +346,18 @@ public final class EntityUtil {
         if (teleporter == null) {
             teleporter = toWorld.getDefaultTeleporter();
         }
-        final SpongeConfig<? extends GeneralConfigBase> activeConfig = fromMixinWorld.getActiveConfig();
+        final Map<String, String> portalAgents = fromMixinWorld.getActiveConfig().getConfig().getWorld().getPortalAgents();
         String worldName = "";
         String teleporterClassName = teleporter.getClass().getName();
 
         // check for new destination in config
         if (teleporterClassName.equals("net.minecraft.world.Teleporter")) {
-            if (toWorld.provider instanceof WorldProviderHell) {
-                worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:default_nether");
-            } else if (toWorld.provider instanceof WorldProviderEnd) {
-                worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:default_the_end");
+            worldName = portalAgents.get("minecraft:default_" + toWorld.provider.getDimensionType().getName().toLowerCase(Locale.ENGLISH));
+            if (worldName == null && toWorld.provider instanceof WorldProviderHell) {
+                worldName = portalAgents.get("minecraft:default_nether");
             }
         } else { // custom
-            worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:" + teleporter.getClass().getSimpleName());
+            worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
         }
 
         if (worldName != null && !worldName.equals("")) {
