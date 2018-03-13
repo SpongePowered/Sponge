@@ -47,6 +47,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -59,6 +62,7 @@ import java.util.Random;
 @Mixin(Teleporter.class)
 public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
+    private boolean isVanilla;
     private int searchRadius = 128;
     private int creationRadius = 16;
     private boolean createNetherPortal = true;
@@ -67,6 +71,11 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     @Shadow @Final private WorldServer world;
     @Shadow @Final private Random random;
     @Shadow @Final private Long2ObjectMap<Teleporter.PortalPosition> destinationCoordinateCache;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onConstruct(WorldServer worldIn, CallbackInfo ci) {
+        this.isVanilla = this.getClass().getName().startsWith("net.minecraft.");
+    }
 
     @Override
     public int getSearchRadius() {
@@ -525,6 +534,11 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         } else {
             this.createNetherPortal = false;
         }
+    }
+
+    @Override
+    public boolean isVanilla() {
+        return this.isVanilla;
     }
 
     @Override
