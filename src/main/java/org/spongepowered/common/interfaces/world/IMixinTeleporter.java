@@ -33,4 +33,6 @@ public interface IMixinTeleporter {
     void setPortalAgentType(PortalAgentType type);
 
     void setPortalType(int dimensionId);
+
+    boolean isVanilla();
 }

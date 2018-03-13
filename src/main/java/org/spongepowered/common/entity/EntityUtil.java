@@ -327,6 +327,7 @@ public final class EntityUtil {
     public static MoveEntityEvent.Teleport.Portal handleDisplaceEntityPortalEvent(Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
         final MinecraftServer mcServer = SpongeImpl.getServer();
+        final IMixinTeleporter mixinTeleporter = (IMixinTeleporter) teleporter;
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
         final Transform<World> fromTransform = mixinEntity.getTransform();
@@ -385,10 +386,11 @@ public final class EntityUtil {
     
             if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
                 fromWorld.profiler.startSection("placing");
-                // placeInPortal must be used to support mods
-                // Only place entity in portal if it collided with a portal block
-                // Note: To verify if this is true, entityIn.getLastPortalVec() should not be null
-                if (entityIn.getLastPortalVec() != null) {
+                // Only place entity in portal if one of the following are true :
+                // 1. The teleporter is custom. (not vanilla)
+                // 2. The last known portal vec is known. (Usually set after block collision)
+                // Note: We must always use placeInPortal to support mods.
+                if (!mixinTeleporter.isVanilla() || entityIn.getLastPortalVec() != null) {
                     teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
                 }
                 fromWorld.profiler.endSection();
