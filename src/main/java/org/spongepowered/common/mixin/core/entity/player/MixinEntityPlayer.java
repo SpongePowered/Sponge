@@ -213,6 +213,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         recalculateTotalExperience();
     }
 
+    @Inject(method = "onEnchant", at = @At("RETURN"))
+    private void onEnchantChangeExperienceLevels(ItemStack item, int levels, CallbackInfo ci) {
+        recalculateTotalExperience();
+    }
+
     /**
      * @author JBYoshi - May 17, 2017
      * @reason This makes the experience updating more accurate and disables
