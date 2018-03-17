@@ -32,7 +32,7 @@ public interface IMixinTeleporter {
 
     void setPortalAgentType(PortalAgentType type);
 
-    void setPortalType(int dimensionId);
+    void setNetherPortalType(boolean isNetherPortal);
 
     boolean isVanilla();
 }
