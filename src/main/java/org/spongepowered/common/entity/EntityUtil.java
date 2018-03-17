@@ -368,7 +368,11 @@ public final class EntityUtil {
                     if (spongeWorld.isPresent()) {
                         toWorld = (WorldServer) spongeWorld.get();
                         teleporter = toWorld.getDefaultTeleporter();
-                        ((IMixinTeleporter) teleporter).setPortalType(targetDimensionId);
+                        if (fromWorld.provider.isNether() || toWorld.provider.isNether()) {
+                            ((IMixinTeleporter) teleporter).setNetherPortalType(true);
+                        } else {
+                            ((IMixinTeleporter) teleporter).setNetherPortalType(false);
+                        }
                     }
                 }
             }
