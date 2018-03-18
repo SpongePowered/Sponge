@@ -528,8 +528,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     }
 
     @Override
-    public void setPortalType(int dimensionId) {
-        if (dimensionId == -1) {
+    public void setNetherPortalType(boolean isNetherPortal) {
+        if (isNetherPortal) {
             this.createNetherPortal = true;
         } else {
             this.createNetherPortal = false;
