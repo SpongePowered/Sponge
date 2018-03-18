@@ -37,6 +37,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.data.util.DataUtil;
@@ -67,6 +68,11 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @Override
     public boolean supports(DataHolder dataHolder) {
         return this.holderClass.isInstance(dataHolder) && supports((Holder) dataHolder);
+    }
+
+    @Override
+    public boolean supports(EntityType entityType) {
+        return this.holderClass.isAssignableFrom(entityType.getEntityClass());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
