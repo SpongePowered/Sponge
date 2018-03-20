@@ -1334,6 +1334,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void neighborChanged(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
+        final Chunk chunk =
+                ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(otherPos.getX() >> 4, otherPos.getZ() >>
+                        4);
+
+        // Don't let neighbor updates trigger a chunk load ever
+        if (chunk == null) {
+            return;
+        }
+
         PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos, blockIn, otherPos);
     }
 
@@ -1345,6 +1354,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
         if (!isValid(pos)) {
+            return;
+        }
+
+        final Chunk chunk =
+                ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >>
+                        4);
+
+        // Don't let neighbor updates trigger a chunk load ever
+        if (chunk == null) {
             return;
         }
 
@@ -1374,6 +1392,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType, boolean updateObserverBlocks) {
         if (!isValid(pos)) {
+            return;
+        }
+
+        final Chunk chunk =
+                ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+
+        // Don't let neighbor updates trigger a chunk load ever
+        if (chunk == null) {
             return;
         }
 
@@ -2076,7 +2102,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;scheduleUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V"))
     private void redirectDontRescheduleBlockUpdates(WorldServer worldServer, BlockPos pos, Block blockIn, int delay) {
-
     }
 
     // TIMINGS
