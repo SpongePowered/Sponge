@@ -77,7 +77,6 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -784,11 +783,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posZ = fromPos.getZ();
         }
         final net.minecraft.world.chunk.Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
-        if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
-            return false;
-        }
-
-        return true;
+        return chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded();
     }
 
     /**
@@ -847,7 +842,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             SpongeImpl.getLogger().error("Original caught error:", category.crashReport.cause);
             throw new ReportedException(category.crashReport);
         }
-
     }
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
@@ -902,11 +896,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
     private boolean onTicktick(IChunkProvider chunkProvider) {
         // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
-        if (this.chunkGCTickInterval > 0) {
-            return false;
-        }
-
-        return chunkProvider.tick();
+        return this.chunkGCTickInterval <= 0 && chunkProvider.tick();
     }
 
     // Chunk GC
@@ -1942,11 +1932,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Overwrite
     protected boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
         final IMixinChunk spongeChunk = (IMixinChunk) this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(x, z);
-        if (spongeChunk == null || (spongeChunk.isQueuedForUnload() && !spongeChunk.isPersistedChunk())) {
-            return false;
-        }
-
-        return true;
+        return spongeChunk != null && (!spongeChunk.isQueuedForUnload() || spongeChunk.isPersistedChunk());
     }
 
     @Override
@@ -2079,6 +2065,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private void onEndUpdatePortal(CallbackInfo ci) {
         this.timings.doPortalForcer.stopTiming();
     }
+
+    /**
+     * Seriously, this was stupid.
+     */
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;add(III)Lnet/minecraft/util/math/BlockPos;"))
+    private BlockPos redirectNeedlessBlockPosObjectCreation(BlockPos pos, int x, int y, int z) {
+        return pos;
+    }
+
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;scheduleUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V"))
+    private void redirectDontRescheduleBlockUpdates(WorldServer worldServer, BlockPos pos, Block blockIn, int delay) {
+
+    }
+
     // TIMINGS
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
     private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
