@@ -435,11 +435,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         // API is not allowed to unload overworld
-        if (((IMixinWorldServer) world).getDimensionId() == 0) {
-            return false;
-        }
+        return ((IMixinWorldServer) world).getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false);
 
-        return WorldManager.unloadWorld((WorldServer) world, false);
     }
 
     @SuppressWarnings("unchecked")
