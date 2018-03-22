@@ -96,7 +96,6 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
         Chunk chunk = minecraftWorld.getChunkFromBlockCoords(notifyPos);
-        ((IMixinChunk) chunk).setBlockCreator(notifyPos, player.getUniqueId());
         ((IMixinChunk) chunk).setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
