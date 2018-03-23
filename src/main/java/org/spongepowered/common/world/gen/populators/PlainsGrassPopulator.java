@@ -47,10 +47,12 @@ public class PlainsGrassPopulator implements Populator {
 
     private NoiseGeneratorPerlin noise = new NoiseGeneratorPerlin(new Random(2345L), 1);
     private final boolean sunflowers;
-
     private Flower flowers;
     private Shrub grass;
     private DoublePlant plant;
+
+    private boolean populateFlowers = true;
+    private boolean populateGrass = true;
 
     public PlainsGrassPopulator(boolean sunflowers) {
         this.sunflowers = sunflowers;
@@ -87,18 +89,29 @@ public class PlainsGrassPopulator implements Populator {
             this.grass.setShrubsPerChunk(10 * 64);
 
             this.plant.getPossibleTypes().clear();
-            this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.GRASS, 1));
+            this.plant.getPossibleTypes().add(new WeightedObject<>(DoublePlantTypes.GRASS, 1));
             this.plant.setPlantsPerChunk(7 * 5);
-            this.plant.populate(world, extent, random);
+
+            if (this.populateGrass) {
+                this.plant.populate(world, extent, random);
+            }
         }
-        this.flowers.populate(world, extent, random);
-        this.grass.populate(world, extent, random);
+        if (this.populateFlowers) {
+            this.flowers.populate(world, extent, random);
+        }
+
+        if (this.populateGrass) {
+            this.grass.populate(world, extent, random);
+        }
 
         if (this.sunflowers) {
             this.plant.getPossibleTypes().clear();
-            this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.SUNFLOWER, 1));
+            this.plant.getPossibleTypes().add(new WeightedObject<>(DoublePlantTypes.SUNFLOWER, 1));
             this.plant.setPlantsPerChunk(10 * 5);
-            this.plant.populate(world, extent, random);
+
+            if (this.populateFlowers) {
+                this.plant.populate(world, extent, random);
+            }
         }
     }
 
@@ -116,19 +129,57 @@ public class PlainsGrassPopulator implements Populator {
             this.grass.setShrubsPerChunk(10 * 64);
 
             this.plant.getPossibleTypes().clear();
-            this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.GRASS, 1));
+            this.plant.getPossibleTypes().add(new WeightedObject<>(DoublePlantTypes.GRASS, 1));
             this.plant.setPlantsPerChunk(7 * 5);
-            this.plant.populate(world, extent, random, virtualBiomes);
+
+            if (this.populateGrass) {
+                this.plant.populate(world, extent, random, virtualBiomes);
+            }
         }
-        this.flowers.populate(world, extent, random, virtualBiomes);
-        this.grass.populate(world, extent, random, virtualBiomes);
+        if (this.populateFlowers) {
+            this.flowers.populate(world, extent, random, virtualBiomes);
+        }
+
+        if (this.populateGrass) {
+            this.grass.populate(world, extent, random, virtualBiomes);
+        }
 
         if (this.sunflowers) {
             this.plant.getPossibleTypes().clear();
-            this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.SUNFLOWER, 1));
+            this.plant.getPossibleTypes().add(new WeightedObject<>(DoublePlantTypes.SUNFLOWER, 1));
             this.plant.setPlantsPerChunk(10 * 5);
-            this.plant.populate(world, extent, random, virtualBiomes);
+
+            if (this.populateFlowers) {
+                this.plant.populate(world, extent, random, virtualBiomes);
+            }
         }
     }
 
+    public boolean isPopulateFlowers() {
+        return this.populateFlowers;
+    }
+
+    public boolean isPopulateGrass() {
+        return this.populateGrass;
+    }
+
+    public void setPopulateFlowers(boolean populateFlowers) {
+        this.populateFlowers = populateFlowers;
+    }
+
+    public void setPopulateGrass(boolean populateGrass) {
+        this.populateGrass = populateGrass;
+    }
+
+    public Flower getFlowers() {
+        return this.flowers;
+    }
+
+    public Shrub getGrass() {
+        return this.grass;
+    }
+
+    public DoublePlant getPlant() {
+        return this.plant;
+    }
 }
