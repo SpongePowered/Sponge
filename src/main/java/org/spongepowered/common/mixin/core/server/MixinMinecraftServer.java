@@ -207,7 +207,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean hasWhitelist() {
-        return this.getPlayerList().isWhiteListEnabled();
+        return this.getPlayerList().whiteListEnforced;
     }
 
     @Override
