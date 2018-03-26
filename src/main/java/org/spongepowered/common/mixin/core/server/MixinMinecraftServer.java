@@ -314,28 +314,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         initiateShutdown();
     }
 
-    @Inject(method = "stopServer()V", at = @At("HEAD"))
-    public void onServerStopping(CallbackInfo ci) {
-        ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
-
-        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
-                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
-            for (WorldServer world : this.worlds) {
-                ((IMixinWorldServer) world).getLightingExecutor().shutdown();
-            }
-
-            for (WorldServer world : this.worlds) {
-                try {
-                    ((IMixinWorldServer) world).getLightingExecutor().awaitTermination(1, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    ((IMixinWorldServer) world).getLightingExecutor().shutdownNow();
-                }
-            }
-        }
-    }
-
     /**
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
