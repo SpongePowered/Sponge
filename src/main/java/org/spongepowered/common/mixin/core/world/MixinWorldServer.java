@@ -2379,9 +2379,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("LevelName", this.worldInfo.getWorldName())
-                .add("DimensionId", this.provider.getDimensionType().getId())
+                .add("Name", this.worldInfo.getWorldName())
+                .add("DimensionId", ((IMixinWorldServer) this).getDimensionId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
+                .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();
     }
 }
