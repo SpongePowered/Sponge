@@ -333,7 +333,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         this.getPlayerList().setPlayerManager(this.worlds);
         this.setDifficultyForAllWorlds(this.getDifficulty());
-        this.initialWorldChunkLoad();
     }
 
     /**
