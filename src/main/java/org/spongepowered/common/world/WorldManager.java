@@ -816,11 +816,11 @@ public final class WorldManager {
         ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
 
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
-        SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.world.World) worldServer));
-
 
         WorldManager.reorderWorldsVanillaFirst();
+
+        SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
+            (org.spongepowered.api.world.World) worldServer));
 
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
 
