@@ -53,7 +53,7 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
         String[] ids = this.getId().split(":");
         String modId = ids[0];
         if (ids.length != 2) {
-            throw new ValidationException("Corrupt block id found '" + modId + "'! Block id must use the following format: 'minecraft:wood'");   
+            throw new IllegalArgumentException("Corrupt block id found '" + modId + "'! Block id must use the following format: 'minecraft:wood'");   
         }
         String name = ids[1];
 
