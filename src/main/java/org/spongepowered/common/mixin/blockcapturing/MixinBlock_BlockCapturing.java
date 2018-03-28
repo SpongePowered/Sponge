@@ -26,8 +26,11 @@ package org.spongepowered.common.mixin.blockcapturing;
 
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockCapturingCategory;
 import org.spongepowered.common.config.category.BlockCapturingModCategory;
@@ -51,6 +54,25 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
         SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
         BlockCapturingCategory blockCapturing = activeConfig.getConfig().getBlockCapturing();
         String[] ids = this.getId().split(":");
+        if (ids.length != 2) {
+            final PrettyPrinter printer = new PrettyPrinter(60).add("Malformatted Block ID discovered!").centre().hr()
+                .addWrapped(60, "Sponge has found a malformatted block id when trying to"
+                                + " load configurations for the block id. The printed out block id"
+                                + "is not originally from sponge, and should be brought up with the"
+                                + "mod developer as the registration for this block is not likely"
+                                + "to work with other systems and assumptions of having a properly"
+                                + "formatted block id.")
+                .add("%s : %s", "Malformed ID", this.getId())
+                .add("%s : %s", "Discovered id array", ids)
+                .add();
+            final String id = ids[0];
+            ids = new String[]{"unknown", id};
+            printer
+                .add("Sponge will attempt to work around this by using the provided generated id:")
+                .add("%s : %s", "Generated ID", ids)
+                .log(SpongeImpl.getLogger(), Level.WARN);
+
+        }
         String modId = ids[0];
         String name = ids[1];
 
