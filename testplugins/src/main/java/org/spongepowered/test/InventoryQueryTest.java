@@ -38,6 +38,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.InventoryTransformations;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -113,6 +114,16 @@ public class InventoryQueryTest {
                     return CommandResult.success();
                 }).build();
 
+        CommandSpec inventoryTransform = CommandSpec.builder()
+                .executor((src, args) -> {
+                    Inventory inventory = getPlayerInventory(src);
+                    inventory.transform(InventoryTransformations.PLAYER_MAIN_HOTBAR_FIRST)
+                             .transform(InventoryTransformations.REVERSE).offer(ItemStack.of(ItemTypes.PAPER, 46));
+
+                    src.sendMessage(Text.of("Added paper to hotbar last."));
+                    return CommandResult.success();
+                }).build();
+
         Sponge.getCommandManager().register(this, CommandSpec.builder()
                 .child(inventoryType, "inventorytype")
                 .child(itemType, "itemtype")
@@ -121,6 +132,7 @@ public class InventoryQueryTest {
                 .child(itemStackCustom, "itemstackcustom")
                 .child(inventoryProperty, "inventoryproperty")
                 .child(inventoryTranslation, "inventorytranslation")
+                .child(inventoryTransform, "inventorytransform")
                 .build(), "invquery");
     }
 
