@@ -838,6 +838,10 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.INVULNERABLE, new InvulnerableValueProcessor());
         DataUtil.registerValueProcessor(Keys.LAST_ATTACKER, new LastAttackerValueProcessor());
         DataUtil.registerValueProcessor(Keys.LAST_DAMAGE, new LastDamageValueProcessor());
+        DataUtil.registerValueProcessor(Keys.END_GATEWAY_TELEPORT_COOLDOWN, new EndGatewayTeleportCooldownValueProcessor());
+        DataUtil.registerValueProcessor(Keys.END_GATEWAY_AGE, new EndGatewayAgeValueProcessor());
+        DataUtil.registerValueProcessor(Keys.EXIT_POSITION, new EndGatewayExitPositionValueProcessor());
+        DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
