@@ -81,6 +81,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
@@ -937,6 +938,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
         return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public void setElytraFlying(boolean value) {
+        setFlag(DataConstants.ELYTRA_FLYING_FLAG, value);
     }
 
 }
