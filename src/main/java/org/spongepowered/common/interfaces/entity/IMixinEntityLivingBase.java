@@ -65,4 +65,6 @@ public interface IMixinEntityLivingBase {
 
     void setRevengeTarget(EntityLivingBase entityLivingBase);
 
+    void setElytraFlying(boolean value);
+
 }
