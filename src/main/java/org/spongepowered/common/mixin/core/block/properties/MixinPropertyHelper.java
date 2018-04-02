@@ -31,6 +31,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
+import java.util.Optional;
+
 /**
  * This is retained solely for simplification not having to perform any
  * lookups to the {@link BlockTypeRegistryModule#getIdFor(IProperty)}.
@@ -40,7 +42,7 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 @Mixin(value = PropertyHelper.class)
 public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
 
-    protected String idString;
+    private String idString;
 
     @Override
     public String getId() {
@@ -50,5 +52,10 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
     @Override
     public void setId(String id) {
         this.idString = id;
+    }
+
+    @Override
+    public Optional<T> parseValue(String value) {
+        return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orNull());
     }
 }
