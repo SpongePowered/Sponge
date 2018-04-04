@@ -60,7 +60,8 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
     @Shadow
     public abstract void setItemRotation(int p_82336_1_);
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItemFrame;dropItemOrSelf(Lnet/minecraft/entity/Entity;Z)V"))
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItemFrame;dropItemOrSelf"
+      + "(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
