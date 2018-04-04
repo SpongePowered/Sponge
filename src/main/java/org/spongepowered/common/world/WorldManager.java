@@ -843,26 +843,26 @@ public final class WorldManager {
     public static void reorderWorldsVanillaFirst() {
         final List<WorldServer> sorted = new LinkedList<>();
 
-        int vanillaWorldsCount = 0;
+        List<Integer> vanillaWorldIds = new ArrayList<>();
         WorldServer worldServer = worldByDimensionId.get(0);
 
         if (worldServer != null) {
+            vanillaWorldIds.add(0);
             sorted.add(worldServer);
-            vanillaWorldsCount++;
         }
 
         worldServer = worldByDimensionId.get(-1);
 
         if (worldServer != null) {
+            vanillaWorldIds.add(-1);
             sorted.add(worldServer);
-            vanillaWorldsCount++;
         }
 
         worldServer = worldByDimensionId.get(1);
 
         if (worldServer != null) {
+            vanillaWorldIds.add(1);
             sorted.add(worldServer);
-            vanillaWorldsCount++;
         }
 
         final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
@@ -870,7 +870,7 @@ public final class WorldManager {
         while(iterator.hasNext()) {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) iterator.next();
             final Integer dimensionId = mixinWorld.getDimensionId();
-            if (dimensionId < vanillaWorldsCount - 1) {
+            if (vanillaWorldIds.contains(dimensionId)) {
                 iterator.remove();
             }
         }
