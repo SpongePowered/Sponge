@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -69,6 +70,20 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
                 cir.setReturnValue(true);
             }
         }
+    }
+
+    /**
+     * Fixes MC-124833
+     *
+     * @author Meronat - April 4th, 2018
+     * @reason Fixes a vanilla dupe in 1.12.2 - MC-124833 - Which resulted due
+     *     to the displayed item not being properly unset.
+     *
+     * @param ci The callback info
+     */
+    @Inject(method ="removeFrameFromMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/EntityItemFrame;)V"))
+    private void postOnSetItemFrame(CallbackInfo ci) {
+        setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
     }
 
     public Optional<ItemStack> getItem() {
