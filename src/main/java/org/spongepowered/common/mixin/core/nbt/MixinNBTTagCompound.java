@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.nbt;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Map;
@@ -57,7 +59,37 @@ public abstract class MixinNBTTagCompound extends NBTBase {
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTBase;copy()Lnet/minecraft/nbt/NBTBase;"))
     @Nullable
     private NBTBase onTagCopy(@Nullable NBTBase base) {
-        return base == null ? null : base.copy();
+        try {
+            final NBTBase copy = base == null ? null : base.copy();
+            return copy;
+        } catch (StackOverflowError e) {
+            final PrettyPrinter printer = new PrettyPrinter(60)
+                .add("StackOverflow from trying to copy this compound")
+                .centre()
+                .hr();
+            printer.addWrapped(70, "Sponge caught a stack overflow error, printing out some special"
+                                   + " handling and printouts to assist in finding out where this"
+                                   + " recursion is coming from.");
+            printer.add();
+            try {
+                printer.addWrapped(80, "%s : %s", "This compound", this);
+            } catch (Throwable error) {
+                printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
+
+                for (Map.Entry<String, NBTBase> entry : this.tagMap.entrySet()) {
+                    try {
+                        printer.addWrapped(80, "%s : %s", entry.getKey(), entry.getValue());
+                    } catch (Throwable throwable) {
+                        printer.add();
+                        printer.addWrapped(80, "The offending key entry is belonging to " + entry.getKey());
+                        break;
+                    }
+                }
+            }
+            printer.add();
+            printer.log(SpongeImpl.getLogger(), Level.ERROR);
+            return null;
+        }
     }
 
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = SET_TAG))
