@@ -121,6 +121,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow public abstract BlockStateContainer getBlockState();
 
+    @Shadow protected boolean enableStats;
+
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
         // Determine which blocks can avoid executing un-needed event logic
