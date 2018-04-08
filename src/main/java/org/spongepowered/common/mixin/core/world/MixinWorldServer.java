@@ -2274,15 +2274,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void setWeather(Weather weather) {
-        if (weather.equals(Weathers.CLEAR)) {
-            this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
-        } else {
-            this.setWeather(weather, 0);
-        }
+        this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
     }
 
     @Override
     public void setWeather(Weather weather, long duration) {
+        this.prevWeather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
@@ -2304,22 +2301,25 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Inject(method = "updateWeather", at = @At(value = "RETURN"))
-    private void onUpdateWeatherReturn(CallbackInfo ci) {
+    @Inject(method = "updateWeather", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;prevRainingStrength:F"), cancellable = true)
+    private void onAccessPreviousRain(CallbackInfo ci) {
         final Weather weather = getWeather();
         int duration = (int) getRemainingDuration();
-        if (this.prevWeather != weather && duration > 0) {
+        if (!weather.equals(this.prevWeather) && duration > 0) {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 final ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(frame.getCurrentCause(), duration, duration,
                         weather, weather, this.prevWeather, this);
                 if (Sponge.getEventManager().post(event)) {
                     this.setWeather(this.prevWeather);
+                    this.prevWeather = getWeather();
+                    ci.cancel();
                 } else {
                     if (!weather.equals(event.getWeather()) || duration != event.getDuration()) {
                         this.setWeather(event.getWeather(), event.getDuration());
-                        this.prevWeather = event.getWeather();
                         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+                    } else {
+                        this.prevWeather = event.getWeather();
                     }
                 }
             }
