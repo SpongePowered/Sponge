@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.passive.EntityVillager;
@@ -152,6 +153,11 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Override
     public Profession getProfession() {
         return this.profession;
+    }
+
+    @Override
+    public void setProfession(Profession profession) {
+        this.profession = checkNotNull(profession, "VillagerProfession cannot be null!");
     }
 
     @Override
