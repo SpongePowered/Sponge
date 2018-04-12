@@ -244,6 +244,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
 
+    @Shadow public abstract void closeContainer();
+
     public int newExperience = 0;
     public int newLevel = 0;
     public int newTotalExperience = 0;
@@ -654,12 +656,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this,
-                inventory));
+        if (((IMixinContainer) this.openContainer).isInUse()) {
+            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
+                this.closeInventory(); // Cause close event first. So cursor item is not lost.
+                this.openInventory(inventory); // Then open the inventory
+            }).submit(SpongeImpl.getPlugin());
+            return this.getOpenInventory();
+        }
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory));
     }
 
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
+        if (((IMixinContainer) this.openContainer).isInUse()) {
+            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(this::closeInventory).submit(SpongeImpl.getPlugin());
+            return false;
+        }
         // Create Close_Window to capture item drops
         try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                 .source(this)

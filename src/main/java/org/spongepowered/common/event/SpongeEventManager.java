@@ -46,6 +46,7 @@ import org.spongepowered.api.event.GenericEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeImpl;
@@ -53,6 +54,7 @@ import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Field;
@@ -421,10 +423,19 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public boolean post(Event event) {
-        // Allow the client thread by default so devs can actually
-        // call their own events inside the init events. Only allowing
-        // this as long that there is no server available
-        return post(event, !Sponge.isServerAvailable());
+        try {
+            if (event instanceof InteractInventoryEvent) { // Track usage of Containers
+                ((IMixinContainer) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(true);
+            }
+            // Allow the client thread by default so devs can actually
+            // call their own events inside the init events. Only allowing
+            // this as long that there is no server available
+            return post(event, !Sponge.isServerAvailable());
+        } finally {
+            if (event instanceof InteractInventoryEvent) { // Finished using Container
+                ((IMixinContainer) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(false);
+            }
+        }
     }
 
     public boolean postServer(Event event) {
@@ -433,5 +444,7 @@ public class SpongeEventManager implements EventManager {
 
     public boolean post(Event event, boolean allowClientThread) {
         return post(event, getHandlerCache(event).getListeners());
+
+
     }
 }
