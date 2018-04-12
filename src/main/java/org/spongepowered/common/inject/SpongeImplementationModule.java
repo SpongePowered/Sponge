@@ -59,7 +59,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.scheduler.SpongeScheduler;
+import org.spongepowered.common.server.ServerInternal;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -76,7 +76,7 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
-        this.bindAndExpose(Scheduler.class).to(SpongeScheduler.class);
+        this.bindAndExpose(Scheduler.class).toInstance(ServerInternal.SCHEDULER); // TODO: deprecated
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);

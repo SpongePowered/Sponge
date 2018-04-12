@@ -30,24 +30,24 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.common.server.ServerInternal;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+
 public class SpongeTaskBuilder implements Task.Builder {
 
-    private final SpongeScheduler scheduler;
-    private Consumer<Task> consumer;
-    private ScheduledTask.TaskSynchronicity syncType;
-    private String name;
+    @Nullable private Consumer<Task> consumer;
+    private ScheduledTask.TaskSynchronicity syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
+    @Nullable private String name;
     private long delay; //nanoseconds or ticks
     private long interval; //nanoseconds or ticks
     private boolean delayIsTicks;
     private boolean intervalIsTicks;
 
-    public SpongeTaskBuilder(SpongeScheduler scheduler) {
-        this.scheduler = scheduler;
-        this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
+    public SpongeTaskBuilder() {
     }
 
     @Override
@@ -102,15 +102,13 @@ public class SpongeTaskBuilder implements Task.Builder {
     }
 
     @Override
-    public Task submit(Object plugin) {
-        PluginContainer pluginContainer = this.scheduler.checkPluginInstance(plugin);
+    public Task build() {
+        return this.buildInternal(null, null);
+    }
+
+    private ScheduledTask buildInternal(@Nullable final PluginContainer plugin, @Nullable final String name) {
         checkState(this.consumer != null, "Runnable task not set");
-        String name;
-        if (this.name == null) {
-            name = this.scheduler.getNameFor(pluginContainer, this.syncType);
-        } else {
-            name = this.name;
-        }
+
         long delay = this.delay;
         long interval = this.interval;
         boolean delayIsTicks = this.delayIsTicks;
@@ -120,8 +118,16 @@ public class SpongeTaskBuilder implements Task.Builder {
             interval = intervalIsTicks ? interval * SpongeScheduler.TICK_DURATION_NS : interval;
             delayIsTicks = intervalIsTicks = false;
         }
-        ScheduledTask task = new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, pluginContainer);
-        this.scheduler.submit(task);
+
+        return new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, plugin);
+    }
+
+    @Override
+    public Task submit(final Object plugin) {
+        final SpongeScheduler scheduler = ServerInternal.SCHEDULER;
+        final PluginContainer container = scheduler.checkPluginInstance(plugin);
+        final ScheduledTask task = this.buildInternal(container, this.name != null ? this.name : scheduler.getNameFor(container, this.syncType));
+        scheduler.submit(task);
         return task;
     }
 

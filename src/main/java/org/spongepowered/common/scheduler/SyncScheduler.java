@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.scheduler;
 
+import org.spongepowered.api.Platform;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
@@ -32,8 +33,8 @@ public class SyncScheduler extends SchedulerBase {
     // The number of ticks elapsed since this scheduler began.
     private volatile long counter = 0L;
 
-    SyncScheduler() {
-        super(ScheduledTask.TaskSynchronicity.SYNCHRONOUS);
+    SyncScheduler(final Platform.Type platform) {
+        super(platform, ScheduledTask.TaskSynchronicity.SYNCHRONOUS);
     }
 
     /**

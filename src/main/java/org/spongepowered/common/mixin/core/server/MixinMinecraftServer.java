@@ -63,6 +63,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
@@ -93,8 +94,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -107,6 +108,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.server.ServerInternal;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -123,7 +125,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -757,7 +758,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public boolean isMainThread() {
+    public boolean onMainThread() {
         return this.serverThread == Thread.currentThread();
     }
 
@@ -788,5 +789,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
         report.makeCategory("Sponge PhaseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
+    }
+
+    @Override
+    public Scheduler getScheduler() {
+        return ServerInternal.SCHEDULER;
     }
 }

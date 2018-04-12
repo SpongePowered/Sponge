@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.scheduler;
 
+import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,11 +49,11 @@ public class AsyncScheduler extends SchedulerBase {
     // The dynamic thread pooling executor of asynchronous tasks.
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    AsyncScheduler() {
-        super(ScheduledTask.TaskSynchronicity.ASYNCHRONOUS);
+    AsyncScheduler(final Platform.Type platform) {
+        super(platform, ScheduledTask.TaskSynchronicity.ASYNCHRONOUS);
 
         Thread thread = new Thread(AsyncScheduler.this::mainLoop);
-        thread.setName("Sponge Async Scheduler Thread");
+        thread.setName("Sponge " + StringUtils.capitalize(platform.name().toLowerCase(Locale.ENGLISH)) + " Async Scheduler Thread");
         thread.setDaemon(true);
         thread.start();
     }

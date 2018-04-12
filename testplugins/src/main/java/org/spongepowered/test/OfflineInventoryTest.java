@@ -82,7 +82,7 @@ public class OfflineInventoryTest {
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player player) {
         UUID uuid = player.getUniqueId();
         if (receiveDiamonds.remove(uuid)) {
-            Sponge.getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
+            Sponge.getServer().getScheduler().createTaskBuilder().delayTicks(20).execute(() -> this.run(uuid)).submit(this);
         }
     }
 

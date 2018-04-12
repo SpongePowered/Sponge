@@ -234,6 +234,7 @@ import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorObjectRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
+import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
@@ -310,7 +311,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(RangeAgentAITask.Builder.class, SpongeRangeAgentAIBuilder::new)
             .registerBuilderSupplier(LookIdleAITask.Builder.class, SpongeLookIdleAIBuilder::new)
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-            .registerBuilderSupplier(Task.Builder.class, () -> Sponge.getScheduler().createTaskBuilder())
+            .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
             .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
             .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
             .registerBuilderSupplier(ChorusFlower.Builder.class, ChorusFlowerBuilder::new)

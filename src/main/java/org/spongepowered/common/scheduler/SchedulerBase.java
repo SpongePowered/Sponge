@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import co.aikar.timings.TimingsManager;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
@@ -45,8 +46,8 @@ abstract class SchedulerBase {
     private long sequenceNumber = 0L;
     private final String taskNameFmt;
 
-    protected SchedulerBase(ScheduledTask.TaskSynchronicity type) {
-        this.taskNameFmt = "%s-" + (type == ScheduledTask.TaskSynchronicity.SYNCHRONOUS ? "S" : "A") + "-%d";
+    protected SchedulerBase(final Platform.Type platform, final ScheduledTask.TaskSynchronicity type) {
+        this.taskNameFmt = "%s-" + platform.name().charAt(0) + '-' + (type == ScheduledTask.TaskSynchronicity.SYNCHRONOUS ? "S" : "A") + "-%d";
     }
 
     protected String nextName(PluginContainer plugin) {

@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.base.MoreObjects;
+import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
-
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 /**
  * An internal representation of a {@link Task} created by a plugin.
@@ -45,14 +47,13 @@ public class ScheduledTask implements Task {
     final long period; //nanoseconds or ticks
     final boolean delayIsTicks;
     final boolean intervalIsTicks;
-    private final PluginContainer owner;
+    @Nullable PluginContainer owner;
     private final Consumer<Task> consumer;
     private long timestamp;
     private ScheduledTaskState state;
     private final UUID id;
-    private final String name;
+    @Nullable String name;
     private final TaskSynchronicity syncType;
-    private final String stringRepresentation;
     private Timing taskTimer;
 
     // Internal Task state. Not for user-service use.
@@ -81,8 +82,8 @@ public class ScheduledTask implements Task {
         }
     }
 
-    ScheduledTask(TaskSynchronicity syncType, Consumer<Task> task, String taskName, long delay, boolean delayIsTicks, long interval,
-            boolean intervalIsTicks, PluginContainer pluginContainer) {
+    ScheduledTask(TaskSynchronicity syncType, Consumer<Task> task, @Nullable String taskName, long delay, boolean delayIsTicks, long interval,
+            boolean intervalIsTicks, @Nullable PluginContainer pluginContainer) {
         // All tasks begin waiting.
         this.setState(ScheduledTaskState.WAITING);
         this.offset = delay;
@@ -94,19 +95,21 @@ public class ScheduledTask implements Task {
         this.id = UUID.randomUUID();
         this.name = taskName;
         this.syncType = syncType;
+    }
 
-        this.stringRepresentation = MoreObjects.toStringHelper(this)
-                .add("name", this.name)
-                .add("delay", this.offset)
-                .add("interval", this.period)
-                .add("owner", this.owner)
-                .add("id", this.id)
-                .add("isAsync", this.isAsynchronous())
-                .toString();
+    void submitted(final PluginContainer container, final SpongeScheduler scheduler) {
+        if (this.owner == null) {
+            this.owner = container;
+        }
+
+        if (this.name == null) {
+            this.name = scheduler.getNameFor(this.owner, this.syncType);
+        }
     }
 
     @Override
     public PluginContainer getOwner() {
+        checkState(this.owner != null, "The task has not been submitted to a scheduler yet");
         return this.owner;
     }
 
@@ -148,6 +151,7 @@ public class ScheduledTask implements Task {
 
     @Override
     public String getName() {
+        checkState(this.name != null, "The task has not been submitted to a scheduler yet");
         return this.name;
     }
 
@@ -188,7 +192,14 @@ public class ScheduledTask implements Task {
 
     @Override
     public String toString() {
-        return this.stringRepresentation;
+        return MoreObjects.toStringHelper(this)
+                .add("name", this.name)
+                .add("delay", this.offset)
+                .add("interval", this.period)
+                .add("owner", this.owner)
+                .add("id", this.id)
+                .add("isAsync", this.isAsynchronous())
+                .toString();
     }
 
     public enum TaskSynchronicity {

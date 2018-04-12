@@ -263,7 +263,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause);
         // Double check that the PhaseTracker is already capturing the Death phase
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
             if (!this.world.isRemote) {
                 final PhaseData peek = phaseTracker.getCurrentPhaseData();

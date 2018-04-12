@@ -36,6 +36,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
+import org.spongepowered.common.server.ServerInternal;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Collection;
@@ -132,7 +133,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     private <T> CompletableFuture<T> submitTask(Callable<T> callable) {
-        return SpongeImpl.getScheduler().submitAsyncTask(callable);
+        return ServerInternal.SCHEDULER.submitAsyncTask(callable);
     }
 
 }

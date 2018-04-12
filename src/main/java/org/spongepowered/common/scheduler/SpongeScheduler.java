@@ -28,8 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -50,23 +49,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Singleton
 public class SpongeScheduler implements Scheduler {
 
     public static final int TICK_DURATION_MS = 50;
     public static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS.convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
-    private final AsyncScheduler asyncScheduler = new AsyncScheduler();
-    private final SyncScheduler syncScheduler = new SyncScheduler();
+    private final AsyncScheduler asyncScheduler;
+    private final SyncScheduler syncScheduler;
     private final PluginManager pluginManager;
 
-    @Inject
-    private SpongeScheduler(PluginManager pluginManager) {
+    public SpongeScheduler(final Platform.Type platform, final PluginManager pluginManager) {
         this.pluginManager = pluginManager;
-    }
-
-    @Override
-    public Task.Builder createTaskBuilder() {
-        return new SpongeTaskBuilder(this);
+        this.asyncScheduler = new AsyncScheduler(platform);
+        this.syncScheduler = new SyncScheduler(platform);
     }
 
     @Override
@@ -140,6 +134,12 @@ public class SpongeScheduler implements Scheduler {
     @Override
     public SpongeExecutorService createAsyncExecutor(Object plugin) {
         return new TaskExecutorService(() -> createTaskBuilder().async(), this.asyncScheduler, checkPluginInstance(plugin));
+    }
+
+    @Override
+    public Task submit(final Object plugin, final Task task) {
+        ((ScheduledTask) task).submitted(this.checkPluginInstance(plugin), this);
+        return task;
     }
 
     /**

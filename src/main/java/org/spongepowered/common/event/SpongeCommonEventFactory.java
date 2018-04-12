@@ -754,7 +754,7 @@ public class SpongeCommonEventFactory {
 
         originalMessage = SpongeTexts.toText(entity.getCombatTracker().getDeathMessage());
         formatter.getBody().add(new MessageEvent.DefaultBodyApplier(originalMessage));
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
         // Try-with-resources will not produce an NPE when trying to autoclose the frame if it is null. Client sided
         // checks need to be made here since entities can die on the client world.
         try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {

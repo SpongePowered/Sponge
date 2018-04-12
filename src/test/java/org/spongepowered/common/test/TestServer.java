@@ -30,6 +30,7 @@ import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -258,7 +259,12 @@ public class TestServer implements Server {
     }
 
     @Override
-    public boolean isMainThread() {
+    public Scheduler getScheduler() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean onMainThread() {
         return true;
     }
 }

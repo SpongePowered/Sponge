@@ -72,11 +72,11 @@ import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.server.ServerInternal;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
@@ -1019,7 +1019,7 @@ public final class WorldManager {
             ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);
         }
 
-        final CompletableFuture<Optional<WorldProperties>> future = SpongeImpl.getScheduler().submitAsyncTask(new CopyWorldTask(info, copyName));
+        final CompletableFuture<Optional<WorldProperties>> future = ServerInternal.SCHEDULER.submitAsyncTask(new CopyWorldTask(info, copyName));
         if (worldServer != null) { // World was loaded
             future.thenRun(() -> ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(true));
         }
@@ -1066,7 +1066,7 @@ public final class WorldManager {
         checkNotNull(worldProperties);
         checkArgument(worldPropertiesByWorldUuid.containsKey(worldProperties.getUniqueId()), "World properties not registered!");
         checkState(!worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World not unloaded!");
-        return SpongeImpl.getScheduler().submitAsyncTask(new DeleteWorldTask(worldProperties));
+        return ServerInternal.SCHEDULER.submitAsyncTask(new DeleteWorldTask(worldProperties));
     }
 
     private static class CopyWorldTask implements Callable<Optional<WorldProperties>> {

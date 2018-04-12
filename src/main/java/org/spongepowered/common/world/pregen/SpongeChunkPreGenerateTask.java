@@ -103,7 +103,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             World world, Vector3d center, double diameter, int chunkCount, float tickPercent, int tickInterval, Cause cause,
             List<Consumer<ChunkPreGenerationEvent>> eventListeners) {
 
-        this.scheduler = Sponge.getScheduler();
+        this.scheduler = Sponge.getServer().getScheduler();
         int preferredTickInterval = this.scheduler.getPreferredTickInterval();
 
         this.plugin = plugin;

@@ -387,7 +387,7 @@ public class SpongeEventManager implements EventManager {
 
     @SuppressWarnings("unchecked")
     private boolean post(Event event, List<RegisteredListener<?>> handlers) {
-        if (!Sponge.getServer().isMainThread()) {
+        if (!Sponge.getServer().onMainThread()) {
             // If this event is being posted asynchronously then we don't want
             // to do any timing or cause stack changes
             for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {

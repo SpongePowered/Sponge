@@ -52,7 +52,6 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -90,7 +89,6 @@ public final class SpongeImpl {
     @Inject private static SpongeDataManager dataManager;
     @Inject private static SpongePropertyRegistry propertyRegistry;
 
-    @Inject private static SpongeScheduler scheduler;
     @Inject private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
@@ -144,10 +142,6 @@ public final class SpongeImpl {
 
     public static SpongePropertyRegistry getPropertyRegistry() {
         return check(propertyRegistry);
-    }
-
-    public static SpongeScheduler getScheduler() {
-        return check(scheduler);
     }
 
     public static SpongeCauseStackManager getCauseStackManager() {
@@ -250,6 +244,6 @@ public final class SpongeImpl {
         // Return true when the server isn't yet initialized, this means on a client
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
-        return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
+        return !Sponge.isServerAvailable() || Sponge.getServer().onMainThread();
     }
 }
