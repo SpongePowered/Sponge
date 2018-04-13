@@ -109,6 +109,7 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
@@ -168,6 +169,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -657,10 +659,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
         if (((IMixinContainer) this.openContainer).isInUse()) {
+            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
-                this.closeInventory(); // Cause close event first. So cursor item is not lost.
-                this.openInventory(inventory); // Then open the inventory
+                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    cause.all().forEach(frame::pushCause);
+                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
+                    this.closeInventory(); // Cause close event first. So cursor item is not lost.
+                    this.openInventory(inventory); // Then open the inventory
+                }
             }).submit(SpongeImpl.getPlugin());
             return this.getOpenInventory();
         }
@@ -670,8 +677,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
         if (((IMixinContainer) this.openContainer).isInUse()) {
+            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(this::closeInventory).submit(SpongeImpl.getPlugin());
+            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
+                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    cause.all().forEach(frame::pushCause);
+                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
+                    closeInventory();
+                }
+            }).submit(SpongeImpl.getPlugin());
             return false;
         }
         // Create Close_Window to capture item drops
