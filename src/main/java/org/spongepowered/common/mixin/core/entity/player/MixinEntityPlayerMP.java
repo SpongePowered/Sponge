@@ -691,6 +691,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Create Close_Window to capture item drops
         try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                 .source(this)
+                .packetPlayer(((EntityPlayerMP)(Object) this))
                 .openContainer(this.openContainer)
                 // intentionally missing the lastCursor to not double throw close event
                 .buildAndSwitch()) {
