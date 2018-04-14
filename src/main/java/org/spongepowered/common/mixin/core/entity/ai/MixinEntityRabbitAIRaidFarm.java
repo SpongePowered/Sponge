@@ -28,20 +28,42 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.passive.EntityRabbit;
 import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
 @Mixin(EntityRabbit.AIRaidFarm.class)
 public abstract class MixinEntityRabbitAIRaidFarm extends EntityAIMoveToBlock {
 
+    @Shadow @Final private EntityRabbit rabbit;
+
     public MixinEntityRabbitAIRaidFarm(EntityCreature entityCreature, double a, int b) {
         super(entityCreature, a, b);
     }
 
-    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.creature).canGrief();
+    /**
+     * @author gabizou - April 13th, 2018
+     * @reason Forge changes the gamerule method calls, so the old injection/redirect
+     * would fail in forge environments. This changes the injection to a predictable
+     * place where we still can forcibly call things but still cancel as needed.
+     *
+     * @param cir
+     */
+    @Inject(
+        method = "shouldExecute",
+        at = @At(value = "HEAD"),
+        cancellable = true
+    )
+    private void onCanGrief(CallbackInfoReturnable<Boolean> cir) {
+        if (this.runDelay <= 0) {
+            if (!((IMixinGriefer) this.rabbit).canGrief()) {
+                cir.setReturnValue(false);
+            }
+        }
     }
 }
