@@ -275,9 +275,9 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @param thisEntity
      * @return
      */
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;canPickUpLoot()Z"))
+    @Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;dead:Z"))
     private boolean onCanGrief(EntityLiving thisEntity) {
-        return thisEntity.canPickUpLoot() && ((IMixinGriefer) this).canGrief();
+        return this.dead || ((IMixinGriefer) this).canGrief();
     }
 
     // Data delegated methods

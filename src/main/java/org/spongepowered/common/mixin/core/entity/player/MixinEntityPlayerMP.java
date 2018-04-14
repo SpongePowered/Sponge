@@ -150,6 +150,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -414,20 +415,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return ((IMixinWorldServer) this.world);
     }
 
-    /**
+    /* // gabizou comment - Due to forge changes, this is now required to be injected/overwritten
+       // in either SpongeForge or SpongeVanilla respectively due to the signature change from Forge.
+       // The logic is still being processed as normal in vanilla, just the actual method calls are
+       // per project, and not in common.
      * @author blood - May 30th, 2016
      * @author gabizou - May 31st, 2016 - Update for 1.9.4 changes
      *
      * @reason - adjusted to support {@link MoveEntityEvent.Teleport}
      *
      * @param dimensionId The id of target dimension.
-     */
+     *
     @Nullable
     @Override
     @Overwrite
     public Entity changeDimension(int dimensionId) {
         return EntityUtil.teleportPlayerToDimension((EntityPlayerMP)(Object) this, dimensionId);
     }
+    */
 
     @Override
     public GameProfile getProfile() {

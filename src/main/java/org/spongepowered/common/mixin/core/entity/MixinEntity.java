@@ -882,15 +882,18 @@ public abstract class MixinEntity implements IMixinEntity {
         return entity != null && entity.addPassenger(this);
     }
 
-
-    /**
-     * @author blood - May 28th, 2016
+    /*
+     // gabizou comment - Due to forge changes, this is now required to be injected/overwritten
+     // in either SpongeForge or SpongeVanilla respectively due to the signature change from Forge.
+     // The logic is still being processed as normal in vanilla, just the actual method calls are
+     // per project, and not in common.
+     * @author blood - May 30th, 2016
      * @author gabizou - May 31st, 2016 - Update for 1.9.4
      *
      * @reason - rewritten to support {@link MoveEntityEvent.Teleport.Portal}
      *
      * @param toDimensionId The id of target dimension.
-     */
+     *
     @Nullable
     @Overwrite
     public net.minecraft.entity.Entity changeDimension(int toDimensionId) {
@@ -901,6 +904,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
         return null;
     }
+    */
 
     /**
      * Hooks into vanilla's writeToNBT to call {@link #writeToNbt}.
