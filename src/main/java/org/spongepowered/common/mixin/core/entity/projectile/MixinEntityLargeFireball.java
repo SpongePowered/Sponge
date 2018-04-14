@@ -38,7 +38,10 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinExplosive;
 
@@ -49,15 +52,42 @@ import javax.annotation.Nullable;
 @Mixin(EntityLargeFireball.class)
 public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball, IMixinExplosive {
 
-    private static final String TARGET_NEW_EXPLOSION =
-        "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;";
     private static final int DEFAULT_EXPLOSION_RADIUS = 1;
 
     @Shadow public int explosionPower;
 
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    /**
+     * @author gabizou April 13th, 2018
+     * @reason Due to changes from Forge, we have to redirect or modify the gamerule check,
+     * but since forge doesn't allow us to continue to check the gamerule method call here,
+     * we have to modify the arguments passed in (the two booleans). There may be a better way,
+     * which may include redirecting the world.newExplosion method call instead of modifyargs,
+     * but, it is what it is.
+     * @return
+     */
+    @Redirect(method = "onImpact",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"
+        )
+    )
+    private net.minecraft.world.Explosion onSpongeExplosion(net.minecraft.world.World worldObj, @Nullable Entity nil,
+        double x, double y, double z, float strength, boolean flaming,
+        boolean smoking) {
+        boolean griefer = ((IMixinGriefer) this).canGrief();
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(this);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+            Sponge.getCauseStackManager().pushCause(getShooter());
+            Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
+                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .sourceExplosive(this)
+                .radius(strength)
+                .canCauseFire(flaming && griefer)
+                .shouldPlaySmoke(smoking && griefer)
+                .shouldBreakBlocks(smoking && griefer));
+
+            return ex.orElse(null);
+        }
     }
 
     // Explosive Impl
@@ -74,29 +104,8 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
 
     @Override
     public void detonate() {
-        onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
+        onSpongeExplosion(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
         setDead();
-    }
-
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
-                                                      double x, double y, double z, float strength, boolean flaming,
-                                                      boolean smoking) {
-        boolean griefer = ((IMixinGriefer) this).canGrief();
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(this);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
-            Sponge.getCauseStackManager().pushCause(getShooter());
-            Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
-                .sourceExplosive(this)
-                .radius(strength)
-                .canCauseFire(flaming && griefer)
-                .shouldPlaySmoke(smoking && griefer)
-                .shouldBreakBlocks(smoking && griefer));
-
-            return ex.orElse(null);
-        }
     }
 
 }

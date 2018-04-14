@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.world.GameRules;
@@ -34,13 +35,32 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityEnderman.AITakeBlock.class)
 public abstract class MixinEntityEndermanAITakeBlock extends EntityAIBase {
 
     @Shadow @Final private EntityEnderman enderman; //enderman
 
-    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.enderman).canGrief();
+    /**
+     * @author gabizou - April 13th, 2018
+     *  @reason - Due to Forge's changes, there's no clear redirect or injection
+     *  point where Sponge can add the griefer checks. The original redirect aimed
+     *  at the gamerule check, but this can suffice for now.
+     *
+     * @param entityEnderman
+     * @return
+     */
+    @Redirect(
+        method = "shouldExecute",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/monster/EntityEnderman;getHeldBlockState()Lnet/minecraft/block/state/IBlockState;"
+        )
+    )
+    @Nullable
+    private IBlockState onCanGrief(EntityEnderman entityEnderman) {
+        final IBlockState heldBlockState = entityEnderman.getHeldBlockState();
+        return ((IMixinGriefer) this.enderman).canGrief() ? heldBlockState : null;
     }
 }

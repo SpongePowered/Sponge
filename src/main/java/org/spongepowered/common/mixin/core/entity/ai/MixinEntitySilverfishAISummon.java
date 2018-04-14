@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
+import net.minecraft.block.BlockSilverfish;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntitySilverfish;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,8 +43,25 @@ public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
 
     @Shadow(aliases = "this$0") @Final private EntitySilverfish silverfish;
 
-    @Redirect(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.silverfish).canGrief();
+    /**
+     * @author gabizou - April 13th, 2018
+     * @reason Forge changes the gamerule method calls, so the old injection/redirect
+     * would fail in forge environments. This changes the injection to a predictable
+     * place where we still can forcibly call things but still cancel as needed.
+     *
+     * @param cir
+     */
+    @Redirect(
+        method = "updateTask",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"
+        )
+    )
+    private boolean onCanGrief(World world, BlockPos pos, boolean dropBlock) {
+        final IBlockState blockState = world.getBlockState(pos);
+        return ((IMixinGriefer) this.silverfish).canGrief()
+               ? world.destroyBlock(pos, dropBlock)
+               : world.setBlockState(pos, blockState.getValue(BlockSilverfish.VARIANT).getModelBlock(), 3);
     }
 }
