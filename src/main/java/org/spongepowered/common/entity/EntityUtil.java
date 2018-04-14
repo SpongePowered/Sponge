@@ -145,9 +145,10 @@ public final class EntityUtil {
     public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
 
     /**
-     * Called specifically from {@link MixinEntity#changeDimension(int)} to overwrite
-     * {@link Entity#changeDimension(int)}. This is mostly for debugging
-     * purposes, but as well as ensuring that the phases are entered and exited correctly.
+     * This is mostly for debugging purposes, but as well as ensuring that the phases are entered and exited correctly.
+     *
+     *  <p>Note that this is called only in SpongeVanilla or SpongeForge directly due to changes in signatures
+     *  from Forge.</p>
      *
      * @param mixinEntity The mixin entity being called
      * @param toSuggestedDimension The target dimension id suggested by mods and vanilla alike. The suggested
@@ -156,7 +157,7 @@ public final class EntityUtil {
      * @return The entity, if the teleport was not cancelled or something.
      */
     @Nullable
-    public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension) {
+    public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension, IMixinTeleporter teleporter) {
         final Entity entity = toNative(mixinEntity);
         // handle portal event
         MoveEntityEvent.Teleport.Portal event = handleDisplaceEntityPortalEvent(entity, toSuggestedDimension, null);
@@ -191,12 +192,15 @@ public final class EntityUtil {
      * A relative copy paste of {@link EntityPlayerMP#changeDimension(int)} where instead we direct all processing
      * to the appropriate areas for throwing events and capturing world changes during the transfer.
      *
+     * <p>Note that this is called only in SpongeVanilla or SpongeForge directly due to changes in signatures
+     * from Forge.</p>
+     *
      * @param entityPlayerMP The player being teleported
      * @param suggestedDimensionId The suggested dimension
      * @return The player object, not re-created
      */
     @Nullable
-    public static Entity teleportPlayerToDimension(EntityPlayerMP entityPlayerMP, int suggestedDimensionId) {
+    public static Entity teleportPlayerToDimension(EntityPlayerMP entityPlayerMP, int suggestedDimensionId, IMixinTeleporter teleporter) {
         // Fire teleport event here to support Forge's EntityTravelDimensionEvent
         // This also prevents sending client wrong data if event is cancelled
         WorldServer toWorld = SpongeImpl.getServer().getWorld(suggestedDimensionId);

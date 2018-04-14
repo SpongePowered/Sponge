@@ -31,6 +31,7 @@ import net.minecraft.block.BlockPortal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -533,6 +534,15 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             this.createNetherPortal = true;
         } else {
             this.createNetherPortal = false;
+        }
+    }
+
+    @Override
+    public void placeEntity(net.minecraft.world.World world, Entity entity, float yaw) {
+        if (entity instanceof EntityPlayerMP) {
+            placeInPortal(entity, yaw);
+        } else {
+            placeInExistingPortal(entity, yaw);
         }
     }
 
