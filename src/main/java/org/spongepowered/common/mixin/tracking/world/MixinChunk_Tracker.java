@@ -166,9 +166,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             return getValidatedUser(intKey, notifierIndex);
         } else {
             final short shortKey = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(shortKey) != null) {
-                PlayerTracker tracker = this.trackedShortBlockPositions.get(shortKey);
-                final int notifierIndex = tracker.ownerIndex;
+            final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
+            if (shortTracker != null) {
+                final int notifierIndex = shortTracker.ownerIndex;
                 return getValidatedUser(shortKey, notifierIndex);
             }
         }
@@ -200,14 +200,12 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         final int intKey = blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
-            final int notifierIndex = intTracker.notifierIndex;
-            return getValidatedUser(intKey, notifierIndex);
+            return getValidatedUser(intKey, intTracker.notifierIndex);
         } else {
             final short shortKey = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(shortKey) != null) {
-                PlayerTracker tracker = this.trackedShortBlockPositions.get(shortKey);
-                final int notifierIndex = tracker.notifierIndex;
-                return getValidatedUser(shortKey, notifierIndex);
+            final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
+            if (shortTracker != null) {
+                return getValidatedUser(shortKey, shortTracker.notifierIndex);
             }
         }
 
@@ -219,14 +217,12 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         final int key = blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
         if (intTracker != null) {
-            final int ownerIndex = intTracker.notifierIndex;
-            return getValidatedUUID(key, ownerIndex);
+            return getValidatedUUID(key, intTracker.notifierIndex);
         } else {
             final short shortKey = blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
-                final int ownerIndex = shortTracker.notifierIndex;
-                return getValidatedUUID(shortKey, ownerIndex);
+                return getValidatedUUID(shortKey, shortTracker.notifierIndex);
             }
         }
 
@@ -286,9 +282,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     public void setBlockNotifier(BlockPos pos, @Nullable UUID uuid) {
         if (pos.getY() <= 255) {
             short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                this.trackedShortBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
-                                                                              ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+            final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(blockPos);
+            if (shortTracker != null) {
+                shortTracker.notifierIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedShortBlockPositions.put(blockPos,
                         new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
@@ -296,9 +292,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         } else {
             int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                this.trackedIntBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
-                                                                            ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
+            final PlayerTracker intTracker = this.trackedIntBlockPositions.get(blockPos);
+            if (intTracker != null) {
+                intTracker.notifierIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedIntBlockPositions.put(blockPos,
                         new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid),
@@ -312,18 +308,18 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     public void setBlockCreator(BlockPos pos, @Nullable UUID uuid) {
         if (pos.getY() <= 255) {
             short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                this.trackedShortBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
-                        .getIndexForUniqueId(uuid);
+            final PlayerTracker shortTracker = this.trackedShortBlockPositions.get(blockPos);
+            if (shortTracker != null) {
+                shortTracker.ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
                         .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         } else {
             int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                this.trackedIntBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
-                        .getIndexForUniqueId(uuid);
+            final PlayerTracker intTracker = this.trackedIntBlockPositions.get(blockPos);
+            if (intTracker != null) {
+                intTracker.ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo()).getIndexForUniqueId(uuid);
             } else {
                 this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.world.getWorldInfo())
                         .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
