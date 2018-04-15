@@ -31,6 +31,7 @@ import net.minecraft.entity.ai.EntityAIDoorInteract;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
@@ -41,6 +42,7 @@ public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {
     public MixinEntityAIBreakDoor(EntityLiving entityLiving) {
         super(entityLiving);
     }
+
 
     /**
      * @author gabizou - April 13th, 2018
@@ -56,7 +58,7 @@ public abstract class MixinEntityAIBreakDoor extends EntityAIDoorInteract {
         )
     )
     private boolean spongeShouldExecuteForGriefer(EntityAIDoorInteract entityAIDoorInteract) {
-        return entityAIDoorInteract.shouldExecute() && ((IMixinGriefer) this.entity).canGrief();
+        return super.shouldExecute() && ((IMixinGriefer) this.entity).canGrief();
 
     }
 }
