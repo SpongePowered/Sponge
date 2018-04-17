@@ -1912,7 +1912,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 return false;
             }
 
-            IMixinChunk currentRow = (IMixinChunk) currentColumn.getNeighborChunk(1);
+            IMixinChunk currentRow = currentColumn;
             for (int j = zStart; j <= zEnd; j++) {
                 if (currentRow == null) {
                     return false;
