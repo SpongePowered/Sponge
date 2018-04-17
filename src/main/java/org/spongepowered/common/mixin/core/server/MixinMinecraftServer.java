@@ -141,7 +141,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private Thread serverThread;
     @Shadow @Final private DataFixer dataFixer;
 
-    @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void sendMessage(ITextComponent message);
     @Shadow public abstract void initiateShutdown();
     @Shadow public abstract boolean isServerInOnlineMode();
@@ -333,6 +332,39 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         this.getPlayerList().setPlayerManager(this.worlds);
         this.setDifficultyForAllWorlds(this.getDifficulty());
+    }
+
+    /**
+     * @author blood - April 17th, 2018
+     *
+     * Avoids overwriting difficulty and allowed spawntype settings to support multi-world properties.
+     * @reason Add multiworld support
+     */
+    @Overwrite
+    public void setDifficultyForAllWorlds(EnumDifficulty difficulty)
+    {
+        for (WorldServer worldserver1 : this.worlds)
+        {
+            if (worldserver1 != null)
+            {
+                if (worldserver1.getWorldInfo().isHardcoreModeEnabled())
+                {
+                    worldserver1.getWorldInfo().setDifficulty(EnumDifficulty.HARD);
+                    worldserver1.setAllowedSpawnTypes(true, true);
+                }
+                /* Ignore below as we allow difficulty and spawntypes settings per world
+                else if (this.isSinglePlayer())
+                {
+                    worldserver1.getWorldInfo().setDifficulty(difficulty);
+                    worldserver1.setAllowedSpawnTypes(worldserver1.getDifficulty() != EnumDifficulty.PEACEFUL, true);
+                }
+                else
+                {
+                    worldserver1.getWorldInfo().setDifficulty(difficulty);
+                    worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
+                }*/
+            }
+        }
     }
 
     /**
