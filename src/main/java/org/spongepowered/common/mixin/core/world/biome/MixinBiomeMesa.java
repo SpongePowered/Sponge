@@ -52,9 +52,11 @@ public abstract class MixinBiomeMesa extends MixinBiome {
 
     @Shadow @Final private boolean brycePillars;
     @Shadow @Final private boolean hasForest;
+    private boolean vanillaCompat = true;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+        this.vanillaCompat = false;
         gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.brycePillars, this.hasForest));
         super.buildPopulators(world, gensettings);
         String s = world.getWorldInfo().getGeneratorOptions();
@@ -95,7 +97,9 @@ public abstract class MixinBiomeMesa extends MixinBiome {
      */
     @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") , cancellable = true)
     public void genTerrainBlocks(World world, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise, CallbackInfo ci) {
-        ci.cancel();
+        if (this.vanillaCompat) {
+            ci.cancel();
+        }
     }
 
 }
