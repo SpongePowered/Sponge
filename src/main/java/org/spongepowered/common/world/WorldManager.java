@@ -498,9 +498,10 @@ public final class WorldManager {
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.WORLD_UNLOAD.createPhaseContext().source(worldServer).buildAndSwitch()) {
 
-            if (SpongeImpl.postEvent(
-                SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
-                    worldServer))) {
+            final boolean isCancelled = SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause
+              (), (org.spongepowered.api.world.World) worldServer));
+
+            if (server.isServerRunning() && isCancelled) {
                 return false;
             }
 
