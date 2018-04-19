@@ -214,8 +214,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (settings == null) {
             if (SpongeGenerationPopulator.class.isInstance(this.baseGenerator)) {
                 // If the base generator was mod provided then we assume that it
-                // will handle its own
-                // generation so we don't add the base game's generation
+                // will handle its own generation so we don't add the base game's generation
                 settings = new SpongeBiomeGenerationSettings();
             } else {
                 settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
@@ -474,22 +473,31 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public boolean isInsideStructure(World worldIn, String structureName, BlockPos position) {
         Class<? extends MapGenStructure> target = null;
-        if ("Stronghold".equals(structureName)) {
-            target = MapGenStronghold.class;
-        } else if ("Mansion".equals(structureName)) {
-            target = WoodlandMansion.class;
-        } else if ("Monument".equals(structureName)) {
-            target = StructureOceanMonument.class;
-        } else if ("Village".equals(structureName)) {
-            target = MapGenVillage.class;
-        } else if ("Mineshaft".equals(structureName)) {
-            target = MapGenMineshaft.class;
-        } else if ("Temple".equals(structureName)) {
-            target = MapGenScatteredFeature.class;
-        } else if ("Fortress".equals(structureName)) {
-            target = MapGenNetherBridge.class;
-        } else if ("EndCity".equals(structureName)) {
-            target = MapGenEndCity.class;
+        switch (structureName) {
+            case "Stronghold":
+                target = MapGenStronghold.class;
+                break;
+            case "Mansion":
+                target = WoodlandMansion.class;
+                break;
+            case "Monument":
+                target = StructureOceanMonument.class;
+                break;
+            case "Village":
+                target = MapGenVillage.class;
+                break;
+            case "Mineshaft":
+                target = MapGenMineshaft.class;
+                break;
+            case "Temple":
+                target = MapGenScatteredFeature.class;
+                break;
+            case "Fortress":
+                target = MapGenNetherBridge.class;
+                break;
+            case "EndCity":
+                target = MapGenEndCity.class;
+                break;
         }
         if (target != null) {
             for (GenerationPopulator gen : this.genpop) {
