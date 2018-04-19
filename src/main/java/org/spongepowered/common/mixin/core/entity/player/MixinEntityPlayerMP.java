@@ -137,7 +137,10 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -147,6 +150,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -204,6 +208,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -410,20 +415,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return ((IMixinWorldServer) this.world);
     }
 
-    /**
+    /* // gabizou comment - Due to forge changes, this is now required to be injected/overwritten
+       // in either SpongeForge or SpongeVanilla respectively due to the signature change from Forge.
+       // The logic is still being processed as normal in vanilla, just the actual method calls are
+       // per project, and not in common.
      * @author blood - May 30th, 2016
      * @author gabizou - May 31st, 2016 - Update for 1.9.4 changes
      *
      * @reason - adjusted to support {@link MoveEntityEvent.Teleport}
      *
      * @param dimensionId The id of target dimension.
-     */
+     *
     @Nullable
     @Override
     @Overwrite
     public Entity changeDimension(int dimensionId) {
         return EntityUtil.teleportPlayerToDimension((EntityPlayerMP)(Object) this, dimensionId);
     }
+    */
 
     @Override
     public GameProfile getProfile() {
@@ -1251,5 +1260,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         throw new UnsupportedOperationException("This is an internal method not intended for use with Players " +
                 "as it causes the player to be placed into an undefined state. " +
                 "Consider putting them through the normal death process instead.");
+    }
+
+    @Override
+    public Optional<UUID> getWorldUniqueId() {
+        return Optional.of(this.getWorld().getUniqueId());
+    }
+
+    @Override
+    public boolean setLocation(Vector3d position, UUID world) {
+        WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
+        World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
+        return this.setLocation(new Location<>(loaded, position));
     }
 }

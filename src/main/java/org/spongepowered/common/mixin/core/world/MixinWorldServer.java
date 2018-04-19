@@ -458,7 +458,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
 
-        SpongeWorldGenerator newGenerator = createWorldGenerator(generatorSettings);
+        SpongeWorldGenerator newGenerator = this.createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
@@ -477,7 +477,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             modifier.modifyWorldGenerator(this.getProperties(), generatorSettings, newGenerator);
         }
 
-        this.spongegen = createChunkGenerator(newGenerator);
+        this.spongegen = this.createChunkGenerator(newGenerator);
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
@@ -783,11 +783,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posZ = fromPos.getZ();
         }
         final net.minecraft.world.chunk.Chunk chunk = this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
-        if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
-            return false;
-        }
-
-        return true;
+        return chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded();
     }
 
     /**
@@ -846,7 +842,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             SpongeImpl.getLogger().error("Original caught error:", category.crashReport.cause);
             throw new ReportedException(category.crashReport);
         }
-
     }
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
@@ -901,11 +896,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
     private boolean onTicktick(IChunkProvider chunkProvider) {
         // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
-        if (this.chunkGCTickInterval > 0) {
-            return false;
-        }
-
-        return chunkProvider.tick();
+        return this.chunkGCTickInterval <= 0 && chunkProvider.tick();
     }
 
     // Chunk GC
@@ -1343,6 +1334,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void neighborChanged(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
+        final Chunk chunk =
+                ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(otherPos.getX() >> 4, otherPos.getZ() >>
+                        4);
+
+        // Don't let neighbor updates trigger a chunk load ever
+        if (chunk == null) {
+            return;
+        }
+
         PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos, blockIn, otherPos);
     }
 
@@ -1354,6 +1354,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
         if (!isValid(pos)) {
+            return;
+        }
+
+        final Chunk chunk =
+                ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >>
+                        4);
+
+        // Don't let neighbor updates trigger a chunk load ever
+        if (chunk == null) {
             return;
         }
 
@@ -1383,6 +1392,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType, boolean updateObserverBlocks) {
         if (!isValid(pos)) {
+            return;
+        }
+
+        final Chunk chunk =
+                ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+
+        // Don't let neighbor updates trigger a chunk load ever
+        if (chunk == null) {
             return;
         }
 
@@ -1578,7 +1595,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.builder.notifier(notifier.get());
         }
         if (state.getBlock() instanceof ITileEntityProvider) {
-            net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
+            // We MUST only check to see if a TE exists to avoid creating a new one.
+            final net.minecraft.tileentity.TileEntity te = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             if (te != null) {
                 TileEntity tile = (TileEntity) te;
                 for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tile).getCustomManipulators()) {
@@ -1940,11 +1958,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Overwrite
     protected boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
         final IMixinChunk spongeChunk = (IMixinChunk) this.mixinChunkProviderServer.getLoadedChunkWithoutMarkingActive(x, z);
-        if (spongeChunk == null || (spongeChunk.isQueuedForUnload() && !spongeChunk.isPersistedChunk())) {
-            return false;
-        }
-
-        return true;
+        return spongeChunk != null && (!spongeChunk.isQueuedForUnload() || spongeChunk.isPersistedChunk());
     }
 
     @Override
@@ -2077,6 +2091,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private void onEndUpdatePortal(CallbackInfo ci) {
         this.timings.doPortalForcer.stopTiming();
     }
+
+    /**
+     * Seriously, this was stupid.
+     */
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;add(III)Lnet/minecraft/util/math/BlockPos;"))
+    private BlockPos redirectNeedlessBlockPosObjectCreation(BlockPos pos, int x, int y, int z) {
+        return pos;
+    }
+
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;scheduleUpdate(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;I)V"))
+    private void redirectDontRescheduleBlockUpdates(WorldServer worldServer, BlockPos pos, Block blockIn, int delay) {
+    }
+
     // TIMINGS
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
     private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
@@ -2247,15 +2274,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void setWeather(Weather weather) {
-        if (weather.equals(Weathers.CLEAR)) {
-            this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
-        } else {
-            this.setWeather(weather, 0);
-        }
+        this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
     }
 
     @Override
     public void setWeather(Weather weather, long duration) {
+        this.prevWeather = getWeather();
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
@@ -2277,22 +2301,25 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Inject(method = "updateWeather", at = @At(value = "RETURN"))
-    private void onUpdateWeatherReturn(CallbackInfo ci) {
+    @Inject(method = "updateWeather", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;prevRainingStrength:F"), cancellable = true)
+    private void onAccessPreviousRain(CallbackInfo ci) {
         final Weather weather = getWeather();
         int duration = (int) getRemainingDuration();
-        if (this.prevWeather != weather && duration > 0) {
+        if (!weather.equals(this.prevWeather) && duration > 0) {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 final ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(frame.getCurrentCause(), duration, duration,
                         weather, weather, this.prevWeather, this);
                 if (Sponge.getEventManager().post(event)) {
                     this.setWeather(this.prevWeather);
+                    this.prevWeather = getWeather();
+                    ci.cancel();
                 } else {
                     if (!weather.equals(event.getWeather()) || duration != event.getDuration()) {
                         this.setWeather(event.getWeather(), event.getDuration());
-                        this.prevWeather = event.getWeather();
                         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+                    } else {
+                        this.prevWeather = event.getWeather();
                     }
                 }
             }
@@ -2352,9 +2379,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("LevelName", this.worldInfo.getWorldName())
-                .add("DimensionId", this.provider.getDimensionType().getId())
+                .add("Name", this.worldInfo.getWorldName())
+                .add("DimensionId", ((IMixinWorldServer) this).getDimensionId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
+                .add("DimensionTypeId", this.provider.getDimensionType().getId())
                 .toString();
     }
 }

@@ -24,15 +24,19 @@
  */
 package org.spongepowered.common.interfaces.network;
 
-import net.minecraft.network.play.server.SPacketResourcePackSend;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Deque;
+import javax.annotation.Nullable;
 
 public interface IMixinNetHandlerPlayServer {
 
-    Deque<SPacketResourcePackSend> getPendingResourcePackQueue();
+    @Nullable
+    ResourcePack popReceivedResourcePack(boolean markAccepted);
+
+    @Nullable
+    ResourcePack popAcceptedResourcePack();
 
     void resendLatestResourcePackRequest();
 

@@ -58,7 +58,7 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
         final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
         // TODO pass player for carrier to EquipmentInventory
-        final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots);
+        final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots, true);
         base += EQUIPMENT; // 4
         final MainPlayerInventoryLensImpl main = new MainPlayerInventoryLensImpl(base, slots, true);
         base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH + HOTBAR * INVENTORY_WIDTH; // 9

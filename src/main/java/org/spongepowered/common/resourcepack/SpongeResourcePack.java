@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.resourcepack;
 
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.resourcepack.ResourcePack;
 
 import java.net.URI;
@@ -54,6 +55,11 @@ public abstract class SpongeResourcePack implements ResourcePack {
     @Override
     public Optional<String> getHash() {
         return this.hash;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("id", this.getId()).add("uri", this.getUri()).toString();
     }
 
     public static SpongeResourcePack create(String uri, String hash) throws URISyntaxException {

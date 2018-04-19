@@ -26,12 +26,16 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
@@ -42,7 +46,7 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
 
     @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    protected float onAttackEntityFrom(float amount) {
+    private float onSpongeAttackEntityFrom(float amount) {
         return this.damage;
     }
 
@@ -68,8 +72,27 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
         compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
     }
 
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+
+    /**
+     * @author gabizou - April 13th, 2018
+     * @reason Due to changes from Forge removing the calls for gamerules, this is
+     * the most simplest logical boolean operator we can redirect while avoiding
+     * complicated injectors that may not end up working. For a more precise point
+     * of where this is redirectiong, refer to the mixin issue.
+     *
+     * @see <a href="https://github.com/SpongePowered/Mixin/issues/250"/>
+     * @param world
+     * @param pos
+     * @return
+     */
+    @Redirect(
+        method = "onImpact",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;isAirBlock(Lnet/minecraft/util/math/BlockPos;)Z"
+        )
+    )
+    private boolean onCanGrief(World world, BlockPos pos) {
+        return ((IMixinGriefer) this).canGrief() && world.isAirBlock(pos);
     }
 }

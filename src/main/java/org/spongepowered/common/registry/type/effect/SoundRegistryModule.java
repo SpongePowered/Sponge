@@ -42,7 +42,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class SoundRegistryModule implements AdditionalCatalogRegistryModule<SoundType>, AlternateCatalogRegistryModule<SoundType> {
+import javax.annotation.Nullable;
+
+public final class SoundRegistryModule implements AdditionalCatalogRegistryModule<SoundType> {
 
     @RegisterCatalog(SoundTypes.class)
     private final Map<String, SoundType> soundMappings = Maps.newHashMap();
@@ -52,18 +54,10 @@ public final class SoundRegistryModule implements AdditionalCatalogRegistryModul
     }
 
     @Override
-    public Map<String, SoundType> provideCatalogMap() {
-        Map<String, SoundType> soundTypeMap = new HashMap<>();
-        for (Map.Entry<String, SoundType> entry : this.soundMappings.entrySet()) {
-            soundTypeMap.put(entry.getKey().replace("minecraft:", "").replace('.', '_'), entry.getValue());
-        }
-        return soundTypeMap;
-    }
-
-    @Override
     public void registerDefaults() {
         for (ResourceLocation key: SoundEvent.REGISTRY.getKeys()) {
             this.soundMappings.put(key.toString(), (SoundType) SoundEvent.REGISTRY.getObject(key));
+            this.soundMappings.put(key.toString().replace('.', '_'), (SoundType) SoundEvent.REGISTRY.getObject(key));
         }
     }
 
@@ -73,7 +67,16 @@ public final class SoundRegistryModule implements AdditionalCatalogRegistryModul
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.soundMappings.get(id.toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.getInternal(id.toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Nullable
+    private SoundType getInternal(final String id) {
+        final SoundType sound = this.soundMappings.get(id);
+        if (sound != null) {
+            return sound;
+        }
+        return this.soundMappings.get(id.replace('_', '.'));
     }
 
     @Override

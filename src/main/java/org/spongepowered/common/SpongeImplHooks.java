@@ -401,6 +401,10 @@ public final class SpongeImplHooks {
         return null;
     }
 
+    public static void onTileEntityInvalidate(TileEntity te) {
+        te.invalidate();
+    }
+
     public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
         EntityItem entityitem) {
         phaseContext.getCapturedEntityItemDropSupplier().get().put(owner.getUniqueID(), entityitem);

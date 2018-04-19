@@ -207,7 +207,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean hasWhitelist() {
-        return this.getPlayerList().isWhiteListEnabled();
+        return this.getPlayerList().whiteListEnforced;
     }
 
     @Override
@@ -314,28 +314,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         initiateShutdown();
     }
 
-    @Inject(method = "stopServer()V", at = @At("HEAD"))
-    public void onServerStopping(CallbackInfo ci) {
-        ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
-
-        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
-                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
-            for (WorldServer world : this.worlds) {
-                ((IMixinWorldServer) world).getLightingExecutor().shutdown();
-            }
-
-            for (WorldServer world : this.worlds) {
-                try {
-                    ((IMixinWorldServer) world).getLightingExecutor().awaitTermination(1, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    ((IMixinWorldServer) world).getLightingExecutor().shutdownNow();
-                }
-            }
-        }
-    }
-
     /**
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
@@ -355,7 +333,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         this.getPlayerList().setPlayerManager(this.worlds);
         this.setDifficultyForAllWorlds(this.getDifficulty());
-        this.initialWorldChunkLoad();
     }
 
     /**
@@ -435,11 +412,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         // API is not allowed to unload overworld
-        if (((IMixinWorldServer) world).getDimensionId() == 0) {
-            return false;
-        }
+        return ((IMixinWorldServer) world).getDimensionId() != 0 && WorldManager.unloadWorld((WorldServer) world, false);
 
-        return WorldManager.unloadWorld((WorldServer) world, false);
     }
 
     @SuppressWarnings("unchecked")

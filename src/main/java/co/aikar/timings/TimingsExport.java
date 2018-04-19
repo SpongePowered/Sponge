@@ -48,7 +48,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.SpongeEntityType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -164,7 +163,7 @@ class TimingsExport extends Thread {
                     if (entityType == EntityTypes.UNKNOWN) {
                         return null;
                     }
-                    return JSONUtil.singleObjectPair(((SpongeEntityType) entityType).entityTypeId, entityType.getId());
+                    return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getId());
                 })));
 
         // Information about loaded plugins

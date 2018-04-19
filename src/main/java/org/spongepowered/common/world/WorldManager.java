@@ -72,6 +72,7 @@ import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -94,6 +95,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -495,9 +497,10 @@ public final class WorldManager {
             .source(worldServer)
             .buildAndSwitch()) {
 
-            if (SpongeImpl.postEvent(
-                SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
-                    worldServer))) {
+            final boolean isCancelled = SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause
+              (), (org.spongepowered.api.world.World) worldServer));
+
+            if (server.isServerRunning() && isCancelled) {
                 return false;
             }
 
@@ -508,8 +511,9 @@ public final class WorldManager {
                 // Don't save if server is stopping to avoid duplicate saving.
                 if (server.isServerRunning()) {
                     saveWorld(worldServer, true);
-                    mixinWorldServer.getActiveConfig().save();
                 }
+
+                mixinWorldServer.getActiveConfig().save();
             } catch (MinecraftException e) {
                 e.printStackTrace();
             } finally {
@@ -520,7 +524,7 @@ public final class WorldManager {
                 reorderWorldsVanillaFirst();
             }
 
-            if (!server.isServerRunning()) {
+            if (server.isServerRunning()) {
                 unregisterDimension(dimensionId);
             }
 
@@ -620,6 +624,9 @@ public final class WorldManager {
 
         final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
                         properties));
+
+        // Set the worlds on the Minecraft server
+        reorderWorldsVanillaFirst();
 
         return Optional.of(worldServer);
     }
@@ -762,6 +769,9 @@ public final class WorldManager {
             SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
                     (dimensionId).get().getName());
         }
+
+        // Set the worlds on the Minecraft server
+        reorderWorldsVanillaFirst();
     }
 
     public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
@@ -783,8 +793,8 @@ public final class WorldManager {
 
     }
 
-    public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
-            worldSettings) {
+    private static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
+        worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
         final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.profiler);
         worldServer.init();
@@ -806,13 +816,15 @@ public final class WorldManager {
 
         ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
 
-        // Set the worlds on the Minecraft server
-        reorderWorldsVanillaFirst();
-
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(true);
+
+        WorldManager.reorderWorldsVanillaFirst();
+
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.world.World) worldServer));
+            (org.spongepowered.api.world.World) worldServer));
+
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
+
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(false);
         return worldServer;
     }
@@ -830,34 +842,42 @@ public final class WorldManager {
     }
 
     public static void reorderWorldsVanillaFirst() {
-        final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
         final List<WorldServer> sorted = new LinkedList<>();
 
-        int vanillaWorldsCount = 0;
+        List<Integer> vanillaWorldIds = new ArrayList<>();
         WorldServer worldServer = worldByDimensionId.get(0);
 
         if (worldServer != null) {
+            vanillaWorldIds.add(0);
             sorted.add(worldServer);
-            vanillaWorldsCount++;
         }
 
         worldServer = worldByDimensionId.get(-1);
 
         if (worldServer != null) {
+            vanillaWorldIds.add(-1);
             sorted.add(worldServer);
-            vanillaWorldsCount++;
         }
 
         worldServer = worldByDimensionId.get(1);
 
         if (worldServer != null) {
+            vanillaWorldIds.add(1);
             sorted.add(worldServer);
-            vanillaWorldsCount++;
         }
 
-        final List<WorldServer> nonVanillaWorlds = worlds.subList(vanillaWorldsCount, worlds.size());
-        nonVanillaWorlds.sort(WORLD_SERVER_COMPARATOR);
-        sorted.addAll(nonVanillaWorlds);
+        final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
+        final Iterator<WorldServer> iterator = worlds.iterator();
+        while(iterator.hasNext()) {
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) iterator.next();
+            final Integer dimensionId = mixinWorld.getDimensionId();
+            if (vanillaWorldIds.contains(dimensionId)) {
+                iterator.remove();
+            }
+        }
+
+        worlds.sort(WORLD_SERVER_COMPARATOR);
+        sorted.addAll(worlds);
         SpongeImpl.getServer().worlds = sorted.toArray(new WorldServer[sorted.size()]);
     }
 
@@ -865,7 +885,7 @@ public final class WorldManager {
      * Parses a {@link UUID} from disk from other known plugin platforms and sets it on the
      * {@link WorldProperties}. Currently only Bukkit is supported.
      */
-    public static UUID setUuidOnProperties(Path savesRoot, WorldProperties properties) {
+    private static UUID setUuidOnProperties(Path savesRoot, WorldProperties properties) {
         checkNotNull(properties);
 
         UUID uuid;

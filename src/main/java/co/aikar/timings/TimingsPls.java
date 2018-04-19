@@ -22,40 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.properties;
+package co.aikar.timings;
 
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyHelper;
-import org.spongepowered.api.block.trait.BlockTrait;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
-import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.entity.SpongeEntityType;
 
-import java.util.Optional;
+final class TimingsPls {
+    private static final Object2IntMap<EntityType> ENTITY_IDS = new Object2IntOpenHashMap<>();
+    private static final int NOT_FOUND = Integer.MIN_VALUE;
+    private static int nextEntityId = 56991891; // Some random number
 
-/**
- * This is retained solely for simplification not having to perform any
- * lookups to the {@link BlockTypeRegistryModule#getIdFor(IProperty)}.
- *
- * @param <T> The type of comparable
- */
-@Mixin(value = PropertyHelper.class)
-public abstract class MixinPropertyHelper<T extends Comparable<T>> implements BlockTrait<T>, IMixinPropertyHolder {
-
-    private String idString;
-
-    @Override
-    public String getId() {
-        return this.idString;
+    static {
+        ENTITY_IDS.defaultReturnValue(NOT_FOUND);
     }
 
-    @Override
-    public void setId(String id) {
-        this.idString = id;
-    }
-
-    @Override
-    public Optional<T> parseValue(String value) {
-        return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orNull());
+    public static int getEntityId(final EntityType type) {
+        if (type instanceof SpongeEntityType) {
+            return ((SpongeEntityType) type).entityTypeId;
+        }
+        int fake;
+        if ((fake = ENTITY_IDS.getInt(type)) == NOT_FOUND) {
+            fake = nextEntityId++;
+            ENTITY_IDS.put(type, fake);
+        }
+        return fake;
     }
 }

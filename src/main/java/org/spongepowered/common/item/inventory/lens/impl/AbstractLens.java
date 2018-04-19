@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
@@ -173,7 +174,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     public TStack getStack(Fabric<TInventory> inv, int ordinal) {
         LensHandle<TInventory, TStack> lens = this.getLensForOrdinal(ordinal);
         if (lens == null) {
-            return null;
+            return ((TStack) ItemStack.EMPTY);
         }
         return lens.lens.getStack(inv, ordinal - lens.ordinal);
     }

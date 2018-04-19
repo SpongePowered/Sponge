@@ -166,8 +166,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(openContainer);
+            Sponge.getCauseStackManager().pushCause(player);
             final ClickInventoryEvent inventoryEvent;
             inventoryEvent =
                 this

@@ -24,39 +24,35 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
-public final class BlockPhase extends TrackingPhase {
+public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
 
-    public static final class State {
-        public static final IPhaseState<?> BLOCK_DECAY = new BlockDecayPhaseState();
-        public static final IPhaseState<?> RESTORING_BLOCKS = new RestoringBlockPhaseState();
-        public static final IPhaseState<?> DISPENSE = new DispensePhaseState();
-        public static final IPhaseState<?> BLOCK_DROP_ITEMS = new BlockDropItemsPhaseState();
-        public static final IPhaseState<?> TILE_ENTITY_INVALIDATING = new TileEntityInvalidatingPhaseState();
+    @Override
+    public boolean canSwitchTo(IPhaseState<?> state) {
+        return true;
+    }
 
-        /**
-         * Specifically for Forge environments where a TileEntity may need to perform block
-         * changes or entity spawns as a chunk unloads.
-         */
-        public static final IPhaseState<?> TILE_CHUNK_UNLOAD = new TileChunkUnloadState();
-
-        private State() {
-        }
+    @Override
+    public void unwind(GeneralizedContext context) {
 
     }
 
-    public static BlockPhase getInstance() {
-        return Holder.INSTANCE;
+    @Override
+    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
+            BlockPos pos) {
+        return false;
     }
 
-    private BlockPhase() {
+    @Override
+    public boolean tracksBlockSpecificDrops() {
+        return false;
     }
 
-    private static final class Holder {
-        static final BlockPhase INSTANCE = new BlockPhase();
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
     }
-
-
 }

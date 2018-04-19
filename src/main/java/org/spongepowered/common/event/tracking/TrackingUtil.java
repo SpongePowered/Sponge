@@ -70,6 +70,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
@@ -628,7 +629,7 @@ public final class TrackingUtil {
                                                 PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
-        final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
+        // final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
         final CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         final CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = phaseContext.getBlockItemDropSupplier();
         final CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> capturedBlockEntitySpawns = phaseContext.getBlockEntitySpawnSupplier();
@@ -662,33 +663,35 @@ public final class TrackingUtil {
             capturedBlockEntitySpawns.acceptAndRemoveIfPresent(pos, items -> spawnEntitiesForBlock(items, oldBlockSnapshot,
                 phaseContext, phaseState));
 
-            SpongeHooks.logBlockAction(mixinWorldServer.asMinecraftWorld(), oldBlockSnapshot.blockChange, transaction);
+            final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
+            SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
             final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
-            // We call onBlockAdded here for both TE blocks (BlockContainer's) and other blocks.
-            // MixinChunk#setBlockState will only call onBlockAdded for BlockContainers when it's passed a null newBlockSnapshot,
-            // which only happens when capturing is not being done.
+
+            // We call onBlockAdded here for blocks without a TileEntity.
+            // MixinChunk#setBlockState will call onBlockAdded for blocks 
+            // with a TileEntity or when capturing is not being done.
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock()) {
-                newState.getBlock().onBlockAdded(mixinWorldServer.asMinecraftWorld(), pos, newState);
+            if (!SpongeImplHooks.hasBlockTileEntity(newState.getBlock(), newState) && changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock()) {
+                newState.getBlock().onBlockAdded(worldServer, pos, newState);
                 final PhaseData peek = phaseTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
                     ((IPhaseState) peek.state).unwind(peek.context);
                 }
             }
 
-            proxyBlockAccess.proceed();
+            //proxyBlockAccess.proceed();
             ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
             if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
-                mixinWorldServer.asMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
+                worldServer.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
             }
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
                 mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
             } else if (changeFlag.notifyObservers()) {
-                mixinWorldServer.asMinecraftWorld().updateObservingBlocksAt(pos, newState.getBlock());
+                worldServer.updateObservingBlocksAt(pos, newState.getBlock());
             }
 
             final PhaseData peek = phaseTracker.getCurrentPhaseData();

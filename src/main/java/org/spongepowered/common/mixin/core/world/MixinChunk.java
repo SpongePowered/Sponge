@@ -96,6 +96,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -432,7 +434,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public int getHighestYAt(int x, int z) {
-        return this.sponge_world.getHighestYAt(this.x << 4 + (x & 15), this.z << 4 + (z & 15));
+        return this.sponge_world.getHighestYAt((this.x << 4) + (x & 15), (this.z << 4) + (z & 15));
     }
 
     @Override
@@ -634,9 +636,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
         // Sponge end
 
-        extendedblockstorage.set(xPos, yPos & 15, zPos, newState);
-
         // Sponge Start
+        final int modifiedY = yPos & 15;
+        extendedblockstorage.set(xPos, modifiedY, zPos, newState);
+
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseData peek = phaseTracker.getCurrentPhaseData();
+        final boolean requiresCapturing = peek.state.requiresBlockCapturing();
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
@@ -655,16 +661,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
                 if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.world, pos, currentState, newState)) {
-                    // Sponge End
                     this.world.removeTileEntity(pos);
                 }
             }
         }
 
-        if (extendedblockstorage.get(xPos, yPos & 15, zPos).getBlock() != newBlock) {
+        final IBlockState blockAfterSet = extendedblockstorage.get(xPos, modifiedY, zPos);
+        if (blockAfterSet.getBlock() != newBlock) {
             return null;
         }
-        // Sponge Start - Slight modifications
+
         // } else { // Sponge - remove unnecessary else
         if (requiresNewLightCalculations) {
             this.generateSkylightMap();
@@ -690,15 +696,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         if (!this.world.isRemote && currentBlock != newBlock) {
             // Sponge start - Ignore block activations during block placement captures unless it's
-            // a BlockContainer. Prevents blocks such as TNT from activating when
-            // cancelled.
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final PhaseData peek = phaseTracker.getCurrentPhaseData();
-            final boolean requiresCapturing = peek.state.requiresBlockCapturing();
+            // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
-                if (newBlockSnapshot == null && flag.performBlockPhysics()) {
+                if (flag.performBlockPhysics()) {
                     newBlock.onBlockAdded(this.world, pos, newState);
                 }
             }
@@ -715,6 +717,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
                 // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
                 tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
+                final User owner = peek.context.getOwner().orElse(null);
+                // If current owner exists, transfer it to newly created TE pos
+                // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
+                if (owner != null) {
+                    IMixinChunk spongeChunk = (IMixinChunk) this;
+                    spongeChunk.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                }
+                
                 // Sponge End
                 this.world.setTileEntity(pos, tileentity);
             }
@@ -1249,6 +1259,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 }
             }
         }
+    }
+
+    @Redirect(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At(target =
+            "Lnet/minecraft/tileentity/TileEntity;invalidate()V", value = "INVOKE"))
+    private void redirectInvalidate(TileEntity te) {
+        SpongeImplHooks.onTileEntityInvalidate(te);
     }
 
     @Override

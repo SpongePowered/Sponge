@@ -230,8 +230,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @param entitylivingbaseIn The entity living base coming in
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
-    public void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
-        if (ShouldFire.SET_A_I_TARGET_EVENT) {
+    private void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
+        if (!this.world.isRemote && ShouldFire.SET_A_I_TARGET_EVENT) {
             if (entitylivingbaseIn != null) {
                 if (((IMixinEntity) entitylivingbaseIn).isVanished() && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
                     this.attackTarget = null;
@@ -266,9 +266,18 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         return this.attackTarget;
     }
 
-    @Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    /**
+     * @author gabizou - April 11th, 2018
+     * @reason Instead of redirecting the gamerule request, redirecting the dead check
+     * to avoid compatibility issues with Forge's change of the gamerule check to an
+     * event check that doesn't exist in sponge except in the case of griefing data.
+     *
+     * @param thisEntity
+     * @return
+     */
+    @Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;dead:Z"))
+    private boolean onCanGrief(EntityLiving thisEntity) {
+        return this.dead || ((IMixinGriefer) this).canGrief();
     }
 
     // Data delegated methods

@@ -123,6 +123,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         final Vector3d changedPosition = changedLocation.getPosition();
         final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
         final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+        changedMixinChunk.getBlockOwner(changedBlockPos)
+                .ifPresent(owner -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER));
         final User user = TrackingUtil.getNotifierOrOwnerFromBlock(changedLocation);
         if (user != null) {
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);

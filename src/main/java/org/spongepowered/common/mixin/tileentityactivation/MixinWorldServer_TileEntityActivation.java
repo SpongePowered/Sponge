@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.tileentityactivation;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.world.MixinWorld;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -40,9 +42,8 @@ public abstract class MixinWorldServer_TileEntityActivation extends MixinWorld {
         TileEntityActivation.activateTileEntities((WorldServer) (Object) this);
     }
 
-    // TODO 1.12-pre2 I have no fucking clue what this injection is trying to target
-    // updateTileEntity doesn't exist, and it didn't exist in 1.11 either
-    //@Inject(method = "updateTileEntity", at = @At("HEAD"), cancellable = true, remap = false)
+    // Note: This method overrides our updateTileEntity method in MixinWorldServer
+    @Inject(method = "updateTileEntity", at = @At("HEAD"), cancellable = true, remap = false)
     public void onUpdateTileEntityHead(ITickable tile, CallbackInfo ci) {
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);

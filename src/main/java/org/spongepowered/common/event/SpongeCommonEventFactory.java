@@ -963,7 +963,7 @@ public class SpongeCommonEventFactory {
             } else if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
-            if (!clientSource) {
+            if (!clientSource && player.openContainer != null && player.connection != null) {
                 player.closeScreen();
             }
         }
@@ -1132,6 +1132,9 @@ public class SpongeCommonEventFactory {
             return;
         }
         Inventory ordered = inv.query(OrderedInventory.class);
+        if (!(ordered instanceof OrderedInventory)) {
+            ordered = ordered.iterator().next();
+        }
         if (ordered instanceof OrderedInventory) {
             Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
             if (slot.isPresent()) {
@@ -1141,6 +1144,7 @@ public class SpongeCommonEventFactory {
                 captureIn.getCapturedTransactions().add(trans);
             }
         }
+        // else inventory was missing the slot for some reason
     }
 
     /**
@@ -1158,6 +1162,9 @@ public class SpongeCommonEventFactory {
             return transaction.get();
         }
         Inventory ordered = inv.query(OrderedInventory.class);
+        if (!(ordered instanceof OrderedInventory)) {
+            ordered = ordered.iterator().next();
+        }
         if (ordered instanceof OrderedInventory) {
             Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
             if (slot.isPresent()) {

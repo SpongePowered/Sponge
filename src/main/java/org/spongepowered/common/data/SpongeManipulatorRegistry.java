@@ -179,6 +179,13 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     public DataRegistration<?, ?> getRegistrationFor(DataManipulator<?, ?> manipulator) {
         final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator.getClass());
         if (dataRegistration == null) {
+            if (this.tempRegistry != null) {
+                for (SpongeDataRegistration<?, ?> registration : this.tempRegistry.registrations) {
+                    if (registration.getManipulatorClass() == manipulator.getClass()) {
+                        return registration;
+                    }
+                }
+            }
             throw new DataRegistrationNotFoundException("Could not locate a DataRegistration for class " + manipulator.getClass());
         }
         return dataRegistration;
@@ -187,6 +194,13 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     public DataRegistration<?, ?> getRegistrationFor(ImmutableDataManipulator<?, ?> immutable) {
         final DataRegistration<?, ?> dataRegistration = this.immutableRegistrationMap.get(immutable.getClass());
         if (dataRegistration == null) {
+            if (this.tempRegistry != null) {
+                for (SpongeDataRegistration<?, ?> registration : this.tempRegistry.registrations) {
+                    if (registration.getImmutableManipulatorClass() == immutable.getClass()) {
+                        return registration;
+                    }
+                }
+            }
             throw new DataRegistrationNotFoundException("Could not locate a DataRegistration for class " + immutable.getClass());
         }
         return dataRegistration;
@@ -291,9 +305,17 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         if (this.tempRegistry != null) {
             // During soft registrations
             if (DataManipulator.class.isAssignableFrom(mClass)) {
-                return new DataProcessorDelegate(ImmutableList.copyOf(this.tempRegistry.processorMap.get(mClass)));
+                List<DataProcessor<?, ?>> dataProcessors = this.tempRegistry.processorMap.get(mClass);
+                if (dataProcessors == null) {
+                    return null;
+                }
+                return new DataProcessorDelegate(ImmutableList.copyOf(dataProcessors));
             } else {
-                return new DataProcessorDelegate(ImmutableList.copyOf(this.tempRegistry.immutableProcessorMap.get(mClass)));
+                List<DataProcessor<?, ?>> dataProcessors = this.tempRegistry.immutableProcessorMap.get(mClass);
+                if (dataProcessors == null) {
+                    return null;
+                }
+                return new DataProcessorDelegate(ImmutableList.copyOf(dataProcessors));
             }
         }
         return DataManipulator.class.isAssignableFrom(mClass)

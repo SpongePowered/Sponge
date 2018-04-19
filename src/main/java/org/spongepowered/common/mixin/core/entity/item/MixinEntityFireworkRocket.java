@@ -179,11 +179,11 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Redirect(method = "dealExplosionDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;attackEntityFrom"
             + "(Lnet/minecraft/util/DamageSource;F)Z"))
     public boolean useEntitySource(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
-        final DamageSource originalFireworks = DamageSource.FIREWORKS;
-        DamageSource.FIREWORKS = new EntityDamageSource(originalFireworks.damageType, (Entity) (Object) this).setExplosion();
-        final boolean result = entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
-        DamageSource.FIREWORKS = originalFireworks;
-
-        return result;
+        try {
+            DamageSource.FIREWORKS = new EntityDamageSource(DamageSource.FIREWORKS.damageType, (Entity) (Object) this).setExplosion();
+            return entityLivingBase.attackEntityFrom(DamageSource.FIREWORKS, amount);
+        } finally {
+            DamageSource.FIREWORKS = source;
+        }
     }
 }

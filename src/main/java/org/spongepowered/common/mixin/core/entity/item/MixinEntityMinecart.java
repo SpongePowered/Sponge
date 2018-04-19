@@ -87,7 +87,8 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
         return !this.slowWhenEmpty || isBeingRidden();
     }
 
-    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;removePassengers()V"))
+    @Inject(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;removePassengers()V"),
+      cancellable = true)
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);

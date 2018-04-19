@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
+import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
@@ -177,6 +178,7 @@ public final class NbtDataUtil {
     public static final String ENTITY_TYPE_ID = "id";
     public static final String MINECART_TYPE = "Type";
     public static final String ENTITY_POSITION = "Pos";
+    public static final String ENTITY_DIMENSION = "Dimension";
 
     // These are used by pickup/despawn delay for ItemEntity
     public static final String INFINITE_PICKUP_DELAY = "InfinitePickupDelay";
@@ -411,6 +413,16 @@ public final class NbtDataUtil {
         for (int j = 0; j < i; ++j) {
             double d1 = adouble[j];
             nbttaglist.appendTag(new NBTTagDouble(d1));
+        }
+
+        return nbttaglist;
+    }
+
+    public static NBTTagList newFloatNBTList(float... numbers) {
+        NBTTagList nbttaglist = new NBTTagList();
+
+        for (float f : numbers) {
+            nbttaglist.appendTag(new NBTTagFloat(f));
         }
 
         return nbttaglist;
