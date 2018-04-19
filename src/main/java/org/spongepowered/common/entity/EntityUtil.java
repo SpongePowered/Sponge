@@ -30,7 +30,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
@@ -96,7 +95,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -107,20 +105,17 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -915,92 +910,71 @@ public final class EntityUtil {
     }
 
     /**
-     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}
-     * for easy debugging.
-     * @param entity
-     * @param itemStack
-     * @param offsetY
-     * @return
+     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}.
+     * What this does is ensures that any possibly required wrapping of captured drops is performed.
+     * Likewise, it ensures that the phase state is set up appropriately.
+     *
+     * @param entity The entity dropping the item
+     * @param itemStack The itemstack to spawn
+     * @param offsetY The offset y coordinate
+     * @return The item entity
      */
+    @Nullable
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY) {
-        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
-        final IMixinEntityPlayer mixinPlayer = entity instanceof Player ? (IMixinEntityPlayer) entity : null;
-        // Now the real fun begins.
-        final ItemStack item;
-        final double posX = entity.posX;
-        final double posY = entity.posY + offsetY;
-        final double posZ = entity.posZ;
+        return entityOnDropItem(entity, itemStack, offsetY, entity.posX, entity.posZ);
+    }
+
+    /**
+     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}.
+     * What this does is ensures that any possibly required wrapping of captured drops is performed.
+     * Likewise, it ensures that the phase state is set up appropriately.
+     *
+     * @param entity The entity dropping the item
+     * @param itemStack The itemstack to spawn
+     * @param offsetY The offset y coordinate
+     * @return The item entity
+     */
+    @Nullable
+    public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY, double xPos, double zPos) {
         if (itemStack.isEmpty()) {
+            // Sanity check, just like vanilla
             return null;
         }
+        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        // Now the real fun begins.
+        final ItemStack item;
+        final double posX = xPos;
+        final double posY = entity.posY + offsetY;
+        final double posZ = zPos;
+
         // FIRST we want to throw the DropItemEvent.PRE
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
+
+        // Gather phase states to determine whether we're merging or capturing later
+        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+        final IPhaseState currentState = peek.state;
+        final PhaseContext<?> phaseContext = peek.context;
+
+        // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(entity);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                    ImmutableList.of(snapshot), original);
-            SpongeImpl.postEvent(dropEvent);
-            if (dropEvent.isCancelled()) {
-                if (mixinPlayer != null) {
-                    mixinPlayer.shouldRestoreInventory(true);
-                }
-                return null;
-            }
-            if (dropEvent.getDroppedItems().isEmpty()) {
+            // Perform the event throws first, if they return false, return null
+            item = throwDropItemAndConstructEvent(mixinEntity, posX, posY, posZ, snapshot, original);
+
+            if (item == null || item.isEmpty()) {
                 return null;
             }
 
-            // SECOND throw the ConstructEntityEvent
-            Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + offsetY, posZ));
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            ConstructEntityEvent.Pre event = SpongeEventFactory
-                    .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, suggested);
-            SpongeImpl.postEvent(event);
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-            if (item == null) {
-                if (mixinPlayer != null) {
-                    mixinPlayer.shouldRestoreInventory(true);
-                }
-                return null;
-            }
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState currentState = peek.state;
-            final PhaseContext<?> phaseContext = peek.context;
 
-            if (item.isEmpty()) {
-                return null;
-            }
+            // This is where we could perform item pre merging, and cancel before we create a new entity.
+            // For now, we aren't performing pre merging.
 
-            if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
-                if (currentState.tracksEntitySpecificDrops()) {
-                    final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
-                    final Collection<ItemDropData> itemStacks = multimap.get(entity.getUniqueID());
-                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(item)
-                            .position(new Vector3d(posX, posY, posZ))
-                            .build());
-                    return null;
-                }
-                final List<ItemDropData> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
-                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(item)
-                        .position(new Vector3d(posX, posY, posZ))
-                        .build());
-                return null;
-            }
-            EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
+            final EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (currentState.doesCaptureEntityDrops()) {
-                if (currentState.tracksEntitySpecificDrops()) {
-                    // We are capturing per entity drop
-                    phaseContext.getCapturedEntityItemDropSupplier().get().put(entity.getUniqueID(), entityitem);
-                } else {
-                    // We are adding to a general list - usually for EntityPhase.State.DEATH
-                    phaseContext.getCapturedItemsSupplier().get().add(entityitem);
-                }
-                // Return the item, even if it wasn't spawned in the world.
+            if (captureEntityItem(currentState, phaseContext, entityitem, entity)) {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
@@ -1015,66 +989,32 @@ public final class EntityUtil {
         final EntityPlayer player = EntityUtil.toNative(mixinPlayer);
 
         final double posX = player.posX;
-        final double adjustedPosY = player.posY - 0.3 + player.getEyeHeight();
+        final double posY = player.posY - 0.3 + player.getEyeHeight();
         final double posZ = player.posZ;
         // Now the real fun begins.
         final ItemStack item;
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
+        final List<ItemStackSnapshot> original = new ArrayList<>();
+        original.add(snapshot);
+
+        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+        final IPhaseState currentState = peek.state;
+        final PhaseContext<?> phaseContext = peek.context;
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            // FIRST we want to throw the DropItemEvent.PRE
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
-            final List<ItemStackSnapshot> original = new ArrayList<>();
-            original.add(snapshot);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                    ImmutableList.of(snapshot), original);
-            SpongeImpl.postEvent(dropEvent);
-            if (dropEvent.isCancelled()) {
-                mixinPlayer.shouldRestoreInventory(true);
-                return null;
-            }
-            if (dropEvent.getDroppedItems().isEmpty()) {
+
+            item = throwDropItemAndConstructEvent(mixinPlayer, posX, posY, posZ, snapshot, original);
+
+            if (item == null || item.isEmpty()) {
                 return null;
             }
 
-            // SECOND throw the ConstructEntityEvent
-            Transform<World> suggested = new Transform<>(mixinPlayer.getWorld(), new Vector3d(posX, adjustedPosY, posZ));
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, suggested);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                mixinPlayer.shouldRestoreInventory(true);
-                return null;
-            }
 
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-            if (item == null) {
-                mixinPlayer.shouldRestoreInventory(true);
-                return null;
-            }
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState currentState = peek.state;
-            final PhaseContext<?> phaseContext = peek.context;
+            // Here is where we would potentially perform item pre-merging (merge the item stacks with previously captured item stacks
+            // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
+            // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
 
-            if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
-                final Collection<ItemDropData> itemStacks;
-                if (currentState.tracksEntitySpecificDrops()) {
-                    final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
-                    itemStacks = multimap.get(player.getUniqueID());
-                } else {
-                    itemStacks = phaseContext.getCapturedItemStackSupplier().get();
-                }
-                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.Player.player(player)
-                        .stack(item)
-                        .trace(traceItem)
-                        .motion(createDropMotion(dropAround, player, mixinPlayer.getRandom()))
-                        .dropAround(dropAround)
-                        .position(new Vector3d(posX, adjustedPosY, posZ))
-                        .build());
-                return null;
-            }
-
-            EntityItem entityitem = new EntityItem(player.world, posX, adjustedPosY, posZ, droppedItem);
+            EntityItem entityitem = new EntityItem(player.world, posX, posY, posZ, droppedItem);
             entityitem.setPickupDelay(40);
 
             if (traceItem) {
@@ -1100,17 +1040,10 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (currentState.doesCaptureEntityDrops()) {
-                if (currentState.tracksEntitySpecificDrops()) {
-                    // We are capturing per entity drop
-                    phaseContext.getCapturedEntityItemDropSupplier().get().put(player.getUniqueID(), entityitem);
-                } else {
-                    // We are adding to a general list - usually for EntityPhase.State.DEATH
-                    phaseContext.getCapturedItemsSupplier().get().add(entityitem);
-                }
-                // Return the item, even if it wasn't spawned in the world.
+            if (captureEntityItem(currentState, phaseContext, entityitem, player)) {
                 return entityitem;
             }
+            // TODO - Investigate whether player drops are adding to the stat list in captures.
             ItemStack itemstack = dropItemAndGetStack(player, entityitem);
 
             if (traceItem) {
@@ -1123,6 +1056,104 @@ public final class EntityUtil {
 
             return entityitem;
         }
+    }
+
+    /**
+     * @author gabizou - April 19th, 2018
+     * Creates two events here:
+     * - {@link DropItemEvent}
+     * - {@link ConstructEntityEvent}
+     *
+     * This is to reduce the code size from normal entity drops and player drops.
+     * While player drops usually require performing position and motion modifications,
+     * we return the item stack if it is to be thrown (this allows the event to have a
+     * say in what item is dropped).
+     *
+     * @param entity The entity throwing the item
+     * @param posX The position x for the item stack to spawn
+     * @param posY The position y for the item stack to spawn
+     * @param posZ The position z for the item stack to spawn
+     * @param snapshot The item snapshot of the item to drop
+     * @param original The original list to be used
+     * @return The item if it is to be spawned, null if to be ignored
+     */
+    @Nullable
+    public static ItemStack throwDropItemAndConstructEvent(IMixinEntity entity, double posX, double posY,
+        double posZ, ItemStackSnapshot snapshot, List<ItemStackSnapshot> original) {
+        try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            final IMixinEntityPlayer mixinPlayer;
+            if (entity instanceof IMixinEntityPlayer) {
+                mixinPlayer = (IMixinEntityPlayer) entity;
+            } else {
+                mixinPlayer = null;
+            }
+            ItemStack item;
+
+            stackFrame.pushCause(entity);
+
+            // FIRST we want to throw the DropItemEvent.PRE
+            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                ImmutableList.of(snapshot), original);
+            SpongeImpl.postEvent(dropEvent);
+            if (dropEvent.isCancelled()) {
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
+                return null;
+            }
+            if (dropEvent.getDroppedItems().isEmpty()) {
+                return null;
+            }
+
+            // SECOND throw the ConstructEntityEvent
+            Transform<World> suggested = new Transform<>(entity.getWorld(), new Vector3d(posX, posY, posZ));
+            stackFrame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(stackFrame.getCurrentCause(), EntityTypes.ITEM, suggested);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                // Make sure the player is restoring inventories
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
+                return null;
+            }
+
+            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+            if (item == null) {
+                // Make sure the player is restoring inventories
+                if (mixinPlayer != null) {
+                    mixinPlayer.shouldRestoreInventory(true);
+                }
+                return null;
+            }
+            return item;
+        }
+    }
+
+    /**
+     * Captures the item based on the current state.
+     *
+     * @param currentState The current state
+     * @param phaseContext The phase context
+     * @param entityitem The item entity to capture
+     * @param owner The owning entity
+     * @return Whether the drop is being captured
+     */
+    private static boolean captureEntityItem(IPhaseState currentState, PhaseContext<?> phaseContext, EntityItem entityitem, Entity owner) {
+        if (currentState.doesCaptureEntityDrops()) {
+            if (currentState.tracksEntitySpecificDrops()) {
+                // We are capturing per entity drop
+                // This is overridden in forge to utilize forge's capture lists as well
+                // (sets up the multimap list to the entity)
+                SpongeImplHooks.capturePerEntityItemDrop(phaseContext, owner, entityitem);
+            } else {
+                // We are adding to a general list - usually for EntityPhase.State.DEATH
+                phaseContext.getCapturedItemsSupplier().get().add(entityitem);
+            }
+            // Return the item, even if it wasn't spawned in the world.
+            return true;
+        }
+        return false;
     }
 
     private static Vector3d createDropMotion(boolean dropAround, EntityPlayer player, Random random) {
@@ -1151,11 +1182,8 @@ public final class EntityUtil {
 
     private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
         final ItemStack stack = item.getItem();
-        if (stack != null) {
-            player.world.spawnEntity(item);
-            return stack;
-        }
-        return null;
+        player.world.spawnEntity(item);
+        return stack;
     }
 
     @SuppressWarnings("unchecked")

@@ -1275,25 +1275,28 @@ public abstract class MixinEntity implements IMixinEntity {
      * 2) If we are in a client environment, we should not perform any sort of processing whatsoever.
      * 3) This method is entirely managed from the standpoint where our events have final say, as per usual.
      *
-     * @param itemStackIn
+     * @param stack
      * @param offsetY
      * @return
      */
-    @Inject(method = "entityDropItem(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;", at = @At("HEAD"), cancellable = true)
-    private void spongeEntityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY, CallbackInfoReturnable<EntityItem> returnable) {
+    @Overwrite
+    @Nullable
+    public EntityItem entityDropItem(net.minecraft.item.ItemStack stack, float offsetY) {
+        // Sponge Start
         // Gotta stick with the client side handling things
         if (this.world.isRemote) {
-            if (itemStackIn.getCount() != 0 && itemStackIn.getItem() != null) {
-                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + offsetY, this.posZ, itemStackIn);
+            // Sponge End - resume normal client code. Server side we will handle it elsewhere
+            if (stack.isEmpty()) {
+                return null;
+            } else {
+                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double) offsetY, this.posZ, stack);
                 entityitem.setDefaultPickupDelay();
                 this.world.spawnEntity(entityitem);
-                returnable.setReturnValue(entityitem);
-                return;
+                return entityitem;
             }
-            returnable.setReturnValue(null);
-            return;
         }
-        returnable.setReturnValue(EntityUtil.entityOnDropItem((net.minecraft.entity.Entity) (Object) this, itemStackIn, offsetY));
+        // Sponge - Redirect server sided code to handle through the PhaseTracker
+        return EntityUtil.entityOnDropItem((net.minecraft.entity.Entity) (Object) this, stack, offsetY);
     }
 
     @Override

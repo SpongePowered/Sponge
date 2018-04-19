@@ -156,42 +156,30 @@ public final class ContainerUtil {
         final IPhaseState currentState = currentPhase.state;
         if (currentState.tracksBlockSpecificDrops()) {
             final PhaseContext<?> context = currentPhase.context;
-            if (!currentState.ignoresItemPreMerging() && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
-                // Add itemstack to pre merge list
-                final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
-                final BlockPos pos = new BlockPos(x, y, z);
-                final Collection<ItemDropData> itemStacks = multimap.get(pos);
-                for (int i = 0; i < inventory.getSizeInventory(); i++) {
-                    final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
-                    if (!itemStack.isEmpty()) {
-                        SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(itemStack)
-                                .position(VecHelper.toVector3d(pos))
-                                .build());
-                    }
-                }
-            } else {
-                // Don't do pre-merging - directly spawn in item
-                final Multimap<BlockPos, EntityItem> multimap = context.getBlockItemDropSupplier().get();
-                final BlockPos pos = new BlockPos(x, y, z);
-                final Collection<EntityItem> itemStacks = multimap.get(pos);
-                for (int j = 0; j < inventory.getSizeInventory(); j++) {
-                    final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(j);
-                    if (!itemStack.isEmpty()) {
-                        float f = RANDOM.nextFloat() * 0.8F + 0.1F;
-                        float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
-                        float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
+            // this is where we could perform item stack pre-merging.
+            // For development reasons, not performing any pre-merging except after the entity item spawns.
 
-                        while (!itemStack.isEmpty())
-                        {
-                            int i = RANDOM.nextInt(21) + 10;
+            // Don't do pre-merging - directly spawn in item
+            final Multimap<BlockPos, EntityItem> multimap = context.getBlockItemDropSupplier().get();
+            final BlockPos pos = new BlockPos(x, y, z);
+            final Collection<EntityItem> itemStacks = multimap.get(pos);
+            for (int j = 0; j < inventory.getSizeInventory(); j++) {
+                final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(j);
+                if (!itemStack.isEmpty()) {
+                    float f = RANDOM.nextFloat() * 0.8F + 0.1F;
+                    float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
+                    float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
 
-                            EntityItem entityitem = new EntityItem(worldServer, x + f, y + f1, z + f2, itemStack.splitStack(i));
+                    while (!itemStack.isEmpty())
+                    {
+                        int i = RANDOM.nextInt(21) + 10;
 
-                            entityitem.motionX = RANDOM.nextGaussian() * 0.05;
-                            entityitem.motionY = RANDOM.nextGaussian() * 0.05 + 0.2;
-                            entityitem.motionZ = RANDOM.nextGaussian() * 0.05;
-                            itemStacks.add(entityitem);
-                        }
+                        EntityItem entityitem = new EntityItem(worldServer, x + f, y + f1, z + f2, itemStack.splitStack(i));
+
+                        entityitem.motionX = RANDOM.nextGaussian() * 0.05;
+                        entityitem.motionY = RANDOM.nextGaussian() * 0.05 + 0.2;
+                        entityitem.motionZ = RANDOM.nextGaussian() * 0.05;
+                        itemStacks.add(entityitem);
                     }
                 }
             }

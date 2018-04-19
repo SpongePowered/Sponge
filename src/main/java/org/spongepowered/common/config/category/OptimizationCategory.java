@@ -33,15 +33,13 @@ import java.io.IOException;
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
 
-    private static final String PRE_MERGE_COMMENT = "If 'true', block item drops are pre-processed to avoid \n"
+    @Setting(value = "drops-pre-merge", comment = "If 'true', block item drops are pre-processed to avoid \n"
                                                   + "having to spawn extra entities that will be merged post spawning. \n"
                                                   + "Usually, Sponge is smart enough to determine when to attempt an item pre-merge \n"
                                                   + "and when not to, however, in certain cases, some mods rely on items not being \n"
                                                   + "pre-merged and actually spawned, in which case, the items will flow right through \n"
-                                                  + "without being merged.";
-
-    @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
-    private boolean preItemDropMerge;
+                                                  + "without being merged.")
+    private boolean preItemDropMerge = false;
 
     @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods \n"
                                                       + "cause issues, disable this.")
@@ -81,6 +79,15 @@ public class OptimizationCategory extends ConfigCategory {
         return this.structureSaveCategory.isEnabled();
     }
 
+    /**
+     * This defines whether items can be pre-merged as item stacks, prior to spawning an entity. This has the ramification
+     * that some items are simply "dropped" and some other items during particular contexts, say when a mod is performing
+     * drops of their own, cannot be pre-merged as the item entity NEEDS to be created for them. In most cases, this is
+     * perfectly fine to perform in vanilla, but in forge mod environments, it is highly incompatible with a majority of
+     * more "advanced" or "complex" mods.
+     *
+     * @return Whether item pre-merging is enabled
+     */
     public boolean doDropsPreMergeItemDrops() {
         return this.preItemDropMerge;
     }

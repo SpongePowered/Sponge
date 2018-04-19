@@ -51,6 +51,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -79,6 +80,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -120,7 +123,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
     @Shadow public int maxHurtTime;
-    @Shadow public int deathTime;
     @Shadow protected int scoreValue;
     @Shadow public float attackedAtYaw;
     @Shadow public float limbSwingAmount;
@@ -170,7 +172,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract boolean isHandActive();
     @Shadow protected abstract void onDeathUpdate();
     @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
-    @Shadow public abstract void setRevengeTarget(EntityLivingBase livingBase);
+    @Shadow public abstract void shadow$setRevengeTarget(EntityLivingBase livingBase);
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
@@ -213,11 +215,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public void setMaxAir(int air) {
         this.maxAir = air;
-    }
-
-    @Override
-    public double getLastDamage() {
-        return this.lastDamage;
     }
 
     @Override
@@ -266,10 +263,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return;
         }
         // Double check that the PhaseTracker is already capturing the Death phase
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null;
-             final EntityDeathContext context = createOrNullDeathPhase(cause)) {
+             final EntityDeathContext context = createOrNullDeathPhase(isMainThread, frame, cause)) {
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
@@ -317,17 +313,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Nullable
-    private EntityDeathContext createOrNullDeathPhase(DamageSource source) {
+    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, @Nullable StackFrame frame, DamageSource source) {
         boolean tracksEntityDeaths = false;
-        if (((IMixinWorld) this.world).isFake()) {
+        if (((IMixinWorld) this.world).isFake() || !isMainThread || frame == null) { // Short circuit to avoid erroring on handling
             return null;
         }
-        PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        final IPhaseState state = peek.state;
+        final IPhaseState state = PhaseTracker.getInstance().getCurrentPhaseData().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.pushCause(this);
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()
                 .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
                 .source(this);
@@ -344,8 +338,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return false; // handled in our damageEntityHook
     }
 
+    /**
+     * @author blood - Some time ago in 2015?
+     * @reason Our damage hook handles armor modifiers and "replaying" damage to armor.
+     *
+     * @param entityIn The entity being damaged
+     * @param damage The damage to deal
+     */
     @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;damageArmor(F)V") )
-    protected void onDamageArmor(EntityLivingBase entityIn, float damage) {
+    private void onDamageArmor(EntityLivingBase entityIn, float damage) {
         // do nothing as this is handled in our damageEntityHook
     }
 
@@ -371,7 +372,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
         if (source == null) {
-            Thread.dumpStack();
+            new PrettyPrinter(60).centre().add("Null DamageSource").hr()
+                .addWrapped("Sponge has found a null damage source! This should NEVER happen "
+                            + "as the DamageSource is used for all sorts of calculations. Usually"
+                            + " this can be considered developer error. Please report the following"
+                            + " stacktrace to the most appropriate mod/plugin available.")
+                .add()
+                .add(new IllegalArgumentException("Null DamageSource"))
+                .log(SpongeImpl.getLogger(), Level.WARN);
+            return false;
         }
         // Sponge - This hook is for forge use mainly
         if (!hookModAttack((EntityLivingBase) (Object) this, source, amount))
@@ -457,7 +466,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 if (entity != null) {
                     if (entity instanceof EntityLivingBase) {
-                        this.setRevengeTarget((EntityLivingBase) entity);
+                        this.shadow$setRevengeTarget((EntityLivingBase) entity);
                     }
 
                     if (entity instanceof EntityPlayer) {
@@ -511,9 +520,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         }
 
                         // Sponge Start - notify the cause tracker
-                        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
                         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                             final EntityDeathContext context = createOrNullDeathPhase(source)) {
+                             final EntityDeathContext context = createOrNullDeathPhase(true, frame, source)) {
                             this.onDeath(source);
                         }
                     }

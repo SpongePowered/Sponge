@@ -38,6 +38,8 @@ import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
 
+import java.util.Arrays;
+
 @Mixin(Block.class)
 public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturing, BlockType {
 
@@ -69,7 +71,7 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
             ids = new String[]{"unknown", id};
             printer
                 .add("Sponge will attempt to work around this by using the provided generated id:")
-                .add("%s : %s", "Generated ID", ids)
+                .add("%s : %s", "Generated ID", Arrays.toString(ids))
                 .log(SpongeImpl.getLogger(), Level.WARN);
 
         }
