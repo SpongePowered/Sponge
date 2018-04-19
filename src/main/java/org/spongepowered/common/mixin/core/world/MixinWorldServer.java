@@ -458,7 +458,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
 
-        SpongeWorldGenerator newGenerator = createWorldGenerator(generatorSettings);
+        SpongeWorldGenerator newGenerator = this.createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
@@ -477,7 +477,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             modifier.modifyWorldGenerator(this.getProperties(), generatorSettings, newGenerator);
         }
 
-        this.spongegen = createChunkGenerator(newGenerator);
+        this.spongegen = this.createChunkGenerator(newGenerator);
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
