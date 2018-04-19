@@ -73,28 +73,20 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
                 .log(SpongeImpl.getLogger(), Level.WARN);
 
         }
-        String modId = ids[0];
-        String name = ids[1];
+        final String modId = ids[0];
+        final String name = ids[1];
 
         BlockCapturingModCategory modCapturing = blockCapturing.getModMappings().get(modId);
-        if (modCapturing == null && blockCapturing.autoPopulateData()) {
-            modCapturing = new BlockCapturingModCategory();
-            blockCapturing.getModMappings().put(modId.toLowerCase(), modCapturing);
-            modCapturing.getBlockMap().put(name.toLowerCase(), false);
-            if (blockCapturing.autoPopulateData()) {
-                activeConfig.save();
-            }
-            return;
-        } else if (modCapturing != null) {
-            if (!modCapturing.isEnabled()) {
-                this.processTickChangesImmediately = false;
-                return;
-            }
 
-            Boolean processImmediately = modCapturing.getBlockMap().get(name.toLowerCase());
-            if (processImmediately != null) {
-                this.processTickChangesImmediately = processImmediately;
-            }
+        if (modCapturing == null) {
+            modCapturing = new BlockCapturingModCategory();
+            blockCapturing.getModMappings().put(modId, modCapturing);
+        }
+        if (!modCapturing.isEnabled()) {
+            this.processTickChangesImmediately = false;
+            modCapturing.getBlockMap().computeIfAbsent(name.toLowerCase(), k -> this.processTickChangesImmediately);
+        } else {
+            this.processTickChangesImmediately = modCapturing.getBlockMap().computeIfAbsent(name.toLowerCase(), k -> false);
         }
 
         if (blockCapturing.autoPopulateData()) {
