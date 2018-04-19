@@ -524,7 +524,7 @@ public final class WorldManager {
                 reorderWorldsVanillaFirst();
             }
 
-            if (!server.isServerRunning()) {
+            if (server.isServerRunning()) {
                 unregisterDimension(dimensionId);
             }
 
