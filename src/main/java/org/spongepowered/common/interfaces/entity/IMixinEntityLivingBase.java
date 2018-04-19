@@ -37,8 +37,6 @@ public interface IMixinEntityLivingBase {
 
     boolean damageEntityHook(DamageSource damageSource, float damage);
 
-    double getLastDamage();
-
     int getMaxAir();
 
     int getRecentlyHit();
@@ -58,7 +56,5 @@ public interface IMixinEntityLivingBase {
     boolean hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
 
     double getLastDamageTaken();
-
-    void setRevengeTarget(EntityLivingBase entityLivingBase);
 
 }

@@ -65,4 +65,9 @@ final class PostServerTickListenerState extends ListenerPhaseState {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 
+
+    @Override
+    public boolean doesDenyChunkRequests() {
+        return true;
+    }
 }
