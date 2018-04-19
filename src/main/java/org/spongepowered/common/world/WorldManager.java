@@ -497,9 +497,10 @@ public final class WorldManager {
             .source(worldServer)
             .buildAndSwitch()) {
 
-            if (SpongeImpl.postEvent(
-                SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
-                    worldServer))) {
+            final boolean isCancelled = SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause
+              (), (org.spongepowered.api.world.World) worldServer));
+
+            if (server.isServerRunning() && isCancelled) {
                 return false;
             }
 
