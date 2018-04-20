@@ -39,6 +39,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -71,6 +72,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -79,7 +81,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.*;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -260,19 +264,52 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         canCaptureItems = true;
     }
 
-    @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
-        Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
+    /**
+     * @author gabizou - April 19th, 2018
+     * @reason With the amount of redirects and events needed to be thrown here,
+     * we overwrite the method in it's entirety (also bypassing forge's block captures
+     * to sync up with sponge's captures).
+     *
+     * @param worldIn
+     * @param pos
+     * @param stack
+     */
+    @Overwrite
+    public static void spawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack) {
+        // Sponge Start - short circuit up top to reduce indentation as necessary
+        final boolean doTileDrops = worldIn.getGameRules().getBoolean("doTileDrops");
+
+        if (worldIn.isRemote || !SpongeImpl.isMainThread() || stack.isEmpty() || doTileDrops) {
+            return;
+        }
+        // Double check we aren't performing drops during restores.
+        if (PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+            return;
+        }
+        // Sponge Start - make some of these local variables so we have them prepped already.
+        double xOffset = (double) (worldIn.rand.nextFloat() * 0.5F) + 0.25D;
+        double yOffset = (double) (worldIn.rand.nextFloat() * 0.5F) + 0.25D;
+        double zOffset = (double) (worldIn.rand.nextFloat() * 0.5F) + 0.25D;
+        final double xPos = (double) pos.getX() + xOffset;
+        final double yPos = (double) pos.getY() + yOffset;
+        final double zPos = (double) pos.getZ() + zOffset;
+
+        // TODO - Determine whether DropItemEvent.Pre is supposed to spawn here.
+
+        // Go ahead and throw the construction event
+        Transform<World> position = new Transform<>((World) worldIn, new Vector3d(xPos, yPos, zPos));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(worldIn.getBlockState(pos));
-            final ConstructEntityEvent.Pre
-                    eventPre =
-                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, position);
+            frame.pushCause(worldIn.getBlockState(pos));
+            final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
             SpongeImpl.postEvent(eventPre);
             if (eventPre.isCancelled()) {
-                callbackInfo.cancel();
+                return;
             }
         }
+        EntityItem entityitem = new EntityItem(worldIn, xPos, yPos, zPos, stack);
+        entityitem.setDefaultPickupDelay();
+        worldIn.spawnEntity(entityitem);
+
     }
 
     // This method can be called directly by pistons, mods, etc. so the hook must go here
@@ -311,7 +348,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
-    public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+    private void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
+        CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final IPhaseState<?> currentState = phaseTracker.getCurrentState();
@@ -320,30 +358,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 phaseTracker.completePhase(BlockPhase.State.BLOCK_DROP_ITEMS);
             }
         }
-    }
-
-    @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"), cancellable = true)
-    private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        if (!worldIn.isRemote && PhaseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
-            ci.cancel();
-        }
-    }
-
-    @Redirect(method = "spawnAsEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private static boolean redirectGameRulesToCaptureItemDrops(GameRules gameRules, String argument, net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack) {
-        final boolean allowTileDrops = gameRules.getBoolean(argument);
-        if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
-            final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState<?> currentState = currentPhase.state;
-            if (canCaptureItems && currentState.tracksBlockSpecificDrops()) {
-                final PhaseContext<?> context = currentPhase.context;
-                final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
-                final Collection<ItemDropData> itemStacks = multimap.get(pos);
-                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(stack).position(VecHelper.toVector3d(pos)).build());
-                return false;
-            }
-        }
-        return allowTileDrops;
     }
 
     @Override

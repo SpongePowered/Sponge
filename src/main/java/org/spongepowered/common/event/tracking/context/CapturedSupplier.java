@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
+import net.minecraft.util.NonNullList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +45,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     @Override
     public final List<T> get() {
         if (this.captured == null) {
-            this.captured = new ArrayList<>();
+            this.captured = NonNullList.create();
         }
         return this.captured;
     }
