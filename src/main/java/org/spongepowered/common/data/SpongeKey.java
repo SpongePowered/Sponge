@@ -44,9 +44,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
+public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
-    private static Set<String> loggedPlugins = new HashSet<>();
+    private static final Set<String> loggedPlugins = new HashSet<>();
 
     private final TypeToken<V> valueToken;
     private final String id;
@@ -75,7 +75,7 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         }
     }
 
-    public static PluginContainer getCurrentContainer() {
+    private static PluginContainer getCurrentContainer() {
         return Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
             .orElse(SpongeImpl.getMinecraftPlugin());
     }
@@ -129,10 +129,10 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        SpongeKey<?> spongeKey = (SpongeKey<?>) o;
+        final SpongeKey<?> spongeKey = (SpongeKey<?>) o;
         return Objects.equals(this.valueToken, spongeKey.valueToken) &&
                Objects.equals(this.id, spongeKey.id) &&
                Objects.equals(this.name, spongeKey.name) &&

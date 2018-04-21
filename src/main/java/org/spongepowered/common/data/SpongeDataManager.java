@@ -171,10 +171,10 @@ public final class SpongeDataManager implements DataManager {
         return Optional.of(new DataUpdaterDelegate(builder.build(), fromVersion, toVersion));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T extends DataSerializable> void registerBuilderAndImpl(Class<T> clazz, Class<? extends T> implClass, DataBuilder<T> builder) {
-        registerBuilder(clazz, builder);
-        registerBuilder((Class<T>) (Class) implClass, builder);
+    @SuppressWarnings({"unchecked", "rawtypes"}) <T extends DataSerializable> void registerBuilderAndImpl(Class<T> clazz,
+      Class<? extends T> implClass, DataBuilder<T> builder) {
+        this.registerBuilder(clazz, builder);
+        this.registerBuilder((Class<T>) implClass, builder);
     }
 
     @Override
@@ -194,7 +194,7 @@ public final class SpongeDataManager implements DataManager {
 
     @Override
     public <T extends DataSerializable> Optional<T> deserialize(Class<T> clazz, final DataView dataView) {
-        final Optional<DataBuilder<T>> optional = getBuilder(clazz);
+        final Optional<DataBuilder<T>> optional = this.getBuilder(clazz);
         return optional.flatMap(tDataBuilder -> tDataBuilder.build(dataView));
     }
 
@@ -285,8 +285,8 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
     }
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(
-        SpongeDataRegistrationBuilder<M, I> builder) {
+    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(
+      SpongeDataRegistrationBuilder<M, I> builder) {
         checkState(allowRegistrations);
         final Class<M> manipulatorClass = builder.manipulatorClass;
         final Class<? extends M> implementationClass = builder.implementationData;
@@ -314,8 +314,8 @@ public final class SpongeDataManager implements DataManager {
         return !allowRegistrations;
     }
 
-    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void registerInternally(
-        SpongeDataRegistration<M, I> registration) {
+    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void registerInternally(
+      SpongeDataRegistration<M, I> registration) {
         this.builders.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
         this.builderMap.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
         if (!registration.getImplementationClass().equals(registration.getManipulatorClass())) {
