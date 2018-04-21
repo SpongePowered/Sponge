@@ -29,7 +29,9 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
+import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.DelayedRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Comparator;
@@ -45,23 +47,24 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
     @RegisterCatalog(ItemStackComparators.class)
     private final Map<String, Comparator<ItemStack>> comparators = new HashMap<>();
 
+    @DelayedRegistration(value = RegistrationPhase.PRE_INIT)
     @Override
     public void registerDefaults() {
 
         Comparator<ItemStack> type = Comparator.comparing(i -> i.getType().getId());
-        this.comparators.put("TYPE", type);
+        this.comparators.put("type", type);
         Comparator<ItemStack> size = Comparator.comparing(ItemStack::getQuantity);
-        this.comparators.put("SIZE", size);
+        this.comparators.put("size", size);
         Comparator<ItemStack> typeSize = type.thenComparing(size);
-        this.comparators.put("TYPE_SIZE", typeSize);
-        this.comparators.put("DEFAULT", typeSize);
+        this.comparators.put("type_size", typeSize);
+        this.comparators.put("default", typeSize);
         Properties properties = new Properties();
-        this.comparators.put("PROPERTIES", properties);
+        this.comparators.put("properties", properties);
         ItemDataComparator itemData = new ItemDataComparator();
-        this.comparators.put("ITEM_DATA", itemData);
-        this.comparators.put("ITEM_DATA_IGNORE_DAMAGE", new ItemDataComparator(DamageableData.class));
-        this.comparators.put("IGNORE_SIZE", type.thenComparing(properties).thenComparing(itemData));
-        this.comparators.put("ALL", type.thenComparing(size).thenComparing(properties).thenComparing(itemData));
+        this.comparators.put("item_data", itemData);
+        this.comparators.put("item_data_ignore_damage", new ItemDataComparator(DamageableData.class));
+        this.comparators.put("ignore_size", type.thenComparing(properties).thenComparing(itemData));
+        this.comparators.put("all", type.thenComparing(size).thenComparing(properties).thenComparing(itemData));
     }
 
     private static final class Properties implements Comparator<ItemStack> {
@@ -94,7 +97,7 @@ public final class ItemStackComparatorRegistryModule implements RegistryModule {
             for (final DataManipulator<?, ?> manipulator : o1.getContainers()) {
                 if (manipulators.contains(manipulator)) {
                     manipulators.remove(manipulator);
-                } else if (!isIgnored(manipulators, manipulator)) {
+                } else if (!this.isIgnored(manipulators, manipulator)) {
                     return -1;
                 }
             }

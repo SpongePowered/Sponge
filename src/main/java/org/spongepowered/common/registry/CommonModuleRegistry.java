@@ -506,7 +506,7 @@ public final class CommonModuleRegistry {
             ;
     }
 
-    CommonModuleRegistry() { }
+    private CommonModuleRegistry() { }
 
     private static final class Holder {
 
