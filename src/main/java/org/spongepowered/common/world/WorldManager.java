@@ -523,11 +523,6 @@ public final class WorldManager {
                 SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
                 reorderWorldsVanillaFirst();
             }
-
-            if (server.isServerRunning()) {
-                unregisterDimension(dimensionId);
-            }
-
         }
         return true;
     }

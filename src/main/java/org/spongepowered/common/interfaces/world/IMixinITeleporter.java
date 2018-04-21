@@ -24,14 +24,25 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.world.PortalAgentType;
 
-public interface IMixinTeleporter extends IMixinITeleporter {
+/**
+ * Compatibility interface to handle Forge binary patching {@link Teleporter} to implement their ITeleporter
+ */
+public interface IMixinITeleporter {
 
-  void removePortalPositionFromCache(Long portalLocation);
+    // Copied from Forge to match their teleporter methods, this allows
+    // the forge mod provided teleporters to still work with common
+    // code.
+    void placeEntity(World world, Entity entity, float yaw);
 
-  void setPortalAgentType(PortalAgentType type);
-
-  void setNetherPortalType(boolean isNetherPortal);
-
+    // used internally to handle vanilla hardcoding
+    default boolean isVanilla()
+    {
+        return this.getClass().equals(Teleporter.class);
+    }
 }

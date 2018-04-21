@@ -77,6 +77,7 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpawnerSpawnType;
@@ -199,7 +200,7 @@ public final class SpongeImplHooks {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
-    public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
+    public static void registerPortalAgentType(@Nullable IMixinITeleporter teleporter) {
         // Overwritten in SpongeForge
     }
 
