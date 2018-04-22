@@ -372,11 +372,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public boolean attackEntityFrom(DamageSource source, float amount) {
         // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
-        if (source == null) {
-            Thread.dumpStack();
-        }
         // Sponge - This hook is for forge use mainly
-        if (!hookModAttack((EntityLivingBase) (Object) this, source, amount))
+        if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount))
             return false;
         // Sponge end
         if (this.isEntityInvulnerable(source)) {
@@ -516,9 +513,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
                         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             final boolean enterDeathPhase = !phaseTracker.getCurrentState().tracksEntityDeaths();
-                            if (enterDeathPhase) {
-                                Sponge.getCauseStackManager().pushCause(this);
-                            }
                             try (final PhaseContext<?> context = !enterDeathPhase
                                                                  ? null
                                                                  : EntityPhase.State.DEATH.createPhaseContext()

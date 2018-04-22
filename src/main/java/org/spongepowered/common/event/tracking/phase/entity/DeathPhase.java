@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -49,10 +50,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
-
-    DeathPhase() {
-
-    }
 
     @Override
     public boolean tracksBlockSpecificDrops() {
@@ -77,8 +74,8 @@ final class DeathPhase extends EntityPhaseState<BasicEntityContext> {
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         final DamageSource damageSource = context.getDamageSource();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(damageSource);
-            Sponge.getCauseStackManager().pushCause(dyingEntity);
+            frame.pushCause(dyingEntity);
+            frame.pushCause(damageSource);
             final boolean isPlayer = dyingEntity instanceof EntityPlayer;
             final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
             final Optional<User> notifier = context.getNotifier();
