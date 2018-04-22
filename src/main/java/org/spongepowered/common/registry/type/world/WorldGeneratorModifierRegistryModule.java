@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.extra.modifier.empty.VoidWorldGeneratorModifier;
+import org.spongepowered.common.world.gen.modifier.VoidWorldGeneratorModifier;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
