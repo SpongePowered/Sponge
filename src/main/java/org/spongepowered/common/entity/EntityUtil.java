@@ -261,6 +261,7 @@ public final class EntityUtil {
             }
         }
         playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+        SpongeImpl.getServer().getPlayerList().updatePermissionLevel(playerIn);
         fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
@@ -386,7 +387,7 @@ public final class EntityUtil {
 
             Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
-            
+
             if (entityIn.isEntityAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
                 fromWorld.profiler.startSection("placing");
                 // Only place entity in portal if one of the following are true :
