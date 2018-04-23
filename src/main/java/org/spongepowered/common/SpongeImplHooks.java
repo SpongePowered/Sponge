@@ -37,6 +37,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -71,6 +72,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.command.SpongeCommandFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -401,5 +403,10 @@ public final class SpongeImplHooks {
 
     public static void onTileEntityInvalidate(TileEntity te) {
         te.invalidate();
+    }
+
+    public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
+        EntityItem entityitem) {
+        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), entityitem);
     }
 }

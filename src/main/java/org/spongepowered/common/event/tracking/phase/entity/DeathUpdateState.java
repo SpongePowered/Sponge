@@ -126,7 +126,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     }
 
                 });
-        context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
             if (map.isEmpty()) {
                 return;
             }

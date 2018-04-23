@@ -49,6 +49,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -68,7 +69,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class InteractionPacketState extends BasicPacketState {
+final class InteractionPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
 
 
     @Override
@@ -102,11 +103,6 @@ final class InteractionPacketState extends BasicPacketState {
 
     @Override
     public boolean tracksBlockSpecificDrops() {
-        return true;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
         return true;
     }
 
@@ -180,7 +176,7 @@ final class InteractionPacketState extends BasicPacketState {
                         processSpawnedEntities(player, dispense);
                     }
                 });
-            phaseContext.getCapturedEntityDropSupplier()
+            phaseContext.getPerEntityItemDropSupplier()
                 .acceptIfNotEmpty(map -> {
                     if (map.isEmpty()) {
                         return;

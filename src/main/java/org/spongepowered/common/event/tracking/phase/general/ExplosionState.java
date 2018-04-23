@@ -49,6 +49,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -62,7 +63,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-final class ExplosionState extends GeneralState<ExplosionContext> {
+final class ExplosionState extends GeneralState<ExplosionContext> implements IEntitySpecificItemDropsState<ExplosionContext> {
 
     @Override
     public ExplosionContext createPhaseContext() {
@@ -75,11 +76,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
         return true;
     }
 
@@ -218,8 +214,8 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                         // Cancel any block drops performed, avoids any item drops, regardless
                         final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
                         context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
-                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
-                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
+                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
                     }
                 }
             }
@@ -265,7 +261,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public boolean spawnEntityOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
-            final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();
+            final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();
             final Multimap<BlockPos, EntityItem> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
             if (entity instanceof EntityItem) {
                 blockPosEntityItemMultimap.put(blockPos, (EntityItem) entity);

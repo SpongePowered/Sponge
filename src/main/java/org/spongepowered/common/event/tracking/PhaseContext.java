@@ -305,14 +305,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.blockItemEntityDropsSupplier;
     }
 
-    public CapturedMultiMapSupplier<UUID, ItemDropData> getCapturedEntityDropSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<UUID, ItemDropData> getPerEntityItemDropSupplier() throws IllegalStateException {
         if (this.entityItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
         }
         return this.entityItemDropsSupplier;
     }
 
-    public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<UUID, EntityItem> getPerEntityItemEntityDropSupplier() throws IllegalStateException {
         if (this.entityItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
         }
@@ -326,7 +326,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedItemStackSupplier;
     }
 
-    public CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> getBlockEntitySpawnSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> getPerBlockEntitySpawnSuppplier() throws IllegalStateException {
         if (this.blockEntitySpawnSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to track block entity spawns!", this).get();
         }

@@ -96,7 +96,6 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -571,8 +570,8 @@ public final class TrackingUtil {
                     if (location != null) {
                         final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
                         context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
-                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
-                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
+                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
                     }
                 }
             }
@@ -632,7 +631,7 @@ public final class TrackingUtil {
         // final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
         final CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         final CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = phaseContext.getBlockItemDropSupplier();
-        final CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> capturedBlockEntitySpawns = phaseContext.getBlockEntitySpawnSupplier();
+        final CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> capturedBlockEntitySpawns = phaseContext.getPerBlockEntitySpawnSuppplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 // Rememver that this value needs to be set to false to return because of the fact that
@@ -765,13 +764,13 @@ public final class TrackingUtil {
                 .map(EntityUtil::fromNative)
                 .collect(Collectors.toList());
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(oldBlockSnapshot);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.pushCause(oldBlockSnapshot);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             if(phaseContext.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, phaseContext.getNotifier().get());
+                frame.addContext(EventContextKeys.NOTIFIER, phaseContext.getNotifier().get());
             }
             final User entityCreator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemDrops);
+            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemDrops);
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
@@ -784,8 +783,8 @@ public final class TrackingUtil {
         }
     }
 
-    public static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, BlockSnapshot newBlockSnapshot,
-                                             PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
+    private static void spawnEntitiesForBlock(Collection<net.minecraft.entity.Entity> entities, BlockSnapshot newBlockSnapshot,
+        PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         // Now we can spawn the entity items appropriately
         final List<Entity> entitiesSpawned = entities.stream()
             .map(EntityUtil::fromNative)

@@ -39,6 +39,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -52,7 +53,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class InteractEntityPacketState extends BasicPacketState {
+final class InteractEntityPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
 
     @Override
     public boolean ignoresItemPreMerging() {
@@ -77,11 +78,6 @@ final class InteractEntityPacketState extends BasicPacketState {
             }
         }
 
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
     @Override
@@ -136,7 +132,7 @@ final class InteractEntityPacketState extends BasicPacketState {
                 }
             });
         }
-        phaseContext.getCapturedEntityDropSupplier()
+        phaseContext.getPerEntityItemDropSupplier()
             .acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();

@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -55,7 +54,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -343,7 +341,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         if (this.doesCaptureEntityDrops()) {
             if (this.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
-                phaseContext.getCapturedEntityItemDropSupplier().get().put(entity.getUniqueID(), entityitem);
+                phaseContext.getPerEntityItemEntityDropSupplier().get().put(entity.getUniqueID(), entityitem);
             } else {
                 // We are adding to a general list - usually for EntityPhase.State.DEATH
                 phaseContext.getCapturedItemsSupplier().get().add(entityitem);
