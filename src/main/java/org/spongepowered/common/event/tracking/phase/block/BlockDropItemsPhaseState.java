@@ -126,7 +126,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                     for (BlockPos key : drops.asMap().keySet()) {
                         final List<ItemDropData> values = drops.get(key);
                         if (!values.isEmpty()) {
-                            TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, phaseContext, this);
+                            TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, phaseContext);
                         }
                     }
                 });
