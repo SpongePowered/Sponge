@@ -41,6 +41,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -56,7 +57,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class AttackEntityPacketState extends BasicPacketState {
+final class AttackEntityPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
 
     @Override
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
@@ -76,10 +77,6 @@ final class AttackEntityPacketState extends BasicPacketState {
         }
     }
 
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
-    }
 
     @Override
     public void unwind(BasicPacketContext context) {
@@ -108,7 +105,7 @@ final class AttackEntityPacketState extends BasicPacketState {
             });
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-        context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                 final UUID key = entry.getKey();
                 final Optional<Entity> affectedEntity = spongeWorld.getEntity(key);
@@ -141,7 +138,7 @@ final class AttackEntityPacketState extends BasicPacketState {
                 }
             }
         });
-        context.getCapturedEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Sponge.getCauseStackManager().pushCause(player);
                 Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);

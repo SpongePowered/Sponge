@@ -116,7 +116,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     processSpawnedEntities(player, event);
                 }
             });
-            context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact At Entity").centre().hr();
                 printer.add("The item stacks captured are: ");
@@ -129,7 +129,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                 }
                 printer.trace(System.err);
             });
-            context.getCapturedEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
                     final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);

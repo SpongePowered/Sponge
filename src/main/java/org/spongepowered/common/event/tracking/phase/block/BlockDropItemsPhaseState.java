@@ -67,14 +67,9 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(blockSnapshot);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            if (phaseContext.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, phaseContext.getNotifier().get());
-            }
-            if (phaseContext.getOwner().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, phaseContext.getOwner().get());
-            }
+            frame.pushCause(blockSnapshot);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            phaseContext.addNotifierAndOwnerToCauseStack();
             phaseContext.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> entities = new ArrayList<>();
@@ -82,7 +77,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                             entities.add(EntityUtil.fromNative(item));
                         }
                         final DropItemEvent.Destruct event =
-                                SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                                SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
@@ -93,7 +88,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
@@ -105,7 +100,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             phaseContext.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
             phaseContext.getCapturedItemStackSupplier()
@@ -115,8 +110,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                                 .collect(Collectors.toList());
                         final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event =
-                                    SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
                                 for (Entity droppedItem : event.getEntities()) {

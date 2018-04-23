@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.interfaces.item;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IMixinItem {
 
     void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list);
+
+    default Optional<Entity> getCustomEntityItem(World world, Entity location, ItemStack itemstack) {
+        return Optional.empty();
+    }
 
 }

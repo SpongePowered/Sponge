@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -32,18 +33,13 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import javax.annotation.Nullable;
 
-public abstract class EntityPhaseState<E extends EntityContext<E>> implements IPhaseState<E> {
+public abstract class EntityPhaseState<E extends EntityContext<E>> implements IPhaseState<E>, IEntitySpecificItemDropsState<E> {
 
     private final String className = this.getClass().getSimpleName();
 
     @Override
     public final TrackingPhase getPhase() {
         return TrackingPhases.ENTITY;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
     @Override

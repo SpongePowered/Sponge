@@ -126,7 +126,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             // Forge always fires a living drop event even if nothing was captured
             // This allows mods such as Draconic Evolution to add items to the drop list
-            if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
+            if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
                 SpongeImpl.postEvent(destruct);
@@ -137,7 +137,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 }
                 return;
             }
-            context.getCapturedEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
+            context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
                     entities.add(EntityUtil.fromNative(item));
@@ -163,7 +163,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 // This avoids many issues with mods such as Tinkers Construct's soulbound items.
             });
             // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
-            context.getCapturedEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
+            context.getPerEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
                 final List<ItemDropData> items = new ArrayList<>();
                 items.addAll(itemStacks);
     

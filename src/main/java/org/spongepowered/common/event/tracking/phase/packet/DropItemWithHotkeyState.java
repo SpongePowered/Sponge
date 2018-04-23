@@ -109,7 +109,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     slotTrans.clear();
                     mixinContainer.setCaptureInventory(false);
                 });
-            context.getCapturedEntityDropSupplier()
+            context.getPerEntityItemDropSupplier()
                 .acceptIfNotEmpty(itemMapping -> {
 
                 });

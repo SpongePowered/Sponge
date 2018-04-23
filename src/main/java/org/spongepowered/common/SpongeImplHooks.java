@@ -407,6 +407,6 @@ public final class SpongeImplHooks {
 
     public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
         EntityItem entityitem) {
-        phaseContext.getCapturedEntityItemDropSupplier().get().put(owner.getUniqueID(), entityitem);
+        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), entityitem);
     }
 }

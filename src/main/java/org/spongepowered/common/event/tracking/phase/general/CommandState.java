@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -64,7 +65,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class CommandState extends GeneralState<CommandPhaseContext> {
+final class CommandState extends GeneralState<CommandPhaseContext> implements IEntitySpecificItemDropsState<CommandPhaseContext> {
 
     @Override
     public CommandPhaseContext createPhaseContext() {
@@ -74,11 +75,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
         return state instanceof BlockPhaseState;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
     @Override
@@ -138,7 +134,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(sender);
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            phaseContext.getCapturedEntityDropSupplier()
+            phaseContext.getPerEntityItemDropSupplier()
                     .acceptIfNotEmpty(uuidItemStackMultimap -> {
                         for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
                             final UUID key = entry.getKey();

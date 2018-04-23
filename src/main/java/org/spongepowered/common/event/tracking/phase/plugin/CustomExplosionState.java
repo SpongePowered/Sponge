@@ -46,6 +46,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -57,7 +58,7 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.List;
 
-final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
+final class CustomExplosionState extends PluginPhaseState<ExplosionContext> implements IEntitySpecificItemDropsState<ExplosionContext> {
     @Override
     public ExplosionContext createPhaseContext() {
         return new ExplosionContext()
@@ -93,11 +94,6 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> {
 
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
         return true;
     }
 
