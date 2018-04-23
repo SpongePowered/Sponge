@@ -71,6 +71,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -82,10 +83,10 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private final TileEntityType tileType = SpongeImpl.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
-    private Timing timing;
-    private LocatableBlock locatableBlock;
+    @Nullable private Timing timing;
+    @Nullable private LocatableBlock locatableBlock;
     // caches owner to avoid constant lookups in chunk
-    private User spongeOwner;
+    @Nullable private User spongeOwner;
     private boolean hasSetOwner = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
 
@@ -286,14 +287,27 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public void setSpongeOwner(User owner) {
+    public void setSpongeOwner(@Nullable User owner) {
+        if (owner == null) {
+            this.spongeOwner = null;
+            this.hasSetOwner = false;
+            return;
+        }
         this.spongeOwner = owner;
         this.hasSetOwner = true;
     }
 
     @Override
-    public User getSpongeOwner() {
-        return this.spongeOwner;
+    public Optional<User> getSpongeOwner() {
+        Optional<User> blockOwner;
+        if (!this.hasSetOwner()) {
+            IMixinChunk activeChunk = this.getActiveChunk();
+            if (activeChunk != null) {
+                blockOwner = activeChunk.getBlockOwner(pos);
+                this.setSpongeOwner(blockOwner.orElse(null));
+            }
+        }
+        return Optional.ofNullable(this.spongeOwner);
     }
 
     @Override

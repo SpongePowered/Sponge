@@ -36,6 +36,8 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 public interface IMixinTileEntity {
@@ -100,9 +102,9 @@ public interface IMixinTileEntity {
         return InternalSpawnTypes.BLOCK_SPAWNING;
     }
 
-    void setSpongeOwner(User owner);
+    void setSpongeOwner(@Nullable User owner);
 
-    User getSpongeOwner();
+    Optional<User> getSpongeOwner();
 
     boolean hasSetOwner();
 
