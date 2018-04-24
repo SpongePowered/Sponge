@@ -99,6 +99,7 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -724,6 +725,13 @@ public final class EntityUtil {
         return (Entity) tickingEntity;
     }
 
+    public static EntityLivingBase toNative(IMixinEntityLivingBase entityLivingBase) {
+        if (!(entityLivingBase instanceof EntityLivingBase)) {
+            throw new IllegalArgumentException("Not a native EntityLivingBase for this implementation!");
+        }
+        return (EntityLivingBase) entityLivingBase;
+    }
+
     public static EntityPlayer toNative(IMixinEntityPlayer player) {
         if (!(player instanceof EntityPlayer)) {
             throw new IllegalArgumentException("Not a native EntityPlayer for this implementation!");
@@ -934,6 +942,7 @@ public final class EntityUtil {
      * @param offsetY The offset y coordinate
      * @return The item entity
      */
+    @SuppressWarnings({"unchecked", "rawType"})
     @Nullable
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY, double xPos, double zPos) {
         if (itemStack.isEmpty()) {
@@ -974,7 +983,7 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (captureEntityItem(currentState, phaseContext, entityitem, entity)) {
+            if (currentState.performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
@@ -983,6 +992,7 @@ public final class EntityUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     public static EntityItem playerDropItem(IMixinEntityPlayer mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         mixinPlayer.shouldRestoreInventory(false);
@@ -1040,7 +1050,7 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (captureEntityItem(currentState, phaseContext, entityitem, player)) {
+            if (currentState.performOrCaptureItemDrop(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
                 return entityitem;
             }
             // TODO - Investigate whether player drops are adding to the stat list in captures.
@@ -1092,7 +1102,7 @@ public final class EntityUtil {
             stackFrame.pushCause(entity);
 
             // FIRST we want to throw the DropItemEvent.PRE
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(stackFrame.getCurrentCause(),
                 ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
@@ -1128,32 +1138,6 @@ public final class EntityUtil {
             }
             return item;
         }
-    }
-
-    /**
-     * Captures the item based on the current state.
-     *
-     * @param currentState The current state
-     * @param phaseContext The phase context
-     * @param entityitem The item entity to capture
-     * @param owner The owning entity
-     * @return Whether the drop is being captured
-     */
-    private static boolean captureEntityItem(IPhaseState currentState, PhaseContext<?> phaseContext, EntityItem entityitem, Entity owner) {
-        if (currentState.doesCaptureEntityDrops()) {
-            if (currentState.tracksEntitySpecificDrops()) {
-                // We are capturing per entity drop
-                // This is overridden in forge to utilize forge's capture lists as well
-                // (sets up the multimap list to the entity)
-                SpongeImplHooks.capturePerEntityItemDrop(phaseContext, owner, entityitem);
-            } else {
-                // We are adding to a general list - usually for EntityPhase.State.DEATH
-                phaseContext.getCapturedItemsSupplier().get().add(entityitem);
-            }
-            // Return the item, even if it wasn't spawned in the world.
-            return true;
-        }
-        return false;
     }
 
     private static Vector3d createDropMotion(boolean dropAround, EntityPlayer player, Random random) {
