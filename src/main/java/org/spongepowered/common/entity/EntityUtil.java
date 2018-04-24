@@ -82,6 +82,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -95,6 +96,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -102,6 +104,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -498,6 +501,27 @@ public final class EntityUtil {
 
     public static int getHorseInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {
         return color.getBitMask() | style.getBitMask();
+    }
+
+    public static void processEntitySpawnsFromEvent(PhaseContext<?> context, SpawnEntityEvent destruct) {
+        for (org.spongepowered.api.entity.Entity entity : destruct.getEntities()) {
+            // Here is where we need to handle the custom items potentially having custom entities
+            final Entity minecraftEntity = toNative(entity);
+            if (minecraftEntity instanceof EntityItem) {
+                final ItemStack item = ((EntityItem) minecraftEntity).getItem();
+                if (!item.isEmpty()) {
+                    final Optional<Entity>
+                        customEntityItem =
+                        ((IMixinItem) item.getItem()).getCustomEntityItem(minecraftEntity.getEntityWorld(), minecraftEntity, item);
+                    if (customEntityItem.isPresent()) {
+                        // Bypass spawning the entity item, since it is established that the custom entity is spawned.
+                        context.getCapturedEntities().add(fromNative(customEntityItem.get()));
+                        continue;
+                    }
+                }
+            }
+            getMixinWorld(entity).forceSpawnEntity(entity);
+        }
     }
 
 

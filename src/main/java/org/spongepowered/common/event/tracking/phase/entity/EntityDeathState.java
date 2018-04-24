@@ -78,65 +78,16 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         final DamageSource damageSource = context.getDamageSource();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(damageSource);
-            Sponge.getCauseStackManager().pushCause(dyingEntity);
+            frame.pushCause(damageSource);
+            frame.pushCause(dyingEntity);
             final boolean isPlayer = dyingEntity instanceof EntityPlayer;
             final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
             final Optional<User> notifier = context.getNotifier();
             final Optional<User> owner = context.getOwner();
             final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-            context.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        // Separate experience orbs from other entity drops
-                        final List<Entity> experience = entities.stream()
-                                .filter(entity -> entity instanceof ExperienceOrb)
-                                .collect(Collectors.toList());
-                        if (!experience.isEmpty()) {
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-    
-                            final SpawnEntityEvent
-                                    spawnEntityEvent =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
-                            SpongeImpl.postEvent(spawnEntityEvent);
-                            if (!spawnEntityEvent.isCancelled()) {
-                                for (Entity entity : spawnEntityEvent.getEntities()) {
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                }
-                            }
-                        }
-    
-                        // Now process other entities, this is separate from item drops specifically
-                        final List<Entity> other = entities.stream()
-                                .filter(entity -> !(entity instanceof ExperienceOrb))
-                                .collect(Collectors.toList());
-                        if (!other.isEmpty()) {
-                            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
-                            final SpawnEntityEvent
-                                    spawnEntityEvent =
-                                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
-                            SpongeImpl.postEvent(spawnEntityEvent);
-                            if (!spawnEntityEvent.isCancelled()) {
-                                for (Entity entity : spawnEntityEvent.getEntities()) {
-                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                }
-                            }
-                        }
-                    });
-    
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            // Forge always fires a living drop event even if nothing was captured
-            // This allows mods such as Draconic Evolution to add items to the drop list
-            if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
-                SpongeImpl.postEvent(destruct);
-                if (!destruct.isCancelled()) {
-                    for (Entity entity : destruct.getEntities()) {
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                    }
-                }
-                return;
-            }
+            // WE have to handle per-item entity drops and entity item drops before we handle other entity spawns
+            // the reason we have to do it this way is because forge allows for item drops to potentially spawn
+            // other entities at the same time.
             context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
                 final ArrayList<Entity> entities = new ArrayList<>();
                 for (EntityItem item : items) {
@@ -149,19 +100,68 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                     entityPlayer.inventory.clear();
                 }
 
-                final DropItemEvent.Destruct
-                    destruct =
-                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                SpongeImpl.postEvent(destruct);
-                if (!destruct.isCancelled()) {
-                    for (Entity entity : destruct.getEntities()) {
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                try (StackFrame internal = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    internal.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                    final DropItemEvent.Destruct
+                        destruct =
+                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
+                    SpongeImpl.postEvent(destruct);
+                    if (!destruct.isCancelled()) {
+                        EntityUtil.processEntitySpawnsFromEvent(context, destruct);
                     }
                 }
 
                 // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
                 // This avoids many issues with mods such as Tinkers Construct's soulbound items.
             });
+            context.getCapturedEntitySupplier()
+                    .acceptAndClearIfNotEmpty(entities -> {
+                        // Separate experience orbs from other entity drops
+                        final List<Entity> experience = entities.stream()
+                                .filter(entity -> entity instanceof ExperienceOrb)
+                                .collect(Collectors.toList());
+                        if (!experience.isEmpty()) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+    
+                            final SpawnEntityEvent
+                                    spawnEntityEvent =
+                                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), experience);
+                            SpongeImpl.postEvent(spawnEntityEvent);
+                            if (!spawnEntityEvent.isCancelled()) {
+                                EntityUtil.processEntitySpawnsFromEvent(context, spawnEntityEvent);
+
+                            }
+                        }
+    
+                        // Now process other entities, this is separate from item drops specifically
+                        final List<Entity> other = entities.stream()
+                                .filter(entity -> !(entity instanceof ExperienceOrb))
+                                .collect(Collectors.toList());
+                        if (!other.isEmpty()) {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
+                            final SpawnEntityEvent
+                                    spawnEntityEvent =
+                                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), experience);
+                            SpongeImpl.postEvent(spawnEntityEvent);
+                            if (!spawnEntityEvent.isCancelled()) {
+                                EntityUtil.processEntitySpawnsFromEvent(context, spawnEntityEvent);
+                            }
+                        }
+                    });
+    
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            // Forge always fires a living drop event even if nothing was captured
+            // This allows mods such as Draconic Evolution to add items to the drop list
+            if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
+                final ArrayList<Entity> entities = new ArrayList<>();
+                final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
+                SpongeImpl.postEvent(destruct);
+                if (!destruct.isCancelled()) {
+                    EntityUtil.processEntitySpawnsFromEvent(context, destruct);
+
+                return;
+            }
+
             // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
             context.getPerEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
                 final List<ItemDropData> items = new ArrayList<>();
@@ -182,7 +182,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
     
                     final DropItemEvent.Destruct
                             destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                            SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
                     SpongeImpl.postEvent(destruct);
                     if (!destruct.isCancelled()) {
                         for (Entity entity : destruct.getEntities()) {
@@ -200,4 +200,5 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             });
         }
     }
+
 }

@@ -96,7 +96,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                     final IMixinContainer mixinContainer = ContainerUtil.toMixin( player.openContainer);
                     List<SlotTransaction> slotTrans = mixinContainer.getCapturedTransactions();
-                    ClickInventoryEvent.Drop dropItemEvent = ((DropItemWithHotkeyState) this)
+                    ClickInventoryEvent.Drop dropItemEvent = this
                         .createInventoryEvent(player, ContainerUtil.fromNative(player.openContainer), cursorTrans, Lists.newArrayList(slotTrans), entities,  usedButton);
 
                     SpongeImpl.postEvent(dropItemEvent);
@@ -123,9 +123,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     public ClickInventoryEvent.Drop createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            Sponge.getCauseStackManager().pushCause(openContainer);
-            Sponge.getCauseStackManager().pushCause(playerMP);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (Entity currentEntity : capturedEntities) {
                 currentEntity.setCreator(playerMP.getUniqueID());   
             }
