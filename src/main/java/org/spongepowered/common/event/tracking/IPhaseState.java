@@ -43,6 +43,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -155,10 +156,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             entities);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled() && event.getEntities().size() > 0) {
-            for (org.spongepowered.api.entity.Entity item: event.getEntities()) {
-                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-            }
-            return true;
+            EntityUtil.processEntitySpawnsFromEvent(context, event);
+
         }
         return false;
     }

@@ -78,6 +78,7 @@ import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -85,6 +86,7 @@ import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -166,6 +168,40 @@ public class SpongeCommonEventFactory {
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
     public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
+
+    public static void callDispenseItems(List<EntityItem> items, PhaseContext<?> context) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+            final ArrayList<Entity> entities = new ArrayList<>();
+            for (EntityItem item : items) {
+                entities.add(EntityUtil.fromNative(item));
+            }
+            final DropItemEvent.Dispense dispense =
+                SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(dispense);
+            if (!dispense.isCancelled()) {
+                EntityUtil.processEntitySpawnsFromEvent(context, dispense);
+            }
+        }
+    }
+
+    public static void callDropItemEvent(List<EntityItem> items, PhaseContext<?> context) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            final ArrayList<Entity> entities = new ArrayList<>();
+            for (EntityItem item : items) {
+                entities.add(EntityUtil.fromNative(item));
+            }
+            final DropItemEvent.Custom event =
+                SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                EntityUtil.processEntitySpawnsFromEvent(context, event);
+            }
+        }
+    }
+
+
 
     public static boolean callPlayerChangeInventoryPickupPreEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
         ItemStack stack = itemToPickup.getItem();
