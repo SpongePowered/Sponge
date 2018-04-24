@@ -32,6 +32,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -45,6 +46,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
@@ -73,11 +75,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -408,5 +411,18 @@ public final class SpongeImplHooks {
     public static void capturePerEntityItemDrop(PhaseContext<?> phaseContext, Entity owner,
         EntityItem entityitem) {
         phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), entityitem);
+    }
+
+    /**
+     * @author gabizou - April 21st, 2018
+     * Gets the enchantment modifier for looting on the entity living base from the damage source, but in forge cases, we need to use their hooks.
+     *
+     * @param mixinEntityLivingBase
+     * @param entity
+     * @param cause
+     * @return
+     */
+    public static int getLootingEnchantmentModifier(IMixinEntityLivingBase mixinEntityLivingBase, EntityLivingBase entity, DamageSource cause) {
+        return EnchantmentHelper.getLootingModifier(entity);
     }
 }

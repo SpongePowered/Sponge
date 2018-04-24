@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -41,6 +42,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -54,6 +56,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -337,11 +340,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param entityitem The item to be dropped
      * @return True if we are capturing, false if we are to let the item spawn
      */
-    default boolean performOrCaptureItemDrop(C phaseContext, EntityLivingBase entity, EntityItem entityitem) {
+    default boolean performOrCaptureItemDrop(C phaseContext, Entity entity, EntityItem entityitem) {
         if (this.doesCaptureEntityDrops()) {
             if (this.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
-                phaseContext.getPerEntityItemEntityDropSupplier().get().put(entity.getUniqueID(), entityitem);
+                // This has to be handled specially for the entity in forge environments to
+                // specifically syncronize the list used for sponge's tracking and forge's partial tracking
+                SpongeImplHooks.capturePerEntityItemDrop(phaseContext, entity, entityitem);
             } else {
                 // We are adding to a general list - usually for EntityPhase.State.DEATH
                 phaseContext.getCapturedItemsSupplier().get().add(entityitem);

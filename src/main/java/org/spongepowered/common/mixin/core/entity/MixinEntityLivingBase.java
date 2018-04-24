@@ -82,6 +82,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -292,7 +293,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 int i = 0;
 
                 if (entity instanceof EntityPlayer) {
-                    i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+                    // Sponge Start - use Forge hooks for the looting modifier.
+                    //i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+                    i = SpongeImplHooks.getLootingEnchantmentModifier(this, (EntityLivingBase) entity, cause);
                 }
 
                 if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
