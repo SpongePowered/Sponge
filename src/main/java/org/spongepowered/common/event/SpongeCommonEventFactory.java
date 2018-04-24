@@ -380,11 +380,11 @@ public class SpongeCommonEventFactory {
 
     /**
      * Processes pre block event data then fires event.
-     * 
+     *
      * Note: This method does not create a stack frame.
      * Any caller to this method should have a frame created to
      * avoid stack corruption.
-     * 
+     *
      * @param worldIn The world
      * @param locations The locations affected
      * @param source The source of event
@@ -703,13 +703,13 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(EntityPlayer player, ItemStack heldItem, @Nullable Vector3d hitVec,
+    public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(EntityPlayer player, ItemStack heldItem, @Nullable Vector3d hitVec,
             BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
-        return callInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
+        return createInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
                 hitVec, targetBlock, targetSide, hand);
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(EntityPlayer player, ItemStack heldItem, Tristate originalUseBlockResult, Tristate useBlockResult,
+    public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(EntityPlayer player, ItemStack heldItem, Tristate originalUseBlockResult, Tristate useBlockResult,
             Tristate originalUseItemResult, Tristate useItemResult, @Nullable Vector3d hitVec, BlockSnapshot targetBlock,
             Direction targetSide, EnumHand hand) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -726,7 +726,6 @@ public class SpongeCommonEventFactory {
                         originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, HandTypes.OFF_HAND, Optional.ofNullable
                                 (hitVec), targetBlock, targetSide);
             }
-            SpongeImpl.postEvent(event);
             return event;
         }
     }

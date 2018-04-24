@@ -60,6 +60,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
@@ -112,9 +113,10 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final ItemStack oldStack = stack.copy();
 
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(player, oldStack,
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, oldStack,
                 new Vector3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ),
                 currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        SpongeImpl.postEvent(event);
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
