@@ -122,7 +122,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                                 .collect(Collectors.toList());
                         if (!experience.isEmpty()) {
                             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-    
+
                             final SpawnEntityEvent
                                     spawnEntityEvent =
                                     SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), experience);
@@ -132,7 +132,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
                             }
                         }
-    
+
                         // Now process other entities, this is separate from item drops specifically
                         final List<Entity> other = entities.stream()
                                 .filter(entity -> !(entity instanceof ExperienceOrb))
@@ -141,14 +141,14 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
                             final SpawnEntityEvent
                                     spawnEntityEvent =
-                                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), experience);
+                                    SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), other);
                             SpongeImpl.postEvent(spawnEntityEvent);
                             if (!spawnEntityEvent.isCancelled()) {
                                 EntityUtil.processEntitySpawnsFromEvent(context, spawnEntityEvent);
                             }
                         }
                     });
-    
+
             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             // Forge always fires a living drop event even if nothing was captured
             // This allows mods such as Draconic Evolution to add items to the drop list
@@ -158,28 +158,27 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
                     EntityUtil.processEntitySpawnsFromEvent(context, destruct);
-
-                return;
+                }
             }
 
             // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
             context.getPerEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
                 final List<ItemDropData> items = new ArrayList<>();
                 items.addAll(itemStacks);
-    
+
                 if (!items.isEmpty()) {
                     final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
                     final List<Entity> itemEntities = items.stream()
                             .map(data -> data.create((WorldServer) minecraftEntity.world))
                             .map(EntityUtil::fromNative)
                             .collect(Collectors.toList());
-    
+
                     if (isPlayer) {
                         // Forge and Vanilla always clear items on player death BEFORE drops occur
                         // This will also provide the highest compatibility with mods such as Tinkers Construct
                         entityPlayer.inventory.clear();
                     }
-    
+
                     final DropItemEvent.Destruct
                             destruct =
                             SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
@@ -192,13 +191,14 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                             EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
-    
+
                     // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
                     // This avoids many issues with mods such as Tinkers Construct's soulbound items.
                 }
-    
+
             });
         }
     }
+
 
 }
