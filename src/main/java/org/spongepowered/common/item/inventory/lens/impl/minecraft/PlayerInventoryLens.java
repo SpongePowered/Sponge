@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.common.entity.player.SpongeUserInventory;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
@@ -38,27 +42,37 @@ import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+
+import java.util.Optional;
 
 public class PlayerInventoryLens extends RealLens {
 
     private static final int EQUIPMENT = 4;
-    private final ArmorEquipable player;
+    private static final int OFFHAND = 1;
 
     private MainPlayerInventoryLensImpl main;
     private EquipmentInventoryLensImpl equipment;
     private SlotLens<IInventory, ItemStack> offhand;
+    private final boolean isContainer;
 
     public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getFabric().getSize(), adapter, slots);
-        if (adapter instanceof InventoryPlayer) {
-            this.player = (ArmorEquipable) ((InventoryPlayer) adapter).player;
-        }
-        else if (adapter instanceof SpongeUserInventory) {
-            this.player = ((SpongeUserInventory) adapter).player;
-        } else {
-            throw new IllegalArgumentException("Adapter is not a PlayerInventory");
-        }
+        this.isContainer = false;
+        this.init(slots);
+    }
+
+    /**
+     * Constructor for ContainerPlayer Inventory
+     *
+     * @param base The base index
+     * @param size The size
+     * @param slots The slots
+     */
+    public PlayerInventoryLens(int base, int size, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, size, PlayerInventory.class, slots);
+        this.isContainer = true;
         this.init(slots);
     }
 
@@ -69,24 +83,50 @@ public class PlayerInventoryLens extends RealLens {
             this.addChild(slots.getSlot(slot), new SlotIndex(ord));
         }
 
-        int base = 0;
-        this.main = new MainPlayerInventoryLensImpl(base, slots, false);
-        base += this.main.slotCount();
-        this.equipment = new EquipmentInventoryLensImpl(this.player, base, EQUIPMENT, 1, slots, false);
-        base += EQUIPMENT;
-        this.offhand = slots.getSlot(base);
+        int base = this.base;
+        if (this.isContainer) {
+            this.equipment = new EquipmentInventoryLensImpl(base, EQUIPMENT, 1, slots, true);
+            base += EQUIPMENT; // 4
+            this.main = new MainPlayerInventoryLensImpl(base, slots, true);
+            base += this.main.slotCount();
+            this.offhand = slots.getSlot(base);
+            base += OFFHAND;
+        } else {
+            this.main = new MainPlayerInventoryLensImpl(base, slots, false);
+            base += this.main.slotCount();
+            this.equipment = new EquipmentInventoryLensImpl(base, EQUIPMENT, 1, slots, false);
+            base += EQUIPMENT;
+            this.offhand = slots.getSlot(base);
+            base += OFFHAND;
+        }
 
-        // TODO Hotbar in Vanilla is part of the main inventory (first 9 slots) ; maybe wrap it in a Lens?
+        finishInit(slots, base);
+
+    }
+
+    @Override
+    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+        if (this.isContainer && inv instanceof ContainerFabric) {
+            // If Lens is for Container extract the PlayerInventory
+            Container container = ((ContainerFabric) inv).getContainer();
+            Optional carrier = ((CarriedInventory) container).getCarrier();
+            if (carrier.isPresent() && carrier.get() instanceof Player) {
+                return ((InventoryAdapter) ((Player) carrier.get()).getInventory());
+            }
+        }
+        return super.getAdapter(inv, parent);
+    }
+
+    private void finishInit(SlotProvider<IInventory, ItemStack> slots, int base) {
         this.addSpanningChild(this.main);
         this.addSpanningChild(this.equipment);
         this.addSpanningChild(this.offhand);
 
         // Additional Slots for bigger modded inventories
-        int additionalSlots = this.size - base - 1;
+        int additionalSlots = this.size - base;
         if (additionalSlots > 0) {
             this.addSpanningChild(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
         }
-
     }
 
     public MainPlayerInventoryLens<IInventory, ItemStack> getMainLens() {
