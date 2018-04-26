@@ -437,11 +437,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
         }
-
-        // Send the tab list packets here, insetad of in 'playerLoggedIn'. This gives event
-        // listeners the chance to set any VANISH keys that they want to
-        this.sendTabList(playerIn);
-
         // Sponge end
     }
 
@@ -788,18 +783,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS, shift = At.Shift.BEFORE), cancellable = true)
     public void playerLoggedIn2(EntityPlayerMP player, CallbackInfo ci) {
-
-        // Spawn player into level
-        WorldServer level = this.mcServer.getWorld(player.dimension);
-        // TODO direct this appropriately
-        level.spawnEntity(player);
-        this.preparePlayer(player, null);
-
-        // We always want to cancel.
-        ci.cancel();
-    }
-
-    private void sendTabList(EntityPlayerMP player) {
         // Create a packet to be used for players without context data
         SPacketPlayerListItem noSpecificViewerPacket = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, player);
 
@@ -812,6 +795,15 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 player.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
             }
         }
+
+        // Spawn player into level
+        WorldServer level = this.mcServer.getWorld(player.dimension);
+        // TODO direct this appropriately
+        level.spawnEntity(player);
+        this.preparePlayer(player, null);
+
+        // We always want to cancel.
+        ci.cancel();
     }
 
     @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))
