@@ -99,6 +99,7 @@ shadowJar ext.shadowConfiguration = {
 
         // We need to exclude the test plugins
         exclude project(testPlugins.path)
+        exclude project(testmods.path)
 
         include dependency('org.spongepowered:plugin-meta')
 
