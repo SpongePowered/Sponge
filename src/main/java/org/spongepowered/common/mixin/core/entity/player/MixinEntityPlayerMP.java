@@ -707,12 +707,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, true);
         this.spongeScoreboard = scoreboard;
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
     }
 
     @Override
     public void initScoreboard() {
-        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, true);
+    }
+
+    @Override
+    public void setScoreboardOnRespawn(Scoreboard scoreboard) {
+        this.spongeScoreboard = scoreboard;
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this, false);
+    }
+
+    @Override
+    public void removeScoreboardOnRespawn() {
+        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, false);
+        // This player is being removed, so this is fine
+        this.spongeScoreboard = null;
     }
 
     @Override

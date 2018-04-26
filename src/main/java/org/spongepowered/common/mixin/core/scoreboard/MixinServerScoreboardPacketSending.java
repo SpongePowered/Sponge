@@ -67,9 +67,11 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @Override
-    public void addPlayer(EntityPlayerMP player) {
+    public void addPlayer(EntityPlayerMP player, boolean sendPackets) {
         this.players.add(player);
-        this.sendScoreboard(player);
+        if (sendPackets) {
+            this.sendScoreboard(player);
+        }
     }
 
     void sendScoreboard(EntityPlayerMP player) {

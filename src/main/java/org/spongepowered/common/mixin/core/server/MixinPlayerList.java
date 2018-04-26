@@ -534,6 +534,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
+        ((IMixinEntityPlayerMP) newPlayer).setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
+        ((IMixinEntityPlayerMP) playerIn).removeScoreboardOnRespawn();
+
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
         }
