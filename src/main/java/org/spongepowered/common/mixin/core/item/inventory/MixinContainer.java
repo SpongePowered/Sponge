@@ -107,6 +107,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Nullable private CraftItemEvent.Craft lastCraft = null;
     private boolean firePreview;
     @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
+    private boolean inUse = false;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -552,5 +553,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public void setOpenLocation(Location<org.spongepowered.api.world.World> loc) {
         this.lastOpenLocation = loc;
+    }
+
+    @Override
+    public void setInUse(boolean inUse) {
+        this.inUse = inUse;
+    }
+
+    @Override
+    public boolean isInUse() {
+        return this.inUse;
     }
 }

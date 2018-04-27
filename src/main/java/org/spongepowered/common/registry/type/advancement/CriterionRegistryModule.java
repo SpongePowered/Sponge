@@ -30,7 +30,7 @@ import org.spongepowered.common.advancement.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.SpongeEmptyCriterion;
 import org.spongepowered.common.registry.RegistryHelper;
 
-public class CriterionRegistryModule implements RegistryModule {
+public final class CriterionRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {

@@ -79,6 +79,11 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
             builder.success(ImmutableSpongeValue.cachedOf(Keys.GLOWING, false, newGlowing));
             changed = true;
         }
+        if (elytra != newElytra) {
+            builder.replace(ImmutableSpongeValue.cachedOf(Keys.IS_ELYTRA_FLYING, false, elytra));
+            builder.success(ImmutableSpongeValue.cachedOf(Keys.IS_ELYTRA_FLYING, false, newElytra));
+            changed = true;
+        }
         builder.result(DataTransactionResult.Type.SUCCESS);
         return changed ? Optional.of(builder.build()) : Optional.empty();
     }
@@ -94,7 +99,7 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
         boolean newSprinting = getFlag(originalValue, SPRINTING_MASK);
         boolean newInvisible = getFlag(originalValue, INVISIBLE_MASK);
         boolean newGlowing = getFlag(originalValue, GLOWING_MASK);
-        boolean elytra = getFlag(originalValue, FLYING_ELYTRA_MASK);
+        boolean newElytra = getFlag(originalValue, FLYING_ELYTRA_MASK);
         for (ImmutableValue<?> immutableValue : immutableValues) {
             if (immutableValue.getKey() == Keys.IS_SNEAKING) {
                 newIsSneaking = ((Boolean) immutableValue.get());
@@ -108,13 +113,16 @@ public class EntityFlagsConverter extends DataParameterConverter<Byte> {
             if (immutableValue.getKey() == Keys.GLOWING) {
                 newGlowing = (Boolean) immutableValue.get();
             }
+            if (immutableValue.getKey() == Keys.IS_ELYTRA_FLYING) {
+                newElytra = (Boolean) immutableValue.get();
+            }
         }
         byte newValue = (byte) (onFire ?  ON_FIRE_MASK : 0);
         newValue = (byte) (newIsSneaking ? newValue | CROUCHED_MASK : newValue & ~CROUCHED_MASK);
         newValue = (byte) (newSprinting ? newValue | SPRINTING_MASK : newValue & ~SPRINTING_MASK);
         newValue = (byte) (newInvisible ? newValue | INVISIBLE_MASK : newValue & ~INVISIBLE_MASK);
         newValue = (byte) (newGlowing ? newValue | GLOWING_MASK : newValue & ~GLOWING_MASK);
-        newValue = (byte) (elytra ? newValue | FLYING_ELYTRA_MASK : newValue & ~FLYING_ELYTRA_MASK);
+        newValue = (byte) (newElytra ? newValue | FLYING_ELYTRA_MASK : newValue & ~FLYING_ELYTRA_MASK);
         return newValue;
     }
 

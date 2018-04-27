@@ -50,10 +50,6 @@ import java.util.stream.Collectors;
 
 final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
-    EntityDeathState() {
-
-    }
-
     @Override
     public boolean tracksBlockSpecificDrops() {
         return true;
@@ -78,8 +74,8 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         final DamageSource damageSource = context.getDamageSource();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(damageSource);
             frame.pushCause(dyingEntity);
+            frame.pushCause(damageSource);
             final boolean isPlayer = dyingEntity instanceof EntityPlayer;
             final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
             final Optional<User> notifier = context.getNotifier();

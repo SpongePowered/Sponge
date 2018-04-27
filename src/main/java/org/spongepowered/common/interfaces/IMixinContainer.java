@@ -66,4 +66,8 @@ public interface IMixinContainer extends IMixinInventory {
 
     @Nullable Location<World> getOpenLocation();
     void setOpenLocation(@Nullable Location<World> loc);
+
+    void setInUse(boolean inUse);
+    boolean isInUse();
+
 }

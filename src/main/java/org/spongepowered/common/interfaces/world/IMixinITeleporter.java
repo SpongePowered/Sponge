@@ -24,54 +24,25 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.difficulty.Difficulty;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 
-import javax.annotation.Nullable;
+/**
+ * Compatibility interface to handle Forge binary patching {@link Teleporter} to implement their ITeleporter
+ */
+public interface IMixinITeleporter {
 
-public interface IMixinWorldSettings {
+    // Copied from Forge to match their teleporter methods, this allows
+    // the forge mod provided teleporters to still work with common
+    // code.
+    void placeEntity(World world, Entity entity, float yaw);
 
-    void setId(String id);
-
-    void setName(String name);
-
-    boolean isFromBuilder();
-
-    void setDimensionType(DimensionType dimensionType);
-
-    void setDifficulty(Difficulty difficulty);
-
-    void setSerializationBehavior(SerializationBehavior behavior);
-
-    void setGeneratorSettings(DataContainer generatorSettings);
-
-    void setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers);
-
-    void setEnabled(boolean state);
-
-    void setLoadOnStartup(boolean state);
-
-    void setKeepSpawnLoaded(@Nullable Boolean state);
-
-    void setGenerateSpawnOnLoad(boolean state);
-
-    void setPVPEnabled(boolean state);
-
-    void setCommandsAllowed(boolean state);
-
-    void setGenerateBonusChest(boolean state);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void fromBuilder(boolean state);
-
-    void setRandomSeed(boolean state);
-
-    @Nullable
-    Boolean internalKeepSpawnLoaded();
+    // used internally to handle vanilla hardcoding
+    default boolean isVanilla()
+    {
+        return this.getClass().equals(Teleporter.class);
+    }
 }

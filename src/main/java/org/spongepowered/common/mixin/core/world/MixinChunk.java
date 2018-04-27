@@ -34,6 +34,8 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -786,11 +788,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
+    public void setTrackedIntPlayerPositions(Int2ObjectMap<PlayerTracker> trackedPositions) {
     }
 
     @Override
-    public void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPositions) {
+    public void setTrackedShortPlayerPositions(Short2ObjectMap<PlayerTracker> trackedPositions) {
     }
 
     // Continuing the rest of the implementation

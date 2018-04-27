@@ -435,7 +435,7 @@ public class DamageEventHandler {
                 .cause(Cause.of(EventContext.empty(), player))
                 .type(DamageModifierTypes.CRITICAL_HIT)
                 .build();
-        DoubleUnaryOperator function = (damage) -> damage * 1.5F;
+        DoubleUnaryOperator function = (damage) -> damage * .5F;
         return new DamageFunction(modifier, function);
     }
 

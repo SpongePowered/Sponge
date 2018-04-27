@@ -31,19 +31,20 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 
+import java.util.Optional;
+
 public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens<IInventory, ItemStack> {
 
-    final ArmorEquipable carrier;
-
-    public EquipmentInventoryLensImpl(ArmorEquipable carrier, int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots, boolean isContainer) {
+    public EquipmentInventoryLensImpl(int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots,
+            boolean isContainer) {
         super(base, size, stride, EquipmentInventoryAdapter.class, slots);
-        this.carrier = carrier;
         if (isContainer) {
             this.initContainer(slots);
         } else {
@@ -85,6 +86,13 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
 
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new EquipmentInventoryAdapter(this.carrier, inv, this, parent);
+        ArmorEquipable carrier = null;
+        if (parent instanceof CarriedInventory) {
+            Optional opt = ((CarriedInventory) parent).getCarrier();
+            if (opt.isPresent() && opt.get() instanceof ArmorEquipable) {
+                carrier = ((ArmorEquipable) opt.get());
+            }
+        }
+        return new EquipmentInventoryAdapter(carrier, inv, this, parent);
     }
 }

@@ -85,6 +85,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
@@ -386,7 +387,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return false;
         }
         // Sponge - This hook is for forge use mainly
-        if (!hookModAttack((EntityLivingBase) (Object) this, source, amount))
+        if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount))
             return false;
         // Sponge end
         if (this.isEntityInvulnerable(source)) {
@@ -716,7 +717,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
                     Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
 
-                    MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
+                    MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform);
                     if (event.isCancelled()) {
                         this.posX = d0;
                         this.posY = d1;
@@ -744,7 +745,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             if (!world.isRemote) {
                 Transform<org.spongepowered.api.world.World> transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
-                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, false);
+                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform);
                 if (event.isCancelled()) {
                     return false;
                 }
@@ -940,6 +941,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
         return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public void setElytraFlying(boolean value) {
+        setFlag(DataConstants.ELYTRA_FLYING_FLAG, value);
     }
 
 }

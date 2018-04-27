@@ -73,7 +73,7 @@ final class CloseWindowState extends BasicPacketState {
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);// Non-merged
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // items
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
                 final List<Entity> entities = items

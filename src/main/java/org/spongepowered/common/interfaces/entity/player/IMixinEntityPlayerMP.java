@@ -31,6 +31,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
@@ -54,6 +55,10 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     MessageChannel getDeathMessageChannel();
 
     void initScoreboard();
+
+    void removeScoreboardOnRespawn();
+
+    void setScoreboardOnRespawn(Scoreboard scoreboard);
 
     IMixinWorldServer getMixinWorld();
 

@@ -45,7 +45,9 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.advancement.AdvancementEvent;
 import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
+import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
@@ -59,6 +61,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.explosion.Explosion;
 
 import java.util.HashMap;
@@ -302,5 +305,15 @@ public class AdvancementTest {
                 }
             }
         }
+    }
+
+    @Listener
+    public void onCriterionGrant(CriterionEvent.Grant event) {
+        event.getTargetEntity().sendMessage(Text.of(TextColors.GREEN, "Congratulations on achieving criterion " + event.getCriterion().getName()));
+    }
+
+    @Listener
+    public void onAdvancementGrant(AdvancementEvent.Grant event) {
+        event.getTargetEntity().sendMessage(Text.of(TextColors.BLUE, "You achieved advancement " + event.getAdvancement().getName()));
     }
 }

@@ -52,6 +52,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
+import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
@@ -249,8 +250,9 @@ public class PacketUtil {
 
             final boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), result ==
                     null ? null : VecHelper.toVector3d(result.hitVec), BlockSnapshot.NONE).isCancelled();
-            SpongeCommonEventFactory.callInteractBlockEventSecondary(playerMP, heldItem, result == null ? null : VecHelper.toVector3d(result
-                    .hitVec), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
+
+            SpongeImpl.postEvent(SpongeCommonEventFactory.createInteractBlockEventSecondary(playerMP, heldItem, result == null ? null : VecHelper.toVector3d(result
+                    .hitVec), BlockSnapshot.NONE, Direction.NONE, packet.getHand()));
             if (isCancelled) {
                 // Multiple slots may have been changed on the client. Right
                 // clicking armor is one example - the client changes it

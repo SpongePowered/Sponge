@@ -27,7 +27,9 @@ package org.spongepowered.common.mixin.core.server;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +37,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -61,7 +64,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     @Override
     public Optional<InetSocketAddress> getBoundAddress() {
         //noinspection ConstantConditions
-        if (getHostname() == null) {
+        if (this.getHostname() == null) {
             return Optional.empty();
         }
         return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
@@ -80,8 +83,17 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     }
 
     @Inject(method = "systemExitNow", at = @At("HEAD"))
-    public void postGameStoppingEvent(CallbackInfo ci) {
+    private void postGameStoppingEvent(CallbackInfo ci) {
         SpongeImpl.postShutdownEvents();
+    }
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/PropertyManager;getIntProperty(Ljava/lang/String;I)I"))
+    private int fixWrongDefaultDifficulty(PropertyManager propertyManager, String key, int defaultValue) {
+        if ("difficulty".equalsIgnoreCase(key)) {
+            return propertyManager.getIntProperty(key, WorldInfo.DEFAULT_DIFFICULTY.getDifficultyId());
+        }
+
+        return propertyManager.getIntProperty(key, defaultValue);
     }
 
     /**
@@ -107,7 +119,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
         }
 
         BlockPos spawnPoint = worldIn.getSpawnPoint();
-        int protectionRadius = getSpawnProtectionSize();
+        int protectionRadius = this.getSpawnProtectionSize();
 
         return protectionRadius > 0
                && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius

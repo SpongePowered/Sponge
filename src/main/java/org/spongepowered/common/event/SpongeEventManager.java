@@ -32,6 +32,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -46,6 +47,7 @@ import org.spongepowered.api.event.GenericEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeImpl;
@@ -53,6 +55,7 @@ import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Field;
@@ -83,10 +86,8 @@ public class SpongeEventManager implements EventManager {
     private final Object lock = new Object();
     protected final Logger logger;
     private final PluginManager pluginManager;
-    private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
-    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-            new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
+    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders = Maps.newHashMap();
     private final Set<Object> registeredListeners = Sets.newHashSet();
 
     public final ListenerChecker checker = new ListenerChecker(ShouldFire.class);
@@ -225,6 +226,16 @@ public class SpongeEventManager implements EventManager {
         Map<Method, String> methodErrors = new HashMap<>();
 
         Class<?> handle = listenerObject.getClass();
+        ClassLoader handleLoader = handle.getClassLoader();
+
+        AnnotatedEventListener.Factory handlerFactory = classLoaders.get(handleLoader);
+        if (handlerFactory == null) {
+            final DefineableClassLoader classLoader = new DefineableClassLoader(handleLoader);
+            handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
+                    new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
+            classLoaders.put(handleLoader, handlerFactory);
+        }
+
         for (Method method : handle.getMethods()) {
             Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
@@ -234,7 +245,7 @@ public class SpongeEventManager implements EventManager {
                     final TypeToken eventType = TypeToken.of(method.getGenericParameterTypes()[0]);
                     AnnotatedEventListener handler;
                     try {
-                        handler = this.handlerFactory.create(listenerObject, method);
+                        handler = handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
                         this.logger.error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
@@ -421,10 +432,19 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public boolean post(Event event) {
-        // Allow the client thread by default so devs can actually
-        // call their own events inside the init events. Only allowing
-        // this as long that there is no server available
-        return post(event, !Sponge.isServerAvailable());
+        try {
+            if (event instanceof InteractInventoryEvent) { // Track usage of Containers
+                ((IMixinContainer) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(true);
+            }
+            // Allow the client thread by default so devs can actually
+            // call their own events inside the init events. Only allowing
+            // this as long that there is no server available
+            return post(event, !Sponge.isServerAvailable());
+        } finally {
+            if (event instanceof InteractInventoryEvent) { // Finished using Container
+                ((IMixinContainer) ((InteractInventoryEvent) event).getTargetInventory()).setInUse(false);
+            }
+        }
     }
 
     public boolean postServer(Event event) {
@@ -433,5 +453,7 @@ public class SpongeEventManager implements EventManager {
 
     public boolean post(Event event, boolean allowClientThread) {
         return post(event, getHandlerCache(event).getListeners());
+
+
     }
 }
