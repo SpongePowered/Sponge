@@ -22,33 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.command.multiworld;
+package org.spongepowered.common.world;
 
-import net.minecraft.command.CommandDifficulty;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-@Mixin(CommandDifficulty.class)
-public abstract class MixinCommandDifficulty {
+public final class WorldUtil {
 
-    /**
-     * @author Minecrell - September 28, 2016
-     * @author Zidane - January 31, 2018
-     * @reason Change difficulty only in the world the command was executed in
-     * @reason Redirect to the WorldManager
-     */
-    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;"
-            + "setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
-    private void onSetDifficulty(MinecraftServer server, EnumDifficulty difficulty, MinecraftServer server2, ICommandSender sender, String[] args) {
-        World world = sender.getEntityWorld();
+  private WorldUtil() {}
 
-        WorldManager.adjustWorldForDifficulty((WorldServer) world, difficulty, true);
-    }
+  @SuppressWarnings("unchecked")
+  public static <T extends World> T asNative(org.spongepowered.api.world.World world) {
+    return (T) world;
+  }
+
+  public static WorldServer asNative(IMixinWorldServer world) {
+    return (WorldServer) world;
+  }
+
+  public static org.spongepowered.api.world.World fromNative(World world) {
+    return (org.spongepowered.api.world.World) world;
+  }
+
+  public static org.spongepowered.api.world.World fromNative(IMixinWorld world) {
+    return (org.spongepowered.api.world.World) world;
+  }
+
+  public static org.spongepowered.api.world.World fromNative(IMixinWorldServer world) {
+    return (org.spongepowered.api.world.World) world;
+  }
 }

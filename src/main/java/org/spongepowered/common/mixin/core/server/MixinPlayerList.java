@@ -59,6 +59,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
@@ -111,6 +112,7 @@ import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
+import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
 import org.spongepowered.common.service.ban.SpongeUserListBans;
@@ -193,7 +195,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge
      */
     public void func_72355_a(NetworkManager netManager, EntityPlayerMP playerIn) {
-        initializeConnectionToPlayer(netManager, playerIn, null);
+        this.initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
     /**
@@ -220,7 +222,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
     }
 
-    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
+    private void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, @Nullable NetHandlerPlayServer handler) {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
@@ -237,7 +239,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
         WorldServer worldServer = this.mcServer.getWorld(playerIn.dimension);
         int actualDimensionId = ((IMixinWorldServer) worldServer).getDimensionId();
-        BlockPos spawnPos = null;
+        BlockPos spawnPos;
         // Join data
         Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
         Instant lastJoined = Instant.now();
@@ -256,7 +258,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         // Sponge start - fire login event
-        @Nullable String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
+        @Nullable String kickReason = this.allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
         Text disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeTexts.fromLegacy(kickReason);
@@ -279,7 +281,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         if (SpongeImpl.postEvent(loginEvent)) {
             Sponge.getCauseStackManager().popCause();
-            disconnectClient(netManager, loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage()), gameprofile);
+            this.disconnectClient(netManager, loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage()), gameprofile);
             return;
         }
         Sponge.getCauseStackManager().popCause();
@@ -352,9 +354,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         // Sponge Start - Use the server's ResourcePack object
         Optional<ResourcePack> pack = ((Server)this.mcServer).getDefaultResourcePack();
-        if (pack.isPresent()) {
-            ((Player)playerIn).sendResourcePack(pack.get());
-        }
+        pack.ifPresent(((Player) playerIn)::sendResourcePack);
         // Sponge End
 
         // Sponge Start
@@ -534,6 +534,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             newPlayer.setSpawnPoint(bedPos, playerIn.isSpawnForced());
         }
 
+        ((IMixinEntityPlayerMP) newPlayer).setScoreboardOnRespawn(((Player) playerIn).getScoreboard());
+        ((IMixinEntityPlayerMP) playerIn).removeScoreboardOnRespawn();
+
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
         }
@@ -579,13 +582,15 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             WorldManager.sendDimensionRegistration(newPlayer, worldServer.provider);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
-            if (fromTransform.getExtent() != worldServer && fromTransform.getExtent().getDimension().getType() == toTransform.getExtent().getDimension().getType()) {
+            if (fromTransform.getExtent().getUniqueId() != ((World) worldServer).getUniqueId() && fromTransform.getExtent().getDimension().getType() ==
+              toTransform.getExtent().getDimension().getType()) {
                 newPlayer.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), worldServer.getDifficulty(), worldServer
                         .getWorldInfo().getTerrainType(), newPlayer.interactionManager.getGameType()));
             }
         }
         newPlayer.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
                 .getWorldInfo().getTerrainType(), newPlayer.interactionManager.getGameType()));
+        newPlayer.connection.sendPacket(new SPacketServerDifficulty(worldServer.getDifficulty(), worldServer.getWorldInfo().isDifficultyLocked()));
         newPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 (float) toTransform.getYaw(), (float) toTransform.getPitch());
 
@@ -625,8 +630,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      * @param teleporter The teleporter used to transport and create the portal
      */
     @Override
-    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
-        MoveEntityEvent.Teleport.Portal event = EntityUtil.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
+    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, Teleporter teleporter) {
+        MoveEntityEvent.Teleport.Portal event = EntityUtil.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, (IMixinITeleporter) teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }
@@ -709,7 +714,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
         MoveEntityEvent.Teleport.Portal event = EntityUtil
-                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld), teleporter);
+                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld), (IMixinITeleporter) teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }

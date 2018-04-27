@@ -70,13 +70,13 @@ public class SpongeConfig<T extends ConfigBase> {
             + "# IRC: #sponge @ irc.esper.net ( https://webchat.esper.net/?channel=sponge )\n"
             + "# Forums: https://forums.spongepowered.org/\n";
 
-    private Type type;
+    private final Type type;
     private HoconConfigurationLoader loader;
     private CommentedConfigurationNode root = SimpleCommentedConfigurationNode.root(ConfigurationOptions.defaults()
             .setHeader(HEADER));
     private ObjectMapper<T>.BoundInstance configMapper;
     private T configBase;
-    private String modId;
+    private final String modId;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public SpongeConfig(Type type, Path path, String modId) {

@@ -22,19 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.type;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import ninja.leaping.configurate.objectmapping.Setting;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElytraFlyingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.ElytraFlyingData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElytraFlyingData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
-import java.util.ArrayList;
-import java.util.List;
+public class SpongeElytraFlyingData extends AbstractBooleanData<ElytraFlyingData, ImmutableElytraFlyingData> implements ElytraFlyingData {
 
-public final class WorldConfig extends GeneralConfigBase {
-
-    @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
-    private final List<String> worldModifiers = new ArrayList<>();
-
-    public List<String> getWorldGenModifiers() {
-        return this.worldModifiers;
+    public SpongeElytraFlyingData(boolean value) {
+        super(ElytraFlyingData.class, value, Keys.IS_ELYTRA_FLYING, ImmutableSpongeElytraFlyingData.class, false);
     }
+
+    public SpongeElytraFlyingData() {
+        this(false);
+    }
+
+    @Override
+    public Value<Boolean> elytraFlying() {
+        return getValueGetter();
+    }
+
 }

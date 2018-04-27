@@ -22,33 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.command.multiworld;
+package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.command.CommandDifficulty;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.EnumDifficulty;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.WorldManager;
+import net.minecraft.world.WorldProvider;
+import org.spongepowered.api.world.PortalAgentType;
 
-@Mixin(CommandDifficulty.class)
-public abstract class MixinCommandDifficulty {
+/**
+ * Compatibility interface to handle Forge binary patching {@link Teleporter} to implement their ITeleporter
+ */
+public interface IMixinITeleporter {
 
-    /**
-     * @author Minecrell - September 28, 2016
-     * @author Zidane - January 31, 2018
-     * @reason Change difficulty only in the world the command was executed in
-     * @reason Redirect to the WorldManager
-     */
-    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;"
-            + "setDifficultyForAllWorlds(Lnet/minecraft/world/EnumDifficulty;)V"))
-    private void onSetDifficulty(MinecraftServer server, EnumDifficulty difficulty, MinecraftServer server2, ICommandSender sender, String[] args) {
-        World world = sender.getEntityWorld();
+    // Copied from Forge to match their teleporter methods, this allows
+    // the forge mod provided teleporters to still work with common
+    // code.
+    void placeEntity(World world, Entity entity, float yaw);
 
-        WorldManager.adjustWorldForDifficulty((WorldServer) world, difficulty, true);
+    // used internally to handle vanilla hardcoding
+    default boolean isVanilla()
+    {
+        return this.getClass().equals(Teleporter.class);
     }
 }

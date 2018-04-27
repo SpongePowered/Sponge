@@ -57,6 +57,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -65,6 +66,8 @@ import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegist
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
@@ -81,26 +84,24 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Shadow public abstract WorldType getTerrainType();
     @Shadow public abstract boolean shadow$areCommandsAllowed();
 
-    private String id, name;
+    @Nullable private String id, name;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
     private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
-    private Boolean keepSpawnLoaded = null;
+    @Nullable private Boolean keepSpawnLoaded = null;
     private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
     private boolean fromBuilder = false;
-    private PortalAgentType portalAgentType;
+    @Nullable private PortalAgentType portalAgentType;
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
     private boolean seedRandomized = false;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
-    public void onConstruct(WorldInfo info, CallbackInfo ci) {
-        //Set above: info.getSeed(), info.getGameType(),  info.isMapFeaturesEnabled(), info.isHardcoreModeEnabled(), info.getTerrainType()
-
+    private void onConstruct(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
         if (((IMixinWorldInfo) properties).getWorldConfig() != null) {
             this.dimensionType = properties.getDimensionType();
@@ -134,7 +135,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
-    public void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
+    private void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         DataContainer settings = null;
@@ -327,7 +328,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean state) {
+    public void setKeepSpawnLoaded(@Nullable Boolean state) {
         this.keepSpawnLoaded = state;
     }
 

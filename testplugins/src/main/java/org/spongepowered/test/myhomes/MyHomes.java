@@ -78,7 +78,7 @@ public class MyHomes {
         this.logger.info("onKeyRegistration");
         DEFAULT_HOME = Key.builder()
             .type(new TypeToken<Value<Home>>() {})
-            .id("myhomes:default_home")
+            .id("default_home")
             .name("Default Home")
             .query(DataQuery.of("DefaultHome"))
             .build();
@@ -86,7 +86,7 @@ public class MyHomes {
 
         HOMES = Key.builder()
             .type(new TypeToken<MapValue<String, Home>>() {})
-            .id("myhomes:homes")
+            .id("homes")
             .name("Homes")
             .query(DataQuery.of("Homes"))
             .build();
@@ -94,7 +94,7 @@ public class MyHomes {
 
         FRIENDS = Key.builder()
             .type(new TypeToken<ListValue<UUID>>() {})
-            .id("myhomes:friends")
+            .id("friends")
             .name("Friends")
             .query(DataQuery.of("Friends"))
             .build();

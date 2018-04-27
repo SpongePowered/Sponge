@@ -57,4 +57,8 @@ public interface IMixinEntityLivingBase {
 
     double getLastDamageTaken();
 
+    void setRevengeTarget(EntityLivingBase entityLivingBase);
+
+    void setElytraFlying(boolean value);
+
 }

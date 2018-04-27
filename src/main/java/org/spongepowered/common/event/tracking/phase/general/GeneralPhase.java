@@ -53,6 +53,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
+import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -202,15 +203,15 @@ public final class GeneralPhase extends TrackingPhase {
 
             // Handle item drops captured
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
-            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldLocation.getExtent();
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
             final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
             capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
                     .spawnItemDataForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext));
             capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
                     .spawnItemEntitiesForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext));
 
-            final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
-            SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
+            final WorldServer world = WorldUtil.asNative(mixinWorld);
+            SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);
             final SpongeBlockChangeFlag spongeFlag = oldBlockSnapshot.getChangeFlag();
             final int updateFlag =  spongeFlag.getRawFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -219,7 +220,7 @@ public final class GeneralPhase extends TrackingPhase {
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
             if (spongeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
                     newState)) {
-                newState.getBlock().onBlockAdded(worldServer, pos, newState);
+                newState.getBlock().onBlockAdded(world, pos, newState);
                 postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                     final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
                     ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
@@ -237,13 +238,13 @@ public final class GeneralPhase extends TrackingPhase {
             if (spongeFlag.isNotifyClients()) {
                 // Since notifyBlockUpdate is basically to tell clients that the block position has changed,
                 // we need to respect that flag
-                worldServer.notifyBlockUpdate(pos, originalState, newState, updateFlag);
+                world.notifyBlockUpdate(pos, originalState, newState, updateFlag);
             }
 
             if (spongeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                mixinWorldServer.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, spongeFlag);
+                mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, spongeFlag);
             } else if (spongeFlag.notifyObservers()) {
-                worldServer.updateObservingBlocksAt(pos, newState.getBlock());
+                world.updateObservingBlocksAt(pos, newState.getBlock());
             }
 
             capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {

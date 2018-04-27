@@ -68,6 +68,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.WorldUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -544,7 +545,7 @@ public final class PhaseTracker {
 
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, BlockChangeFlag flag) {
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final net.minecraft.world.World minecraftWorld = mixinWorld.asMinecraftWorld();
+        final net.minecraft.world.World minecraftWorld = WorldUtil.asNative(mixinWorld);
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
         // It is now possible for setBlockState to be called on an empty chunk due to our optimization
         // for returning empty chunks when we don't want a chunk to load.

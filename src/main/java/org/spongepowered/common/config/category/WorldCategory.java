@@ -27,6 +27,7 @@ package org.spongepowered.common.config.category;
 import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.world.difficulty.Difficulty;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,22 +49,22 @@ public class WorldCategory extends ConfigCategory {
 
     @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \n"
                                                 + "This value is capped to the current view distance setting in server.properties")
-    protected int mobSpawnRange = 4;
+    private int mobSpawnRange = 4;
 
     @Setting(value = "world-enabled", comment = "If 'true', this world will be registered.")
-    protected boolean worldEnabled = true;
+    private boolean worldEnabled = true;
 
     @Setting(value = "load-on-startup", comment = "If 'true', this world will load on startup.")
-    protected Boolean loadOnStartup;
+    private Boolean loadOnStartup = true;
 
     @Setting(value = "generate-spawn-on-load", comment = "If 'true', this world will generate its spawn the moment its loaded.")
-    protected Boolean generateSpawnOnLoad;
+    private Boolean generateSpawnOnLoad;
 
     @Setting(value = "keep-spawn-loaded", comment = "If 'true', this worlds spawn will remain loaded with no players.")
-    protected Boolean keepSpawnLoaded;
+    private Boolean keepSpawnLoaded = true;
 
     @Setting(value = "pvp-enabled", comment = "If 'true', this world will allow PVP combat.")
-    protected boolean pvpEnabled = true;
+    private boolean pvpEnabled = true;
 
     @Setting(value = "portal-agents", comment = "A list of all detected portal agents used in this world. \n"
                                               + "In order to override, change the target world name to any other valid world. \n"
@@ -119,7 +120,7 @@ public class WorldCategory extends ConfigCategory {
                     + "The server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + "."
     )
     private int viewDistance = USE_SERVER_VIEW_DISTANCE;
-    
+
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");

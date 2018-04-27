@@ -67,6 +67,7 @@ public final class DataConstants {
     public static final boolean DEFAULT_SHOULD_DROP = true;
     public static final boolean DEFAULT_PISTON_EXTENDED = false;
 
+    public static final int ELYTRA_FLYING_FLAG = 7;
 
     // A bunch of entity defaults (for use in constructing "default" values)
     public static final boolean CAN_FLY_DEFAULT = false;
