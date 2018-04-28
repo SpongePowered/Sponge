@@ -260,6 +260,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
+        if (this.isDead) {
+            if (this.deathEventsPosted > MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+                // ignore because some moron is not resetting the entity.
+            }
+        }
         if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause).isCancelled()) {
             // Since the forge event is cancellable
             return;
