@@ -71,6 +71,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -84,8 +87,10 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.ChangeEntityExperienceEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.ChangeLevelEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -101,6 +106,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeExperienceHolderData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.entity.EntityUtil;
@@ -223,9 +230,21 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "addExperienceLevel", at = @At("RETURN"))
+    /**
+     * @author JBYoshi - October 11, 2017
+     * @reason This makes the experience updating more accurate by using
+     * integer-based calculations instead of floating-point calculations, which
+     * are known to cause <a href="https://github.com/SpongePowered/SpongeVanilla/issues/340">
+     * rounding errors.</a>
+     */
+    @Inject(method = "addExperienceLevel", at = @At("HEAD"), cancellable = true)
     private void onAddExperienceLevels(int levels, CallbackInfo ci) {
-        recalculateTotalExperience();
+        if (!this.dontRecalculateExperience) {
+            int newLevel = Math.max(this.experienceLevel + levels, 0);
+            postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
+                    + (int) (this.experience * ExperienceHolderUtils.getExpBetweenLevels(newLevel)));
+            ci.cancel();
+        }
     }
 
     @Inject(method = "onEnchant", at = @At("RETURN"))
@@ -255,22 +274,47 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             // this.experience = (this.experience - 1.0F) * (float)this.xpBarCap();
             // this.addExperienceLevel(1);
         // }
+        postEventAndUpdateExperience(this.experienceTotal + amount);
+        // Sponge end
+    }
 
-        int finalExperience = this.experienceTotal + amount;
-        int finalLevel = ExperienceHolderUtils.getLevelForExp(finalExperience);
+    private void postEventAndUpdateExperience(int finalExperience) {
+        ExperienceHolderData data = new SpongeExperienceHolderData();
+        ((SpongeExperienceHolderData) data).setTotalExp(finalExperience);
+        ChangeEntityExperienceEvent event = SpongeEventFactory.createChangeEntityExperienceEvent(
+                Sponge.getCauseStackManager().getCurrentCause(),
+                new ImmutableSpongeExperienceHolderData(this.experienceLevel, this.experienceTotal, this.getExperienceSinceLevel()),
+                data, (Player) this);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            return;
+        }
+        int finalLevel = event.getFinalData().level().get();
         if (finalLevel != this.experienceLevel) {
-            this.dontRecalculateExperience = true;
-            try {
-                addExperienceLevel(finalLevel - this.experienceLevel);
-            } finally {
-                this.dontRecalculateExperience = false;
+            @SuppressWarnings("deprecation")
+            ChangeLevelEvent levelEvent = SpongeEventFactory.createChangeLevelEventTargetPlayer(
+                    Sponge.getCauseStackManager().getCurrentCause(), this.experienceLevel, finalLevel, (Player) this);
+            SpongeImpl.postEvent(levelEvent);
+            if (levelEvent.isCancelled()) {
+                return;
+            }
+            if (levelEvent.getLevel() != finalLevel) {
+                finalLevel = levelEvent.getLevel();
+                event.getFinalData().set(Keys.EXPERIENCE_LEVEL, finalLevel);
+            }
+            if (finalLevel != this.experienceLevel) {
+                this.dontRecalculateExperience = true;
+                try {
+                    addExperienceLevel(finalLevel - this.experienceLevel);
+                } finally {
+                    this.dontRecalculateExperience = false;
+                }
             }
         }
-        this.experience = (float) (finalExperience - ExperienceHolderUtils.xpAtLevel(finalLevel))
+        this.experience = (float) event.getFinalData().experienceSinceLevel().get()
                 / ExperienceHolderUtils.getExpBetweenLevels(finalLevel);
-        this.experienceTotal = finalExperience;
+        this.experienceTotal = event.getFinalData().totalExperience().get();
         this.experienceLevel = finalLevel;
-        // Sponge end
     }
 
     @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
