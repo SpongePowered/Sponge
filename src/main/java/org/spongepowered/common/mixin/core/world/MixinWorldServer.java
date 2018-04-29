@@ -1424,7 +1424,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @SuppressWarnings("Duplicates")
     @Override
-    public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
+    protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
@@ -1436,7 +1436,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void onUpdateTileEntities(ITickable tile) {
+    protected void onUpdateTileEntities(ITickable tile) {
         this.updateTileEntity(tile);
     }
 
@@ -1454,7 +1454,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
+    protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
@@ -1467,7 +1467,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
+    protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
