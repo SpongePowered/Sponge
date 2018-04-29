@@ -764,7 +764,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, DamageSource source) {
+    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;
         MessageChannel channel;
@@ -793,13 +793,15 @@ public class SpongeCommonEventFactory {
         // checks need to be made here since entities can die on the client world.
         try (final StackFrame ignored = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
             if (isMainThread) {
-                Sponge.getCauseStackManager().pushCause(source);
+                if (source != null) {
+                    Sponge.getCauseStackManager().pushCause(source);
+                }
                 if (sourceCreator.isPresent()) {
                     Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, sourceCreator.get());
                 }
             }
 
-            final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
+            final Cause cause = isMainThread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
             DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
                 originalChannel, Optional.of(channel), formatter,
                 (Living) entity, entity.world.getGameRules().getBoolean("keepInventory"), messageCancelled);

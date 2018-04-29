@@ -61,4 +61,6 @@ public interface IMixinEntityLivingBase {
 
     void setElytraFlying(boolean value);
 
+    void resetDeathEventsPosted();
+
 }

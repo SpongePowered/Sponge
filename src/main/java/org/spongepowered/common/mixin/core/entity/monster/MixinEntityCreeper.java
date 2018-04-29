@@ -46,6 +46,8 @@ import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityCreeper.class)
 public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper, IMixinFusedExplosive {
 
@@ -133,7 +135,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
-    protected void onStateChange(int state, CallbackInfo ci) {
+    private void onStateChange(int state, CallbackInfo ci) {
         setFuseDuration(this.fuseDuration);
         if (!isPrimed() && state == STATE_PRIMED && !shouldPrime()) {
             ci.cancel();
@@ -145,7 +147,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
-    protected void postStateChange(int state, CallbackInfo ci) {
+    private void postStateChange(int state, CallbackInfo ci) {
         if (this.stateDirty) {
             if (state == STATE_PRIMED) {
                 postPrime();
@@ -157,8 +159,9 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
-            double y, double z, float strength, boolean smoking) {
+    @Nullable
+    private net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
+        double y, double z, float strength, boolean smoking) {
         return detonate(Explosion.builder()
                 .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
@@ -172,14 +175,14 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Inject(method = "explode", at = @At("RETURN"))
-    protected void postExplode(CallbackInfo ci) {
+    private void postExplode(CallbackInfo ci) {
         if (this.detonationCancelled) {
             this.detonationCancelled = this.isDead = false;
         }
     }
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_IGNITE))
-    protected void onInteractIgnite(EntityCreeper self) {
+    private void onInteractIgnite(EntityCreeper self) {
         this.interactPrimeCancelled = !shouldPrime();
         if (!this.interactPrimeCancelled) {
             ignite();
@@ -187,7 +190,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_DAMAGE_ITEM))
-    protected void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
+    private void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
         if (!this.interactPrimeCancelled) {
             fas.damageItem(amount, player);
             // TODO put this in the cause somehow?

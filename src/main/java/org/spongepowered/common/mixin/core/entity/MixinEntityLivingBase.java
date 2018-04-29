@@ -42,6 +42,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.CombatEntry;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -119,6 +120,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
 
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+    private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
 
     private int maxAir = 300;
 
@@ -197,6 +199,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow @Nullable public abstract EntityLivingBase getRevengeTarget();
 
+    @Shadow public int deathTime;
+
+    @Shadow public abstract void heal(float healAmount);
+
+    private int deathEventsPosted;
+
+
     @Override
     public Vector3d getHeadRotation() {
         // pitch, yaw, roll -- Minecraft does not currently support head roll
@@ -245,6 +254,26 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     protected boolean tracksEntityDeaths = false;
 
+    @Inject(method = "onDeathUpdate", at = @At("HEAD"), cancellable = true)
+    private void onDeathUpdateForSpongeEvent(CallbackInfo ci) {
+        if (!this.isDead) {
+            if (this.deathEventsPosted > MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+                // ignore because some moron is not resetting the entity.
+            } else {
+                this.deathEventsPosted++;
+                final CombatEntry bestCombatEntry = this.getCombatTracker().getBestCombatEntry();
+                final DamageSource source = bestCombatEntry != null ? bestCombatEntry.getDamageSrc() : null;
+                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, source).isCancelled()) {
+                    // Since the forge event is cancellable
+                    ci.cancel();
+                    this.deathTime = 0;
+                }
+            }
+        } else {
+            this.deathEventsPosted = 0;
+        }
+    }
+
     /**
      * @author blood - May 12th, 2016
      * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
@@ -260,15 +289,20 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        if (this.isDead) {
+        if (!this.isDead) {
             if (this.deathEventsPosted > MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
+            } else {
+                this.deathEventsPosted++;
+                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause).isCancelled()) {
+                    // Since the forge event is cancellable
+                    return;
+                }
             }
+        } else {
+            this.deathEventsPosted = 0;
         }
-        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause).isCancelled()) {
-            // Since the forge event is cancellable
-            return;
-        }
+
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null;
@@ -319,6 +353,27 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
 
         // Sponge End
+    }
+
+    @Override
+    public void resetDeathEventsPosted() {
+        this.deathEventsPosted = 0;
+    }
+
+    /**
+     * @author gabizou - April 29th, 2018
+     * @reason Due to cancelling death events, "healing" the entity is the only way to cancel the
+     * death, but we still want to reset the death event counter. This is the simplest way to get it working
+     * with forge mods who do not have access to Sponge's API.
+     *
+     * @param health The health
+     * @param info The callback
+     */
+    @Inject(method = "setHealth", at = @At("HEAD"))
+    private void onSetHealthResetEvents(float health, CallbackInfo info) {
+        if (this.getHealth() <= 0 && health > 0) {
+            resetDeathEventsPosted();
+        }
     }
 
     @Nullable
