@@ -281,7 +281,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     @Override
     public void onDeath(DamageSource cause) {
-        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause).isCancelled()) {
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread).isCancelled()) {
             return;
         }
         super.onDeath(cause);

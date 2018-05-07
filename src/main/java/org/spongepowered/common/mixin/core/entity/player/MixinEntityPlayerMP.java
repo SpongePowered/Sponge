@@ -315,23 +315,21 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Overwrite
     public void onDeath(DamageSource cause) {
         // Sponge start
-        DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause);
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
         if (event.isCancelled()) {
             return;
         }
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean tracksEntityDeaths;
-        if (!this.world.isRemote) {
+        if (isMainThread && !this.world.isRemote) {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
         } else {
             tracksEntityDeaths = false;
         }
-        try (PhaseContext<?> context = !tracksEntityDeaths ? EntityPhase.State.DEATH.createPhaseContext()
-            .source(this)
-            .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-            .buildAndSwitch() : null) {
+        try (PhaseContext<?> context = createContextForDeath(cause, tracksEntityDeaths)) {
             // Sponge end
 
             boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
@@ -386,6 +384,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
             this.keepInventory = event.getKeepInventory();
         } // Sponge - brackets
+    }
+
+    @Nullable
+    private PhaseContext<?> createContextForDeath(DamageSource cause, boolean tracksEntityDeaths) {
+        return !tracksEntityDeaths
+               ? EntityPhase.State.DEATH.createPhaseContext()
+                   .source(this)
+                   .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
+                   .buildAndSwitch()
+               : null;
     }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))

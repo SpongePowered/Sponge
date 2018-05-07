@@ -142,6 +142,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
+
     // Empty body so that we can call super() in MixinEntityPlayer
     @Shadow public void stopActiveHand() {
 
@@ -252,28 +253,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return Text.of(this.getUniqueID().toString());
     }
 
-    protected boolean tracksEntityDeaths = false;
-
-    @Inject(method = "onDeathUpdate", at = @At("HEAD"), cancellable = true)
-    private void onDeathUpdateForSpongeEvent(CallbackInfo ci) {
-        if (!this.isDead) {
-            if (this.deathEventsPosted > MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
-                // ignore because some moron is not resetting the entity.
-            } else {
-                this.deathEventsPosted++;
-                final CombatEntry bestCombatEntry = this.getCombatTracker().getBestCombatEntry();
-                final DamageSource source = bestCombatEntry != null ? bestCombatEntry.getDamageSrc() : null;
-                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, source).isCancelled()) {
-                    // Since the forge event is cancellable
-                    ci.cancel();
-                    this.deathTime = 0;
-                }
-            }
-        } else {
-            this.deathEventsPosted = 0;
-        }
-    }
-
     /**
      * @author blood - May 12th, 2016
      * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
@@ -289,12 +268,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        if (!this.isDead) {
-            if (this.deathEventsPosted > MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
+            if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
-            } else {
                 this.deathEventsPosted++;
-                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause).isCancelled()) {
+                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).isCancelled()) {
                     // Since the forge event is cancellable
                     return;
                 }
@@ -304,7 +283,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
 
         // Double check that the PhaseTracker is already capturing the Death phase
-        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null;
              final EntityDeathContext context = createOrNullDeathPhase(isMainThread, frame, cause)) {
             // We re-enter the state only if we aren't already in the death state. This can usually happen when

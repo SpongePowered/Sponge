@@ -24,18 +24,37 @@
  */
 package org.spongepowered.test;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 @Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest")
 public class DeathTest {
 
+    private boolean allowDeathsOfPlayers = true;
+
+    @Listener
+    public void onInit(GameInitializationEvent event) {
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                this.allowDeathsOfPlayers = !this.allowDeathsOfPlayers;
+                return CommandResult.success();
+            }
+            )
+            .build(), "toggleDeath");
+    }
+
     @Listener
     public void onDeath(DestructEntityEvent.Death entityEvent, @Getter("getTargetEntity") Player player) {
-        entityEvent.setCancelled(true);
+        if (!this.allowDeathsOfPlayers) {
+            entityEvent.setCancelled(true);
+        }
     }
 
 }

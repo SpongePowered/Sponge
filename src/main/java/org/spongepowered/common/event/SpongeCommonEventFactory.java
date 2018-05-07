@@ -764,7 +764,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source) {
+    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source, boolean isMainThread) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;
         MessageChannel channel;
@@ -788,16 +788,15 @@ public class SpongeCommonEventFactory {
 
         originalMessage = SpongeTexts.toText(entity.getCombatTracker().getDeathMessage());
         formatter.getBody().add(new MessageEvent.DefaultBodyApplier(originalMessage));
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         // Try-with-resources will not produce an NPE when trying to autoclose the frame if it is null. Client sided
         // checks need to be made here since entities can die on the client world.
-        try (final StackFrame ignored = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
+        try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
             if (isMainThread) {
                 if (source != null) {
-                    Sponge.getCauseStackManager().pushCause(source);
+                    frame.pushCause(source);
                 }
                 if (sourceCreator.isPresent()) {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, sourceCreator.get());
+                    frame.addContext(EventContextKeys.OWNER, sourceCreator.get());
                 }
             }
 
@@ -805,9 +804,10 @@ public class SpongeCommonEventFactory {
             DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
                 originalChannel, Optional.of(channel), formatter,
                 (Living) entity, entity.world.getGameRules().getBoolean("keepInventory"), messageCancelled);
-            SpongeImpl.postEvent(event);
+            SpongeImpl.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
             Text message = event.getMessage();
-            if (!event.isMessageCancelled() && !message.isEmpty()) {
+            // Check the event isn't cancelled either. If it is, then don't spawn the message.
+            if (!event.isCancelled() && !event.isMessageCancelled() && !message.isEmpty()) {
                 event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
             }
             return event;
