@@ -29,11 +29,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -99,16 +94,17 @@ public class PlayerPhase extends TrackingPhase {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-                SpongeCommonEventFactory.callDispenseItems(items, phaseContext);
+                SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
             });
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
 
             });
             phaseContext.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(items -> {
-                final List<EntityItem> drops = items.stream()
+                final List<Entity> drops = items.stream()
                         .map(drop -> drop.create(EntityUtil.getMinecraftWorld(player)))
+                        .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
-                SpongeCommonEventFactory.callDropItemEvent(drops, phaseContext);
+                SpongeCommonEventFactory.callDropItemCustom(drops, phaseContext);
             });
             phaseContext.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, phaseContext));

@@ -46,6 +46,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -85,8 +86,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
                     blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
             context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
-                    final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                    TrackingUtil.splitAndSpawnEntities(entities, entity -> entity.setCreator(user.getUniqueId()));
+                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
 
                 });
         }

@@ -110,30 +110,26 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
         phaseContext.getCapturedBlockSupplier()
                 .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(sender);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            frame.pushCause(sender);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid,
                         // need to investigate further.
-                        final SpawnEntityEvent spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        if (!spawnEntityEvent.isCancelled()) {
+                        final SpawnEntityEvent event =
+                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
                             final boolean isPlayer = sender instanceof Player;
                             final Player player = isPlayer ? (Player) sender : null;
-                            for (Entity entity : spawnEntityEvent.getEntities()) {
-                                if (isPlayer) {
-                                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
+                            EntityUtil.processEntitySpawnsFromEvent(event, () -> Optional.ofNullable(isPlayer ? player.getUniqueId() : null));
+
                         }
                     });
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(sender);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.pushCause(sender);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
             phaseContext.getPerEntityItemDropSupplier()
                     .acceptIfNotEmpty(uuidItemStackMultimap -> {
                         for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
@@ -165,20 +161,15 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
                                         .map(data -> data.create(minecraftWorld))
                                         .map(EntityUtil::fromNative)
                                         .collect(Collectors.toList());
-                                Sponge.getCauseStackManager().pushCause(affectedEntity.get());
+                                frame.pushCause(affectedEntity.get());
                                 final DropItemEvent.Destruct destruct =
-                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
                                 SpongeImpl.postEvent(destruct);
-                                Sponge.getCauseStackManager().popCause();
+                                frame.popCause();
                                 if (!destruct.isCancelled()) {
                                     final boolean isPlayer = sender instanceof Player;
                                     final Player player = isPlayer ? (Player) sender : null;
-                                    for (Entity entity : destruct.getEntities()) {
-                                        if (isPlayer) {
-                                            EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                                        }
-                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                    }
+                                    EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUniqueId() : null));
                                 }
 
                             }

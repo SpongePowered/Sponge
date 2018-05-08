@@ -36,7 +36,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -54,7 +53,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -103,23 +101,17 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     public void unwind(ExplosionContext context) {
         final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            context.addNotifierAndOwnerToCauseStack();
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
-            Sponge.getCauseStackManager().pushCause(explosion);
+            context.addNotifierAndOwnerToCauseStack(frame);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
+            frame.pushCause(explosion);
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
             context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
                         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                if (user != null) {
-                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
+                            EntityUtil.processEntitySpawnsFromEvent(context, event);
                         }
                     });
         }
@@ -276,10 +268,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
                 entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled() && event.getEntities().size() > 0) {
-                for (Entity item: event.getEntities()) {
-                    ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-                }
-                return true;
+                EntityUtil.processEntitySpawnsFromEvent(context, event);
             }
             return false;
         });

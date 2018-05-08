@@ -1104,7 +1104,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return ImmutableList.of();
         }
         for (Entity entity : event.getEntities()) {
-            this.forceSpawnEntity(entity);
+            EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
 
         return event.getEntities().stream().filter(Entity::isLoaded).collect(ImmutableList.toImmutableList());

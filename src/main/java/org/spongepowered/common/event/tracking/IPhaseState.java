@@ -45,6 +45,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -147,20 +148,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if the entity was successfully captured
      */
     default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
-        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-        if (user != null) {
-            entity.setCreator(user.getUniqueId());
-        }
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-            entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled() && event.getEntities().size() > 0) {
-            EntityUtil.processEntitySpawnsFromEvent(context, event);
-
-        }
-        return false;
+        return SpongeCommonEventFactory.callSpawnEntity(entities, context);
     }
 
     default boolean ignoresBlockTracking() {
@@ -264,15 +254,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        final User creator = unwindingContext.getNotifier().orElseGet(() -> unwindingContext.getOwner().orElse(null));
-        TrackingUtil.splitAndSpawnEntities(
-            entities,
-            entity -> {
-                if (creator != null) {
-                    entity.setCreator(creator.getUniqueId());
-                }
-            }
-        );
+        SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
     }
 
     default boolean alreadyCapturingEntitySpawns() {

@@ -67,7 +67,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
 
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatable);
-            context.addNotifierAndOwnerToCauseStack();
+            context.addNotifierAndOwnerToCauseStack(frame);
 
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
@@ -78,20 +78,15 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), items);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
+                            EntityUtil.processEntitySpawnsFromEvent(context, event);
                         }
                     });
             context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
+                            EntityUtil.processEntitySpawnsFromEvent(context, event);
                         }
                     });
             context.getCapturedItemStackSupplier()
@@ -101,13 +96,10 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                                 .collect(Collectors.toList());
                         final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event =
-                                    SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
+                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
-                                for (Entity droppedItem : event.getEntities()) {
-                                    mixinWorld.forceSpawnEntity(droppedItem);
-                                }
+                                EntityUtil.processEntitySpawnsFromEvent(context, event);
                             }
                         }
                     });

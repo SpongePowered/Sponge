@@ -69,9 +69,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
 
-    default boolean forceSpawnEntity(Entity entity) {
-        return this.forceSpawnEntity(EntityUtil.fromNative(entity));
-    }
 
     void onSpongeEntityAdded(Entity entity);
 

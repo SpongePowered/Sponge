@@ -61,15 +61,19 @@ final class CreativeInventoryPacketState extends BasicPacketState {
                 if (items.isEmpty()) {
                     return;
                 }
+                /*
+                By this point, the stack frame should have the following:
+
+                 */
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-                    Sponge.getCauseStackManager().pushCause(player);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                    frame.pushCause(player);
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
                         entities.add(EntityUtil.fromNative(item));
                     }
                     final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeEventFactory.createDropItemEventDispense(frame.getCurrentCause(), entities);
                     SpongeImpl.postEvent(dispense);
                     if (!dispense.isCancelled()) {
                         processSpawnedEntities(player, dispense);
