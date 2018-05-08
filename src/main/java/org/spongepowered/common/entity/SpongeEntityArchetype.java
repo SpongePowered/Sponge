@@ -111,11 +111,13 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             if (entity instanceof EntityLiving) {
-                mixinWorldServer.forceSpawnEntity(entity);
+                // This is ok to force spawn since we aren't considering custom items.
+                mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
                 ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
                 ((EntityLiving) entity).spawnExplosionParticle();
             } else {
-                mixinWorldServer.forceSpawnEntity(entity);
+                // This is ok to force spawn since we aren't considering custom items.
+                mixinWorldServer.forceSpawnEntity(EntityUtil.fromNative(entity));
             }
             return Optional.of(spongeEntity);
         }

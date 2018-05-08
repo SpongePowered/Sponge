@@ -74,6 +74,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
@@ -746,7 +747,7 @@ public final class PhaseTracker {
             SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         if (entity instanceof EntityPlayer || !event.isCancelled()) {
-            mixinWorldServer.forceSpawnEntity(entity);
+            EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
         // Sponge end
 

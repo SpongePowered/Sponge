@@ -75,8 +75,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.lang.ref.WeakReference;
 
 public class PacketUtil {
-    @SuppressWarnings("unchecked")
-    private static final PhaseContext<?> EMPTY = new BasicPacketContext((PacketState) PacketPhase.General.INVALID).markEmpty();
 
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
@@ -133,7 +131,7 @@ public class PacketUtil {
                     if (packetState == null) {
                         throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                     }
-                    PhaseContext<?> context = EMPTY;
+                    PhaseContext<?> context = PhaseContext.empty();
                     if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
                         context = packetState.createPhaseContext()
                             .source(packetPlayer)

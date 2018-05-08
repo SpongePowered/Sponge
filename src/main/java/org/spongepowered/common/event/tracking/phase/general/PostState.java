@@ -30,6 +30,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -141,7 +142,8 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
         if (!contextItems.isEmpty()) {
             final ArrayList<Entity> items = new ArrayList<>(contextItems);
             contextItems.clear();
-            TrackingUtil.splitAndSpawnEntities(items);
+            SpongeCommonEventFactory.callSpawnEntity(items, unwindingContext);
+
         }
     }
 

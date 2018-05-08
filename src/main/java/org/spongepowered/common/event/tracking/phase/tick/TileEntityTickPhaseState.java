@@ -39,6 +39,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -76,41 +77,27 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public void unwind(TileEntityTickContext phaseContext) {
-        final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
-        final Optional<User> notifier = phaseContext.getNotifier();
-        final Optional<User> owner = phaseContext.getOwner();
-        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+    public void unwind(TileEntityTickContext context) {
+        final TileEntity tickingTile = context.getSource(TileEntity.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-            phaseContext.getCapturedBlockSupplier()
+            context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blockSnapshots -> {
-                        TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
+                        TrackingUtil.processBlockCaptures(blockSnapshots, this, context);
                     });
-            Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
-            phaseContext.getCapturedItemsSupplier()
+            frame.pushCause(tickingTile.getLocatableBlock());
+            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : entities) {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
-                        final SpawnEntityEvent
-                                spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        if (!spawnEntityEvent.isCancelled()) {
-                            for (Entity entity : spawnEntityEvent.getEntities()) {
-                                if (entityCreator != null) {
-                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
+                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Exception occured while processing tile entity %s at %s", tickingTile, tickingTile.getLocation()), e);
+            throw new RuntimeException(String.format("Exception occurred while processing tile entity %s at %s", tickingTile, tickingTile.getLocation()), e);
         }
     }
 
@@ -127,54 +114,27 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     public boolean spawnEntityOrCapture(TileEntityTickContext context, Entity entity, int chunkX, int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        final Optional<User> notifier = context.getNotifier();
-        final Optional<User> owner = context.getOwner();
-        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
         // Separate experience from other entities
         if (entity instanceof EntityXPOrb) {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
-                context.addNotifierAndOwnerToCauseStack();
+                frame.pushCause(tickingTile.getLocatableBlock());
+                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                context.addNotifierAndOwnerToCauseStack(frame);
                 final ArrayList<Entity> exp = new ArrayList<>();
                 exp.add(entity);
-                final SpawnEntityEvent event =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), exp);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity anEntity : event.getEntities()) {
-                        if (entityCreator != null) {
-                            EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                        }
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                    }
-                    return true;
-                }
+                return SpongeCommonEventFactory.callSpawnEntity(exp, context);
             }
-            return false;
         }
         final List<Entity> nonExpEntities = new ArrayList<>(1);
         nonExpEntities.add(entity);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(tickingTile.getLocatableBlock());
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
-            context.addNotifierAndOwnerToCauseStack();
-            final SpawnEntityEvent
-                    spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), nonExpEntities);
-            SpongeImpl.postEvent(spawnEntityEvent);
-            if (!spawnEntityEvent.isCancelled()) {
-                for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                    if (entityCreator != null) {
-                        EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                    }
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
-                }
-                return true;
-            }
+            frame.pushCause(tickingTile.getLocatableBlock());
+            frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
+            context.addNotifierAndOwnerToCauseStack(frame);
+            return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
+
         }
-        return false;
     }
 
     @Override

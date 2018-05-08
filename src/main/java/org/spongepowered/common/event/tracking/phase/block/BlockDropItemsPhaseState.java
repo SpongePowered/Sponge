@@ -34,11 +34,11 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -64,37 +64,28 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(GeneralizedContext phaseContext) {
-        final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
+    public void unwind(GeneralizedContext context) {
+        final BlockSnapshot blockSnapshot = context.getSource(BlockSnapshot.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(blockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            phaseContext.addNotifierAndOwnerToCauseStack();
-            phaseContext.getCapturedItemsSupplier()
+            context.addNotifierAndOwnerToCauseStack(frame);
+            context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> entities = new ArrayList<>();
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
                         }
-                        final DropItemEvent.Destruct event =
-                                SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
+                        SpongeCommonEventFactory.callDropItemDestruct(entities, context);
                     });
-            phaseContext.getCapturedEntitySupplier()
+            context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final SpawnEntityEvent event =
                                 SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
+                            EntityUtil.processEntitySpawnsFromEvent(context, event);
                         }
                         entities.clear();
                     });
@@ -102,32 +93,26 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            phaseContext.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
-            phaseContext.getCapturedItemStackSupplier()
+            context.getCapturedBlockSupplier()
+                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+            context.getCapturedItemStackSupplier()
                     .acceptAndClearIfNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
                                 .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
                                 .collect(Collectors.toList());
                         final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                for (Entity droppedItem : event.getEntities()) {
-                                    mixinWorld.forceSpawnEntity(droppedItem);
-                                }
-                            }
+                            SpongeCommonEventFactory.callDropItemCustom(entities, context);
                         }
                         drops.clear();
 
                     });
-            phaseContext.getBlockDropSupplier()
+            context.getBlockDropSupplier()
                 .acceptAndClearIfNotEmpty(drops -> {
                     for (BlockPos key : drops.asMap().keySet()) {
                         final List<ItemDropData> values = drops.get(key);
                         if (!values.isEmpty()) {
-                            TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, phaseContext);
+                            TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, context);
                         }
                     }
                 });

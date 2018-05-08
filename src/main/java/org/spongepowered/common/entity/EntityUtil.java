@@ -61,10 +61,8 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -77,6 +75,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -98,7 +97,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.*;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportingContext;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -123,7 +121,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -503,25 +503,46 @@ public final class EntityUtil {
         return color.getBitMask() | style.getBitMask();
     }
 
-    public static void processEntitySpawnsFromEvent(PhaseContext<?> context, SpawnEntityEvent destruct) {
-        for (org.spongepowered.api.entity.Entity entity : destruct.getEntities()) {
+    public static boolean processEntitySpawnsFromEvent(SpawnEntityEvent event, Supplier<Optional<UUID>> entityCreatorSupplier) {
+        boolean spawnedAny = false;
+        for (org.spongepowered.api.entity.Entity entity : event.getEntities()) {
             // Here is where we need to handle the custom items potentially having custom entities
-            final Entity minecraftEntity = toNative(entity);
-            if (minecraftEntity instanceof EntityItem) {
-                final ItemStack item = ((EntityItem) minecraftEntity).getItem();
-                if (!item.isEmpty()) {
-                    final Optional<Entity>
-                        customEntityItem =
-                        ((IMixinItem) item.getItem()).getCustomEntityItem(minecraftEntity.getEntityWorld(), minecraftEntity, item);
-                    if (customEntityItem.isPresent()) {
-                        // Bypass spawning the entity item, since it is established that the custom entity is spawned.
-                        context.getCapturedEntities().add(fromNative(customEntityItem.get()));
-                        continue;
-                    }
+            spawnedAny = processEntitySpawn(entity, entityCreatorSupplier);
+        }
+        return spawnedAny;
+    }
+
+    public static boolean processEntitySpawnsFromEvent(PhaseContext<?> context, SpawnEntityEvent destruct) {
+        final User creator = context.getNotifier().orElse(context.getOwner().orElse(null));
+        return processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(creator).map(User::getUniqueId));
+    }
+
+    public static boolean processEntitySpawn(org.spongepowered.api.entity.Entity entity, Supplier<Optional<UUID>> supplier) {
+        final Entity minecraftEntity = toNative(entity);
+        if (minecraftEntity instanceof EntityItem) {
+            final ItemStack item = ((EntityItem) minecraftEntity).getItem();
+            if (!item.isEmpty()) {
+                final Optional<Entity>
+                    customEntityItem =
+                    ((IMixinItem) item.getItem()).getCustomEntityItem(minecraftEntity.getEntityWorld(), minecraftEntity, item);
+                if (customEntityItem.isPresent()) {
+                    // Bypass spawning the entity item, since it is established that the custom entity is spawned.
+                    final Entity entityToSpawn = customEntityItem.get();
+                    supplier.get()
+                        .ifPresent(creator -> toMixin(entityToSpawn).setCreator(creator));
+                    // Since forge already has a new event thrown for the entity, we don't need to throw
+                    // the event anymore as sponge plugins getting the event after forge mods will
+                    // have the modified entity list for entities, so no need to re-capture the entities.
+                    getMixinWorld(entity).forceSpawnEntity(entity);
+                    return true;
                 }
             }
-            getMixinWorld(entity).forceSpawnEntity(entity);
         }
+        supplier.get()
+            .ifPresent(creator -> toMixin(entity).setCreator(creator));
+        // Allowed to call force spawn directly since we've applied creator and custom item logic already
+        getMixinWorld(entity).forceSpawnEntity(entity);
+        return true;
     }
 
 

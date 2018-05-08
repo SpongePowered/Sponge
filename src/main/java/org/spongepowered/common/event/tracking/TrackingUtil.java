@@ -74,6 +74,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -708,21 +709,9 @@ public final class TrackingUtil {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(newBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            final Optional<User> owner = phaseContext.getOwner();
             final Optional<User> notifier = phaseContext.getNotifier();
             notifier.ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
-            final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-            final DropItemEvent.Destruct destruct =
-                    SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemDrops);
-            SpongeImpl.postEvent(destruct);
-            if (!destruct.isCancelled()) {
-                for (Entity entity : destruct.getEntities()) {
-                    if (entityCreator != null) {
-                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                    }
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                }
-            }
+            SpongeCommonEventFactory.callDropItemDestruct(itemDrops, phaseContext);
         }
     }
 
@@ -769,17 +758,7 @@ public final class TrackingUtil {
             if(phaseContext.getNotifier().isPresent()) {
                 frame.addContext(EventContextKeys.NOTIFIER, phaseContext.getNotifier().get());
             }
-            final User entityCreator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemDrops);
-            SpongeImpl.postEvent(destruct);
-            if (!destruct.isCancelled()) {
-                for (Entity entity : destruct.getEntities()) {
-                    if (entityCreator != null) {
-                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                    }
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                }
-            }
+            SpongeCommonEventFactory.callDropItemDestruct(itemDrops, phaseContext);
         }
     }
 
@@ -788,19 +767,7 @@ public final class TrackingUtil {
         final List<Entity> entitiesSpawned = entities.stream()
             .map(EntityUtil::fromNative)
             .collect(Collectors.toList());
-        final Optional<User> owner = phaseContext.getOwner();
-        final Optional<User> notifier = phaseContext.getNotifier();
-        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-        final SpawnEntityEvent destruct = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entitiesSpawned);
-        SpongeImpl.postEvent(destruct);
-        if (!destruct.isCancelled()) {
-            for (Entity entity : destruct.getEntities()) {
-                if (entityCreator != null) {
-                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                }
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-            }
-        }
+        SpongeCommonEventFactory.callSpawnEntity(entitiesSpawned, phaseContext);
     }
 
     @Nullable
@@ -823,44 +790,4 @@ public final class TrackingUtil {
         return null;
     }
 
-    public static void splitAndSpawnEntities(List<Entity> entities) {
-        splitAndSpawnEntities(entities, (entity) -> {});
-    }
-
-    public static void splitAndSpawnEntities(List<Entity> entities, Consumer<IMixinEntity> mixinEntityConsumer) {
-
-        if (entities.size() > 1) {
-            final HashMultimap<World, Entity> entityListMap = HashMultimap.create();
-            for (Entity entity : entities) {
-                entityListMap.put(entity.getWorld(), entity);
-            }
-            for (Map.Entry<World, Collection<Entity>> entry : entityListMap.asMap().entrySet()) {
-                final World world = entry.getKey();
-                final ArrayList<Entity> worldEntities = new ArrayList<>(entry.getValue());
-                final SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), worldEntities);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity entity : event.getEntities()) {
-                        mixinEntityConsumer.accept(EntityUtil.toMixin(entity));
-                        ((IMixinWorldServer) world).forceSpawnEntity(entity);
-                    }
-                }
-            }
-            return;
-        }
-
-        final Entity singleEntity = entities.get(0);
-
-        final World world = singleEntity.getWorld();
-
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                mixinEntityConsumer.accept(EntityUtil.toMixin(entity));
-                ((IMixinWorldServer) world).forceSpawnEntity(entity);
-            }
-        }
-    }
 }

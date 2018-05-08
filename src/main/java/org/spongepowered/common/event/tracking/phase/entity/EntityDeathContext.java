@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class EntityDeathContext extends EntityContext<EntityDeathContext> {
     private DamageSource damageSource;
@@ -75,58 +71,4 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
             .add("    - %s: %s", "DamageSource", this.damageSource);
     }
 
-    @Override
-    public EntityDeathContext source(Object owner) {
-        return (EntityDeathContext) super.source(owner);
-    }
-
-    @Override
-    public EntityDeathContext owner(Supplier<Optional<User>> supplier) {
-        return (EntityDeathContext) super.owner(supplier);
-    }
-
-    @Override
-    public EntityDeathContext owner(User owner) {
-        return (EntityDeathContext) super.owner(owner);
-    }
-
-    @Override
-    public EntityDeathContext notifier(Supplier<Optional<User>> supplier) {
-        return (EntityDeathContext) super.notifier(supplier);
-    }
-
-    @Override
-    public EntityDeathContext notifier(User notifier) {
-        return (EntityDeathContext) super.notifier(notifier);
-    }
-
-    @Override
-    public EntityDeathContext addBlockCaptures() {
-        return (EntityDeathContext) super.addBlockCaptures();
-    }
-
-    @Override
-    public EntityDeathContext addCaptures() {
-        return (EntityDeathContext) super.addCaptures();
-    }
-
-    @Override
-    public EntityDeathContext addEntityCaptures() {
-        return (EntityDeathContext) super.addEntityCaptures();
-    }
-
-    @Override
-    public EntityDeathContext addEntityDropCaptures() {
-        return (EntityDeathContext) super.addEntityDropCaptures();
-    }
-
-    @Override
-    public EntityDeathContext buildAndSwitch() {
-        return (EntityDeathContext) super.buildAndSwitch();
-    }
-
-    @Override
-    public EntityDeathContext markEmpty() {
-        return (EntityDeathContext) super.markEmpty();
-    }
 }

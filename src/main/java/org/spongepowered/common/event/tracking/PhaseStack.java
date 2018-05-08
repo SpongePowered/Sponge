@@ -44,8 +44,7 @@ import java.util.function.Consumer;
  */
 final class PhaseStack {
 
-    private static final PhaseContext<?> EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
-    static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
+    static final PhaseData EMPTY_DATA = new PhaseData(PhaseContext.empty(), GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
     private final Deque<PhaseData> states;
@@ -70,7 +69,7 @@ final class PhaseStack {
 
     PhaseContext<?> peekContext() {
         final PhaseData peek = this.states.peek();
-        return peek == null ? PhaseStack.EMPTY : peek.context;
+        return peek == null ? PhaseContext.empty() : peek.context;
     }
 
     PhaseData pop() {
