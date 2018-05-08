@@ -613,7 +613,7 @@ public abstract class WorldMixin_API implements World {
         }
         if (te.isPresent()) {
             final TileEntity tileEntity = te.get();
-            for (DataManipulator<?, ?> manipulator : ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators()) {
+            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();

@@ -50,7 +50,6 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
@@ -153,7 +152,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
                 this.compound = new NBTTagCompound();
                 final org.spongepowered.api.block.tileentity.TileEntity te = location.getTileEntity().get();
                 ((TileEntity) te).writeToNBT(this.compound);
-                this.manipulators = ((CustomDataHolderBridge) te).bridge$getCustomManipulators().stream()
+                this.manipulators = te.getContainers().stream()
                         .map(DataManipulator::asImmutable)
                         .collect(Collectors.toList());
             }
