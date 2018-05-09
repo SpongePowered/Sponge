@@ -149,4 +149,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setInvulnerable(boolean value);
 
+    default void clearWrappedCaptureList() {
+
+    }
 }

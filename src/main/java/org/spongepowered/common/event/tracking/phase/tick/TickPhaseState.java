@@ -64,6 +64,11 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
+    public boolean doesCaptureEntityDrops() {
+        return true;
+    }
+
+    @Override
     public boolean tracksBlockSpecificDrops() {
         return true;
     }

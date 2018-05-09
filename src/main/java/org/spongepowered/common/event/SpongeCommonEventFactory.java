@@ -232,10 +232,16 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static boolean callSpawnEntity(List<Entity> entities, PhaseContext context) {
+    public static boolean callSpawnEntity(List<Entity> entities, PhaseContext<?> context) {
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
+    }
+
+    public static boolean callSpawnEntityCustom(List<Entity> entities, PhaseContext<?> context) {
+        SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        SpongeImpl.postEvent(event);
+        return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
     }
 
 
