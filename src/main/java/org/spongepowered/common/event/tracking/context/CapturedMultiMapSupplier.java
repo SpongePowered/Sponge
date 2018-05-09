@@ -74,6 +74,13 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
         }
     }
 
+    public final void acceptAndClearIfNotEmpty(BiConsumer<K, V> consumer) {
+        if (!this.isEmpty()) {
+            this.captured.forEach(consumer);
+            this.captured.clear();
+        }
+    }
+
     /**
      * If not empty, activates the {@link BiConsumer} with captures.
      * 
