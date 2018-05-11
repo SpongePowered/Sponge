@@ -83,8 +83,10 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinITeleporter;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
 
@@ -425,5 +427,9 @@ public final class SpongeImplHooks {
      */
     public static int getLootingEnchantmentModifier(IMixinEntityLivingBase mixinEntityLivingBase, EntityLivingBase entity, DamageSource cause) {
         return EnchantmentHelper.getLootingModifier(entity);
+    }
+
+    public static double getWorldMaxEntityRadius(IMixinWorldServer mixinWorldServer) {
+        return 2.0D;
     }
 }
