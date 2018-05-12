@@ -31,9 +31,11 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +54,6 @@ public abstract class MixinBlockDynamicLiquid {
 
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
     public void onCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir) {
-        // TODO LIQUID_FLOW flag
         if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
@@ -60,8 +61,11 @@ public abstract class MixinBlockDynamicLiquid {
 
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
     public void onUpdateTick(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
-            ci.cancel();
+        if (!worldIn.isRemote) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_FLOW, (org.spongepowered.api.world.World) worldIn);
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
+                ci.cancel();
+            }
         }
     }
 
