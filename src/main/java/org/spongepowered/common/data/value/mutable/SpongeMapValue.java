@@ -67,6 +67,11 @@ public class SpongeMapValue<K, V> extends SpongeValue<Map<K, V>> implements MapV
     }
 
     @Override
+    public MapValue<K, V> copy() {
+        return new SpongeMapValue<>(getKey(), this.getDefault(), this.actualValue);
+    }
+
+    @Override
     public int size() {
         return this.actualValue.size();
     }

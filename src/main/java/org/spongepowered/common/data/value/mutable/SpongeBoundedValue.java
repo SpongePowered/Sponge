@@ -31,6 +31,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 import java.util.Comparator;
@@ -88,4 +89,8 @@ public class SpongeBoundedValue<E> extends SpongeValue<E> implements MutableBoun
         return new ImmutableSpongeBoundedValue<>(getKey(), this.getDefault(), this.actualValue, this.comparator, this.minimum, this.maximum);
     }
 
+    @Override
+    public MutableBoundedValue<E> copy() {
+        return new SpongeBoundedValue<>(this.getKey(), this.getDefault(), this.comparator, this.minimum, this.maximum, this.actualValue);
+    }
 }
