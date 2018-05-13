@@ -1092,7 +1092,7 @@ public class SpongeCommonEventFactory {
     }
 
     @Nullable
-    public static Container displayContainer(EntityPlayerMP player, Inventory inventory) {
+    public static Container displayContainer(EntityPlayerMP player, Inventory inventory, Text displayName) {
         net.minecraft.inventory.Container previousContainer = player.openContainer;
         net.minecraft.inventory.Container container;
 
@@ -1103,34 +1103,45 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        if (inventory instanceof IInteractionObject) {
-            final String guiId = ((IInteractionObject) inventory).getGuiID();
 
-            switch (guiId) {
-                case "EntityHorse":
-                    if (inventory instanceof CarriedInventory) {
-                        CarriedInventory<?> cinventory = (CarriedInventory<?>) inventory;
-                        if (cinventory.getCarrier().isPresent() && cinventory.getCarrier().get() instanceof AbstractHorse) {
-                            player.openGuiHorseInventory(((AbstractHorse) cinventory.getCarrier().get()), (IInventory) inventory);
-                        }
-                    }
-                    break;
-                case "minecraft:chest":
-                    player.displayGUIChest((IInventory) inventory);
-                    break;
-                case "minecraft:crafting_table":
-                case "minecraft:anvil":
-                case "minecraft:enchanting_table":
-                    player.displayGui((IInteractionObject) inventory);
-                    break;
-                default:
-                    player.displayGUIChest((IInventory) inventory);
-                    break;
+
+        try {
+            if (displayName != null) {
+                ((IMixinEntityPlayerMP) player).setContainerDisplay(displayName);
             }
-        } else if (inventory instanceof IInventory) {
-            player.displayGUIChest(((IInventory) inventory));
-        } else {
-            return null;
+            if (inventory instanceof IInteractionObject) {
+                final String guiId = ((IInteractionObject) inventory).getGuiID();
+
+                switch (guiId) {
+                    case "EntityHorse":
+                        if (inventory instanceof CarriedInventory) {
+                            CarriedInventory<?> cinventory = (CarriedInventory<?>) inventory;
+                            if (cinventory.getCarrier().isPresent() && cinventory.getCarrier().get() instanceof AbstractHorse) {
+                                player.openGuiHorseInventory(((AbstractHorse) cinventory.getCarrier().get()), (IInventory) inventory);
+                            }
+                        }
+                        break;
+                    case "minecraft:chest":
+                        player.displayGUIChest((IInventory) inventory);
+                        break;
+                    case "minecraft:crafting_table":
+                    case "minecraft:anvil":
+                    case "minecraft:enchanting_table":
+                        player.displayGui((IInteractionObject) inventory);
+                        break;
+                    default:
+                        player.displayGUIChest((IInventory) inventory);
+                        break;
+                }
+            } else if (inventory instanceof IInventory) {
+                player.displayGUIChest(((IInventory) inventory));
+            } else {
+                return null;
+            }
+        } finally {
+            if (displayName != null) {
+                ((IMixinEntityPlayerMP) player).setContainerDisplay(null);
+            }
         }
 
         container = player.openContainer;
