@@ -37,6 +37,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -80,6 +81,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
@@ -111,7 +113,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
@@ -151,7 +152,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -164,12 +164,10 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -666,6 +664,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
+        return this.openInventory(inventory, null);
+    }
+
+    @Override
+    public Optional<Container> openInventory(Inventory inventory, Text displayName) {
         if (((IMixinContainer) this.openContainer).isInUse()) {
             Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
@@ -679,7 +682,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }).submit(SpongeImpl.getPlugin());
             return this.getOpenInventory();
         }
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory));
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory, displayName));
     }
 
     @Override
@@ -1322,5 +1325,44 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
         World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
         return this.setLocation(new Location<>(loaded, position));
+    }
+
+    @Nullable private Text displayName = null;
+
+    @Override
+    public void setContainerDisplay(Text displayName) {
+        this.displayName = displayName;
+    }
+
+    @Redirect(method = "displayGUIChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName(IInventory chestInventory) {
+        if (this.displayName == null) {
+            return chestInventory.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "displayGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IInteractionObject;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName2(IInteractionObject guiOwner) {
+        if (this.displayName == null) {
+            return guiOwner.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName3(IInventory inventoryIn) {
+        if (this.displayName == null) {
+            return inventoryIn.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "displayVillagerTradeGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/IMerchant;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName4(IMerchant villager) {
+        if (this.displayName == null) {
+            return villager.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
     }
 }
