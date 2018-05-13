@@ -121,16 +121,11 @@ class PlaceBlockPacketState extends BasicPacketState {
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (@SuppressWarnings("unused") CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().pushCause(player);
-                    Sponge.getCauseStackManager().pushCause(snapshot);
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    final SpawnEntityEvent spawnEntityEvent =
-                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        processSpawnedEntities(player, spawnEntityEvent);
-                    }
+                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    frame.pushCause(player);
+                    frame.pushCause(snapshot);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
             });
         context.getCapturedBlockSupplier()
@@ -153,7 +148,7 @@ class PlaceBlockPacketState extends BasicPacketState {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                     frame.pushCause(player);
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
+                    SpongeCommonEventFactory.callDropItemCustom(entities, context, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
 
                 }
             }

@@ -43,6 +43,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -248,11 +249,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else if (!context.getCapturedEntitySupplier().isEmpty()) {
-                        SpawnEntityEvent spawnEntityEvent = SpongeEventFactory
-                            .createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), context.getCapturedEntities());
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        if (!spawnEntityEvent.isCancelled()) {
-                            processSpawnedEntities(player, spawnEntityEvent);}
+                        SpongeCommonEventFactory.callSpawnEntity(context.getCapturedEntities(), context);
                     }
                 }
             }

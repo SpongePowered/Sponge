@@ -124,6 +124,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -133,6 +134,18 @@ public final class EntityUtil {
     private static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
     private static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     private static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
+
+    public static final Function<PhaseContext<?>, Supplier<Optional<UUID>>> ENTITY_CREATOR_FUNCTION = (context) ->
+        () -> Stream.<Supplier<Optional<User>>>builder()
+            .add(() -> context.getSource(User.class))
+            .add(context::getNotifier)
+            .add(context::getOwner)
+            .build()
+            .map(Supplier::get)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(User::getUniqueId)
+            .findFirst();
 
     private EntityUtil() {
     }
@@ -514,7 +527,7 @@ public final class EntityUtil {
 
     public static boolean processEntitySpawnsFromEvent(PhaseContext<?> context, SpawnEntityEvent destruct) {
         final User creator = context.getNotifier().orElse(context.getOwner().orElse(null));
-        return processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(creator).map(User::getUniqueId));
+        return processEntitySpawnsFromEvent(destruct, ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
     public static boolean processEntitySpawn(org.spongepowered.api.entity.Entity entity, Supplier<Optional<UUID>> supplier) {

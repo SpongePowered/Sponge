@@ -37,6 +37,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -68,23 +69,11 @@ final class UnknownPacketState extends BasicPacketState implements IEntitySpecif
             frame1.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             context.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
             context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(frame1.getCurrentCause(), entities);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    processSpawnedEntities(player, event);
-
-                }
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
             });
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(frame1.getCurrentCause(), items);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    processSpawnedEntities(player, event);
-
-                }
+                SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
         }
         context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {

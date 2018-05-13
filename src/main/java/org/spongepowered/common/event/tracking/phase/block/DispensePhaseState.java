@@ -28,10 +28,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 final class DispensePhaseState extends BlockPhaseState {
 
@@ -54,7 +54,7 @@ final class DispensePhaseState extends BlockPhaseState {
                 .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(blockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DISPENSE);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
             phaseContext.addNotifierAndOwnerToCauseStack(frame);
             phaseContext.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {

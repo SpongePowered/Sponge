@@ -159,13 +159,13 @@ public class SpongeCommonEventFactory {
     // Set if the player's held item changes during InteractBlockEvent.Secondary
     public static boolean playerInteractItemChanged = false;
     // Set if any of the events fired during interaction with a block (open
-    // inventory or interact block) were cancelled
     public static boolean interactBlockEventCancelled = false;
-    // Dummy ChangeBlockEvent.Pre
+    // inventory or interact block) were cancelled
     @Nullable private static ChangeBlockEvent.Pre DUMMY_BLOCK_PRE_EVENT = null;
 
-    // For animation packet
+    // Dummy ChangeBlockEvent.Pre
     public static int lastAnimationPacketTick = 0;
+    // For animation packet
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
     public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
@@ -173,6 +173,22 @@ public class SpongeCommonEventFactory {
     public static void callDropItemDispense(List<EntityItem> items, PhaseContext<?> context) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+            final ArrayList<Entity> entities = new ArrayList<>();
+            for (EntityItem item : items) {
+                entities.add(EntityUtil.fromNative(item));
+            }
+            final DropItemEvent.Dispense dispense =
+                SpongeEventFactory.createDropItemEventDispense(frame.getCurrentCause(), entities);
+            SpongeImpl.postEvent(dispense);
+            if (!dispense.isCancelled()) {
+                EntityUtil.processEntitySpawnsFromEvent(context, dispense);
+            }
+        }
+    }
+
+    public static void callDropItemDrop(List<EntityItem> items, PhaseContext<?> context) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             final ArrayList<Entity> entities = new ArrayList<>();
             for (EntityItem item : items) {
                 entities.add(EntityUtil.fromNative(item));
@@ -200,6 +216,7 @@ public class SpongeCommonEventFactory {
 
     public static void callDropItemCustom(List<Entity> items, PhaseContext<?> context, Supplier<Optional<UUID>> supplier) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), items);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
@@ -223,6 +240,7 @@ public class SpongeCommonEventFactory {
 
     public static void callDropItemDestruct(List<Entity> entities, PhaseContext<?> context) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
@@ -232,12 +250,14 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean callSpawnEntity(List<Entity> entities, PhaseContext<?> context) {
+        Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
     }
 
     public static boolean callSpawnEntityCustom(List<Entity> entities, PhaseContext<?> context) {
+        Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);

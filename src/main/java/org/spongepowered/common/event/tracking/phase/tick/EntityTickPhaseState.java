@@ -42,15 +42,13 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -58,14 +56,12 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -101,7 +97,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         }
 
                         if (!experience.isEmpty()) {
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                             if (EntityUtil.isEntityDead(tickingEntity)) {
                                 if (tickingEntity instanceof EntityLivingBase) {
                                     CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
@@ -117,7 +113,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                             frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
                         }
                         if (!breeding.isEmpty()) {
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BREEDING);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
                             if (tickingEntity instanceof EntityAnimal) {
                                 final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                                 if (playerInLove != null) {
@@ -129,13 +125,14 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                             frame.removeContext(EventContextKeys.PLAYER);
                         }
                         if (!projectile.isEmpty()) {
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                             SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
                             frame.removeContext(EventContextKeys.SPAWN_TYPE);
 
                         }
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
                         SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
+                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
 
                     });
             phaseContext.getCapturedItemsSupplier()
@@ -144,7 +141,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                         for (EntityItem entity : entities) {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
                         frame.removeContext(EventContextKeys.SPAWN_TYPE);
                     });
@@ -158,7 +155,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                             final Collection<EntityItem> entityItems = map.get(blockPos);
                             if (!entityItems.isEmpty()) {
                                 frame.pushCause(snapshot);
-                                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                                 final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                                 SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
 
@@ -173,7 +170,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                                 .map(drop -> drop.create(EntityUtil.getMinecraftWorld(tickingEntity)))
                                 .map(EntityUtil::fromNative)
                                 .collect(Collectors.toList());
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
                     });
             this.fireMovementEvents(EntityUtil.toNative(tickingEntity));
@@ -286,15 +283,15 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack(frame);
-            Sponge.getCauseStackManager().pushCause(tickingEntity);
+            frame.pushCause(tickingEntity);
             if (entity instanceof EntityXPOrb) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 if (EntityUtil.isEntityDead(tickingEntity)) {
                     if (tickingEntity instanceof EntityLivingBase) {
                         CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
                         if (entry != null) {
                             if (entry.damageSrc != null) {
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (DamageSource) entry.damageSrc);
+                                frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (DamageSource) entry.damageSrc);
                             }
                         }
                     }
@@ -304,11 +301,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     
                 return SpongeCommonEventFactory.callSpawnEntity(experience, context);
             } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BREEDING);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
                 if (tickingEntity instanceof EntityAnimal) {
                     final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                     if (playerInLove != null) {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER, (Player) playerInLove);
+                        frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                     }
                 }
                 final List<Entity> breeding = new ArrayList<>(1);
@@ -316,7 +313,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 return SpongeCommonEventFactory.callSpawnEntity(breeding, context);
 
             } else if (entity instanceof Projectile) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                 final List<Entity> projectile = new ArrayList<>(1);
                 projectile.add(entity);
                 return SpongeCommonEventFactory.callSpawnEntity(projectile, context);
@@ -324,8 +321,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             }
             final List<Entity> nonExp = new ArrayList<>(1);
             nonExp.add(entity);
-    
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
+
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
             return SpongeCommonEventFactory.callSpawnEntity(nonExp, context);
         }
     }

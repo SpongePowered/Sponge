@@ -35,6 +35,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
@@ -42,10 +43,9 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -124,12 +124,12 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
                             .map(data -> data.create(((WorldServer) player.world)))
                             .map(EntityUtil::fromNative)
                             .collect(Collectors.toList());
-                        Sponge.getCauseStackManager().pushCause(player);
-                        Sponge.getCauseStackManager().pushCause(affectedEntity.get());
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                        frame.pushCause(player);
+                        frame.pushCause(affectedEntity.get());
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
                         final DropItemEvent.Destruct destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                            SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
                         SpongeImpl.postEvent(destruct);
                         if (!destruct.isCancelled()) {
                             processSpawnedEntities(player, destruct);
@@ -140,8 +140,8 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
         });
         context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(player);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID key = entry.getKey();
                     final Optional<Entity> attackedEntities = spongeWorld.getEntity(key);
@@ -151,7 +151,7 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
                     final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
 
                     final DropItemEvent.Destruct destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
+                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);
                     SpongeImpl.postEvent(destruct);
                     if (!destruct.isCancelled()) {
                         processSpawnedEntities(player, destruct);

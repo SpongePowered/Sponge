@@ -30,20 +30,16 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
@@ -69,7 +65,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(blockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.addNotifierAndOwnerToCauseStack(frame);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
@@ -80,15 +76,8 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
                         SpongeCommonEventFactory.callDropItemDestruct(entities, context);
                     });
             context.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            EntityUtil.processEntitySpawnsFromEvent(context, event);
-                        }
-                        entities.clear();
-                    });
+                    .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
+            frame.removeContext(EventContextKeys.SPAWN_TYPE);
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 

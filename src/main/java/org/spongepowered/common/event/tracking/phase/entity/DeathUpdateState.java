@@ -34,9 +34,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.Collection;
 import java.util.List;
@@ -89,7 +89,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                     if (!other.isEmpty()) {
                         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                             frame.pushCause(dyingEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
                             SpongeCommonEventFactory.callSpawnEntity(other, context);
 
                         }
