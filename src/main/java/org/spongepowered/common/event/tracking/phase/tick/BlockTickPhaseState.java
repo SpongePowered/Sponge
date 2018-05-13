@@ -32,20 +32,17 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +79,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         final LocatableBlock locatableBlock = context.requireSource(LocatableBlock.class);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
             context.getCapturedItemsSupplier()
@@ -114,14 +111,14 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
             notifier.ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
             if (entity instanceof EntityXPOrb) {
-                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 final ArrayList<Entity> entities = new ArrayList<>(1);
                 entities.add(entity);
                 return SpongeCommonEventFactory.callSpawnEntity(entities, context);
             }
             final List<Entity> nonExpEntities = new ArrayList<>(1);
             nonExpEntities.add(entity);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
         }
     }

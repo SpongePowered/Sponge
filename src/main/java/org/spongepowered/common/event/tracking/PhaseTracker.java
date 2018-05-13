@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -60,12 +59,12 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
@@ -109,7 +108,7 @@ public final class PhaseTracker {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                 // we'll just mark it as "forced".
-                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.FORCED);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.FORCED);
                 for (net.minecraft.entity.Entity entity : entities) {
                     // At this point, we don't care what the causes are...
                     PhaseTracker.getInstance().spawnEntityWithCause((World) entity.getEntityWorld(), (Entity) entity);
@@ -664,16 +663,15 @@ public final class PhaseTracker {
                 if (minecraftEntity instanceof IEntityOwnable) {
                     IEntityOwnable ownable = (IEntityOwnable) entity;
                     net.minecraft.entity.Entity owner = ownable.getOwner();
-                    if (owner != null&&owner instanceof EntityPlayer) {
-                            context. owner = (User) owner;
-
-                            entity.setCreator(ownable.getOwnerId());
+                    if (owner instanceof EntityPlayer) {
+                        context. owner = (User) owner;
+                        entity.setCreator(ownable.getOwnerId());
                     }
                 } else if (minecraftEntity instanceof EntityThrowable) {
                     EntityThrowable throwable = (EntityThrowable) minecraftEntity;
                     EntityLivingBase thrower = throwable.getThrower();
                     if (thrower != null) {
-                        User user = null;
+                        User user;
                         if (!(thrower instanceof EntityPlayer)) {
                             user = ((IMixinEntity) thrower).getCreatorUser().orElse(null);
                         } else {

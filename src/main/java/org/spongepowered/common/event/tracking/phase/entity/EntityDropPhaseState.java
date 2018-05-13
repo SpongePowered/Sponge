@@ -30,23 +30,18 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
@@ -80,7 +75,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                         .filter(entity -> entity instanceof ExperienceOrb)
                         .collect(Collectors.toList());
                     if (!experience.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                         SpongeCommonEventFactory.callSpawnEntity(experience, context);
 
                     }
@@ -90,12 +85,12 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                         .filter(entity -> !(entity instanceof ExperienceOrb))
                         .collect(Collectors.toList());
                     if (!other.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
                         SpongeCommonEventFactory.callSpawnEntity(experience, context);
                     }
                 });
 
-            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // Forge always fires a living drop event even if nothing was captured
             // This allows mods such as Draconic Evolution to add items to the drop list
             if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {

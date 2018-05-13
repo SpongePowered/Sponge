@@ -31,6 +31,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -40,7 +41,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +95,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                         TrackingUtil.processBlockCaptures(blockSnapshots, this, context);
                     });
             frame.pushCause(tickingTile.getLocatableBlock());
-            frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
@@ -120,11 +120,11 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                         // be spawned regardless (because their entrance is through Entity#entityDropItem, which we
                         // reroute to captures)
                         frame.pushCause(tickingTile); // We only have the tile entity to consider
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BLOCK_SPAWNING);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
                         SpongeCommonEventFactory.callSpawnEntity((List<Entity>) list, context);
                         return;
                     }
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     // Now we can actually push the entity onto the stack, and then push the tile entity onto the stack as well.
                     final Entity nestedEntity = entity.get();
                     frame.pushCause(nestedEntity);
@@ -156,7 +156,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         if (entity instanceof EntityXPOrb) {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(tickingTile.getLocatableBlock());
-                frame.addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 context.addNotifierAndOwnerToCauseStack(frame);
                 final ArrayList<Entity> exp = new ArrayList<>();
                 exp.add(entity);

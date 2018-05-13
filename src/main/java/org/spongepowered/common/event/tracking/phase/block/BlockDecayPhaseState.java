@@ -38,11 +38,13 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.WorldUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,19 +77,15 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), items);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            EntityUtil.processEntitySpawnsFromEvent(context, event);
-                        }
+                        final List<Entity> entities = items.stream()
+                            .map(EntityUtil::fromNative)
+                            .collect(Collectors.toList());
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
                     });
             context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            EntityUtil.processEntitySpawnsFromEvent(context, event);
-                        }
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+
                     });
             context.getCapturedItemStackSupplier()
                     .acceptAndClearIfNotEmpty(drops -> {
