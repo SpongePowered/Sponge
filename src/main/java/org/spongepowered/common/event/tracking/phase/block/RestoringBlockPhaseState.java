@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
@@ -49,7 +53,10 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+        }
     }
 
     @Override

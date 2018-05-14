@@ -264,11 +264,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public void postProcessSpawns(EntityTickContext phaseContext, ArrayList<Entity> entities) {
-        super.postProcessSpawns(phaseContext, entities);
-    }
-
-    @Override
     public void appendContextPreExplosion(ExplosionContext explosionContext, EntityTickContext context) {
         context.getOwner().ifPresent(explosionContext::owner);
         context.getNotifier().ifPresent(explosionContext::notifier);
