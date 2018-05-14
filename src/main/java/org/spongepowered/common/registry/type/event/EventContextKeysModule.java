@@ -81,6 +81,7 @@ public final class EventContextKeysModule
         this.createKey("sponge:igniter", "Igniter", User.class);
         this.createKey("sponge:last_damage_source", "Last Damage Source", DamageSource.class);
         this.createKey("sponge:liquid_break", "Liquid Break", World.class);
+        this.createKey("sponge:liquid_flow", "Liquid Flow", World.class);
         this.createKey("sponge:liquid_mix", "Liquid Mix", World.class);
         this.createKey("sponge:notifier", "Notifier", User.class);
         this.createKey("sponge:owner", "Owner", User.class);

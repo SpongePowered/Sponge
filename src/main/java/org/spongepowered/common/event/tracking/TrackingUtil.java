@@ -214,8 +214,7 @@ public final class TrackingUtil {
         if (!mixinTileEntity.shouldTick()) {
             return;
         }
-        final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext()
-            .source(tile);
+        final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(tile);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final PhaseContext<?> phaseContext = context) {
             frame.pushCause(tile);
