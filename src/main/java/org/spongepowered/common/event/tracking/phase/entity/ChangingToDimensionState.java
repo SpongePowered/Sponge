@@ -64,6 +64,11 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
         return true;
     }
 
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
     @Nullable
     @Override
     public net.minecraft.entity.Entity returnTeleportResult(PhaseContext<?> context, MoveEntityEvent.Teleport.Portal event) {

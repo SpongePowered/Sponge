@@ -65,6 +65,11 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
+    public boolean doesCaptureEntitySpawns() {
+        return true;
+    }
+
+    @Override
     public boolean allowEntitySpawns() {
         return true;
     }

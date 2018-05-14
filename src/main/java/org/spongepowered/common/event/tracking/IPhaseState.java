@@ -338,4 +338,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         }
         return false;
     }
+    default boolean doesCaptureEntitySpawns() {
+        return false;
+    }
 }

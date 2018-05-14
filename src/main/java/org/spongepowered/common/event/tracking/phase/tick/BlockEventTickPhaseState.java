@@ -98,6 +98,11 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
         Transaction<BlockSnapshot> snapshotTransaction, BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();

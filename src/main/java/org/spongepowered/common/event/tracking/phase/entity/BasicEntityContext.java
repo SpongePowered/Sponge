@@ -28,6 +28,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
+import javax.annotation.Nullable;
+
 public class BasicEntityContext extends EntityContext<BasicEntityContext> {
 
     private DamageSource damageSource;
@@ -36,6 +38,7 @@ public class BasicEntityContext extends EntityContext<BasicEntityContext> {
         super(state);
     }
 
+    @Nullable
     public DamageSource getDamageSource() {
         return damageSource;
     }

@@ -393,14 +393,14 @@ public final class EntityUtil {
 
         adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
 
-        try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame();
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              TeleportingContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld)
                      .buildAndSwitch()
             ) {
-            Sponge.getCauseStackManager().pushCause(teleporter);
-            Sponge.getCauseStackManager().pushCause(mixinEntity);
+            frame.pushCause(teleporter);
+            frame.pushCause(mixinEntity);
 
-            Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
+            frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
 
             if (entityIn.isEntityAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
@@ -421,7 +421,7 @@ public final class EntityUtil {
             final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
             // Use setLocationAndAngles to avoid firing MoveEntityEvent to plugins
             mixinEntity.setLocationAndAngles(fromTransform);
-            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
+            final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
             SpongeImpl.postEvent(event);
             final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
             final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();

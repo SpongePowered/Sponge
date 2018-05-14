@@ -265,4 +265,11 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
         });
 
     }
+
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
 }

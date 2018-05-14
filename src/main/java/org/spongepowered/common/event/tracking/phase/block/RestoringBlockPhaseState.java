@@ -53,6 +53,11 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false; // Since we throw the spawn event directly
+    }
+
+    @Override
     public boolean requiresBlockCapturing() {
         return false;
     }

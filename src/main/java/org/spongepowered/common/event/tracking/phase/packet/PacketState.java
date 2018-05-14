@@ -150,6 +150,13 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         return false;
     }
 
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return shouldCaptureEntity();
+    }
+
+
     /**
      * Defaulted method for packet phase states to spawn an entity directly.
      * This should be overridden by all packet phase states that are handling spawns

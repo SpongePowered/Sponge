@@ -123,6 +123,12 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         }
     }
 
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
     @Override
     public void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, BlockTickContext context) {
         if (context.shouldProcessImmediately()) {

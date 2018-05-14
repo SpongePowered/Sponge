@@ -182,4 +182,9 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
 }

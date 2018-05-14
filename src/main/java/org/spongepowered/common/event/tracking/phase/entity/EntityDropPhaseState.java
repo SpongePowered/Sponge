@@ -64,7 +64,9 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         final DamageSource damageSource = context.getDamageSource();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(damageSource);
+            if (damageSource != null) {
+                frame.pushCause(damageSource);
+            }
             frame.pushCause(dyingEntity);
             final boolean isPlayer = dyingEntity instanceof EntityPlayer;
             final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
