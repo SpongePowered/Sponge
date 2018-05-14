@@ -27,7 +27,6 @@ package org.spongepowered.common.entity.player;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -45,7 +44,6 @@ import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -68,6 +66,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -85,7 +84,7 @@ import javax.annotation.Nullable;
  */
 public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carrier, ISpongeUser {
 
-    public static final Set<SpongeUser> dirtyUsers = Sets.newHashSet();
+    public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
 
     private final User self = (User) this; // convenient access
     private final GameProfile profile;

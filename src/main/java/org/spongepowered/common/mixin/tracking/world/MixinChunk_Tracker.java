@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.tracking.world;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
@@ -81,8 +80,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Shadow @Final public int x;
     @Shadow @Final public int z;
 
-    private Int2ObjectMap<PlayerTracker> trackedIntBlockPositions = new Int2ObjectArrayMap<>();
-    private Short2ObjectMap<PlayerTracker> trackedShortBlockPositions = new Short2ObjectArrayMap<>();
+    private Int2ObjectMap<PlayerTracker> trackedIntBlockPositions = new Int2ObjectOpenHashMap<>();
+    private Short2ObjectMap<PlayerTracker> trackedShortBlockPositions = new Short2ObjectOpenHashMap<>();
 
     @Final // need this constructor to never be overwritten by anything.
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
