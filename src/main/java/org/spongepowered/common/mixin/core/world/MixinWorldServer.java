@@ -114,6 +114,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -1161,8 +1162,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            frame.pushCause(this);
             SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));
             SpongeImpl.postEvent(chunkLoad);
             if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {

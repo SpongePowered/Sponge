@@ -37,7 +37,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
@@ -150,7 +153,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+        }
     }
 
     default boolean ignoresBlockTracking() {
@@ -254,7 +260,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
+        }
     }
 
     default boolean alreadyCapturingEntitySpawns() {

@@ -103,13 +103,15 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
         final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack(frame);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
             frame.pushCause(explosion);
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
             context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                        try (CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()){
+                            smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
+                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                        }
                     });
         }
     }
@@ -261,7 +263,10 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
         }).orElseGet(() -> {
             final ArrayList<Entity> entities = new ArrayList<>(1);
             entities.add(entity);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            }
         });
 
     }

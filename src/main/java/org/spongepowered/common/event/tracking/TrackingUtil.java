@@ -762,7 +762,10 @@ public final class TrackingUtil {
         final List<Entity> entitiesSpawned = entities.stream()
             .map(EntityUtil::fromNative)
             .collect(Collectors.toList());
-        SpongeCommonEventFactory.callSpawnEntity(entitiesSpawned, phaseContext);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            SpongeCommonEventFactory.callSpawnEntity(entitiesSpawned, phaseContext);
+        }
     }
 
     @Nullable

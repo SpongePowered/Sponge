@@ -81,7 +81,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
             context.getCapturedItemStackSupplier()
