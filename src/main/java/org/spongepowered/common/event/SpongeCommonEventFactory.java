@@ -580,20 +580,20 @@ public class SpongeCommonEventFactory {
             source = worldIn; // Fallback
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(source);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
+            frame.pushCause(source);
+            frame.addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
             if (owner != null) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
+                frame.addContext(EventContextKeys.OWNER, owner);
             }
             if (notifier != null) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
+                frame.addContext(EventContextKeys.NOTIFIER, notifier);
             }
             WorldProperties world = ((World) worldIn).getProperties();
             Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
             Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
                     BlockSnapshot.builder().blockState(toState).world(world).position(position).build());
-            ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(Sponge.getCauseStackManager().getCurrentCause(),
+            ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
                     Collections.singletonList(transaction));
 
             SpongeImpl.postEvent(event);

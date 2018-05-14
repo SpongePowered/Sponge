@@ -1556,10 +1556,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
             }
-            for (Entity entity : context.getCapturedEntities()) {
-                // We can ignore the type check because we're already checking the instance class of the entity.
-                if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
-                    list.add((T) entity);
+            if (state.doesCaptureEntitySpawns()) {
+                for (Entity entity : context.getCapturedEntities()) {
+                    // We can ignore the type check because we're already checking the instance class of the entity.
+                    if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                        list.add((T) entity);
+                    }
                 }
             }
         }

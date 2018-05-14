@@ -175,6 +175,11 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "TileEntityTickPhase";
     }

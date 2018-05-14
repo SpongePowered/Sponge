@@ -65,8 +65,11 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                 .acceptAndClearIfNotEmpty(items -> {
                     final DamageSource damageSource = context.getDamageSource();
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        if (damageSource != null) {
+                            frame.pushCause(damageSource);
+                        }
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
                         frame.pushCause(dyingEntity);
-                        frame.pushCause(damageSource);
                         SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) items, context);
                     }
                 });

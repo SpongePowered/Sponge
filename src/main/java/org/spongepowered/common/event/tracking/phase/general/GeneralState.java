@@ -72,6 +72,11 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
         return SpongeCommonEventFactory.callSpawnEntity(entities, context);
     }
 
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
     private final String className = this.getClass().getSimpleName();
 
     @Override

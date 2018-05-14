@@ -77,6 +77,11 @@ public class TileChunkUnloadState extends BlockPhaseState {
     }
 
     @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
     public boolean alreadyCapturingItemSpawns() {
         return true;
     }

@@ -328,6 +328,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "EntityTickPhase";
     }
