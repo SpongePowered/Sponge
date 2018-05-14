@@ -42,6 +42,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.CombatEntry;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -51,6 +52,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -79,6 +81,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDamageableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -94,9 +99,11 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
@@ -113,13 +120,13 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
 
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+    private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
 
     private int maxAir = 300;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
     @Shadow public int maxHurtTime;
-    @Shadow public int deathTime;
     @Shadow protected int scoreValue;
     @Shadow public float attackedAtYaw;
     @Shadow public float limbSwingAmount;
@@ -135,6 +142,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
+
     // Empty body so that we can call super() in MixinEntityPlayer
     @Shadow public void stopActiveHand() {
 
@@ -169,7 +177,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract boolean isHandActive();
     @Shadow protected abstract void onDeathUpdate();
     @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
-    @Shadow public abstract void setRevengeTarget(EntityLivingBase livingBase);
+    @Shadow public abstract void shadow$setRevengeTarget(EntityLivingBase livingBase);
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
@@ -192,6 +200,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow @Nullable public abstract EntityLivingBase getRevengeTarget();
 
+    @Shadow public int deathTime;
+
+    @Shadow public abstract void heal(float healAmount);
+
+    private int deathEventsPosted;
+
+
     @Override
     public Vector3d getHeadRotation() {
         // pitch, yaw, roll -- Minecraft does not currently support head roll
@@ -212,11 +227,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public void setMaxAir(int air) {
         this.maxAir = air;
-    }
-
-    @Override
-    public double getLastDamage() {
-        return this.lastDamage;
     }
 
     @Override
@@ -243,8 +253,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return Text.of(this.getUniqueID().toString());
     }
 
-    protected boolean tracksEntityDeaths = false;
-
     /**
      * @author blood - May 12th, 2016
      * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
@@ -260,34 +268,28 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause);
-        // Double check that the PhaseTracker is already capturing the Death phase
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
-            if (!this.world.isRemote) {
-                final PhaseData peek = phaseTracker.getCurrentPhaseData();
-                final IPhaseState state = peek.state;
-                this.tracksEntityDeaths = !phaseTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
-                if (this.tracksEntityDeaths) {
-                    Sponge.getCauseStackManager().pushCause(this);
-                    final PhaseContext<?> context = EntityPhase.State.DEATH.createPhaseContext()
-                        .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-                        .source(this);
-                    this.getNotifierUser().ifPresent(context::notifier);
-                    this.getCreatorUser().ifPresent(context::owner);
-                    context.buildAndSwitch();
+        if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
+            if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
+                // ignore because some moron is not resetting the entity.
+                this.deathEventsPosted++;
+                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).isCancelled()) {
+                    // Since the forge event is cancellable
+                    return;
                 }
-            } else {
-                this.tracksEntityDeaths = false;
             }
+        } else {
+            this.deathEventsPosted = 0;
+        }
+
+        // Double check that the PhaseTracker is already capturing the Death phase
+        try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null;
+             final EntityDeathContext context = createOrNullDeathPhase(isMainThread, frame, cause)) {
+            // We re-enter the state only if we aren't already in the death state. This can usually happen when
+            // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
+            // but then again, mods....
             // Sponge End
             if (this.dead) {
-                // Sponge Start - ensure that we finish the tracker if necessary
-                if (this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
-                    phaseTracker.completePhase(EntityPhase.State.DEATH);
-                }
-                // Sponge End
                 return;
             }
 
@@ -309,7 +311,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 int i = 0;
 
                 if (entity instanceof EntityPlayer) {
-                    i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+                    // Sponge Start - use Forge hooks for the looting modifier.
+                    //i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+                    i = SpongeImplHooks.getLootingEnchantmentModifier(this, (EntityLivingBase) entity, cause);
                 }
 
                 if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
@@ -323,23 +327,52 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
                 this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
             }
-            if (phaseTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
-                this.tracksEntityDeaths = false;
-                phaseTracker.completePhase(EntityPhase.State.DEATH);
-            }
 
         }
 
         // Sponge End
     }
 
-    @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
-            "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"))
-    private void onDeathSendEntityState(World world, net.minecraft.entity.Entity self, byte state) {
-        // Don't send the state if this is a human. Fixes ghost items on client.
-        if (!((net.minecraft.entity.Entity) (Object) this instanceof EntityHuman)) {
-            world.setEntityState(self, state);
+    @Override
+    public void resetDeathEventsPosted() {
+        this.deathEventsPosted = 0;
+    }
+
+    /**
+     * @author gabizou - April 29th, 2018
+     * @reason Due to cancelling death events, "healing" the entity is the only way to cancel the
+     * death, but we still want to reset the death event counter. This is the simplest way to get it working
+     * with forge mods who do not have access to Sponge's API.
+     *
+     * @param health The health
+     * @param info The callback
+     */
+    @Inject(method = "setHealth", at = @At("HEAD"))
+    private void onSetHealthResetEvents(float health, CallbackInfo info) {
+        if (this.getHealth() <= 0 && health > 0) {
+            resetDeathEventsPosted();
         }
+    }
+
+    @Nullable
+    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, @Nullable StackFrame frame, DamageSource source) {
+        boolean tracksEntityDeaths = false;
+        if (((IMixinWorld) this.world).isFake() || !isMainThread || frame == null) { // Short circuit to avoid erroring on handling
+            return null;
+        }
+        final IPhaseState state = PhaseTracker.getInstance().getCurrentPhaseData().state;
+        tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+        if (tracksEntityDeaths) {
+            frame.pushCause(this);
+            final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()
+                .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
+                .source(this);
+            this.getNotifierUser().ifPresent(context::notifier);
+            this.getCreatorUser().ifPresent(context::owner);
+            context.buildAndSwitch();
+            return context;
+        }
+        return null;
     }
 
     @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
@@ -347,8 +380,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return false; // handled in our damageEntityHook
     }
 
+    /**
+     * @author blood - Some time ago in 2015?
+     * @reason Our damage hook handles armor modifiers and "replaying" damage to armor.
+     *
+     * @param entityIn The entity being damaged
+     * @param damage The damage to deal
+     */
     @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;damageArmor(F)V") )
-    protected void onDamageArmor(EntityLivingBase entityIn, float damage) {
+    private void onDamageArmor(EntityLivingBase entityIn, float damage) {
         // do nothing as this is handled in our damageEntityHook
     }
 
@@ -373,6 +413,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public boolean attackEntityFrom(DamageSource source, float amount) {
         // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
+        if (source == null) {
+            new PrettyPrinter(60).centre().add("Null DamageSource").hr()
+                .addWrapped("Sponge has found a null damage source! This should NEVER happen "
+                            + "as the DamageSource is used for all sorts of calculations. Usually"
+                            + " this can be considered developer error. Please report the following"
+                            + " stacktrace to the most appropriate mod/plugin available.")
+                .add()
+                .add(new IllegalArgumentException("Null DamageSource"))
+                .log(SpongeImpl.getLogger(), Level.WARN);
+            return false;
+        }
         // Sponge - This hook is for forge use mainly
         if (!this.hookModAttack((EntityLivingBase) (Object) this, source, amount))
             return false;
@@ -457,7 +508,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 if (entity != null) {
                     if (entity instanceof EntityLivingBase) {
-                        this.setRevengeTarget((EntityLivingBase) entity);
+                        this.shadow$setRevengeTarget((EntityLivingBase) entity);
                     }
 
                     if (entity instanceof EntityPlayer) {
@@ -511,19 +562,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         }
 
                         // Sponge Start - notify the cause tracker
-                        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            final boolean enterDeathPhase = !phaseTracker.getCurrentState().tracksEntityDeaths();
-                            try (final PhaseContext<?> context = !enterDeathPhase
-                                                                 ? null
-                                                                 : EntityPhase.State.DEATH.createPhaseContext()
-                                                                     .source(this)
-                                                                     .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
-                                                                     .owner(this::getCreatorUser)
-                                                                     .notifier(this::getNotifierUser)
-                                                                     .buildAndSwitch()) {
-                                this.onDeath(source);
-                            }
+                        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+                             final EntityDeathContext context = createOrNullDeathPhase(true, frame, source)) {
+                            this.onDeath(source);
                         }
                     }
                     // Sponge End

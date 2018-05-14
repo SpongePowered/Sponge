@@ -31,18 +31,17 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.Collection;
 import java.util.List;
@@ -52,7 +51,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class InteractEntityPacketState extends BasicPacketState {
+final class InteractEntityPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
 
     @Override
     public boolean ignoresItemPreMerging() {
@@ -77,11 +76,6 @@ final class InteractEntityPacketState extends BasicPacketState {
             }
         }
 
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
     @Override
@@ -123,20 +117,14 @@ final class InteractEntityPacketState extends BasicPacketState {
                 printer.trace(System.err);
             });
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    processSpawnedEntities(player, event);
-
-                }
+                SpongeCommonEventFactory.callSpawnEntity(items, phaseContext);
             });
         }
-        phaseContext.getCapturedEntityDropSupplier()
+        phaseContext.getPerEntityItemDropSupplier()
             .acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();

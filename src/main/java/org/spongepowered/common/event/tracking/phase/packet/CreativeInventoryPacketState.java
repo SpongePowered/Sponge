@@ -24,19 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-
-import java.util.ArrayList;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 final class CreativeInventoryPacketState extends BasicPacketState {
 
@@ -58,22 +49,9 @@ final class CreativeInventoryPacketState extends BasicPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
-                if (items.isEmpty()) {
-                    return;
-                }
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-                    Sponge.getCauseStackManager().pushCause(player);
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (EntityItem item : items) {
-                        entities.add(EntityUtil.fromNative(item));
-                    }
-                    final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dispense);
-                    if (!dispense.isCancelled()) {
-                        processSpawnedEntities(player, dispense);
-                    }
+                    frame.pushCause(player);
+                    SpongeCommonEventFactory.callDropItemDrop(items, context);
                 }
             });
     }

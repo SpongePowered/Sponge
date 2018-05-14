@@ -33,6 +33,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -50,7 +51,9 @@ import org.spongepowered.common.event.tracking.context.CapturedMultiMapSupplier;
 import org.spongepowered.common.event.tracking.context.CapturedSupplier;
 import org.spongepowered.common.event.tracking.context.EntityItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.EntityItemEntityDropsSupplier;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +72,16 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings("unchecked")
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
+
+    private static final PhaseContext<?> EMPTY = new PhaseContext<>(GeneralPhase.State.COMPLETE).markEmpty();
+
+    /**
+     * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
+     * @return
+     */
+    public static PhaseContext<?> empty() {
+        return EMPTY;
+    }
 
     final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
@@ -305,14 +318,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.blockItemEntityDropsSupplier;
     }
 
-    public CapturedMultiMapSupplier<UUID, ItemDropData> getCapturedEntityDropSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<UUID, ItemDropData> getPerEntityItemDropSupplier() throws IllegalStateException {
         if (this.entityItemDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
         }
         return this.entityItemDropsSupplier;
     }
 
-    public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<UUID, EntityItem> getPerEntityItemEntityDropSupplier() throws IllegalStateException {
         if (this.entityItemEntityDropsSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to capture entity drops!", this).get();
         }
@@ -326,7 +339,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.capturedItemStackSupplier;
     }
 
-    public CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> getBlockEntitySpawnSupplier() throws IllegalStateException {
+    public CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> getPerBlockEntitySpawnSuppplier() throws IllegalStateException {
         if (this.blockEntitySpawnSupplier == null) {
             throw TrackingUtil.throwWithContext("Intended to track block entity spawns!", this).get();
         }
@@ -345,12 +358,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 .getPos();
     }
 
-    public void addNotifierAndOwnerToCauseStack() {
+    public void addNotifierAndOwnerToCauseStack(CauseStackManager.StackFrame frame) {
         if (this.owner != null) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, this.owner);
+            frame.addContext(EventContextKeys.OWNER, this.owner);
         }
         if (this.notifier != null) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, this.notifier);
+            frame.addContext(EventContextKeys.NOTIFIER, this.notifier);
         }
     }
 
@@ -382,9 +395,16 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 .toString();
     }
 
-    public P markEmpty() {
+    private P markEmpty() {
         this.isCompleted = true;
         return (P) this;
+    }
+
+    private boolean isEmpty() {
+        if (this == PhaseContext.EMPTY) {
+            return true;
+        }
+        return false;
     }
 
     @Override

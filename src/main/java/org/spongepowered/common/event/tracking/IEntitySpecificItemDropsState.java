@@ -22,35 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
+package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+public interface IEntitySpecificItemDropsState<C extends PhaseContext<C>> extends IPhaseState<C> {
 
-public final class EntityPhase extends TrackingPhase {
-
-    public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<TeleportingContext> CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
-        public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
-
-        private State() {
-        }
+    @Override
+    default boolean tracksEntitySpecificDrops() {
+        return true;
     }
 
-
-    public static EntityPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    private EntityPhase() {
-    }
-
-    private static final class Holder {
-        static final EntityPhase INSTANCE = new EntityPhase();
-    }
 
 }

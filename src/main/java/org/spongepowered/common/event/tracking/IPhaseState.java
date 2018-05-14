@@ -26,6 +26,8 @@ package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -35,12 +37,18 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -101,7 +109,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * states that deem it necessary to have some post processing for
      * advanced game mechanics. This is always performed when capturing
      * has been turned on during a phases's
-     * {@link IPhaseState#unwind(PhaseContext<?>)} is
+     * {@link IPhaseState#unwind(PhaseContext)} is
      * dispatched. The rules of post dispatch are as follows:
      * - Entering extra phases is not allowed: This is to avoid
      *  potential recursion in various corner cases.
@@ -143,22 +151,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if the entity was successfully captured
      */
     default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
-        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-        if (user != null) {
-            entity.setCreator(user.getUniqueId());
-        }
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-            entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled() && event.getEntities().size() > 0) {
-            for (org.spongepowered.api.entity.Entity item: event.getEntities()) {
-                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-            }
-            return true;
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
-        return false;
     }
 
     default boolean ignoresBlockTracking() {
@@ -226,10 +224,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default Optional<DamageSource> createDestructionDamageSource(PhaseContext<?> context, Entity entity) {
-        return Optional.empty();
-    }
-
     default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
 
     }
@@ -266,15 +260,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        final User creator = unwindingContext.getNotifier().orElseGet(() -> unwindingContext.getOwner().orElse(null));
-        TrackingUtil.splitAndSpawnEntities(
-            entities,
-            entity -> {
-                if (creator != null) {
-                    entity.setCreator(creator.getUniqueId());
-                }
-            }
-        );
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
+        }
     }
 
     default boolean alreadyCapturingEntitySpawns() {
@@ -318,5 +307,47 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
     default void appendContextPreExplosion(ExplosionContext explosionContext, C currentPhaseData) {
 
+    }
+    default boolean doesDenyChunkRequests() {
+        return false;
+    }
+
+    /**
+     * A phase specific method that determines whether it is needed to capture the entity based onto the
+     * entity-specific lists of drops, or a generalized list of drops.
+     *
+     * Cases for entity specific drops:
+     * - Explosions
+     * - Entity deaths
+     * - Commands killing mass entities and those entities dropping items
+     *
+     * Cases for generalized drops:
+     * - Phase states for specific entity deaths
+     * - Phase states for generalization, like packet handling
+     * - Using items
+     *
+     * @param phaseContext The current context
+     * @param entity The entity performing the drop or "source" of the drop
+     * @param entityitem The item to be dropped
+     * @return True if we are capturing, false if we are to let the item spawn
+     */
+    default boolean performOrCaptureItemDrop(C phaseContext, Entity entity, EntityItem entityitem) {
+        if (this.doesCaptureEntityDrops()) {
+            if (this.tracksEntitySpecificDrops()) {
+                // We are capturing per entity drop
+                // This has to be handled specially for the entity in forge environments to
+                // specifically syncronize the list used for sponge's tracking and forge's partial tracking
+                SpongeImplHooks.capturePerEntityItemDrop(phaseContext, entity, entityitem);
+            } else {
+                // We are adding to a general list - usually for EntityPhase.State.DEATH
+                phaseContext.getCapturedItemsSupplier().get().add(entityitem);
+            }
+            // Return the item, even if it wasn't spawned in the world.
+            return true;
+        }
+        return false;
+    }
+    default boolean doesCaptureEntitySpawns() {
+        return false;
     }
 }

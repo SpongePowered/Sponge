@@ -36,6 +36,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -44,14 +45,15 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class CommandState extends GeneralState<CommandPhaseContext> {
+final class CommandState extends GeneralState<CommandPhaseContext> implements IEntitySpecificItemDropsState<CommandPhaseContext> {
 
     @Override
     public CommandPhaseContext createPhaseContext() {
@@ -74,11 +76,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
         return state instanceof BlockPhaseState;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
     @Override
@@ -114,31 +111,19 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         phaseContext.getCapturedBlockSupplier()
                 .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(sender);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            frame.pushCause(sender);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             phaseContext.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid,
                         // need to investigate further.
-                        final SpawnEntityEvent spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        if (!spawnEntityEvent.isCancelled()) {
-                            final boolean isPlayer = sender instanceof Player;
-                            final Player player = isPlayer ? (Player) sender : null;
-                            for (Entity entity : spawnEntityEvent.getEntities()) {
-                                if (isPlayer) {
-                                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
+                        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
                     });
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(sender);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
-            phaseContext.getCapturedEntityDropSupplier()
+            frame.pushCause(sender);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            phaseContext.getPerEntityItemDropSupplier()
                     .acceptIfNotEmpty(uuidItemStackMultimap -> {
                         for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
                             final UUID key = entry.getKey();
@@ -169,20 +154,15 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                                         .map(data -> data.create(minecraftWorld))
                                         .map(EntityUtil::fromNative)
                                         .collect(Collectors.toList());
-                                Sponge.getCauseStackManager().pushCause(affectedEntity.get());
+                                frame.pushCause(affectedEntity.get());
                                 final DropItemEvent.Destruct destruct =
-                                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
                                 SpongeImpl.postEvent(destruct);
-                                Sponge.getCauseStackManager().popCause();
+                                frame.popCause();
                                 if (!destruct.isCancelled()) {
                                     final boolean isPlayer = sender instanceof Player;
                                     final Player player = isPlayer ? (Player) sender : null;
-                                    for (Entity entity : destruct.getEntities()) {
-                                        if (isPlayer) {
-                                            EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                                        }
-                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                                    }
+                                    EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUniqueId() : null));
                                 }
 
                             }
@@ -193,6 +173,18 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public boolean spawnEntityOrCapture(CommandPhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        return context.getCapturedEntities().add(entity);
+        // Instead of bulk capturing entities that are spawned in a command, some commands could potentially
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+
+            final List<Entity> entities = new ArrayList<>(1);
+            entities.add(entity);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+        }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
     }
 }

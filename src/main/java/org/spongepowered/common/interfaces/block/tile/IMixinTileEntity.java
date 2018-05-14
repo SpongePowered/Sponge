@@ -32,9 +32,11 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -97,12 +99,12 @@ public interface IMixinTileEntity {
 
     // Tracking
     default SpawnType getTickedSpawnType() {
-        return InternalSpawnTypes.BLOCK_SPAWNING;
+        return SpawnTypes.BLOCK_SPAWNING;
     }
 
-    void setSpongeOwner(User owner);
+    void setSpongeOwner(@Nullable User owner);
 
-    User getSpongeOwner();
+    Optional<User> getSpongeOwner();
 
     boolean hasSetOwner();
 

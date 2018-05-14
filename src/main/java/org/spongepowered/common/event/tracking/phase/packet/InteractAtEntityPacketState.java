@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -40,10 +41,11 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +55,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-final class InteractAtEntityPacketState extends BasicPacketState {
+final class InteractAtEntityPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
 
     @Override
     public boolean ignoresItemPreMerging() {
@@ -97,26 +99,16 @@ final class InteractAtEntityPacketState extends BasicPacketState {
 
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-
-                SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    processSpawnedEntities(player, event);
-                }
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
             });
             context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), items);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    processSpawnedEntities(player, event);
-                }
+                SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
-            context.getCapturedEntityDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact At Entity").centre().hr();
                 printer.add("The item stacks captured are: ");
@@ -129,7 +121,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                 }
                 printer.trace(System.err);
             });
-            context.getCapturedEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
                     final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
@@ -139,8 +131,10 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                             .map(EntityUtil::fromNative)
                             .collect(Collectors.toList());
                         if (!entities.isEmpty()) {
+                            // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
+                            // SpongeCommonEventFactory.callDropItemCustom(entities, context);
                             DropItemEvent.Custom event =
-                                SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(),
+                                SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
                                     entities);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
@@ -158,7 +152,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(),
+                    DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
                         entities);
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {

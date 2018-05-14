@@ -81,6 +81,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -149,7 +150,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
-    @Shadow public abstract void addStat(StatBase stat, int amount);
+    @Shadow public abstract void addStat(@Nullable StatBase stat, int amount);
     @Shadow public abstract void addStat(StatBase stat);
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
@@ -280,6 +281,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     @Override
     public void onDeath(DamageSource cause) {
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread).isCancelled()) {
+            return;
+        }
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
@@ -378,59 +383,61 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @reason When a player drops an item, all methods flow through here instead of {@link Entity#dropItem(Item, int)}
      * because of the idea of {@code dropAround} and {@code traceItem}.
      *
-     * @param droppedItem
-     * @param dropAround
-     * @param traceItem
-     * @return
+     * @param droppedItem The item to drop
+     * @param dropAround If true, the item is dropped around the player, otherwise thrown in front of the player
+     * @param traceItem If true, the item is thrown as the player
+     * @return The entity, if spawned correctly and not captured in any way
      */
     @Nullable
     @Overwrite
     public EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (droppedItem.isEmpty()) {
             return null;
-        } else if (this.world.isRemote) {
-            double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
-            EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
-            entityitem.setPickupDelay(40);
-
-            if (traceItem) {
-                entityitem.setThrower(this.getName());
-            }
-
-            if (dropAround) {
-                float f = this.rand.nextFloat() * 0.5F;
-                float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-                entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
-                entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
-                entityitem.motionY = 0.20000000298023224D;
-            } else {
-                float f2 = 0.3F;
-                entityitem.motionX =
-                        (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
-                entityitem.motionZ =
-                        (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
-                entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
-                float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-                f2 = 0.02F * this.rand.nextFloat();
-                entityitem.motionX += Math.cos((double) f3) * (double) f2;
-                entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
-                entityitem.motionZ += Math.sin((double) f3) * (double) f2;
-            }
-
-            ItemStack itemstack = this.dropItemAndGetStack(entityitem);
-
-            if (traceItem) {
-                if (!itemstack.isEmpty()) {
-                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
-                }
-
-                this.addStat(StatList.DROP);
-            }
-
-            return entityitem;
-        } else {
+        }
+        // Sponge Start - redirect to our handling to capture and throw events.
+        if (!((IMixinWorld) this.world).isFake()) {
             return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
         }
+        // Sponge end
+        double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
+        EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
+        entityitem.setPickupDelay(40);
+
+        if (traceItem) {
+            entityitem.setThrower(this.getName());
+        }
+
+        if (dropAround) {
+            float f = this.rand.nextFloat() * 0.5F;
+            float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
+            entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
+            entityitem.motionY = 0.20000000298023224D;
+        } else {
+            float f2 = 0.3F;
+            entityitem.motionX =
+                (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionZ =
+                (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            f2 = 0.02F * this.rand.nextFloat();
+            entityitem.motionX += Math.cos((double) f3) * (double) f2;
+            entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
+            entityitem.motionZ += Math.sin((double) f3) * (double) f2;
+        }
+
+        ItemStack itemstack = this.dropItemAndGetStack(entityitem);
+
+        if (traceItem) {
+            if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
+                this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
+            }
+
+            this.addStat(StatList.DROP);
+        }
+
+        return entityitem;
     }
 
     /**
@@ -450,7 +457,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
-    public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
+    private void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
         this.collidingEntityUuid = entity.getUniqueID();
         entity.onCollideWithPlayer(player);
         this.collidingEntityUuid = null;
@@ -470,7 +477,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * when the {@link DamageSourceRegistryModule#IGNORED_DAMAGE_SOURCE} is being used.
      */
     @Inject(method = "attackEntityFrom", cancellable = true, at = @At(value = "HEAD"))
-    public void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (source == DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
             // Taken from the original method, wake the player up if they are about to die.
             if (this.isPlayerSleeping() && !this.world.isRemote) {

@@ -32,6 +32,7 @@ import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -41,6 +42,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -60,7 +62,9 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
@@ -110,6 +114,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -1104,7 +1109,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return ImmutableList.of();
         }
         for (Entity entity : event.getEntities()) {
-            this.forceSpawnEntity(entity);
+            EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
 
         return event.getEntities().stream().filter(Entity::isLoaded).collect(ImmutableList.toImmutableList());
@@ -1157,8 +1162,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CHUNK_LOAD);
+            frame.pushCause(this);
             SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Sponge.getCauseStackManager().getCurrentCause(), Lists.newArrayList(entityList));
             SpongeImpl.postEvent(chunkLoad);
             if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
@@ -1424,7 +1429,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @SuppressWarnings("Duplicates")
     @Override
-    public void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
+    protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
@@ -1436,7 +1441,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void onUpdateTileEntities(ITickable tile) {
+    protected void onUpdateTileEntities(ITickable tile) {
         this.updateTileEntity(tile);
     }
 
@@ -1454,7 +1459,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
+    protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
@@ -1467,7 +1472,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
+    protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
@@ -1487,6 +1492,82 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .buildAndSwitch()) {
             player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         }
+    }
+
+    /**
+     * @author gabizou - May 11th, 2018
+     * @reason Due to mods attempting to retrieve spawned entity drops in the world,
+     * we occasionally have to accomodate those mods by providing insight into the
+     * entities that are being captured by the {@link PhaseTracker} in the instance
+     * we have an {@link IPhaseState} that is capturing entities. This is only to
+     * allow the mod to still retrieve said entities in the "world" that would otherwise
+     * be spawned.
+     *
+     * <p>Note that the entities are also filtered on whether they are being removed
+     * during the {@link IPhaseState#unwind(PhaseContext)} process to avoid duplicate
+     * entity spawns.</p>
+     *
+     * @param clazz The entity class
+     * @param aabb The axis aligned bounding box
+     * @param filter The filter predicate
+     * @param <T> The type of entity list
+     * @return The list of entities found
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class<? extends T> clazz, AxisAlignedBB aabb,
+        @Nullable Predicate<? super T> filter) {
+        // Sponge start - get the max entity radius variable from forge
+        final double maxEntityRadius = SpongeImplHooks.getWorldMaxEntityRadius(this);
+        // j2 == minChunkX
+        // k2 == maxChunkX
+        // l2 == minChunkZ
+        // i3 == maxChunkZ
+        int minChunkX = MathHelper.floor((aabb.minX - maxEntityRadius) / 16.0D);
+        int maxChunkX = MathHelper.ceil((aabb.maxX + maxEntityRadius) / 16.0D);
+        int minChunkZ = MathHelper.floor((aabb.minZ - maxEntityRadius) / 16.0D);
+        int maxChunkZ = MathHelper.ceil((aabb.maxZ + maxEntityRadius) / 16.0D);
+        // Sponge End
+        List<T> list = Lists.newArrayList();
+
+        for (int currentX = minChunkX; currentX < maxChunkX; ++currentX) {
+            for (int currentZ = minChunkZ; currentZ < maxChunkZ; ++currentZ) {
+                if (this.isChunkLoaded(currentX, currentZ, true)) {
+                    this.getChunkFromChunkCoords(currentX, currentZ).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
+                }
+            }
+        }
+        // Sponge Start - check the phase tracker
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        if (!isMainThread) {
+            // Short circuit here if we're not on the main thread. Don't bother with the PhaseTracker off thread.
+            return list;
+        }
+        final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
+        final PhaseContext<?> context = currentPhase.context;
+        final IPhaseState<?> state = currentPhase.state;
+        if (state.doesCaptureEntityDrops() || state.allowEntitySpawns()) {
+            // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
+            // they pass the predicate check
+            if (state.doesCaptureEntityDrops()) {
+                for (EntityItem entity : context.getCapturedItems()) {
+                    // We can ignore the type check because we're already checking the instance class of the entity.
+                    if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                        list.add((T) entity);
+                    }
+                }
+            }
+            if (state.doesCaptureEntitySpawns()) {
+                for (Entity entity : context.getCapturedEntities()) {
+                    // We can ignore the type check because we're already checking the instance class of the entity.
+                    if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                        list.add((T) entity);
+                    }
+                }
+            }
+        }
+        // Sponge End
+        return list;
     }
 
     // ------------------------ End of Cause Tracking ------------------------------------

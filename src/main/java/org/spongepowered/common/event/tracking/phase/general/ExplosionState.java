@@ -36,11 +36,11 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -49,12 +49,12 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -62,7 +62,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-final class ExplosionState extends GeneralState<ExplosionContext> {
+final class ExplosionState extends GeneralState<ExplosionContext> implements IEntitySpecificItemDropsState<ExplosionContext> {
 
     @Override
     public ExplosionContext createPhaseContext() {
@@ -75,11 +75,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
         return true;
     }
 
@@ -107,23 +102,15 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public void unwind(ExplosionContext context) {
         final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            context.addNotifierAndOwnerToCauseStack();
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
-            Sponge.getCauseStackManager().pushCause(explosion);
+            context.addNotifierAndOwnerToCauseStack(frame);
+            frame.pushCause(explosion);
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
             context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                if (user != null) {
-                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
+                        try (CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()){
+                            smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
+                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
                         }
                     });
         }
@@ -218,8 +205,8 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                         // Cancel any block drops performed, avoids any item drops, regardless
                         final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
                         context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
-                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
-                        context.getBlockEntitySpawnSupplier().removeAllIfNotEmpty(pos);
+                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
+                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
                     }
                 }
             }
@@ -265,7 +252,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public boolean spawnEntityOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
-            final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();
+            final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();
             final Multimap<BlockPos, EntityItem> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
             if (entity instanceof EntityItem) {
                 blockPosEntityItemMultimap.put(blockPos, (EntityItem) entity);
@@ -276,17 +263,18 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         }).orElseGet(() -> {
             final ArrayList<Entity> entities = new ArrayList<>(1);
             entities.add(entity);
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
-                entities);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled() && event.getEntities().size() > 0) {
-                for (Entity item: event.getEntities()) {
-                    ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-                }
-                return true;
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
             }
-            return false;
         });
 
     }
+
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
 }

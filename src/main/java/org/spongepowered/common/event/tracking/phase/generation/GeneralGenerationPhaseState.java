@@ -30,12 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -130,17 +125,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         if (spawnedEntities.isEmpty()) {
             return;
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
-    
-            final SpawnEntityEvent.Spawner event = SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), spawnedEntities);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
-                for (Entity entity : event.getEntities()) {
-                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                }
-            }
-        }
+        SpongeCommonEventFactory.callSpawnEntitySpawner(spawnedEntities, context);
     }
 
     @Override
@@ -149,18 +134,13 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity.getLocation().getExtent());
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
-
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), entities);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled() && event.getEntities().size() > 0) {
-                for (Entity item : event.getEntities()) {
-                    ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
-                }
-                return true;
-            }
-            return false;
+            return SpongeCommonEventFactory.callSpawnEntitySpawner(entities, context);
         }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
     }
 
     @Override

@@ -22,35 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
+package org.spongepowered.test;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.plugin.Plugin;
 
-public final class EntityPhase extends TrackingPhase {
+@Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest")
+public class DeathTest {
 
-    public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<TeleportingContext> CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
-        public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
+    private boolean allowDeathsOfPlayers = true;
 
-        private State() {
+    @Listener
+    public void onInit(GameInitializationEvent event) {
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                this.allowDeathsOfPlayers = !this.allowDeathsOfPlayers;
+                return CommandResult.success();
+            }
+            )
+            .build(), "toggleDeath");
+    }
+
+    @Listener
+    public void onDeath(DestructEntityEvent.Death entityEvent, @Getter("getTargetEntity") Player player) {
+        if (!this.allowDeathsOfPlayers) {
+            entityEvent.setCancelled(true);
         }
-    }
-
-
-    public static EntityPhase getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    private EntityPhase() {
-    }
-
-    private static final class Holder {
-        static final EntityPhase INSTANCE = new EntityPhase();
     }
 
 }

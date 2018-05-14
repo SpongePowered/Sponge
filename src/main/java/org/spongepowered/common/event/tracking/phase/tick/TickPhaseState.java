@@ -34,6 +34,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -60,6 +61,11 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
         return state instanceof BlockPhaseState || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops() {
+        return true;
     }
 
     @Override
@@ -90,15 +96,7 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
 
     @Override
     public void postProcessSpawns(C phaseContext, ArrayList<Entity> entities) {
-        final SpawnEntityEvent
-                event =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-            }
-        }
+        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
     }
 
     @Override

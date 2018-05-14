@@ -29,18 +29,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,38 +92,19 @@ public class PlayerPhase extends TrackingPhase {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing a player leaving, but we're not!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+            frame.pushCause(player);
             phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                for (EntityItem item : items) {
-                    entities.add(EntityUtil.fromNative(item));
-                }
-                final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                SpongeImpl.postEvent(dispense);
-                if (!dispense.isCancelled()) {
-                    for (Entity entity : dispense.getEntities()) {
-                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                    }
-                }
+                SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
             });
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
+
+            });
             phaseContext.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(items -> {
-                final List<EntityItem> drops = items.stream()
+                final List<Entity> drops = items.stream()
                         .map(drop -> drop.create(EntityUtil.getMinecraftWorld(player)))
+                        .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
-                final List<Entity> entities = (List<Entity>) (List<?>) drops;
-                if (!entities.isEmpty()) {
-                    DropItemEvent.Custom event =
-                            SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        for (Entity droppedItem : event.getEntities()) {
-                            EntityUtil.getMixinWorld(droppedItem).forceSpawnEntity(droppedItem);
-                        }
-                    }
-                }
+                SpongeCommonEventFactory.callDropItemCustom(drops, phaseContext);
             });
             phaseContext.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, phaseContext));

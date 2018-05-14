@@ -38,11 +38,13 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.WorldUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,32 +69,23 @@ final class BlockDecayPhaseState extends BlockPhaseState {
 
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatable);
-            context.addNotifierAndOwnerToCauseStack();
+            context.addNotifierAndOwnerToCauseStack(frame);
 
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), items);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
+                        final List<Entity> entities = items.stream()
+                            .map(EntityUtil::fromNative)
+                            .collect(Collectors.toList());
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
                     });
             context.getCapturedEntitySupplier()
                     .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent event =
-                                SpongeEventFactory.createSpawnEntityEvent(frame.getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
+                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+
                     });
             context.getCapturedItemStackSupplier()
                     .acceptAndClearIfNotEmpty(drops -> {
@@ -101,13 +94,10 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                                 .collect(Collectors.toList());
                         final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event =
-                                    SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
+                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
-                                for (Entity droppedItem : event.getEntities()) {
-                                    mixinWorld.forceSpawnEntity(droppedItem);
-                                }
+                                EntityUtil.processEntitySpawnsFromEvent(context, event);
                             }
                         }
                     });
