@@ -64,9 +64,13 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         this.fabric = MinecraftFabric.of(this);
         this.slots = new SlotCollection.Builder().add(1).build();
         if (this.inventory instanceof InventoryAdapter) {
-            this.lens = ((SlotLens) ((InventoryAdapter) this.inventory).getRootLens().getChildren().get(slotIndex));
-        } else {
-            this.lens = new SlotLensImpl(0);
+            Object lens = ((InventoryAdapter) this.inventory).getRootLens().getChildren().get(slotIndex);
+            if (lens instanceof SlotLens) {
+                this.lens = ((SlotLens) lens);
+            }
+        }
+        if (this.lens == null) {
+            this.lens = new SlotLensImpl<>(0);
         }
     }
 
