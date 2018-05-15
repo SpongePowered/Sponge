@@ -45,6 +45,7 @@ import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 @Mixin(Slot.class)
 public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter<IInventory> {
@@ -62,7 +63,11 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     public void onConstructed(CallbackInfo ci) {
         this.fabric = MinecraftFabric.of(this);
         this.slots = new SlotCollection.Builder().add(1).build();
-        this.lens = new SlotLensImpl(0);
+        if (this.inventory instanceof InventoryAdapter) {
+            this.lens = ((SlotLens) ((InventoryAdapter) this.inventory).getRootLens().getChildren().get(slotIndex));
+        } else {
+            this.lens = new SlotLensImpl(0);
+        }
     }
 
     @Override
