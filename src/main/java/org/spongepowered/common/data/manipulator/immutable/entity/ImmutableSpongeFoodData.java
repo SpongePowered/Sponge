@@ -36,15 +36,15 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFoodData, FoodData> implements ImmutableFoodData {
 
     private final int foodLevel;
-    private final float foodSaturationLevel;
-    private final float foodExhaustionLevel;
+    private final double foodSaturationLevel;
+    private final double foodExhaustionLevel;
 
     private final ImmutableBoundedValue<Integer> foodLevelValue;
     private final ImmutableBoundedValue<Double> saturationValue;
     private final ImmutableBoundedValue<Double> exhaustionValue;
 
 
-    public ImmutableSpongeFoodData(int foodLevel, float foodSaturationLevel, float foodExhaustionLevel) {
+    public ImmutableSpongeFoodData(int foodLevel, double foodSaturationLevel, double foodExhaustionLevel) {
         super(ImmutableFoodData.class);
         this.foodLevel = foodLevel;
         this.foodSaturationLevel = foodSaturationLevel;

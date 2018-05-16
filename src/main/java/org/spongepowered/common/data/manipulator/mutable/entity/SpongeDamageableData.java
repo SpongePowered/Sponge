@@ -87,7 +87,7 @@ public class SpongeDamageableData extends AbstractData<DamageableData, Immutable
 
     @Override
     public ImmutableDamageableData asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDamageableData.class, this.lastAttacker, this.lastDamage);
+        return new ImmutableSpongeDamageableData(this.lastAttacker, this.lastDamage);
     }
 
     @Override

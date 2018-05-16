@@ -31,8 +31,10 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
@@ -43,8 +45,11 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -66,7 +71,10 @@ import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTa
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -99,7 +107,39 @@ public final class DataUtil {
 
     public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
-        final Object object = dataView.get(key.getQuery()).get();
+        final Object object;
+        final TypeToken<?> elementToken = key.getElementToken();
+        if (elementToken.isSubtypeOf(TypeToken.of(CatalogType.class))) {
+            object = dataView.getCatalogType(key.getQuery(), (Class<CatalogType>) elementToken.getRawType())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Text.class))) {
+            final String input = dataView.getString(key.getQuery())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+            object = TextSerializers.PLAIN.deserialize(input);
+        } else if (elementToken.isSubtypeOf(TypeToken.of(DataSerializable.class))) {
+            object = dataView.getSerializable(key.getQuery(), (Class<DataSerializable>) elementToken.getRawType())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(List.class))) {
+            object = dataView.getList(key.getQuery())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Set.class))) {
+            final HashSet<Object> set = new HashSet<>();
+            set.addAll(dataView.getList(key.getQuery()).orElse(Collections.emptyList()));
+            object = set;
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Enum.class))) {
+            object = Enum.valueOf((Class<Enum>) elementToken.getRawType(), dataView.getString(key.getQuery())
+                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId())));
+        } else {
+            final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.getInstance().getTranslator(elementToken.getRawType());
+            if (translator.isPresent()) {
+                object = translator.map(trans -> trans.translate(dataView))
+                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
+            } else {
+                object = dataView.get(key.getQuery())
+                    .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
+            }
+        }
+
         return (T) object;
     }
 

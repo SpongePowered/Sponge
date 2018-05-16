@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.extra;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
@@ -57,5 +58,11 @@ public class ImmutableSpongeFluidItemData extends AbstractImmutableSingleData<Fl
     @Override
     public ImmutableValue<FluidStackSnapshot> fluid() {
         return getValueGetter();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Keys.FLUID_ITEM_STACK, getValue());
     }
 }
