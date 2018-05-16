@@ -111,7 +111,8 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
 
     @Override
     public Optional<M> fill(DataContainer container, M m) {
-        m.set(this.key, DataUtil.getData(container, this.key));
+        final T data = DataUtil.getData(container, this.key);
+        m.set(this.key, data);
         return Optional.of(m);
     }
 

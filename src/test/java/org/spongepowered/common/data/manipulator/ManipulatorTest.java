@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
@@ -38,12 +40,25 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
+import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
+import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
+import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 @RunWith(LaunchWrapperParameterized.class)
 public class ManipulatorTest {
@@ -187,15 +202,25 @@ public class ManipulatorTest {
             final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
 
             final DataContainer container = manipulator.toContainer();
-
             if (this.builder != null) {
-                final Optional<DataManipulator<?, ?>> optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
+                final Optional<DataManipulator<?, ?>> optional;
+                try {
+                     optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
+                } catch (Exception e) {
+                    printExceptionBuildingData(container);
+                    return;
+                }
                 if (!optional.isPresent()) {
+                    printEmptyBuild(container);
                     throw new IllegalArgumentException("[Serialization]: A builder did not translate the data manipulator: "
                         + this.dataName + "\n[Serialization]: Providing the DataContainer: " + container.toString());
                 }
                 final DataManipulator<?, ?> deserialized = this.builder.build(container).get();
-                assertThat(manipulator.equals(deserialized), is(true));
+                final boolean equals = manipulator.equals(deserialized);
+                if (!equals) {
+                    printNonEqual(container, manipulator, deserialized);
+                }
+                assertThat(equals, is(true));
             }
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException e) {
             throw new PEBKACException("Exceptions thrown trying to construct: " + this.dataName, e);
@@ -205,4 +230,56 @@ public class ManipulatorTest {
         }
     }
 
+    private void printNonEqual(DataContainer container, DataManipulator<?,?> original, DataManipulator<?, ?> deserialized) {
+        final PrettyPrinter printer = new PrettyPrinter(60).centre().add("Unequal Data").hr()
+            .add("Something something equals....")
+            .add()
+            .add("Provided manipulators don't equal eachother.");
+        printRemaining(container, printer);
+
+    }
+
+    private void printEmptyBuild(DataContainer container) {
+        final PrettyPrinter printer = new PrettyPrinter(60).centre().add("Did not build data!").hr()
+            .add("Something something builders....")
+            .add()
+            .add("Provided container didn't get built into a manipulator!");
+        printRemaining(container, printer);
+    }
+
+    private void printExceptionBuildingData(DataContainer container) {
+        final PrettyPrinter printer = new PrettyPrinter(60).centre().add("Could not build data!").hr()
+            .add("Something something data....")
+            .add()
+            .add("Here's the provided container:");
+        printRemaining(container, printer);
+    }
+
+    private void printRemaining(DataContainer container, PrettyPrinter printer) {
+        printContainerToPrinter(printer, container, 2);
+        printer.add()
+            .add("Manipulator class: " + this.manipulatorClass)
+            .print(System.err);
+    }
+
+
+    private static void printContainerToPrinter(PrettyPrinter printer, DataView container, int indentation) {
+        for (DataQuery dataQuery : container.getKeys(false)) {
+            final Object o = container.get(dataQuery).get();
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < indentation; i++) {
+                stringBuilder.append(" ");
+            }
+            final List<String> parts = dataQuery.getParts();
+
+            printer.add(stringBuilder.toString() + "- Query: " + parts.get(parts.size() - 1));
+            if (o instanceof DataView) {
+                // Paginate the internal views.
+                printContainerToPrinter(printer, (DataView) o, indentation * 2);
+            } else {
+                printer                .add(stringBuilder.toString() + "- Value: " + o);
+
+            }
+        }
+    }
 }

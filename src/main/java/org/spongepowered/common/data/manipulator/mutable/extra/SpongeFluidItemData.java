@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.extra;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
@@ -62,5 +63,11 @@ public class SpongeFluidItemData extends AbstractSingleData<FluidStackSnapshot, 
     @Override
     public Value<FluidStackSnapshot> fluid() {
         return getValueGetter();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Keys.FLUID_ITEM_STACK, getValue());
     }
 }

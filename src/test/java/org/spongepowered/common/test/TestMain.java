@@ -43,7 +43,7 @@ public final class TestMain {
         registry.preRegistryInit();
         registry.preInit();
         registry.init();
-        //registry.postInit();
+        registry.postInit();
     }
 
 }

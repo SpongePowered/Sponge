@@ -42,6 +42,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -75,6 +76,7 @@ import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVani
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
+import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
@@ -168,6 +170,7 @@ public class DataRegistrar {
         // Text stuff
         dataManager.registerBuilder(Text.class, new TextConfigSerializer());
         dataManager.registerBuilder(BookView.class, new BookViewDataBuilder());
+        dataManager.registerBuilder(FluidStackSnapshot.class, new SpongeFluidStackSnapshotBuilder());
 
         // Effects stuff
         dataManager.registerBuilder(ParticleEffect.class, new SpongeParticleEffectBuilder());
