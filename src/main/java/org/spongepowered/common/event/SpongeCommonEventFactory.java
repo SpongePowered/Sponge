@@ -973,17 +973,18 @@ public class SpongeCommonEventFactory {
                 && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null) {
-                ItemStackSnapshot clickedItem = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
-                        : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
-                SlotTransaction slotTransaction =
-                        new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, ItemStackSnapshot.NONE);
+                ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.getStack());
+                ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getStack());
+                SlotTransaction slotTransaction = new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, replacement);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
         ClickInventoryEvent.Creative event =
                 SpongeEventFactory.createClickInventoryEventCreative(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
                         (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                        ((IMixinContainer) player.openContainer).getCapturedTransactions());
+                        new ArrayList<>(((IMixinContainer) player.openContainer).getCapturedTransactions()));
+        ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
+        ((IMixinContainer) player.openContainer).setCaptureInventory(false);
         SpongeImpl.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         return event;
