@@ -364,7 +364,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 }
             }
 
-            boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
+            boolean clickedInsideNotOutput = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
             boolean itemValidCheck = itemstack.isEmpty() || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
@@ -383,7 +383,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                 }
 
-                if (clickedHotbar) {
+                if (clickedInsideNotOutput) {
                     if (itemstack.isEmpty()) {
                         this.player.inventoryContainer.putStackInSlot(packetIn.getSlotId(), ItemStack.EMPTY);
                     } else {
