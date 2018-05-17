@@ -53,6 +53,8 @@ import org.spongepowered.common.event.tracking.context.EntityItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.EntityItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.util.Collections;
@@ -73,13 +75,16 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    private static final PhaseContext<?> EMPTY = new PhaseContext<>(GeneralPhase.State.COMPLETE).markEmpty();
+    private static PhaseContext<?> EMPTY;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      * @return
      */
     public static PhaseContext<?> empty() {
+        if (EMPTY == null) {
+            EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE).markEmpty();
+        }
         return EMPTY;
     }
 
@@ -395,7 +400,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 .toString();
     }
 
-    private P markEmpty() {
+    protected P markEmpty() {
         this.isCompleted = true;
         return (P) this;
     }
