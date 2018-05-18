@@ -70,6 +70,11 @@ public class SpongeOptionalValue<E> extends SpongeValue<Optional<E>> implements 
     }
 
     @Override
+    public OptionalValue<E> copy() {
+        return new SpongeOptionalValue<>(getKey(), this.actualValue);
+    }
+
+    @Override
     public OptionalValue<E> setTo(@Nullable E value) {
         return set(Optional.ofNullable(value));
     }
