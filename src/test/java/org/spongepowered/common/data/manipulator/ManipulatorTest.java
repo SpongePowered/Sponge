@@ -41,15 +41,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
-import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
-import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
@@ -57,8 +48,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 @RunWith(LaunchWrapperParameterized.class)
 public class ManipulatorTest {
