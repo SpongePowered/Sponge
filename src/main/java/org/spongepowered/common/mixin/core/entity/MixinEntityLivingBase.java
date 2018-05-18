@@ -363,7 +363,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         final IPhaseState state = PhaseTracker.getInstance().getCurrentPhaseData().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
-            frame.pushCause(this);
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()
                 .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
                 .source(this);
@@ -646,7 +645,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             }
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 DamageEventHandler.generateCauseFor(damageSource);
-    
+
                 DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
                 if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
                     Sponge.getEventManager().post(event);
@@ -654,53 +653,53 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (event.isCancelled()) {
                     return false;
                 }
-    
+
                 damage = (float) event.getFinalDamage();
-    
+
                 // Helmet
                 final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
                 if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
                     mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
                 }
-    
+
                 // Shield
                 if (shieldFunction.isPresent()) {
                     this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
                     if (!damageSource.isProjectile()) {
                         Entity entity = damageSource.getImmediateSource();
-    
+
                         if (entity instanceof EntityLivingBase) {
                             this.blockUsingShield((EntityLivingBase) entity);
                         }
                     }
                 }
-    
+
                 // Armor
                 if (!damageSource.isUnblockable()) {
                     for (DamageFunction modifier : event.getModifiers()) {
                         applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
                     }
                 }
-    
+
                 double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
                 if (absorptionFunction.isPresent()) {
                     absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
                 }
-    
+
                 this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
                 if (damage != 0.0F) {
                     if (human) {
                         ((EntityPlayer) (Object) this).addExhaustion(damageSource.getHungerDamage());
                     }
                     float f2 = this.getHealth();
-    
+
                     this.setHealth(f2 - damage);
                     this.getCombatTracker().trackDamage(damageSource, f2, damage);
-    
+
                     if (human) {
                         return true;
                     }
-    
+
                     this.setAbsorptionAmount(this.getAbsorptionAmount() - damage);
                 }
                 return true;
