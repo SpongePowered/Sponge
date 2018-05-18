@@ -212,20 +212,42 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public PrettyPrinter printCustom(PrettyPrinter printer) {
-        printer
-            .add("    - %s: %s", "Owner", this.owner)
-            .add("    - %s: %s", "Notifier", this.notifier)
-            .add("    - %s: %s", "Source", this.source)
-            .add("    - %s: %s", "CapturedBlocks", this.blocksSupplier)
-            .add("    - %s: %s", "BlockItemDrops", this.blockItemDropsSupplier)
-            .add("    - %s: %s", "BlockItemEntityDrops", this.blockItemEntityDropsSupplier)
-            .add("    - %s: %s", "CapturedItems", this.capturedItemsSupplier)
-            .add("    - %s: %s", "CapturedEntities", this.capturedEntitiesSupplier)
-            .add("    - %s: %s", "CapturedItemStack", this.capturedItemStackSupplier)
-            .add("    - %s: %s", "EntityItemDrops", this.entityItemDropsSupplier)
-            .add("    - %s: %s", "EntityItemEntityDrops", this.entityItemEntityDropsSupplier)
-            .add("    - %s: %s", "BlockEntitySpawns", this.blockEntitySpawnSupplier)
-            .add("    - %s: %s", "CapturedBlockPosition", this.captureBlockPos);
+        if (this.owner != null) {
+            printer.add("    - %s: %s", "Owner", this.owner);
+        }
+        if (this.source != null) {
+            printer.add("    - %s: %s", "Source", this.source);
+        }
+        if (this.blocksSupplier != null && !this.blocksSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "CapturedBlocks", this.blocksSupplier);
+        }
+        if (this.blockItemDropsSupplier != null && !this.blockItemDropsSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "BlockItemDrops", this.blockItemDropsSupplier);
+        }
+        if (this.blockItemEntityDropsSupplier != null && !this.blockItemEntityDropsSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "BlockItemEntityDrops", this.blockItemEntityDropsSupplier);
+        }
+        if (this.capturedItemsSupplier != null && !this.capturedItemsSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "CapturedItems", this.capturedItemsSupplier);
+        }
+        if (this.capturedEntitiesSupplier != null && !this.capturedEntitiesSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "CapturedEntities", this.capturedEntitiesSupplier);
+        }
+        if (this.capturedItemStackSupplier != null && !this.capturedItemStackSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "CapturedItemStack", this.capturedItemStackSupplier);
+        }
+        if (this.entityItemDropsSupplier != null && !this.entityItemDropsSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "EntityItemDrops", this.entityItemDropsSupplier);
+        }
+        if (this.entityItemEntityDropsSupplier != null && !this.entityItemEntityDropsSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "EntityItemEntityDrops", this.entityItemEntityDropsSupplier);
+        }
+        if (this.blockEntitySpawnSupplier != null && !this.blockEntitySpawnSupplier.isEmpty()) {
+            printer.add("    - %s: %s", "BlockEntitySpawns", this.blockEntitySpawnSupplier);
+        }
+        if (this.captureBlockPos != null) {
+            printer.add("    - %s: %s", "CapturedBlockPosition", this.captureBlockPos);
+        }
         return printer;
     }
 

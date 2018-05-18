@@ -29,7 +29,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -96,7 +99,12 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
 
     @Override
     public void postProcessSpawns(C phaseContext, ArrayList<Entity> entities) {
-        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            if (!frame.getCurrentContext().get(EventContextKeys.SPAWN_TYPE).isPresent()) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            }
+            SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+        }
     }
 
     @Override

@@ -55,6 +55,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -110,6 +111,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
@@ -252,13 +254,34 @@ public class SpongeCommonEventFactory {
 
     public static boolean callSpawnEntity(List<Entity> entities, PhaseContext<?> context) {
         Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
-        return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
+        try {
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeImpl.postEvent(event);
+            return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
+        } catch (Exception e) {
+            final PrettyPrinter printer = new PrettyPrinter(60).add("Exception trying to create a Spawn Event").centre().hr()
+                .addWrapped(
+                    "Something did not go well trying to create an event or while trying to throw a SpawnEntityEvent. My bet is it's gremlins")
+                .add()
+                .add("At the very least here's some information about what's going to be directly spawned without an event:");
+            printer.add("Entities:");
+            for (Entity entity : entities) {
+                printer.add(" - " + entity);
+            }
+            printer.add("PhaseContext:");
+            context.printCustom(printer);
+            printer.add();
+            printer.add("Exception:");
+            printer.add(e);
+            printer.log(SpongeImpl.getLogger(), Level.ERROR);
+            for (Entity entity : entities) {
+                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+            }
+            return true;
+        }
     }
 
     public static boolean callSpawnEntityCustom(List<Entity> entities, PhaseContext<?> context) {
-        Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
