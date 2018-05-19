@@ -75,8 +75,10 @@ public abstract class MixinEntityEndermite extends MixinEntityMob implements End
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEndermite;setDead()V"))
     private void fireExpireEventLifetime(CallbackInfo ci) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            Sponge.getCauseStackManager().pushCause(this);
             ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
             SpongeImpl.postEvent(event);
+            Sponge.getCauseStackManager().popCause();
         }
     }
 }
