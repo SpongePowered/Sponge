@@ -43,6 +43,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -83,6 +84,7 @@ public final class SpongeImpl {
     @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
     @Nullable private static PluginContainer minecraftPlugin;
     @Nullable private static SpongeConfig<CustomDataConfig> customDataConfig;
+    @Nullable private static SpongeConfigSaveManager configSaveManager;
 
     @Inject private static SpongeGame game;
 
@@ -182,6 +184,14 @@ public final class SpongeImpl {
 
     public static Path getSpongeConfigDir() {
         return SpongeLaunch.getSpongeConfigDir();
+    }
+
+    public static SpongeConfigSaveManager getConfigSaveManager() {
+        if (configSaveManager == null) {
+            configSaveManager = new SpongeConfigSaveManager();
+        }
+
+        return configSaveManager;
     }
 
     public static SpongeConfig<GlobalConfig> getGlobalConfig() {
