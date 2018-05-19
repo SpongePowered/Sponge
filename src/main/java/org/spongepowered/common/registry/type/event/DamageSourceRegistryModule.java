@@ -44,6 +44,7 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             DAMAGESOURCE_POISON = (new DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
             DAMAGESOURCE_MELTING = (new DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
             IGNORED_DAMAGE_SOURCE = new DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
+            DamageSources.class.getDeclaredField("DRAGON_BREATH").set(null, DamageSource.DRAGON_BREATH);
             DamageSources.class.getDeclaredField("DROWNING").set(null, DamageSource.DROWN);
             DamageSources.class.getDeclaredField("FALLING").set(null, DamageSource.FALL);
             DamageSources.class.getDeclaredField("FIRE_TICK").set(null, DamageSource.ON_FIRE);
@@ -54,6 +55,7 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             DamageSources.class.getDeclaredField("STARVATION").set(null, DamageSource.STARVE);
             DamageSources.class.getDeclaredField("WITHER").set(null, DamageSource.WITHER);
             DamageSources.class.getDeclaredField("VOID").set(null, DamageSource.OUT_OF_WORLD);
+            DamageSources.class.getDeclaredField("WALL_COLLISION").set(null, DamageSource.FLY_INTO_WALL);
         } catch (Exception e) {
             e.printStackTrace();
         }

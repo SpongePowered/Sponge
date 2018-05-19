@@ -46,13 +46,18 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     DamageSourceToTypeProvider() {
 
         this.damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
-        this.damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
+        this.damageSourceToTypeMappings.put("arrow", DamageTypes.PROJECTILE);
         this.damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("cramming", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("dragonbreath", DamageTypes.MAGIC);
         this.damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
         this.damageSourceToTypeMappings.put("explosion.player", DamageTypes.EXPLOSIVE);
         this.damageSourceToTypeMappings.put("fall", DamageTypes.FALL);
         this.damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("fireworks", DamageTypes.EXPLOSIVE);
+        this.damageSourceToTypeMappings.put("flyintowall", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
+        this.damageSourceToTypeMappings.put("hotfloor", DamageTypes.MAGMA);
         this.damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
         this.damageSourceToTypeMappings.put("infire", DamageTypes.FIRE);
         this.damageSourceToTypeMappings.put("inwall", DamageTypes.SUFFOCATE);
@@ -67,7 +72,6 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         this.damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
         this.damageSourceToTypeMappings.put("thrown", DamageTypes.PROJECTILE);
         this.damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
-        this.damageSourceToTypeMappings.put("hotfloor", DamageTypes.MAGMA);
     }
 
     @Override
