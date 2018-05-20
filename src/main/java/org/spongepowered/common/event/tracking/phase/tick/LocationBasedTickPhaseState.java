@@ -36,7 +36,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -56,11 +55,8 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     @Override
     public void associateNeighborStateNotifier(T context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        if (sourcePos == null) {
-            LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
-            sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
-        }
-        User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(minecraftWorld, sourcePos));
+        // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
+        final User user = context.getNotifier().orElse(null);
         if (user != null) {
             final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
@@ -70,13 +66,13 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
         Transaction<BlockSnapshot> snapshotTransaction, T context) {
-        final Location<World> location = getLocatableBlockSourceFromContext(context).getLocation();
-        final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
-        final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
-        final BlockPos changedBlockPos = ((IMixinLocation)(Object) changedLocation).getBlockPos();
-        final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
-        final User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(location));
+        // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
+        final User user = context.getNotifier().orElse(null);
         if (user != null) {
+            final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
+            final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
+            final BlockPos changedBlockPos = ((IMixinLocation)(Object) changedLocation).getBlockPos();
+            final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
         }
     }
