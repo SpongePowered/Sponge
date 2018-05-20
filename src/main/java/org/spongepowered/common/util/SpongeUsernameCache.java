@@ -53,11 +53,11 @@ import com.google.gson.JsonSyntaxException;
  * last known username.<br>
  * For convenience, {@link #getMap()} is provided to get an immutable copy of
  * the caches underlying map.
- * 
+ *
  * Note: This class represents Forge's UsernameCache. It is used merely used
  * to support both SpongeForge and SpongeVanilla. Original code can be found
  * here :
- * 
+ *
  * https://github.com/MinecraftForge/MinecraftForge/blob/1.8.9/src/main/java/net/minecraftforge/common/UsernameCache.java
  */
 public final class SpongeUsernameCache {
@@ -67,10 +67,27 @@ public final class SpongeUsernameCache {
 
     private static final Charset charset = Charsets.UTF_8;
 
-    private static final File saveFile = new File(".", "usernamecache.json");
+    private static File saveFile = new File(".", "usernamecache.json");
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static boolean loaded = false;
+
+    /**
+     * Internal method used to set the proper server directory when it's available
+     *
+     * <p>When running the integrated server, the 'gameDir' option can be used
+     * to set a server directory other than the current working directory.
+     * Normally, we could use MinecraftServer#getDataDirectory() to get this
+     * directory, but SpongeUsernameCache is initialized extremely early - before
+     * the server has even started.
+     *
+     * To work around this issue, we call setServerDir from implementation-specific
+     * code (either SpongeForge or SpongeVanilla).</p>
+     * @param serverDir
+     */
+    public static void setServerDir(File serverDir) {
+        saveFile = new File(serverDir, saveFile.getName());
+    }
 
     /**
      * Set a player's current username
