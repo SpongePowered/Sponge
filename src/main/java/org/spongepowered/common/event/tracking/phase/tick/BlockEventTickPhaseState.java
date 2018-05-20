@@ -71,15 +71,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void associateNeighborStateNotifier(BlockEventTickContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        if (sourcePos == null) {
-            LocatableBlock locatableBlock =  context.getSource(LocatableBlock.class).orElse(null);
-            if (locatableBlock == null) {
-                TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
-                locatableBlock = tileEntity.getLocatableBlock();
-            }
-            sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
-        }
-        final User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(minecraftWorld, sourcePos));
+        // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
+        final User user = context.getNotifier().orElse(null);
         if (user != null) {
             final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
