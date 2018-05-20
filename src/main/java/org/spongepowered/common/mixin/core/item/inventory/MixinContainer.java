@@ -42,6 +42,7 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -90,6 +91,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -594,5 +596,29 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             }
         }
         return false;
+    }
+
+    @Override
+    public Set<Player> getViewers() {
+        return this.listeners.stream().filter(Player.class::isInstance).map(Player.class::cast).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean hasViewers() {
+        return this.listeners.stream().anyMatch(p -> p instanceof Player);
+    }
+
+    @Override
+    public void open(Player viewer) throws IllegalArgumentException {
+        if (!this.listeners.contains(viewer)) {
+            viewer.openInventory(this);
+        }
+    }
+
+    @Override
+    public void close(Player viewer) throws IllegalArgumentException {
+        if (this.listeners.contains(viewer)) {
+            viewer.closeInventory();
+        }
     }
 }
