@@ -1,6 +1,6 @@
 // Shared Gradle configuration for the Sponge implementation projects
 
-ext.common = project(':SpongeCommon')
+ext.common = project('SpongeCommon')
 
 // Finish configuring SpongeCommon first
 evaluationDependsOn common.path
