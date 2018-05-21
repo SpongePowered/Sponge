@@ -60,14 +60,15 @@ public class OptimizationCategory extends ConfigCategory {
                                                + "Note: This optimization has a few issues which are explained in the bug report.")
     private boolean pandaRedstone = false;
 
-    @Setting(value = "enchantment-helper-leak-fix", comment = "If 'true', provides a fix for possible leaks throug\n"
+    @Setting(value = "enchantment-helper-leak-fix", comment = "If 'true', provides a fix for possible leaks through\n"
                                                               + "Minecraft's enchantment helper code that can leak\n"
                                                               + "entity and world references without much interaction\n"
-                                                              + "Forge fixes this already, but Sponge is ensuring the leak\n"
-                                                              + "is fixed in a second iterator."
-                                                              + "See https://bugs.mojang.com/browse/MC-128547 for more information.\n"
-                                                              + "Note that this should be enabled in SpongeVanilla as Forge is the\n"
-                                                              + "only other platform having this fix.")
+                                                              + "Forge native (so when running SpongeForge implementation)\n"
+                                                              + "has a similar patch, but Sponge's patch works a little harder\n"
+                                                              + "at it, but Vanilla (SpongeVanilla implementation) does NOT\n"
+                                                              + "have any of the patch, leading to the recommendation that this\n"
+                                                              + "patch is enabled \"for sure\" when using SpongeVanilla implementation.\n"
+                                                              + "See https://bugs.mojang.com/browse/MC-128547 for more information.\n")
     private boolean enchantmentLeak = true;
 
     public OptimizationCategory() {  
