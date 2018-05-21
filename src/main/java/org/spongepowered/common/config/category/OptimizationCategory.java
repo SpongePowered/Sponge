@@ -60,6 +60,16 @@ public class OptimizationCategory extends ConfigCategory {
                                                + "Note: This optimization has a few issues which are explained in the bug report.")
     private boolean pandaRedstone = false;
 
+    @Setting(value = "enchantment-helper-leak-fix", comment = "If 'true', provides a fix for possible leaks throug\n"
+                                                              + "Minecraft's enchantment helper code that can leak\n"
+                                                              + "entity and world references without much interaction\n"
+                                                              + "Forge fixes this already, but Sponge is ensuring the leak\n"
+                                                              + "is fixed in a second iterator."
+                                                              + "See https://bugs.mojang.com/browse/MC-128547 for more information.\n"
+                                                              + "Note that this should be enabled in SpongeVanilla as Forge is the\n"
+                                                              + "only other platform having this fix.")
+    private boolean enchantmentLeak = true;
+
     public OptimizationCategory() {  
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -106,5 +116,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean usePandaRedstone() {
         return this.pandaRedstone;
+    }
+
+    public boolean useEnchantmentHelperFix() {
+        return this.enchantmentLeak;
     }
 }
