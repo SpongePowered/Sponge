@@ -82,7 +82,14 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
      *
      * @param ci The callback info
      */
-    @Inject(method ="removeFrameFromMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/EntityItemFrame;)V"))
+    @Inject(
+        method ="removeFrameFromMap",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/EntityItemFrame;)V",
+            shift = At.Shift.AFTER
+        )
+    )
     private void postOnSetItemFrame(CallbackInfo ci) {
         setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
     }
