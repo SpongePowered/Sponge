@@ -126,7 +126,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
             return entityitem;
         }
         // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states
-        return EntityUtil.entityOnDropItem((EntityHanging) (Object) this, stack, offsetY, xOffset, zOffset);
+        return EntityUtil.entityOnDropItem((EntityHanging) (Object) this, stack, offsetY, this.posX + xOffset, this.posZ + zOffset);
     }
 
     // Data delegated methods
