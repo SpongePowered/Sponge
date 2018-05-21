@@ -1046,7 +1046,7 @@ public final class EntityUtil {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            entity.world.spawnEntity(entityitem);
+            EntityUtil.processEntitySpawn(fromNative(entityitem), () -> Optional.empty());
             return entityitem;
         }
     }
