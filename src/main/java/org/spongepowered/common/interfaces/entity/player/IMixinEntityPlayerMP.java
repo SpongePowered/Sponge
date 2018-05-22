@@ -49,6 +49,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     User getUserObject();
 
+    void forceRecreateUser();
+
     void setVelocityOverride(@Nullable Vector3d velocity);
 
     void sendBlockChange(BlockPos pos, IBlockState state);

@@ -254,7 +254,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Used to restore original item received in a packet after canceling an event
     private ItemStack packetItem;
 
-    private final User user = getUserObject();
+    private User user = getUserObject();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -457,6 +457,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Optional<Player> getPlayer() {
         return Optional.of(this);
+    }
+
+    @Override
+    public void forceRecreateUser() {
+        UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (!(service instanceof SpongeUserStorageService)) {
+            SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.getName(), service);
+        } else {
+            this.user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
+        }
     }
 
     @Override

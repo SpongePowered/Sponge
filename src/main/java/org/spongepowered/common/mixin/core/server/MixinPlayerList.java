@@ -100,6 +100,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
@@ -847,6 +848,11 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Overwrite
     public void sendMessage(ITextComponent component, boolean isSystem) {
         ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.mcServer, !isSystem);
+    }
+
+    @Inject(method = "createPlayerForUser", at = @At("RETURN"), cancellable = true)
+    public void onCreatePlayerForUser(CallbackInfoReturnable<EntityPlayerMP> cir) {
+        ((IMixinEntityPlayerMP) cir.getReturnValue()).forceRecreateUser();
     }
 
 }
