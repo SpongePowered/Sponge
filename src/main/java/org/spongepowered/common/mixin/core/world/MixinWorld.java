@@ -289,8 +289,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // @formatter:on
 
+    @Shadow public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
+        return true; // shadowed so we can call from MixinWorldServer in spongeforge.
+    }
+
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
-            + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
+                                                                     + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
         if (this.isRemote) {
             return provider.createWorldBorder();

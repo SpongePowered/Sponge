@@ -490,23 +490,15 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
-        try (StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
-            return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
-        }
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
-        try (StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
-            return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
-        }
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
     /**
      * Processes pre block event data then fires event.
-     *
-     * Note: This method does not create a stack frame.
-     * Any caller to this method should have a frame created to
-     * avoid stack corruption.
      *
      * @param worldIn The world
      * @param locations The locations affected
@@ -514,45 +506,48 @@ public class SpongeCommonEventFactory {
      * @return The event
      */
     private static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, @Nullable Object source) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData data = phaseTracker.getCurrentPhaseData();
-        if (source == null) {
-            source = data.context.getSource(LocatableBlock.class).orElse(null);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+            final PhaseData data = phaseTracker.getCurrentPhaseData();
             if (source == null) {
-                // safety measure, return a dummy event
-                if (DUMMY_BLOCK_PRE_EVENT == null) {
-                    DUMMY_BLOCK_PRE_EVENT = SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.of());
+                source = data.context.getSource(LocatableBlock.class).orElse(null);
+                if (source == null) {
+                    // safety measure, return a dummy event
+                    if (DUMMY_BLOCK_PRE_EVENT == null) {
+                        DUMMY_BLOCK_PRE_EVENT =
+                            SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), ImmutableList.of());
+                    }
+                    return DUMMY_BLOCK_PRE_EVENT;
                 }
-                return DUMMY_BLOCK_PRE_EVENT;
             }
-        }
 
-        EntityPlayer player = null;
-        User owner = data.context.getOwner().orElse(null);
-        User notifier = data.context.getNotifier().orElse(null);
+            EntityPlayer player = null;
+            User owner = data.context.getOwner().orElse(null);
+            User notifier = data.context.getNotifier().orElse(null);
 
-        Sponge.getCauseStackManager().pushCause(source);
-        if (source instanceof Player) {
-            player = (EntityPlayer) source;
-            if (SpongeImplHooks.isFakePlayer(player)) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.FAKE_PLAYER, EntityUtil.toPlayer(player));
+            frame.pushCause(source);
+            if (source instanceof Player) {
+                player = (EntityPlayer) source;
+                if (SpongeImplHooks.isFakePlayer(player)) {
+                    frame.addContext(EventContextKeys.FAKE_PLAYER, EntityUtil.toPlayer(player));
+                }
             }
-        }
 
-        if (owner != null) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
-        } else if (player != null) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, (User) player);
-        }
+            if (owner != null) {
+                frame.addContext(EventContextKeys.OWNER, owner);
+            } else if (player != null) {
+                frame.addContext(EventContextKeys.OWNER, (User) player);
+            }
 
-        if (notifier != null) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
-        }
+            if (notifier != null) {
+                frame.addContext(EventContextKeys.NOTIFIER, notifier);
+            }
 
-        ChangeBlockEvent.Pre event =
-                SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(), locations);
-        SpongeImpl.postEvent(event);
-        return event;
+            ChangeBlockEvent.Pre event =
+                SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
+            SpongeImpl.postEvent(event);
+            return event;
+        }
     }
 
     public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, @Nullable Object source) {
