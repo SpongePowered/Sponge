@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -75,6 +76,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
                                                    + "Lnet/minecraft/nbt/NBTBase;)V";
     @Shadow @Final private File worldDirectory;
     @Shadow @Final private long initializationTime;
+
+    private Exception capturedException;
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
             , ordinal = 0, remap = false))
@@ -225,6 +228,17 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Inject(method = "writePlayerData", at = @At(value = "INVOKE", target = COMPRESSED_WRITE_FILE, shift = At.Shift.AFTER))
     private void onSpongeWrite(EntityPlayer player, CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(player.getUniqueID());
+    }
+
+    @Inject(method = "writePlayerData", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    public void beforeLogWarning(EntityPlayer player, CallbackInfo ci, Exception exception) {
+        this.capturedException = exception;
+    }
+
+    @Redirect(method = "writePlayerData", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V"))
+    public void onWarn(Logger logger, String message, Object param) {
+        logger.warn(message, param, this.capturedException);
+        this.capturedException = null;
     }
 
     // SF overrides getWorldDirectory for mod compatibility.
