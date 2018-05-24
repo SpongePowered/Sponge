@@ -27,11 +27,15 @@ package org.spongepowered.common.mixin.core.authlib;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.mojang.authlib.properties.Property;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
@@ -39,11 +43,15 @@ import javax.annotation.Nullable;
 
 @Mixin(value = Property.class, remap = false)
 @Implements(@Interface(iface = ProfileProperty.class, prefix = "property$"))
-public abstract class MixinProperty {
+public abstract class MixinProperty implements DataSerializable {
 
     @Shadow public abstract String getName();
     @Shadow public abstract String getValue();
     @Nullable @Shadow public abstract String getSignature();
+
+    @Shadow @Final private String name;
+
+    @Shadow @Final private String signature;
 
     public Optional<String> property$getSignature() {
         return Optional.ofNullable(this.getSignature());
@@ -78,5 +86,23 @@ public abstract class MixinProperty {
                 .add("signature", this.property$getSignature())
                 .toString();
     }
+
+    @Override
+    public int getContentVersion() {
+        return 0;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+       DataContainer container = DataContainer.createNew()
+               .set(DataQueries.CONTENT_VERSION, this.getContentVersion())
+               .set(DataQueries.PROPERTY_NAME, this.getName())
+               .set(DataQueries.PROPERTY_VALUE, this.getValue());
+
+       this.property$getSignature().ifPresent(s -> container.set(DataQueries.PROPERTY_SIGNATURE, s));
+       return container;
+    }
+
+
 
 }

@@ -54,12 +54,16 @@ import javax.annotation.Nullable;
 public final class SpongeTabList implements TabList {
 
     private static final ITextComponent EMPTY_COMPONENT = new TextComponentString("");
-    private final EntityPlayerMP player;
+    private EntityPlayerMP player;
     @Nullable private Text header;
     @Nullable private Text footer;
     private final Map<UUID, TabListEntry> entries = Maps.newHashMap();
 
     public SpongeTabList(EntityPlayerMP player) {
+        this.player = player;
+    }
+
+    public void setPlayer(EntityPlayerMP player) {
         this.player = player;
     }
 
@@ -157,12 +161,15 @@ public final class SpongeTabList implements TabList {
 
         if (!this.entries.containsKey(uniqueId)) {
             this.entries.put(uniqueId, entry);
-
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.ADD_PLAYER);
-            entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME));
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_LATENCY);
-            this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_GAME_MODE);
+            this.sendAddPackets(entry);
         }
+    }
+
+    public void sendAddPackets(TabListEntry entry) {
+        this.sendUpdate(entry, SPacketPlayerListItem.Action.ADD_PLAYER);
+        entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME));
+        this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_LATENCY);
+        this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_GAME_MODE);
     }
 
     @Override

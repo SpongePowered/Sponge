@@ -29,44 +29,55 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
+import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
+import org.spongepowered.common.data.processor.data.entity.SkinDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.util.UUID;
+public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkinData, SkinData> implements ImmutableSkinData {
 
-public class ImmutableSpongeSkinData extends AbstractImmutableSingleData<UUID, ImmutableSkinData, SkinData> implements ImmutableSkinData {
-
-    private final ImmutableSpongeValue<UUID> skinValue;
+    private final ImmutableValue<ProfileProperty> skinValue;
+    private final ImmutableValue<Boolean> updateTabListValue;
 
     public ImmutableSpongeSkinData() {
-        this(new UUID(0, 0));
+        this(SkinDataProcessor.EMPTY_SKIN, false);
     }
 
-    public ImmutableSpongeSkinData(UUID value) {
-        super(ImmutableSkinData.class, value, Keys.SKIN_UNIQUE_ID);
-        this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, value);
+    public ImmutableSpongeSkinData(ProfileProperty skin, boolean updateTabList) {
+        super(ImmutableSkinData.class);
+        this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN, SkinDataProcessor.EMPTY_SKIN, skin);
+        this.updateTabListValue = ImmutableSpongeValue.<Boolean>cachedOf(Keys.UPDATE_GAME_PROFILE, false, (boolean) updateTabList);
     }
 
     @Override
     public SkinData asMutable() {
-        return new SpongeSkinData(this.value);
+        return new SpongeSkinData(this.skinValue.get(), this.updateTabListValue.get());
+    }
+
+    @Override
+    protected void registerGetters() {
+        registerFieldGetter(Keys.SKIN, () -> this.skinValue);
+        registerKeyValue(Keys.SKIN, this::skin);
+
+        registerFieldGetter(Keys.UPDATE_GAME_PROFILE, () -> this.updateTabListValue);
+        registerKeyValue(Keys.UPDATE_GAME_PROFILE, this::updateGameProfile);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.SKIN_UNIQUE_ID.getQuery(), this.value.toString());
+                .set(Keys.SKIN.getQuery(), this.skinValue.get())
+                .set(Keys.UPDATE_GAME_PROFILE.getQuery(), this.updateTabListValue.get());
     }
 
     @Override
-    public ImmutableValue<UUID> skinUniqueId() {
+    public ImmutableValue<ProfileProperty> skin() {
         return this.skinValue;
     }
 
     @Override
-    protected ImmutableValue<?> getValueGetter() {
-        return skinUniqueId();
+    public ImmutableValue<Boolean> updateGameProfile() {
+        return this.updateTabListValue;
     }
-
 }

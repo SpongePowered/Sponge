@@ -126,12 +126,22 @@ public final class DataQueries {
     public static final DataQuery ENTITY_TYPE = of("EntityType");
     public static final DataQuery ENTITY_ROTATION = of("Rotation");
     public static final DataQuery ENTITY_SCALE = of("Scale");
-    public static final DataQuery SKIN_UUID = of("SkinUUID");
+    //public static final DataQuery SKIN_UUID = of("SkinUUID");
+    public static final DataQuery SKIN = of("Skin");
+    public static final DataQuery UPDATE_TAB_LIST = of("UpdateTabList");
 
     // User
     public static final DataQuery USER_UUID = of("UUID");
     public static final DataQuery USER_NAME = of("Name");
     public static final DataQuery USER_SPAWNS = of("Spawns");
+
+    // GameProfile
+    public static final DataQuery PROFILE_PROPERTIES = of("ProfileProperties");
+
+    // ProfileProperty
+    public static final DataQuery PROPERTY_NAME = of("PropertyName");
+    public static final DataQuery PROPERTY_VALUE = of("PropertyValue");
+    public static final DataQuery PROPERTY_SIGNATURE = of("PropertySignature");
 
     // ItemStacks
     public static final DataQuery ITEM_COUNT = of("Count");
@@ -215,12 +225,12 @@ public final class DataQueries {
         }
 
     }
-    
+
     public static final class Schematic {
-        
+
         public static final DataQuery VERSION = of("Version");
         public static final DataQuery METADATA = of("Metadata");
-        
+
         public static final DataQuery WIDTH = of("Width");
         public static final DataQuery HEIGHT = of("Height");
         public static final DataQuery LENGTH = of("Length");
@@ -229,12 +239,12 @@ public final class DataQueries {
         public static final DataQuery PALETTE = of("Palette");
         public static final DataQuery PALETTE_MAX = of("PaletteMax");
         public static final DataQuery BLOCK_DATA = of("BlockData");
-        
+
         public static final DataQuery TILEENTITY_DATA = of("TileEntities");
         public static final DataQuery TILEENTITY_POS = of("Pos");
 
         public static final DataQuery LEGACY_MATERIALS = of("Materials");
-        
+
         public static final DataQuery LEGACY_OFFSET_X = of("WEOffsetX");
         public static final DataQuery LEGACY_OFFSET_Y = of("WEOffsetY");
         public static final DataQuery LEGACY_OFFSET_Z = of("WEOffsetZ");
@@ -244,7 +254,7 @@ public final class DataQueries {
         public static final DataQuery LEGACY_ADD_BLOCKS = of("AddBlocks");
 
         public static final DataQuery LEGACY_TILEDATA = of("TileEntities");
-        
+
         private Schematic() {
         }
     }

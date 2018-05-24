@@ -52,6 +52,7 @@ import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketConfirmTransaction;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraft.network.play.client.CPacketPlayer;
@@ -129,6 +130,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
@@ -421,6 +423,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"))
     public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set<?> relativeSet, CallbackInfo ci) {
         this.justTeleported = true;
+    }
+
+    @Inject(method = "processPlayer", at =  @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketThreadUtil;checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V",
+                                                shift = At.Shift.AFTER))
+    public void onProcessPlayerStart(CPacketPlayer packetPlayer, CallbackInfo ci) {
+        SpongeClientWaiter.INSTANCE.onClientPacketPlayer(packetPlayer, this.player);
     }
 
     /**
@@ -835,5 +843,16 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         ResourcePack pack = this.lastAcceptedPack;
         this.lastAcceptedPack = null;
         return pack;
+    }
+
+    @Inject(method = "processConfirmTransaction",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/network/PacketThreadUtil;checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V",
+                    shift = At.Shift.AFTER),
+            cancellable = true)
+    public void onProcessConfirmTransaction(CPacketConfirmTransaction packet, CallbackInfo ci) {
+        if (SpongeClientWaiter.INSTANCE.onClientConfirm(packet, this.player)) {
+            ci.cancel();
+        }
     }
 }

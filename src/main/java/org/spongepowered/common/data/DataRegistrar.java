@@ -41,7 +41,6 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
-import org.spongepowered.api.data.property.IntProperty;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
@@ -69,6 +68,7 @@ import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.property.SlotSide;
 import org.spongepowered.api.item.inventory.property.StringProperty;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.BookViewDataBuilder;
@@ -81,6 +81,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.authlib.SpongeGameProfileBuilder;
+import org.spongepowered.common.data.builder.authlib.SpongeProfilePropertyBuilder;
 import org.spongepowered.common.data.builder.block.state.SpongeBlockStateMetaContentUpdater;
 import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
@@ -213,6 +214,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
 
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
+        dataManager.registerBuilder(ProfileProperty.class, new SpongeProfilePropertyBuilder());
 
         dataManager.registerBuilder(Color.class, new Color.Builder());
 
@@ -361,6 +363,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(InvisibilityData.class, SpongeInvisibilityData.class, ImmutableInvisibilityData.class,
                 ImmutableSpongeInvisibilityData.class, new InvisibilityDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class, ImmutableSpongeSkinData.class,
+                new SkinDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
                 ImmutableSpongeFallingBlockData.class, new FallingBlockDataProcessor());
 
@@ -382,8 +387,8 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
                 ImmutableSpongeCareerData.class, new CareerDataProcessor());
 
-        DataUtil.registerDualProcessor(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
-                ImmutableSpongeSkinData.class, new SkinDataProcessor());
+        /*DataUtil.registerDualProcessor(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
+                ImmutableSpongeSkinData.class, new SkinDataProcessor());*/
 
         DataUtil.registerDualProcessor(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
                 ImmutableSpongeExpOrbData.class, new ExpOrbDataProcessor());
@@ -882,6 +887,8 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.END_GATEWAY_AGE, new EndGatewayAgeValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXIT_POSITION, new EndGatewayExitPositionValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
+        DataUtil.registerValueProcessor(Keys.SKIN, new SkinValueProcessor());
+        DataUtil.registerValueProcessor(Keys.UPDATE_GAME_PROFILE, new UpdateGameProfileValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();

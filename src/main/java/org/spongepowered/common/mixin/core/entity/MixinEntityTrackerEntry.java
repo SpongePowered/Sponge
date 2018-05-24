@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -32,6 +33,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,22 +63,21 @@ public abstract class MixinEntityTrackerEntry {
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet<?> spawnPacket, final EntityPlayerMP playerIn) {
-        if (!(this.trackedEntity instanceof EntityHuman)) {
+        if (this.trackedEntity instanceof EntityHuman) {
+            final EntityHuman human = (EntityHuman) this.trackedEntity;
+            // Adds the GameProfile to the client
+            thisCtx.sendPacket(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
+            // Actually spawn the human (a player)
+            thisCtx.sendPacket(spawnPacket);
+            // Remove from tab list
+            final SPacketPlayerListItem removePacket = human.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER);
+            human.removeFromTabListDelayed(playerIn, removePacket);
+        } else if (this.trackedEntity instanceof EntityPlayerMP) {
+            ((IMixinEntityPlayerMP) trackedEntity).onSpawnToPlayers(ImmutableList.of((Player) playerIn));
+            thisCtx.sendPacket(spawnPacket);
+        } else {
             // This is the method call that was @Redirected
             thisCtx.sendPacket(spawnPacket);
-            return;
-        }
-        final EntityHuman human = (EntityHuman) this.trackedEntity;
-        // Adds the GameProfile to the client
-        thisCtx.sendPacket(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
-        // Actually spawn the human (a player)
-        thisCtx.sendPacket(spawnPacket);
-        // Remove from tab list
-        final SPacketPlayerListItem removePacket = human.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER);
-        if (human.canRemoveFromListImmediately()) {
-            thisCtx.sendPacket(removePacket);
-        } else {
-            human.removeFromTabListDelayed(playerIn, removePacket);
         }
     }
 

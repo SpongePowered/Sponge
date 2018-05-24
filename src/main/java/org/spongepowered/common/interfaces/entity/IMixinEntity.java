@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces.entity;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
@@ -152,4 +153,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     default void clearWrappedCaptureList() {
 
     }
+
+    void onVanish(EntityTrackerEntry entry);
+
+    void onUnVanish();
 }
