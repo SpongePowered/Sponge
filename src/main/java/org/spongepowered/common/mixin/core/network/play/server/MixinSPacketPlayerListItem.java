@@ -25,12 +25,17 @@
 package org.spongepowered.common.mixin.core.network.play.server;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketPlayerListItem;
 
 import java.util.List;
@@ -41,6 +46,25 @@ import javax.annotation.Nullable;
 public class MixinSPacketPlayerListItem implements IMixinSPacketPlayerListItem {
 
     @Shadow @Final public List<SPacketPlayerListItem.AddPlayerData> players;
+
+    private static final String GET_GAME_PROFILE = "Lnet/minecraft/entity/player/EntityPlayerMP;getGameProfile()Lcom/mojang/authlib/GameProfile;";
+
+    /*private GameProfile replaceGameProfile(EntityPlayerMP player) {
+        return ((IMixinEntityPlayerMP) player).getCustomSkinProfile();
+    }*/
+
+    // We only replace game profiles send by Vanilla (or mods). Plugins using the TabList API
+    // do not have their specified GameProfile modified.
+
+    /*@Redirect(method = "<init>(Lnet/minecraft/network/play/server/SPacketPlayerListItem$Action;Ljava/lang/Iterable;)V", at = @At(value = "INVOKE", target = GET_GAME_PROFILE))
+    public GameProfile onGetGameProfileFirst(EntityPlayerMP player) {
+        return this.replaceGameProfile(player);
+    }
+
+    @Redirect(method = "<init>(Lnet/minecraft/network/play/server/SPacketPlayerListItem$Action;[Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = GET_GAME_PROFILE))
+    public GameProfile onGetGameProfileSecond(EntityPlayerMP player) {
+        return this.replaceGameProfile(player);
+    }*/
 
     @Override
     public void addEntry(GameProfile profile, int latency, GameType gameMode, @Nullable ITextComponent displayName) {

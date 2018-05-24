@@ -24,60 +24,99 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.authlib.properties.Property;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkinData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkinData;
-import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.interfaces.entity.IMixinSkinnable;
 
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class SkinDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityHuman, UUID, Value<UUID>, SkinData, ImmutableSkinData> {
+        AbstractMultiDataSingleTargetProcessor<IMixinSkinnable, SkinData, ImmutableSkinData> {
 
     public SkinDataProcessor() {
-        super(EntityHuman.class, Keys.SKIN_UNIQUE_ID);
+        super(IMixinSkinnable.class);
     }
 
-    @Override
+    public static final ProfileProperty EMPTY_SKIN = (ProfileProperty) new Property(ProfileProperty.TEXTURES, "");
+
+    /*@Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof EntityHuman)) {
-            return DataTransactionResult.failNoData();
+        if (container instanceof IMixinSkinnable) {
+            return ((IMixinSkinnable) container).removeSkin();
         }
-        return ((EntityHuman) container).removeSkin();
+        return DataTransactionResult.failNoData();
+
     }
 
     @Override
-    protected Value<UUID> constructValue(UUID actualValue) {
-        return new SpongeValue<>(Keys.SKIN_UNIQUE_ID, actualValue);
+    protected Value<ProfileProperty> constructValue(ProfileProperty actualValue) {
+        return new SpongeValue<>(Keys.SKIN, actualValue);
     }
 
     @Override
-    protected boolean set(EntityHuman entity, UUID value) {
-        return entity.setSkinUuid(value);
+    protected boolean set(IMixinSkinnable entity, ProfileProperty value) {
+        return entity.setSkin(value);
     }
 
     @Override
-    protected Optional<UUID> getVal(EntityHuman entity) {
-        return Optional.ofNullable(entity.getSkinUuid());
+    protected Optional<ProfileProperty> getVal(IMixinSkinnable entity) {
+        return Optional.ofNullable(entity.getSkin());
     }
 
     @Override
-    protected ImmutableValue<UUID> constructImmutableValue(UUID value) {
-        return new ImmutableSpongeValue<UUID>(Keys.SKIN_UNIQUE_ID, value);
-    }
+    protected ImmutableValue<ProfileProperty> constructImmutableValue(ProfileProperty value) {
+        return new ImmutableSpongeValue<ProfileProperty>(Keys.SKIN, value);
+    }*/
 
     @Override
     protected SkinData createManipulator() {
         return new SpongeSkinData();
     }
 
+
+    @Override
+    protected boolean doesDataExist(IMixinSkinnable dataHolder) {
+        return true;
+    }
+
+    @Override
+    protected boolean set(IMixinSkinnable dataHolder, Map<Key<?>, Object> keyValues) {
+        ProfileProperty skin = (ProfileProperty) keyValues.get(Keys.SKIN);
+        boolean updateTabList = (Boolean) keyValues.get(Keys.UPDATE_GAME_PROFILE);
+
+        dataHolder.setSkin(skin, updateTabList);
+        return true;
+    }
+
+    @Override
+    protected Map<Key<?>, ?> getValues(IMixinSkinnable dataHolder) {
+        return ImmutableMap.of(Keys.SKIN, dataHolder.getSkin(),
+                Keys.UPDATE_GAME_PROFILE, dataHolder.shouldUpdateGameProfile());
+    }
+
+    @Override
+    public Optional<SkinData> fill(DataContainer container, SkinData skinData) {
+        ProfileProperty skin = container.getSerializable(DataQueries.SKIN, ProfileProperty.class).get();
+        boolean updateTabList = container.getBoolean(DataQueries.UPDATE_TAB_LIST).get();
+
+        return Optional.of(skinData.set(Keys.SKIN,  skin)
+                .set(Keys.UPDATE_GAME_PROFILE, updateTabList));
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder dataHolder) {
+        return DataTransactionResult.failNoData();
+    }
 }

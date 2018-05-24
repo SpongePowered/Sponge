@@ -55,10 +55,16 @@ public final class SpongeTabListEntry implements TabListEntry {
     public SpongeTabListEntry(TabList list, GameProfile profile, @Nullable Text displayName, int latency, GameMode gameMode) {
         checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
-        this.profile = checkNotNull(profile, "profile");
+        this.profile = this.copyGameProfile(checkNotNull(profile, "profile"));
         this.displayName = displayName;
         this.latency = latency;
         this.gameMode = checkNotNull(gameMode, "game mode");
+    }
+
+    private GameProfile copyGameProfile(GameProfile oldProfile) {
+        GameProfile newProfile = GameProfile.of(oldProfile.getUniqueId(), oldProfile.getName().orElse(null));
+        newProfile.getPropertyMap().putAll(oldProfile.getPropertyMap());
+        return newProfile;
     }
 
     @Override

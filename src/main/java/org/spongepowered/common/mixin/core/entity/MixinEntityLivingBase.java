@@ -213,6 +213,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow public abstract void heal(float healAmount);
 
+    @Shadow public float randomUnused1;
     private int deathEventsPosted;
 
 

@@ -30,6 +30,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.state.IBlockState;
@@ -37,6 +39,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -60,19 +63,26 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketEntityProperties;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketRespawn;
+import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.network.play.server.SPacketWorldBorder;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -86,6 +96,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.WorldServer;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
@@ -93,29 +104,35 @@ import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.record.RecordType;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -129,6 +146,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -143,6 +161,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -158,8 +177,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
+import org.spongepowered.common.data.processor.data.entity.SkinDataProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -191,6 +212,7 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.network.keepalive.SpongeClientWaiter;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
@@ -199,6 +221,7 @@ import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -207,9 +230,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -233,6 +258,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
+    private boolean respawning;
+
 
     @Shadow public abstract Entity getSpectatingEntity();
     @Shadow public abstract void setSpectatingEntity(Entity entity);
@@ -249,6 +276,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private void getNextWindowId() { }
 
     @Shadow public abstract void closeContainer();
+
+    @Shadow public abstract WorldServer getServerWorld();
 
     public int newExperience = 0;
     public int newLevel = 0;
@@ -267,10 +296,19 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
+    private GameProfile originalProfile = this.copyCurrentGameProfile();
+    private boolean updateGameProfile = false;
+    private ProfileProperty customSkin;
 
     @Nullable private Vector3d velocityOverride = null;
     private boolean healthScaling = false;
     private double healthScale = 20;
+
+    private Map<UUID, TabListEntry> savedTabEntries = new HashMap<>();
+
+    private ProfileProperty getTextures() {
+        return Iterables.getFirst(this.getProfile().getPropertyMap().get(ProfileProperty.TEXTURES), SkinDataProcessor.EMPTY_SKIN);
+    }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
@@ -414,6 +452,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         // Copy overworld spawn pos
         ((IMixinEntityPlayer) this).setOverworldSpawnPoint(SpongeImplHooks.getBedLocation(oldPlayer, 0));
+
+        // Get old tab list.
+        // We remove the tab list from the old player in MixinPlayerList,
+        SpongeTabList tabList = (SpongeTabList) ((Player) oldPlayer).getTabList();
+        tabList.setPlayer((EntityPlayerMP) (Object) this);
+        this.tabList = tabList;
+        this.updateGameProfile = ((IMixinEntityPlayerMP) oldPlayer).shouldUpdateGameProfile();
+        this.customSkin = ((IMixinEntityPlayerMP) oldPlayer).getSkin();
+
+        if (this.updateGameProfile) {
+            this.updateGameProfileWithSkin();
+        }
+    }
+
+    @Override
+    public SpongeTabList removeTabList() {
+        SpongeTabList tabList = (SpongeTabList) this.tabList;
+        this.tabList = null;
+        return tabList;
     }
 
     @Redirect(method = "copyFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
@@ -475,6 +532,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         } else {
             this.user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
         }
+        this.customSkin = this.getTextures();
     }
 
     @Override
@@ -1395,5 +1453,362 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             return villager.getDisplayName();
         }
         return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Override
+    @Nullable
+    public ProfileProperty getSkin() {
+        return this.customSkin;
+    }
+
+    /*@Override
+    public com.mojang.authlib.GameProfile getTabListProfilea() {
+        if (this.updateGameProfile) {
+            return (com.mojang.authlib.GameProfile) this.getProfile();
+        } else {
+            return this.oldP
+
+        }
+    }*/
+
+    @Override
+    public com.mojang.authlib.GameProfile getCustomSkinProfile() {
+        if (this.updateGameProfile) {
+            return (com.mojang.authlib.GameProfile) this.getProfile();
+        } else {
+            // Re-create it each time, so that we stay up-to-date
+            // with any property changes made by plugins or mods
+            GameProfile newProfile = GameProfile.of(this.getUniqueID(), this.getName());
+            newProfile.getPropertyMap().putAll(this.getProfile().getPropertyMap());
+
+            Collection<ProfileProperty> textures = newProfile.getPropertyMap().get(ProfileProperty.TEXTURES);
+            textures.clear();
+            textures.add(this.customSkin);
+            return (com.mojang.authlib.GameProfile) newProfile;
+        }
+    }
+
+    @Override
+    public boolean setSkin(ProfileProperty skin) {
+        this.customSkin = skin;
+        if (this.updateGameProfile) {
+            this.updateGameProfileWithSkin();
+        }
+
+
+        this.updateSkin();
+        return true;
+    }
+
+    private void updateGameProfileWithSkin() {
+        Collection<ProfileProperty> props = this.getProfile().getPropertyMap().get(ProfileProperty.TEXTURES);
+        props.clear();
+        props.add(this.customSkin);
+    }
+
+    @Override
+    public boolean shouldUpdateGameProfile() {
+        return this.updateGameProfile;
+    }
+
+    @Override
+    public void setUpdateGameProfile(boolean updateGameProfile) {
+        if (!this.updateGameProfile && this.updateGameProfile) {
+            this.originalProfile = this.copyCurrentGameProfile();
+            this.updateGameProfileWithSkin();
+            this.updateTabListNoSkinChange();
+        } else if (this.updateGameProfile && !updateGameProfile) {
+            this.restoreOriginalProfile();
+            this.updateTabListNoSkinChange();
+        }
+        this.updateGameProfile = updateGameProfile;
+    }
+
+    private void restoreOriginalProfile() {
+        Collection<ProfileProperty> textures = this.getProfile().getPropertyMap().get(ProfileProperty.TEXTURES);
+        textures.clear();
+        textures.addAll(this.originalProfile.getPropertyMap().get(ProfileProperty.TEXTURES));
+    }
+
+    private void updateTabListNoSkinChange() {
+        for (Player player: Sponge.getServer().getOnlinePlayers()) {
+            player.getTabList().removeEntry(this.getUniqueID()).ifPresent(oldEntry -> {
+                TabListEntry newEntry = TabListEntry.builder().from(oldEntry).profile(this.getProfile()).build();
+                player.getTabList().addEntry(newEntry);
+            });
+        }
+    }
+
+    @Override
+    public DataTransactionResult removeSkin() {
+        if (!this.getProfile().getPropertyMap().containsKey(ProfileProperty.TEXTURES)) {
+            return DataTransactionResult.successNoData();
+        }
+        Collection<ProfileProperty> skin = this.getProfile().getPropertyMap().removeAll("textures");
+        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN, skin.iterator().next());
+        this.updateSkin();
+
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
+    }
+
+    @Override
+    public void refreshSkinOnRespawn() {
+        /*if (!this.hasCustomSkin) {
+            return;
+        }*/
+        // We don't update the skin for other players, as this is done
+        // in MixinEntityTrackerEntry.
+        this.updateSkinSelf();
+    }
+
+    /*@Override
+    public void refreshSkinOnSpawnToOthers() {
+        this.updateSkinOthers();
+    }*/
+
+    private void updateSkin() {
+        this.updateSkinSelf();
+        this.updateSkinOthers();
+    }
+
+    private GameProfile copyCurrentGameProfile() {
+        GameProfile newProfile = GameProfile.of(this.getUniqueID(), this.getName());
+        newProfile.getPropertyMap().putAll(this.getProfile().getPropertyMap());
+
+        return newProfile;
+    }
+
+    private void updateSkinSelf() {
+        // Remove any existing entry
+        Optional<TabListEntry> oldEntry = this.getTabList().removeEntry(this.getUniqueID());
+
+        // Add an entry with the new GameProfile
+        this.getTabList().addEntry(TabListEntry.builder()
+                .displayName(this.getDisplayNameData().displayName().get())
+                .latency(this.getConnection().getLatency())
+                .list(this.getTabList())
+                .gameMode(this.getGameModeData().type().get())
+                .profile((GameProfile) this.getCustomSkinProfile())
+                .build());
+
+        Runnable restoreOldEntry = () -> {
+            // Don't restore the previous entry if a plugin
+            // wants the new skin to show up in the tab list
+            if (this.updateGameProfile) {
+                return;
+            }
+            SpongeClientWaiter.INSTANCE.waitForRenderTick(() -> {
+                // Remove the entry we added
+                this.getTabList().removeEntry(this.getUniqueID());
+                // Restore any existing entry
+                oldEntry.ifPresent(e -> this.getTabList().addEntry(e));
+
+            }, (EntityPlayerMP) (Object) this);
+        };
+
+        if (this.isDead) {
+            // If we're dead, we don't want to force a respawn now.
+            // Instead, we wait for a respawn to occur before restoring the tab list.
+            // This might appear odd to plugins, but unfortunately, it can't be helped.
+            Sponge.getEventManager().registerListener(SpongeImpl.getPlugin(), RespawnPlayerEvent.class, Order.PRE, (event) -> {
+                if (event.getOriginalPlayer().getUniqueId().equals(this.getUniqueID())) {
+                    // Delay restoring the skin by one tick, to ensure
+                    // that the respawn packet is sent to the client before we change the skin back
+                    Sponge.getScheduler().createTaskBuilder().execute(restoreOldEntry).delayTicks(1).submit(SpongeImpl.getPlugin());
+                    Sponge.getEventManager().unregisterListeners(this);
+                }
+            });
+        } else {
+            // If we're alive, we perform a fake respawn, and immediately
+            // restore the tab list.
+            if (!this.isRespawning()) {
+                this.fakeRespawn();
+            }
+            restoreOldEntry.run();
+        }
+    }
+
+    @Override
+    public void onVanish(EntityTrackerEntry entry) {
+        super.onVanish(entry);
+        this.savedTabEntries.clear();
+        for (EntityPlayerMP entityPlayerMP : entry.trackingPlayers) {
+            ((Player) entityPlayerMP).getTabList().getEntry(this.getUniqueID()).ifPresent(e -> this.savedTabEntries.put(entityPlayerMP.getUniqueID(), e));
+            //this.savedTabEntries.put(entityPlayerMP.getUniqueID(), .orElse(null));
+        }
+    }
+
+    @Override
+    public void onUnVanish() {
+        super.onUnVanish();
+        this.onSpawnToPlayers(Sponge.getServer().getOnlinePlayers(), ImmutableMap.copyOf(this.savedTabEntries));
+        this.savedTabEntries.clear();
+    }
+
+    @Override
+    public void onSpawnToPlayers(Collection<Player> players) {
+        this.onSpawnToPlayers(players, new HashMap<>());
+    }
+
+    public void onSpawnToPlayers(Collection<Player> players, Map<UUID, TabListEntry> previousEntries) {
+        for (Player player : players) {
+            if (player == (EntityPlayerMP) (Object) this) {
+                continue;
+            }
+
+                TabListEntry.Builder baseBuilder = TabListEntry.builder()
+                    .displayName(this.getDisplayNameData().displayName().get())
+                    .latency(this.getConnection().getLatency())
+                    .list(player.getTabList())
+                    .gameMode(this.getGameModeData().type().get());
+
+            // If we haven't modified the player's GameProfile, we remove their old tab list entry (which contains their original skin)
+            if (!this.updateGameProfile && !previousEntries.containsKey(player.getUniqueId())) {
+                // If we don't have an old entry (e.g. due to vanishing), we create a new one
+                // using our normal profile.
+                TabListEntry oldEntry = player.getTabList().removeEntry(this.getUniqueID()).orElse(baseBuilder.profile(this.getProfile()).build());
+                previousEntries.put(player.getUniqueId(), oldEntry);
+            }
+            if (!player.getTabList().getEntry(this.getUniqueID()).isPresent()) {
+                player.getTabList().addEntry(baseBuilder.profile((GameProfile) this.getCustomSkinProfile())
+                        .build());
+            }
+
+        }
+
+        if (!this.updateGameProfile) {
+            this.runDelay(2, () -> {
+
+                // Restore the tab list
+                for (Player player : players) {
+                    if (player == this) {
+                        continue;
+                    }
+                    SpongeClientWaiter.INSTANCE.waitForRenderTick(() -> {
+                        player.getTabList().removeEntry(this.getUniqueID());
+                        TabListEntry entry = previousEntries.get(player.getUniqueId());
+                        if (entry != null) {
+                            player.getTabList().addEntry(entry);
+                        }
+                    }, (EntityPlayerMP) player);
+                }
+            });
+        }
+    }
+
+    private void updateSkinOthers() {
+        // If we're already vanished, do nothing. When a plugin unvanishes us,
+        // the skin will be applied
+        if (!this.isDead && !this.get(Keys.VANISH).get()) {
+            // MixinEntity#spongeOnUpdate takes care of setting the new skin when we unvanish.
+            this.offer(Keys.VANISH, true);
+            this.runDelay(2, () -> this.offer(Keys.VANISH, false));
+        }
+
+
+        // If we're already vanished, there's no need to do anything.
+        // When we're unvanished, the proper skin will be displayed.
+
+        // However, if we're not vanished, we vanish and un-vanish outself
+        // in order to cause our player entity to respawn on other clients.
+        /*if (!this.isDead && !this.get(Keys.VANISH).get().booleanValue()) {
+            Map<UUID, TabListEntry> map = new HashMap<>();
+            if (!this.updateGameProfile) {
+                for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                    if (player == (EntityPlayerMP) (Object) this) {
+                        continue;
+                    }
+                    player.getTabList().getEntry(this.getUniqueID()).ifPresent(entry -> map.put(player.getUniqueId(), entry));
+                }
+            }
+
+            // Allow two ticks between vanishing and unvanishing
+            // to ensure that clients are actually updated
+
+            // We also allow ticks ticks between unvanishing and restoring
+            // the tab list to ensure that the spawn packet has been sent to the client
+
+            if (doVanish) {
+                this.offer(Keys.VANISH, true);
+                this.runDelay(2, () -> this.offer(Keys.VANISH, false));
+            }
+
+            this.runDelay(2, () -> {
+
+                if (doVanish) {
+                    this.offer(Keys.VANISH, false);
+                }
+                this.runDelay(2, () -> {
+
+                    if (!this.updateGameProfile) {
+
+                        // Restore the tab list
+                        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                            if (player == (EntityPlayerMP) (Object) this) {
+                                continue;
+                            }
+                            SpongeClientWaiter.INSTANCE.waitForRenderTick(() -> {
+                                player.getTabList().removeEntry(this.getUniqueID());
+                                TabListEntry entry = map.get(player.getUniqueId());
+                                if (entry != null) {
+                                    player.getTabList().addEntry(entry);
+                                }
+                            }, (EntityPlayerMP) player);
+                        }
+                    }
+                });
+
+
+            });*/
+    }
+
+    // Adapted from MixinPlayerList#recreatePlayerEntity
+    // We want to respawn the player *only* on tts own client. Therefore,
+    // we skip most of the logic that's performed for a normal respawn.
+    private void fakeRespawn() {
+        WorldServer worldServer = this.getServerWorld();
+        final int dimensionId = WorldManager.getClientDimensionId((EntityPlayerMP) (Object) this, worldServer);
+        PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+        Transform<World> transform = this.getTransform();
+
+        this.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
+                .getWorldInfo().getTerrainType(), this.interactionManager.getGameType()));
+        this.connection.sendPacket(new SPacketServerDifficulty(worldServer.getDifficulty(), worldServer.getWorldInfo().isDifficultyLocked()));
+        this.connection.setPlayerLocation(transform.getLocation().getX(), transform.getLocation().getY(), transform.getLocation().getZ(),
+                (float) transform.getYaw(), (float) transform.getPitch());
+
+        final BlockPos spawnLocation = worldServer.getSpawnPoint();
+        this.connection.sendPacket(new SPacketSpawnPosition(spawnLocation));
+        this.connection.sendPacket(new SPacketSetExperience(this.experience, this.experienceTotal,
+                this.experienceLevel));
+        playerList.updateTimeAndWeatherForPlayer((EntityPlayerMP) (Object) this, worldServer);
+        playerList.updatePermissionLevel((EntityPlayerMP) (Object) this);
+        playerList.syncPlayerInventory((EntityPlayerMP) (Object) this);
+        //worldServer.getPlayerChunkMap().addPlayer(this);
+        //org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) this;
+        //((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity);
+        //this.playerEntityList.add(this);
+        //this.uuidToPlayerMap.put(this.getUniqueID(), this);
+        //this.addSelfToInternalCraftingInventory();
+
+        // Update reducedDebugInfo game rule
+        this.connection.sendPacket(new SPacketEntityStatus((EntityPlayerMP) (Object) this,
+                worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? DataConstants.REDUCED_DEBUG_INFO_ENABLE : DataConstants.REDUCED_DEBUG_INFO_DISABLE));
+
+        for (Object potioneffect : this.getActivePotionEffects()) {
+            this.connection.sendPacket(new SPacketEntityEffect(this.getEntityId(), (PotionEffect) potioneffect));
+        }
+        this.refreshScaledHealth();
+
+    }
+
+    @Override
+    public void setRespawning(boolean respawning) {
+        this.respawning = respawning;
+    }
+
+    @Override
+    public boolean isRespawning() {
+        return this.respawning;
     }
 }

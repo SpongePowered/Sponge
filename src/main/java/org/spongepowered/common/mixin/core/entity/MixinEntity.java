@@ -128,6 +128,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -254,6 +255,12 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
 
     @Shadow private boolean invulnerable;
+
+    @Shadow protected abstract boolean shouldSetPosAfterLoading();
+
+    @Shadow public abstract String getCustomNameTag();
+
+    @Shadow public boolean preventEntitySpawning;
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
@@ -649,6 +656,16 @@ public abstract class MixinEntity implements IMixinEntity {
         return relocated;
     }
 
+    @Override
+    public void onVanish(EntityTrackerEntry entry) {
+
+    }
+
+    @Override
+    public void onUnVanish() {
+
+    }
+
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void spongeOnUpdate(CallbackInfo callbackInfo) {
         if (this.pendingVisibilityUpdate && !this.world.isRemote) {
@@ -656,27 +673,66 @@ public abstract class MixinEntity implements IMixinEntity {
             final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
             if (this.visibilityTicks % 4 == 0) {
                 if (this.isVanished) {
+                    this.onVanish(lookup);
                     for (EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) {
                         entityPlayerMP.connection.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
                         if (((Object) this) instanceof EntityPlayerMP) {
                             entityPlayerMP.connection.sendPacket(
                                     new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) (Object) this));
+                            // Save old tab list data!!!
                         }
                     }
                 } else {
                     this.visibilityTicks = 1;
                     this.pendingVisibilityUpdate = false;
-                    for (EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayers()) {
-                        if (((Object) this) == entityPlayerMP) {
-                            continue;
+
+
+                    this.onUnVanish();
+                    /*if (((Object) this) instanceof EntityPlayerMP) {
+                        ((IMixinEntityPlayerMP) this).onSpawnToPlayers(Sponge.getServer().getOnlinePlayers());
+                    }*/
+
+                    // If we're not a player, or we're a player that doesn't need the tab list restored (regular gameprofile is the same as the tab list gameprofile)
+                    //if ((!(((Object) this) instanceof EntityPlayerMP)) || ((((Object) this) instanceof EntityPlayerMP) && ((IMixinEntityPlayerMP) this).shouldUpdateGameProfile())) {
+                        for (EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayers()) {
+                            if (((Object) this) == entityPlayerMP) {
+                                continue;
+                            }
+                            /*if (((Object) this) instanceof EntityPlayerMP) {
+                                Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
+                                entityPlayerMP.connection.sendPacket(packet);
+                            }*/
+                            Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                            entityPlayerMP.connection.sendPacket(newPacket);
                         }
-                        if (((Object) this) instanceof EntityPlayerMP) {
-                            Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
-                            entityPlayerMP.connection.sendPacket(packet);
+                        //}
+                    /*} else { // Do tab list restoration
+                        Map<UUID, TabListEntry> map = new HashMap<>();
+                        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                            if (player == (EntityPlayerMP) (Object) this) {
+                                continue;
+                            }
+                            player.getTabList().getEntry(this.getUniqueID()).ifPresent(entry -> map.put(player.getUniqueId(), entry));
                         }
-                        Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
-                        entityPlayerMP.connection.sendPacket(newPacket);
-                    }
+
+                        this.runDelay(2, () -> {
+
+                            // Restore the tab list
+                            for (Player player : Sponge.getServer().getOnlinePlayers()) {
+                                if (player == (EntityPlayerMP) (Object) this) {
+                                    continue;
+                                }
+                                SpongeClientWaiter.INSTANCE.waitForRenderTick(() -> {
+                                    player.getTabList().removeEntry(this.getUniqueID());
+                                    TabListEntry entry = map.get(player.getUniqueId());
+                                    if (entry != null) {
+                                        player.getTabList().addEntry(entry);
+                                    }
+                                }, (EntityPlayerMP) player);
+                            }
+                        });
+                    }*/
+
                 }
             }
             if (this.visibilityTicks > 0) {
@@ -685,6 +741,10 @@ public abstract class MixinEntity implements IMixinEntity {
                 this.pendingVisibilityUpdate = false;
             }
         }
+    }
+
+    protected void runDelay(int ticks, Runnable runnable) {
+        Sponge.getScheduler().createTaskBuilder().execute(runnable).delayTicks(ticks).submit(SpongeImpl.getPlugin());
     }
 
     @Override
@@ -1024,7 +1084,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
         return list;
     }
-    
+
     @Override
     public DataHolder copy() {
         if ((Object) this instanceof Player) {
