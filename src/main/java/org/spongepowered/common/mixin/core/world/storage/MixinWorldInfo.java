@@ -31,7 +31,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.MoreCollectors;
 import com.google.gson.JsonParseException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -44,7 +43,6 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -89,7 +87,6 @@ import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.IOException;
@@ -163,15 +160,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Nullable private SpongeConfig<WorldConfig> worldConfig;
     @Nullable private PortalAgentType portalAgentType;
 
-    // Flag to indicate that construction is complete to save operations
-    // Fixes file locking issues, see https://github.com/SpongePowered/SpongeForge/issues/1991
-    private boolean isConstructed = false;
-
     //     protected WorldInfo()
     @Inject(method = "<init>", at = @At("RETURN") )
     private void onConstruction(CallbackInfo ci) {
         this.onConstructionCommon();
-        this.isConstructed = true;
     }
 
     //     public WorldInfo(NBTTagCompound nbt)
@@ -180,7 +172,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (!SpongeCommonEventFactory.convertingMapFormat) {
             this.onConstructionCommon();
         }
-        this.isConstructed = true;
     }
 
     //     public WorldInfo(WorldSettings settings, String name)
@@ -188,7 +179,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
         if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
             this.isValid = false;
-            this.isConstructed = true;
             return;
         }
 
@@ -215,7 +205,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
         this.setSerializationBehavior(archetype.getSerializationBehavior());
         this.getOrCreateWorldConfig().save();
-        this.isConstructed = true;
     }
 
     //     public WorldInfo(WorldInfo worldInformation)
@@ -224,8 +213,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.onConstructionCommon();
 
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
+        this.getOrCreateWorldConfig(); // Create the config now if it has not yet been created.
         this.portalAgentType = info.portalAgentType;
-        this.isConstructed = true;
         this.setDimensionType(info.dimensionType);
     }
 
@@ -927,9 +916,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void saveConfig() {
-        // this.isConstructed is checked so that we don't continuously save until
-        // object construction is complete.
-        if (this.isConstructed && this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+        if (this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
             this.getOrCreateWorldConfig().save();
         }
     }

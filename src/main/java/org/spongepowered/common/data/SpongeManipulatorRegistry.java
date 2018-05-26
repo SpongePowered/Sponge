@@ -438,7 +438,6 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
         this.pluginBasedRegistrations = pluginBuilder.build();
 
         final SpongeConfig<CustomDataConfig> dataConfig = SpongeImpl.getDataConfig();
-        dataConfig.reload();
         final CustomDataRegistrationCategory config = dataConfig.getConfig().getDataRegistrationConfig();
         config.populateRegistrations(this.registrations);
         // Save the list of registered id's, this way the config can be re-understood.
