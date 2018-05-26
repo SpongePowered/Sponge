@@ -94,7 +94,7 @@ public class SpongeConfig<T extends ConfigBase> {
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
 
             reload();
-            save();
+            saveNow();
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to initialize configuration", e);
         }
@@ -105,15 +105,27 @@ public class SpongeConfig<T extends ConfigBase> {
     }
 
     public void save() {
+        SpongeImpl.getConfigSaveManager().save(this);
+    }
+
+    public boolean saveNow() {
         try {
             this.configMapper.serialize(this.root.getNode(this.modId));
             this.loader.save(this.root);
+            return true;
         } catch (IOException | ObjectMappingException e) {
             SpongeImpl.getLogger().error("Failed to save configuration", e);
+            return false;
         }
     }
 
     public void reload() {
+        if (!SpongeImpl.getConfigSaveManager().flush(this)) {
+            // Can't reload
+            SpongeImpl.getLogger().error("Failed to load configuration due to error in flushing config");
+            return;
+        }
+
         try {
             this.root = this.loader.load(ConfigurationOptions.defaults()
                     .setSerializers(
