@@ -39,6 +39,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -60,6 +61,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -78,12 +80,17 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Shadow @Final private Block block;
     @Shadow @Final private ImmutableMap<IProperty<?>, Comparable<?>> properties;
 
-    private ImmutableSet<ImmutableValue<?>> values;
-    private ImmutableSet<Key<?>> keys;
-    private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
-    private ImmutableMap<Key<?>, Object> keyMap;
-
-    private String id;
+    // All of these fields are lazily evaluated either at startup or the first time
+    // they are accessed by a plugin, depending on how much of an impact the
+    // implementation can pose during start up, or whether game state
+    // can affect the various systems in place (i.e. we sometimes can't load certain
+    // systems before other registries have finished registering their stuff)
+    @Nullable private ImmutableSet<ImmutableValue<?>> values;
+    @Nullable private ImmutableSet<Key<?>> keys;
+    @Nullable private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
+    @Nullable private ImmutableMap<Key<?>, Object> keyMap;
+    @Nullable private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> dataProperties;
+    @Nullable private String id;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -151,12 +158,9 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public <E> Optional<BlockState> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
-        if (!supports(checkNotNull(key))) {
-            return Optional.empty();
-        }
-        E current = this.get(key).get();
-        final E newVal = checkNotNull(function.apply(current));
-        return this.with(key, newVal);
+        return this.get(checkNotNull(key, "Key cannot be null!")) // If we don't have a value for the key, we don't support it.
+            .map(checkNotNull(function, "Function cannot be null!"))
+            .map(newVal -> with(key, newVal).orElse(this)); // We can either return this value or the updated value, but not an empty
     }
 
     @Override
@@ -234,6 +238,24 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
             }
         }
         return temp;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+        return Optional.ofNullable((T) this.getSpongeInternalProperties().get(propertyClass));
+    }
+
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return this.getSpongeInternalProperties().values();
+    }
+
+    private ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> getSpongeInternalProperties() {
+        if (this.dataProperties == null) {
+            this.dataProperties = ((IMixinBlock) this.block).getProperties(this);
+        }
+        return this.dataProperties;
     }
 
     @Override
