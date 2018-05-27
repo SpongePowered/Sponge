@@ -51,6 +51,7 @@ import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.filter.cause.After;
 import org.spongepowered.api.event.filter.cause.All;
 import org.spongepowered.api.event.filter.cause.Before;
+import org.spongepowered.api.event.filter.cause.ContextValue;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -65,6 +66,7 @@ import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDele
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDelegate;
+import org.spongepowered.common.event.filter.delegate.ContextValueFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDelegate;
@@ -317,6 +319,7 @@ public class FilterGenerator {
         CAUSE_ALL(All.class),
         CAUSE_ROOT(Root.class),
         GETTER(Getter.class),
+        CONTEXT_VALUE(ContextValue.class)
         ;
 
         private final Class<? extends Annotation> cls;
@@ -347,6 +350,10 @@ public class FilterGenerator {
             if (this == GETTER) {
                 return new GetterFilterSourceDelegate((Getter) anno);
             }
+            if (this == CONTEXT_VALUE) {
+                return new ContextValueFilterSourceDelegate((ContextValue) anno);
+            }
+
             throw new UnsupportedOperationException();
         }
 
