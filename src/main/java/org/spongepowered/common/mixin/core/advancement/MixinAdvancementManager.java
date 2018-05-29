@@ -25,19 +25,28 @@
 package org.spongepowered.common.mixin.core.advancement;
 
 import net.minecraft.advancements.AdvancementManager;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+
+import net.minecraft.server.MinecraftServer;
 
 @Mixin(AdvancementManager.class)
 public class MixinAdvancementManager {
 
     @Inject(method = "reload", at = @At("HEAD"))
-    private void onReload(CallbackInfo ci) {
+    private void onReloadHead(CallbackInfo ci) {
         AdvancementTreeRegistryModule.getInstance().clear();
         AdvancementRegistryModule.getInstance().clear();
+    }
+
+    @Inject(method = "reload", at = @At("RETURN"))
+    private void onReloadReturn(CallbackInfo ci) {
+        ((IMixinPlayerList) ((MinecraftServer) Sponge.getServer()).getPlayerList()).reloadAdvancementProgress();
     }
 }

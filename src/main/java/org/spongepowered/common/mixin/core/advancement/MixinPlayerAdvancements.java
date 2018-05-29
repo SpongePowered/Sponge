@@ -171,4 +171,11 @@ public class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
     public Player getPlayer() {
         return (Player) this.player;
     }
+
+    @Override
+    public void reloadAdvancementProgress() {
+        for (AdvancementProgress progress : this.progress.values()) {
+            ((IMixinAdvancementProgress) progress).updateProgressMap();
+        }
+    }
 }

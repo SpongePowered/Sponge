@@ -39,4 +39,6 @@ public interface IMixinPlayerList {
 
     void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world
             .Teleporter teleporter);
+
+    void reloadAdvancementProgress();
 }
