@@ -29,6 +29,7 @@ import net.minecraft.advancements.AdvancementManager;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
+import org.spongepowered.common.advancement.SpongeAdvancementHelper;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
@@ -37,8 +38,6 @@ import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistry
 @CustomRegistrationPhase
 public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
         implements AdditionalCatalogRegistryModule<Advancement> {
-
-    public static boolean INSIDE_REGISTER_EVENT = false;
 
     public static AdvancementRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -56,7 +55,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     public void registerAdditionalCatalog(Advancement advancement) {
         super.register(advancement);
         ((IMixinAdvancement) advancement).setRegistered();
-        if (INSIDE_REGISTER_EVENT) {
+        if (SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.get()) {
             final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
             final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
             advancementList.getAdvancements().put(mcAdv.getId(), mcAdv);

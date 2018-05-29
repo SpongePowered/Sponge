@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.advancement;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.Advancement;
@@ -48,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
+import org.spongepowered.common.advancement.SpongeAdvancementHelper;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
@@ -89,10 +92,22 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Nullable private Advancement tempParent;
 
+    // Whether the Advancement is constructed for the client
+    private boolean client;
+
+    private void checkServer() {
+        checkState(!this.client);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
+        this.client = SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get();
+        // Don't do anything on the client
+        if (this.client) {
+            return;
+        }
         if (displayIn != null) {
             ((IMixinDisplayInfo) displayIn).setAdvancement(this);
         }
@@ -102,7 +117,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
-        if (!AdvancementRegistryModule.INSIDE_REGISTER_EVENT) {
+        if (!SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.get()) {
             AdvancementRegistryModule.getInstance().registerAdditionalCatalog(this);
         } else {
             // Wait to set the parent until the advancement is registered
@@ -182,47 +197,56 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public Optional<AdvancementTree> getTree() {
+        checkServer();
         return Optional.ofNullable(this.tree);
     }
 
     @Override
     public void setParent(@Nullable Advancement advancement) {
+        checkServer();
         this.parent = advancement;
     }
 
     @Override
     public void setTree(AdvancementTree tree) {
+        checkServer();
         this.tree = tree;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<org.spongepowered.api.advancement.Advancement> getChildren() {
+        checkServer();
         return ImmutableList.copyOf((Collection) this.children);
     }
 
     @Override
     public AdvancementCriterion getCriterion() {
+        checkServer();
         return this.criterion;
     }
 
     @Override
     public void setCriterion(AdvancementCriterion criterion) {
+        checkServer();
         this.criterion = criterion;
     }
 
     @Override
     public void setName(String name) {
+        checkServer();
         this.name = name;
     }
 
     @Override
     public boolean isRegistered() {
+        checkServer();
         return this.tempParent == null;
     }
 
     @Override
     public void setRegistered() {
+        checkServer();
         if (this.tempParent == null) {
             return;
         }
@@ -232,6 +256,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public Optional<org.spongepowered.api.advancement.Advancement> getParent() {
+        checkServer();
         if (this.tempParent != null) {
             return Optional.of((org.spongepowered.api.advancement.Advancement) this.tempParent);
         }
@@ -243,26 +268,31 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Override
     public Optional<org.spongepowered.api.advancement.DisplayInfo> getDisplayInfo() {
+        checkServer();
         return Optional.ofNullable((org.spongepowered.api.advancement.DisplayInfo) this.display);
     }
 
     @Override
     public List<Text> toToastText() {
+        checkServer();
         return this.toastText;
     }
 
     @Override
     public String getId() {
+        checkServer();
         return this.spongeId;
     }
 
     @Override
     public String getName() {
+        checkServer();
         return this.name;
     }
 
     @Override
     public Text toText() {
+        checkServer();
         return this.text;
     }
 }
