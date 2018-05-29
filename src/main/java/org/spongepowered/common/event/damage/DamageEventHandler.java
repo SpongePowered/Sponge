@@ -50,6 +50,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -360,30 +361,37 @@ public class DamageEventHandler {
         return ((org.spongepowered.api.entity.Entity) entity).getLocation();
     }
 
-    public static void generateCauseFor(DamageSource damageSource) {
+    /**
+     * This applies various contexts based on the type of {@link DamageSource}, whether
+     * it's provided by sponge or vanilla. This is not stack neutral, which is why it requires
+     * a {@link CauseStackManager.StackFrame} reference to push onto the stack.
+     * @param damageSource
+     * @param frame
+     */
+    public static void generateCauseFor(DamageSource damageSource, CauseStackManager.StackFrame frame) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
             net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof EntityPlayer) && source != null) {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
-                mixinEntity.getNotifierUser().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
-                mixinEntity.getCreatorUser().ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner));
+                mixinEntity.getNotifierUser().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                mixinEntity.getCreatorUser().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
         } else if (damageSource instanceof EntityDamageSource) {
             net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof EntityPlayer) && source != null) {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
                 // TODO only have a UUID, want a user
-                mixinEntity.getNotifierUser().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
-                mixinEntity.getCreatorUser().ifPresent(creator -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, creator));
+                mixinEntity.getNotifierUser().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                mixinEntity.getCreatorUser().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             }
         } else if (damageSource instanceof BlockDamageSource) {
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
             final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunkFromBlockCoords(blockPos);
-            mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
-            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, owner));
+            mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }
-        Sponge.getCauseStackManager().pushCause(damageSource);
+        frame.pushCause(damageSource);
     }
 
     public static List<DamageFunction> createAttackEnchantmentFunction(

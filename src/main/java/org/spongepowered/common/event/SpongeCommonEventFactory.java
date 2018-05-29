@@ -564,13 +564,13 @@ public class SpongeCommonEventFactory {
             source = LocatableBlock.builder().state(fromState).world(((World) worldIn)).position(pos.getX(), pos.getY(), pos.getZ()).build();
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(source);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
+            frame.pushCause(source);
+            frame.addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
             if (owner != null) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
+                frame.addContext(EventContextKeys.OWNER, owner);
             }
             if (notifier != null) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
+                frame.addContext(EventContextKeys.NOTIFIER, notifier);
             }
 
             WorldProperties world = ((World) worldIn).getProperties();
@@ -578,7 +578,7 @@ public class SpongeCommonEventFactory {
 
             Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
                                                                        BlockSnapshot.builder().blockState(toState).world(world).position(position).build());
-            ChangeBlockEvent.Modify event = SpongeEventFactory.createChangeBlockEventModify(Sponge.getCauseStackManager().getCurrentCause(),
+            ChangeBlockEvent.Modify event = SpongeEventFactory.createChangeBlockEventModify(frame.getCurrentCause(),
                     Collections.singletonList(transaction));
 
             SpongeImpl.postEvent(event);
@@ -666,9 +666,9 @@ public class SpongeCommonEventFactory {
 
         try (StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (extending) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.PISTON_EXTEND, WorldUtil.fromNative(world));
+                frame.addContext(EventContextKeys.PISTON_EXTEND, WorldUtil.fromNative(world));
             } else {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.PISTON_RETRACT, WorldUtil.fromNative(world));
+                frame.addContext(EventContextKeys.PISTON_RETRACT, WorldUtil.fromNative(world));
             }
             return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), locatable)
                 .isCancelled();
@@ -751,18 +751,18 @@ public class SpongeCommonEventFactory {
 
     public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
         @Nullable Vector3d hitVec, Object hitTarget) {
-        try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
+                frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
             } else if (hitTarget instanceof BlockSnapshot) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
+                frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
             }
             InteractItemEvent.Primary event;
             if (hand == EnumHand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractItemEventPrimaryMainHand(Sponge.getCauseStackManager().getCurrentCause(),
+                event = SpongeEventFactory.createInteractItemEventPrimaryMainHand(frame.getCurrentCause(),
                         HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
             } else {
-                event = SpongeEventFactory.createInteractItemEventPrimaryOffHand(Sponge.getCauseStackManager().getCurrentCause(),
+                event = SpongeEventFactory.createInteractItemEventPrimaryOffHand(frame.getCurrentCause(),
                         HandTypes.OFF_HAND, Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
             }
             SpongeImpl.postEvent(event);
@@ -772,18 +772,18 @@ public class SpongeCommonEventFactory {
 
     public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
             @Nullable Vector3d hitVec, Object hitTarget) {
-        try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
+                frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
             } else if (hitTarget instanceof BlockSnapshot) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
+                frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
             }
             InteractItemEvent.Secondary event;
             if (hand == EnumHand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(Sponge.getCauseStackManager().getCurrentCause(),
+                event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(frame.getCurrentCause(),
                         HandTypes.MAIN_HAND, Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
             } else {
-                event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(Sponge.getCauseStackManager().getCurrentCause(),
+                event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(frame.getCurrentCause(),
                         HandTypes.OFF_HAND, Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
             }
             SpongeImpl.postEvent(event);
@@ -828,17 +828,17 @@ public class SpongeCommonEventFactory {
     public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(EntityPlayer player, ItemStack heldItem, Tristate originalUseBlockResult, Tristate useBlockResult,
             Tristate originalUseItemResult, Tristate useItemResult, @Nullable Vector3d hitVec, BlockSnapshot targetBlock,
             Direction targetSide, EnumHand hand) {
-        try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             InteractBlockEvent.Secondary event;
             if (!heldItem.isEmpty()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             }
             if (hand == EnumHand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(Sponge.getCauseStackManager().getCurrentCause(),
+                event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(frame.getCurrentCause(),
                         originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, HandTypes.MAIN_HAND, Optional.ofNullable
                                 (hitVec), targetBlock, targetSide);
             } else {
-                event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(Sponge.getCauseStackManager().getCurrentCause(),
+                event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(frame.getCurrentCause(),
                         originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, HandTypes.OFF_HAND, Optional.ofNullable
                                 (hitVec), targetBlock, targetSide);
             }
@@ -903,16 +903,16 @@ public class SpongeCommonEventFactory {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause( entity);
+            frame.pushCause( entity);
 
             if (!(entity instanceof EntityPlayer)) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 Optional<User> user = spongeEntity.getCreatorUser();
-                user.ifPresent(user1 -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, user1));
+                user.ifPresent(user1 -> frame.addContext(EventContextKeys.OWNER, user1));
             }
 
             // TODO: Add target side support
-            CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Sponge.getCauseStackManager().getCurrentCause(), (BlockState) state,
+            CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(frame.getCurrentCause(), (BlockState) state,
                     new Location<>((World) world, VecHelper.toVector3d(pos)), direction);
             boolean cancelled = SpongeImpl.postEvent(event);
             if (!cancelled) {
@@ -935,12 +935,12 @@ public class SpongeCommonEventFactory {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(projectile);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
+            frame.pushCause(projectile);
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? ProjectileSource.UNKNOWN
                     : projectileSource);
             final Optional<User> owner = phaseTracker.getCurrentPhaseData().context.getOwner();
-            owner.ifPresent(user -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, user));
+            owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
 
             Location<World> impactPoint = new Location<>((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.hitVec));
             boolean cancelled = false;
@@ -957,7 +957,7 @@ public class SpongeCommonEventFactory {
                     side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
                 }
 
-                CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(Sponge.getCauseStackManager().getCurrentCause(),
+                CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
                         impactPoint, targetBlock.getState(),
                         targetBlock.getLocation().get(), side);
                 cancelled = SpongeImpl.postEvent(event);
@@ -970,7 +970,7 @@ public class SpongeCommonEventFactory {
             } else if (movingObjectPosition.entityHit != null) { // entity
                 ArrayList<Entity> entityList = new ArrayList<>();
                 entityList.add((Entity) movingObjectPosition.entityHit);
-                CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(Sponge.getCauseStackManager().getCurrentCause(), entityList, impactPoint);
+                CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.getCurrentCause(), entityList, impactPoint);
                         cancelled = SpongeImpl.postEvent(event);
             }
 
@@ -984,7 +984,8 @@ public class SpongeCommonEventFactory {
     }
 
     public static ClickInventoryEvent.Creative callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
-        Sponge.getCauseStackManager().pushCause(player);
+        try (CauseStackManager.StackFrame frame =Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
         // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
         // Due to this, we can only send the original item that was clicked in slot
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
@@ -993,21 +994,20 @@ public class SpongeCommonEventFactory {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null) {
                 ItemStackSnapshot clickedItem = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
-                        : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
-                SlotTransaction slotTransaction =
-                        new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, ItemStackSnapshot.NONE);
+                : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
+                SlotTransaction slotTransaction = new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
         ClickInventoryEvent.Creative event =
-                SpongeEventFactory.createClickInventoryEventCreative(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
+                SpongeEventFactory.createClickInventoryEventCreative(frame.getCurrentCause(), cursorTransaction,
                         (org.spongepowered.api.item.inventory.Container) player.openContainer,
                         new ArrayList<>(((IMixinContainer) player.openContainer).getCapturedTransactions()));
         ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
         ((IMixinContainer) player.openContainer).setCaptureInventory(false);
         SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
-        return event;
+        frame.popCause();
+        return event;}
     }
 
     public static boolean callInteractInventoryOpenEvent(EntityPlayerMP player) {

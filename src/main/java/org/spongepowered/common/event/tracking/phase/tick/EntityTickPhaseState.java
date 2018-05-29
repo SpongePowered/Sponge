@@ -308,7 +308,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 return SpongeCommonEventFactory.callSpawnEntity(breeding, context);
 
             } else if (entity instanceof Projectile) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                 final List<Entity> projectile = new ArrayList<>(1);
                 projectile.add(entity);
                 return SpongeCommonEventFactory.callSpawnEntity(projectile, context);

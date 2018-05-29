@@ -631,12 +631,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         if (world.getGameRules().getBoolean("doMobSpawning") && this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
                             // Sponge Start - Throw construction events
                             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                                Sponge.getCauseStackManager().pushCause(this.getWeather());
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                frame.pushCause(this.getWeather());
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                                 ConstructEntityEvent.Pre
                                     constructEntityEvent =
                                     SpongeEventFactory
-                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
+                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
                                 SpongeImpl.postEvent(constructEntityEvent);
                                 if (!constructEntityEvent.isCancelled()) {
                                     // Sponge End
@@ -651,7 +651,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 ConstructEntityEvent.Pre
                                     lightning =
                                     SpongeEventFactory
-                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING,
+                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
                                             transform);
                                 SpongeImpl.postEvent(lightning);
                                 if (!lightning.isCancelled()) {
@@ -666,11 +666,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         } else {
                             // Sponge start - Throw construction event for lightningbolts
                             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                                Sponge.getCauseStackManager().pushCause(this.getWeather());
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                frame.pushCause(this.getWeather());
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                                 ConstructEntityEvent.Pre
                                     event =
-                                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                                    SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                                         EntityTypes.LIGHTNING, transform);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {

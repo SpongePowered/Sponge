@@ -131,10 +131,10 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if(context.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+                frame.addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
             }
             if(context.getOwner().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+                frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             try {
                 this.associateAdditionalCauses(this, context);
@@ -150,7 +150,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                 if (mainEvent != null) {
-                    Sponge.getCauseStackManager().pushCause(mainEvent);
+                    frame.pushCause(mainEvent);
                 }
             }
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];

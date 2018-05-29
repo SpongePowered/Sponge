@@ -718,41 +718,43 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
 
                     // Sponge start - Fire interact events
-                    EnumHand hand = packetIn.getHand();
-                    ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
+                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        EnumHand hand = packetIn.getHand();
+                        ItemStack itemstack = hand != null ? this.player.getHeldItem(hand) : ItemStack.EMPTY;
+                        frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(itemstack));
 
-                    SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
+                        SpongeCommonEventFactory.lastSecondaryPacketTick = this.serverController.getTickCounter();
 
-                    // Is interaction allowed with item in hand
-                    if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
-                                    .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
+                        // Is interaction allowed with item in hand
+                        if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
+                            .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
-                        // Restore held item in hand
-                        int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
-                        Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
-                        sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
+                            // Restore held item in hand
+                            int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
+                            Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
+                            sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
 
-                        // Handle a few special cases where the client assumes that the interaction is successful,
-                        // which means that we need to force an update
-                        if (itemstack.getItem() == Items.LEAD) {
-                            // Detach entity again
-                            sendPacket(new SPacketEntityAttach(entity, null));
-                        } else {
-                            // Other cases may involve a specific DataParameter of the entity
-                            // We fix the client state by marking it as dirty so it will be updated on the client the next tick
-                            DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
-                            if (parameter != null) {
-                                entity.getDataManager().setDirty(parameter);
+                            // Handle a few special cases where the client assumes that the interaction is successful,
+                            // which means that we need to force an update
+                            if (itemstack.getItem() == Items.LEAD) {
+                                // Detach entity again
+                                sendPacket(new SPacketEntityAttach(entity, null));
+                            } else {
+                                // Other cases may involve a specific DataParameter of the entity
+                                // We fix the client state by marking it as dirty so it will be updated on the client the next tick
+                                DataParameter<?> parameter = findModifiedEntityInteractDataParameter(itemstack, entity);
+                                if (parameter != null) {
+                                    entity.getDataManager().setDirty(parameter);
+                                }
                             }
+
+                            return;
                         }
 
-                        return;
-                    }
-
-                    // If INTERACT_AT is not successful, run the INTERACT logic
-                    if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
-                        this.player.interactOn(entity, hand);
+                        // If INTERACT_AT is not successful, run the INTERACT logic
+                        if (entity.applyPlayerInteraction(this.player, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
+                            this.player.interactOn(entity, hand);
+                        }
                     }
                     // Sponge end
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
