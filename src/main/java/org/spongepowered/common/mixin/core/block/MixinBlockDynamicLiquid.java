@@ -60,12 +60,19 @@ public abstract class MixinBlockDynamicLiquid {
     }
 
     @Inject(method = "updateTick", at = @At("HEAD"), cancellable = true)
-    public void onUpdateTick(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+    public void onUpdateTickHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         if (!worldIn.isRemote) {
             Sponge.getCauseStackManager().addContext(EventContextKeys.LIQUID_FLOW, (org.spongepowered.api.world.World) worldIn);
             if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
                 ci.cancel();
             }
+        }
+    }
+
+    @Inject(method = "updateTick", at = @At("RETURN"), cancellable = true)
+    public void onUpdateTickReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+        if (!worldIn.isRemote) {
+            Sponge.getCauseStackManager().removeContext(EventContextKeys.LIQUID_FLOW);
         }
     }
 
