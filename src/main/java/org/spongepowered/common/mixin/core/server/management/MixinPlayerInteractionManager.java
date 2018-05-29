@@ -53,6 +53,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.util.Tristate;
@@ -223,14 +224,15 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     @Override
     public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, BlockSnapshot blockSnapshot, EnumActionResult result) {
         if (lastOpenContainer != player.openContainer) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
-            ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
-            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
-                result = EnumActionResult.FAIL;
-                SpongeCommonEventFactory.interactBlockEventCancelled = true;
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
+                ((IMixinContainer) player.openContainer).setOpenLocation(blockSnapshot.getLocation().orElse(null));
+                if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(player)) {
+                    result = EnumActionResult.FAIL;
+                    SpongeCommonEventFactory.interactBlockEventCancelled = true;
+                }
             }
-            Sponge.getCauseStackManager().popCause();
         }
         return result;
     }

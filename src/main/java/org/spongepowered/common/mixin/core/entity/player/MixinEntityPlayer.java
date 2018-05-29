@@ -667,11 +667,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                     final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
                                     try (final StackFrame frame = isMainthread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
                                         if (isMainthread) {
-                                            Sponge.getCauseStackManager().pushCause(sweepingAttackSource);
+                                            frame.pushCause(sweepingAttackSource);
                                         }
                                         final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
                                         if (isMainthread) {
-                                            Sponge.getCauseStackManager().addContext(EventContextKeys.WEAPON, heldSnapshot);
+                                            frame.addContext(EventContextKeys.WEAPON, heldSnapshot);
                                         }
                                         final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
                                                 .cause(Cause.of(EventContext.empty(), heldSnapshot))

@@ -222,7 +222,7 @@ public final class TrackingUtil {
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
             chunk.getBlockNotifier(pos)
                     .ifPresent(notifier -> {
-                        Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
+                        frame.addContext(EventContextKeys.NOTIFIER, notifier);
                         phaseContext.notifier(notifier);
                     });
 

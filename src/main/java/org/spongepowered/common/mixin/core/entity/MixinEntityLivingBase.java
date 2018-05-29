@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
@@ -42,7 +41,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.CombatEntry;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -98,7 +96,6 @@ import org.spongepowered.common.event.damage.DamageObject;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
@@ -645,62 +642,62 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 originalFunctions.add(absorptionFunction.get());
             }
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                DamageEventHandler.generateCauseFor(damageSource);
-    
-                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
+                DamageEventHandler.generateCauseFor(damageSource, frame);
+
+                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), originalFunctions, this, originalDamage);
                 if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
                     Sponge.getEventManager().post(event);
                 }
                 if (event.isCancelled()) {
                     return false;
                 }
-    
+
                 damage = (float) event.getFinalDamage();
-    
+
                 // Helmet
                 final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
                 if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
                     mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
                 }
-    
+
                 // Shield
                 if (shieldFunction.isPresent()) {
                     this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
                     if (!damageSource.isProjectile()) {
                         Entity entity = damageSource.getImmediateSource();
-    
+
                         if (entity instanceof EntityLivingBase) {
                             this.blockUsingShield((EntityLivingBase) entity);
                         }
                     }
                 }
-    
+
                 // Armor
                 if (!damageSource.isUnblockable()) {
                     for (DamageFunction modifier : event.getModifiers()) {
                         applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getModifier());
                     }
                 }
-    
+
                 double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
                 if (absorptionFunction.isPresent()) {
                     absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
                 }
-    
+
                 this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
                 if (damage != 0.0F) {
                     if (human) {
                         ((EntityPlayer) (Object) this).addExhaustion(damageSource.getHungerDamage());
                     }
                     float f2 = this.getHealth();
-    
+
                     this.setHealth(f2 - damage);
                     this.getCombatTracker().trackDamage(damageSource, f2, damage);
-    
+
                     if (human) {
                         return true;
                     }
-    
+
                     this.setAbsorptionAmount(this.getAbsorptionAmount() - damage);
                 }
                 return true;

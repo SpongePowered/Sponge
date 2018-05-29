@@ -152,25 +152,27 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = TARGET_ENTITY_STATE))
     protected void onExplode(World world, Entity self, byte state) {
-        // Fireworks don't typically explode like other explosives, but we'll
-        // post an event regardless and if the radius is zero the explosion
-        // won't be triggered (the default behavior).
-        Sponge.getCauseStackManager().pushCause(this);
-        Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
-        detonate(Explosion.builder()
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            // Fireworks don't typically explode like other explosives, but we'll
+            // post an event regardless and if the radius is zero the explosion
+            // won't be triggered (the default behavior).
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.THROWER, getShooter());
+            detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(getLocation())
                 .radius(this.explosionRadius))
                 .ifPresent(explosion -> world.setEntityState(self, state));
-        Sponge.getCauseStackManager().popCause();
+            frame.popCause();
+        }
     }
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(this);
-                Sponge.getCauseStackManager().addContext(EventContextKeys.THROWER, getShooter());
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.THROWER, getShooter());
                 postPrime();
             }
         }
