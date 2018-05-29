@@ -95,12 +95,12 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public BlockState cycleValue(Key<? extends BaseValue<? extends Cycleable<?>>> key) {
-        if (supports(key)) {
-            final Cycleable value = (Cycleable) get((Key) key).get();
-            final Cycleable next = value.cycleNext();
-            return with((Key<? extends BaseValue<Object>>) (Key<?>) key, next).get();
-        }
-        throw new IllegalArgumentException("Used an invalid cyclable key! Check with supports in the future!");
+        final Optional<Cycleable<?>> optional = get((Key) key);
+        return optional
+            .map(Cycleable::cycleNext)
+            .map(newVal -> with((Key<? extends BaseValue<Object>>) key, newVal)
+                .orElseThrow(() -> new IllegalStateException("Unable to retrieve a cycled BlockState for key: " + key + " and value: " + newVal)))
+            .orElseThrow(() -> new IllegalArgumentException("Used an invalid cycleable key! Check with supports in the future!"));
     }
 
     @Override
@@ -110,7 +110,8 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
             .position(location.getBlockPosition())
             .worldId(location.getExtent().getUniqueId());
         if (this.block.hasTileEntity() && location.getBlockType().equals(this.block)) {
-            final TileEntity tileEntity = location.getTileEntity().get();
+            final TileEntity tileEntity = location.getTileEntity()
+                .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
                 builder.add(manipulator);
             }
@@ -120,10 +121,17 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         }
         return builder.build();
     }
+
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators() {
+        return getCachedManipulators();
+    }
+
+    private ImmutableList<ImmutableDataManipulator<?, ?>> getCachedManipulators() {
         if (this.manipulators == null) {
             this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators(this));
+        }
+        if (this.keyMap == null) {
             populateKeyValues();
         }
         return this.manipulators;
@@ -365,11 +373,17 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public String getId() {
+        if (this.id == null) {
+            generateId(this.block);
+        }
         return this.id;
     }
 
     @Override
     public String getName() {
+        if (this.id == null) {
+            generateId(this.block);
+        }
         return this.id;
     }
 }
