@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.advancement.SpongeAdvancementHelper;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
@@ -60,18 +61,26 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     @Inject(method = "loadAdvancements", at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
             target = "Ljava/util/Map;size()I"))
     private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
-        AdvancementRegistryModule.INSIDE_REGISTER_EVENT = true;
+        // Don't post events when loading advancements on the client
+        if (SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get()) {
+            return;
+        }
+        SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.set(true);
         SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
                 org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance()));
-        AdvancementRegistryModule.INSIDE_REGISTER_EVENT = false;
+        SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.set(false);
     }
 
     @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
     private void onLoadAdvancementForTrees(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
-        AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = true;
+        // Don't post events when loading advancements on the client
+        if (SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get()) {
+            return;
+        }
+        SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.set(true);
         SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
                 org.spongepowered.api.advancement.AdvancementTree.class, AdvancementTreeRegistryModule.getInstance()));
-        AdvancementTreeRegistryModule.INSIDE_REGISTER_EVENT = false;
+        SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.set(false);
         LOGGER.info("Loaded " + this.roots.size() + " advancement trees");
     }
 
