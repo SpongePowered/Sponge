@@ -35,4 +35,6 @@ public interface IMixinAdvancementProgress {
     void setAdvancement(String advancement);
 
     void invalidateAchievedState();
+
+    void updateProgressMap();
 }

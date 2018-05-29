@@ -92,17 +92,20 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     @Inject(method = "update", at = @At("RETURN"))
     private void onUpdate(Map<String, Criterion> criteriaIn, String[][] requirements, CallbackInfo ci) {
         this.client = SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get();
-        this.progressMap = null; // Reconstruct the progress map after reloading resources, etc.
-        if (!this.client && this.advancement != null) {
-            getProgressMap();
+        updateProgressMap();
+    }
+
+    @Override
+    public void updateProgressMap() {
+        if (this.client) {
+            return;
         }
+        this.progressMap = new HashMap<>();
+        processProgressMap(getAdvancement().getCriterion(), this.progressMap);
     }
 
     private Map<AdvancementCriterion, ICriterionProgress> getProgressMap() {
-        if (this.progressMap == null) {
-            this.progressMap = new HashMap<>();
-            processProgressMap(getAdvancement().getCriterion(), this.progressMap);
-        }
+        checkState(this.progressMap != null, "progressMap isn't initialized");
         return this.progressMap;
     }
 
@@ -261,7 +264,6 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     @Override
     public void setPlayerAdvancements(PlayerAdvancements playerAdvancements) {
         checkServer();
-        getProgressMap();
         this.playerAdvancements = playerAdvancements;
     }
 

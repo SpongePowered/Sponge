@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server;
 import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
+import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -110,6 +111,7 @@ import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.PlayerPhase;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
@@ -147,6 +149,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
+    @Shadow @Final private Map<UUID, PlayerAdvancements> advancements;
     @Shadow private IPlayerFileData playerDataManager;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();
@@ -855,4 +858,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         ((IMixinEntityPlayerMP) cir.getReturnValue()).forceRecreateUser();
     }
 
+    @Override
+    public void reloadAdvancementProgress() {
+        for (PlayerAdvancements playerAdvancements : this.advancements.values()) {
+            ((IMixinPlayerAdvancements) playerAdvancements).reloadAdvancementProgress();
+        }
+    }
 }

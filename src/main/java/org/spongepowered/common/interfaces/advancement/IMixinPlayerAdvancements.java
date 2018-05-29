@@ -34,4 +34,6 @@ public interface IMixinPlayerAdvancements {
     Set<AdvancementTree> getAdvancementTrees();
 
     Player getPlayer();
+
+    void reloadAdvancementProgress();
 }
