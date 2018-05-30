@@ -663,7 +663,7 @@ public class SpongeCommonEventFactory {
             locations.add(new Location<>((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
         }
 
-        try (StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (extending) {
                 frame.addContext(EventContextKeys.PISTON_EXTEND, WorldUtil.fromNative(world));
             } else {
@@ -750,7 +750,7 @@ public class SpongeCommonEventFactory {
 
     public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
         @Nullable Vector3d hitVec, Object hitTarget) {
-        try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
                 frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
             } else if (hitTarget instanceof BlockSnapshot) {
