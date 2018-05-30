@@ -25,8 +25,16 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+
+import java.util.ArrayList;
 
 public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
 
@@ -43,6 +51,21 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     @Override
     public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext,
             BlockPos pos) {
+        return false;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(GeneralizedContext context, Entity entity, int chunkX, int chunkZ) {
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+        }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 
