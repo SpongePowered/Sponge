@@ -60,6 +60,7 @@ import org.spongepowered.common.registry.type.advancement.AdvancementRegistryMod
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.ServerUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -92,20 +93,16 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
 
     @Nullable private Advancement tempParent;
 
-    // Whether the Advancement is constructed for the client
-    private boolean client;
-
     private void checkServer() {
-        checkState(!this.client);
+        checkState(ServerUtils.isCallingFromMainThread());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
-        this.client = SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get();
         // Don't do anything on the client
-        if (this.client) {
+        if (!ServerUtils.isCallingFromMainThread()) {
             return;
         }
         if (displayIn != null) {

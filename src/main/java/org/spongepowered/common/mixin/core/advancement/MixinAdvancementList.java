@@ -42,6 +42,7 @@ import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+import org.spongepowered.common.util.ServerUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +63,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
             target = "Ljava/util/Map;size()I"))
     private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get()) {
+        if (!ServerUtils.isCallingFromMainThread()) {
             return;
         }
         SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.set(true);
@@ -74,7 +75,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
     private void onLoadAdvancementForTrees(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (SpongeAdvancementHelper.CONSTRUCTING_CLIENT_ADVANCEMENTS.get()) {
+        if (!ServerUtils.isCallingFromMainThread()) {
             return;
         }
         SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.set(true);

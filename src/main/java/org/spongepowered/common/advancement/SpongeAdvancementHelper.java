@@ -26,7 +26,5 @@ package org.spongepowered.common.advancement;
 
 public final class SpongeAdvancementHelper {
 
-    public static final ThreadLocal<Boolean> CONSTRUCTING_CLIENT_ADVANCEMENTS = ThreadLocal.withInitial(() -> false);
-
     public static final ThreadLocal<Boolean> INSIDE_REGISTER_EVENT = ThreadLocal.withInitial(() -> false);
 }
