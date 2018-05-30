@@ -98,8 +98,16 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         final Optional<Cycleable<?>> optional = get((Key) key);
         return optional
             .map(Cycleable::cycleNext)
-            .map(newVal -> with((Key<? extends BaseValue<Object>>) key, newVal)
-                .orElseThrow(() -> new IllegalStateException("Unable to retrieve a cycled BlockState for key: " + key + " and value: " + newVal)))
+            .map(newVal -> {
+                BlockState o = null;
+                try {
+                    o = (BlockState) with((Key) key, newVal)
+                        .orElseThrow(() -> new IllegalStateException("Unable to retrieve a cycled BlockState for key: " + key + " and value: " + newVal));
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+                return o;
+            })
             .orElseThrow(() -> new IllegalArgumentException("Used an invalid cycleable key! Check with supports in the future!"));
     }
 
