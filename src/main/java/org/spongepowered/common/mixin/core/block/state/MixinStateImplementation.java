@@ -132,15 +132,27 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators() {
-        return getCachedManipulators();
+        return lazyLoadManipulatorsAndKeys();
     }
 
-    private ImmutableList<ImmutableDataManipulator<?, ?>> getCachedManipulators() {
+    private ImmutableList<ImmutableDataManipulator<?, ?>> lazyLoadManipulatorsAndKeys() {
         if (this.manipulators == null) {
             this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators(this));
         }
         if (this.keyMap == null) {
-            populateKeyValues();
+            ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
+            ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
+            for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+                for (ImmutableValue<?> value : manipulator.getValues()) {
+                    builder.put(value.getKey(), value.get());
+                    valueBuilder.add(value);
+                    keyBuilder.add(value.getKey());
+                }
+            }
+            this.values = valueBuilder.build();
+            this.keys = keyBuilder.build();
+            this.keyMap = builder.build();
         }
         return this.manipulators;
     }
@@ -283,28 +295,12 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         if(this.keyMap == null) {
-            this.populateKeyValues();
+            lazyLoadManipulatorsAndKeys();
         }
         if (this.keyMap.containsKey(checkNotNull(key))) {
             return Optional.of((E) this.keyMap.get(key));
         }
         return Optional.empty();
-    }
-
-    private void populateKeyValues() {
-        ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-        ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-        ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-        for (ImmutableDataManipulator<?, ?> manipulator : this.getManipulators()) {
-            for (ImmutableValue<?> value : manipulator.getValues()) {
-                builder.put(value.getKey(), value.get());
-                valueBuilder.add(value);
-                keyBuilder.add(value.getKey());
-            }
-        }
-        this.values = valueBuilder.build();
-        this.keys = keyBuilder.build();
-        this.keyMap = builder.build();
     }
 
     @SuppressWarnings("unchecked")
@@ -332,7 +328,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Override
     public Set<Key<?>> getKeys() {
         if (this.keys == null) {
-            populateKeyValues();
+            lazyLoadManipulatorsAndKeys();
         }
         return this.keys;
     }
@@ -340,7 +336,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @Override
     public Set<ImmutableValue<?>> getValues() {
         if (this.values == null) {
-            populateKeyValues();
+            lazyLoadManipulatorsAndKeys();
         }
         return this.values;
     }
