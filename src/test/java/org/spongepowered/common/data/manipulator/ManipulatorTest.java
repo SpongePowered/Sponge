@@ -197,7 +197,7 @@ public class ManipulatorTest {
                      optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
                 } catch (Exception e) {
                     printExceptionBuildingData(container, e);
-                    return;
+                    throw e;
                 }
                 if (!optional.isPresent()) {
                     printEmptyBuild(container);
