@@ -72,6 +72,7 @@ import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTa
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -126,6 +127,8 @@ public final class DataUtil {
             final HashSet<Object> set = new HashSet<>();
             set.addAll(dataView.getList(key.getQuery()).orElse(Collections.emptyList()));
             object = set;
+        } else if (elementToken.isSubtypeOf(TypeToken.of(Map.class))) {
+            object = dataView.getMap(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
         } else if (elementToken.isSubtypeOf(TypeToken.of(Enum.class))) {
             object = Enum.valueOf((Class<Enum>) elementToken.getRawType(), dataView.getString(key.getQuery())
                 .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId())));
