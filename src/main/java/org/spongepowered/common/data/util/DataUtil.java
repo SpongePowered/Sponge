@@ -135,7 +135,7 @@ public final class DataUtil {
         } else {
             final Optional<? extends DataTranslator<?>> translator = SpongeDataManager.getInstance().getTranslator(elementToken.getRawType());
             if (translator.isPresent()) {
-                object = translator.map(trans -> trans.translate(dataView))
+                object = translator.map(trans -> trans.translate(dataView.getView(key.getQuery()).orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()))))
                     .orElseThrow(() -> new InvalidDataException("Could not translate translateable: " + key.getId()));
             } else {
                 object = dataView.get(key.getQuery())
