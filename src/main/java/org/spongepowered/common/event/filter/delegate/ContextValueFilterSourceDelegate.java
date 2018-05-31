@@ -27,19 +27,26 @@ package org.spongepowered.common.event.filter.delegate;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.spongepowered.api.GameRegistry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.filter.cause.ContextValue;
 
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
 import static org.objectweb.asm.Opcodes.INSTANCEOF;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegate {
@@ -51,10 +58,31 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
     }
 
     @Override
-    protected void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
-        // Sponge.getRegistry().getType(EventContextKey.class, anno.value()).get())
+    protected void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
+        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Sponge.class), "getRegistry",
+                Type.getMethodDescriptor(Type.getType(GameRegistry.class)), false);
+        mv.visitLdcInsn(Type.getType(EventContextKey.class));
+        mv.visitLdcInsn(this.anno.value());
 
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(GameRegistry.class), "getType",
+                Type.getMethodDescriptor(
+                        Type.getType(Optional.class),
+                        Type.getType(Class.class), Type.getType(String.class)
+                ),
+                true
+        );
+
+        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Optional.class), "get",
+                "()Ljava/lang/Object;", false);
+        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(EventContextKey.class));
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(EventContext.class), "get",
+                Type.getMethodDescriptor(
+                        Type.getType(Optional.class),
+                        Type.getType(EventContextKey.class)
+                ),
+                false
+        );
+        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Optional.class), "get",
                 "()Ljava/lang/Object;", false);
     }
 

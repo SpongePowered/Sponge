@@ -28,7 +28,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.util.Tuple;
 
@@ -50,8 +49,8 @@ public abstract class ContextFilterSourceDelegate implements ParameterFilterSour
 
         Class<?> targetType = param.getType();
 
-        insertContextCall(mv, param, targetType, local);
-        int paramLocal = local + 2;
+        insertContextCall(mv, param, targetType);
+        int paramLocal = local++;
         mv.visitVarInsn(ASTORE, paramLocal);
 
         insertTransform(mv, param, targetType, paramLocal);
@@ -59,7 +58,7 @@ public abstract class ContextFilterSourceDelegate implements ParameterFilterSour
         return new Tuple<>(local, paramLocal);
     }
 
-    protected abstract void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType, int local);
+    protected abstract void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType);
 
     protected abstract void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local);
 }
