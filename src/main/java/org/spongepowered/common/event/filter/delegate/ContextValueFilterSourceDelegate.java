@@ -55,10 +55,31 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
 
     public ContextValueFilterSourceDelegate(ContextValue anno) {
         this.anno = anno;
+
+        Optional<EventContextKey> opKey = Sponge.getRegistry().getType(EventContextKey.class, this.anno.value());
+
+        if(!opKey.isPresent()) {
+            throw new IllegalArgumentException(String.format(
+                    "The %s context key specified by the context value annotation was not found",
+                    this.anno.value()
+            ));
+        }
     }
 
     @Override
     protected void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
+        EventContextKey<?> key = Sponge.getRegistry().getType(EventContextKey.class, this.anno.value()).get();
+
+        if(!key.getAllowedType().isAssignableFrom(targetType)) {
+            throw new IllegalArgumentException(String.format(
+                    "The parameter type doesn't match the context key type from the context value annotation. Expected: %s Found: %s",
+                    key.getAllowedType().getName(),
+                    targetType.getName()
+            ));
+        }
+
+        // TODO: Put the EventContextKey in a field
+
         mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Sponge.class), "getRegistry",
                 Type.getMethodDescriptor(Type.getType(GameRegistry.class)), false);
         mv.visitLdcInsn(Type.getType(EventContextKey.class));
