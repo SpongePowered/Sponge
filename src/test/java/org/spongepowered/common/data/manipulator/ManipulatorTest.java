@@ -196,7 +196,7 @@ public class ManipulatorTest {
                 try {
                      optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
                 } catch (Exception e) {
-                    printExceptionBuildingData(container);
+                    printExceptionBuildingData(container, e);
                     return;
                 }
                 if (!optional.isPresent()) {
@@ -236,8 +236,9 @@ public class ManipulatorTest {
         printRemaining(container, printer);
     }
 
-    private void printExceptionBuildingData(DataContainer container) {
+    private void printExceptionBuildingData(DataContainer container, Exception exception) {
         final PrettyPrinter printer = new PrettyPrinter(60).centre().add("Could not build data!").hr()
+            .add(exception)
             .add("Something something data....")
             .add()
             .add("Here's the provided container:");
