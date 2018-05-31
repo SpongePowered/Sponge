@@ -55,6 +55,7 @@ public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<Immut
         this.vanishValue = ImmutableSpongeValue.cachedOf(Keys.VANISH, false, this.vanish);
         this.collisionValue = ImmutableSpongeValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, false, this.collision);
         this.untargetableValue = ImmutableSpongeValue.cachedOf(Keys.VANISH_PREVENTS_TARGETING, false, this.untargetable);
+        this.registerGetters();
     }
 
     @Override
@@ -87,6 +88,9 @@ public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<Immut
 
         registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
         registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
+
+        registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);
+        registerKeyValue(Keys.INVISIBLE, this::invisible);
     }
 
     @Override

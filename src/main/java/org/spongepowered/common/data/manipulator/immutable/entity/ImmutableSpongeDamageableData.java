@@ -57,6 +57,7 @@ public class ImmutableSpongeDamageableData extends AbstractImmutableData<Immutab
         this.lastDamage = lastDamage;
         this.lastAttackerValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable(this.lastAttacker));
         this.lastDamageValue = new ImmutableSpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.lastDamage));
+        this.registerGetters();
     }
 
     public ImmutableSpongeDamageableData(@Nullable Living lastAttacker, @Nullable Double lastDamage) {
