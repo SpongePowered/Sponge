@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.filter.delegate;
 
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -41,6 +43,7 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
@@ -48,6 +51,7 @@ import static org.objectweb.asm.Opcodes.INSTANCEOF;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegate {
 
@@ -67,18 +71,15 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
     }
 
     @Override
-    protected void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
-        EventContextKey<?> key = Sponge.getRegistry().getType(EventContextKey.class, this.anno.value()).get();
+    public void createFields(ClassWriter cw) {
+        FieldVisitor fv = cw.visitField(0, "contextKey", Type.getDescriptor(EventContextKey.class),
+                "Lorg/spongepowered/api/event/cause/EventContextKey<*>;", null);
+        fv.visitEnd();
+    }
 
-        if(!key.getAllowedType().isAssignableFrom(targetType)) {
-            throw new IllegalArgumentException(String.format(
-                    "The parameter type doesn't match the context key type from the context value annotation. Expected: %s Found: %s",
-                    key.getAllowedType().getName(),
-                    targetType.getName()
-            ));
-        }
-
-        // TODO: Put the EventContextKey in a field
+    @Override
+    public void writeCtor(String name, ClassWriter cw, MethodVisitor mv) {
+        mv.visitVarInsn(ALOAD, 0);
 
         mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Sponge.class), "getRegistry",
                 Type.getMethodDescriptor(Type.getType(GameRegistry.class)), false);
@@ -96,6 +97,25 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Optional.class), "get",
                 "()Ljava/lang/Object;", false);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(EventContextKey.class));
+
+        mv.visitFieldInsn(PUTFIELD, name, "contextKey", Type.getDescriptor(EventContextKey.class));
+    }
+
+    @Override
+    protected void insertContextCall(String name, MethodVisitor mv, Parameter param, Class<?> targetType) {
+        EventContextKey<?> key = Sponge.getRegistry().getType(EventContextKey.class, this.anno.value()).get();
+
+        if(!key.getAllowedType().isAssignableFrom(targetType)) {
+            throw new IllegalArgumentException(String.format(
+                    "The parameter type doesn't match the context key type from the context value annotation. Expected: %s Found: %s",
+                    key.getAllowedType().getName(),
+                    targetType.getName()
+            ));
+        }
+
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitFieldInsn(GETFIELD, name, "contextKey", Type.getDescriptor(EventContextKey.class));
+
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(EventContext.class), "get",
                 Type.getMethodDescriptor(
                         Type.getType(Optional.class),

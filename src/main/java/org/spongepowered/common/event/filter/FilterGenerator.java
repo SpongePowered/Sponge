@@ -66,6 +66,7 @@ import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDele
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDelegate;
+import org.spongepowered.common.event.filter.delegate.ContextFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ContextValueFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
@@ -109,6 +110,8 @@ public class FilterGenerator {
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
 
         SubtypeFilterDelegate sfilter = null;
+        List<ContextFilterSourceDelegate> contextDelegates = Lists.newArrayList();
+
         List<FilterDelegate> additional = Lists.newArrayList();
         boolean cancellation = false;
         for (Annotation anno : method.getAnnotations()) {
@@ -127,6 +130,12 @@ public class FilterGenerator {
                 if (etf == EventTypeFilter.CANCELLATION) {
                     cancellation = true;
                 }
+            } else if (obj instanceof ParameterSource) {
+                ParameterFilterSourceDelegate delegate = ((ParameterSource) obj).getDelegate(anno);
+
+                if(delegate instanceof ContextFilterSourceDelegate) {
+                    contextDelegates.add((ContextFilterSourceDelegate) delegate);
+                }
             }
         }
         if (!cancellation && Cancellable.class.isAssignableFrom(method.getParameterTypes()[0])) {
@@ -136,14 +145,25 @@ public class FilterGenerator {
         if (sfilter != null) {
             sfilter.createFields(cw);
         }
+
+        for(ContextFilterSourceDelegate delegate : contextDelegates) {
+            delegate.createFields(cw);
+        }
+
         {
             mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+
             if (sfilter != null) {
                 sfilter.writeCtor(name, cw, mv);
             }
+
+            for(ContextFilterSourceDelegate delegate : contextDelegates) {
+                delegate.writeCtor(name, cw, mv);
+            }
+
             mv.visitInsn(RETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();
@@ -188,7 +208,7 @@ public class FilterGenerator {
                     throw new IllegalStateException(
                             "Cannot have additional parameters filters without an array source (for " + param.getName() + ")");
                 }
-                Tuple<Integer, Integer> localState = source.write(cw, mv, method, param, local);
+                Tuple<Integer, Integer> localState = source.write(name, cw, mv, method, param, local);
                 local = localState.getFirst();
                 plocals[i - 1] = localState.getSecond();
 

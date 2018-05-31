@@ -33,5 +33,5 @@ import java.lang.reflect.Parameter;
 
 public interface ParameterFilterSourceDelegate {
 
-    Tuple<Integer, Integer> write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local);
+    Tuple<Integer, Integer> write(String name, ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local);
 }

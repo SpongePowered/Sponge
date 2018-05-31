@@ -40,8 +40,11 @@ import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
 public abstract class ContextFilterSourceDelegate implements ParameterFilterSourceDelegate {
 
+    public abstract void createFields(ClassWriter cw);
+    public abstract void writeCtor(String name, ClassWriter cw, MethodVisitor mv);
+
     @Override
-    public Tuple<Integer, Integer> write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
+    public Tuple<Integer, Integer> write(String name, ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
         // Get the context
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "getContext",
@@ -49,7 +52,7 @@ public abstract class ContextFilterSourceDelegate implements ParameterFilterSour
 
         Class<?> targetType = param.getType();
 
-        insertContextCall(mv, param, targetType);
+        insertContextCall(name, mv, param, targetType);
         int paramLocal = local++;
         mv.visitVarInsn(ASTORE, paramLocal);
 
@@ -58,7 +61,7 @@ public abstract class ContextFilterSourceDelegate implements ParameterFilterSour
         return new Tuple<>(local, paramLocal);
     }
 
-    protected abstract void insertContextCall(MethodVisitor mv, Parameter param, Class<?> targetType);
+    protected abstract void insertContextCall(String name, MethodVisitor mv, Parameter param, Class<?> targetType);
 
     protected abstract void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local);
 }
