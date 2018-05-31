@@ -53,6 +53,7 @@ public class SpongeDamageableData extends AbstractData<DamageableData, Immutable
         super(DamageableData.class);
         this.lastAttacker = lastAttacker;
         this.lastDamage = lastDamage;
+        this.registerGettersAndSetters();
     }
 
     public SpongeDamageableData(@Nullable Living lastAttacker, @Nullable Double lastDamage) {
