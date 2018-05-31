@@ -61,6 +61,7 @@ import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.BookViewDataBuilder;
 import org.spongepowered.api.text.serializer.TextConfigSerializer;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -186,6 +187,8 @@ public class DataRegistrar {
         dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
 
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
+
+        dataManager.registerBuilder(Color.class, new Color.Builder());
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());

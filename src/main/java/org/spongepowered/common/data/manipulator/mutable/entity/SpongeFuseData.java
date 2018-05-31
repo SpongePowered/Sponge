@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFuseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FuseData;
@@ -77,6 +78,13 @@ public class SpongeFuseData extends AbstractData<FuseData, ImmutableFuseData> im
     @Override
     public ImmutableFuseData asImmutable() {
         return new ImmutableSpongeFuseData(this.fuseDuration, this.ticksRemaining);
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+                .set(Keys.FUSE_DURATION, this.fuseDuration)
+                .set(Keys.TICKS_REMAINING, this.ticksRemaining);
     }
 
 }

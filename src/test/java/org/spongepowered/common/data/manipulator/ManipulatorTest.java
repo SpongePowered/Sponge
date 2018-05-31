@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -145,7 +146,7 @@ public class ManipulatorTest {
                 + "key/values as the ImmutableDataManipulator and vice versa.\n"
                 + "The mutable manipulator in question: " + this.dataName +"\n"
                 + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
-                mutableKeys.equals(immutableKeys), is(true));
+                immutableKeys, equalTo(mutableKeys));
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
                                                     + "If the manipulator needs to be parametarized, please understand that there needs to "
@@ -196,8 +197,8 @@ public class ManipulatorTest {
                 try {
                      optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
                 } catch (Exception e) {
-                    printExceptionBuildingData(container);
-                    return;
+                    printExceptionBuildingData(container, e);
+                    throw e;
                 }
                 if (!optional.isPresent()) {
                     printEmptyBuild(container);
@@ -236,8 +237,9 @@ public class ManipulatorTest {
         printRemaining(container, printer);
     }
 
-    private void printExceptionBuildingData(DataContainer container) {
+    private void printExceptionBuildingData(DataContainer container, Exception exception) {
         final PrettyPrinter printer = new PrettyPrinter(60).centre().add("Could not build data!").hr()
+            .add(exception)
             .add("Something something data....")
             .add()
             .add("Here's the provided container:");
