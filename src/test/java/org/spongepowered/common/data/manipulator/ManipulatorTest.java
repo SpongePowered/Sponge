@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -145,7 +146,7 @@ public class ManipulatorTest {
                 + "key/values as the ImmutableDataManipulator and vice versa.\n"
                 + "The mutable manipulator in question: " + this.dataName +"\n"
                 + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
-                mutableKeys.equals(immutableKeys), is(true));
+                immutableKeys, equalTo(mutableKeys));
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
                                                     + "If the manipulator needs to be parametarized, please understand that there needs to "
