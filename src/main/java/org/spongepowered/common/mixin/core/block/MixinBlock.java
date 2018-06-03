@@ -177,12 +177,22 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public String getId() {
-        return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+        return this.getNameFromRegistry();
     }
 
     @Override
     public String getName() {
-        return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+        return this.getNameFromRegistry();
+    }
+
+    private String getNameFromRegistry() {
+        // This should always succeed when things are working properly,
+        // so we just catch the exception instead of doing a null check.
+        try {
+            return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+        } catch (NullPointerException e) {
+            throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
+        }
     }
 
     @Override
