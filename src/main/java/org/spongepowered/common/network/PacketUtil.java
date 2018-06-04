@@ -251,11 +251,7 @@ public class PacketUtil {
                 final RayTraceResult result = SpongeImplHooks.rayTraceEyes(playerMP, SpongeImplHooks.getBlockReachDistance(playerMP));
 
                 final boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), result ==
-                                                                                                                                          null ? null
-                                                                                                                                               : VecHelper
-                                                                                                                                              .toVector3d(
-                                                                                                                                                  result.hitVec),
-                    BlockSnapshot.NONE).isCancelled();
+                        null ? null : VecHelper.toVector3d(result.hitVec), BlockSnapshot.NONE).isCancelled();
 
                 SpongeImpl.postEvent(
                     SpongeCommonEventFactory.createInteractBlockEventSecondary(playerMP, heldItem, result == null ? null : VecHelper.toVector3d(result
@@ -268,29 +264,10 @@ public class PacketUtil {
                     return true;
                 }
             } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
-                CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
+                // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
+                // Only track the timestamps to support our block animation events
                 lastTryBlockPacketTimeStamp = System.currentTimeMillis();
                 SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-                Vector3d interactionPoint = VecHelper.toVector3d(packet.getPos());
-                final RayTraceResult result = SpongeImplHooks.rayTraceEyes(playerMP, SpongeImplHooks.getBlockReachDistance(playerMP));
-                BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
-                final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
-                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-                boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, heldItem, packet.getHand(), result ==
-                                                                                                                                    null ? null
-                                                                                                                                         : VecHelper
-                                                                                                                                        .toVector3d(
-                                                                                                                                            result.hitVec),
-                    blockSnapshot).isCancelled();
-                lastTryBlockPacketItemResult = isCancelled;
-                if (isCancelled) {
-                    // update client
-                    BlockPos pos = packet.getPos();
-                    playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos));
-                    playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos.offset(packet.getDirection())));
-                    playerMP.sendAllContents(playerMP.openContainer, playerMP.openContainer.getInventory()); // See above
-                    return true;
-                }
             }
 
             return false;

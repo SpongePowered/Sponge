@@ -65,6 +65,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 @Mixin(value = PlayerInteractionManager.class)
@@ -112,11 +113,15 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
         final ItemStack oldStack = stack.copy();
-
+        final Vector3d hitVec = new Vector3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
+        Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(oldStack));
+        final boolean interactItemCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(player, oldStack, hand, hitVec, currentSnapshot).isCancelled();
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, oldStack,
-                new Vector3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ),
-                currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+                hitVec, currentSnapshot, DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        if (interactItemCancelled) {
+            event.setUseItemResult(Tristate.FALSE);
+        }
         SpongeImpl.postEvent(event);
         if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
@@ -206,10 +211,13 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // }
         // } // Sponge - Remove unecessary else bracket
         // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
-        final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
-        if (this.isCreative()) {
-            stack.setItemDamage(oldStack.getItemDamage());
-            stack.setCount(oldStack.getCount());
+        EnumActionResult result = EnumActionResult.PASS;
+        if (event.getUseItemResult() != Tristate.FALSE) {
+            result = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ);
+            if (this.isCreative()) {
+                stack.setItemDamage(oldStack.getItemDamage());
+                stack.setCount(oldStack.getCount());
+            }
         }
 
         if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
