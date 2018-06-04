@@ -121,6 +121,7 @@ import org.spongepowered.common.data.util.LegacyCustomDataClassContentUpdater;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -202,6 +203,7 @@ public class DataRegistrar {
         dataManager.registerContentUpdater(ImmutablePotionEffectData.class, potionUpdater);
         dataManager.registerContentUpdater(SpongePotionEffectData.class, potionUpdater);
         dataManager.registerContentUpdater(ImmutableSpongePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ItemStackSnapshot.class, new ItemStackSnapshotDuplicateManipulatorUpdater());
 
         // Content Updaters for Custom Data
         dataManager.registerContentUpdater(DataManipulator.class, new LegacyCustomDataClassContentUpdater());
