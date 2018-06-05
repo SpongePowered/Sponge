@@ -65,9 +65,7 @@ import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -88,6 +86,7 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.Inventory2DLensImpl;
@@ -101,11 +100,9 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.Con
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -293,9 +290,11 @@ public final class ContainerUtil {
         try {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
                 additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+            } else if (crafting.base != null && crafting.grid != null) {
+                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             }
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl for " + container.getClass().getName(), e);
+            SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
         }
 
         // Lens containing/delegating to other lenses
@@ -326,8 +325,8 @@ public final class ContainerUtil {
             Slot slot = slotList.get(0);
             adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
                     itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
-            crafting.out = index;
             if (slot instanceof SlotCrafting) {
+                crafting.out = index;
                 if (crafting.base == null) {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
