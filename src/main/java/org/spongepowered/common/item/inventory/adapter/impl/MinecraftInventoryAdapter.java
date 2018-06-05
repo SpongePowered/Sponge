@@ -205,6 +205,7 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
         return Query.compile(this, new SlotLensQueryOperation(ImmutableSet.of(inventory))).execute();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     default Inventory union(Inventory inventory) {
         CompoundLens.Builder lensBuilder = CompoundLens.builder().add(getRootLens());
@@ -220,6 +221,7 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
         return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     default boolean containsInventory(Inventory inventory) {
         Inventory result = Query.compile(this, new LensQueryOperation(((InventoryAdapter) inventory).getRootLens())).execute();

@@ -233,7 +233,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean canEquip(EquipmentType type, ItemStack equipment) {
+    public boolean canEquip(EquipmentType type, @Nullable ItemStack equipment) {
         return getForInventory(p -> p.canEquip(type, equipment), u -> true); // TODO Inventory API
     }
 
@@ -243,7 +243,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean equip(EquipmentType type, ItemStack equipment) {
+    public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.setForInventory(p -> p.equip(type, equipment), u -> u.setEquippedItem(type, equipment));
             return true;
@@ -251,6 +251,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return false;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public CarriedInventory<?> getInventory() {
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
@@ -371,7 +372,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return Optional.empty();
     }
 
-    private void setEquippedItem(EquipmentType type, ItemStack item) {
+    private void setEquippedItem(EquipmentType type, @Nullable ItemStack item) {
         if (type instanceof SpongeEquipmentType) {
             EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
             for (EntityEquipmentSlot slot : slots) {

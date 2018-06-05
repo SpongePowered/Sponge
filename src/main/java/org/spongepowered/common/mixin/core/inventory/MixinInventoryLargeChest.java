@@ -58,9 +58,10 @@ import java.util.Optional;
 public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdapter<IInventory>, CarriedInventory<MultiBlockCarrier>, ReusableLensProvider<IInventory, ItemStack>,
         IMixinMultiBlockCarrier {
 
-    @Shadow @Final private ILockableContainer upperChest;
-    @Shadow @Final private ILockableContainer lowerChest;
+    @Shadow @Final public ILockableContainer upperChest;
+    @Shadow @Final public ILockableContainer lowerChest;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         return ReusableLens.getLens(LargeChestInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);

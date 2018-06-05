@@ -150,7 +150,7 @@ public final class ContainerUtil {
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState currentState = currentPhase.state;
+        final IPhaseState<?> currentState = currentPhase.state;
         if (currentState.tracksBlockSpecificDrops()) {
             final PhaseContext<?> context = currentPhase.context;
             // this is where we could perform item stack pre-merging.
@@ -301,6 +301,7 @@ public final class ContainerUtil {
         return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses, additional);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static @Nullable Lens<IInventory, ItemStack> generateAdapterLens(SlotProvider<IInventory, ItemStack> slots, int index,
             CraftingInventoryData crafting, List<Slot> slotList, @Nullable IInventory subInventory) {
         if (!(subInventory instanceof InventoryAdapter)) {
@@ -342,6 +343,7 @@ public final class ContainerUtil {
         return new DelegatingLens(index, adapterLens, slots);
     }
 
+    @SuppressWarnings("rawtypes")
     private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens,
             SlotCollection slots) {
         if (lens instanceof LargeChestInventoryLens) {
@@ -380,6 +382,7 @@ public final class ContainerUtil {
      *
      * @return The {@link SlotCollection} with the amount of slots for this container.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static SlotProvider<IInventory, ItemStack> countSlots(net.minecraft.inventory.Container container, Fabric fabric) {
         if (container instanceof LensProvider) {
             return ((LensProvider) container).slotProvider(fabric, ((InventoryAdapter) container));
@@ -491,6 +494,7 @@ public final class ContainerUtil {
                             return new Location<>(((org.spongepowered.api.world.World) ((TileEntity) slot.inventory).getWorld()), pos.getX(), pos.getY(), pos.getZ());
                         }
 
+                        @SuppressWarnings("rawtypes")
                         @Override
                         public CarriedInventory<?> getInventory() {
                             return ((CarriedInventory) container);
@@ -507,6 +511,7 @@ public final class ContainerUtil {
                     return loc;
                 }
 
+                @SuppressWarnings("rawtypes")
                 @Override
                 public CarriedInventory<?> getInventory() {
                     return ((CarriedInventory) container);
@@ -516,6 +521,7 @@ public final class ContainerUtil {
         return null;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Carrier carrierOrNull(IInventory inventory) {
         if (inventory instanceof Carrier) {
             return (Carrier) inventory;

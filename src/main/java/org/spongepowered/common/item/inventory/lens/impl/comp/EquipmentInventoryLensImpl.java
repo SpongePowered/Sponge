@@ -84,6 +84,7 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
         this.cache();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         ArmorEquipable carrier = null;

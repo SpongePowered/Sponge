@@ -64,7 +64,7 @@ public class ConnectedSouthValueProcessor extends
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer container) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

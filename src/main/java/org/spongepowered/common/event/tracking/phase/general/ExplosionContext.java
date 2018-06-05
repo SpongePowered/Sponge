@@ -42,7 +42,7 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         super(GeneralPhase.State.EXPLOSION);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public ExplosionContext populateFromCurrentState() {
         final PhaseData currentPhaseData = PhaseTracker.getInstance().getCurrentPhaseData();
         ((IPhaseState) currentPhaseData.state).appendContextPreExplosion(this, currentPhaseData.context);

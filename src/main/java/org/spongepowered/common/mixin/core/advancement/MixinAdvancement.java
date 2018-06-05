@@ -195,7 +195,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         this.tree = tree;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<org.spongepowered.api.advancement.Advancement> getChildren() {
         return ImmutableList.copyOf((Collection) this.children);

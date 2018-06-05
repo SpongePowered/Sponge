@@ -208,7 +208,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState currentState = phaseTracker.getCurrentState();
+        final IPhaseState<?> currentState = phaseTracker.getCurrentState();
         // TODO - write a tristate for whether the state can deny chunks
         // States that cannot deny chunks
         if (currentState == TickPhase.Tick.PLAYER

@@ -272,10 +272,11 @@ public abstract class AdapterLogic{
         return Streams.stream(findRootProperty(adapter, property)).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     static <TInventory, T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, Class<T> property, Object key) {
         adapter = inventoryRoot(adapter);
         if (adapter instanceof CustomInventory) {
-            InventoryProperty forKey = ((CustomInventory) adapter).getProperties().get(key);
+            InventoryProperty<?, ?> forKey = ((CustomInventory) adapter).getProperties().get(key);
             if (forKey != null && property.equals(forKey.getClass())) {
                 return Optional.of((T) forKey);
             }
@@ -283,6 +284,7 @@ public abstract class AdapterLogic{
         return findRootProperty(adapter, property);
     }
 
+    @SuppressWarnings("unchecked")
     private static <TInventory, T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter, Class<T> property) {
         if (property == InventoryTitle.class) {
             Text text = Text.of(adapter.getFabric().getDisplayName());
@@ -292,6 +294,7 @@ public abstract class AdapterLogic{
         return Optional.empty();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static <TInventory> InventoryAdapter<TInventory, net.minecraft.item.ItemStack> inventoryRoot(InventoryAdapter<TInventory, net.minecraft.item.ItemStack> adapter) {
         // Get Root Inventory
         adapter = ((InventoryAdapter) adapter.root());

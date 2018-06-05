@@ -181,7 +181,7 @@ public final class GeneralPhase extends TrackingPhase {
         performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static void performPostBlockAdditions(PhaseContext<?> postContext, List<Transaction<BlockSnapshot>> transactions,
                                                   IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block

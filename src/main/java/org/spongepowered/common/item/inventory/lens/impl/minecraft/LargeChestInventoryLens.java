@@ -67,12 +67,13 @@ public class LargeChestInventoryLens extends RealLens {
         // we add the indexed slots ourselves
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void initLargeChest(SlotProvider<IInventory, ItemStack> slots) {
         // add grids
         int base = 0;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class)TileEntityChest.class, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class) TileEntityChest.class, slots));
         base += this.upperChest;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class)TileEntityChest.class, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class) TileEntityChest.class, slots));
         base += this.lowerChest;
 
         this.addChild(new GridInventoryLensImpl(0, 9, (this.upperChest + this.lowerChest) / 9, 9, slots));

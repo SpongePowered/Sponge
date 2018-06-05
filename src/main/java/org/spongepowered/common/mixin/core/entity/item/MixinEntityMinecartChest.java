@@ -39,7 +39,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 public abstract class MixinEntityMinecartChest extends MixinEntityMinecartContainer {
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onMinecartChestConstructed(CallbackInfo ci) {
         // Override default Lens with GridLens
         this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
     }

@@ -63,6 +63,7 @@ public abstract class MinecraftFabric implements Fabric<IInventory> {
         throw new UnsupportedFabricException("Container of type %s could not be used as an inventory fabric", target.getClass());
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent, int base, Class<? extends Inventory> adapterType) {
         IInventory inventory = fabric.get(base);
         if (inventory.getClass() == adapterType) {

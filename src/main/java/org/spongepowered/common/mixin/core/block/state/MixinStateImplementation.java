@@ -135,6 +135,14 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         return lazyLoadManipulatorsAndKeys();
     }
 
+    @Nullable
+    private ImmutableMap<Key<?>, Object> getKeyMap() {
+        if (this.keyMap == null) {
+            lazyLoadManipulatorsAndKeys();
+        }
+        return this.keyMap;
+    }
+
     private ImmutableList<ImmutableDataManipulator<?, ?>> lazyLoadManipulatorsAndKeys() {
         if (this.manipulators == null) {
             this.manipulators = ImmutableList.copyOf(((IMixinBlock) this.block).getManipulators(this));
@@ -294,13 +302,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        if(this.keyMap == null) {
-            lazyLoadManipulatorsAndKeys();
-        }
-        if (this.keyMap.containsKey(checkNotNull(key))) {
-            return Optional.of((E) this.keyMap.get(key));
-        }
-        return Optional.empty();
+        return Optional.ofNullable((E) this.getKeyMap().get(key));
     }
 
     @SuppressWarnings("unchecked")

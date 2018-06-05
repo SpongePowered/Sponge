@@ -321,7 +321,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final boolean tracksEntityDeaths;
         if (isMainThread && !this.world.isRemote) {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState state = peek.state;
+            final IPhaseState<?> state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
         } else {
             tracksEntityDeaths = false;
@@ -674,6 +674,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.openInventory(inventory, null);
     }
 
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
     public Optional<Container> openInventory(Inventory inventory, Text displayName) {
         if (((IMixinContainer) this.openContainer).isInUse()) {
@@ -692,6 +693,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory, displayName));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
         if (((IMixinContainer) this.openContainer).isInUse()) {

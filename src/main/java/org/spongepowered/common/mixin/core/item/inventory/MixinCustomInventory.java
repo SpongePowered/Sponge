@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+@SuppressWarnings("rawtypes")
 @Mixin(CustomInventory.class)
 public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<IInventory>, Inventory, CarriedInventory<Carrier> {
 
