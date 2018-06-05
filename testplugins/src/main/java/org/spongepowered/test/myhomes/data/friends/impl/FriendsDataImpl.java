@@ -90,10 +90,4 @@ public class FriendsDataImpl extends AbstractListData<UUID, FriendsData, Immutab
     public int getContentVersion() {
         return FriendsDataBuilder.CONTENT_VERSION;
     }
-
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-                .set(MyHomes.FRIENDS, this.friends().get());
-    }
 }
