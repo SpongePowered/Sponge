@@ -57,7 +57,7 @@ public class MixinICriterionTriggerListener implements IMixinICriterionTriggerLi
     @Shadow @Final private Advancement advancement;
     @Shadow @Final private String criterionName;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "grantCriterion", at = @At("HEAD"), cancellable = true)
     private void onGrantCriterion(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
         final org.spongepowered.api.advancement.Advancement advancement =

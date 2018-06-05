@@ -79,6 +79,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @Mixin(EntityVillager.class)
 @Implements({@Interface(iface = Villager.class, prefix = "villager$"), @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager, CarriedInventory<Villager> {
@@ -102,12 +103,12 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     private Profession profession;
 
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
-    public void onSetProfession(int professionId, CallbackInfo ci) {
+    private void onSetProfession(int professionId, CallbackInfo ci) {
         this.profession = EntityUtil.validateProfession(professionId);
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onSpongeConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this.villagerInventory);
         this.slots = new SlotCollection.Builder().add(8).build();
         this.lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);

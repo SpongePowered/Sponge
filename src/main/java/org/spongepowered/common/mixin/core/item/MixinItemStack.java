@@ -149,14 +149,14 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
     private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
         if (!worldIn.isRemote) {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            state.capturePlayerUsingStackToBreakBlock((ItemStack)this, (EntityPlayerMP) playerIn, peek.context);
+            state.capturePlayerUsingStackToBreakBlock((ItemStack) this, (EntityPlayerMP) playerIn, peek.context);
         }
     }
 

@@ -56,7 +56,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
             .addEntityDropCaptures();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void unwind(BasicEntityContext context) {
         final Entity dyingEntity = context.getSource(Entity.class)

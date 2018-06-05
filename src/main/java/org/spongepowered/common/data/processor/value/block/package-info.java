@@ -22,37 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement;
-
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-
-@SuppressWarnings("rawtypes")
-public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
-
-    private final SpongeTrigger triggerType;
-    private final FilteredTriggerConfiguration configuration;
-
-    SpongeFilteredTrigger(SpongeTrigger triggerType, FilteredTriggerConfiguration configuration) {
-        this.triggerType = triggerType;
-        this.configuration = configuration;
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return this.triggerType.getId();
-    }
-
-    @Override
-    public Trigger getType() {
-        return (Trigger) this.triggerType;
-    }
-
-    @Override
-    public FilteredTriggerConfiguration getConfiguration() {
-        return this.configuration;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.processor.value.block;

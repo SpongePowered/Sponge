@@ -622,6 +622,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot this.register new Keys after Data Registration has completed!");
@@ -648,6 +649,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     private KeyRegistryModule() {
     }
 
+    @SuppressWarnings("rawtypes")
     public void registerKeyListeners() {
         for (Key<?> key : this.keyMap.values()) {
             ((SpongeKey) key).registerListeners();

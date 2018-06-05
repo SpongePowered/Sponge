@@ -137,7 +137,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
                 frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             try {
-                this.associateAdditionalCauses(this, context);
+                this.associateAdditionalCauses(this, context, frame);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.

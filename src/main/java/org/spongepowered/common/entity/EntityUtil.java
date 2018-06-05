@@ -1011,7 +1011,7 @@ public final class EntityUtil {
      * @param offsetY The offset y coordinate
      * @return The item entity
      */
-    @SuppressWarnings({"unchecked", "rawType"})
+    @SuppressWarnings({"unchecked", "rawType", "rawtypes"})
     @Nullable
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY, double xPos, double zPos) {
         if (itemStack.isEmpty()) {
@@ -1032,7 +1032,7 @@ public final class EntityUtil {
 
         // Gather phase states to determine whether we're merging or capturing later
         final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState currentState = peek.state;
+        final IPhaseState<?> currentState = peek.state;
         final PhaseContext<?> phaseContext = peek.context;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
@@ -1052,16 +1052,16 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (currentState.performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
+            if (((IPhaseState) currentState).performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            EntityUtil.processEntitySpawn(fromNative(entityitem), () -> Optional.empty());
+            EntityUtil.processEntitySpawn(fromNative(entityitem), Optional::empty);
             return entityitem;
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static EntityItem playerDropItem(IMixinEntityPlayer mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         mixinPlayer.shouldRestoreInventory(false);
@@ -1209,6 +1209,17 @@ public final class EntityUtil {
         }
     }
 
+    /**
+     * This is used to create the "dropping" motion for items caused by players. This
+     * specifically was being used (and should be the correct math) to drop from the
+     * player, when we do item stack captures preventing entity items being created.
+     *
+     * @param dropAround True if it's being "dropped around the player like dying"
+     * @param player The player to drop around from
+     * @param random The random instance
+     * @return The motion vector
+     */
+    @SuppressWarnings("unused")
     private static Vector3d createDropMotion(boolean dropAround, EntityPlayer player, Random random) {
         double x;
         double y;

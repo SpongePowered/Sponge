@@ -47,6 +47,7 @@ public class MixinCarrierContainerEnchantment implements IMixinSingleBlockCarrie
         return new Location<>(((World) this.worldPointer), new Vector3d(this.position.getX(), this.position.getY(), this.position.getZ()));
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this);

@@ -36,6 +36,7 @@ import org.spongepowered.common.registry.type.advancement.TriggerTypeRegistryMod
 @Mixin(CriteriaTriggers.class)
 public class MixinCriteriaTriggers {
 
+    @SuppressWarnings("rawtypes")
     @Inject(method = "register", at = @At("RETURN"))
     private static void onRegister(ICriterionTrigger criterion, CallbackInfoReturnable<ICriterionTrigger> ci) {
         TriggerTypeRegistryModule.getInstance().register((Trigger) criterion);

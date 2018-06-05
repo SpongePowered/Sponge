@@ -73,7 +73,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Subject> getLoadedSubjects() {
         return (Collection) this.subjects.values();
     }

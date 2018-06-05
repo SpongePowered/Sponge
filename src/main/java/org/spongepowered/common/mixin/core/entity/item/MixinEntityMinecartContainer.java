@@ -45,6 +45,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
+@SuppressWarnings("rawtypes")
 @Mixin(EntityMinecartContainer.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
              @Interface(iface = ContainerMinecart.class, prefix = "container$")})
@@ -54,8 +55,9 @@ public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart i
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onBaseMinecartContainerConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
         this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);

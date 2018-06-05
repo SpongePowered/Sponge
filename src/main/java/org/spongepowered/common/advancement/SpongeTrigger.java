@@ -51,6 +51,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, ITrigger {
 
     private final Class<FilteredTriggerConfiguration> triggerConfigurationClass;

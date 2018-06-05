@@ -46,6 +46,7 @@ import java.util.Set;
 /**
  * A generalized
  */
+@SuppressWarnings("rawtypes")
 abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
 
     private Set<IPhaseState<?>> compatibleStates = new HashSet<>();

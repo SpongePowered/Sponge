@@ -95,6 +95,7 @@ public class AdvancementTest {
         private float chance;
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegister(GameRegistryEvent.Register event) {
         this.logger.info("onRegister: " + event.getCatalogType().getName());
@@ -105,11 +106,13 @@ public class AdvancementTest {
         this.logger.info("onRegister<?>: " + event.getCatalogType().getName());
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegister3(GameRegistryEvent.Register<? extends Trigger> event) {
         this.logger.info("onRegister<? extends Trigger>: " + event.getCatalogType().getName());
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegisterKeys1(GameRegistryEvent.Register<Key> event) {
         this.logger.info("onRegister<Key>: " + event.getCatalogType().getName());
@@ -120,6 +123,7 @@ public class AdvancementTest {
         this.logger.info("onRegister<Key<?>>: " + event.getCatalogType().getName());
     }
 
+    @SuppressWarnings("rawtypes")
     @Listener
     public void onRegisterTriggers(GameRegistryEvent.Register<Trigger> event) {
         this.logger.info("Advancements test source: " + this.pluginContainer.getSource().orElse(null));
