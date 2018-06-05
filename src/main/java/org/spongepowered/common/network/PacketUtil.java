@@ -78,7 +78,6 @@ public class PacketUtil {
 
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
-    private static boolean lastTryBlockPacketItemResult = true;
 
     @SuppressWarnings({"rawtypes", "unchecked", "unused"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
@@ -242,7 +241,7 @@ public class PacketUtil {
                 // If the time between packets is small enough, use the last result.
                 if (packetDiff < 100) {
                     // Use previous result and avoid firing a second event
-                    return lastTryBlockPacketItemResult;
+                    return SpongeCommonEventFactory.lastItemOnBlockResult;
                 }
 
                 final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
