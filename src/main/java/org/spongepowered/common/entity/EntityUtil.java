@@ -410,7 +410,17 @@ public final class EntityUtil {
                 // 2. The last known portal vec is known. (Usually set after block collision)
                 // Note: We must always use placeInPortal to support mods.
                 if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null) {
+                    // In Forge, the entity dimension is already set by this point.
+                    // To maintain compatibility with Forge mods, we temporarily
+                    // set the entity's dimension to the current target dimension
+                    // when calling Teleporter#placeEntity.
+
+                    // When MoveEntityEvent.Teleport.Portal is fully implemented,
+                    // this logic should be reworked.
+                    int oldDimension = entityIn.dimension;
+                    entityIn.dimension = targetDimensionId;
                     teleporter.placeEntity(toWorld, entityIn, entityIn.rotationYaw);
+                    entityIn.dimension = oldDimension;
                 }
                 fromWorld.profiler.endSection();
             }
