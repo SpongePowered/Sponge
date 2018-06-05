@@ -69,7 +69,7 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
         if (((IMixinWorldServer) this.world).getChunkGCTickInterval() <= 0
                 || ((IMixinWorldServer) this.world).getChunkUnloadDelay() <= 0) {
             chunkProvider.queueUnload(chunk);
-        } else {
+        } else if (!((IMixinChunk) chunk).isPersistedChunk() && this.world.provider.canDropChunk(chunk.x, chunk.z)) {
             ((IMixinChunk) chunk).setScheduledForUnload(System.currentTimeMillis());
         }
     }
