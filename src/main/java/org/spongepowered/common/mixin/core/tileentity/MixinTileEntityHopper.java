@@ -69,6 +69,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
 public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinInventory {

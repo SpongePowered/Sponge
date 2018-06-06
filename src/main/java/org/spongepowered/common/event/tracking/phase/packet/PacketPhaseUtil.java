@@ -45,6 +45,7 @@ import javax.annotation.Nullable;
 
 public final class PacketPhaseUtil {
 
+    @SuppressWarnings("rawtypes")
     public static void handleSlotRestore(EntityPlayer player, @Nullable Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 

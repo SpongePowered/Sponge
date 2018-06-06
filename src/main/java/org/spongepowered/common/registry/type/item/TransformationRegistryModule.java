@@ -57,6 +57,7 @@ public class TransformationRegistryModule implements RegistryModule {
         this.register("EMPTY", EmptyInventoryImpl::new);
     }
 
+    @SuppressWarnings("rawtypes")
     private void register(String field, List<QueryOperation> operations) {
         SpongeQueryTransformation transformation = new SpongeQueryTransformation(operations);
         register(field, transformation);

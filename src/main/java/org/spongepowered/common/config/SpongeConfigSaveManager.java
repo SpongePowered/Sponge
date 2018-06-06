@@ -85,7 +85,7 @@ public class SpongeConfigSaveManager {
     public void flush() {
         if (!this.stagedConfigs.isEmpty()) {
             synchronized (this) {
-                for (SpongeConfig spongeConfig : this.stagedConfigs) {
+                for (SpongeConfig<?> spongeConfig : this.stagedConfigs) {
                     spongeConfig.saveNow();
                 }
 

@@ -77,6 +77,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.generation.PopulatorPhaseContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
@@ -399,7 +400,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
                     try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                         GenerationContext context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                         GenerationContext<PopulatorPhaseContext> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
                              .world(this.world)
                              .populator(populator.getType())
                             .buildAndSwitch()) {

@@ -22,39 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.item.inventory.query;
-
-import org.spongepowered.api.item.inventory.InventoryTransformation;
-import org.spongepowered.api.item.inventory.query.QueryOperation;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@SuppressWarnings("rawtypes")
-public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
-
-    private List<QueryOperation> operationList = new ArrayList<>();
-
-    @Override
-    public InventoryTransformation.Builder append(QueryOperation... operations) {
-        this.operationList.addAll(Arrays.asList(operations));
-        return this;
-    }
-
-    @Override
-    public InventoryTransformation build() {
-        return new SpongeQueryTransformation(this.operationList);
-    }
-
-    @Override
-    public InventoryTransformation.Builder from(InventoryTransformation value) {
-        return this;
-    }
-
-    @Override
-    public InventoryTransformation.Builder reset() {
-        this.operationList.clear();
-        return this;
-    }
-}

@@ -575,7 +575,7 @@ public class SpongeGameRegistry implements GameRegistry {
         registerAdditionalPhase();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void throwRegistryEvent(RegistryModule module) {
         if (this.phase == RegistrationPhase.INIT
             && module instanceof AdditionalCatalogRegistryModule

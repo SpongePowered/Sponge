@@ -248,6 +248,7 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public static void updateTickBlock(IMixinWorldServer mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
@@ -289,6 +290,7 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public static void randomTickBlock(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Block block,
                                        BlockPos pos, IBlockState state, Random random) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);

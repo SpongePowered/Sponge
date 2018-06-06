@@ -502,6 +502,7 @@ public final class PhaseTracker {
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
      */
+    @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final BlockPos notifyPos,
         final Block sourceBlock, @Nullable final BlockPos sourcePos) {
         final IBlockState iblockstate = ((WorldServer) mixinWorld).getBlockState(notifyPos);
@@ -626,6 +627,7 @@ public final class PhaseTracker {
      * @param entity The entity
      * @return True if the entity spawn was successful
      */
+    @SuppressWarnings("rawtypes")
     public boolean spawnEntity(World world, Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
 

@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
 public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, ILockableContainer {
@@ -91,7 +92,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
      * @reason Overwritten in case chests ever attempt to tick
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void onUpdate(CallbackInfo ci) {
+    private void onUpdate(CallbackInfo ci) {
         if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
@@ -99,7 +100,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     }
 
     @Inject(method = "openInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
-    public void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
+    private void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
@@ -129,7 +130,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     }
 
     @Inject(method = "closeInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
-    public void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
+    private void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
             ci.cancel();
