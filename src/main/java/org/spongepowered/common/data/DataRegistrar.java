@@ -671,6 +671,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
                 ImmutableSpongeMoistureData.class, new MoistureDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(WireAttachmentData.class, SpongeWireAttachmentData.class, ImmutableWireAttachmentData.class,
+                ImmutableSpongeWireAttachmentData.class, new WireAttachmentDataProcessor());
+
         // TileEntity Processors
 
         DataUtil.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,

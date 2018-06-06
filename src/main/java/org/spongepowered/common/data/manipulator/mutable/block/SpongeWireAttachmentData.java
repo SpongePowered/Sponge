@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.block;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -41,11 +42,18 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Map;
 
-public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, ImmutableWireAttachmentData> implements WireAttachmentData {
+public class SpongeWireAttachmentData extends AbstractData<WireAttachmentData, ImmutableWireAttachmentData> implements WireAttachmentData {
 
     private Map<Direction, WireAttachmentType> wireAttachmentMap;
 
-    public SpongeWireAttachementData(Map<Direction, WireAttachmentType> attachmentMap) {
+    public SpongeWireAttachmentData() {
+        this(ImmutableMap.of(Direction.NORTH, WireAttachmentTypes.NONE,
+                Direction.SOUTH, WireAttachmentTypes.NONE,
+                Direction.EAST, WireAttachmentTypes.NONE,
+                Direction.WEST, WireAttachmentTypes.NONE));
+    }
+
+    public SpongeWireAttachmentData(Map<Direction, WireAttachmentType> attachmentMap) {
         super(WireAttachmentData.class);
         this.wireAttachmentMap = Maps.newHashMap(attachmentMap);
         registerGettersAndSetters();
@@ -78,7 +86,7 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
 
     @Override
     public WireAttachmentData copy() {
-        return new SpongeWireAttachementData(this.wireAttachmentMap);
+        return new SpongeWireAttachmentData(this.wireAttachmentMap);
     }
 
     @Override
@@ -99,6 +107,33 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
     @Override
     protected void registerGettersAndSetters() {
         // north
-        // TODO register things
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_NORTH, () -> this.wireAttachmentMap.get(Direction.NORTH));
+        this.registerFieldSetter(Keys.WIRE_ATTACHMENT_NORTH, x -> this.wireAttachmentMap.put(Direction.NORTH, x));
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_NORTH, this::wireAttachmentNorth);
+
+        // south
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_SOUTH, () -> this.wireAttachmentMap.get(Direction.SOUTH));
+        this.registerFieldSetter(Keys.WIRE_ATTACHMENT_SOUTH, x -> this.wireAttachmentMap.put(Direction.SOUTH, x));
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_SOUTH, this::wireAttachmentSouth);
+
+        // east
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_EAST, () -> this.wireAttachmentMap.get(Direction.EAST));
+        this.registerFieldSetter(Keys.WIRE_ATTACHMENT_EAST, x -> this.wireAttachmentMap.put(Direction.EAST, x));
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_EAST, this::wireAttachmentEast);
+
+        // west
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENT_WEST, () -> this.wireAttachmentMap.get(Direction.WEST));
+        this.registerFieldSetter(Keys.WIRE_ATTACHMENT_WEST, x -> this.wireAttachmentMap.put(Direction.WEST, x));
+        this.registerKeyValue(Keys.WIRE_ATTACHMENT_WEST, this::wireAttachmentWest);
+
+        // all
+        this.registerFieldGetter(Keys.WIRE_ATTACHMENTS, () -> ImmutableMap.copyOf(this.wireAttachmentMap));
+        this.registerFieldSetter(Keys.WIRE_ATTACHMENTS, x -> {
+            this.wireAttachmentMap.put(Direction.NORTH, x.getOrDefault(Direction.NORTH, WireAttachmentTypes.NONE));
+            this.wireAttachmentMap.put(Direction.SOUTH, x.getOrDefault(Direction.SOUTH, WireAttachmentTypes.NONE));
+            this.wireAttachmentMap.put(Direction.EAST, x.getOrDefault(Direction.EAST, WireAttachmentTypes.NONE));
+            this.wireAttachmentMap.put(Direction.WEST, x.getOrDefault(Direction.WEST, WireAttachmentTypes.NONE));
+        });
+        this.registerKeyValue(Keys.WIRE_ATTACHMENTS, this::wireAttachments);
     }
 }
