@@ -42,6 +42,7 @@ import java.util.List;
  */
 public class ReverseTransformation implements InventoryTransformation {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Inventory transform(Inventory inventory) {
 

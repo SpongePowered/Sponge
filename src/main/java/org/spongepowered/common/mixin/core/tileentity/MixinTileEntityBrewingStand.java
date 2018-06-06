@@ -55,7 +55,7 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
 
     @Shadow private String customName;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         return ReusableLens.getLens(BrewingStandInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);

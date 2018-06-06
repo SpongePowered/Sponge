@@ -45,6 +45,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 
 import java.util.Optional;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityDispenser.class)
 public abstract class MixinTileEntityDispenser extends MixinTileEntityLockableLoot implements Dispenser {

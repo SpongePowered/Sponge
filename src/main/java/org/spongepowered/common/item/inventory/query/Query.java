@@ -117,6 +117,7 @@ public class Query<TInventory, TStack> {
         return matches;
     }
 
+    @SuppressWarnings("rawtypes")
     private boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
         for (QueryOperation<?> operation : this.queries) {
             if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {

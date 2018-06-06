@@ -28,6 +28,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,26 +47,28 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
+@SuppressWarnings("rawtypes")
 @Mixin(InventoryCrafting.class)
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
 public abstract class MixinInventoryCrafting implements IInventory, LensProvider<IInventory, ItemStack> {
 
-    @Shadow private NonNullList<ItemStack> stackList;
-
-    @Shadow private int inventoryWidth;
-    @Shadow private int inventoryHeight;
+    @Shadow @Final private NonNullList<ItemStack> stackList;
+    @Shadow @Final private int inventoryWidth;
+    @Shadow @Final private int inventoryHeight;
 
     protected Fabric<IInventory> fabric;
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(this.stackList.size()).build();
         this.lens = rootLens(fabric, ((InventoryAdapter) this));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         if (this.stackList.size() == 0) {
@@ -74,6 +77,7 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
         return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, this.slots);
     }
 
+    @SuppressWarnings("unchecked")
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }

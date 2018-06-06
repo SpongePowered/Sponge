@@ -55,7 +55,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
 
     @Shadow private String furnaceCustomName;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         return ReusableLens.getLens(FurnaceInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);

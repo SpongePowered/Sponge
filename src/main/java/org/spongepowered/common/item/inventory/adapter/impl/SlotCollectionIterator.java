@@ -53,6 +53,7 @@ public class SlotCollectionIterator<TInventory> implements Iterable<Slot> {
         this.slots = this.traverseSpanningTree(inv, lens, slots, ImmutableList.<Slot>builder()).build();
     }
     
+    @SuppressWarnings("rawtypes")
     private Builder<Slot> traverseSpanningTree(Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens, SlotProvider<IInventory, ItemStack> slots, Builder<Slot> list) {
         for (Lens<TInventory, ItemStack> child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {

@@ -62,13 +62,13 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     @Shadow private String customName;
     @Override @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         return ReusableLens.getLens(InputSlotLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
         InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
@@ -77,7 +77,7 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private InputSlotLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
         return ((InputSlotLens) slots.getSlot(0));
     }

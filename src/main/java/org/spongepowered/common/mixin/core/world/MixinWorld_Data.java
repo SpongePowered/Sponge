@@ -57,25 +57,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld_Data implements World {
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
         final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(new Location<>(this, x, y, z));
-        }
-        return Optional.empty();
+        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z)));
     }
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
         final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(new Location<>(this, x, y, z), direction);
-        }
-        return Optional.empty();
+        return optional.flatMap(tPropertyStore -> tPropertyStore.getFor(new Location<>(this, x, y, z), direction));
     }
 
     @Override
@@ -108,10 +103,7 @@ public abstract class MixinWorld_Data implements World {
             return optional;
         }
         final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
-        if (tileEntityOptional.isPresent()) {
-            return tileEntityOptional.get().get(key);
-        }
-        return Optional.empty();
+        return tileEntityOptional.flatMap(tileEntity -> tileEntity.get(key));
     }
 
     @SuppressWarnings("unchecked")
@@ -133,10 +125,7 @@ public abstract class MixinWorld_Data implements World {
             return optional;
         }
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
-        if (tileEntity.isPresent()) {
-            return tileEntity.get().getOrCreate(manipulatorClass);
-        }
-        return Optional.empty();
+        return tileEntity.flatMap(tileEntity1 -> tileEntity1.getOrCreate(manipulatorClass));
     }
 
     @Override
@@ -187,9 +176,7 @@ public abstract class MixinWorld_Data implements World {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         builder.addAll(blockState.getKeys());
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
-        if (tileEntity.isPresent()) {
-            builder.addAll(tileEntity.get().getKeys());
-        }
+        tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getKeys()));
         return builder.build();
     }
 
@@ -199,9 +186,7 @@ public abstract class MixinWorld_Data implements World {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         builder.addAll(blockState.getValues());
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
-        if (tileEntity.isPresent()) {
-            builder.addAll(tileEntity.get().getValues());
-        }
+        tileEntity.ifPresent(tileEntity1 -> builder.addAll(tileEntity1.getValues()));
         return builder.build();
     }
 
@@ -238,19 +223,17 @@ public abstract class MixinWorld_Data implements World {
     @Override
     public DataTransactionResult remove(int x, int y, int z, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
         final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
-        if (tileEntityOptional.isPresent()) {
-            return tileEntityOptional.get().remove(manipulatorClass);
-        }
-        return DataTransactionResult.failNoData();
+        return tileEntityOptional
+            .map(tileEntity -> tileEntity.remove(manipulatorClass))
+            .orElseGet(DataTransactionResult::failNoData);
     }
 
     @Override
     public DataTransactionResult remove(int x, int y, int z, Key<?> key) {
         final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
-        if (tileEntityOptional.isPresent()) {
-            return tileEntityOptional.get().remove(key);
-        }
-        return DataTransactionResult.failNoData();
+        return tileEntityOptional
+            .map(tileEntity -> tileEntity.remove(key))
+            .orElseGet(DataTransactionResult::failNoData);
     }
 
     @Override
@@ -281,15 +264,15 @@ public abstract class MixinWorld_Data implements World {
     @Override
     public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
         final List<DataManipulator<?, ?>> list = new ArrayList<>();
-        final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z).withExtendedProperties(
-                new Location<>(this, x, y, z)).getManipulators();
+        final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z)
+            .withExtendedProperties(new Location<>(this, x, y, z))
+            .getManipulators();
         for (ImmutableDataManipulator<?, ?> immutableDataManipulator : manipulators) {
             list.add(immutableDataManipulator.asMutable());
         }
         final Optional<TileEntity> optional = getTileEntity(x, y, z);
-        if (optional.isPresent()) {
-            list.addAll(optional.get().getContainers());
-        }
+        optional
+            .ifPresent(tileEntity -> list.addAll(tileEntity.getContainers()));
         return list;
     }
 

@@ -78,12 +78,12 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
         return false;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void registerDefaults() {
         final Class clazz = Teleporter.class;
-        this.portalAgentTypeMappings.put("minecraft:default", new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends
-        IMixinITeleporter>) clazz));
+        this.portalAgentTypeMappings.put("minecraft:default",
+            new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends IMixinITeleporter>) clazz));
     }
 
     @Override

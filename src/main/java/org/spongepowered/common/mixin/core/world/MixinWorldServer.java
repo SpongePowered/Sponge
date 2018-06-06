@@ -114,7 +114,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -188,18 +187,15 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.NonNullArrayList;
-import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -558,7 +554,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *
      * @reason Added chunk and block tick optimizations, timings, cause tracking, and pre-construction events.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Overwrite
     protected void updateBlocks() {
@@ -821,7 +817,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     private void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -849,6 +845,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
@@ -891,7 +888,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     private boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState phaseState = phaseTracker.getCurrentState();
+        final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
         if (phaseState.ignoresBlockEvent()) {
             return fireBlockEvent(event);
         }
@@ -1007,7 +1004,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState phaseState = phaseTracker.getCurrentState();
+        final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
 
         if (phaseState.ignoresScheduledUpdates()) {
             this.tmpScheduledObj = sbu;
@@ -1433,7 +1430,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
             entityIn.onUpdate();
             return;
@@ -1450,7 +1447,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     // separated from onUpdateEntities for TileEntityActivation mixin
     private void updateTileEntity(ITickable tile) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
 
         if (state.alreadyCapturingTileTicks()) {
             tile.update();
@@ -1463,7 +1460,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
             entity.onUpdate();
             return;
@@ -1476,7 +1473,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
             entity.updateRidden();
             return;
@@ -1621,7 +1618,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return true;
         }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (!state.alreadyCapturingEntitySpawns()) {
             try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
                 .addCaptures()
@@ -1781,7 +1778,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // TODO add TE config to disable/enable chunk loads
             final boolean forceChunkRequests = this.mixinChunkProviderServer.getForceChunkRequests();
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final IPhaseState currentState = phaseTracker.getCurrentState();
+            final IPhaseState<?> currentState = phaseTracker.getCurrentState();
             if (currentState == TickPhase.Tick.TILE_ENTITY) {
                 ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
             }
