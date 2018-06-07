@@ -427,7 +427,6 @@ public class SpongeEventManager implements EventManager {
                 printer.add("A listener threw an exception while being handled, this is usually not a sponge bug.");
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
-            Sponge.getCauseStackManager().popCause();
         }
         if (event instanceof AbstractEvent) {
             ((AbstractEvent) event).currentOrder = null;
