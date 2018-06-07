@@ -68,6 +68,7 @@ import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -117,6 +118,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -282,7 +284,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public void onDeath(DamageSource cause) {
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread).isCancelled()) {
+        Optional<DestructEntityEvent.Death>
+                event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
+        if (event.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
         super.onDeath(cause);
