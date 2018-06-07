@@ -609,8 +609,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
             if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
             {
-                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)
-                    .buildAndSwitch()) {
+                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)) {
+                    context.buildAndSwitch();
                     // Sponge end
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int l = this.updateLCG >> 2;
@@ -694,8 +694,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             {
                 // Sponge Start - Enter weather phase for snow and ice and flooding.
                 try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext()
-                        .source(this)
-                        .buildAndSwitch()) {
+                        .source(this)) {
+                    context.buildAndSwitch();
                     // Sponge End
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int j2 = this.updateLCG >> 2;
@@ -1076,8 +1076,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
                 ? null
-                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-                                           .buildAndSwitch()) {
+                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         }
     }
@@ -1187,11 +1189,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkNotNull(explosion, "explosion");
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
 
         try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-                .explosion(explosion)
-                .buildAndSwitch()) {
+                .explosion(explosion)) {
+            phaseContext.buildAndSwitch();
             final Explosion mcExplosion;
             try {
                 // Since we already have the API created implementation Explosion, let's use it.
@@ -1487,8 +1488,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
         try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
                 .source(player)
-                .addCaptures()
-                .buildAndSwitch()) {
+                .addCaptures()) {
+            basicEntityContext.buildAndSwitch();
             player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         }
     }
@@ -1621,8 +1622,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (!state.alreadyCapturingEntitySpawns()) {
             try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
-                .addCaptures()
-                .buildAndSwitch()) {
+                .addCaptures()) {
+                context.buildAndSwitch();
                 phaseTracker.spawnEntityWithCause(this, entity);
                 return true;
             }
@@ -1720,8 +1721,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - Cause tracking
         try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
                 .potentialExplosionSource((WorldServer) (Object) this, entityIn)
-                .explosion(explosion)
-                .buildAndSwitch()) {
+                .explosion(explosion)) {
+            context.buildAndSwitch();
             this.processingExplosion = true;
             // Sponge End
 

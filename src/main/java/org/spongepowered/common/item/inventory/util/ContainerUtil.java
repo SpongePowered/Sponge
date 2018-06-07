@@ -343,7 +343,7 @@ public final class ContainerUtil {
         return new DelegatingLens(index, adapterLens, slots);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens,
             SlotCollection slots) {
         if (lens instanceof LargeChestInventoryLens) {

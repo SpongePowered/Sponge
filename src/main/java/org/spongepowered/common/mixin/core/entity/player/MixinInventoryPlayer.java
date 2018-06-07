@@ -211,6 +211,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

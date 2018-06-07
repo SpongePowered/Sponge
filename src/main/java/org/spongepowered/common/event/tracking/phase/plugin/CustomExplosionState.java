@@ -101,7 +101,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
         return true;
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;

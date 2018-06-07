@@ -42,6 +42,7 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInventory, ItemStack> implements SlotProvider<TInventory, ItemStack> {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -124,11 +125,13 @@ public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInven
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private SlotLens<TInventory, ItemStack> createSlotLens(int slotIndex) {
         return this.builder == null ? new SlotLensImpl(slotIndex, SlotAdapter.class) : this.builder.getProvider(slotIndex).createSlotLens(slotIndex);
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public SlotLens<TInventory, ItemStack> getSlot(int index) {
         return (SlotLens<TInventory, ItemStack>) this.get(index);
     }
@@ -141,7 +144,7 @@ public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInven
         return this.getIterator(parent, adapter.getFabric(), adapter.getRootLens());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Iterable<Slot> getIterator(Inventory parent, Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens) {
         return new SlotCollectionIterator(parent, inv, lens, this);
     }

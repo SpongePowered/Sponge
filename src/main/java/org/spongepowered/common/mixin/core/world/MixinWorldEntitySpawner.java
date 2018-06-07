@@ -103,8 +103,8 @@ public abstract class MixinWorldEntitySpawner {
         }
 
         try (PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
-                .world(worldServerIn)
-                .buildAndSwitch()) {
+                .world(worldServerIn)) {
+            context.buildAndSwitch();
             Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
                 Chunk chunk = chunkIterator.next();

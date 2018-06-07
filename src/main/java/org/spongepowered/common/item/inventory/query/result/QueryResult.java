@@ -45,6 +45,7 @@ public interface QueryResult<TInventory, TStack> extends Result<TInventory, TSta
             this.init(null);
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         protected void init(SlotProvider<TInventory, TStack> slots) {
             for (Lens<TInventory, TStack> result : this.resultSet) {

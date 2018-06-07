@@ -53,6 +53,7 @@ public abstract class MixinInventoryBasic implements IInventory, LensProvider<II
         return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.getSlotProvider());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         return new SlotCollection.Builder().add(this.getSizeInventory()).build();

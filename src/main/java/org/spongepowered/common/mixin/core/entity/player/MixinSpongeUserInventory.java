@@ -144,6 +144,7 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

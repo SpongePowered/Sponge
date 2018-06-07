@@ -54,6 +54,7 @@ public abstract class MixinContainerWorkbench extends MixinContainer implements 
         return new ContainerLens(adapter, inventory$getSlotProvider(), lenses);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         SlotCollection.Builder builder = new SlotCollection.Builder()

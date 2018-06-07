@@ -150,6 +150,7 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         this.explosionRadius = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
     }
 
+    @SuppressWarnings("deprecation")
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = TARGET_ENTITY_STATE))
     protected void onExplode(World world, Entity self, byte state) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -157,7 +158,8 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter());
+            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
             detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(getLocation())
@@ -167,12 +169,14 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
-                frame.addContext(EventContextKeys.THROWER, getShooter());
+                frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
+                frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
                 postPrime();
             }
         }

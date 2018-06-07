@@ -46,6 +46,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
  */
 public final class GenerationPhase extends TrackingPhase {
 
+    @SuppressWarnings("unchecked")
     public static final class State {
 
         public static final IPhaseState<GenericGenerationContext> CHUNK_LOADING = new BasicGenerationState("CHUNK_LOADING").bake();

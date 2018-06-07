@@ -525,6 +525,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param targetEntity The target entity
      */
     @Overwrite
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
         if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
@@ -811,10 +812,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
-                    .openContainer(container)
+                    .openContainer(container);
                     // intentionally missing the lastCursor to not double throw close event
-                    .buildAndSwitch();
                     StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                ctx.buildAndSwitch();
                 frame.pushCause(serverPlayer);
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
                 container.onContainerClosed(player);

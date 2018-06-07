@@ -334,6 +334,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             tracksEntityDeaths = false;
         }
         try (PhaseContext<?> context = createContextForDeath(cause, tracksEntityDeaths)) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             // Sponge end
 
             boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
@@ -396,7 +399,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                ? EntityPhase.State.DEATH.createPhaseContext()
                    .source(this)
                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-                   .buildAndSwitch()
                : null;
     }
 
@@ -723,7 +725,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 .packetPlayer(((EntityPlayerMP)(Object) this))
                 .openContainer(this.openContainer)
                 // intentionally missing the lastCursor to not double throw close event
-                .buildAndSwitch()) {
+                ) {
+            ctx.buildAndSwitch();
             ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
         }
@@ -926,11 +929,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
+    @SuppressWarnings("unchecked")
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.pushCause(this);
             ChangeGameModeEvent.TargetPlayer event =
-                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
                             (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {

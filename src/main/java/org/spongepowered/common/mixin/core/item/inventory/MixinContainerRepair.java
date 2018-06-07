@@ -46,6 +46,7 @@ public abstract class MixinContainerRepair extends MixinContainer implements Len
         return new OrderedInventoryLensImpl(0, 3, 1, inventory$getSlotProvider());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         SlotCollection.Builder builder = new SlotCollection.Builder()

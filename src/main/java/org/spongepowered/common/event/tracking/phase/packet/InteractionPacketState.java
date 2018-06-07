@@ -112,6 +112,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void unwind(BasicPacketContext phaseContext) {
 

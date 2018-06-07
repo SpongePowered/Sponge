@@ -87,8 +87,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                                                .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                                                .state((BlockState) state)
                                                .build())
-                                           .buildAndSwitch()
                                        : null) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             return worldIn.setBlockState(pos, state, flags);
         }
     }
@@ -119,8 +121,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
                 .source(LocatableBlock.builder()
                     .location(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
                     .state((BlockState) state)
-                    .build())
-                .buildAndSwitch() : null) {
+                    .build()) : null) {
+                if (context != null) {
+                    context.buildAndSwitch();
+                }
                 this.dropBlockAsItem(worldIn, pos, state, 0);
                 worldIn.setBlockToAir(pos);
             }
