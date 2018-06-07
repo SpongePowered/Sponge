@@ -53,6 +53,7 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
         return (float) this.damageAmount;
     }
 
+    @SuppressWarnings("deprecation")
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
     private boolean onEnderPearlImpact(EntityPlayerMP player) {
         if (player.isPlayerSleeping()) {
@@ -62,7 +63,7 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
-            frame.addContext(EventContextKeys.THROWER, (Player) player);
+            frame.addContext(EventContextKeys.THROWER, (Player) player); // TODO - remove in API 8/1.13
 
             MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, this.getLocation());
             if (event.isCancelled()) {

@@ -77,7 +77,7 @@ public class CompoundLens extends ConceptualLens {
 
         private final List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
 
-        @SuppressWarnings("rawtypes")
+        @SuppressWarnings({"rawtypes", "unchecked"})
         public Builder add(Lens lens) {
             this.lenses.add(lens);
             return this;

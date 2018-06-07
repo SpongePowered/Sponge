@@ -471,8 +471,8 @@ public abstract class MixinEntity implements IMixinEntity {
             return false;
         }
 
-        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext().buildAndSwitch()) {
-
+        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext()) {
+            context.buildAndSwitch();
             // TODO Add a 'Move' plugin phase or just keep it under Teleport?
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();) {
                 if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {

@@ -64,6 +64,7 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<
     private CustomLens lens;
     private PluginContainer plugin;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier, Map<Class<? extends
             InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin, CallbackInfo ci) {
@@ -101,6 +102,7 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<
         return this.plugin;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

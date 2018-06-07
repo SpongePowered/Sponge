@@ -141,7 +141,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     
             while (!this.tileEntityPosQueue.isEmpty())
             {
-                BlockPos blockpos = (BlockPos)this.tileEntityPosQueue.poll();
+                BlockPos blockpos = this.tileEntityPosQueue.poll();
     
                 if (this.getTileEntity(blockpos, Chunk.EnumCreateEntityType.CHECK) == null && this.getBlockState(blockpos).getBlock().hasTileEntity())
                 {

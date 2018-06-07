@@ -49,6 +49,7 @@ public abstract class MixinContainerPlayer extends MixinContainer implements Len
         return new ContainerPlayerInventoryLens(adapter, inventory$getSlotProvider());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         SlotCollection.Builder builder = new SlotCollection.Builder()

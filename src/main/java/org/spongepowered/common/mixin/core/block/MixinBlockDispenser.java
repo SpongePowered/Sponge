@@ -147,9 +147,8 @@ public abstract class MixinBlockDispenser extends MixinBlock {
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(dispenser);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                    ImmutableList.of(snapshot), original);
+            frame.pushCause(dispenser);
+            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
             SpongeImpl.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
                 dispenser.setInventorySlotContents(index, (net.minecraft.item.ItemStack) this.originalItem.createStack());

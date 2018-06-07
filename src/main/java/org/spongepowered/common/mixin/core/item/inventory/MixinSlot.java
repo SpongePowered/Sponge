@@ -81,6 +81,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         return this.slotIndex;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Inventory parent() {
         if (this.inventory instanceof Inventory) {
@@ -103,6 +104,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         return this.transform(Type.INVENTORY);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

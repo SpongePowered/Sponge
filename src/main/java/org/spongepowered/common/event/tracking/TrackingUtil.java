@@ -151,8 +151,9 @@ public final class TrackingUtil {
             .source(entityIn);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
+             final Timing entityTiming = mixinEntity.getTimingsHandler()
         ) {
+
             mixinEntity.getNotifierUser()
                     .ifPresent(notifier -> {
                         frame.addContext(EventContextKeys.NOTIFIER, notifier);
@@ -167,6 +168,7 @@ public final class TrackingUtil {
                         context.owner(owner);
                     });
             context.buildAndSwitch();
+            entityTiming.startTiming();
             entityIn.onUpdate();
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
@@ -188,15 +190,23 @@ public final class TrackingUtil {
             .notifier(() -> notifierUser)
             .owner(() -> creatorUser);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = tickContext
-                    .buildAndSwitch();
-             final Timing entityTiming = mixinEntity.getTimingsHandler().startTiming()
+             final EntityTickContext context = tickContext;
+             final Timing entityTiming = mixinEntity.getTimingsHandler()
              ) {
+            context.buildAndSwitch();
+            entityTiming.startTiming();
             frame.pushCause(entity);
-            notifierUser
-                    .ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-            creatorUser
-                    .ifPresent(notifier -> frame.addContext(EventContextKeys.OWNER, notifier));
+            mixinEntity.getNotifierUser()
+                .ifPresent(notifier -> {
+                    frame.addContext(EventContextKeys.NOTIFIER, notifier);
+                    context.notifier(notifier);
+                });
+            mixinEntity.getCreatorUser()
+                .ifPresent(creator -> {
+                    frame.addContext(EventContextKeys.OWNER, creator);
+                    context.owner(creator);
+
+                });
             entity.updateRidden();
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
@@ -282,7 +292,8 @@ public final class TrackingUtil {
             ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
             // Now actually switch to the new phase
 
-            try (PhaseContext<?> ignored1 = phaseContext.buildAndSwitch()) {
+            try (PhaseContext<?> context = phaseContext) {
+                context.buildAndSwitch();
                 block.updateTick(world, pos, state, random);
             } catch (Exception | NoClassDefFoundError e) {
                 phaseTracker.printExceptionFromPhase(e, phaseContext);
@@ -323,7 +334,8 @@ public final class TrackingUtil {
             final IPhaseState<?> currentState = current.state;
             ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
             // Now actually switch to the new phase
-            try (PhaseContext<?> context = phaseContext.buildAndSwitch()) {
+            try (PhaseContext<?> context = phaseContext) {
+                context.buildAndSwitch();
                 block.randomTick(world, pos, state, random);
             } catch (Exception | NoClassDefFoundError e) {
                 phaseTracker.printExceptionFromPhase(e, phaseContext);
@@ -343,7 +355,8 @@ public final class TrackingUtil {
 
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
-        try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider).buildAndSwitch()) {
+        try (DimensionContext context = TickPhase.Tick.DIMENSION.createPhaseContext().source(worldProvider)) {
+            context.buildAndSwitch();
             worldProvider.onWorldUpdateEntities();
         }
     }
@@ -366,7 +379,8 @@ public final class TrackingUtil {
             phaseContext.notifier(blockEvent.getSourceUser());
         }
 
-        try (PhaseContext<?> o = phaseContext.buildAndSwitch()) {
+        try (PhaseContext<?> o = phaseContext) {
+            o.buildAndSwitch();
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
     }
@@ -485,7 +499,7 @@ public final class TrackingUtil {
      * @param context The phase context, only used by the phase for handling processes.
      * @return True if no events or transactions were cancelled
      */
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return false;

@@ -1609,7 +1609,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         if (!this.isRemote) {
-            try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
+            try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this)) {
+                context.buildAndSwitch();
                 this.startPendingTileEntityTimings(); // Sponge
             }
         }

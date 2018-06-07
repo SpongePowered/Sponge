@@ -170,6 +170,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         return this.adapterType;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public TStack getStack(Fabric<TInventory> inv, int ordinal) {
         LensHandle<TInventory, TStack> lens = this.getLensForOrdinal(ordinal);

@@ -52,6 +52,7 @@ public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlo
         super(index, adapterType, stackFilter, typeFilter);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
         return ObjectUtils.firstNonNull(MinecraftFabric.getAdapter(fabric, parent, this.base, this.adapterType), new InputSlotAdapter(fabric, this, parent));

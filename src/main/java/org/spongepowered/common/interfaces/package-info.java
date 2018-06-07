@@ -22,35 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.interfaces;
-
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.item.inventory.BlockCarrier;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.SingleBlockCarrier;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-
-public interface IMixinSingleBlockCarrier extends SingleBlockCarrier {
-
-    @Override
-    default Inventory getInventory(Direction from) {
-        return getInventory(from, this);
-    }
-
-    @SuppressWarnings("deprecation")
-    static Inventory getInventory(Direction from, BlockCarrier thisThing) {
-        if (thisThing instanceof ISidedInventory) {
-            EnumFacing facing = DirectionFacingProvider.getInstance().get(from).get();
-            int[] slots = ((ISidedInventory) thisThing).getSlotsForFace(facing);
-            SlotIndex[] indices = new SlotIndex[slots.length];
-            for (int i = 0; i < slots.length; i++) {
-                indices[i] = SlotIndex.of(slots[i]);
-            }
-            return thisThing.getInventory().query(indices);
-        }
-        return thisThing.getInventory();
-    }
-}

@@ -339,7 +339,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public int getInhabittedTime() {
+        return (int) this.inhabitedTime;
+    }
+
+    @Override
+    public int getInhabitedTime() {
         return (int) this.inhabitedTime;
     }
 

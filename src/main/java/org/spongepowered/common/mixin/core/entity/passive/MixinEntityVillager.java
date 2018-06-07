@@ -107,6 +107,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.profession = EntityUtil.validateProfession(professionId);
     }
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this.villagerInventory);
@@ -114,6 +115,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);
     }
 
+    @SuppressWarnings("unchecked")
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }

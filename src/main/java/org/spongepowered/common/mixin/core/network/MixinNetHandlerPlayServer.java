@@ -218,10 +218,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             return;
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext()
-                 .source(player)
-                 .buildAndSwitch()) {
-            Sponge.getCauseStackManager().pushCause(player);
+             PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext().source(player)) {
+            context.buildAndSwitch();
+            frame.pushCause(player);
             player.onUpdateEntity();
         }
     }

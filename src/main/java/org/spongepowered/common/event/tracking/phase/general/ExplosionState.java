@@ -114,7 +114,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
         }
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;

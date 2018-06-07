@@ -65,6 +65,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
      * but, it is what it is.
      * @return
      */
+    @SuppressWarnings("deprecation")
     @Redirect(method = "onImpact",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"
@@ -76,7 +77,8 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
         boolean griefer = ((IMixinGriefer) this).canGrief();
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.THROWER, getShooter());
+            frame.addContext(EventContextKeys.THROWER, getShooter()); // TODO - Remove in 1.13/API 8
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, getShooter());
             frame.pushCause(getShooter());
             Optional<net.minecraft.world.Explosion> ex = detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))

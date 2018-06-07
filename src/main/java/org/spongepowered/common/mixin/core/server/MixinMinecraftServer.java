@@ -359,8 +359,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         try (GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
             .source(worldServer)
-            .world( worldServer)
-            .buildAndSwitch()) {
+            .world( worldServer)) {
+            context.buildAndSwitch();
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
             LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
@@ -763,8 +763,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public Object onCall(Callable<?> callable) throws Exception {
         Object value;
         try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
-                .source(callable)
-                .buildAndSwitch()) {
+                .source(callable)) {
+            context.buildAndSwitch();
             value = callable.call();
         } catch (Exception e) {
             throw e;
