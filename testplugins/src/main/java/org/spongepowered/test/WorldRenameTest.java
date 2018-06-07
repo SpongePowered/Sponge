@@ -54,7 +54,7 @@ import javax.annotation.Nullable;
 
 // Allows for testing the rename of a world.
 // Includes commands to load, unload, rename and create worlds.
-@Plugin(id = "world-rename-test", name = "World Rename Test", description = "Tests renaming of worlds")
+@Plugin(id = "world-rename-test", name = "World Rename Test", description = "Tests renaming of worlds", version = "0.0.0")
 public class WorldRenameTest {
 
     static final Text worldKey = Text.of("world");

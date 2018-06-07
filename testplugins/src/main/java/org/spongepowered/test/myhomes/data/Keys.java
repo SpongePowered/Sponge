@@ -24,19 +24,6 @@
  */
 package org.spongepowered.test.myhomes.data;
 
-import org.spongepowered.test.myhomes.data.home.Home;
-import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.KeyFactory;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.MapValue;
-import org.spongepowered.api.data.value.mutable.Value;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 public class Keys {
 
 }

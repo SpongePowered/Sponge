@@ -58,7 +58,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     @Shadow @Nullable private AdvancementList.Listener listener;
 
     @Inject(method = "loadAdvancements", at = @At(value = "INVOKE", shift = At.Shift.BEFORE,
-            target = "Ljava/util/Map;size()I"))
+            target = "Ljava/util/Map;size()I", remap = false))
     private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         AdvancementRegistryModule.INSIDE_REGISTER_EVENT = true;
         SpongeImpl.postEvent(new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),

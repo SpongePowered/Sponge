@@ -288,7 +288,7 @@ public class SpongeEventManager implements EventManager {
         return createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T extends Event> RegisteredListener<T> createRegistration(PluginContainer plugin, TypeToken<T> eventType, Order order,
             boolean beforeModifications, EventListener<? super T> handler) {
         TypeToken<?> genericType = null;
@@ -410,12 +410,11 @@ public class SpongeEventManager implements EventManager {
         }
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
-            Sponge.getCauseStackManager().pushCause(handler.getPlugin());
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                  final PhaseContext<?> context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
-                            .source(handler.getPlugin())
-                            .buildAndSwitch();
+                            .source(handler.getPlugin());
                  final Timing timings = handler.getTimingsHandler()) {
+                context.buildAndSwitch();
                 timings.startTimingIfSync();
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
@@ -424,7 +423,7 @@ public class SpongeEventManager implements EventManager {
             } catch (Throwable e) {
                 // TODO - add some better handling, especially since we have the stakc frame and phase context to boot
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Error with event listener handling").centre().hr();
-                printer.add("A listener threw an exception while being handled, this is usually not a sponge bug.")
+                printer.add("A listener threw an exception while being handled, this is usually not a sponge bug.");
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
             Sponge.getCauseStackManager().popCause();

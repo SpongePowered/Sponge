@@ -24,14 +24,13 @@
  */
 package org.spongepowered.test.myhomes.data.home;
 
-import org.spongepowered.test.myhomes.data.home.impl.HomeBuilder;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
+import org.spongepowered.test.myhomes.data.home.impl.HomeBuilder;
 
 public class Home implements DataSerializable {
 
@@ -64,7 +63,7 @@ public class Home implements DataSerializable {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
                 .set(WORLD_QUERY, this.transform.getExtent().getUniqueId())
                 .set(POSITION_QUERY, this.transform.getPosition())
                 .set(ROTATION_QUERY, this.transform.getRotation())

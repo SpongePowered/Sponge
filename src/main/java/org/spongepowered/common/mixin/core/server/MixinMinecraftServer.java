@@ -788,6 +788,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         cir.setReturnValue(report);
     }
 
+    /**
+     * @author unknown
+     * @reason uses the world manager to update.
+     */
     @Overwrite
     public void setDifficultyForAllWorlds(EnumDifficulty difficulty) {
         WorldManager.updateServerDifficulty();

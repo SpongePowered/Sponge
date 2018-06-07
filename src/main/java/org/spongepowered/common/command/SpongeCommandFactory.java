@@ -159,6 +159,7 @@ public class SpongeCommandFactory {
      *
      * @return The newly created command
      */
+    @SuppressWarnings("deprecation")
     public static CommandSpec createSpongeCommand() {
         final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
         final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren);

@@ -67,7 +67,7 @@ import org.spongepowered.api.world.World;
  * Clicks in the opened Inventory are recorded with their SlotIndex in your Chat.
  * For detection this uses a very basic custom Carrier Implementation.
  */
-@Plugin(id = "custominventorytest", name = "Custom Inventory Test", description = "A plugin to test custom inventories")
+@Plugin(id = "custominventorytest", name = "Custom Inventory Test", description = "A plugin to test custom inventories", version = "0.0.0")
 public class CustomInventoryTest {
 
     @Listener

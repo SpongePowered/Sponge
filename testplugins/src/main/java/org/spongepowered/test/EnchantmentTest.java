@@ -46,7 +46,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.ArrayList;
 import java.util.List;
 
-@Plugin(id = "enchantmenttest", name = "Enchantment Test", description = "Tests Sponge's simple enchantment API.")
+@Plugin(id = "enchantmenttest", name = "Enchantment Test", description = "Tests Sponge's simple enchantment API.", version = "0.0.0")
 public final class EnchantmentTest {
 
     @Listener

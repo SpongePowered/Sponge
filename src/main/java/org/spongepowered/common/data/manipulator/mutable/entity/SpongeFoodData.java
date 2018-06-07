@@ -85,7 +85,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
             .defaultValue(0D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
-            .actualValue((double) this.foodExhaustionLevel)
+            .actualValue(this.foodExhaustionLevel)
             .build();
     }
 
@@ -95,7 +95,7 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
             .defaultValue(20D)
             .minimum(0D)
             .maximum(Double.MAX_VALUE)
-            .actualValue((double) this.foodSaturationLevel)
+            .actualValue(this.foodSaturationLevel)
             .build();
     }
 

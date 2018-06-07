@@ -71,6 +71,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     @Nullable private String name;
 
     @Override
+    @SuppressWarnings("rawtypes")
     public <T extends FilteredTriggerConfiguration & DataSerializable> Trigger.Builder<T> dataSerializableConfig(Class<T> dataConfigClass) {
         checkNotNull(dataConfigClass, "dataConfigClass");
         this.configType = (Class<C>) dataConfigClass;
@@ -104,6 +105,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(Class<T> configClass,
             TypeSerializerCollection typeSerializerCollection) {
         checkNotNull(configClass, "configClass");
@@ -137,6 +139,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(Class<T> configClass, Gson gson) {
         checkNotNull(configClass, "configClass");

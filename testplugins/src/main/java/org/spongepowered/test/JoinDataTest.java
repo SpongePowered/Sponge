@@ -35,8 +35,10 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "join_data_test", name = "Join Data Test", description = "Run '/getjoindata [player]' to display the JoinData for a player, either online or offline.")
+@Plugin(id = "join_data_test", name = "Join Data Test", description = JoinDataTest.DESCRIPTION, version = "0.0.0")
 public class JoinDataTest {
+
+    public static final String DESCRIPTION = "Run '/getjoindata [player]' to display the JoinData for a player, either online or offline.";
 
     @Listener
     public void onInit(GameInitializationEvent event) {

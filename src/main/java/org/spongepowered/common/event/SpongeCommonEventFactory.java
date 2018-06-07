@@ -1255,6 +1255,7 @@ public class SpongeCommonEventFactory {
      * @param index the affected SlotIndex
      * @param originalStack the original Stack
      */
+    @SuppressWarnings("deprecation")
     public static void captureTransaction(IMixinInventory captureIn, Inventory inv, int index, ItemStack originalStack) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
@@ -1285,6 +1286,7 @@ public class SpongeCommonEventFactory {
      * @param transaction the transaction to execute
      * @return the result if the transaction
      */
+    @SuppressWarnings("deprecation")
     public static ItemStack captureTransaction(IMixinInventory captureIn, Inventory inv, int index, Supplier<ItemStack> transaction) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
