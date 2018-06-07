@@ -48,9 +48,10 @@ import javax.inject.Inject;
 /**
  * Tests intersect union on and containsInventory
  */
-@Plugin(id = "inventorysetoperationstest", name = "Inventory Set Operations Test", description = "A plugin to test inventory set operations")
+@Plugin(id = "inventorysetoperationstest", name = "Inventory Set Operations Test", description = InventorySetOpsTest.DESCRIPTION, version = "0.0.0")
 public class InventorySetOpsTest {
 
+    public static final String DESCRIPTION = "A plugin to test inventory set operations";
     @Inject private Logger logger;
 
     @Listener
@@ -59,6 +60,7 @@ public class InventorySetOpsTest {
         testUnion();
     }
 
+    @SuppressWarnings("deprecation")
     @Listener
     public void onMidas(ChangeInventoryEvent.Held event, @Root Player player) {
         // Checks if Slots are contained in the hotbar then may transform iron to gold
@@ -76,6 +78,7 @@ public class InventorySetOpsTest {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
         Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
@@ -85,6 +88,7 @@ public class InventorySetOpsTest {
         Preconditions.checkState(intersection.capacity() == 1, "This should be the first slot only!");
     }
 
+    @SuppressWarnings("deprecation")
     private void testUnion() {
 
         Inventory chest = Inventory.builder().build(this);

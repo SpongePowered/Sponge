@@ -41,7 +41,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "parrotdatatest", name = "Parrot Data Test", description = "A plugin to test parrot data.")
+@Plugin(id = "parrotdatatest", name = "Parrot Data Test", description = "A plugin to test parrot data.", version = "0.0.0")
 public class ParrotDataTest {
 
     private ParrotVariant parrotVariant;

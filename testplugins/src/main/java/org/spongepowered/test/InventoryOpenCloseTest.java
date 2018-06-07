@@ -40,9 +40,10 @@ import org.spongepowered.api.text.Text;
 
 import java.util.Optional;
 
-@Plugin(id = "inventoryopenclosetest", name = "Inventory Open/Close Test", description = "A plugin to test open and close during inventory events.")
+@Plugin(id = "inventoryopenclosetest", name = "Inventory Open/Close Test", description = InventoryOpenCloseTest.DESCRIPTION, version = "0.0.0")
 public class InventoryOpenCloseTest {
 
+    public static final String DESCRIPTION = "A plugin to test open and close during inventory events.";
     private final InventoryListener listener = new InventoryListener();
     private boolean registered = false;
 

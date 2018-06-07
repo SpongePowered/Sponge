@@ -46,6 +46,7 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore<Instrume
         return Optional.of(new InstrumentProperty(getInstrumentType(block)));
     }
 
+    @SuppressWarnings("deprecation")
     private InstrumentType getInstrumentType(IBlockState block) {
         final Block blockType = block.getBlock();
         if (blockType == Blocks.CLAY) {

@@ -206,6 +206,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public Set<Key<?>> getKeys() {
         return DataUtil.getNbtValueProcessors(this.getDataType()).stream()
                 .map(processor -> processor.readFrom(this.data))

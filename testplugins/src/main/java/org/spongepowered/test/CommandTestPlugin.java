@@ -44,7 +44,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-@Plugin(id = "command-test", name = "Command Test", description = "Tests command related functions")
+@Plugin(id = "command-test", name = "Command Test", description = "Tests command related functions", version = "0.0.0")
 public class CommandTestPlugin {
 
     @Listener

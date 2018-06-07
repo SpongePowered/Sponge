@@ -86,6 +86,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
         return new SpongeDamageableData();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<DamageableData> fill(DataContainer container, DamageableData damageableData) {
         if (container.contains(Keys.LAST_DAMAGE)) {

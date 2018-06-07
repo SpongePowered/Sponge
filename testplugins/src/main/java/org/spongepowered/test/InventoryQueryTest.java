@@ -46,7 +46,7 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "inventoryquerytest", name = "Inventory Query Test", description = "A plugin for testing inventory queries")
+@Plugin(id = "inventoryquerytest", name = "Inventory Query Test", description = "A plugin for testing inventory queries", version = "0.0.0")
 public class InventoryQueryTest {
 
     @Listener

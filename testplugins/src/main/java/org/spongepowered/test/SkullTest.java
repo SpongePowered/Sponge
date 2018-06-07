@@ -47,7 +47,7 @@ import org.spongepowered.api.text.Text;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
-@Plugin(id = "skulltest", name = "Skull Test", description = "A plugin to test Skulls")
+@Plugin(id = "skulltest", name = "Skull Test", description = "A plugin to test Skulls", version = "0.0.0")
 public class SkullTest {
 
     final static Text SKULL = Text.of("skulltype");

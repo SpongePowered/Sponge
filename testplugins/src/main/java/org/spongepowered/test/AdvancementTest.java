@@ -70,7 +70,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Plugin(id = "advancement_test", name = "Advancement Test")
+@Plugin(id = "advancement_test", name = "Advancement Test", version = "0.0.0", description = "sponge-test")
 public class AdvancementTest {
 
     @Inject private Logger logger;

@@ -344,6 +344,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
             try (CauseStackManager.StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
                 Timing timing = null;
+                ignored.pushCause(populator);
                 if (Timings.isTimingsEnabled()) {
                     timing = this.populatorTimings.get(populator.getType().getId());
                     if (timing == null) {
@@ -353,17 +354,17 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     }
                     timing.startTimingIfSync();
                 }
-                try (PhaseContext<?> ignored1 = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
+                try (PhaseContext<?> context = GenerationPhase.State.POPULATOR_RUNNING.createPhaseContext()
                     .world(WorldUtil.asNative(world))
-                    .populator(type)
-                    .buildAndSwitch()) {
+                    .populator(type)) {
+                    context.buildAndSwitch();
 
                     if (populator instanceof IFlaggedPopulator) {
                         ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
                     } else {
                         populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
                     }
-                    if (Timings.isTimingsEnabled()) {
+                    if (timing != null) { // It wouldn't be null if we are enabled or we set it up before hand.
                         timing.stopTimingIfSync();
                     }
                 }
@@ -394,6 +395,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
+    @SuppressWarnings("try")
     public boolean generateStructures(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {

@@ -56,7 +56,8 @@ public abstract class MixinEntityAIEatGrass extends EntityAIBase {
         method = "updateTask",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z"
+            target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z",
+            remap = false
         )
     )
     @SuppressWarnings({"unchecked", "rawtypes"})

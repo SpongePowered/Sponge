@@ -36,9 +36,10 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.world.LocatableBlock;
 
-@Plugin(id = "dispenserfiretest", name = "Dispenser Fire Test", description = "A plugin to test the item dispense event fires for dispensers.")
+@Plugin(id = "dispenserfiretest", name = "Dispenser Fire Test", description = DispenserFireTest.DESCRIPTION, version = "0.0.0")
 public class DispenserFireTest {
 
+    public static final String DESCRIPTION = "A plugin to test the item dispense event fires for dispensers.";
     private final DispenserFireListener listener = new DispenserFireListener();
     private boolean registered = false;
 

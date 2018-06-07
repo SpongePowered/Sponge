@@ -42,8 +42,10 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "boat_type_test", name = "Boat Type Test", description = "Right click a boat to get the TreeType, run /makeboat <treetype> to make a boat.")
+@Plugin(id = "boat_type_test", name = "Boat Type Test", description = BoatTypeTest.DESCRIPTION, version = "0.0.0")
 public class BoatTypeTest {
+
+    public static final String DESCRIPTION = "Right click a boat to get the TreeType, run /makeboat <treetype> to make a boat.";
 
     @Listener
     public void onInit(GameInitializationEvent event) {
