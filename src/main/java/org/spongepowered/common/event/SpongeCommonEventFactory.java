@@ -1369,4 +1369,9 @@ public class SpongeCommonEventFactory {
         ((IMixinContainer) container).setCaptureInventory(true);
         return event;
     }
+
+    public static void callPostPlayerRespawnEvent(EntityPlayerMP playerMP, boolean conqueredEnd) {
+        // We overwrite this method in SpongeForge, in order to fire
+        // Forge's PlayerRespawnEvent
+    }
 }
