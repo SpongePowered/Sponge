@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
@@ -96,10 +97,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
-        // Checking isRemote is not sufficient - it can be set to 'false'
-        // for mod worlds that don't extend WorldServer. We only want to run async lighting when we
-        // actually have an IMixinWorldServer
-        this.isServerChunk = worldIn instanceof IMixinWorldServer;
+        this.isServerChunk = !((IMixinWorld) worldIn).isFake();
         if (this.isServerChunk) {
             this.lightExecutorService = ((IMixinWorldServer) worldIn).getLightingExecutor();
         }
