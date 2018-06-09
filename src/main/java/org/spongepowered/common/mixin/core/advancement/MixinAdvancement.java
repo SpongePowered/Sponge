@@ -50,9 +50,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
-import org.spongepowered.common.advancement.SpongeAdvancementHelper;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinDisplayInfo;
@@ -114,7 +114,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
-        if (!SpongeAdvancementHelper.INSIDE_REGISTER_EVENT.get()) {
+        if (!PhaseTracker.getInstance().getCurrentState().isEvent()) {
             AdvancementRegistryModule.getInstance().registerAdditionalCatalog(this);
         } else {
             // Wait to set the parent until the advancement is registered
