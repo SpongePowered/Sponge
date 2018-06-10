@@ -108,6 +108,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -313,10 +314,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void onDeath(DamageSource cause) {
         // Sponge start
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
-        if (event.isCancelled()) {
+        Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
+        if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
+        DestructEntityEvent.Death event = optEvent.get();
+
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean tracksEntityDeaths;
         if (isMainThread && !this.world.isRemote) {

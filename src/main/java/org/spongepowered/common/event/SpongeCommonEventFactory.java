@@ -846,7 +846,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source, boolean isMainThread) {
+    public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source, boolean isMainThread) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;
         MessageChannel channel;
@@ -892,7 +892,7 @@ public class SpongeCommonEventFactory {
             if (!event.isCancelled() && !event.isMessageCancelled() && !message.isEmpty()) {
                 event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
             }
-            return event;
+            return Optional.of(event);
         }
     }
 
@@ -1370,5 +1370,10 @@ public class SpongeCommonEventFactory {
         transactions.clear();
         ((IMixinContainer) container).setCaptureInventory(true);
         return event;
+    }
+
+    public static void callPostPlayerRespawnEvent(EntityPlayerMP playerMP, boolean conqueredEnd) {
+        // We overwrite this method in SpongeForge, in order to fire
+        // Forge's PlayerRespawnEvent
     }
 }
