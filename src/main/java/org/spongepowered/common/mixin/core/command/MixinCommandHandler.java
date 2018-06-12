@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
@@ -47,8 +46,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
-        SpongeTimings.playerCommandTimer.startTiming();
-
+        SpongeTimings.playerCommandTimer.startTimingIfSync();
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
         }
@@ -56,9 +54,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "RETURN"))
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
-        if (sender.getEntityWorld() != null && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            SpongeTimings.playerCommandTimer.stopTiming();
-        }
+        SpongeTimings.playerCommandTimer.stopTimingIfSync();
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
         }
