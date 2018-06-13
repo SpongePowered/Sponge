@@ -278,7 +278,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !((IMixinWorld) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -297,7 +297,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
-            context.buildAndSwitch();
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             // Sponge End
             if (this.dead) {
                 return;
