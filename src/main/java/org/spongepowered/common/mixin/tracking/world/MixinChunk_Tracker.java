@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracking.world;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -57,6 +53,7 @@ import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.SpongeUsernameCache;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,8 +77,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Shadow @Final public int x;
     @Shadow @Final public int z;
 
-    private Int2ObjectMap<PlayerTracker> trackedIntBlockPositions = new Int2ObjectOpenHashMap<>();
-    private Short2ObjectMap<PlayerTracker> trackedShortBlockPositions = new Short2ObjectOpenHashMap<>();
+    private Map<Integer, PlayerTracker> trackedIntBlockPositions = new HashMap<>();
+    private Map<Short, PlayerTracker> trackedShortBlockPositions = new HashMap<>();
 
     @Final // need this constructor to never be overwritten by anything.
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
@@ -322,12 +319,12 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     @Override
-    public void setTrackedIntPlayerPositions(Int2ObjectMap<PlayerTracker> trackedPositions) {
+    public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
         this.trackedIntBlockPositions = trackedPositions;
     }
 
     @Override
-    public void setTrackedShortPlayerPositions(Short2ObjectMap<PlayerTracker> trackedPositions) {
+    public void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPositions) {
         this.trackedShortBlockPositions = trackedPositions;
     }
 

@@ -25,8 +25,6 @@
 package org.spongepowered.common.interfaces;
 
 import com.flowpowered.math.vector.Vector3d;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -77,9 +75,9 @@ public interface IMixinChunk {
 
     void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType);
 
-    void setTrackedIntPlayerPositions(Int2ObjectMap<PlayerTracker> trackedPlayerPositions);
+    void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPlayerPositions);
 
-    void setTrackedShortPlayerPositions(Short2ObjectMap<PlayerTracker> trackedPlayerPositions);
+    void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPlayerPositions);
 
     void setNeighbor(Direction direction, Chunk neighbor);
 
