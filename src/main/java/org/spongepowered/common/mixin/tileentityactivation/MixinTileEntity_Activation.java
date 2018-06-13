@@ -32,7 +32,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModDat
 public class MixinTileEntity_Activation implements IModData_Activation {
 
     private boolean refreshCache = false;
-    public boolean defaultActivationState = false;
+    public boolean defaultActivationState = true;
     public long activatedTick = Integer.MIN_VALUE;
     private int activationRange;
     private int ticksExisted;
