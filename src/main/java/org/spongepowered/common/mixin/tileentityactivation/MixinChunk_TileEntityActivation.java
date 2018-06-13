@@ -63,7 +63,7 @@ public class MixinChunk_TileEntityActivation {
                 spongeTile.setDefaultActivationState(true);
                 return;
             }
-            spongeTile.setDefaultActivationState(TileEntityActivation.initializeTileEntityActivationState(tileEntityIn));
+            TileEntityActivation.initializeTileEntityActivationState(tileEntityIn);
             if (!spongeTile.getDefaultActivationState()) {
                 TileEntityActivation.addTileEntityToConfig(this.world, (SpongeTileEntityType) ((TileEntity) tileEntityIn).getType());
             }
