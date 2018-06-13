@@ -39,14 +39,10 @@ public class TileEntityActivationModCategory extends ConfigCategory {
     private Integer defaultBlockRange;
     @Setting(value = "default-tick-rate")
     private Integer defaultTickRate;
-    @Setting(value = "default-activation-state")
-    private Boolean defaultActivationState;
     @Setting(value = "block-range")
     private Map<String, Integer> tileEntityRangeList = new HashMap<>();
     @Setting(value = "tick-rate")
     private Map<String, Integer> tileEntityTickRateList = new HashMap<>();
-    @Setting(value = "activation-state")
-    private Map<String, Boolean> tileEntityActivationStateList = new HashMap<>();
 
     public TileEntityActivationModCategory() {
     }
@@ -72,10 +68,6 @@ public class TileEntityActivationModCategory extends ConfigCategory {
         return this.defaultBlockRange;
     }
 
-    public Boolean getDefaultActivationState() {
-        return this.defaultActivationState;
-    }
-
     public Integer getDefaultTickRate() {
         return this.defaultTickRate;
     }
@@ -86,9 +78,5 @@ public class TileEntityActivationModCategory extends ConfigCategory {
 
     public Map<String, Integer> getTileEntityTickRateList() {
         return this.tileEntityTickRateList;
-    }
-
-    public Map<String, Boolean> getTileEntityActivationStateList() {
-        return this.tileEntityActivationStateList;
     }
 }
