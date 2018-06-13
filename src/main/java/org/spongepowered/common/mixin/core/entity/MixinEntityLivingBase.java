@@ -266,7 +266,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !((IMixinWorld) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -286,6 +286,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             // Sponge End
             if (this.dead) {
                 return;
@@ -358,7 +361,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (((IMixinWorld) this.world).isFake() || !isMainThread || frame == null) { // Short circuit to avoid erroring on handling
             return null;
         }
-        final IPhaseState state = PhaseTracker.getInstance().getCurrentPhaseData().state;
+        final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentPhaseData().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
             frame.pushCause(this);
@@ -367,7 +370,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 .source(this);
             this.getNotifierUser().ifPresent(context::notifier);
             this.getCreatorUser().ifPresent(context::owner);
-            context.buildAndSwitch();
             return context;
         }
         return null;
@@ -562,6 +564,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         // Sponge Start - notify the cause tracker
                         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                              final EntityDeathContext context = createOrNullDeathPhase(true, frame, source)) {
+                            if (context != null) {
+                                context.buildAndSwitch();
+                            }
                             this.onDeath(source);
                         }
                     }
@@ -871,12 +876,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                 PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext()
-                        .source(entityLivingBase)
-                        .buildAndSwitch()) {
-                Sponge.getCauseStackManager().pushCause(entityLivingBase);
+                 PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext().source(entityLivingBase)) {
+                context.buildAndSwitch();
+                frame.pushCause(entityLivingBase);
                 ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
             }
         } else {

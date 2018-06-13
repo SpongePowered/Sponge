@@ -72,6 +72,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("rawtypes")
 @Mixin(InventoryPlayer.class)
 public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, PlayerInventory {
 
@@ -80,7 +83,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Shadow @Final public NonNullList<ItemStack> mainInventory;
     @Shadow @Final public NonNullList<ItemStack> armorInventory;
     @Shadow @Final public NonNullList<ItemStack> offHandInventory;
-    @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
+    @Shadow @Final public List<NonNullList<ItemStack>> allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
 
@@ -104,11 +107,12 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     private Player carrier;
     private HotbarAdapter hotbar;
     private MainPlayerInventoryAdapter main;
-    private EquipmentInventoryAdapter equipment;
+    @Nullable private EquipmentInventoryAdapter equipment;
     private SlotAdapter offhand;
 
     private int offhandIndex;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
         // Find offhand slot
@@ -207,6 +211,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

@@ -241,6 +241,7 @@ public final class PacketPhase extends TrackingPhase {
         return PacketPhase.General.UNKNOWN;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState<?> state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");

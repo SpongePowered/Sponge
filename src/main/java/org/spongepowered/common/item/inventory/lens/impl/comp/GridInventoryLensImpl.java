@@ -120,6 +120,7 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
         return child.lens.getRealIndex(inv, ordinal - child.ordinal);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
         return ObjectUtils.firstNonNull(MinecraftFabric.getAdapter(fabric, parent, this.base, this.adapterType), new GridInventoryAdapter(fabric, this, parent));

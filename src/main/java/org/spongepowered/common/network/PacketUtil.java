@@ -79,12 +79,12 @@ public class PacketUtil {
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastTryBlockPacketTimeStamp = 0;
 
-    @SuppressWarnings({"rawtypes", "unchecked", "unused"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
-                Sponge.getCauseStackManager().pushCause(packetPlayer);
+                frame.pushCause(packetPlayer);
                 // If true, logic was handled in Pre so return
                 if (firePreEvents(packetIn, packetPlayer)) {
                     return;
@@ -143,7 +143,8 @@ public class PacketUtil {
                         context.owner((Player) packetPlayer);
                         context.notifier((Player) packetPlayer);
                     }
-                    try (PhaseContext<?> packetContext = context.buildAndSwitch()) {
+                    try (PhaseContext<?> packetContext = context) {
+                        packetContext.buildAndSwitch();
                         packetIn.processPacket(netHandler);
 
                     }

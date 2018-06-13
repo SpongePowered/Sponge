@@ -51,6 +51,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, ITrigger {
 
     private final Class<FilteredTriggerConfiguration> triggerConfigurationClass;
@@ -109,7 +110,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     public void trigger(Player player) {
         final PlayerAdvancements playerAdvancements = ((EntityPlayerMP) player).getAdvancements();
         final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-        final TypeToken typeToken = TypeToken.of(this.triggerConfigurationClass);
+        final TypeToken<FilteredTriggerConfiguration> typeToken = TypeToken.of(this.triggerConfigurationClass);
         for (Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
             final IMixinICriterionTriggerListener mixinListener = (IMixinICriterionTriggerListener) listener;
             final Advancement advancement = (Advancement) mixinListener.getAdvancement();

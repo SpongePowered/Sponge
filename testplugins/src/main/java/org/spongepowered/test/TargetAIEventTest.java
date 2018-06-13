@@ -36,7 +36,7 @@ import org.spongepowered.api.plugin.Plugin;
 /**
  * ignore players on command
  */
-@Plugin(id = "targetaieventtest", name = "Target AI Event Test", description = "A plugin to test the TargetAIEvent")
+@Plugin(id = "targetaieventtest", name = "Target AI Event Test", description = "A plugin to test the TargetAIEvent", version = "0.0.0")
 public class TargetAIEventTest {
 
     private final AITargetListener listener = new AITargetListener();

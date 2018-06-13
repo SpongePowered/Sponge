@@ -90,7 +90,8 @@ public abstract class MixinCooldownTracker implements org.spongepowered.api.enti
             at = @At(
                     value = "INVOKE",
                     shift = At.Shift.BEFORE,
-                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
+                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                    remap = false
             ),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
@@ -101,7 +102,7 @@ public abstract class MixinCooldownTracker implements org.spongepowered.api.enti
         }
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map$Entry;getKey()Ljava/lang/Object;", remap = false))
     private Object onTick(Map.Entry<Item, CooldownTracker.Cooldown> entry) {
         throwEndCooldownEvent((ItemType) entry.getKey());
         return entry.getKey();

@@ -42,6 +42,7 @@ import org.spongepowered.api.entity.living.monster.Slime;
 
 public final class TypeTokenHelperTest {
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testA() {
         assertTrue(TypeTokenHelper.isAssignable(

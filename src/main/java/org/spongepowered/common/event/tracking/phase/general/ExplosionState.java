@@ -41,14 +41,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -74,7 +72,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return true;
     }
 
@@ -116,7 +114,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
         }
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;
@@ -146,7 +144,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             try {
-                this.associateAdditionalCauses(this, context);
+                this.associateAdditionalCauses(this, context, frame);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.

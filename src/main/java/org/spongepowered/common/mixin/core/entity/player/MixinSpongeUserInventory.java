@@ -56,6 +56,9 @@ import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("rawtypes")
 @Mixin(SpongeUserInventory.class)
 public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter<IInventory>, UserInventory<User> {
 
@@ -71,11 +74,12 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     protected Fabric<IInventory> inventory;
     protected PlayerInventoryLens lens;
 
-    private User carrier;
-    private MainPlayerInventoryAdapter main;
-    private EquipmentInventoryAdapter equipment;
-    private SlotAdapter offhand;
+    @Nullable private User carrier;
+    @Nullable private MainPlayerInventoryAdapter main;
+    @Nullable private EquipmentInventoryAdapter equipment;
+    @Nullable private SlotAdapter offhand;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(SpongeUser playerIn, CallbackInfo ci) {
         // We only care about Server inventories
@@ -140,6 +144,7 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

@@ -42,8 +42,10 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInventory, ItemStack> implements SlotProvider<TInventory, ItemStack> {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static class Builder {
 
         private List<Tuple<Class<? extends SlotAdapter>, SlotLensProvider>> slotTypes = new ArrayList<>();
@@ -111,7 +113,7 @@ public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInven
         this(size, null);
     }
 
-    SlotCollection(int size, Builder builder) {
+    private SlotCollection(int size, Builder builder) {
         super(size);
         this.builder = builder;
         this.populate();
@@ -123,11 +125,13 @@ public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInven
         }
     }
 
-    protected SlotLens<TInventory, ItemStack> createSlotLens(int slotIndex) {
+    @SuppressWarnings("rawtypes")
+    private SlotLens<TInventory, ItemStack> createSlotLens(int slotIndex) {
         return this.builder == null ? new SlotLensImpl(slotIndex, SlotAdapter.class) : this.builder.getProvider(slotIndex).createSlotLens(slotIndex);
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public SlotLens<TInventory, ItemStack> getSlot(int index) {
         return (SlotLens<TInventory, ItemStack>) this.get(index);
     }
@@ -140,7 +144,8 @@ public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInven
         return this.getIterator(parent, adapter.getFabric(), adapter.getRootLens());
     }
 
-    public Iterable<Slot> getIterator(Inventory parent, Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Iterable<Slot> getIterator(Inventory parent, Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens) {
         return new SlotCollectionIterator(parent, inv, lens, this);
     }
 

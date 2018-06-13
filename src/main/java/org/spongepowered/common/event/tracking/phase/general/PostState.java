@@ -41,6 +41,7 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
@@ -49,7 +50,7 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
+    public boolean canSwitchTo(IPhaseState<?> state) {
         return state.getPhase() == TrackingPhases.GENERATION
                 || state.getPhase() == TrackingPhases.PLUGIN
                 || state == BlockPhase.State.RESTORING_BLOCKS

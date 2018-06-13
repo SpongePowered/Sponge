@@ -37,7 +37,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "elytratest", name = "ElytraDataTest", description = "Testing some nice elytra data.")
+@Plugin(id = "elytratest", name = "ElytraDataTest", description = "Testing some nice elytra data.", version = "0.0.0")
 public class ElytraDataTest {
 
     @Listener

@@ -279,8 +279,8 @@ public final class SpongeImplHooks {
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
-                .source(task)
-                .buildAndSwitch())  {
+                .source(task))  {
+            context.buildAndSwitch();
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {

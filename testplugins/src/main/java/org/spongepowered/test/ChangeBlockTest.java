@@ -39,9 +39,10 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "change_block_test", name = "ChangeBlock Listener Test", description = "Run /changeblocktest to break the block beneath you, should print out something.")
+@Plugin(id = "change_block_test", name = "ChangeBlock Listener Test", description = ChangeBlockTest.DESCRIPTION, version = "0.0.0")
 public class ChangeBlockTest {
 
+    public static final String DESCRIPTION = "Run /changeblocktest to break the block beneath you, should print out something.";
     private boolean enabled = false;
 
     @Listener

@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.util;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
@@ -50,9 +51,10 @@ public final class InventoryUtil {
 
     private InventoryUtil() {}
 
+    @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
         IInventoryFabric fabric = new IInventoryFabric(inv);
-        CraftingGridInventoryLens lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
+        CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
 
         return new CraftingGridInventoryAdapter(fabric, lens);
     }

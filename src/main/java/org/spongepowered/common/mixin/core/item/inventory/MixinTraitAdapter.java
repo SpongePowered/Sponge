@@ -71,7 +71,7 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter<IIn
         return this.getReusableLens().getLens();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private ReusableLens<?> getReusableLens()
     {
         if (this.reusableLens != null) {

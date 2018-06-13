@@ -251,6 +251,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public WorldArchetype build(String id, String name) throws IllegalArgumentException, CatalogTypeAlreadyRegisteredException {
         WorldArchetypeRegistryModule.getInstance().getById(id).ifPresent(w -> {

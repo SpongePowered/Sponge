@@ -34,9 +34,10 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
-@Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest")
+@Plugin(authors = "gabizou", name = "DeathTest", id = "deathtest", description = DeathTest.DESCRIPTION, version = "0.0.0")
 public class DeathTest {
 
+    public static final String DESCRIPTION = "Use /toggleDeath to toggle whether players can die";
     private boolean allowDeathsOfPlayers = true;
 
     @Listener

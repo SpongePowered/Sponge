@@ -47,7 +47,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "cooldowntracker", name = "Cooldown Tracker", description = "A plugin to test the cooldown tracker.")
+@Plugin(id = "cooldowntracker", name = "Cooldown Tracker", description = "A plugin to test the cooldown tracker.", version = "0.0.0")
 public final class CooldownTrackerTest {
 
     private final Set<UUID> enabled = new HashSet<>();

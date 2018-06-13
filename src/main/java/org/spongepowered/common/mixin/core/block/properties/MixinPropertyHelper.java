@@ -54,6 +54,7 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
         this.idString = id;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<T> parseValue(String value) {
         return Optional.ofNullable((T) ((IProperty) this).parseValue(value).orNull());

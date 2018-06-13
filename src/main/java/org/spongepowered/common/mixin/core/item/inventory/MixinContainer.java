@@ -93,6 +93,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})

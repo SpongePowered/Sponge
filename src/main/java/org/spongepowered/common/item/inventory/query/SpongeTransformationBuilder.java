@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 public class SpongeTransformationBuilder implements InventoryTransformation.Builder {
 
     private List<QueryOperation> operationList = new ArrayList<>();

@@ -106,6 +106,7 @@ public final class DataUtil {
         return dataView;
     }
 
+    @SuppressWarnings("rawtypes")
     public static <T> T getData(final DataView dataView, final Key<? extends BaseValue<T>> key) throws InvalidDataException {
         checkDataExists(dataView, checkNotNull(key).getQuery());
         final Object object;
@@ -175,6 +176,7 @@ public final class DataUtil {
         return getSerializedManipulatorList(manipulators, DataUtil::getRegistrationFor);
     }
 
+    @SuppressWarnings("rawtypes")
     private static <T extends DataSerializable> List<DataView> getSerializedManipulatorList(Iterable<T> manipulators, Function<T, DataRegistration> func) {
         checkNotNull(manipulators);
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();

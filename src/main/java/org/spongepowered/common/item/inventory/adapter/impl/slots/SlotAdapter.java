@@ -49,6 +49,7 @@ import java.util.Optional;
  *
  * @param <TInventory> the Inventory Type
  */
+@SuppressWarnings("rawtypes")
 public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory> implements Slot {
 
     private final SlotLens<TInventory, net.minecraft.item.ItemStack> slot;
@@ -250,6 +251,7 @@ public class SlotAdapter<TInventory> extends AbstractInventoryAdapter<TInventory
                 if (this.inventory instanceof ContainerFabric) {
                     return ((Slot) ((ContainerFabric) this.inventory).getContainer().getSlot(this.slotNumber));
                 }
+                return this;
             default:
                 return this;
         }

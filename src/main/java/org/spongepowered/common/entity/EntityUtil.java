@@ -1007,7 +1007,7 @@ public final class EntityUtil {
      * @param offsetY The offset y coordinate
      * @return The item entity
      */
-    @SuppressWarnings({"unchecked", "rawType"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY, double xPos, double zPos) {
         if (itemStack.isEmpty()) {
@@ -1028,13 +1028,13 @@ public final class EntityUtil {
 
         // Gather phase states to determine whether we're merging or capturing later
         final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState currentState = peek.state;
+        final IPhaseState<?> currentState = peek.state;
         final PhaseContext<?> phaseContext = peek.context;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             // Perform the event throws first, if they return false, return null
-            item = throwDropItemAndConstructEvent(mixinEntity, posX, posY, posZ, snapshot, original);
+            item = throwDropItemAndConstructEvent(mixinEntity, posX, posY, posZ, snapshot, original, frame);
 
             if (item == null || item.isEmpty()) {
                 return null;
@@ -1048,16 +1048,16 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (currentState.performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
+            if (((IPhaseState) currentState).performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            EntityUtil.processEntitySpawn(fromNative(entityitem), () -> Optional.empty());
+            EntityUtil.processEntitySpawn(fromNative(entityitem), Optional::empty);
             return entityitem;
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static EntityItem playerDropItem(IMixinEntityPlayer mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         mixinPlayer.shouldRestoreInventory(false);
@@ -1078,7 +1078,7 @@ public final class EntityUtil {
 
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-            item = throwDropItemAndConstructEvent(mixinPlayer, posX, posY, posZ, snapshot, original);
+            item = throwDropItemAndConstructEvent(mixinPlayer, posX, posY, posZ, snapshot, original, frame);
 
             if (item == null || item.isEmpty()) {
                 return null;
@@ -1150,61 +1150,73 @@ public final class EntityUtil {
      * @param posZ The position z for the item stack to spawn
      * @param snapshot The item snapshot of the item to drop
      * @param original The original list to be used
+     * @param frame
      * @return The item if it is to be spawned, null if to be ignored
      */
     @Nullable
     public static ItemStack throwDropItemAndConstructEvent(IMixinEntity entity, double posX, double posY,
-        double posZ, ItemStackSnapshot snapshot, List<ItemStackSnapshot> original) {
-        try (CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            final IMixinEntityPlayer mixinPlayer;
-            if (entity instanceof IMixinEntityPlayer) {
-                mixinPlayer = (IMixinEntityPlayer) entity;
-            } else {
-                mixinPlayer = null;
-            }
-            ItemStack item;
-
-            stackFrame.pushCause(entity);
-
-            // FIRST we want to throw the DropItemEvent.PRE
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(stackFrame.getCurrentCause(),
-                ImmutableList.of(snapshot), original);
-            SpongeImpl.postEvent(dropEvent);
-            if (dropEvent.isCancelled()) {
-                if (mixinPlayer != null) {
-                    mixinPlayer.shouldRestoreInventory(true);
-                }
-                return null;
-            }
-            if (dropEvent.getDroppedItems().isEmpty()) {
-                return null;
-            }
-
-            // SECOND throw the ConstructEntityEvent
-            Transform<World> suggested = new Transform<>(entity.getWorld(), new Vector3d(posX, posY, posZ));
-            stackFrame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(stackFrame.getCurrentCause(), EntityTypes.ITEM, suggested);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                // Make sure the player is restoring inventories
-                if (mixinPlayer != null) {
-                    mixinPlayer.shouldRestoreInventory(true);
-                }
-                return null;
-            }
-
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-            if (item == null) {
-                // Make sure the player is restoring inventories
-                if (mixinPlayer != null) {
-                    mixinPlayer.shouldRestoreInventory(true);
-                }
-                return null;
-            }
-            return item;
+        double posZ, ItemStackSnapshot snapshot, List<ItemStackSnapshot> original, CauseStackManager.StackFrame frame) {
+        final IMixinEntityPlayer mixinPlayer;
+        if (entity instanceof IMixinEntityPlayer) {
+            mixinPlayer = (IMixinEntityPlayer) entity;
+        } else {
+            mixinPlayer = null;
         }
+        ItemStack item;
+
+        frame.pushCause(entity);
+
+        // FIRST we want to throw the DropItemEvent.PRE
+        final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(),
+            ImmutableList.of(snapshot), original);
+        SpongeImpl.postEvent(dropEvent);
+        if (dropEvent.isCancelled()) {
+            if (mixinPlayer != null) {
+                mixinPlayer.shouldRestoreInventory(true);
+            }
+            return null;
+        }
+        if (dropEvent.getDroppedItems().isEmpty()) {
+            return null;
+        }
+
+        // SECOND throw the ConstructEntityEvent
+        Transform<World> suggested = new Transform<>(entity.getWorld(), new Vector3d(posX, posY, posZ));
+        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, suggested);
+        frame.removeContext(EventContextKeys.SPAWN_TYPE);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            // Make sure the player is restoring inventories
+            if (mixinPlayer != null) {
+                mixinPlayer.shouldRestoreInventory(true);
+            }
+            return null;
+        }
+
+        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+        if (item == null) {
+            // Make sure the player is restoring inventories
+            if (mixinPlayer != null) {
+                mixinPlayer.shouldRestoreInventory(true);
+            }
+            return null;
+        }
+        return item;
     }
 
+
+    /**
+     * This is used to create the "dropping" motion for items caused by players. This
+     * specifically was being used (and should be the correct math) to drop from the
+     * player, when we do item stack captures preventing entity items being created.
+     *
+     * @param dropAround True if it's being "dropped around the player like dying"
+     * @param player The player to drop around from
+     * @param random The random instance
+     * @return The motion vector
+     */
+    @SuppressWarnings("unused")
     private static Vector3d createDropMotion(boolean dropAround, EntityPlayer player, Random random) {
         double x;
         double y;

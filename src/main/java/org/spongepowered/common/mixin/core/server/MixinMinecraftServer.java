@@ -97,6 +97,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.generation.GenericGenerationContext;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -355,12 +356,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
 
-        try (GenerationContext context =GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
+        try (GenerationContext<GenericGenerationContext> context = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext()
             .source(worldServer)
-            .world( worldServer)
-            .buildAndSwitch()) {
+            .world( worldServer)) {
+            context.buildAndSwitch();
             int i = 0;
             this.setUserMessage("menu.generatingTerrain");
             LOGGER.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
@@ -763,8 +763,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public Object onCall(Callable<?> callable) throws Exception {
         Object value;
         try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
-                .source(callable)
-                .buildAndSwitch()) {
+                .source(callable)) {
+            context.buildAndSwitch();
             value = callable.call();
         } catch (Exception e) {
             throw e;
@@ -788,6 +788,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         cir.setReturnValue(report);
     }
 
+    /**
+     * @author unknown
+     * @reason uses the world manager to update.
+     */
     @Overwrite
     public void setDifficultyForAllWorlds(EnumDifficulty difficulty) {
         WorldManager.updateServerDifficulty();

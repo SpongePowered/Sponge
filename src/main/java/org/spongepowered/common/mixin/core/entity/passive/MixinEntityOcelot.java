@@ -68,8 +68,8 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                Sponge.getCauseStackManager().pushCause(player);
-                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this))) {
+                frame.pushCause(player);
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), this))) {
                     stack.setCount(stack.getCount() - 1);
                     return random;
                 }

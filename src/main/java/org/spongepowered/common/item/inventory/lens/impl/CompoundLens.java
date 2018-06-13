@@ -77,11 +77,13 @@ public class CompoundLens extends ConceptualLens {
 
         private final List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
 
+        @SuppressWarnings({"rawtypes", "unchecked"})
         public Builder add(Lens lens) {
             this.lenses.add(lens);
             return this;
         }
 
+        @SuppressWarnings({"rawtypes", "unchecked"})
         public CompoundLens build(CompoundSlotProvider provider) {
             return new CompoundLens(provider.size(), VanillaAdapter.class, provider, this.lenses);
         }

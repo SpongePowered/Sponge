@@ -104,6 +104,7 @@ public class PlayerInventoryLens extends RealLens {
 
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         if (this.isContainer && inv instanceof ContainerFabric) {

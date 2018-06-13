@@ -33,11 +33,9 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
 
 @Mixin(AbstractHorse.class)
@@ -46,25 +44,14 @@ public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Ho
 
     @Shadow protected ContainerHorseChest horseChest;
 
-    @Unique
-    protected void printDeprecatedHorseUsage(String specificSubHeader) {
-        new PrettyPrinter(60).add("Deprecated Usage Detected").centre().hr()
-                .add(specificSubHeader)
-                .addWrapped(50,"Usage of these Horse related methods are no longer supported\n"
-                               + "while they work technically for data retrieval, setting\n"
-                               + "this unsupported data is no longer possible. Please \n"
-                               + "notify the plugin developer using these methods!")
-                .add(new UnsupportedOperationException("Deprecated Usage Detected"))
-                .trace();
-    }
-
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this.horseChest);
     }
 
     @Inject(method = "initHorseChest", at = @At("RETURN"))
-    public void onInitHorseChest(CallbackInfo ci) {
+    private void onInitHorseChest(CallbackInfo ci) {
         if (horseChest instanceof IMixinCarriedInventory) {
             ((IMixinCarriedInventory) horseChest).setCarrier(this);
         }

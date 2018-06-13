@@ -34,6 +34,7 @@ import java.util.List;
 /**
  * Queries the inventory for slots in order of the query operations.
  */
+@SuppressWarnings("rawtypes")
 public class SpongeQueryTransformation implements InventoryTransformation {
 
     private final List<QueryOperation> operations;

@@ -42,7 +42,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.world.Location;
 
 // Only newly spawned Humans will work. If you want prior ones, update the code in onSpawnEntity to lookup the creator and add the task :p.
-@Plugin(id = "humanaitest", name = "Human AI Test", description = "Simple plugin used for AI and other tests")
+@Plugin(id = "humanaitest", name = "Human AI Test", description = "Simple plugin used for AI and other tests", version = "0.0.0")
 public class HumanAITest {
 
     @Listener
