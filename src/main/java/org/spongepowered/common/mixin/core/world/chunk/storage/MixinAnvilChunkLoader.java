@@ -25,10 +25,6 @@
 package org.spongepowered.common.mixin.core.world.chunk.storage;
 
 import com.flowpowered.math.vector.Vector3d;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
@@ -74,6 +70,7 @@ import org.spongepowered.common.util.QueuedChunk;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -134,8 +131,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     private void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
       int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            final Int2ObjectMap<PlayerTracker> trackedIntPlayerPositions = new Int2ObjectOpenHashMap<>();
-            final Short2ObjectMap<PlayerTracker> trackedShortPlayerPositions = new Short2ObjectOpenHashMap<>();
+            final Map<Integer, PlayerTracker> trackedIntPlayerPositions = new HashMap<>();
+            final Map<Short, PlayerTracker> trackedShortPlayerPositions = new HashMap<>();
             final NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
             final IMixinChunk chunk = (IMixinChunk) chunkIn;
             for (int i = 0; i < positions.tagCount(); i++) {

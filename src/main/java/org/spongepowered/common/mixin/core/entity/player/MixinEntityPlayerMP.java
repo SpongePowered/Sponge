@@ -201,7 +201,10 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -979,6 +982,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Value<Instant> lastPlayed() {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
+    }
+
+    @Override
+    public boolean hasPlayedBefore() {
+        final Instant instant = SpongePlayerDataHandler.getFirstJoined(this.getUniqueId()).get();
+        final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
+        final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+        final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
+        return timeSinceFirstJoined.getSeconds() > 0;
     }
 
     // TODO implement with contextual data

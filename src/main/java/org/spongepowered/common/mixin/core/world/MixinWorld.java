@@ -289,14 +289,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // @formatter:on
 
-    @Shadow public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
+    @Shadow
+    public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
         return true; // shadowed so we can call from MixinWorldServer in spongeforge.
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
                                                                      + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
-        if (this.isRemote) {
+        if (this.isFake()) {
             return provider.createWorldBorder();
         }
         return ((IMixinWorldProvider) provider).createServerWorldBorder();
@@ -305,10 +306,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollisionBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)
     public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis, CallbackInfoReturnable<List<AxisAlignedBB>> cir) {
-        if (this.isRemote || entity == null) {
+        if (this.isFake() || entity == null) {
             return;
         }
-        if (entity.world != null && !entity.world.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
+        if (entity.world != null && !((IMixinWorld) entity.world).isFake() && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList<>());
         }
@@ -562,7 +563,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        if (this.isRemote) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
+        if (this.isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
             return Collections.emptyList();
         }
         return (List<Chunk>) (List<?>) Lists.newArrayList(((WorldServer) (Object) this).getChunkProvider().getLoadedChunks());
@@ -1152,7 +1153,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
                            to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
     private boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
-        if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
+        if (!this.isFake() && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
             return false;
         }
 
@@ -1210,7 +1211,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
     private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
         final net.minecraft.world.chunk.Chunk chunk;
-        if (!this.isRemote) {
+        if (!this.isFake()) {
             chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         } else {
             chunk = this.getChunkFromBlockCoords(pos);
@@ -1260,7 +1261,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
             // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
-            if (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            if (!this.isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 return this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             }
             // Sponge end
@@ -1608,7 +1609,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        if (!this.isRemote) {
+        if (!this.isFake()) {
             try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this)) {
                 context.buildAndSwitch();
                 this.startPendingTileEntityTimings(); // Sponge

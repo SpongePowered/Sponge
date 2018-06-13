@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -60,6 +61,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
@@ -96,6 +98,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
+        if (((IMixinWorld) worldObjIn).isFake()) {
+            return;
+        }
         this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
         ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
@@ -272,7 +277,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Overwrite
     public boolean tick()
     {
-        if (!this.world.disableLevelSaving)
+        if (!this.world.disableLevelSaving && !((IMixinWorld) this.world).isFake())
         {
             ((IMixinWorldServer) this.world).getTimingsHandler().doChunkUnload.startTiming();
             Iterator<Chunk> iterator = this.id2ChunkMap.values().iterator();
