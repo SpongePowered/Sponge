@@ -186,9 +186,7 @@ public final class TrackingUtil {
         final Optional<User> notifierUser = mixinEntity.getNotifierUser();
         final Optional<User> creatorUser = mixinEntity.getCreatorUser();
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext()
-            .source(entity)
-            .notifier(() -> notifierUser)
-            .owner(() -> creatorUser);
+            .source(entity);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
