@@ -43,7 +43,7 @@ import org.spongepowered.api.text.format.TextColors;
 
 import java.io.IOException;
 
-@Plugin(id = "testing", name = "Testing", version = "1.0")
+@Plugin(id = "itemtest", name = "ItemTest", version = "1.0", description = "tests item stack serialization and deserialization")
 public class ItemCloneTest {
     private static String ITEM_STRING = null;
 
