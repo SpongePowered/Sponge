@@ -39,6 +39,8 @@ public class TileEntityActivationCategory extends ConfigCategory {
     private int defaultBlockRange = 64;
     @Setting(value = "default-tick-rate", comment = "Default tick rate used for all tileentities unless overridden.")
     private int defaultTickRate = 1;
+    @Setting(value = "default-activation-state", comment = "Default activation state used to determine if a tileentity should be active once loaded (starts to tick immediately).\nIf set to false, the tileentity will not be active until a player comes within range.\nNote: This will not affect tileentities in persisted chunks.")
+    private boolean defaultActivationState = true;
     @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, TileEntityActivationModCategory> modList = new HashMap<>();
 
@@ -47,6 +49,10 @@ public class TileEntityActivationCategory extends ConfigCategory {
 
     public boolean autoPopulateData() {
         return this.autoPopulate;
+    }
+
+    public boolean getDefaultActivationState() {
+        return this.defaultActivationState;
     }
 
     public int getDefaultBlockRange() {
