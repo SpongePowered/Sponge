@@ -664,7 +664,7 @@ public class SpongeCommonEventFactory {
             locations.add(new Location<>((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
         }
 
-        try (StackFrame ignored = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (extending) {
                 frame.addContext(EventContextKeys.PISTON_EXTEND, WorldUtil.fromNative(world));
             } else {
