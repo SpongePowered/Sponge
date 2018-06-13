@@ -37,6 +37,17 @@ import javax.annotation.Nullable;
 
 public final class RegistryHelper {
 
+    private static final Field MODIFIERS_FIELD;
+
+    static {
+        try {
+            MODIFIERS_FIELD = Field.class.getDeclaredField("modifiers");
+            MODIFIERS_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Error while preparing 'modifiers' field of Field class.");
+        }
+    }
+
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping) {
         return mapFields(apiClass, mapping, null);
     }
@@ -66,6 +77,7 @@ public final class RegistryHelper {
                     SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), fieldName);
                     continue;
                 }
+                makeStaticNonFinal(f);
                 f.set(null, value);
             } catch (Exception e) {
                 if (!ignore) {
@@ -91,12 +103,14 @@ public final class RegistryHelper {
         try {
             Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
-            Field modifiers = field.getClass().getDeclaredField("modifiers");
-            modifiers.setAccessible(true);
-            modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            makeStaticNonFinal(field);
             field.set(null, newValue);
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
         }
+    }
+
+    private static void makeStaticNonFinal(Field field) throws IllegalAccessException {
+        MODIFIERS_FIELD.setInt(field, field.getModifiers() & ~Modifier.FINAL);
     }
 }
