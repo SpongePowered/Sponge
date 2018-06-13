@@ -193,7 +193,6 @@ public final class TrackingUtil {
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
              ) {
-            context.buildAndSwitch();
             entityTiming.startTiming();
             frame.pushCause(entity);
             mixinEntity.getNotifierUser()
@@ -207,6 +206,7 @@ public final class TrackingUtil {
                     context.owner(creator);
 
                 });
+            context.buildAndSwitch();
             entity.updateRidden();
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
