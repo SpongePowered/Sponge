@@ -54,14 +54,13 @@ import java.util.Map;
 public class TileEntityActivation {
 
     /**
-     * These tileentities are excluded from Activation range checks.
+     * Initialize activation settings for TE
      *
      * @param tileEntity The tileentity to check
-     * @return boolean If it should always tick.
      */
-    public static boolean initializeTileEntityActivationState(TileEntity tileEntity) {
+    public static void initializeTileEntityActivationSettings(TileEntity tileEntity) {
         if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
-            return true;
+            return;
         }
 
         TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
@@ -70,7 +69,7 @@ public class TileEntityActivation {
         IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
         SpongeTileEntityType spongeType = (SpongeTileEntityType) type;
         if (spongeType == null || spongeType.getModId() == null) {
-            return true;
+            return;
         }
         TileEntityActivationModCategory tileEntityMod = config.getModList().get(spongeType.getModId().toLowerCase());
         int defaultActivationRange = config.getDefaultBlockRange();
@@ -78,46 +77,36 @@ public class TileEntityActivation {
         if (tileEntityMod == null) {
             // use default activation range
             spongeTileEntity.setActivationRange(defaultActivationRange);
-            if (defaultActivationRange <= 0) {
-                return true;
-            }
-            return false;
+            return;
         } else if (!tileEntityMod.isEnabled()) {
             spongeTileEntity.setActivationRange(defaultActivationRange);
             spongeTileEntity.setSpongeTickRate(defaultTickRate);
-            return true;
+            return;
+        }
+
+        Boolean defaultChunkLoadActivation = tileEntityMod.getDefaultActivationState();
+        Boolean tileEntityChunkLoadActivation = tileEntityMod.getTileEntityActivationStateList().get(type.getName().toLowerCase());
+        if (defaultChunkLoadActivation != null && tileEntityChunkLoadActivation == null) {
+            spongeTileEntity.setDefaultActivationState(defaultChunkLoadActivation);
+        } else if (tileEntityChunkLoadActivation != null) {
+            spongeTileEntity.setDefaultActivationState(tileEntityChunkLoadActivation);
         }
 
         Integer defaultModActivationRange = tileEntityMod.getDefaultBlockRange();
         Integer tileEntityActivationRange = tileEntityMod.getTileEntityRangeList().get(type.getName().toLowerCase());
         if (defaultModActivationRange != null && tileEntityActivationRange == null) {
             spongeTileEntity.setActivationRange(defaultModActivationRange);
-            if (defaultModActivationRange <= 0) {
-                return true;
-            }
         } else if (tileEntityActivationRange != null) {
             spongeTileEntity.setActivationRange(tileEntityActivationRange);
-            if (tileEntityActivationRange <= 0) {
-                return true;
-            }
         }
 
         Integer defaultModTickRate = tileEntityMod.getDefaultTickRate();
         Integer tileEntityTickRate = tileEntityMod.getTileEntityTickRateList().get(type.getName().toLowerCase());
         if (defaultModTickRate != null && tileEntityTickRate == null) {
             spongeTileEntity.setSpongeTickRate(defaultModTickRate);
-            if (defaultModTickRate <= 0) {
-                return true;
-            }
-            return false;
         } else if (tileEntityTickRate != null) {
             spongeTileEntity.setSpongeTickRate(tileEntityTickRate);
-            if (tileEntityTickRate <= 0) {
-                return true;
-            }
         }
-
-        return false;
     }
 
     /**
@@ -166,7 +155,7 @@ public class TileEntityActivation {
                 IModData_Activation spongeEntity = (IModData_Activation) tileEntity;
                 // check if activation cache needs to be updated
                 if (spongeEntity.requiresActivationCacheRefresh()) {
-                    TileEntityActivation.initializeTileEntityActivationState(tileEntity);
+                    TileEntityActivation.initializeTileEntityActivationSettings(tileEntity);
                     spongeEntity.requiresActivationCacheRefresh(false);
                 }
 
