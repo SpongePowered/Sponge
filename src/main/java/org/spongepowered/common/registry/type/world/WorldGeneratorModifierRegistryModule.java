@@ -77,7 +77,6 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     @SuppressWarnings("deprecation")
     @Override
     public void registerDefaults() {
-        registerAdditionalCatalog(new org.spongepowered.api.extra.modifier.skylands.SkylandsWorldGeneratorModifier());
         registerAdditionalCatalog(new VoidWorldGeneratorModifier());
     }
 
