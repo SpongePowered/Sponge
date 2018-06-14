@@ -40,6 +40,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.weather.Lightning;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.world.World;
@@ -125,23 +126,27 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         if (this.isDead || this.world.isRemote) {
             return;
         }
-        Sponge.getCauseStackManager().pushCause(this);
-        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(Sponge.getCauseStackManager().getCurrentCause(), this.struckEntities, this.struckBlocks);
-        Sponge.getEventManager().post(strike);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            LightningEvent.Strike
+                strike =
+                SpongeEventFactory
+                    .createLightningEventStrike(frame.getCurrentCause(), this.struckEntities, this.struckBlocks);
+            Sponge.getEventManager().post(strike);
 
-        if (!strike.isCancelled()) {
-            for (Transaction<BlockSnapshot> bt : strike.getTransactions()) {
-                if (bt.isValid()) {
-                    BlockSnapshot bs = bt.getFinal();
-                    this.world.setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(), ((IBlockState) bs.getState()));
+            if (!strike.isCancelled()) {
+                for (Transaction<BlockSnapshot> bt : strike.getTransactions()) {
+                    if (bt.isValid()) {
+                        BlockSnapshot bs = bt.getFinal();
+                        this.world.setBlockState(VecHelper.toBlockPos(bs.getLocation().get()), ((IBlockState) bs.getState()));
+                    }
                 }
+                for (Entity e : strike.getEntities()) {
+                    ((net.minecraft.entity.Entity) e).onStruckByLightning((EntityLightningBolt) (Object) this);
+                }
+                SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }
-            for (Entity e : strike.getEntities()) {
-                ((net.minecraft.entity.Entity) e).onStruckByLightning((EntityLightningBolt) (Object) this);
-            }
-            SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(Sponge.getCauseStackManager().getCurrentCause()));
         }
-        Sponge.getCauseStackManager().popCause();
     }
 
     @Override

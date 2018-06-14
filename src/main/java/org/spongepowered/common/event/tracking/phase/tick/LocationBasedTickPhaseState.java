@@ -39,6 +39,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
@@ -71,7 +72,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
         if (user != null) {
             final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
             final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
-            final BlockPos changedBlockPos = ((IMixinLocation)(Object) changedLocation).getBlockPos();
+            final BlockPos changedBlockPos = VecHelper.toBlockPos(changedLocation);
             final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
             changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
         }

@@ -38,6 +38,7 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
 import java.util.function.Predicate;
@@ -81,7 +82,7 @@ public class RandomBlockPopulator implements RandomBlock {
                 world.setBlock(pos.getBlockPosition(), this.state);
                 // Liquids force a block update tick so they may flow during world gen
                 try {
-                    ((WorldServer) world).immediateBlockTick(((IMixinLocation) (Object) pos).getBlockPos(), (IBlockState) this.state, random);
+                    ((WorldServer) world).immediateBlockTick(VecHelper.toBlockPos(pos), (IBlockState) this.state, random);
                 } catch(IllegalArgumentException e) {
                     // ignore
                 }

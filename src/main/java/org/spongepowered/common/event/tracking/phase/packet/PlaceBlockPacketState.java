@@ -88,7 +88,7 @@ class PlaceBlockPacketState extends BasicPacketState {
         BasicPacketContext context) {
         Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final Location<World> location = transaction.getFinal().getLocation().get();
-        BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+        BlockPos pos = VecHelper.toBlockPos(location);
         IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);

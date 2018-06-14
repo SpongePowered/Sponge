@@ -30,9 +30,12 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.data.property.block.SolidCubeProperty;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCubeProperty> {
 
@@ -44,7 +47,7 @@ public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCube
     }
 
     @Override
-    protected Optional<SolidCubeProperty> getForBlock(IBlockState block) {
+    protected Optional<SolidCubeProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
     }
 
