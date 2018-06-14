@@ -59,6 +59,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.List;
