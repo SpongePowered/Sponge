@@ -34,6 +34,8 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class PassablePropertyStore extends AbstractBlockPropertyStore<PassableProperty> {
 
     private static final PassableProperty TRUE = new PassableProperty(true);
@@ -44,7 +46,7 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
     }
 
     @Override
-    protected Optional<PassableProperty> getForBlock(IBlockState block) {
+    protected Optional<PassableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
     }
 

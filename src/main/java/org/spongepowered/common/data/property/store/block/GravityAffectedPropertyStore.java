@@ -27,9 +27,12 @@ package org.spongepowered.common.data.property.store.block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.GravityAffectedProperty;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class GravityAffectedPropertyStore extends AbstractBlockPropertyStore<GravityAffectedProperty> {
 
@@ -41,7 +44,7 @@ public class GravityAffectedPropertyStore extends AbstractBlockPropertyStore<Gra
     }
 
     @Override
-    protected Optional<GravityAffectedProperty> getForBlock(IBlockState block) {
+    protected Optional<GravityAffectedProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(BlockFalling.class.isAssignableFrom(block.getClass()) ? TRUE : FALSE);
     }
 

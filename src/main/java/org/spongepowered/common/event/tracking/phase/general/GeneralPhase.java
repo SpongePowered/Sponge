@@ -50,6 +50,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
@@ -171,7 +172,7 @@ public final class GeneralPhase extends TrackingPhase {
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
                         // Cancel any block drops performed, avoids any item drops, regardless
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         postContext.getBlockDropSupplier().removeAllIfNotEmpty(pos);
                     }
                 }
@@ -204,7 +205,7 @@ public final class GeneralPhase extends TrackingPhase {
             // Handle item drops captured
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
-            final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
+            final BlockPos pos = VecHelper.toBlockPos(worldLocation);
             capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
                     .spawnItemDataForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext));
             capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil

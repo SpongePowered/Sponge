@@ -31,9 +31,12 @@ import net.minecraft.init.Blocks;
 import org.spongepowered.api.data.property.block.InstrumentProperty;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.InstrumentTypes;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class InstrumentPropertyStore extends AbstractBlockPropertyStore<InstrumentProperty> {
 
@@ -42,7 +45,7 @@ public class InstrumentPropertyStore extends AbstractBlockPropertyStore<Instrume
     }
 
     @Override
-    protected Optional<InstrumentProperty> getForBlock(IBlockState block) {
+    protected Optional<InstrumentProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(new InstrumentProperty(getInstrumentType(block)));
     }
 

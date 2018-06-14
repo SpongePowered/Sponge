@@ -93,6 +93,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
@@ -133,7 +134,7 @@ public final class TrackingUtil {
     public static final Function<BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = (blockSnapshot) -> {
         final Location<World> originalLocation = blockSnapshot.getLocation().get();
         final WorldServer worldServer = (WorldServer) originalLocation.getExtent();
-        final BlockPos blockPos = ((IMixinLocation) (Object) originalLocation).getBlockPos();
+        final BlockPos blockPos = VecHelper.toBlockPos(originalLocation);
         final IBlockState newState = worldServer.getBlockState(blockPos);
         final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, BlockChangeFlags.NONE);
@@ -455,7 +456,7 @@ public final class TrackingUtil {
     @SuppressWarnings("ConstantConditions")
     @Nullable
     public static User getNotifierOrOwnerFromBlock(Location<World> location) {
-        final BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
+        final BlockPos blockPos = VecHelper.toBlockPos(location);
         return getNotifierOrOwnerFromBlock((WorldServer) location.getExtent(), blockPos);
     }
 
@@ -576,7 +577,7 @@ public final class TrackingUtil {
                     // Cancel any block drops performed, avoids any item drops, regardless
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
                         context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
                         context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
@@ -596,7 +597,7 @@ public final class TrackingUtil {
                         // This prevents unnecessary spawns.
                         final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                         if (location != null) {
-                            final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                            final BlockPos pos = VecHelper.toBlockPos(location);
                             context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
                         }
                     }

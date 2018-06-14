@@ -195,7 +195,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             teleporter$portalposition.lastUpdateTime = this.world.getTotalWorldTime();
             addToCache = false;
         } else {
-            BlockPos blockSearchPosition = ((IMixinLocation) (Object) searchLocation).getBlockPos();
+            BlockPos blockSearchPosition = VecHelper.toBlockPos(searchLocation);
 
             for (int i1 = -this.searchRadius; i1 <= this.searchRadius; ++i1) {
                 BlockPos blockpos2;
@@ -234,7 +234,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     }
 
     private void handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
-        BlockPos blockPos = ((IMixinLocation) (Object) portalLocation).getBlockPos();
+        BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
         double xTarget = portalLocation.getX() + 0.5D;
         double yTarget;
         double zTarget = portalLocation.getZ() + 0.5D;

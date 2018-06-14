@@ -151,7 +151,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     .acceptIfNotEmpty(map -> {
                         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                         for (BlockSnapshot snapshot : capturedBlocks) {
-                            final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
+                            final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());
                             final Collection<EntityItem> entityItems = map.get(blockPos);
                             if (!entityItems.isEmpty()) {
                                 frame.pushCause(snapshot);

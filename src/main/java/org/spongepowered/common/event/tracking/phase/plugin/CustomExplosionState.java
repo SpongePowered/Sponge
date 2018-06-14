@@ -194,7 +194,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
                     // Cancel any block drops performed, avoids any item drops, regardless
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
                     }
                 }
@@ -211,7 +211,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
                     // This prevents unnecessary spawns.
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
                     }
                 }
