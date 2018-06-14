@@ -370,7 +370,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
             .build("minecraft:player", "Player");
 
         UNKNOWN = builder.reset()
-            .build("minecraft:unknown", "UKNOWN");
+            .build("minecraft:unknown", "UNKNOWN");
 
         registerAdditionalCatalog(SLOT);
         registerAdditionalCatalog(MENU_ROW);

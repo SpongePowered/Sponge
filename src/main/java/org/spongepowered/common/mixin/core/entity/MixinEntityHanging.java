@@ -77,7 +77,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
      * Called to update the entity's position/logic.
      */
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;onValidSurface()Z"))
-    private boolean checkIfOnValidSurceAndIgnoresPhysics(EntityHanging entityHanging) {
+    private boolean checkIfOnValidSurfaceAndIgnoresPhysics(EntityHanging entityHanging) {
         return this.onValidSurface() && !this.ignorePhysics;
     }
 

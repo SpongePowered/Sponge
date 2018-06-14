@@ -100,7 +100,7 @@ import javax.annotation.Nullable;
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer, CarriedInventory<Carrier> {
 
     @Shadow public List<Slot> inventorySlots;
-    @Shadow public NonNullList<ItemStack> inventoryItemStacks ;
+    @Shadow public NonNullList<ItemStack> inventoryItemStacks;
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
     private boolean spectatorChest;
