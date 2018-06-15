@@ -568,6 +568,9 @@ public final class EntityUtil {
         return true;
     }
 
+    public static ItemStack getItem(Entity entity) {
+        return entity instanceof EntityItem ? ((EntityItem) entity).getItem() : ItemStack.EMPTY;
+    }
 
     static final class EntityTrace {
 
