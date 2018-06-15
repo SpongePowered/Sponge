@@ -605,6 +605,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("age", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("age").name("Age").query(of("Age")).build());
 
+        this.register("tags", Key.builder().type(TypeTokens.SET_STRING_VALUE_TOKEN).id("tags").name("Tags").query(of("Tags")).build());
+
         this.register("is_adult", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_adult").name("Is Adult").query(of("IsAdult")).build());
 
         this.register("is_baby", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_baby").name("Is Baby").query(of("IsBaby")).build());
