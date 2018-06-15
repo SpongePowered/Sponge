@@ -96,8 +96,13 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         if (!ServerUtils.isCallingFromMainThread()) {
             return;
         }
-        this.progressMap = new HashMap<>();
-        processProgressMap(getAdvancement().getCriterion(), this.progressMap);
+        final Optional<Advancement> advancement = getOptionalAdvancement();
+        if (advancement.isPresent()) {
+            this.progressMap = new HashMap<>();
+            processProgressMap(advancement.get().getCriterion(), this.progressMap);
+        } else {
+            this.progressMap = null;
+        }
     }
 
     private Map<AdvancementCriterion, ICriterionProgress> getProgressMap() {
@@ -279,11 +284,22 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         }
     }
 
-    @Override
-    public Advancement getAdvancement() {
+    /**
+     * Gets the {@link Advancement} without checking if it's still
+     * loaded on the server.
+     *
+     * @return The advancement
+     */
+    private Optional<Advancement> getOptionalAdvancement() {
         checkServer();
         checkState(this.advancement != null, "The advancement is not yet initialized");
-        return AdvancementRegistryModule.getInstance().getById(this.advancement).get();
+        return AdvancementRegistryModule.getInstance().getById(this.advancement);
+    }
+
+    @Override
+    public Advancement getAdvancement() {
+        return getOptionalAdvancement().orElseThrow(() -> new IllegalStateException(
+                "The advancement of this advancement progress is unloaded: " + this.advancement));
     }
 
     @Override
