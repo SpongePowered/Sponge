@@ -44,7 +44,7 @@ public interface IMixinSingleBlockCarrier extends SingleBlockCarrier {
         return getInventory(from, this);
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "rawtypes"})
     static Inventory getInventory(Direction from, BlockCarrier thisThing) {
         if (thisThing instanceof ISidedInventory) {
             EnumFacing facing = DirectionFacingProvider.getInstance().get(from).get();
