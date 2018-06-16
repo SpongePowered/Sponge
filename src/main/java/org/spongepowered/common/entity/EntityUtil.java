@@ -917,6 +917,8 @@ public final class EntityUtil {
                     new SPacketRespawn(toDimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
                             entityPlayerMP.interactionManager.getGameType()));
             entityPlayerMP.connection.sendPacket(new SPacketServerDifficulty(toWorld.getDifficulty(), toWorld.getWorldInfo().isDifficultyLocked()));
+            SpongeImpl.getServer().getPlayerList().updatePermissionLevel(entityPlayerMP);
+
             entity.setWorld(toWorld);
             entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
@@ -927,6 +929,12 @@ public final class EntityUtil {
             mcServer.getPlayerList().getPlayers().add(entityPlayerMP);
             entityPlayerMP.interactionManager.setWorld(toWorld);
             entityPlayerMP.addSelfToInternalCraftingInventory();
+
+            // Update reducedDebugInfo game rule
+            entityPlayerMP.connection.sendPacket(new SPacketEntityStatus(entityPlayerMP,
+                    toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+
+
             ((IMixinEntityPlayerMP) entityPlayerMP).refreshXpHealthAndFood();
             for (Object effect : entityPlayerMP.getActivePotionEffects()) {
                 entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), (PotionEffect) effect));
