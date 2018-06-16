@@ -40,8 +40,9 @@ public class InventoryPropertyStore<T extends InventoryProperty<?, ?>> implement
 
     private Class<T> property;
 
-    public InventoryPropertyStore(Class<T> property) {
+    public InventoryPropertyStore(Class<T> property, Class<? extends T> propertyImpl) {
         this.property = property;
+        AbstractInventoryProperty.register(property, propertyImpl);
     }
 
     @Override

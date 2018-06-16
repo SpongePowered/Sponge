@@ -45,6 +45,10 @@ public abstract class AbstractInventoryProperty<K, V> implements InventoryProper
 
     private static Map<Class<? extends InventoryProperty>, String> defaultKeys = new HashMap<>();
 
+    public static void register(Class<? extends InventoryProperty> property, Class<? extends InventoryProperty> propertyImpl) {
+        defaultKeys.put(propertyImpl, property.getSimpleName().toLowerCase(Locale.ENGLISH));
+    }
+
     /**
      * Operator for comparing to other properties. Operators should always be
      * applied by consumers in a &lt;this&gt; &lt;OPERATOR&gt; &lt;other&gt;
@@ -129,14 +133,7 @@ public abstract class AbstractInventoryProperty<K, V> implements InventoryProper
      * @return default key to use.
      */
     public static <T extends InventoryProperty<?, ?>> Object getDefaultKey(Class<T> clazz) {
-        return defaultKeys.computeIfAbsent(clazz, k -> {
-            for (Class<?> interf : k.getInterfaces()){
-                if (InventoryProperty.class.isAssignableFrom(interf)) {
-                    return interf.getSimpleName().toLowerCase(Locale.ENGLISH);
-                }
-            }
-            throw new IllegalStateException();
-        });
+        return defaultKeys.computeIfAbsent(clazz, k -> k.getSimpleName().toLowerCase(Locale.ENGLISH));
     }
 
     /**
