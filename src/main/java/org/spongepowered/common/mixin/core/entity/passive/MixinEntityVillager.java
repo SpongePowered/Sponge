@@ -100,7 +100,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
 
-    private Profession profession;
+    @Nullable private Profession profession;
 
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
     private void onSetProfession(int professionId, CallbackInfo ci) {
@@ -154,8 +154,8 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     @Override
-    public Profession getProfession() {
-        return this.profession;
+    public Optional<Profession> getProfession() {
+        return Optional.ofNullable(this.profession);
     }
 
     @Override
