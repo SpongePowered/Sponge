@@ -27,13 +27,15 @@ package org.spongepowered.common.interfaces.entity;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 
+import java.util.Optional;
+
 public interface IMixinVillager {
 
     void setCareer(Career career);
 
     Career getCareer();
 
-    Profession getProfession();
+    Optional<Profession> getProfession();
 
     void setProfession(Profession profession);
 
