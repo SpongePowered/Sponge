@@ -68,7 +68,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -598,27 +597,4 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         return false;
     }
 
-    @Override
-    public Set<Player> getViewers() {
-        return this.listeners.stream().filter(Player.class::isInstance).map(Player.class::cast).collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean hasViewers() {
-        return this.listeners.stream().anyMatch(p -> p instanceof Player);
-    }
-
-    @Override
-    public void open(Player viewer) throws IllegalArgumentException {
-        if (!this.listeners.contains(viewer)) {
-            viewer.openInventory(this);
-        }
-    }
-
-    @Override
-    public void close(Player viewer) throws IllegalArgumentException {
-        if (this.listeners.contains(viewer)) {
-            viewer.closeInventory();
-        }
-    }
 }

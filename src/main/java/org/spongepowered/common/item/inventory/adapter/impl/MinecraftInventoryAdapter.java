@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.api.item.inventory.type.Interactable;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.item.inventory.InventoryIterator;
@@ -238,4 +239,11 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
         return InventoryArchetypes.UNKNOWN;
     }
 
+    @Override
+    default Optional<Interactable> asInteractable() {
+        if (this instanceof Interactable) {
+            return Optional.of(((Interactable) this));
+        }
+        return Optional.empty();
+    }
 }

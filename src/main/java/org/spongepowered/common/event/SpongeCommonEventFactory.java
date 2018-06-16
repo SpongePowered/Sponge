@@ -1101,8 +1101,6 @@ public class SpongeCommonEventFactory {
             }
         }
 
-
-
         try {
             if (displayName != null) {
                 ((IMixinEntityPlayerMP) player).setContainerDisplay(displayName);
@@ -1133,6 +1131,9 @@ public class SpongeCommonEventFactory {
                 }
             } else if (inventory instanceof IInventory) {
                 player.displayGUIChest(((IInventory) inventory));
+            } else if (inventory instanceof org.spongepowered.api.item.inventory.Container) {
+                // TODO maybe make it work later
+                return null;
             } else {
                 return null;
             }
