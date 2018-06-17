@@ -242,7 +242,7 @@ public class PacketUtil {
                 // If the time between packets is small enough, use the last result.
                 if (packetDiff < 100) {
                     // Use previous result and avoid firing a second event
-                    return SpongeCommonEventFactory.lastItemOnBlockResult;
+                    return SpongeCommonEventFactory.lastInteractItemOnBlockCancelled;
                 }
 
                 final ItemStack heldItem = playerMP.getHeldItem(packet.getHand());
