@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
+import org.spongepowered.api.item.inventory.type.Interactable;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
@@ -262,5 +263,10 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     @Override
     public InventoryArchetype getArchetype() {
         return InventoryArchetypes.UNKNOWN;
+    }
+
+    @Override
+    public Optional<Interactable> asInteractable() {
+        return Optional.empty();
     }
 }

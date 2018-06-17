@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -69,5 +70,9 @@ public interface IMixinContainer extends IMixinInventory {
 
     void setInUse(boolean inUse);
     boolean isInUse();
+
+    List<EntityPlayerMP> listeners();
+
+    void setViewed(Object viewed);
 
 }
