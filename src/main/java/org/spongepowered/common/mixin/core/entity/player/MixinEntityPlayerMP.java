@@ -61,7 +61,6 @@ import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.network.play.server.SPacketEntityProperties;
-import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
@@ -124,7 +123,6 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
-import org.spongepowered.api.item.inventory.property.GuiIds;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -180,7 +178,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.interfaces.IMixinInteractable;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
@@ -1120,6 +1118,37 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((IMixinContainer) this.openContainer).setSpectatorChest(true);
         }
+    }
+
+    @Inject(method = "displayGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;addListener(Lnet/minecraft/inventory/IContainerListener;)V"))
+    private void onDisplayGuiAddListener(IInteractionObject guiOwner, CallbackInfo ci) {
+        this.trackInteractable(guiOwner);
+    }
+
+    @Inject(method = "displayGUIChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;addListener(Lnet/minecraft/inventory/IContainerListener;)V"))
+    private void onDisplayGuiChestAddListener(IInventory inventory, CallbackInfo ci) {
+        this.trackInteractable(inventory);
+    }
+
+    @Inject(method = "displayVillagerTradeGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;addListener(Lnet/minecraft/inventory/IContainerListener;)V"))
+    private void onDisplayVillagerTradeGuiAddListener(IMerchant villager, CallbackInfo ci) {
+        this.trackInteractable(villager);
+    }
+
+    @Inject(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;addListener(Lnet/minecraft/inventory/IContainerListener;)V"))
+    private void onOpenGuiHorseInventoryAddListener(AbstractHorse horse, IInventory inventoryIn, CallbackInfo ci) {
+        this.trackInteractable(inventoryIn);
+    }
+
+    private void trackInteractable(Object inventory) {
+        if (inventory instanceof Carrier) {
+            inventory = ((Carrier) inventory).getInventory();
+        }
+        if (inventory instanceof Inventory) {
+            ((Inventory) inventory).asInteractable().ifPresent(i -> ((IMixinInteractable) i).addContainer(this.openContainer));
+        }
+        ((IMixinContainer) this.openContainer).setViewed(inventory);
+        // TODO else unknown inventory - try to provide wrapper Interactable
     }
 
     @Override

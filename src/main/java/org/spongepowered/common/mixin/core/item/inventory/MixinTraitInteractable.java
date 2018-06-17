@@ -26,47 +26,24 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.entity.item.EntityMinecartContainer;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityLockable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.EmptyInventory;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.Interactable;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
-import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
+import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinInteractable;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
+import java.util.stream.Collectors;
 
 /**
  * Mixin into all known vanilla {@link IInventory} and {@link Container}
@@ -79,37 +56,55 @@ import javax.annotation.Nullable;
         CustomInventory.class,
         EntityVillager.class,
         SpongeUserInventory.class,
-        EntityMinecartContainer.class,
-        // TODO can this work?
-        InventoryBasic.class
+        EntityMinecartContainer.class
 }, priority = 999)
-public abstract class MixinTraitInteractable implements Interactable {
+public abstract class MixinTraitInteractable implements Interactable, IMixinInteractable {
 
     private List<Container> openContainers = new ArrayList<>();
 
     @Override
     public Set<Player> getViewers() {
-        return null;
+        return this.openContainers.stream()
+                .flatMap(c -> ((IMixinContainer) c).listeners().stream())
+                .map(Player.class::cast)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public boolean hasViewers() {
-        return false;
+        return this.openContainers.stream()
+                .flatMap(c -> ((IMixinContainer) c).listeners().stream())
+                .findAny().isPresent();
     }
 
     @Override
     public void open(Player viewer) throws IllegalArgumentException {
-
+        viewer.openInventory(this);
     }
 
     @Override
     public void close(Player viewer) throws IllegalArgumentException {
-
+        if (getViewers().contains(viewer)) {
+            viewer.closeInventory();
+        }
     }
 
     @Override
     public boolean canInteractWith(Player player) {
-        return false;
+        if (this instanceof IInventory) {
+            return this.canInteractWith(player);
+        }
+        return true;
+    }
+
+    @Override
+    public void addContainer(Container container) {
+        this.openContainers.add(container);
+    }
+
+    @Override
+    public void removeContainer(Container container) {
+        this.openContainers.remove(container);
     }
 }
 

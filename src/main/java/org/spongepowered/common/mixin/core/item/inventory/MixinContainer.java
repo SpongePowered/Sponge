@@ -70,6 +70,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinInteractable;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
@@ -595,6 +596,37 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             }
         }
         return false;
+    }
+
+    @Override
+    public List<EntityPlayerMP> listeners() {
+        return this.listeners.stream()
+                .filter(EntityPlayerMP.class::isInstance)
+                .map(EntityPlayerMP.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    @Nullable private Object viewed;
+
+    @Override
+    public void setViewed(Object viewed) {
+        this.viewed = viewed;
+    }
+
+    @Inject(method = "onContainerClosed", at = @At(value = "HEAD"))
+    private void onOnContainerClosed(EntityPlayer player, CallbackInfo ci) {
+        this.unTrackInteractable(this.viewed);
+        this.viewed = null;
+    }
+
+    private void unTrackInteractable(@Nullable Object inventory) {
+        if (inventory instanceof Carrier) {
+            inventory = ((Carrier) inventory).getInventory();
+        }
+        if (inventory instanceof Inventory) {
+            ((Inventory) inventory).asInteractable().ifPresent(i -> ((IMixinInteractable) i).removeContainer(((Container)(Object) this)));
+        }
+        // TODO else unknown inventory - try to provide wrapper Interactable
     }
 
 }
