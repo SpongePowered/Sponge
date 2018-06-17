@@ -45,6 +45,9 @@ public abstract class ContextFilterSourceDelegate implements ParameterFilterSour
 
     @Override
     public Tuple<Integer, Integer> write(String name, ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
+        this.createFields(cw);
+        this.writeCtor(name, cw, mv);
+
         // Get the context
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "getContext",

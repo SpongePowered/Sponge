@@ -24,20 +24,6 @@
  */
 package org.spongepowered.common.event.filter.delegate;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-import org.spongepowered.api.GameRegistry;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKey;
-import org.spongepowered.api.event.filter.cause.ContextValue;
-
-import java.lang.reflect.Parameter;
-import java.util.Optional;
-
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
@@ -53,6 +39,21 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
+import org.spongepowered.api.GameRegistry;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.filter.cause.ContextValue;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.SpongeGameRegistry;
+
+import java.lang.reflect.Parameter;
+import java.util.Optional;
+
 public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegate {
 
     private final ContextValue anno;
@@ -60,7 +61,7 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
     public ContextValueFilterSourceDelegate(ContextValue anno) {
         this.anno = anno;
 
-        Optional<EventContextKey> opKey = Sponge.getRegistry().getType(EventContextKey.class, this.anno.value());
+        Optional<EventContextKey> opKey = SpongeImpl.getRegistry().getType(EventContextKey.class, this.anno.value());
 
         if(!opKey.isPresent()) {
             throw new IllegalArgumentException(String.format(
@@ -81,8 +82,8 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
     public void writeCtor(String name, ClassWriter cw, MethodVisitor mv) {
         mv.visitVarInsn(ALOAD, 0);
 
-        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Sponge.class), "getRegistry",
-                Type.getMethodDescriptor(Type.getType(GameRegistry.class)), false);
+        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(SpongeImpl.class), "getRegistry",
+                Type.getMethodDescriptor(Type.getType(SpongeGameRegistry.class)), false);
         mv.visitLdcInsn(Type.getType(EventContextKey.class));
         mv.visitLdcInsn(this.anno.value());
 
@@ -103,16 +104,6 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
 
     @Override
     protected void insertContextCall(String name, MethodVisitor mv, Parameter param, Class<?> targetType) {
-        EventContextKey<?> key = Sponge.getRegistry().getType(EventContextKey.class, this.anno.value()).get();
-
-        if(!key.getAllowedType().isAssignableFrom(targetType)) {
-            throw new IllegalArgumentException(String.format(
-                    "The parameter type doesn't match the context key type from the context value annotation. Expected: %s Found: %s",
-                    key.getAllowedType().getName(),
-                    targetType.getName()
-            ));
-        }
-
         mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(GETFIELD, name, "contextKey", Type.getDescriptor(EventContextKey.class));
 
@@ -123,8 +114,15 @@ public class ContextValueFilterSourceDelegate extends ContextFilterSourceDelegat
                 ),
                 false
         );
-        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Optional.class), "get",
-                "()Ljava/lang/Object;", false);
+
+        mv.visitInsn(ACONST_NULL);
+        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Optional.class), "orElse",
+                Type.getMethodDescriptor(
+                        Type.getType(Object.class),
+                        Type.getType(Object.class)
+                ),
+                false
+        );
     }
 
     @Override
