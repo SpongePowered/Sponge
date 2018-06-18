@@ -291,7 +291,7 @@ public final class ContainerUtil {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
                 additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             } else if (crafting.base != null && crafting.grid != null) {
-                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), crafting.grid.getWidth(), slots));
             }
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
