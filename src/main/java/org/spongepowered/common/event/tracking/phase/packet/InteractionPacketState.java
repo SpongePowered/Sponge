@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -123,6 +124,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
             final boolean hasBlocks = !phaseContext.getCapturedBlockSupplier().isEmpty();
             final List<BlockSnapshot> capturedBlcoks = phaseContext.getCapturedBlocks();
             final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.get(0) : null;
