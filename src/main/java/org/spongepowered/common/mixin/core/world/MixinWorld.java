@@ -144,6 +144,7 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeDimension;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
@@ -187,6 +188,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
+    protected SpongeDimension spongeDimensionWrapper;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -292,6 +294,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow
     public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
         return true; // shadowed so we can call from MixinWorldServer in spongeforge.
+    }
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    public void onInit(CallbackInfo ci) {
+        this.spongeDimensionWrapper = new SpongeDimension(this.provider);
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
@@ -546,7 +553,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Dimension getDimension() {
-        return (Dimension) this.provider;
+        return this.spongeDimensionWrapper;
     }
 
     @Override
