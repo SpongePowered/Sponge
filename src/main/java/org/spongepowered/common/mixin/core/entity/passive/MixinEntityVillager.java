@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -104,7 +105,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
     private void onSetProfession(int professionId, CallbackInfo ci) {
-        this.profession = EntityUtil.validateProfession(professionId);
+        this.profession = SpongeImplHooks.validateProfession(professionId);
     }
 
     @SuppressWarnings("unchecked")
