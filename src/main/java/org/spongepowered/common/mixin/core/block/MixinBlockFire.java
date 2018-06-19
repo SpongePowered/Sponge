@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Random;
@@ -46,12 +47,10 @@ public abstract class MixinBlockFire extends MixinBlock {
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", ordinal = 1))
     private boolean onFireSpread(World world, BlockPos pos, IBlockState state, int updateFlag) {
-        if (!world.isRemote) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                frame.addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
-                if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {
-                    return false;
-                }
+        if (!((IMixinWorld) world).isFake()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {
+                return false;
             }
         }
         return world.setBlockState(pos, state, updateFlag);
@@ -59,7 +58,8 @@ public abstract class MixinBlockFire extends MixinBlock {
 
     @Inject(method = "catchOnFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"), require = 0, expect = 0, cancellable = true)
     private void onCatchFirePreCheck(World world, BlockPos pos, int chance, Random random, int age, CallbackInfo callbackInfo) {
-        if (!world.isRemote) {
+        if (!((IMixinWorld) world).isFake()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
             if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }
@@ -68,7 +68,8 @@ public abstract class MixinBlockFire extends MixinBlock {
 
     @Inject(method = "catchOnFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"), require = 0, expect = 0, cancellable = true)
     private void onCatchFirePreCheckOther(World world, BlockPos pos, int chance, Random random, int age, CallbackInfo callbackInfo) {
-        if (!world.isRemote) {
+        if (!((IMixinWorld) world).isFake()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
             if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {
                 callbackInfo.cancel();
             }

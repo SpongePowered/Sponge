@@ -30,6 +30,7 @@ import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
@@ -52,18 +53,13 @@ final class DispensePhaseState extends BlockPhaseState {
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
                 .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(blockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-            phaseContext.addNotifierAndOwnerToCauseStack(frame);
-            phaseContext.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
-                    });
-            phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
-                    });
-        }
+        Sponge.getCauseStackManager().pushCause(blockSnapshot);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+        phaseContext.addNotifierAndOwnerToCauseStack(PhaseTracker.getInstance().getCurrentFrame());
+        phaseContext.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> SpongeCommonEventFactory.callDropItemDispense(items, phaseContext));
+        phaseContext.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext));
+
     }
 }

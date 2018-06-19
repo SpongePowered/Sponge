@@ -335,13 +335,15 @@ public final class EntityUtil {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(entityIn);
+        Sponge.getCauseStackManager().pushCause(entityIn);
 
-            MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
-            SpongeImpl.postEvent(event);
-            return event;
-        }
+        MoveEntityEvent.Teleport
+            event =
+            SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform,
+                (org.spongepowered.api.entity.Entity) entityIn);
+        SpongeImpl.postEvent(event);
+        return event;
+
     }
 
     @Nullable
@@ -396,14 +398,12 @@ public final class EntityUtil {
 
         adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             TeleportingContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld)
-                     .buildAndSwitch()
-            ) {
-            frame.pushCause(teleporter);
-            frame.pushCause(mixinEntity);
+        try (TeleportingContext context = EntityPhase.State.CHANGING_DIMENSION.createPhaseContext().setTargetWorld(toWorld).buildAndSwitch()) {
+            // The phase state already pushes a new frame.
+            Sponge.getCauseStackManager().pushCause(teleporter);
+            Sponge.getCauseStackManager().pushCause(mixinEntity);
 
-            frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
 
             if (entityIn.isEntityAlive() && (teleporter instanceof IMixinTeleporter && !(fromWorld.provider instanceof WorldProviderEnd))) {
@@ -1043,29 +1043,27 @@ public final class EntityUtil {
         final PhaseContext<?> phaseContext = peek.context;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            // Perform the event throws first, if they return false, return null
-            item = throwDropItemAndConstructEvent(mixinEntity, posX, posY, posZ, snapshot, original, frame);
+        // Perform the event throws first, if they return false, return null
+        item = throwDropItemAndConstructEvent(mixinEntity, posX, posY, posZ, snapshot, original, PhaseTracker.getInstance().getCurrentFrame());
 
-            if (item == null || item.isEmpty()) {
-                return null;
-            }
+        if (item == null || item.isEmpty()) {
+            return null;
+        }
 
+        // This is where we could perform item pre merging, and cancel before we create a new entity.
+        // For now, we aren't performing pre merging.
 
-            // This is where we could perform item pre merging, and cancel before we create a new entity.
-            // For now, we aren't performing pre merging.
+        final EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
+        entityitem.setDefaultPickupDelay();
 
-            final EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
-            entityitem.setDefaultPickupDelay();
-
-            // FIFTH - Capture the entity maybe?
-            if (((IPhaseState) currentState).performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
-                return entityitem;
-            }
-            // FINALLY - Spawn the entity in the world if all else didn't fail
-            EntityUtil.processEntitySpawn(fromNative(entityitem), Optional::empty);
+        // FIFTH - Capture the entity maybe?
+        if (((IPhaseState) currentState).performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
             return entityitem;
         }
+        // FINALLY - Spawn the entity in the world if all else didn't fail
+        EntityUtil.processEntitySpawn(fromNative(entityitem), Optional::empty);
+        return entityitem;
+
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1087,61 +1085,58 @@ public final class EntityUtil {
         final IPhaseState currentState = peek.state;
         final PhaseContext<?> phaseContext = peek.context;
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        item = throwDropItemAndConstructEvent(mixinPlayer, posX, posY, posZ, snapshot, original, frame);
 
-            item = throwDropItemAndConstructEvent(mixinPlayer, posX, posY, posZ, snapshot, original, frame);
+        if (item == null || item.isEmpty()) {
+            return null;
+        }
 
-            if (item == null || item.isEmpty()) {
-                return null;
-            }
+        // Here is where we would potentially perform item pre-merging (merge the item stacks with previously captured item stacks
+        // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
+        // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
 
+        EntityItem entityitem = new EntityItem(player.world, posX, posY, posZ, droppedItem);
+        entityitem.setPickupDelay(40);
 
-            // Here is where we would potentially perform item pre-merging (merge the item stacks with previously captured item stacks
-            // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
-            // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
+        if (traceItem) {
+            entityitem.setThrower(player.getName());
+        }
 
-            EntityItem entityitem = new EntityItem(player.world, posX, posY, posZ, droppedItem);
-            entityitem.setPickupDelay(40);
-
-            if (traceItem) {
-                entityitem.setThrower(player.getName());
-            }
-
-            final Random random = mixinPlayer.getRandom();
-            if (dropAround) {
-                float f = random.nextFloat() * 0.5F;
-                float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-                entityitem.motionX = -MathHelper.sin(f1) * f;
-                entityitem.motionZ = MathHelper.cos(f1) * f;
-                entityitem.motionY = 0.20000000298023224D;
-            } else {
-                float f2 = 0.3F;
-                entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-                entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-                entityitem.motionY = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
-                float f3 = random.nextFloat() * ((float) Math.PI * 2F);
-                f2 = 0.02F * random.nextFloat();
-                entityitem.motionX += Math.cos(f3) * f2;
-                entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
-                entityitem.motionZ += Math.sin(f3) * f2;
-            }
-            // FIFTH - Capture the entity maybe?
-            if (currentState.performOrCaptureItemDrop(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
-                return entityitem;
-            }
-            // TODO - Investigate whether player drops are adding to the stat list in captures.
-            ItemStack itemstack = dropItemAndGetStack(player, entityitem);
-
-            if (traceItem) {
-                if (!itemstack.isEmpty()) {
-                    player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
-                }
-
-                player.addStat(StatList.DROP);
-            }
-
+        final Random random = mixinPlayer.getRandom();
+        if (dropAround) {
+            float f = random.nextFloat() * 0.5F;
+            float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+            entityitem.motionX = -MathHelper.sin(f1) * f;
+            entityitem.motionZ = MathHelper.cos(f1) * f;
+            entityitem.motionY = 0.20000000298023224D;
+        } else {
+            float f2 = 0.3F;
+            entityitem.motionX = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            entityitem.motionZ = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
+            entityitem.motionY = -MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
+            float f3 = random.nextFloat() * ((float) Math.PI * 2F);
+            f2 = 0.02F * random.nextFloat();
+            entityitem.motionX += Math.cos(f3) * f2;
+            entityitem.motionY += (random.nextFloat() - random.nextFloat()) * 0.1F;
+            entityitem.motionZ += Math.sin(f3) * f2;
+        }
+        // FIFTH - Capture the entity maybe?
+        if (currentState.performOrCaptureItemDrop(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
             return entityitem;
         }
+        // TODO - Investigate whether player drops are adding to the stat list in captures.
+        ItemStack itemstack = dropItemAndGetStack(player, entityitem);
+
+        if (traceItem) {
+            if (!itemstack.isEmpty()) {
+                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
+            }
+
+            player.addStat(StatList.DROP);
+        }
+
+        return entityitem;
+
     }
 
     /**

@@ -218,27 +218,24 @@ public class SpongeCommonEventFactory {
     }
 
     public static void callDropItemCustom(List<Entity> items, PhaseContext<?> context, Supplier<Optional<UUID>> supplier) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-            final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), items);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(event, supplier);
-            }
+        Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
+        final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), items);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            EntityUtil.processEntitySpawnsFromEvent(event, supplier);
         }
     }
 
     public static boolean callSpawnEntitySpawner(List<Entity> entities, PhaseContext<?> context) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
 
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(frame.getCurrentCause(), entities);
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled() && event.getEntities().size() > 0) {
-                return EntityUtil.processEntitySpawnsFromEvent(context, event);
-            }
-            return false;
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            return EntityUtil.processEntitySpawnsFromEvent(context, event);
         }
+        return false;
+
     }
 
     public static void callDropItemDestruct(List<Entity> entities, PhaseContext<?> context) {

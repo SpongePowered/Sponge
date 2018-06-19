@@ -146,10 +146,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+        return SpongeCommonEventFactory.callSpawnEntity(entities, context);
     }
 
     default boolean ignoresBlockTracking() {
@@ -217,8 +215,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context,
-        CauseStackManager.StackFrame frame) {
+    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
 
     }
 
@@ -254,10 +251,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void postProcessSpawns(C unwindingContext, ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
-        }
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+        SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
     }
 
     default boolean alreadyCapturingEntitySpawns() {

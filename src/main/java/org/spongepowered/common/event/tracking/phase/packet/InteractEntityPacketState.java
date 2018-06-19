@@ -84,10 +84,10 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
     }
 
     @Override
-    public void unwind(BasicPacketContext phaseContext) {
+    public void unwind(BasicPacketContext context) {
 
-        final EntityPlayerMP player = phaseContext.getPacketPlayer();
-        final CPacketUseEntity useEntityPacket = phaseContext.getPacket();
+        final EntityPlayerMP player = context.getPacketPlayer();
+        final CPacketUseEntity useEntityPacket = context.getPacket();
         final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
         if (entity == null) {
             // Something happened?
@@ -96,7 +96,7 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
         final World spongeWorld = EntityUtil.getSpongeWorld(player);
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
-        phaseContext.getCapturedBlockSupplier()
+        context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
@@ -106,7 +106,7 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
                 }
                 printer.trace(System.err);
             });
-        phaseContext.getCapturedEntitySupplier()
+        context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
@@ -116,15 +116,14 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
                 }
                 printer.trace(System.err);
             });
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                SpongeCommonEventFactory.callSpawnEntity(items, phaseContext);
-            });
-        }
-        phaseContext.getPerEntityItemDropSupplier()
+        Sponge.getCauseStackManager().pushCause(player);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
+            final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+            SpongeCommonEventFactory.callSpawnEntity(items, context);
+        });
+
+        context.getPerEntityItemDropSupplier()
             .acceptIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
@@ -139,7 +138,7 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
                 printer.trace(System.err);
             });
 
-        phaseContext.getCapturedBlockSupplier()
-            .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, phaseContext));
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
     }
 }

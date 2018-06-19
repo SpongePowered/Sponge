@@ -326,14 +326,16 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
         // Go ahead and throw the construction event
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(xPos, yPos, zPos));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(worldIn.getBlockState(pos));
-            final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM, position);
-            SpongeImpl.postEvent(eventPre);
-            if (eventPre.isCancelled()) {
-                return;
-            }
+        Sponge.getCauseStackManager().pushCause(worldIn.getBlockState(pos));
+        final ConstructEntityEvent.Pre
+            eventPre =
+            SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.ITEM, position);
+        SpongeImpl.postEvent(eventPre);
+        if (eventPre.isCancelled()) {
+            Sponge.getCauseStackManager().popCause();
+            return;
         }
+        Sponge.getCauseStackManager().popCause();
         EntityItem entityitem = new EntityItem(worldIn, xPos, yPos, zPos, stack);
         entityitem.setDefaultPickupDelay();
         worldIn.spawnEntity(entityitem);

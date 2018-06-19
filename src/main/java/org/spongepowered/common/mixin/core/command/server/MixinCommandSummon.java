@@ -82,31 +82,30 @@ public abstract class MixinCommandSummon extends CommandBase {
         }
 
         Transform<org.spongepowered.api.world.World> transform = new Transform<>(((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), type, transform);
-            SpongeImpl.postEvent(event);
-            return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
-        }
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+        ConstructEntityEvent.Pre
+            event =
+            SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+        SpongeImpl.postEvent(event);
+        return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
     }
 
     @Inject(method = "execute", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
     private void onProcess(MinecraftServer server, ICommandSender sender, String args[], CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d, double x, double y, double z, World world) {
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
-                    EntityTypes.LIGHTNING, transform);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+            EntityTypes.LIGHTNING, transform);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            ci.cancel();
+        } else {
+            LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(Sponge.getCauseStackManager().getCurrentCause());
+            if (SpongeImpl.postEvent(lightningPre)) {
                 ci.cancel();
-            } else {
-                LightningEvent.Pre lightningPre = SpongeEventFactory.createLightningEventPre(frame.getCurrentCause());
-                if (SpongeImpl.postEvent(lightningPre)) {
-                    ci.cancel();
-                }
             }
         }
+
     }
 }

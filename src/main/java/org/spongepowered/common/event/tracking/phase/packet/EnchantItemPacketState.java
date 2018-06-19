@@ -32,7 +32,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.AffectEntityEvent;
@@ -91,90 +90,91 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
         for (EntityItem entityItem : context.getCapturedItems()) {
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(player);
-            Sponge.getCauseStackManager().pushCause(openContainer);
-            final ClickInventoryEvent inventoryEvent;
-            inventoryEvent =
-                this
-                    .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
-                        Lists.newArrayList(slotTransactions),
-                        capturedItems,
-                        usedButton);
+        Sponge.getCauseStackManager().pushCause(player);
+        Sponge.getCauseStackManager().pushCause(openContainer);
+        final ClickInventoryEvent inventoryEvent;
+        inventoryEvent =
+            this
+                .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
+                    Lists.newArrayList(slotTransactions),
+                    capturedItems,
+                    usedButton);
 
-            // Some mods may override container detectAndSendChanges method and prevent captures
-            // If this happens and we captured no entities, avoid firing events
-            if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
+        // Some mods may override container detectAndSendChanges method and prevent captures
+        // If this happens and we captured no entities, avoid firing events
+        if (mixinContainer.getCapturedTransactions().isEmpty() && capturedItems.isEmpty()) {
+            mixinContainer.setCaptureInventory(false);
+            return;
+        }
+        if (inventoryEvent != null) {
+            // Don't fire inventory drop events when there are no entities
+            if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
+                slotTransactions.clear();
                 mixinContainer.setCaptureInventory(false);
                 return;
-            }if (inventoryEvent != null) {
-                // Don't fire inventory drop events when there are no entities
-                if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
-                    slotTransactions.clear();
-                    mixinContainer.setCaptureInventory(false);
-                    return;
+            }
+
+            // The client sends several packets all at once for drag events
+            // - we
+            // only care about the last one.
+            // Therefore, we never add any 'fake' transactions, as the final
+            // packet has everything we want.
+            if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
+                PacketPhaseUtil.validateCapturedTransactions(packetIn.getWindowId(), openContainer, inventoryEvent.getTransactions());
+            }
+
+            SpongeImpl.postEvent(inventoryEvent);
+            if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
+                if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
+                    capturedItems.clear();
                 }
 
-                // The client sends several packets all at once for drag events
-                // - we
-                // only care about the last one.
-                // Therefore, we never add any 'fake' transactions, as the final
-                // packet has everything we want.
-                if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getWindowId(), openContainer, inventoryEvent.getTransactions());
-                }
+                // Restore cursor
+                PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
 
-                SpongeImpl.postEvent(inventoryEvent);
-                if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
-                    if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
-                        capturedItems.clear();
-                    }
+                // Restore target slots
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
+            } else {
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
 
-                    // Restore cursor
+                // Handle cursor
+                if (!inventoryEvent.getCursorTransaction().isValid()) {
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
+                } else if (inventoryEvent instanceof ClickInventoryEvent.Drag) {
+                    int increment;
 
-                    // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
-                } else {
-                    PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
+                    increment = slotTransactions.stream()
+                        .filter((t) -> !t.isValid())
+                        .mapToInt((t) -> t.getFinal().getQuantity())
+                        .sum();
 
-                    // Handle cursor
-                    if (!inventoryEvent.getCursorTransaction().isValid()) {
-                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                    } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
-                    } else if (inventoryEvent instanceof ClickInventoryEvent.Drag) {
-                        int increment;
+                    final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
+                    cursor.setQuantity(cursor.getQuantity() + increment);
+                    PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
+                } else if (inventoryEvent instanceof ClickInventoryEvent.Double && !(inventoryEvent instanceof ClickInventoryEvent.Shift)) {
+                    int decrement;
 
-                        increment = slotTransactions.stream()
-                            .filter((t) -> !t.isValid())
-                            .mapToInt((t) -> t.getFinal().getQuantity())
-                            .sum();
+                    decrement = slotTransactions.stream()
+                        .filter((t) -> !t.isValid())
+                        .mapToInt((t) -> t.getOriginal().getQuantity())
+                        .sum();
 
-                        final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
-                        cursor.setQuantity(cursor.getQuantity() + increment);
-                        PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
-                    } else if (inventoryEvent instanceof ClickInventoryEvent.Double && !(inventoryEvent instanceof ClickInventoryEvent.Shift)) {
-                        int decrement;
-
-                        decrement = slotTransactions.stream()
-                            .filter((t) -> !t.isValid())
-                            .mapToInt((t) -> t.getOriginal().getQuantity())
-                            .sum();
-
-                        final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
-                        cursor.setQuantity(cursor.getQuantity() - decrement);
-                        PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
-                    }
-                    if (inventoryEvent instanceof SpawnEntityEvent) {
-                        processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else if (!context.getCapturedEntitySupplier().isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        SpongeCommonEventFactory.callSpawnEntity(context.getCapturedEntities(), context);
-                    }
+                    final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
+                    cursor.setQuantity(cursor.getQuantity() - decrement);
+                    PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
+                }
+                if (inventoryEvent instanceof SpawnEntityEvent) {
+                    processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                } else if (!context.getCapturedEntitySupplier().isEmpty()) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callSpawnEntity(context.getCapturedEntities(), context);
                 }
             }
         }
+
         slotTransactions.clear();
-        mixinContainer.setCaptureInventory(false);    }
+        mixinContainer.setCaptureInventory(false);
+    }
 }

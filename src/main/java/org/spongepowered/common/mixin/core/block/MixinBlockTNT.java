@@ -72,12 +72,11 @@ public abstract class MixinBlockTNT extends MixinBlock {
     public boolean onPrime(World world, Entity tnt) {
         IMixinEntityTNTPrimed mixin = (IMixinEntityTNTPrimed) tnt;
         mixin.setDetonator(this.igniter);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if (this.igniter != null) {
-                frame.addContext(EventContextKeys.IGNITER, (Living) this.igniter);
-            } // TODO Maybe add the player or any active entity from the PhaseTracker?
-            this.primeCancelled = !mixin.shouldPrime();
-        }
+        if (this.igniter != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.IGNITER, (Living) this.igniter);
+        } // TODO Maybe add the player or any active entity from the PhaseTracker?
+        this.primeCancelled = !mixin.shouldPrime();
+
         return !this.primeCancelled && world.spawnEntity(tnt);
     }
 
@@ -91,11 +90,8 @@ public abstract class MixinBlockTNT extends MixinBlock {
     @Redirect(method = "onBlockDestroyedByExplosion", at = @At(value = "INVOKE", target = TARGET_PRIME))
     public boolean onPrimePostExplosion(World world, Entity tnt) {
         // Called when prime triggered by explosion
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
-            boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
-            return result;
-        }
+        Sponge.getCauseStackManager().addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
+        return ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
     }
 
     @Redirect(method = "onBlockAdded", at = @At(value = "INVOKE", target = TARGET_REMOVE))

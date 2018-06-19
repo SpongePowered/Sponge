@@ -64,14 +64,12 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
         context.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
                     final DamageSource damageSource = context.getDamageSource();
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        if (damageSource != null) {
-                            frame.pushCause(damageSource);
-                        }
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-                        frame.pushCause(dyingEntity);
-                        SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) items, context);
+                    if (damageSource != null) {
+                        Sponge.getCauseStackManager().pushCause(damageSource);
                     }
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                    Sponge.getCauseStackManager().pushCause(dyingEntity);
+                    SpongeCommonEventFactory.callDropItemCustom((List<Entity>) (List) items, context);
                 });
         context.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
@@ -79,23 +77,18 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                             .filter(entity -> entity instanceof ExperienceOrb)
                             .collect(Collectors.toList());
                     if (!experience.isEmpty()) {
-                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame.pushCause(dyingEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-                        }
+                        Sponge.getCauseStackManager().pushCause(dyingEntity);
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                        SpongeCommonEventFactory.callSpawnEntity(experience, context);
                     }
 
                     final List<Entity> other = entities.stream()
                             .filter(entity -> !(entity instanceof ExperienceOrb))
                             .collect(Collectors.toList());
                     if (!other.isEmpty()) {
-                        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                            frame.pushCause(dyingEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
-                            SpongeCommonEventFactory.callSpawnEntity(other, context);
-
-                        }
+                        Sponge.getCauseStackManager().pushCause(dyingEntity);
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
+                        SpongeCommonEventFactory.callSpawnEntity(other, context);
                     }
 
                 });

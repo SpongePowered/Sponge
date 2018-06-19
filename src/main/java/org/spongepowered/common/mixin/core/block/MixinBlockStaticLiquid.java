@@ -55,19 +55,22 @@ public class MixinBlockStaticLiquid {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseContext<?> context = phaseTracker.getCurrentPhaseData().context;
 
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(pos);
-            frame.pushCause(this);
-            context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
-            context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+        Sponge.getCauseStackManager().pushCause(pos);
+        Sponge.getCauseStackManager().pushCause(this);
+        context.getOwner().ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner));
+        context.getNotifier().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
 
-            ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), Collections.singletonList(new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos))));
-            if (!SpongeImpl.postEvent(event)) {
-                phaseTracker.setBlockState((IMixinWorldServer) world, pos, blockState, BlockChangeFlags.ALL);
-                return true;
-            }
-            return false;
+        final Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(pos));
+        ChangeBlockEvent.Pre
+            event =
+            SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                Collections.singletonList(location));
+        if (!SpongeImpl.postEvent(event)) {
+            phaseTracker.setBlockState((IMixinWorldServer) world, pos, blockState, BlockChangeFlags.ALL);
+            return true;
         }
+        return false;
+
 
     }
 }

@@ -32,7 +32,6 @@ import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -119,43 +118,39 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
                 final List<ItemDropData> items = new ArrayList<>(itemStacks);
 
                 if (!items.isEmpty()) {
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                        final List<Entity> itemEntities = items.stream()
-                            .map(data -> data.create(((WorldServer) player.world)))
-                            .map(EntityUtil::fromNative)
-                            .collect(Collectors.toList());
-                        frame.pushCause(player);
-                        frame.pushCause(affectedEntity.get());
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    final List<Entity> itemEntities = items.stream()
+                        .map(data -> data.create(((WorldServer) player.world)))
+                        .map(EntityUtil::fromNative)
+                        .collect(Collectors.toList());
+                    Sponge.getCauseStackManager().pushCause(player);
+                    Sponge.getCauseStackManager().pushCause(affectedEntity.get());
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-                        final DropItemEvent.Destruct destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
-                        SpongeImpl.postEvent(destruct);
-                        if (!destruct.isCancelled()) {
-                            processSpawnedEntities(player, destruct);
-                        }
+                    final DropItemEvent.Destruct destruct =
+                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                    SpongeImpl.postEvent(destruct);
+                    if (!destruct.isCancelled()) {
+                        processSpawnedEntities(player, destruct);
                     }
                 }
             }
         });
         context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
-                    final UUID key = entry.getKey();
-                    final Optional<Entity> attackedEntities = spongeWorld.getEntity(key);
-                    if (!attackedEntities.isPresent()) {
-                        continue;
-                    }
-                    final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+            Sponge.getCauseStackManager().pushCause(player);
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                final UUID key = entry.getKey();
+                final Optional<Entity> attackedEntities = spongeWorld.getEntity(key);
+                if (!attackedEntities.isPresent()) {
+                    continue;
+                }
+                final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
 
-                    final DropItemEvent.Destruct destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);
-                    SpongeImpl.postEvent(destruct);
-                    if (!destruct.isCancelled()) {
-                        processSpawnedEntities(player, destruct);
-                    }
+                final DropItemEvent.Destruct destruct =
+                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
+                SpongeImpl.postEvent(destruct);
+                if (!destruct.isCancelled()) {
+                    processSpawnedEntities(player, destruct);
                 }
             }
         });

@@ -30,7 +30,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
@@ -68,33 +67,32 @@ final class CloseWindowState extends BasicPacketState {
             Sponge.getCauseStackManager().popCause();
         }
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            // items
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-                final List<Entity> entities = items
-                    .stream()
-                    .map(EntityUtil::fromNative)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
-                }
-            });
-            // Pre-merged items
-            context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
-                final List<EntityItem> items = stacks.stream()
-                    .map(drop -> drop.create(player.getServerWorld()))
-                    .collect(Collectors.toList());
-                final List<Entity> entities = items
-                    .stream()
-                    .map(EntityUtil::fromNative)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
-                }
-            });
-        }
+        Sponge.getCauseStackManager().pushCause(player);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        // items
+        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
+            final List<Entity> entities = items
+                .stream()
+                .map(EntityUtil::fromNative)
+                .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
+            }
+        });
+        // Pre-merged items
+        context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
+            final List<EntityItem> items = stacks.stream()
+                .map(drop -> drop.create(player.getServerWorld()))
+                .collect(Collectors.toList());
+            final List<Entity> entities = items
+                .stream()
+                .map(EntityUtil::fromNative)
+                .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(player.getUniqueID()));
+            }
+        });
+
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 

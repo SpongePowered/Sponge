@@ -50,8 +50,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -69,26 +69,24 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
 
     @Override
     public void unwind(ExplosionContext context) {
-
         final Explosion explosion = context.getExplosion();
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
-            frame.pushCause(explosion);
-            if (context.getNotifier().isPresent()) {
-                frame.addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
-            }
-            if (context.getOwner().isPresent()) {
-                frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
-            }
-            context.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(
-                    blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
-            context.getCapturedEntitySupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-
-                });
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
+        Sponge.getCauseStackManager().pushCause(explosion);
+        if (context.getNotifier().isPresent()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
         }
+        if (context.getOwner().isPresent()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+        }
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(
+                blocks -> processBlockCaptures(blocks, explosion, Sponge.getCauseStackManager().getCurrentCause(), context));
+        context.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> {
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+
+            });
+
     }
 
     @Override
@@ -129,95 +127,94 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if(context.getNotifier().isPresent()) {
-                frame.addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+        if (context.getNotifier().isPresent()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+        }
+        if (context.getOwner().isPresent()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+        }
+        try {
+            this.associateAdditionalCauses(this, context, PhaseTracker.getInstance().getCurrentFrame());
+        } catch (Exception e) {
+            // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
+            // try catch to avoid bombing on performing block changes.
+        }
+        // Creates the block events accordingly to the transaction arrays
+        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
+        // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
+
+        // Copied from TrackingUtil#throwMultiEventsAndCreatePost
+        for (BlockChange blockChange : BlockChange.values()) {
+            final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
+            if (mainEvent != null) {
+                Sponge.getCauseStackManager().pushCause(mainEvent);
             }
-            if(context.getOwner().isPresent()) {
-                frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
-            }
-            try {
-                this.associateAdditionalCauses(this, context, frame);
-            } catch (Exception e) {
-                // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
-                // try catch to avoid bombing on performing block changes.
-            }
-            // Creates the block events accordingly to the transaction arrays
-            iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
-            // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
-    
-            // Copied from TrackingUtil#throwMultiEventsAndCreatePost
-            for (BlockChange blockChange : BlockChange.values()) {
-                final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-                if (mainEvent != null) {
-                    frame.pushCause(mainEvent);
-                }
-            }
-            final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
-    
-            final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, transactions);
-            if (postEvent == null) { // Means that we have had no actual block changes apparently?
-                return;
-            }
-            SpongeImpl.postEvent(postEvent);
-    
-            final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
-    
-            boolean noCancelledTransactions = true;
-    
-            // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
-            // transactions of the preceeding block events)
-            for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
-                if (blockEvent.isCancelled()) {
-                    noCancelledTransactions = false;
-                    // Don't restore the transactions just yet, since we're just marking them as invalid for now
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                        transaction.setValid(false);
-                    }
-                }
-            }
-    
-            // Finally check the post event
-            if (postEvent.isCancelled()) {
-                // Of course, if post is cancelled, just mark all transactions as invalid.
+        }
+        final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
+
+        final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, transactions);
+        if (postEvent == null) { // Means that we have had no actual block changes apparently?
+            return;
+        }
+        SpongeImpl.postEvent(postEvent);
+
+        final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
+
+        boolean noCancelledTransactions = true;
+
+        // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
+        // transactions of the preceeding block events)
+        for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
+            if (blockEvent.isCancelled()) {
                 noCancelledTransactions = false;
-                for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                // Don't restore the transactions just yet, since we're just marking them as invalid for now
+                for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
                     transaction.setValid(false);
                 }
             }
-    
-            // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
-            // Because after, we will restore all the invalid transactions in reverse order.
-            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-                if (!transaction.isValid()) {
-                    invalid.add(transaction);
-                    // Cancel any block drops performed, avoids any item drops, regardless
-                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
-                    if (location != null) {
-                        final BlockPos pos = VecHelper.toBlockPos(location);
-                        context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
-                    }
-                }
-            }
-    
-            if (!invalid.isEmpty()) {
-                // We need to set this value and return it to signify that some transactions were cancelled
-                noCancelledTransactions = false;
-                // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
-                // or the events were cancelled), again in reverse order of which they were received.
-                for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                    transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-                    // Cancel any block drops or harvests for the block change.
-                    // This prevents unnecessary spawns.
-                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
-                    if (location != null) {
-                        final BlockPos pos = VecHelper.toBlockPos(location);
-                        context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
-                    }
-                }
-            }
-            TrackingUtil.performBlockAdditions(postEvent.getTransactions(), this, context, noCancelledTransactions);
         }
+
+        // Finally check the post event
+        if (postEvent.isCancelled()) {
+            // Of course, if post is cancelled, just mark all transactions as invalid.
+            noCancelledTransactions = false;
+            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                transaction.setValid(false);
+            }
+        }
+
+        // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
+        // Because after, we will restore all the invalid transactions in reverse order.
+        for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            if (!transaction.isValid()) {
+                invalid.add(transaction);
+                // Cancel any block drops performed, avoids any item drops, regardless
+                final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                if (location != null) {
+                    final BlockPos pos = VecHelper.toBlockPos(location);
+                    context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
+                }
+            }
+        }
+
+        if (!invalid.isEmpty()) {
+            // We need to set this value and return it to signify that some transactions were cancelled
+            noCancelledTransactions = false;
+            // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
+            // or the events were cancelled), again in reverse order of which they were received.
+            for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
+                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
+                // Cancel any block drops or harvests for the block change.
+                // This prevents unnecessary spawns.
+                final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
+                if (location != null) {
+                    final BlockPos pos = VecHelper.toBlockPos(location);
+                    context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                }
+            }
+        }
+        TrackingUtil.performBlockAdditions(postEvent.getTransactions(), this, context, noCancelledTransactions);
+
     }
 
     @Override

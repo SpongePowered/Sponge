@@ -52,31 +52,30 @@ public class DropInventoryState extends BasicInventoryPacketState {
         final ItemStack usedStack = context.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(spongePlayer);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            context.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        Sponge.getCauseStackManager().pushCause(spongePlayer);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.USED_ITEM, usedSnapshot);
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
-            context.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
+        context.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
 
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (EntityItem item : items) {
-                        entities.add(EntityUtil.fromNative(item));
-                    }
-                    final DropItemEvent.Dispense dropItemEvent =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dropItemEvent);
-                    if (!dropItemEvent.isCancelled()) {
-                        processSpawnedEntities(player, dropItemEvent);
-                    }
-                });
+                final ArrayList<Entity> entities = new ArrayList<>();
+                for (EntityItem item : items) {
+                    entities.add(EntityUtil.fromNative(item));
+                }
+                final DropItemEvent.Dispense dropItemEvent =
+                    SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                SpongeImpl.postEvent(dropItemEvent);
+                if (!dropItemEvent.isCancelled()) {
+                    processSpawnedEntities(player, dropItemEvent);
+                }
+            });
 
-            final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
-            mixinContainer.setCaptureInventory(false);
-            mixinContainer.getCapturedTransactions().clear();
-        }
-
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        mixinContainer.setCaptureInventory(false);
+        mixinContainer.getCapturedTransactions().clear();
     }
+
 }

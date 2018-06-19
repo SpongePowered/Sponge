@@ -48,7 +48,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
@@ -146,7 +145,7 @@ public final class PhaseTracker {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
-        checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
+        checkArgument(phaseContext.isSwitched(), "PhaseContext must be complete!");
         final IPhaseState<?> currentState = this.stack.peek().state;
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
@@ -489,6 +488,10 @@ public final class PhaseTracker {
 
     public PhaseContext<?> getCurrentContext() {
         return this.stack.peekContext();
+    }
+
+    public CauseStackManager.StackFrame getCurrentFrame() {
+        return this.stack.peekContext().getStackFrame();
     }
 
     // --------------------- DELEGATED WORLD METHODS -------------------------

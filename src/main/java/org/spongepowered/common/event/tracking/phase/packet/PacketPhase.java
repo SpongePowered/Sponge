@@ -244,7 +244,7 @@ public final class PacketPhase extends TrackingPhase {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public PhaseContext<?> populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState<?> state, PhaseContext<?> context) {
         checkNotNull(packet, "Packet cannot be null!");
-        checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
+        checkArgument(!context.isSwitched(), "PhaseContext cannot be marked as completed!");
         ((PacketState) state).populateContext(entityPlayerMP, packet, (PacketContext) context);
         return context;
     }

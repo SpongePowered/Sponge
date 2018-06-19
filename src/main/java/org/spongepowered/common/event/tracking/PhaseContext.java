@@ -53,10 +53,9 @@ import org.spongepowered.common.event.tracking.context.EntityItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.EntityItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -89,7 +88,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
-    protected boolean isCompleted = false;
+    @Nullable private CauseStackManager.StackFrame stackFrame = null;
+    protected boolean hasSwitched = false;
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;
 
@@ -110,7 +110,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private Object source;
 
     public P source(Object owner) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         this.source = owner;
         return (P) this;
     }
@@ -121,7 +121,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P owner(User owner) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         if (this.owner != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
         }
@@ -135,7 +135,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P notifier(User notifier) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         if (this.notifier != null) {
             throw new IllegalStateException("Notifier for this phase context is already set!");
         }
@@ -152,7 +152,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P addBlockCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
 
         this.blocksSupplier = new CapturedBlocksSupplier();
@@ -164,7 +164,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P addCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         this.checkBlockSuppliers();
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
@@ -182,7 +182,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P addEntityCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
         checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
@@ -194,7 +194,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P addEntityDropCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(!this.isSwitched(), "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.entityItemDropsSupplier == null, "EntityItemDropsSupplier is already set!");
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
 
@@ -204,7 +204,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public P buildAndSwitch() {
-        this.isCompleted = true;
+        this.hasSwitched = true;
+        checkState(this.stackFrame == null, "PhaseContext is re-entering!");
+        this.stackFrame = Sponge.getCauseStackManager().pushCauseFrame();
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
             this.stackTrace = new Exception("Debug Trace").getStackTrace();
         }
@@ -212,8 +214,13 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    public boolean isComplete() {
-        return this.isCompleted;
+    public boolean isSwitched() {
+        if (!this.hasSwitched) {
+            if (this.stackFrame != null) {
+                this.hasSwitched = true;
+            }
+        }
+        return this.hasSwitched;
     }
 
     public PrettyPrinter printCustom(PrettyPrinter printer) {
@@ -399,31 +406,37 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(this.isCompleted);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PhaseContext<?> that = (PhaseContext<?>) o;
+        return processImmediately == that.processImmediately &&
+               Objects.equals(state, that.state) &&
+               Objects.equals(stackFrame, that.stackFrame) &&
+               Arrays.equals(stackTrace, that.stackTrace) &&
+               Objects.equals(owner, that.owner) &&
+               Objects.equals(notifier, that.notifier) &&
+               Objects.equals(source, that.source);
     }
 
     @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final PhaseContext<?> other = (PhaseContext<?>) obj;
-        return Objects.equals(this.isCompleted, other.isCompleted);
+    public int hashCode() {
+        return Objects.hash(state, owner, notifier, source);
     }
 
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("isCompleted", this.isCompleted)
+                .add("hasSwitched", this.hasSwitched)
                 .toString();
     }
 
     protected P markEmpty() {
-        this.isCompleted = true;
+        this.hasSwitched = true;
         return (P) this;
     }
 
@@ -436,7 +449,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Override
     public void close() { // Should never throw an exception
+        if (isEmpty()) {
+            return;
+        }
         PhaseTracker.getInstance().completePhase(this.state);
+        stackFrame.close();
     }
 
 
@@ -461,5 +478,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
         }
+    }
+
+    public CauseStackManager.StackFrame getStackFrame() {
+        checkState(this.stackFrame != null, "Incompleted stackframe on the ");
+        return this.stackFrame;
     }
 }

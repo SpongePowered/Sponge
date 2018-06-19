@@ -133,10 +133,9 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(entity.getLocation().getExtent());
-            return SpongeCommonEventFactory.callSpawnEntitySpawner(entities, context);
-        }
+        Sponge.getCauseStackManager().pushCause(entity.getLocation().getExtent());
+        return SpongeCommonEventFactory.callSpawnEntitySpawner(entities, context);
+
     }
 
     @Override

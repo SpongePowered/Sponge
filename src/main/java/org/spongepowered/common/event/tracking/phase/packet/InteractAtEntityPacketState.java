@@ -34,7 +34,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
@@ -94,74 +93,69 @@ final class InteractAtEntityPacketState extends BasicPacketState implements IEnt
             // Something happened?
             return;
         }
-        final World spongeWorld = EntityUtil.getSpongeWorld(player);
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
+        Sponge.getCauseStackManager().pushCause(player);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
+        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
+            final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+            SpongeCommonEventFactory.callSpawnEntity(items, context);
+        });
+        context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+            final PrettyPrinter printer = new PrettyPrinter(80);
+            printer.add("Processing Interact At Entity").centre().hr();
+            printer.add("The item stacks captured are: ");
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
-            });
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                SpongeCommonEventFactory.callSpawnEntity(items, context);
-            });
-            context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
-                final PrettyPrinter printer = new PrettyPrinter(80);
-                printer.add("Processing Interact At Entity").centre().hr();
-                printer.add("The item stacks captured are: ");
-
-                for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
-                    printer.add("  - Entity with UUID: %s", entry.getKey());
-                    for (ItemDropData stack : entry.getValue()) {
-                        printer.add("    - %s", stack);
-                    }
+            for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
+                printer.add("  - Entity with UUID: %s", entry.getKey());
+                for (ItemDropData stack : entry.getValue()) {
+                    printer.add("    - %s", stack);
                 }
-                printer.trace(System.err);
-            });
-            context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
-                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
-                    final UUID entityUuid = entry.getKey();
-                    final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
-                    if (entityFromUuid != null) {
-                        final List<Entity> entities = entry.getValue()
-                            .stream()
-                            .map(EntityUtil::fromNative)
-                            .collect(Collectors.toList());
-                        if (!entities.isEmpty()) {
-                            // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
-                            // SpongeCommonEventFactory.callDropItemCustom(entities, context);
-                            DropItemEvent.Custom event =
-                                SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                                    entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, event);
-                            }
+            }
+            printer.trace(System.err);
+        });
+        context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
+            for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                final UUID entityUuid = entry.getKey();
+                final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
+                if (entityFromUuid != null) {
+                    final List<Entity> entities = entry.getValue()
+                        .stream()
+                        .map(EntityUtil::fromNative)
+                        .collect(Collectors.toList());
+                    if (!entities.isEmpty()) {
+                        // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
+                        // SpongeCommonEventFactory.callDropItemCustom(entities, context);
+                        DropItemEvent.Custom event =
+                            SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(),
+                                entities);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            processSpawnedEntities(player, event);
                         }
                     }
                 }
-            });
-            context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
-                final List<EntityItem> items =
-                    drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
-                final List<Entity> entities = items
-                    .stream()
-                    .map(EntityUtil::fromNative)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                        entities);
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        processSpawnedEntities(player, event);
-                    }
+            }
+        });
+        context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
+            final List<EntityItem> items =
+                drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
+            final List<Entity> entities = items
+                .stream()
+                .map(EntityUtil::fromNative)
+                .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(),
+                    entities);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    processSpawnedEntities(player, event);
                 }
+            }
 
-            });
-        }
+        });
+
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
     }

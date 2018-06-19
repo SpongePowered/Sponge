@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.util.ArrayDeque;
@@ -39,7 +38,7 @@ import java.util.function.Consumer;
  * A simple stack that couples a {@link IPhaseState} and
  * {@link PhaseContext}. As states are pushed, they can likewise
  * be popped and include any contextual data with the {@link PhaseContext}.
- * Note that the {@link PhaseContext} must be marked as {@link PhaseContext#isComplete()},
+ * Note that the {@link PhaseContext} must be marked as {@link PhaseContext#isSwitched()},
  * otherwise an {@link IllegalArgumentException} is thrown.
  */
 final class PhaseStack {
@@ -78,7 +77,7 @@ final class PhaseStack {
 
     private PhaseStack push(PhaseData tuple) {
         checkNotNull(tuple, "Tuple cannot be null!");
-        checkArgument(tuple.context.isComplete(), "Phase context must be complete: %s", tuple);
+        checkArgument(tuple.context.isSwitched(), "Phase context must be complete: %s", tuple);
         this.states.push(tuple);
         return this;
     }

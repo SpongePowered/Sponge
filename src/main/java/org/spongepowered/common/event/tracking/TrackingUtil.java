@@ -530,7 +530,7 @@ public final class TrackingUtil {
             context.getNotifier().ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
             context.getOwner().ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
             try {
-                state.associateAdditionalCauses(state, context, frame);
+                state.associateAdditionalCauses(state, context);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.

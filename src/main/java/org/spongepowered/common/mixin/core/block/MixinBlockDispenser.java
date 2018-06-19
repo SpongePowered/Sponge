@@ -146,21 +146,20 @@ public abstract class MixinBlockDispenser extends MixinBlock {
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(dispensedItem);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(dispenser);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
-            SpongeImpl.postEvent(dropEvent);
-            if (dropEvent.isCancelled()) {
-                dispenser.setInventorySlotContents(index, (net.minecraft.item.ItemStack) this.originalItem.createStack());
-                context.getCapturedItems().clear();
-                return;
-            }
-            if (dropEvent.getDroppedItems().isEmpty()) {
-                context.getCapturedItems().clear();
-            }
-
-            dispenser.setInventorySlotContents(index, stack);
+        Sponge.getCauseStackManager().pushCause(dispenser);
+        final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.of(snapshot), original);
+        SpongeImpl.postEvent(dropEvent);
+        if (dropEvent.isCancelled()) {
+            dispenser.setInventorySlotContents(index, (net.minecraft.item.ItemStack) this.originalItem.createStack());
+            context.getCapturedItems().clear();
+            return;
         }
+        if (dropEvent.getDroppedItems().isEmpty()) {
+            context.getCapturedItems().clear();
+        }
+
+        dispenser.setInventorySlotContents(index, stack);
+
     }
 
 }

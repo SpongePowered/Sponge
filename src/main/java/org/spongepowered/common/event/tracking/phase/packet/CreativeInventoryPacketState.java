@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 final class CreativeInventoryPacketState extends BasicPacketState {
@@ -49,10 +48,8 @@ final class CreativeInventoryPacketState extends BasicPacketState {
         final EntityPlayerMP player = context.getPacketPlayer();
         context.getCapturedItemsSupplier()
             .acceptAndClearIfNotEmpty(items -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(player);
-                    SpongeCommonEventFactory.callDropItemDrop(items, context);
-                }
+                Sponge.getCauseStackManager().pushCause(player);
+                SpongeCommonEventFactory.callDropItemDrop(items, context);
             });
     }
 }
