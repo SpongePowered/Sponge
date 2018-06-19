@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.boss;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.MultiPartEntityPart;
@@ -33,6 +34,7 @@ import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.boss.dragon.phase.PhaseHover;
 import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.EnderCrystal;
@@ -79,22 +81,23 @@ public abstract class MixinEntityDragon extends MixinEntityLiving implements End
         method = "destroyBlocksInAABB",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/state/IBlockState;getMaterial()Lnet/minecraft/block/material/Material;"
+            target = "Lnet/minecraft/block/state/IBlockState;getBlock()Lnet/minecraft/block/Block;"
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/block/state/IBlockState;getBlock()Lnet/minecraft/block/Block;"
+                target = "Lnet/minecraft/world/World;getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"
             ),
             to = @At(
                 value = "FIELD",
-                target = "Lnet/minecraft/block/material/Material;AIR:Lnet/minecraft/block/material/Material;",
+                target = "Lnet/minecraft/block/material/Material;FIRE:Lnet/minecraft/block/material/Material;",
                 opcode = Opcodes.GETSTATIC
             )
-        )
+        ),
+        require = 0 // Forge rewrites the material request to block.isAir
     )
-    private Material onCanGrief(IBlockState state) {
-        return ((IMixinGriefer) this).canGrief() ? state.getMaterial() : Material.AIR;
+    private Block onCanGrief(IBlockState state) {
+        return ((IMixinGriefer) this).canGrief() ? state.getBlock() : Blocks.AIR;
     }
     
     @Override

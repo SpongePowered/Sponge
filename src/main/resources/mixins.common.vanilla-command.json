@@ -1,5 +1,5 @@
 {
-    "minVersion": "0.7.2",
+    "minVersion": "0.7.10",
     "package": "org.spongepowered.common.mixin.command.vanilla",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.MultiWorldCommandPlugin",
