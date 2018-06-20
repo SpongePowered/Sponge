@@ -68,7 +68,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             pom.whenConfigured {
-                pom -> pom.dependencies.removeAll { it.groupId == 'org.spongepowered' && (it.artifactId == 'testplugins' || it.artifactId == 'testmods') }
+                pom -> pom.dependencies.removeAll { it.groupId == 'org.spongepowered' && it.artifactId == 'testplugins' }
             }
         }
     }
