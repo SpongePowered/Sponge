@@ -1047,6 +1047,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             // condition evaluate to false, so an integer >= 25
             return 26;
         }
+        SpongeImplHooks.onUseItemTick((EntityLivingBase) (Object) this, this.activeItemStack, this.activeItemStackUseCount);
+
 
         return getItemInUseCount();
     }

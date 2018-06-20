@@ -457,4 +457,7 @@ public final class SpongeImplHooks {
                                         + " when the expected contain: " + professions);
 
     }
+
+    public static void onUseItemTick(EntityLivingBase entity, net.minecraft.item.ItemStack stack, int activeItemStackUseCount) {
+    }
 }
