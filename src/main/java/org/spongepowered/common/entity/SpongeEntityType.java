@@ -30,6 +30,11 @@ import net.minecraft.entity.EnumCreatureType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.EntityTrackerCategory;
+import org.spongepowered.common.config.category.EntityTrackerModCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
@@ -74,6 +79,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public int trackingRange;
     public int updateFrequency;
     public boolean sendsVelocityUpdates;
+    public boolean allowsCaptures = true;
 
     public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
         this(id, name.toLowerCase(Locale.ENGLISH), "minecraft", clazz, translation);
@@ -85,6 +91,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
         this.modId = modId.toLowerCase(Locale.ENGLISH);
+        this.initializeTrackerState();
     }
 
     private static Translation check(@Nullable Translation translation) {
@@ -117,6 +124,33 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
 
     public void setActivationRangeInitialized(boolean flag) {
         this.activationRangeInitialized = flag;
+    }
+
+    public void initializeTrackerState() {
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        EntityTrackerCategory entityTracker = globalConfig.getConfig().getTracker().getEntityTracker();
+        String[] ids = this.entityName.split(":");
+        String name = ids[0];
+        if (ids.length > 1) {
+            name = ids[1];
+        }
+
+        EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
+
+        if (modCapturing == null) {
+            modCapturing = new EntityTrackerModCategory();
+            entityTracker.getModMappings().put(this.modId, modCapturing);
+        }
+        if (!modCapturing.isEnabled()) {
+            this.allowsCaptures = false;
+            modCapturing.getEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsCaptures);
+        } else {
+            this.allowsCaptures = modCapturing.getEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+        }
+
+        if (entityTracker.autoPopulateData()) {
+            globalConfig.save();
+        }
     }
 
     @SuppressWarnings("unchecked")

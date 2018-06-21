@@ -25,8 +25,8 @@
 package org.spongepowered.common.config.type;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.category.BlockCapturingCategory;
-import org.spongepowered.common.config.category.BlockTrackingCategory;
+import org.spongepowered.common.config.category.BlockTrackerCategory;
+import org.spongepowered.common.config.category.PlayerBlockTracker;
 import org.spongepowered.common.config.category.DebugCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.category.EntityCategory;
@@ -36,16 +36,20 @@ import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.category.SpawnerCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.config.category.TimingsCategory;
+import org.spongepowered.common.config.category.TrackerCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 
 public class GeneralConfigBase extends ConfigBase {
 
     @Setting
     protected WorldCategory world = new WorldCategory();
-    @Setting(value = "block-tracking")
-    private BlockTrackingCategory blockTracking = new BlockTrackingCategory();
-    @Setting(value = "block-capturing")
-    private BlockCapturingCategory blockCapturing = new BlockCapturingCategory();
+    @Setting(value = "config-enabled", comment = "This setting does nothing in the global config. In dimension/world configs, it allows the config \n"
+                                               + "to override config(s) that it inherits from")
+    protected boolean configEnabled = false;
+    @Setting(value = "player-block-tracker")
+    private PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
+    @Setting(value = "tracker")
+    private TrackerCategory tracker = new TrackerCategory();
     @Setting
     private DebugCategory debug = new DebugCategory();
     @Setting(value = "entity")
@@ -66,12 +70,12 @@ public class GeneralConfigBase extends ConfigBase {
     @Setting
     private TimingsCategory timings = new TimingsCategory();
 
-    public BlockTrackingCategory getBlockTracking() {
-        return this.blockTracking;
+    public PlayerBlockTracker getBlockTracking() {
+        return this.playerBlockTracker;
     }
 
-    public BlockCapturingCategory getBlockCapturing() {
-        return this.blockCapturing;
+    public TrackerCategory getTracker() {
+        return this.tracker;
     }
 
     public DebugCategory getDebug() {
@@ -112,5 +116,13 @@ public class GeneralConfigBase extends ConfigBase {
 
     public TimingsCategory getTimings() {
         return this.timings;
+    }
+
+    public boolean isConfigEnabled() {
+        return this.configEnabled;
+    }
+
+    public void setConfigEnabled(boolean configEnabled) {
+        this.configEnabled = configEnabled;
     }
 }

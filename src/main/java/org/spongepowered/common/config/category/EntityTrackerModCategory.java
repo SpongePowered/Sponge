@@ -22,38 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.util.math.BlockPos;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
+import java.util.HashMap;
+import java.util.Map;
 
-    NoCaptureBlockTickPhaseState(String name) {
-        super(name);
+@ConfigSerializable
+public class EntityTrackerModCategory extends ConfigCategory {
+
+    @Setting(value = "enabled", comment = "If 'false', all tracking for this mod will be ignored.")
+    private boolean isEnabled = true;
+    @Setting(value = "bulk-captures", comment = "Set to true to perform bulk capturing during entity ticks. (Default: true)")
+    private Map<String, Boolean> entityCaptureMap = new HashMap<>();
+
+    public boolean isEnabled() {
+        return this.isEnabled;
     }
 
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
-        return false;
+    public Map<String, Boolean> getEntityCaptureMap() {
+        return this.entityCaptureMap;
     }
 
-    @Override
-    public boolean tracksBlockSpecificDrops() {
-        return false;
-    }
-
-    @Override
-    public boolean requiresBlockCapturing() {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns() {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntitySpawns() {
-        return true;
-    }
 }

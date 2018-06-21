@@ -22,38 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.util.math.BlockPos;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
+@ConfigSerializable
+public class TrackerCategory extends ConfigCategory {
 
-    NoCaptureBlockTickPhaseState(String name) {
-        super(name);
+    @Setting("block")
+    private BlockTrackerCategory blockTracker = new BlockTrackerCategory();
+
+    @Setting("entity")
+    private EntityTrackerCategory entityTracker = new EntityTrackerCategory();
+
+    @Setting("tileentity")
+    private TileEntityTrackerCategory tileEntityTracker = new TileEntityTrackerCategory();
+
+    public BlockTrackerCategory getBlockTracker() {
+        return this.blockTracker;
     }
 
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
-        return false;
+    public EntityTrackerCategory getEntityTracker() {
+        return this.entityTracker;
     }
 
-    @Override
-    public boolean tracksBlockSpecificDrops() {
-        return false;
-    }
-
-    @Override
-    public boolean requiresBlockCapturing() {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns() {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntitySpawns() {
-        return true;
+    public TileEntityTrackerCategory getTileEntityTracker() {
+        return this.tileEntityTracker;
     }
 }

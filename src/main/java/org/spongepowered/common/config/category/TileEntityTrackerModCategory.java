@@ -31,29 +31,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class BlockCapturingModCategory extends ConfigCategory {
+public class TileEntityTrackerModCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', all specific rules for this mod will be ignored.")
+    @Setting(value = "enabled", comment = "If 'false', all tracking for this mod will be disabled.")
     private boolean isEnabled = true;
-    @Setting(value = "block-tick-capturing", comment = "If 'true', individual capturing (i.e. skip bulk capturing) for scheduled ticks for \n"
-                                                     + "a block type will be performed.")
-    private Map<String, Boolean> blockMap = new HashMap<>();
-
-    public BlockCapturingModCategory() {
-    }
-
-    public BlockCapturingModCategory(String modId) {
-        if (modId.equals("extrautils2")) {
-            this.blockMap.put("redstoneclock", true);
-        }
-    }
+    @Setting(value = "bulk-captures", comment = "Set to true to perform bulk capturing during tileentity ticks. (Default: true)")
+    private Map<String, Boolean> tileEntityCaptureMap = new HashMap<>();
 
     public boolean isEnabled() {
         return this.isEnabled;
     }
 
-    public Map<String, Boolean> getBlockMap() {
-        return this.blockMap;
+    public Map<String, Boolean> getTileEntityCaptureMap() {
+        return this.tileEntityCaptureMap;
     }
 
 }

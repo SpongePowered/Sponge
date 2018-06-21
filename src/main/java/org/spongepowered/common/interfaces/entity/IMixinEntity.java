@@ -41,6 +41,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinTrackable;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
+public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixinTrackable {
 
     boolean isInConstructPhase();
 

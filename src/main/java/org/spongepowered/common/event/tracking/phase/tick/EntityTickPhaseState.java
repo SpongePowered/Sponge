@@ -68,8 +68,12 @@ import javax.annotation.Nullable;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
-    EntityTickPhaseState() {
+    private String name;
+
+    EntityTickPhaseState(String name) {
+        this.name = name;
     }
+
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(EntityTickContext phaseContext) {
@@ -329,6 +333,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     public String toString() {
-        return "EntityTickPhase";
+        return this.name;
     }
 }

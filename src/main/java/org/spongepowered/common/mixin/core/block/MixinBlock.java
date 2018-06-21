@@ -29,7 +29,6 @@ import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 import net.minecraft.block.BlockLeaves;
@@ -48,7 +47,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
@@ -57,7 +56,6 @@ import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -79,25 +77,26 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.BlockTrackerCategory;
+import org.spongepowered.common.config.category.BlockTrackerModCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.VecHelper;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -116,6 +115,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean requiresBlockCapture = true;
     private static boolean canCaptureItems = true;
     private Timing timing;
+    // If this block should allow bulk captures
+    private boolean allowsCaptures = true;
 
     @Shadow private boolean needsRandomTick;
     @Shadow protected SoundType blockSoundType;
@@ -173,6 +174,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
+        ((IMixinBlock) block).initializeTrackerState();
     }
 
     @Override
@@ -419,5 +421,60 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public BlockSoundGroup getSoundGroup() {
         return (BlockSoundGroup) this.blockSoundType;
+    }
+
+    @Override
+    public boolean allowsCaptures() {
+        return this.allowsCaptures;
+    }
+
+    @Override
+    public void refreshCache() {
+        // not needed
+    }
+
+    @Override
+    public void initializeTrackerState() {
+        SpongeConfig<GlobalConfig> globalConfig = SpongeImpl.getGlobalConfig();
+        BlockTrackerCategory blockCapturing = globalConfig.getConfig().getTracker().getBlockTracker();
+        String[] ids = this.getId().split(":");
+        if (ids.length != 2) {
+            final PrettyPrinter printer = new PrettyPrinter(60).add("Malformatted Block ID discovered!").centre().hr()
+                .addWrapped(60, "Sponge has found a malformatted block id when trying to"
+                                + " load configurations for the block id. The printed out block id"
+                                + "is not originally from sponge, and should be brought up with the"
+                                + "mod developer as the registration for this block is not likely"
+                                + "to work with other systems and assumptions of having a properly"
+                                + "formatted block id.")
+                .add("%s : %s", "Malformed ID", this.getId())
+                .add("%s : %s", "Discovered id array", ids)
+                .add();
+            final String id = ids[0];
+            ids = new String[]{"unknown", id};
+            printer
+                .add("Sponge will attempt to work around this by using the provided generated id:")
+                .add("%s : %s", "Generated ID", Arrays.toString(ids))
+                .log(SpongeImpl.getLogger(), Level.WARN);
+
+        }
+        final String modId = ids[0];
+        final String name = ids[1];
+
+        BlockTrackerModCategory modCapturing = blockCapturing.getModMappings().get(modId);
+
+        if (modCapturing == null) {
+            modCapturing = new BlockTrackerModCategory();
+            blockCapturing.getModMappings().put(modId, modCapturing);
+        }
+        if (!modCapturing.isEnabled()) {
+            this.allowsCaptures = false;
+            modCapturing.getBlockCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsCaptures);
+        } else {
+            this.allowsCaptures = modCapturing.getBlockCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+        }
+
+        if (blockCapturing.autoPopulateData()) {
+            globalConfig.save();
+        }
     }
 }

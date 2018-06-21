@@ -30,6 +30,11 @@ import com.google.common.base.MoreObjects;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.TileEntityTrackerCategory;
+import org.spongepowered.common.config.category.TileEntityTrackerModCategory;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
@@ -37,6 +42,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     private final String modId;
     private final Class<? extends TileEntity> clazz;
     private final boolean canTick;
+    public boolean allowCaptures = true;
 
     public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
         super(id);
@@ -44,6 +50,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
         this.clazz = checkNotNull(clazz, "clazz");
         this.canTick = canTick;
         this.modId = modId;
+        this.initializeTrackerState();
     }
 
     @Override
@@ -57,6 +64,30 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
 
     public boolean canTick() {
         return this.canTick;
+    }
+
+    public void initializeTrackerState() {
+        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
+        TileEntityTrackerCategory tileEntityTracker = globalConfig.getConfig().getTracker().getTileEntityTracker();
+        final String modId = this.modId;
+        final String name = this.name;
+
+        TileEntityTrackerModCategory modCapturing = tileEntityTracker.getModMappings().get(modId);
+
+        if (modCapturing == null) {
+            modCapturing = new TileEntityTrackerModCategory();
+            tileEntityTracker.getModMappings().put(modId, modCapturing);
+        }
+        if (!modCapturing.isEnabled()) {
+            this.allowCaptures = false;
+            modCapturing.getTileEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowCaptures);
+        } else {
+            this.allowCaptures = modCapturing.getTileEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+        }
+
+        if (tileEntityTracker.autoPopulateData()) {
+            globalConfig.save();
+        }
     }
 
     @Override

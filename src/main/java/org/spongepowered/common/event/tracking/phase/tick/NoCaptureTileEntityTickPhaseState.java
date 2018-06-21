@@ -24,17 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.util.math.BlockPos;
+class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
 
-class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
-
-    NoCaptureBlockTickPhaseState(String name) {
+    NoCaptureTileEntityTickPhaseState(String name) {
         super(name);
-    }
-
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
-        return false;
     }
 
     @Override

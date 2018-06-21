@@ -31,24 +31,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class BlockCapturingCategory extends ConfigCategory {
+public class BlockTrackerModCategory extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with a default value.")
-    private boolean autoPopulate = false;
+    @Setting(value = "enabled", comment = "If 'false', all tracking for this mod will be ignored.")
+    private boolean isEnabled = true;
+    @Setting(value = "bulk-captures", comment = "Set to true to perform bulk capturing during block ticks. (Default: true)")
+    private Map<String, Boolean> blockCaptureMap = new HashMap<>();
 
-    @Setting(value = "mods", comment = "Per-mod block id mappings for controlling capturing behavior")
-    private Map<String, BlockCapturingModCategory> modMapping = new HashMap<>();
-
-    public BlockCapturingCategory() {
-        this.modMapping.put("extrautils2", new BlockCapturingModCategory("extrautils2"));
+    public BlockTrackerModCategory() {
     }
 
-    public Map<String, BlockCapturingModCategory> getModMappings() {
-        return this.modMapping;
+    public BlockTrackerModCategory(String modId) {
+        if (modId.equals("extrautils2")) {
+            this.blockCaptureMap.put("redstoneclock", false);
+        }
     }
 
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
+    public Map<String, Boolean> getBlockCaptureMap() {
+        return this.blockCaptureMap;
     }
 
 }
