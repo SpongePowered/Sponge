@@ -22,38 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.util.math.BlockPos;
+public interface IMixinTrackable {
 
-class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
+    boolean allowsCaptures();
 
-    NoCaptureBlockTickPhaseState(String name) {
-        super(name);
-    }
-
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
-        return false;
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops() {
-        return false;
-    }
-
-    @Override
-    public boolean requiresBlockCapturing() {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns() {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntitySpawns() {
-        return true;
-    }
+    void refreshCache();
 }

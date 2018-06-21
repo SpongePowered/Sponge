@@ -58,6 +58,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -89,6 +90,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Nullable private User spongeOwner;
     private boolean hasSetOwner = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
+    // If this tileentity should allow bulk captures
+    private boolean allowsCaptures = true;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
@@ -99,6 +102,13 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract Block getBlockType();
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Override @Shadow public abstract void markDirty();
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        if (this.tileType != null) {
+            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowCaptures;
+        }
+    }
 
     @Intrinsic
     public void tile$markDirty() {
@@ -339,6 +349,18 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean allowsCaptures() {
+        return this.allowsCaptures;
+    }
+
+    @Override
+    public void refreshCache() {
+        if (this.tileType != null) {
+            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowCaptures;
+        }
     }
 
     @Override

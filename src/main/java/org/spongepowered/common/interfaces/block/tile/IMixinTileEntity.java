@@ -35,12 +35,13 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinTrackable;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public interface IMixinTileEntity {
+public interface IMixinTileEntity extends IMixinTrackable {
 
     /**
      * Gets a {@link NBTTagCompound} that can be used to store custom data for

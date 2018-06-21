@@ -22,49 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.blockcapturing;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeImpl;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-public class BlockCapturingPlugin implements IMixinConfigPlugin {
+@ConfigSerializable
+public class PlayerBlockTracker extends ConfigCategory {
 
-    @Override
-    public void onLoad(String mixinPackage) {
+    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
+                                        + "Note: This should only be disabled if you do not care who caused a block to change.")
+    private boolean enabled = true;
+
+    @Setting(value = "block-blacklist", comment = "Block IDs that will be blacklisted for player block placement tracking.")
+    private List<String> blockBlacklist = new ArrayList<>();
+
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
-    @Override
-    public String getRefMapperConfig() {
-        return null;
+    public void setEnabled(boolean flag) {
+        this.enabled = flag;
     }
 
-    @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-       return SpongeImpl.getGlobalConfig().getConfig().getModules().usesBlockCapturing();
-    }
-
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return null;
-    }
-
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
-
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
+    public List<String> getBlockBlacklist() {
+        return this.blockBlacklist;
     }
 }

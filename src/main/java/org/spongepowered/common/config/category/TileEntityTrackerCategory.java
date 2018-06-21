@@ -27,28 +27,24 @@ package org.spongepowered.common.config.category;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @ConfigSerializable
-public class BlockTrackingCategory extends ConfigCategory {
+public class TileEntityTrackerCategory extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
-                                        + "Note: This should only be disabled if you do not care who caused a block to change.")
-    private boolean enabled = true;
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered tileentities will be added to this config with default settings.")
+    private boolean autoPopulate = false;
 
-    @Setting(value = "block-blacklist", comment = "Block IDs that will be blacklisted for player block placement tracking.")
-    private List<String> blockBlacklist = new ArrayList<>();
+    @Setting(value = "mods", comment = "Per-mod tileentity id mappings for controlling tracking behavior")
+    private Map<String, TileEntityTrackerModCategory> modMapping = new HashMap<>();
 
-    public boolean isEnabled() {
-        return this.enabled;
+    public Map<String, TileEntityTrackerModCategory> getModMappings() {
+        return this.modMapping;
     }
 
-    public void setEnabled(boolean flag) {
-        this.enabled = flag;
+    public boolean autoPopulateData() {
+        return this.autoPopulate;
     }
 
-    public List<String> getBlockBlacklist() {
-        return this.blockBlacklist;
-    }
 }

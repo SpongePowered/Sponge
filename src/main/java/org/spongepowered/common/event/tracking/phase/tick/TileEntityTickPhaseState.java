@@ -48,7 +48,10 @@ import java.util.Optional;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
 
-    TileEntityTickPhaseState() {
+    private String name;
+
+    TileEntityTickPhaseState(String name) {
+        this.name = name;
     }
 
     @Override
@@ -183,6 +186,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @Override
     public String toString() {
-        return "TileEntityTickPhase";
+        return this.name;
     }
 }

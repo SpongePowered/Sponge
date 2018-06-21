@@ -22,18 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.blockcapturing;
+package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.world.World;
+class NoCaptureEntityTickPhaseState extends EntityTickPhaseState {
 
-public interface IModData_BlockCapturing {
+    NoCaptureEntityTickPhaseState(String name) {
+        super(name);
+    }
 
-    boolean processTickChangesImmediately();
+    @Override
+    public boolean tracksBlockSpecificDrops() {
+        return false;
+    }
 
-    boolean requiresBlockCapturingRefresh();
+    @Override
+    public boolean requiresBlockCapturing() {
+        return false;
+    }
 
-    void requiresBlockCapturingRefresh(boolean refresh);
+    @Override
+    public boolean alreadyCapturingItemSpawns() {
+        return true;
+    }
 
-    void initializeBlockCapturingState(World worldIn);
-
+    @Override
+    public boolean alreadyCapturingEntitySpawns() {
+        return true;
+    }
 }
