@@ -29,6 +29,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
@@ -42,11 +44,18 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlo
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
 @Mixin(ContainerPlayer.class)
-public abstract class MixinContainerPlayer extends MixinContainer implements LensProvider<IInventory, ItemStack> {
+public abstract class MixinContainerPlayer extends MixinContainer implements IMixinContainerPlayer, LensProvider<IInventory, ItemStack> {
 
     @Override
     public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         return new ContainerPlayerInventoryLens(adapter, inventory$getSlotProvider());
+    }
+
+    private int offHandSlot = -1;
+
+    @Override
+    public int getOffHandSlot() {
+        return this.offHandSlot;
     }
 
     @SuppressWarnings("unchecked")
@@ -63,6 +72,11 @@ public abstract class MixinContainerPlayer extends MixinContainer implements Len
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
                 .add(36)
                 .add(1);
+
+        if (this.offHandSlot == -1) {
+            this.offHandSlot = builder.size() - 1;
+        }
+
         builder.add(this.inventorySlots.size() - 46); // Add additional slots (e.g. from mods)
         return builder.build();
     }

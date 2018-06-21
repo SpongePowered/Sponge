@@ -40,6 +40,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -127,6 +128,7 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
@@ -728,10 +730,18 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         if (SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, VecHelper.toVector3d(packetIn
                             .getHitVec()), entity).isCancelled() || SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player,
                             entity, hand, VecHelper.toVector3d(entity.getPositionVector().add(packetIn.getHitVec()))).isCancelled()) {
+
                             // Restore held item in hand
                             int index = ((IMixinInventoryPlayer) this.player.inventory).getHeldItemIndex(hand);
-                            Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
-                            sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
+
+                            if (hand == EnumHand.OFF_HAND) {
+                                // A window id of -2 can be used to set the off hand, even if a container is open.
+                                sendPacket(new SPacketSetSlot(-2, ((IMixinContainerPlayer) this.player.inventoryContainer).getOffHandSlot(), itemstack));
+                            } else {
+                                Slot slot = this.player.openContainer.getSlotFromInventory(this.player.inventory, index);
+                                sendPacket(new SPacketSetSlot(this.player.openContainer.windowId, slot.slotNumber, itemstack));
+                            }
+
 
                             // Handle a few special cases where the client assumes that the interaction is successful,
                             // which means that we need to force an update
