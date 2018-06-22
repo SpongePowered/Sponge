@@ -73,4 +73,14 @@ class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
     public boolean performOrCaptureItemDrop(TileEntityTickContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
     }
+
+    @Override
+    public boolean requiresPost() {
+        return false;
+    }
+
+    @Override
+    public void unwind(TileEntityTickContext context) {
+        // We didn't capture anything, so there's nothing to do here
+    }
 }

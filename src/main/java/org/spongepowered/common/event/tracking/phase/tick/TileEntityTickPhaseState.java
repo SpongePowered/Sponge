@@ -56,7 +56,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @Override
     public TileEntityTickContext createPhaseContext() {
-        return new TileEntityTickContext()
+        return new TileEntityTickContext(this)
                 .addEntityCaptures()
                 .addEntityDropCaptures()
                 .addBlockCaptures();

@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
@@ -72,5 +73,10 @@ class NoCaptureEntityTickPhaseState extends EntityTickPhaseState {
     @Override
     public boolean performOrCaptureItemDrop(EntityTickContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
+    }
+
+    @Override
+    protected void processCaptures(org.spongepowered.api.entity.Entity tickingEntity, EntityTickContext phaseContext, CauseStackManager.StackFrame frame) {
+        // We didn't perform any capturing, so there's nothing to process
     }
 }
