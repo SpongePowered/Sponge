@@ -46,11 +46,13 @@ public class SpongeWireAttachmentData extends AbstractData<WireAttachmentData, I
 
     private Map<Direction, WireAttachmentType> wireAttachmentMap;
 
+    private static final Map<Direction, WireAttachmentType> DEFAULTS = ImmutableMap.of(Direction.NORTH, WireAttachmentTypes.NONE,
+            Direction.SOUTH, WireAttachmentTypes.NONE,
+            Direction.EAST, WireAttachmentTypes.NONE,
+            Direction.WEST, WireAttachmentTypes.NONE);
+
     public SpongeWireAttachmentData() {
-        this(ImmutableMap.of(Direction.NORTH, WireAttachmentTypes.NONE,
-                Direction.SOUTH, WireAttachmentTypes.NONE,
-                Direction.EAST, WireAttachmentTypes.NONE,
-                Direction.WEST, WireAttachmentTypes.NONE));
+        this(SpongeWireAttachmentData.DEFAULTS);
     }
 
     public SpongeWireAttachmentData(Map<Direction, WireAttachmentType> attachmentMap) {
