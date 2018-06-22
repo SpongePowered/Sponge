@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.spongepowered.common.event.tracking.IPhaseState;
+
 public class EntityTickContext extends TickContext<EntityTickContext> {
 
-    EntityTickContext() {
-        super(TickPhase.Tick.ENTITY);
+    EntityTickContext(IPhaseState<EntityTickContext> phaseState) {
+        super(phaseState);
     }
 
 }

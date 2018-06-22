@@ -79,4 +79,14 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     public boolean performOrCaptureItemDrop(BlockTickContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
     }
+
+    @Override
+    public boolean requiresPost() {
+        return false;
+    }
+
+    @Override
+    public void unwind(BlockTickContext context) {
+        // We didn't perform any capturing, so there's nothing to do
+    }
 }
