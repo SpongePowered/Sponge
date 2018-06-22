@@ -43,6 +43,10 @@ public class EntityTrackerCategory extends ConfigCategory {
         return this.modMapping;
     }
 
+    public EntityTrackerCategory() {
+        this.modMapping.put("minecraft", new EntityTrackerModCategory("minecraft"));
+    }
+
     public boolean autoPopulateData() {
         return this.autoPopulate;
     }

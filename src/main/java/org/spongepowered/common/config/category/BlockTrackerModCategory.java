@@ -42,6 +42,8 @@ public class BlockTrackerModCategory extends ConfigCategory {
     }
 
     public BlockTrackerModCategory(String modId) {
+        if (modId.equals("minecraft")) {
+        }
         if (modId.equals("extrautils2")) {
             this.blockCaptureMap.put("redstoneclock", false);
         }
