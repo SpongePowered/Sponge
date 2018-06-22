@@ -24,6 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.common.world.BlockChange;
+
+import javax.annotation.Nullable;
+
 class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
 
     NoCaptureTileEntityTickPhaseState(String name) {
@@ -48,5 +56,21 @@ class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
     @Override
     public boolean alreadyCapturingEntitySpawns() {
         return true;
+    }
+
+    @Override
+    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
+        TileEntityTickContext context) {
+        super.handleBlockChangeWithUser(blockChange, snapshotTransaction, context);
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean performOrCaptureItemDrop(TileEntityTickContext phaseContext, Entity entity, EntityItem entityitem) {
+        return false;
     }
 }
