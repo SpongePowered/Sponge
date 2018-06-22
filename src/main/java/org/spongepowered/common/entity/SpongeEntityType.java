@@ -129,12 +129,6 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public void initializeTrackerState() {
         SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
         EntityTrackerCategory entityTracker = globalConfig.getConfig().getTracker().getEntityTracker();
-        String[] ids = this.entityName.split(":");
-        String name = ids[0];
-        if (ids.length > 1) {
-            name = ids[1];
-        }
-
         EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
 
         if (modCapturing == null) {
@@ -143,9 +137,9 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         }
         if (!modCapturing.isEnabled()) {
             this.allowsCaptures = false;
-            modCapturing.getEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsCaptures);
+            modCapturing.getEntityCaptureMap().computeIfAbsent(this.entityName.toLowerCase(), k -> this.allowsCaptures);
         } else {
-            this.allowsCaptures = modCapturing.getEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsCaptures = modCapturing.getEntityCaptureMap().computeIfAbsent(this.entityName.toLowerCase(), k -> true);
         }
 
         if (entityTracker.autoPopulateData()) {
