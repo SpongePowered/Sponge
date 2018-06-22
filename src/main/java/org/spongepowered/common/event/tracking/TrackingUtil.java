@@ -148,8 +148,7 @@ public final class TrackingUtil {
             return;
         }
 
-        final EntityTickContext tickContext = mixinEntity.allowsCaptures() ? TickPhase.Tick.ENTITY.createPhaseContext()
-            .source(entity) : TickPhase.Tick.NO_CAPTURE_ENTITY.createPhaseContext().source(entity);
+        final EntityTickContext tickContext = getEntityTickContext(entity, mixinEntity);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
@@ -176,6 +175,11 @@ public final class TrackingUtil {
         }
     }
 
+    private static EntityTickContext getEntityTickContext(net.minecraft.entity.Entity entity, IMixinEntity mixinEntity) {
+        return mixinEntity.allowsCaptures() ? TickPhase.Tick.ENTITY.createPhaseContext()
+            .source(entity) : TickPhase.Tick.NO_CAPTURE_ENTITY.createPhaseContext().source(entity);
+    }
+
     public static void tickRidingEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
@@ -184,8 +188,7 @@ public final class TrackingUtil {
             return;
         }
 
-        final EntityTickContext tickContext = mixinEntity.allowsCaptures() ? TickPhase.Tick.ENTITY.createPhaseContext()
-            .source(entity) : TickPhase.Tick.NO_CAPTURE_ENTITY.createPhaseContext().source(entity);
+        final EntityTickContext tickContext = getEntityTickContext(entity, mixinEntity);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
@@ -222,7 +225,7 @@ public final class TrackingUtil {
             return;
         }
 
-        final TileEntityTickContext context = mixinTileEntity.allowsCaptures() ? TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(tile) : TickPhase.Tick.NO_CAPTURE_TILE_ENTITY.createPhaseContext().source(tile);
+        final TileEntityTickContext context = getTileTickContext(tile, mixinTileEntity);
         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
              final PhaseContext<?> phaseContext = context) {
             frame.pushCause(tile);
@@ -256,6 +259,10 @@ public final class TrackingUtil {
         }
     }
 
+    private static TileEntityTickContext getTileTickContext(ITickable tile, IMixinTileEntity mixinTileEntity) {
+        return mixinTileEntity.allowsCaptures() ? TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(tile) : TickPhase.Tick.NO_CAPTURE_TILE_ENTITY.createPhaseContext().source(tile);
+    }
+
     @SuppressWarnings("rawtypes")
     public static void updateTickBlock(IMixinWorldServer mixinWorld, Block block, BlockPos pos, IBlockState state, Random random) {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
@@ -278,7 +285,7 @@ public final class TrackingUtil {
                     .build();
             frame.pushCause(locatable);
             final IMixinBlock mixinBlock = (IMixinBlock) block;
-            IPhaseState<BlockTickContext> phase = mixinBlock.requiresBlockCapture() && mixinBlock.allowsCaptures() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+            IPhaseState<BlockTickContext> phase = getTickBlockContext(mixinBlock, TickPhase.Tick.BLOCK);
             final BlockTickContext phaseContext = phase.createPhaseContext()
                     .source(locatable);
 
@@ -297,6 +304,10 @@ public final class TrackingUtil {
                 phaseTracker.printExceptionFromPhase(e, phaseContext);
             }
         }
+    }
+
+    private static IPhaseState<BlockTickContext> getTickBlockContext(IMixinBlock mixinBlock, IPhaseState<BlockTickContext> block) {
+        return mixinBlock.requiresBlockCapture() && mixinBlock.allowsCaptures() ? block : TickPhase.Tick.NO_CAPTURE_BLOCK;
     }
 
     @SuppressWarnings("rawtypes")
@@ -322,7 +333,7 @@ public final class TrackingUtil {
                     .build();
             frame.pushCause(locatable);
             final IMixinBlock mixinBlock = (IMixinBlock) block;
-            IPhaseState<BlockTickContext> phase = mixinBlock.requiresBlockCapture() && mixinBlock.allowsCaptures() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+            IPhaseState<BlockTickContext> phase = getTickBlockContext(mixinBlock, TickPhase.Tick.RANDOM_BLOCK);
             final BlockTickContext phaseContext = phase.createPhaseContext()
                     .source(locatable);
 
@@ -351,7 +362,7 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
-        IPhaseState<?> phase = blockEvent.getCaptureBlocks() && ((IMixinBlock) event.getBlock()).allowsCaptures() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
+        IPhaseState<?> phase = getBlockEventState(event, blockEvent);
         final PhaseContext<?> phaseContext = phase.createPhaseContext();
 
         Object source = blockEvent.getTickBlock() != null ? blockEvent.getTickBlock() : blockEvent.getTickTileEntity();
@@ -370,6 +381,10 @@ public final class TrackingUtil {
             o.buildAndSwitch();
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         }
+    }
+
+    private static IPhaseState<?> getBlockEventState(BlockEventData event, IMixinBlockEventData blockEvent) {
+        return blockEvent.getCaptureBlocks() && ((IMixinBlock) event.getBlock()).allowsCaptures() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
     }
 
     @SuppressWarnings("rawtypes")

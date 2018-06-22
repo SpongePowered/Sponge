@@ -24,7 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.world.BlockChange;
+
+import javax.annotation.Nullable;
 
 final class NoCaptureUseItemPacketState extends UseItemPacketState {
 
@@ -35,6 +43,22 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
 
     @Override
     public boolean requiresBlockCapturing() {
+        return false;
+    }
+
+    @Override
+    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
+        BasicPacketContext context) {
+        super.handleBlockChangeWithUser(blockChange, snapshotTransaction, context);
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops() {
+        return false;
+    }
+
+    @Override
+    public boolean performOrCaptureItemDrop(BasicPacketContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
     }
 }
