@@ -61,4 +61,9 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
     public boolean performOrCaptureItemDrop(BasicPacketContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
     }
+
+    @Override
+    public void unwind(BasicPacketContext context) {
+        // We didn't capture anything, so there's nothing to do
+    }
 }
