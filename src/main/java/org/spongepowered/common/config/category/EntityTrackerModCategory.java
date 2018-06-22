@@ -46,4 +46,21 @@ public class EntityTrackerModCategory extends ConfigCategory {
         return this.entityCaptureMap;
     }
 
+    public EntityTrackerModCategory() {
+
+    }
+
+    public EntityTrackerModCategory(String name) {
+        if (name.equals("minecraft")) {
+            // These entities don't modify the world or spawn any drops
+            // Skipping bulk capturing shoukd be transparent to plugins
+            this.entityCaptureMap.put("item", false);
+            this.entityCaptureMap.put("experience_orb", false);
+            this.entityCaptureMap.put("leash_hitch", false);
+            this.entityCaptureMap.put("painting", false);
+            this.entityCaptureMap.put("armor_stand", false);
+            this.entityCaptureMap.put("llama_spit", false);
+        }
+    }
+
 }

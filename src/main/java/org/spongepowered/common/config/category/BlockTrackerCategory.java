@@ -40,6 +40,7 @@ public class BlockTrackerCategory extends ConfigCategory {
     private Map<String, BlockTrackerModCategory> modMapping = new HashMap<>();
 
     public BlockTrackerCategory() {
+        this.modMapping.put("minecraft", new BlockTrackerModCategory("minecraft"));
         this.modMapping.put("extrautils2", new BlockTrackerModCategory("extrautils2"));
     }
 
