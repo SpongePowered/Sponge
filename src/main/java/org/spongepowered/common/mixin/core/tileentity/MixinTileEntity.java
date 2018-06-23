@@ -106,7 +106,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
         if (this.tileType != null) {
-            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowCaptures;
+            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowsCaptures;
         }
     }
 
@@ -359,7 +359,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public void refreshCache() {
         if (this.tileType != null) {
-            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowCaptures;
+            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowsCaptures;
         }
     }
 

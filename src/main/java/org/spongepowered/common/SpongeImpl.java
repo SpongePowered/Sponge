@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.common.config.SpongeConfig.Type.CUSTOM_DATA;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
+import static org.spongepowered.common.config.SpongeConfig.Type.TRACKER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -46,6 +47,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeCauseStackManager;
@@ -82,9 +84,10 @@ public final class SpongeImpl {
 
     // Can't @Inject these because they are referenced before everything is initialized
     @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
-    @Nullable private static PluginContainer minecraftPlugin;
+    @Nullable private static SpongeConfig<TrackerConfig> trackerConfig;
     @Nullable private static SpongeConfig<CustomDataConfig> customDataConfig;
     @Nullable private static SpongeConfigSaveManager configSaveManager;
+    @Nullable private static PluginContainer minecraftPlugin;
 
     @Inject private static SpongeGame game;
 
@@ -207,6 +210,13 @@ public final class SpongeImpl {
             customDataConfig = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID);
         }
         return customDataConfig;
+    }
+
+    public static SpongeConfig<TrackerConfig> getTrackerConfig() {
+        if (trackerConfig == null) {
+            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID);
+        }
+        return trackerConfig;
     }
 
     public static List<PluginContainer> getInternalPlugins() {

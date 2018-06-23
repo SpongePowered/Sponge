@@ -34,7 +34,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityTrackerCategory;
 import org.spongepowered.common.config.category.EntityTrackerModCategory;
-import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
@@ -127,8 +127,8 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     public void initializeTrackerState() {
-        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        EntityTrackerCategory entityTracker = globalConfig.getConfig().getTracker().getEntityTracker();
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        EntityTrackerCategory entityTracker = trackerConfig.getConfig().getEntityTracker();
         EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
 
         if (modCapturing == null) {
@@ -143,7 +143,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         }
 
         if (entityTracker.autoPopulateData()) {
-            globalConfig.save();
+            trackerConfig.save();
         }
     }
 

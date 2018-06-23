@@ -22,13 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.category;
+package org.spongepowered.common.config.type;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.config.category.BlockTrackerCategory;
+import org.spongepowered.common.config.category.EntityTrackerCategory;
+import org.spongepowered.common.config.category.TileEntityTrackerCategory;
 
 @ConfigSerializable
-public class TrackerCategory extends ConfigCategory {
+public class TrackerConfig extends ConfigBase {
+
+    public static final String BULK_CAPTURES = "bulk-captures";
 
     @Setting("block")
     private BlockTrackerCategory blockTracker = new BlockTrackerCategory();

@@ -84,8 +84,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.BlockTrackerCategory;
 import org.spongepowered.common.config.category.BlockTrackerModCategory;
-import org.spongepowered.common.config.type.GeneralConfigBase;
-import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -435,8 +434,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public void initializeTrackerState() {
-        SpongeConfig<GlobalConfig> globalConfig = SpongeImpl.getGlobalConfig();
-        BlockTrackerCategory blockCapturing = globalConfig.getConfig().getTracker().getBlockTracker();
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        BlockTrackerCategory blockTracker = trackerConfig.getConfig().getBlockTracker();
         String[] ids = this.getId().split(":");
         if (ids.length != 2) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Malformatted Block ID discovered!").centre().hr()
@@ -460,11 +459,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         final String modId = ids[0];
         final String name = ids[1];
 
-        BlockTrackerModCategory modCapturing = blockCapturing.getModMappings().get(modId);
+        BlockTrackerModCategory modCapturing = blockTracker.getModMappings().get(modId);
 
         if (modCapturing == null) {
             modCapturing = new BlockTrackerModCategory();
-            blockCapturing.getModMappings().put(modId, modCapturing);
+            blockTracker.getModMappings().put(modId, modCapturing);
         }
         if (!modCapturing.isEnabled()) {
             this.allowsCaptures = false;
@@ -473,8 +472,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             this.allowsCaptures = modCapturing.getBlockCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
         }
 
-        if (blockCapturing.autoPopulateData()) {
-            globalConfig.save();
+        if (blockTracker.autoPopulateData()) {
+            trackerConfig.save();
         }
     }
 }
