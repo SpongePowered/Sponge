@@ -156,4 +156,6 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      */
     void invalidate(Fabric<TInventory> inv);
 
+    SlotLens getSlotLens(int ordinal);
+
 }

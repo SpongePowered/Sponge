@@ -44,6 +44,7 @@ import org.spongepowered.common.item.inventory.lens.MutableLensCollection;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensCollectionImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs.Type;
 import org.spongepowered.common.util.observer.Observer;
@@ -198,6 +199,14 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         }
         
         return null;
+    }
+
+    public SlotLens getSlotLens(int ordinal) {
+        LensHandle handle = this.getLensForOrdinal(ordinal);
+        if (handle == null) {
+                return null;
+        }
+        return handle.lens.getSlotLens(ordinal - handle.ordinal);
     }
     
     @Override
