@@ -32,6 +32,26 @@ sourceSets {
     }
 }
 
+// JarInJar
+configurations {
+    // dependencies added to this configuration will be added ad a contained dep in forge
+    jarinjar {
+        // Why not compile.extendsFrom ?
+        // when exclude is used on a configuration, it is propagated up to any
+        // inheriting configurations. Using this, we can exclude dependencies
+        // from packaging, while at the same time, include them in the build.
+        jarinjar.dependencies.whenObjectAdded {
+            compile.dependencies.add it
+        }
+        afterEvaluate {
+            // minecraft deps aren't added until afterEvaluate
+            forgeGradleMcDeps.dependencies.each {
+                exclude group: it.group, module: it.name
+            }
+        }
+    }
+}
+
 // Java 6 source set for compatibility checking
 sourceSets {
     java6
