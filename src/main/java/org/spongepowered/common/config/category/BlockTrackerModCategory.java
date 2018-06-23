@@ -26,6 +26,7 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.config.type.TrackerConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class BlockTrackerModCategory extends ConfigCategory {
 
     @Setting(value = "enabled", comment = "If 'false', all tracking for this mod will be ignored.")
     private boolean isEnabled = true;
-    @Setting(value = "bulk-captures", comment = "Set to true to perform bulk capturing during block ticks. (Default: true)")
+    @Setting(value = TrackerConfig.BULK_CAPTURES, comment = "Set to true to perform bulk capturing during block ticks. (Default: true)")
     private Map<String, Boolean> blockCaptureMap = new HashMap<>();
 
     public BlockTrackerModCategory() {

@@ -34,7 +34,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.TileEntityTrackerCategory;
 import org.spongepowered.common.config.category.TileEntityTrackerModCategory;
-import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.type.TrackerConfig;
 
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
@@ -42,7 +42,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     private final String modId;
     private final Class<? extends TileEntity> clazz;
     private final boolean canTick;
-    public boolean allowCaptures = true;
+    public boolean allowsCaptures = true;
 
     public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
         super(id);
@@ -67,8 +67,8 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     }
 
     public void initializeTrackerState() {
-        SpongeConfig<? extends GeneralConfigBase> globalConfig = SpongeImpl.getGlobalConfig();
-        TileEntityTrackerCategory tileEntityTracker = globalConfig.getConfig().getTracker().getTileEntityTracker();
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        TileEntityTrackerCategory tileEntityTracker = trackerConfig.getConfig().getTileEntityTracker();
         final String modId = this.modId;
         final String name = this.name;
 
@@ -79,14 +79,14 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
             tileEntityTracker.getModMappings().put(modId, modCapturing);
         }
         if (!modCapturing.isEnabled()) {
-            this.allowCaptures = false;
-            modCapturing.getTileEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowCaptures);
+            this.allowsCaptures = false;
+            modCapturing.getTileEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsCaptures);
         } else {
-            this.allowCaptures = modCapturing.getTileEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsCaptures = modCapturing.getTileEntityCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
         }
 
         if (tileEntityTracker.autoPopulateData()) {
-            globalConfig.save();
+            trackerConfig.save();
         }
     }
 
