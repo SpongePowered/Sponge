@@ -56,6 +56,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.api.util.file.ForwardingFileVisitor;
@@ -496,11 +497,13 @@ public final class WorldManager {
             }
         }
 
-        try (final PhaseContext<?> ignored = GeneralPhase.State.WORLD_UNLOAD.createPhaseContext().source(worldServer).buildAndSwitch()) {
+        try (final PhaseContext<?> ignored = GeneralPhase.State.WORLD_UNLOAD.createPhaseContext().source(worldServer)) {
+            ignored.buildAndSwitch();
+            final UnloadWorldEvent event = SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                (org.spongepowered.api.world.World) worldServer);
+            final boolean isCancelled = SpongeImpl.postEvent(event);
 
-            if (SpongeImpl.postEvent(
-                SpongeEventFactory.createUnloadWorldEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.world.World)
-                    worldServer))) {
+            if (server.isServerRunning() && isCancelled) {
                 return false;
             }
 

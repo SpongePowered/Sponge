@@ -135,7 +135,8 @@ public abstract class MixinDragonFightManager {
                 }
 
                 // Sponge Start - Cause tracker - todo: do more logistical configuration of how this all works.
-                try (GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext().buildAndSwitch()) {
+                try (GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext()) {
+                    context.buildAndSwitch();
                     // Sponge End
                     this.respawnState
                         .process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);

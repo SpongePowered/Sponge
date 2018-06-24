@@ -99,7 +99,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -126,7 +126,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
             return entityitem;
         }
         // Sponge - redirect server sided logic to sponge to handle cause stacks and phase states
-        return EntityUtil.entityOnDropItem((EntityHanging) (Object) this, stack, offsetY, xOffset, zOffset);
+        return EntityUtil.entityOnDropItem((EntityHanging) (Object) this, stack, offsetY, this.posX + xOffset, this.posZ + zOffset);
     }
 
     // Data delegated methods

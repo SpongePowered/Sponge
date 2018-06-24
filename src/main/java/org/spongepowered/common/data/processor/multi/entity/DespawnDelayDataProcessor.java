@@ -78,7 +78,6 @@ public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor
     @Override
     public Optional<DespawnDelayData> fill(DataContainer container, DespawnDelayData data) {
         data.set(Keys.DESPAWN_DELAY, getData(container, Keys.DESPAWN_DELAY));
-        data.set(Keys.INFINITE_DESPAWN_DELAY, getData(container, Keys.INFINITE_DESPAWN_DELAY));
         return Optional.of(data);
     }
 

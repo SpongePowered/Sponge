@@ -50,6 +50,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
@@ -93,7 +94,7 @@ public final class GeneralPhase extends TrackingPhase {
      * @param unwindingState
      * @param unwinding
      */
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void processBlockTransactionListsPost(PhaseContext<?> postContext, List<BlockSnapshot> snapshotsToProcess,
                                                         IPhaseState<?> unwindingState, PhaseContext<?> unwinding) {
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
@@ -171,7 +172,7 @@ public final class GeneralPhase extends TrackingPhase {
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
                         // Cancel any block drops performed, avoids any item drops, regardless
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         postContext.getBlockDropSupplier().removeAllIfNotEmpty(pos);
                     }
                 }
@@ -181,7 +182,7 @@ public final class GeneralPhase extends TrackingPhase {
         performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static void performPostBlockAdditions(PhaseContext<?> postContext, List<Transaction<BlockSnapshot>> transactions,
                                                   IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
@@ -204,7 +205,7 @@ public final class GeneralPhase extends TrackingPhase {
             // Handle item drops captured
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
-            final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
+            final BlockPos pos = VecHelper.toBlockPos(worldLocation);
             capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
                     .spawnItemDataForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext));
             capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil

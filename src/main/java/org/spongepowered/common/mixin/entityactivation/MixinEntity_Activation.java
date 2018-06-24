@@ -42,7 +42,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModDat
 public abstract class MixinEntity_Activation implements Entity, IModData_Activation {
 
     public final byte activationType = EntityActivationRange.initializeEntityActivationType((net.minecraft.entity.Entity) (Object) this);
-    public boolean defaultActivationState;
+    public boolean defaultActivationState = true;
     public long activatedTick = Integer.MIN_VALUE;
     private int activationRange;
     private boolean refreshCache = false;
@@ -56,9 +56,7 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityActivationConstruction(World world, CallbackInfo ci) {
         if (world != null && !((IMixinWorld) world).isFake() && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
-            this.defaultActivationState = EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
-        } else {
-            this.defaultActivationState = false;
+            EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
         }
     }
 
@@ -79,6 +77,11 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     @Override
     public boolean getDefaultActivationState() {
         return this.defaultActivationState;
+    }
+
+    @Override
+    public void setDefaultActivationState(boolean defaultState) {
+        this.defaultActivationState = defaultState;
     }
 
     @Override

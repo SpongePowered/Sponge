@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
@@ -42,7 +41,6 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.CombatEntry;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
@@ -54,6 +52,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
@@ -64,6 +63,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -72,6 +72,8 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -81,6 +83,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -95,15 +98,15 @@ import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
@@ -142,6 +145,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
+    @Nullable private ItemStack activeItemStackCopy;
+
+    @Shadow public abstract int getItemInUseCount();
+    @Shadow public abstract void resetActiveHand();
+
+    @Shadow protected int activeItemStackUseCount;
 
     // Empty body so that we can call super() in MixinEntityPlayer
     @Shadow public void stopActiveHand() {
@@ -273,7 +282,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
                 this.deathEventsPosted++;
-                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).isCancelled()) {
+                if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause, isMainThread).map(Cancellable::isCancelled).orElse(true)) {
                     // Since the forge event is cancellable
                     return;
                 }
@@ -288,6 +297,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
+            context.buildAndSwitch();
             // Sponge End
             if (this.dead) {
                 return;
@@ -360,7 +370,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (((IMixinWorld) this.world).isFake() || !isMainThread || frame == null) { // Short circuit to avoid erroring on handling
             return null;
         }
-        final IPhaseState state = PhaseTracker.getInstance().getCurrentPhaseData().state;
+        final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentPhaseData().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()
@@ -368,7 +378,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 .source(this);
             this.getNotifierUser().ifPresent(context::notifier);
             this.getCreatorUser().ifPresent(context::owner);
-            context.buildAndSwitch();
             return context;
         }
         return null;
@@ -563,6 +572,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         // Sponge Start - notify the cause tracker
                         try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
                              final EntityDeathContext context = createOrNullDeathPhase(true, frame, source)) {
+                            if (context != null) {
+                                context.buildAndSwitch();
+                            }
                             this.onDeath(source);
                         }
                     }
@@ -644,9 +656,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 originalFunctions.add(absorptionFunction.get());
             }
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                DamageEventHandler.generateCauseFor(damageSource);
+                DamageEventHandler.generateCauseFor(damageSource, frame);
 
-                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, this, originalDamage);
+                DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), originalFunctions, this, originalDamage);
                 if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
                     Sponge.getEventManager().post(event);
                 }
@@ -872,12 +884,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.world.isRemote) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                 PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext()
-                        .source(entityLivingBase)
-                        .buildAndSwitch()) {
-                Sponge.getCauseStackManager().pushCause(entityLivingBase);
+                 PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext().source(entityLivingBase)) {
+                context.buildAndSwitch();
+                frame.pushCause(entityLivingBase);
                 ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
             }
         } else {
@@ -984,5 +994,152 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void setElytraFlying(boolean value) {
         setFlag(DataConstants.ELYTRA_FLYING_FLAG, value);
     }
+
+    // Start implementation of UseItemstackEvent
+
+    @Inject(method = "setActiveHand", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStack:Lnet/minecraft/item/ItemStack;"))
+    private void onSetActiveItemStack(EnumHand hand, CallbackInfo ci, ItemStack stack) {
+        if (this.world.isRemote) {
+            return;
+        }
+
+        Sponge.getCauseStackManager().pushCause(this);
+        UseItemStackEvent.Start event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
+                stack.getMaxItemUseDuration(), stack.getMaxItemUseDuration(), ItemStackUtil.snapshotOf(stack));
+        if (SpongeImpl.postEvent(event)) {
+            ci.cancel();
+        } else {
+            this.activeItemStackUseCount = event.getRemainingDuration();
+        }
+        Sponge.getCauseStackManager().popCause();
+    }
+
+    @Redirect(method = "setActiveHand", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;activeItemStackUseCount:I"))
+    private void getItemDuration(EntityLivingBase this$0, int count) {
+        if (this.world.isRemote) {
+            this.activeItemStackUseCount = count;
+        }
+        // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
+    }
+
+    @Redirect(method = "updateActiveHand",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;getItemInUseCount()I", ordinal = 0))
+    private int onGetRemainingItemDuration(EntityLivingBase self) {
+        if (this.world.isRemote) {
+            return self.getItemInUseCount();
+        }
+
+        Sponge.getCauseStackManager().pushCause(this);
+        UseItemStackEvent.Tick event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
+                this.activeItemStackUseCount, this.activeItemStackUseCount, ItemStackUtil.snapshotOf(this.activeItemStack));
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        // Because the item usage will only finish if activeItemStackUseCount == 0 and decrements it first, it should be >= 1
+        this.activeItemStackUseCount = Math.max(event.getRemainingDuration(), 1);
+
+        if (event.isCancelled()) {
+            // Get prepared for some cool hacks: We're within the condition for updateItemUse
+            // So if we don't want it to call the method we just pass a value that makes the
+            // condition evaluate to false, so an integer >= 25
+            return 26;
+        }
+
+        return getItemInUseCount();
+    }
+
+    @Inject(method = "onItemUseFinish", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;updateItemUse(Lnet/minecraft/item/ItemStack;I)V"))
+    private void onUpdateItemUse(CallbackInfo ci) {
+        if (this.world.isRemote) {
+            return;
+        }
+
+        Sponge.getCauseStackManager().pushCause(this);
+        UseItemStackEvent.Finish event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
+                this.activeItemStackUseCount, this.activeItemStackUseCount, ItemStackUtil.snapshotOf(this.activeItemStack));
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
+        if (event.getRemainingDuration() > 0) {
+            this.activeItemStackUseCount = event.getRemainingDuration();
+            ci.cancel();
+        } else if (event.isCancelled()) {
+            resetActiveHand();
+            ci.cancel();
+        } else {
+            this.activeItemStackCopy = this.activeItemStack.copy();
+        }
+    }
+
+    @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;"
+            + "setHeldItem(Lnet/minecraft/util/EnumHand;Lnet/minecraft/item/ItemStack;)V"))
+    private void onSetHeldItem(EntityLivingBase self, EnumHand hand, @Nullable ItemStack stack) {
+        if (this.world.isRemote) {
+            self.setHeldItem(hand, stack);
+            return;
+        }
+
+        // Unforunately, ItemFood calls ItemStack#shrink in Item#onItemUseFinish.
+        // To ensure that we provide the original ItemStack in the event,
+        // we make a copy of in our onUpdateItemUse redirect
+        // If the event or transaction is cancelled, we make sure to explicitly
+        // set the copy back in the player's hand, since it may have been already
+        // modified if an ItemFood is being used.
+
+        ItemStackSnapshot activeItemStackSnapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy);
+        Sponge.getCauseStackManager().pushCause(this);
+        UseItemStackEvent.Replace event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
+                this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
+                new Transaction<>((org.spongepowered.api.item.inventory.ItemStack) this.activeItemStackCopy, ItemStackUtil.snapshotOf(stack)));
+
+        if (SpongeImpl.postEvent(event)) {
+            Sponge.getCauseStackManager().popCause();
+            this.setHeldItem(hand, this.activeItemStackCopy.copy());
+            return;
+        }
+        Sponge.getCauseStackManager().popCause();
+
+        if (!event.getItemStackResult().isValid()) {
+            this.setHeldItem(hand, this.activeItemStackCopy.copy());
+            return;
+        }
+
+        setHeldItem(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
+    }
+
+    @Redirect(method = "stopActiveHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;"
+            + "onPlayerStoppedUsing(Lnet/minecraft/world/World;Lnet/minecraft/entity/EntityLivingBase;I)V")) // stopActiveHand
+    private void onStopPlayerUsing(ItemStack stack, World world, EntityLivingBase self, int duration) {
+        if (this.world.isRemote) {
+            stack.onPlayerStoppedUsing(world, self, duration);
+            return;
+        }
+        Sponge.getCauseStackManager().pushCause(this);
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
+                duration, duration, ItemStackUtil.snapshotOf(stack)))) {
+            stack.onPlayerStoppedUsing(world, self, duration);
+        }
+        Sponge.getCauseStackManager().popCause();
+    }
+
+    @Inject(method = "resetActiveHand", at = @At("HEAD"))
+    private void onResetActiveHand(CallbackInfo ci) {
+        if (this.world.isRemote) {
+            return;
+        }
+
+        // If we finished using an item, activeItemStackCopy will be non-null
+        // However, if a player stopped using an item early, activeItemStackCopy will not be set
+        ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStackCopy != null ? this.activeItemStackCopy : this.activeItemStack);
+
+        Sponge.getCauseStackManager().pushCause(this);
+        SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
+                this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
+        Sponge.getCauseStackManager().popCause();
+
+        this.activeItemStackCopy = null;
+    }
+
+    // End implementation of UseItemStackEvent
 
 }

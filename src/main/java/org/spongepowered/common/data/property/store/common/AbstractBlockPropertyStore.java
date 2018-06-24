@@ -38,6 +38,8 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> extends AbstractSpongePropertyStore<T> {
 
     private final boolean checksItemStack;
@@ -50,10 +52,12 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
      * Gets the property for the block, if the block is actually containing a
      * property in the first place.
      *
+     *
+     * @param location
      * @param block The block
      * @return The property, if available
      */
-    protected abstract Optional<T> getForBlock(IBlockState block);
+    protected abstract Optional<T> getForBlock(@Nullable Location<?> location, IBlockState block);
 
     /**
      * This is intended for properties that are intentionally for directional
@@ -74,27 +78,28 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
-            final IBlockState block = (IBlockState) ((Location<?>) propertyHolder).getBlock();
-            return getForBlock(block);
+            final Location<?> location = (Location<?>) propertyHolder;
+            final IBlockState block = (IBlockState) location.getBlock();
+            return getForBlock(location, block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
             final Item item = ((ItemStack) propertyHolder).getItem();
             if (item instanceof ItemBlock) {
                 final Block block = ((ItemBlock) item).getBlock();
                 if (block != null) {
-                    return getForBlock(block.getDefaultState());
+                    return getForBlock(null, block.getDefaultState());
                 }
             }
         } else if (propertyHolder instanceof IBlockState) {
-            return getForBlock(((IBlockState) propertyHolder));
+            return getForBlock(null, ((IBlockState) propertyHolder));
         } else if (propertyHolder instanceof Block) {
-            return getForBlock(((Block) propertyHolder).getDefaultState());
+            return getForBlock(null, ((Block) propertyHolder).getDefaultState());
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<T> getFor(Location<World> location) {
-        return getForBlock((IBlockState) location.getBlock());
+        return getForBlock(location, (IBlockState) location.getBlock());
     }
 
     @Override

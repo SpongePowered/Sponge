@@ -38,6 +38,7 @@ import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityShulkerBox.class)
 public abstract class MixinTileEntityShulkerBox extends MixinTileEntityLockableLoot implements ShulkerBox {

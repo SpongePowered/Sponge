@@ -30,6 +30,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -278,8 +279,8 @@ public class SpongeHooks {
         }
 
         SpongeConfig<? extends GeneralConfigBase> config = getActiveConfig((WorldServer) entity.world);
-        if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer) {
-            return false; // only check living entities that are not players
+        if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer || entity instanceof IEntityMultiPart) {
+            return false; // only check living entities, so long as they are not a player or multipart entity
         }
 
         int maxBoundingBoxSize = config.getConfig().getEntity().getMaxBoundingBoxSize();

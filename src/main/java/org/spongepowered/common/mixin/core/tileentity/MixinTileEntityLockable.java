@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityLockable.class)
 @Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$"),
@@ -132,6 +133,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         return Optional.of(this);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
         SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();

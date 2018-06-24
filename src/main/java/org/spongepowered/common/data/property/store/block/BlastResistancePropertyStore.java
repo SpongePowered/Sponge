@@ -26,9 +26,12 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.BlastResistanceProperty;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class BlastResistancePropertyStore extends AbstractBlockPropertyStore<BlastResistanceProperty> {
 
@@ -37,7 +40,7 @@ public class BlastResistancePropertyStore extends AbstractBlockPropertyStore<Bla
     }
 
     @Override
-    protected Optional<BlastResistanceProperty> getForBlock(IBlockState block) {
+    protected Optional<BlastResistanceProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(new BlastResistanceProperty(block.getBlock().getExplosionResistance(null)));
     }
 }

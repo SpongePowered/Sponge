@@ -114,7 +114,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -188,7 +187,6 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -466,7 +464,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
 
-        SpongeWorldGenerator newGenerator = createWorldGenerator(generatorSettings);
+        SpongeWorldGenerator newGenerator = this.createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
@@ -485,7 +483,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             modifier.modifyWorldGenerator(this.getProperties(), generatorSettings, newGenerator);
         }
 
-        this.spongegen = createChunkGenerator(newGenerator);
+        this.spongegen = this.createChunkGenerator(newGenerator);
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
@@ -556,7 +554,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *
      * @reason Added chunk and block tick optimizations, timings, cause tracking, and pre-construction events.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Overwrite
     protected void updateBlocks() {
@@ -611,8 +609,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
             if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
             {
-                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)
-                    .buildAndSwitch()) {
+                try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext().source(this)) {
+                    context.buildAndSwitch();
                     // Sponge end
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int l = this.updateLCG >> 2;
@@ -629,12 +627,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         if (world.getGameRules().getBoolean("doMobSpawning") && this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
                             // Sponge Start - Throw construction events
                             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                                Sponge.getCauseStackManager().pushCause(this.getWeather());
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                frame.pushCause(this.getWeather());
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                                 ConstructEntityEvent.Pre
                                     constructEntityEvent =
                                     SpongeEventFactory
-                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.HORSE, transform);
+                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.HORSE, transform);
                                 SpongeImpl.postEvent(constructEntityEvent);
                                 if (!constructEntityEvent.isCancelled()) {
                                     // Sponge End
@@ -649,7 +647,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 ConstructEntityEvent.Pre
                                     lightning =
                                     SpongeEventFactory
-                                        .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), EntityTypes.LIGHTNING,
+                                        .createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.LIGHTNING,
                                             transform);
                                 SpongeImpl.postEvent(lightning);
                                 if (!lightning.isCancelled()) {
@@ -664,11 +662,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         } else {
                             // Sponge start - Throw construction event for lightningbolts
                             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                                Sponge.getCauseStackManager().pushCause(this.getWeather());
-                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
+                                frame.pushCause(this.getWeather());
+                                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
                                 ConstructEntityEvent.Pre
                                     event =
-                                    SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                                    SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                                         EntityTypes.LIGHTNING, transform);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
@@ -696,8 +694,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             {
                 // Sponge Start - Enter weather phase for snow and ice and flooding.
                 try (final PhaseContext<?> context = TickPhase.Tick.WEATHER.createPhaseContext()
-                        .source(this)
-                        .buildAndSwitch()) {
+                        .source(this)) {
+                    context.buildAndSwitch();
                     // Sponge End
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int j2 = this.updateLCG >> 2;
@@ -819,7 +817,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     private void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -847,6 +845,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final BlockEventData blockEventData = (BlockEventData) obj;
@@ -889,7 +888,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     private boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState phaseState = phaseTracker.getCurrentState();
+        final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
         if (phaseState.ignoresBlockEvent()) {
             return fireBlockEvent(event);
         }
@@ -1005,7 +1004,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState phaseState = phaseTracker.getCurrentState();
+        final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
 
         if (phaseState.ignoresScheduledUpdates()) {
             this.tmpScheduledObj = sbu;
@@ -1077,8 +1076,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         try (PhaseContext<?> context = isWorldGen || handlesOwnCompletion
                 ? null
-                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-                                           .buildAndSwitch()) {
+                : PluginPhase.State.BLOCK_WORKER.createPhaseContext()) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             return setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         }
     }
@@ -1188,11 +1189,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkNotNull(explosion, "explosion");
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
 
         try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-                .explosion(explosion)
-                .buildAndSwitch()) {
+                .explosion(explosion)) {
+            phaseContext.buildAndSwitch();
             final Explosion mcExplosion;
             try {
                 // Since we already have the API created implementation Explosion, let's use it.
@@ -1431,7 +1431,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
             entityIn.onUpdate();
             return;
@@ -1448,7 +1448,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     // separated from onUpdateEntities for TileEntityActivation mixin
     private void updateTileEntity(ITickable tile) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
 
         if (state.alreadyCapturingTileTicks()) {
             tile.update();
@@ -1461,7 +1461,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
             entity.onUpdate();
             return;
@@ -1474,7 +1474,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (state.alreadyCapturingEntityTicks()) {
             entity.updateRidden();
             return;
@@ -1488,8 +1488,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
         try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext()
                 .source(player)
-                .addCaptures()
-                .buildAndSwitch()) {
+                .addCaptures()) {
+            basicEntityContext.buildAndSwitch();
             player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         }
     }
@@ -1619,11 +1619,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return true;
         }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState state = phaseTracker.getCurrentState();
+        final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (!state.alreadyCapturingEntitySpawns()) {
             try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext()
-                .addCaptures()
-                .buildAndSwitch()) {
+                .addCaptures()) {
+                context.buildAndSwitch();
                 phaseTracker.spawnEntityWithCause(this, entity);
                 return true;
             }
@@ -1721,8 +1721,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - Cause tracking
         try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
                 .potentialExplosionSource((WorldServer) (Object) this, entityIn)
-                .explosion(explosion)
-                .buildAndSwitch()) {
+                .explosion(explosion)) {
+            context.buildAndSwitch();
             this.processingExplosion = true;
             // Sponge End
 
@@ -1779,7 +1779,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             // TODO add TE config to disable/enable chunk loads
             final boolean forceChunkRequests = this.mixinChunkProviderServer.getForceChunkRequests();
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final IPhaseState currentState = phaseTracker.getCurrentState();
+            final IPhaseState<?> currentState = phaseTracker.getCurrentState();
             if (currentState == TickPhase.Tick.TILE_ENTITY) {
                 ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
             }

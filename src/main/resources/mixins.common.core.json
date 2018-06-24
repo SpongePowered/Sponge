@@ -1,6 +1,6 @@
 {
     "required": true,
-    "minVersion": "0.7.2",
+    "minVersion": "0.7.10",
     "package": "org.spongepowered.common.mixin.core",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.CorePlugin",
@@ -374,6 +374,7 @@
         "item.inventory.MixinContainerWorkbench",
         "item.inventory.MixinCustomInventory",
         "item.inventory.MixinCustomContainer",
+        "item.inventory.MixinEntityCarriedInventory",
         "item.inventory.MixinTraitInventory",
         "item.inventory.MixinTraitAdapter",
         "item.inventory.MixinSlot",

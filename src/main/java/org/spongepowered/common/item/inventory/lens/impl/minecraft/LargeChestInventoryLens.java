@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.OrderedInventoryAdapter;
@@ -36,6 +39,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.RealLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 /**
  * This class is only used as an adapter when explicitly requested from the API, trough
@@ -67,19 +71,20 @@ public class LargeChestInventoryLens extends RealLens {
         // we add the indexed slots ourselves
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void initLargeChest(SlotProvider<IInventory, ItemStack> slots) {
         // add grids
         int base = 0;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class)TileEntityChest.class, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, (Class) TileEntityChest.class, slots));
         base += this.upperChest;
-        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class)TileEntityChest.class, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, (Class) TileEntityChest.class, slots));
         base += this.lowerChest;
 
         this.addChild(new GridInventoryLensImpl(0, 9, (this.upperChest + this.lowerChest) / 9, 9, slots));
 
         // add slot childs for grids
         for (int ord = 0, slot = this.base; ord < base; ord++, slot ++) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+            this.addChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
 
         // handle possible extension by mods:

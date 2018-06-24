@@ -142,6 +142,7 @@ public class SpongePaginationService implements PaginationService {
         return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
     }
 
+    @SuppressWarnings("deprecation")
     private CommandSpec buildPaginationCommand() {
 
         final ActivePaginationCommandElement paginationElement = new ActivePaginationCommandElement(t("pagination-id"));

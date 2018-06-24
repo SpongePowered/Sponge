@@ -28,6 +28,7 @@ import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
@@ -53,8 +54,10 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -81,6 +84,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -173,12 +177,22 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public String getId() {
-        return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+        return this.getNameFromRegistry();
     }
 
     @Override
     public String getName() {
-        return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+        return this.getNameFromRegistry();
+    }
+
+    private String getNameFromRegistry() {
+        // This should always succeed when things are working properly,
+        // so we just catch the exception instead of doing a null check.
+        try {
+            return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+        } catch (NullPointerException e) {
+            throw new RuntimeException(String.format("Block '%s' (class '%s') is not registered with the block registry! This is likely a bug in the corresponding mod.", this, this.getClass().getName()), e);
+        }
     }
 
     @Override
@@ -231,6 +245,20 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.of();
+    }
+
+    @Override
+    public ImmutableMap<Class<? extends Property<?, ?>>, Property<?, ?>> getProperties(IBlockState blockState) {
+        return populateSpongeProperties(ImmutableMap.builder(), blockState).build();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> populateSpongeProperties(
+        ImmutableMap.Builder<Class<? extends Property<?, ?>>, Property<?, ?>> builder, IBlockState blockState) {
+        for (Property<?, ?> property : SpongeImpl.getPropertyRegistry().getPropertiesFor((BlockState) blockState)) {
+            builder.put((Class<? extends Property<?, ?>>) property.getClass(), property);
+        }
+        return builder;
     }
 
     @Override

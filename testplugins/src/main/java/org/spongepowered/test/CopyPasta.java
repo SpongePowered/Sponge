@@ -65,10 +65,11 @@ import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-@Plugin(id = "copypasta", description = "A simple plugin that allows creating, saving, and pasting schematics with SpongeAPI")
+@Plugin(id = "copypasta", name = "CopyPasta", description = CopyPasta.DESCRIPTION, version = "0.0.0")
 public class CopyPasta {
 
     public static final String PLUGIN_ID = "copypasta";
+    public static final String DESCRIPTION = "A simple plugin that allows creating, saving, and pasting schematics with SpongeAPI";
 
     @Inject private Logger logger;
     @Inject private PluginContainer plugin;

@@ -31,6 +31,8 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.util.observer.Observer;
 
+import javax.annotation.Nullable;
+
 /**
  * If {@link Inventory} represents the "idea" of an inventory, then an
  * {@link InventoryAdapter} represents the reality of one. All <i>Inventory
@@ -54,13 +56,14 @@ import org.spongepowered.common.util.observer.Observer;
 public interface InventoryAdapter<TInventory, TStack> extends Inventory, Observer<InventoryEventArgs> {
     
     SlotProvider<TInventory, TStack> getSlotProvider();
-    
+
     Lens<TInventory, TStack> getRootLens();
 
     Fabric<TInventory> getFabric();
 
     Inventory getChild(int index);
-    
+
+    @Nullable
     Inventory getChild(Lens<TInventory, TStack> lens);
 
 }

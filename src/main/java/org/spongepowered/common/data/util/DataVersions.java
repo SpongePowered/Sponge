@@ -115,4 +115,10 @@ public final class DataVersions {
 
     }
 
+    public static final class ItemStackSnapshot {
+        public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
+        public static final int REMOVED_DUPLICATE_DATA = 2;
+        public static final int CURRENT_VERSION = REMOVED_DUPLICATE_DATA;
+    }
+
 }

@@ -151,7 +151,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     .acceptIfNotEmpty(map -> {
                         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                         for (BlockSnapshot snapshot : capturedBlocks) {
-                            final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
+                            final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());
                             final Collection<EntityItem> entityItems = map.get(blockPos);
                             if (!entityItems.isEmpty()) {
                                 frame.pushCause(snapshot);
@@ -308,7 +308,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 return SpongeCommonEventFactory.callSpawnEntity(breeding, context);
 
             } else if (entity instanceof Projectile) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                 final List<Entity> projectile = new ArrayList<>(1);
                 projectile.add(entity);
                 return SpongeCommonEventFactory.callSpawnEntity(projectile, context);

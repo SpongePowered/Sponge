@@ -41,6 +41,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
+import org.spongepowered.api.data.property.IntProperty;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -56,11 +57,22 @@ import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
+import org.spongepowered.api.item.inventory.property.GuiIdProperty;
+import org.spongepowered.api.item.inventory.property.Identifiable;
+import org.spongepowered.api.item.inventory.property.InventoryCapacity;
+import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.property.SlotSide;
+import org.spongepowered.api.item.inventory.property.StringProperty;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.BookViewDataBuilder;
 import org.spongepowered.api.text.serializer.TextConfigSerializer;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -75,6 +87,7 @@ import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.data.property.store.common.InventoryPropertyStore;
 import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
@@ -120,6 +133,18 @@ import org.spongepowered.common.data.util.LegacyCustomDataClassContentUpdater;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
+import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
+import org.spongepowered.common.item.inventory.property.IdentifieableImpl;
+import org.spongepowered.common.item.inventory.property.IntPropertyImpl;
+import org.spongepowered.common.item.inventory.property.InventoryCapacityImpl;
+import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
+import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
+import org.spongepowered.common.item.inventory.property.SlotPosImpl;
+import org.spongepowered.common.item.inventory.property.SlotSideImpl;
+import org.spongepowered.common.item.inventory.property.StringPropertyImpl;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -186,6 +211,8 @@ public class DataRegistrar {
 
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
 
+        dataManager.registerBuilder(Color.class, new Color.Builder());
+
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
         final InvisibilityDataAddVanishUpdater invisibilityUpdater = new InvisibilityDataAddVanishUpdater();
@@ -199,6 +226,7 @@ public class DataRegistrar {
         dataManager.registerContentUpdater(ImmutablePotionEffectData.class, potionUpdater);
         dataManager.registerContentUpdater(SpongePotionEffectData.class, potionUpdater);
         dataManager.registerContentUpdater(ImmutableSpongePotionEffectData.class, potionUpdater);
+        dataManager.registerContentUpdater(ItemStackSnapshot.class, new ItemStackSnapshotDuplicateManipulatorUpdater());
 
         // Content Updaters for Custom Data
         dataManager.registerContentUpdater(DataManipulator.class, new LegacyCustomDataClassContentUpdater());
@@ -446,6 +474,9 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(ParrotData.class, SpongeParrotData.class, ImmutableParrotData.class,
                 ImmutableSpongeParrotData.class, new ParrotDataProcessor());
+
+        DataUtil.registerDualProcessor(TagData.class, SpongeTagData.class, ImmutableTagData.class,
+                ImmutableSpongeTagData.class, new TagDataProcessor());
 
         DataUtil.registerDataProcessorAndImpl(PickupDelayData.class, SpongePickupDelayData.class, ImmutablePickupDelayData.class,
                 ImmutableSpongePickupDelayData.class, new PickupDelayDataProcessor());
@@ -892,6 +923,20 @@ public class DataRegistrar {
         // Entities
         propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());
         propertyRegistry.register(EyeHeightProperty.class, new EyeHeightPropertyStore());
+
+        // Inventory Properties
+        propertyRegistry.register(EquipmentSlotType.class, new InventoryPropertyStore<>(EquipmentSlotType.class, EquipmentSlotTypeImpl.class));
+        propertyRegistry.register(GuiIdProperty.class, new InventoryPropertyStore<>(GuiIdProperty.class, GuiIdPropertyImpl.class));
+        propertyRegistry.register(Identifiable.class, new InventoryPropertyStore<>(Identifiable.class, IdentifieableImpl.class));
+        propertyRegistry.register(org.spongepowered.api.item.inventory.property.IntProperty.class, new InventoryPropertyStore<>(
+                org.spongepowered.api.item.inventory.property.IntProperty.class, IntPropertyImpl.class));
+        propertyRegistry.register(InventoryDimension.class, new InventoryPropertyStore<>(InventoryDimension.class, InventoryDimensionImpl.class));
+        propertyRegistry.register(InventoryTitle.class, new InventoryPropertyStore<>(InventoryTitle.class, InventoryTitleImpl.class));
+        propertyRegistry.register(SlotPos.class, new InventoryPropertyStore<>(SlotPos.class, SlotPosImpl.class));
+        propertyRegistry.register(SlotSide.class, new InventoryPropertyStore<>(SlotSide.class, SlotSideImpl.class));
+        propertyRegistry.register(StringProperty.class, new InventoryPropertyStore<>(StringProperty.class, StringPropertyImpl.class));
+        propertyRegistry.register(InventoryCapacity.class, new InventoryPropertyStore<>(InventoryCapacity.class, InventoryCapacityImpl.class));
+        propertyRegistry.register(SlotIndex.class, new InventoryPropertyStore<>(SlotIndex.class, SlotIndexImpl.class));
     }
 
 }

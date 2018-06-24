@@ -65,9 +65,7 @@ import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -88,6 +86,7 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.Inventory2DLensImpl;
@@ -101,11 +100,9 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.Con
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +150,7 @@ public final class ContainerUtil {
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
-        final IPhaseState currentState = currentPhase.state;
+        final IPhaseState<?> currentState = currentPhase.state;
         if (currentState.tracksBlockSpecificDrops()) {
             final PhaseContext<?> context = currentPhase.context;
             // this is where we could perform item stack pre-merging.
@@ -293,15 +290,18 @@ public final class ContainerUtil {
         try {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
                 additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+            } else if (crafting.base != null && crafting.grid != null) {
+                additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), crafting.grid.getWidth(), slots));
             }
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl for " + container.getClass().getName(), e);
+            SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
         }
 
         // Lens containing/delegating to other lenses
         return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses, additional);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static @Nullable Lens<IInventory, ItemStack> generateAdapterLens(SlotProvider<IInventory, ItemStack> slots, int index,
             CraftingInventoryData crafting, List<Slot> slotList, @Nullable IInventory subInventory) {
         if (!(subInventory instanceof InventoryAdapter)) {
@@ -326,8 +326,8 @@ public final class ContainerUtil {
             Slot slot = slotList.get(0);
             adapterLens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
                     itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
-            crafting.out = index;
             if (slot instanceof SlotCrafting) {
+                crafting.out = index;
                 if (crafting.base == null) {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
@@ -343,6 +343,7 @@ public final class ContainerUtil {
         return new DelegatingLens(index, adapterLens, slots);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens,
             SlotCollection slots) {
         if (lens instanceof LargeChestInventoryLens) {
@@ -381,6 +382,7 @@ public final class ContainerUtil {
      *
      * @return The {@link SlotCollection} with the amount of slots for this container.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static SlotProvider<IInventory, ItemStack> countSlots(net.minecraft.inventory.Container container, Fabric fabric) {
         if (container instanceof LensProvider) {
             return ((LensProvider) container).slotProvider(fabric, ((InventoryAdapter) container));
@@ -492,6 +494,7 @@ public final class ContainerUtil {
                             return new Location<>(((org.spongepowered.api.world.World) ((TileEntity) slot.inventory).getWorld()), pos.getX(), pos.getY(), pos.getZ());
                         }
 
+                        @SuppressWarnings("rawtypes")
                         @Override
                         public CarriedInventory<?> getInventory() {
                             return ((CarriedInventory) container);
@@ -508,6 +511,7 @@ public final class ContainerUtil {
                     return loc;
                 }
 
+                @SuppressWarnings("rawtypes")
                 @Override
                 public CarriedInventory<?> getInventory() {
                     return ((CarriedInventory) container);
@@ -517,6 +521,7 @@ public final class ContainerUtil {
         return null;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Carrier carrierOrNull(IInventory inventory) {
         if (inventory instanceof Carrier) {
             return (Carrier) inventory;

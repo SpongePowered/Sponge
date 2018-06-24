@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
@@ -36,17 +35,12 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -62,7 +56,6 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -224,7 +217,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context) {
+    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context,
+        CauseStackManager.StackFrame frame) {
 
     }
 
@@ -348,6 +342,16 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
     default boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    /**
+     * Specifically designed to allow certain registries use the event listener hooks to prevent unnecessary off-threaded
+     * checks and allows for registries to restrict additional registrations ouside of events.
+     *
+     * @return True if this is an event listener state
+     */
+    default boolean isEvent() {
         return false;
     }
 }

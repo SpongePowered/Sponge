@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("rawtypes")
 public class ReusableLens<T extends Lens<IInventory, ItemStack>> {
 
     // InventoryAdapterClass -> LensClass -> Size -> ReusableLens

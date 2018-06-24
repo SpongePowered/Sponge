@@ -41,16 +41,17 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
 
+import javax.annotation.Nullable;
+
 /**
  * Generator populator that wraps a Minecraft {@link IChunkGenerator}.
  */
-public class SpongeGenerationPopulator implements GenerationPopulator, IGenerationPopulator {
+public final class SpongeGenerationPopulator implements GenerationPopulator, IGenerationPopulator {
 
     private final IChunkGenerator chunkGenerator;
     private final World world;
-    private Timing timing;
-    
-    private Chunk cachedChunk = null;
+    @Nullable private Timing timing;
+    @Nullable private Chunk cachedChunk = null;
 
     /**
      * Gets the {@link GenerationPopulator} from the given
@@ -94,12 +95,12 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
         WorldGenConstants.disableLighting();
         if (minChunkX == maxChunkX && minChunkZ == maxChunkZ) {
             this.cachedChunk = this.chunkGenerator.generateChunk(minChunkX, minChunkZ);
-            placeChunkInBuffer(this.cachedChunk, buffer, minChunkX, minChunkZ);
+            this.placeChunkInBuffer(this.cachedChunk, buffer, minChunkX, minChunkZ);
         } else {
             for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
                 for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
                     final Chunk generated = this.chunkGenerator.generateChunk(chunkX, chunkZ);
-                    placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
+                    this.placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
                 }
             }
         }

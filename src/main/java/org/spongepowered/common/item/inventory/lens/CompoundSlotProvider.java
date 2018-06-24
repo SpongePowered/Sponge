@@ -38,6 +38,7 @@ public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider<TI
 
     private final List<SlotLens<TInventory, TStack>> slotList = new ArrayList<>();
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public CompoundSlotProvider add(InventoryAdapter<TInventory, TStack> adapter) {
         for (Inventory slot : adapter.slots()) {
             SlotLens slotLens = ((SlotLens<IInventory, ItemStack>) ((SlotAdapter) slot).getRootLens());

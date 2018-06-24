@@ -46,7 +46,7 @@ import java.util.UUID;
 /**
  * Test for User(Offline-Player) Location and Rotation
  */
-@Plugin(id = "offlinelocationtest", name = "Offline Location Test", description = "A plugin to test offline location and rotation")
+@Plugin(id = "offlinelocationtest", name = "Offline Location Test", description = "A plugin to test offline location and rotation", version = "0.0.0")
 public class OfflineLocationTest {
 
     private Set<UUID> set = new HashSet<>();

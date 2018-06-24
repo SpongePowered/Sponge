@@ -47,6 +47,9 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
+import javax.annotation.Nullable;
+
+@SuppressWarnings("rawtypes")
 @Mixin(Slot.class)
 public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot, MinecraftInventoryAdapter<IInventory> {
 
@@ -57,10 +60,11 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
     protected SlotCollection slots;
     protected Lens<IInventory, ItemStack> lens;
 
-    private InventoryAdapter<IInventory, ItemStack> parentAdapter;
+    @Nullable private InventoryAdapter<IInventory, ItemStack> parentAdapter;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onConstructed(CallbackInfo ci) {
         this.fabric = MinecraftFabric.of(this);
         this.slots = new SlotCollection.Builder().add(1).build();
         try {
@@ -77,6 +81,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         return this.slotIndex;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Inventory parent() {
         if (this.inventory instanceof Inventory) {
@@ -99,6 +104,7 @@ public abstract class MixinSlot implements org.spongepowered.api.item.inventory.
         return this.transform(Type.INVENTORY);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

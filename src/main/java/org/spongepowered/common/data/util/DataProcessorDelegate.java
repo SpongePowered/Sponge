@@ -86,7 +86,10 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
     public boolean supports(EntityType entityType) {
         final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            try (Timing timing = callingFromMinecraftThread ? tuple.getSecond().startTiming() : null) {
+            try (Timing timing = callingFromMinecraftThread ? tuple.getSecond() : null) {
+                if (timing != null) {
+                    timing.startTiming();
+                }
                 if (tuple.getFirst().supports(entityType)) {
                     return true;
                 }

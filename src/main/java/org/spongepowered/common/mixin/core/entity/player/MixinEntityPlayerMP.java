@@ -37,6 +37,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -80,6 +81,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
@@ -106,12 +108,12 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
@@ -151,7 +153,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -164,12 +165,10 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.SpongeEventContextKey;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -203,7 +202,10 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -256,7 +258,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Used to restore original item received in a packet after canceling an event
     private ItemStack packetItem;
 
-    private final User user = getUserObject();
+    private User user = getUserObject();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -316,20 +318,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void onDeath(DamageSource cause) {
         // Sponge start
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
-        if (event.isCancelled()) {
+        Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause, isMainThread);
+        if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
+        DestructEntityEvent.Death event = optEvent.get();
+
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean tracksEntityDeaths;
         if (isMainThread && !this.world.isRemote) {
             final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final IPhaseState state = peek.state;
+            final IPhaseState<?> state = peek.state;
             tracksEntityDeaths = state.tracksEntityDeaths();
         } else {
             tracksEntityDeaths = false;
         }
         try (PhaseContext<?> context = createContextForDeath(cause, tracksEntityDeaths)) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             // Sponge end
 
             boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
@@ -392,7 +399,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                ? EntityPhase.State.DEATH.createPhaseContext()
                    .source(this)
                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) cause)
-                   .buildAndSwitch()
                : null;
     }
 
@@ -459,6 +465,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Optional<Player> getPlayer() {
         return Optional.of(this);
+    }
+
+    @Override
+    public void forceRecreateUser() {
+        UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        if (!(service instanceof SpongeUserStorageService)) {
+            SpongeImpl.getLogger().error("Not re-creating User object for player {}, as UserStorageServer has been replaced with {}", this.getName(), service);
+        } else {
+            this.user = ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.getGameProfile());
+        }
     }
 
     @Override
@@ -666,6 +682,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> openInventory(Inventory inventory) throws IllegalArgumentException {
+        return this.openInventory(inventory, null);
+    }
+
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
+    @Override
+    public Optional<Container> openInventory(Inventory inventory, Text displayName) {
         if (((IMixinContainer) this.openContainer).isInUse()) {
             Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
@@ -679,9 +701,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }).submit(SpongeImpl.getPlugin());
             return this.getOpenInventory();
         }
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory));
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory, displayName));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
         if (((IMixinContainer) this.openContainer).isInUse()) {
@@ -702,7 +725,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 .packetPlayer(((EntityPlayerMP)(Object) this))
                 .openContainer(this.openContainer)
                 // intentionally missing the lastCursor to not double throw close event
-                .buildAndSwitch()) {
+                ) {
+            ctx.buildAndSwitch();
             ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
         }
@@ -905,11 +929,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
+    @SuppressWarnings("unchecked")
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(this);
+            frame.pushCause(this);
             ChangeGameModeEvent.TargetPlayer event =
-                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(Sponge.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createChangeGameModeEventTargetPlayer(frame.getCurrentCause(),
                             (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -960,6 +985,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Value<Instant> lastPlayed() {
         return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
+    }
+
+    @Override
+    public boolean hasPlayedBefore() {
+        final Instant instant = SpongePlayerDataHandler.getFirstJoined(this.getUniqueId()).get();
+        final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
+        final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
+        final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
+        return timeSinceFirstJoined.getSeconds() > 0;
     }
 
     // TODO implement with contextual data
@@ -1322,5 +1356,44 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         WorldProperties prop = Sponge.getServer().getWorldProperties(world).orElseThrow(() -> new IllegalArgumentException("Invalid World: No world found for UUID"));
         World loaded = Sponge.getServer().loadWorld(prop).orElseThrow(() -> new IllegalArgumentException("Invalid World: Could not load world for UUID"));
         return this.setLocation(new Location<>(loaded, position));
+    }
+
+    @Nullable private Text displayName = null;
+
+    @Override
+    public void setContainerDisplay(Text displayName) {
+        this.displayName = displayName;
+    }
+
+    @Redirect(method = "displayGUIChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName(IInventory chestInventory) {
+        if (this.displayName == null) {
+            return chestInventory.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "displayGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IInteractionObject;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName2(IInteractionObject guiOwner) {
+        if (this.displayName == null) {
+            return guiOwner.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "openGuiHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName3(IInventory inventoryIn) {
+        if (this.displayName == null) {
+            return inventoryIn.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
+    }
+
+    @Redirect(method = "displayVillagerTradeGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/IMerchant;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent onGetDisplayName4(IMerchant villager) {
+        if (this.displayName == null) {
+            return villager.getDisplayName();
+        }
+        return new TextComponentString(SpongeTexts.toLegacy(this.displayName));
     }
 }

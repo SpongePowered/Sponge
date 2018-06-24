@@ -70,6 +70,15 @@ class UserDiscoverer {
         return user;
     }
 
+
+    static User forceRecreate(GameProfile profile) {
+        SpongeUser user = (SpongeUser) userCache.getIfPresent(profile.getId());
+        if (user != null && SpongeUser.dirtyUsers.contains(user)) {
+            user.save();
+        }
+        return create(profile);
+    }
+
     /**
      * Searches for user data from a variety of places, in order of preference.
      * A user that has data in sponge may not necessarily have been online

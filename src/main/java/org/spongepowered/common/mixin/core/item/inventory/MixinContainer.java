@@ -83,13 +83,17 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(value = Container.class, priority = 998)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
@@ -138,6 +142,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
     @Nullable private PluginContainer plugin = null;
 
+    private LinkedHashMap<IInventory, Set<Slot>> allInventories = new LinkedHashMap<>();
+
     /*
     Named specifically for sponge to avoid potential illegal access errors when a mod container
     implements an interface that adds a defaulted method. Due to the JVM and compiled bytecode,
@@ -167,6 +173,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
             }
         }
+
+        this.allInventories.clear();
+        this.inventorySlots.forEach(slot -> this.allInventories.computeIfAbsent(slot.inventory, (i) -> new HashSet<>()).add(slot));
+
     }
 
     @Override
@@ -563,5 +573,26 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public boolean isInUse() {
         return this.inUse;
+    }
+
+    @Override
+    public boolean isViewedSlot(org.spongepowered.api.item.inventory.Slot slot) {
+        this.spongeInit();
+        if (slot instanceof Slot) {
+            Set<Slot> set = allInventories.get(((Slot) slot).inventory);
+            if (set != null) {
+                if (set.contains(slot)) {
+                    if (allInventories.size() == 1) {
+                        return true;
+                    }
+                    // TODO better detection of viewer inventory - needs tracking of who views a container
+                    // For now assume that a player inventory is always the viewers inventory
+                    if (((Slot) slot).inventory.getClass() != InventoryPlayer.class) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

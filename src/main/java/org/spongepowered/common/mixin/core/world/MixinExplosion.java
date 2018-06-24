@@ -66,6 +66,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -247,7 +248,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         this.affectedBlockPositions.clear();
         if (this.shouldBreakBlocks) {
             for (Location<World> worldLocation : detonate.getAffectedLocations()) {
-                this.affectedBlockPositions.add(((IMixinLocation) (Object) worldLocation).getBlockPos());
+                this.affectedBlockPositions.add(VecHelper.toBlockPos(worldLocation));
             }
         }
         list.clear();

@@ -64,6 +64,7 @@ public final class NbtDataUtil {
     public static final String BANNER_PATTERNS = "Patterns";
     public static final String FAILED_CUSTOM_DATA = "FailedData";
     public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
+    public static final String ARMOR_COLOR_DISPLAY_TAG = "display";
 
     private NbtDataUtil() {
     }

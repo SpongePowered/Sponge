@@ -101,7 +101,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
         return true;
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext<?> context) {
         if (snapshots.isEmpty()) {
             return;
@@ -131,13 +131,13 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if(context.getNotifier().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
+                frame.addContext(EventContextKeys.NOTIFIER, context.getNotifier().get());
             }
             if(context.getOwner().isPresent()) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, context.getOwner().get());
+                frame.addContext(EventContextKeys.OWNER, context.getOwner().get());
             }
             try {
-                this.associateAdditionalCauses(this, context);
+                this.associateAdditionalCauses(this, context, frame);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.
@@ -150,7 +150,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                 if (mainEvent != null) {
-                    Sponge.getCauseStackManager().pushCause(mainEvent);
+                    frame.pushCause(mainEvent);
                 }
             }
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
@@ -194,7 +194,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
                     // Cancel any block drops performed, avoids any item drops, regardless
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
                     }
                 }
@@ -211,7 +211,7 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
                     // This prevents unnecessary spawns.
                     final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
                     if (location != null) {
-                        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+                        final BlockPos pos = VecHelper.toBlockPos(location);
                         context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
                     }
                 }

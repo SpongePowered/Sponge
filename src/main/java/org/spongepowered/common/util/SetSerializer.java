@@ -57,6 +57,6 @@ public class SetSerializer implements TypeSerializer<Set<?>> {
         TypeToken<?> innerType = getInnerToken(type);
 
         // Put it into the new list token
-        return new TypeToken<List<E>>() {}.where(new TypeParameter<E>() {}, (TypeToken<E>)innerType);
+        return new TypeToken<List<E>>() { private static final long serialVersionUID = 1L; }.where(new TypeParameter<E>() {}, (TypeToken<E>)innerType);
     }
 }

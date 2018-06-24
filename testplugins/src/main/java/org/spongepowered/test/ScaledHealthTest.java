@@ -43,7 +43,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-@Plugin(id = "scaledhealthtest", name = "Scaled Health Test", description = "A plugin to test scaled health")
+@Plugin(id = "scaledhealthtest", name = "Scaled Health Test", description = "A plugin to test scaled health", version = "0.0.0")
 public class ScaledHealthTest {
 
     @Listener
@@ -51,6 +51,7 @@ public class ScaledHealthTest {
         Sponge.getCommandManager().register(this, getHealthCommand(), "health");
     }
 
+    @SuppressWarnings("deprecation")
     private static CommandCallable getHealthCommand() {
         final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
         final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren);

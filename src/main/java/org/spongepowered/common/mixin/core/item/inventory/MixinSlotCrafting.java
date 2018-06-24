@@ -141,7 +141,7 @@ public abstract class MixinSlotCrafting extends Slot {
         List<SlotTransaction> capturedTransactions = ((IMixinContainer) container).getCapturedTransactions();
         for (Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             SlotTransaction trans = iterator.next();
-            Optional<SlotIndex> slotIndex = trans.getSlot().getInventoryProperty(SlotIndex.class);
+            Optional<SlotIndex> slotIndex = trans.getSlot().getProperty(SlotIndex.class);
             if (slotIndex.isPresent() && slotIndex.get().getValue() == 0) {
                 iterator.remove();
                 if (first == null) {

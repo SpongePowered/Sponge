@@ -99,6 +99,8 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
             this.addChild(new GridInventoryLensImpl(this.base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT + 1, INVENTORY_WIDTH, shiftedSlots));
         }
 
+        // TODO MAIN_HAND lens?
+
         this.cache();
     }
 

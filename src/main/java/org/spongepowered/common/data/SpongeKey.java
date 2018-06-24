@@ -70,7 +70,7 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
             if (loggedPlugins.add(this.parent.getId())) {
                 SpongeImpl.getLogger().warn(this.parent.getId() + ": It is no longer required to include the plugin id when specifying a "
                         + "Key id through Key.Builder#id. This is deprecated and may be removed later. The plugin id will be retrieved from the "
-                        + "current PluginContainer in the cause stack. ");
+                        + "current PluginContainer in the cause stack. Key: " + this);
             }
         }
     }

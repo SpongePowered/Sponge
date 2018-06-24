@@ -141,7 +141,7 @@ public class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Text.class), new TextConfigSerializer());
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(BookView.class), new BookViewDataBuilder());
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
-        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<?>>() {}, new SetSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(new TypeToken<Set<?>>() { public static final long serialVersionUID = 1L; }, new SetSerializer());
     }
 
     private final SpongePropertyRegistry propertyRegistry;
@@ -356,6 +356,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return (T) supplier.get();
     }
 
+    @SuppressWarnings("deprecation")
     public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
@@ -574,7 +575,7 @@ public class SpongeGameRegistry implements GameRegistry {
         registerAdditionalPhase();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void throwRegistryEvent(RegistryModule module) {
         if (this.phase == RegistrationPhase.INIT
             && module instanceof AdditionalCatalogRegistryModule

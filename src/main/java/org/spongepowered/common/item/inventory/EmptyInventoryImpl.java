@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory;
 
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -178,13 +179,18 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     }
 
     @Override
-    public <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Inventory child, Class<T> property) {
+    public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property) {
         return Optional.empty();
     }
 
     @Override
-    public <T extends InventoryProperty<?, ?>> Optional<T> getInventoryProperty(Class<T> property) {
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> property) {
         return Optional.empty();
+    }
+
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return Collections.emptyList();
     }
 
     @SuppressWarnings("unchecked")

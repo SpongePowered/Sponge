@@ -65,7 +65,7 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
     private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList(), this, 0, amount);
+            AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), new ArrayList<>(), this, 0, amount);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -82,7 +82,14 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
      *
      * @param ci The callback info
      */
-    @Inject(method ="removeFrameFromMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/EntityItemFrame;)V"))
+    @Inject(
+        method ="removeFrameFromMap",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/item/ItemStack;setItemFrame(Lnet/minecraft/entity/item/EntityItemFrame;)V",
+            shift = At.Shift.AFTER
+        )
+    )
     private void postOnSetItemFrame(CallbackInfo ci) {
         setDisplayedItem(net.minecraft.item.ItemStack.EMPTY);
     }

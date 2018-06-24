@@ -59,6 +59,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.List;
@@ -86,9 +87,9 @@ class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         BasicPacketContext context) {
-        Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
+        final Player player = context.getSpongePlayer();
         final Location<World> location = transaction.getFinal().getLocation().get();
-        BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+        BlockPos pos = VecHelper.toBlockPos(location);
         IMixinChunk spongeChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(pos);
         if (blockChange == BlockChange.PLACE) {
             spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
@@ -98,7 +99,7 @@ class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void addNotifierToBlockEvent(BasicPacketContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
-        final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
+        final Player player = context.getSpongePlayer();
         final Location<World> location = new Location<>(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatableBlock = LocatableBlock.builder()
                 .location(location)
@@ -113,7 +114,6 @@ class PlaceBlockPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final Packet<?> packet = context.getPacket();
         final EntityPlayerMP player = context.getPacketPlayer();
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
 
         // Note - CPacketPlayerTryUseItem is swapped with
         // CPacketPlayerBlockPlacement

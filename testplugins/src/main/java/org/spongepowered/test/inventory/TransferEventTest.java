@@ -22,24 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.test.inventory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
-import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Text;
 
-@Plugin(id = "inventoryplugintest", name = "Inventory Test", description = "A plugin to test the owner of an inventory.")
-public class InventoryPluginTest {
+/**
+ * Bedrock in hoppers prevents them from working
+ */
+@Plugin(id = "hoppereventtest", name = "Hopper Event Test", description = "A plugin to test hopper event", version = "0.0.0")
+public class TransferEventTest {
 
-    private final InventoryPluginListener listener = new InventoryPluginListener();
+    private final TransferListener listener = new TransferListener();
     private boolean registered = false;
 
     @Listener
@@ -54,14 +57,18 @@ public class InventoryPluginTest {
                         Sponge.getEventManager().registerListeners(this, this.listener);
                     }
                     return CommandResult.success();
-                }).build(), "toggleinventoryplugintest");
+                }).build(), "togglebedrocktransferblockage");
     }
 
-    public static class InventoryPluginListener {
+    public static class TransferListener {
 
+        @SuppressWarnings("deprecation")
         @Listener
-        public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
-            player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
+        public void onPreTransferEvent(ChangeInventoryEvent.Transfer.Pre event) {
+            if (event.getSourceInventory().query(QueryOperationTypes.ITEM_STACK_IGNORE_QUANTITY.of(ItemStack.of(ItemTypes.BEDROCK, 1)))
+                    .capacity() != 0) {
+                event.setCancelled(true);
+            }
         }
     }
 }

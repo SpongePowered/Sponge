@@ -24,13 +24,18 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -43,7 +48,10 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventory
 import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.Optional;
 
@@ -80,7 +88,7 @@ public class PlayerInventoryLens extends RealLens {
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+            this.addChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
 
         int base = this.base;
@@ -104,6 +112,7 @@ public class PlayerInventoryLens extends RealLens {
 
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         if (this.isContainer && inv instanceof ContainerFabric) {
@@ -120,7 +129,7 @@ public class PlayerInventoryLens extends RealLens {
     private void finishInit(SlotProvider<IInventory, ItemStack> slots, int base) {
         this.addSpanningChild(this.main);
         this.addSpanningChild(this.equipment);
-        this.addSpanningChild(this.offhand);
+        this.addSpanningChild(this.offhand, new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
 
         // Additional Slots for bigger modded inventories
         int additionalSlots = this.size - base;

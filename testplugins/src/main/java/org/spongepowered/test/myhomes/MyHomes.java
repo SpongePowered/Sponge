@@ -60,8 +60,11 @@ import org.spongepowered.test.myhomes.data.home.impl.ImmutableHomeDataImpl;
 
 import java.util.UUID;
 
-@Plugin(id = "myhomes", name = "MyHomes")
+@Plugin(id = "myhomes", name = "MyHomes", version = "0.0.0", description = "A simple homes plugin")
 public class MyHomes {
+
+    // TODO - make this an actual home plugin that would work...
+    // for now it just registers data and data related stuff.
 
     public static Key<Value<Home>> DEFAULT_HOME = DummyObjectProvider.createExtendedFor(Key.class, "DEFAULT_HOME");
     public static Key<MapValue<String, Home>> HOMES = DummyObjectProvider.createExtendedFor(Key.class, "HOMES");
@@ -77,7 +80,7 @@ public class MyHomes {
     public void onKeyRegistration(GameRegistryEvent.Register<Key<?>> event) {
         this.logger.info("onKeyRegistration");
         DEFAULT_HOME = Key.builder()
-            .type(new TypeToken<Value<Home>>() {})
+            .type(new TypeToken<Value<Home>>() { public static final long serialVersionUID = 1L; })
             .id("default_home")
             .name("Default Home")
             .query(DataQuery.of("DefaultHome"))
@@ -85,7 +88,7 @@ public class MyHomes {
         event.register(DEFAULT_HOME);
 
         HOMES = Key.builder()
-            .type(new TypeToken<MapValue<String, Home>>() {})
+            .type(new TypeToken<MapValue<String, Home>>() { public static final long serialVersionUID = 1L; })
             .id("homes")
             .name("Homes")
             .query(DataQuery.of("Homes"))
@@ -93,7 +96,7 @@ public class MyHomes {
         event.register(HOMES);
 
         FRIENDS = Key.builder()
-            .type(new TypeToken<ListValue<UUID>>() {})
+            .type(new TypeToken<ListValue<UUID>>() { public static final long serialVersionUID = 1L; })
             .id("friends")
             .name("Friends")
             .query(DataQuery.of("Friends"))

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.test.inventory;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -55,7 +55,7 @@ import javax.inject.Inject;
 /**
  * Test for User(Offline-Player) Inventory
  */
-@Plugin(id = "offlineinventorytest", name = "Offline Inventory Test", description = "A plugin to test offline inventories")
+@Plugin(id = "offlineinventorytest", name = "Offline Inventory Test", description = "A plugin to test offline inventories", version = "0.0.0")
 public class OfflineInventoryTest {
 
     @Inject private Logger logger;
@@ -87,6 +87,7 @@ public class OfflineInventoryTest {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void run(UUID uuid) {
         User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(uuid).get();
         this.logger.info(user.getName() + " has an Inventory with:");

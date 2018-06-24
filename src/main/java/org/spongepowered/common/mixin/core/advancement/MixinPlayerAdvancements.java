@@ -70,9 +70,9 @@ public class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
     @Shadow private EntityPlayerMP player;
 
     private boolean wasSuccess;
-    private Text message;
+    @Nullable private Text message;
 
-    @Inject(method = "startProgress", at = @At("RETURN"))
+    @Inject(method = "startProgress", at = @At("HEAD"))
     private void onStartProgress(Advancement advancement, AdvancementProgress progress, CallbackInfo ci) {
         final IMixinAdvancementProgress advancementProgress = (IMixinAdvancementProgress) progress;
         advancementProgress.setAdvancement(((org.spongepowered.api.advancement.Advancement) advancement).getId());
@@ -170,5 +170,12 @@ public class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
     @Override
     public Player getPlayer() {
         return (Player) this.player;
+    }
+
+    @Override
+    public void reloadAdvancementProgress() {
+        for (AdvancementProgress progress : this.progress.values()) {
+            ((IMixinAdvancementProgress) progress).updateProgressMap();
+        }
     }
 }

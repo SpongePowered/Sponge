@@ -56,10 +56,11 @@ public abstract class MixinEntityAIEatGrass extends EntityAIBase {
         method = "updateTask",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z"
+            target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z",
+            remap = false
         )
     )
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private boolean onTallGrassApplyForGriefing(Predicate predicate, Object object) {
         return ((IMixinGriefer) this.grassEaterEntity).canGrief() && predicate.apply(object);
     }

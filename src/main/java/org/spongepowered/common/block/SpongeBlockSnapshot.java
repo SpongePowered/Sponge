@@ -180,8 +180,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
-        try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext().buildAndSwitch()) {
-
+        try (PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext()) {
+            context.buildAndSwitch();
             BlockPos pos = VecHelper.toBlockPos(this.pos);
             IBlockState current = world.getBlockState(pos);
             IBlockState replaced = (IBlockState) this.blockState;

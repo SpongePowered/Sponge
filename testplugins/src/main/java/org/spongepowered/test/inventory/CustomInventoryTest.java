@@ -22,12 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.test.inventory;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.entity.living.animal.Llama;
@@ -41,7 +42,6 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -67,7 +67,7 @@ import org.spongepowered.api.world.World;
  * Clicks in the opened Inventory are recorded with their SlotIndex in your Chat.
  * For detection this uses a very basic custom Carrier Implementation.
  */
-@Plugin(id = "custominventorytest", name = "Custom Inventory Test", description = "A plugin to test custom inventories")
+@Plugin(id = "custominventorytest", name = "Custom Inventory Test", description = "A plugin to test custom inventories", version = "0.0.0")
 public class CustomInventoryTest {
 
     @Listener
@@ -94,7 +94,7 @@ public class CustomInventoryTest {
             } else {
                 builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
             }
-            Inventory inventory = builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Mule")))
+            Inventory inventory = builder.property(InventoryTitle.of(Text.of("Custom Mule"), Property.Operator.DELEGATE))
                     .withCarrier(((Horse) event.getTargetEntity()))
                     .build(this);
             int i = 1;
@@ -112,7 +112,7 @@ public class CustomInventoryTest {
             } else {
                 builder = Inventory.builder().of(InventoryArchetypes.HORSE_WITH_CHEST);
             }
-            Inventory inventory = builder.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Llama")))
+            Inventory inventory = builder.property(InventoryTitle.of(Text.of("Custom Llama"), Property.Operator.DELEGATE))
                     .withCarrier(((Horse) event.getTargetEntity()))
                     .build(this);
             int i = 1;
@@ -125,7 +125,7 @@ public class CustomInventoryTest {
             event.setCancelled(true);
         } else if (event.getTargetEntity() instanceof Horse) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.HORSE)
-                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Horse")))
+                    .property(InventoryTitle.of(Text.of("Custom Horse"), Property.Operator.DELEGATE))
                     .withCarrier(((Horse) event.getTargetEntity()))
                     .build(this);
             int i = 1;
@@ -140,9 +140,9 @@ public class CustomInventoryTest {
         if (event.getTargetEntity() instanceof Slime) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.MENU_GRID)
                     .property(InventoryDimension.of(1, 9))
-                    .property(InventoryTitle.of(Text.of("Slime Content")))
-                    .property(new Identifiable())
-                    .property(new GuiIdProperty(GuiIds.DISPENSER))
+                    .property(InventoryTitle.of(Text.of("Slime Content"), Property.Operator.DELEGATE))
+                    .property(Identifiable.random())
+                    .property(GuiIdProperty.builder().value(GuiIds.DISPENSER).operator(Property.Operator.DELEGATE).build())
                     .build(this);
             ItemStack flard = ItemStack.of(ItemTypes.SLIME, 1);
             flard.offer(Keys.DISPLAY_NAME, Text.of("Flard?"));
@@ -158,7 +158,7 @@ public class CustomInventoryTest {
     private void interactOtherBlock(InteractBlockEvent.Primary event, Player player, Location<World> loc) {
         if (loc.getBlockType() == BlockTypes.CRAFTING_TABLE) {
             Inventory inventory = Inventory.builder().of(InventoryArchetypes.WORKBENCH)
-                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom Workbench")))
+                    .property(InventoryTitle.of(Text.of("Custom Workbench"), Property.Operator.DELEGATE))
                     .build(this);
             for (Inventory slot : inventory.slots()) {
                 slot.set(ItemStack.of(ItemTypes.IRON_NUGGET, 1));
@@ -176,7 +176,7 @@ public class CustomInventoryTest {
             if (te instanceof Carrier) {
                 BasicCarrier myCarrier = new BasicCarrier();
                 Inventory custom = Inventory.builder().from(((Carrier) te).getInventory())
-                        .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName())))
+                        .property(InventoryTitle.of(Text.of("Custom ", ((Carrier) te).getInventory().getName()), Property.Operator.DELEGATE))
                         .withCarrier(myCarrier)
                         .build(this);
                 myCarrier.init(custom);
@@ -210,7 +210,7 @@ public class CustomInventoryTest {
 
         @Listener
         public void onInventoryClick(ClickInventoryEvent event, @First Player player, @Getter("getTargetInventory") CarriedInventory<?> container) {
-            container.getInventoryProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
+            container.getProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
             for (SlotTransaction trans : event.getTransactions()) {
                 Slot slot = trans.getSlot();
                 Slot realSlot = slot.transform();

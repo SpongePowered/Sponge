@@ -74,7 +74,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         mixin.setDetonator(this.igniter);
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (this.igniter != null) {
-                Sponge.getCauseStackManager().addContext(EventContextKeys.IGNITER, (Living) this.igniter);
+                frame.addContext(EventContextKeys.IGNITER, (Living) this.igniter);
             } // TODO Maybe add the player or any active entity from the PhaseTracker?
             this.primeCancelled = !mixin.shouldPrime();
         }
@@ -92,7 +92,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
     public boolean onPrimePostExplosion(World world, Entity tnt) {
         // Called when prime triggered by explosion
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
+            frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
             boolean result =  ((IMixinFusedExplosive) tnt).shouldPrime() && world.spawnEntity(tnt);
             return result;
         }

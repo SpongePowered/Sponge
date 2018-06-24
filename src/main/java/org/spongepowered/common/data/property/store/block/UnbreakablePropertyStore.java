@@ -25,13 +25,17 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.property.block.UnbreakableProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<UnbreakableProperty> {
 
@@ -43,14 +47,21 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
     }
 
     @Override
-    protected Optional<UnbreakableProperty> getForBlock(IBlockState block) {
-        return Optional.of(block.getBlockHardness(null, null) < 0 ? TRUE : FALSE);
+    protected Optional<UnbreakableProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
+        if (location == null) {
+            return Optional.empty();
+        }
+        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
+        final BlockPos blockPos = VecHelper.toBlockPos(location);
+        final float blockHardness = block.getBlockHardness(world, blockPos);
+        return Optional.of(blockHardness < 0 ? TRUE : FALSE);
     }
 
     @Override
     public Optional<UnbreakableProperty> getFor(Location<World> location) {
         final IBlockState blockState = (IBlockState) location.getBlock();
-        final float hardness = blockState.getBlockHardness((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        final net.minecraft.world.World extent = (net.minecraft.world.World) location.getExtent();
+        final float hardness = blockState.getBlockHardness(extent, VecHelper.toBlockPos(location));
         return Optional.of(hardness < 0 ? TRUE : FALSE);
     }
 

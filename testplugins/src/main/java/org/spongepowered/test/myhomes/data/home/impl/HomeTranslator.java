@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.myhomes.data.home.impl;
 
-import org.spongepowered.test.myhomes.data.home.Home;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Sponge;
@@ -35,6 +34,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
+import org.spongepowered.test.myhomes.data.home.Home;
 
 import java.util.UUID;
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -41,15 +42,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.manipulator.mutable.SpongeColoredData;
-import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
-import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
-import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
@@ -57,8 +49,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 @RunWith(LaunchWrapperParameterized.class)
 public class ManipulatorTest {
@@ -156,7 +146,7 @@ public class ManipulatorTest {
                 + "key/values as the ImmutableDataManipulator and vice versa.\n"
                 + "The mutable manipulator in question: " + this.dataName +"\n"
                 + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
-                mutableKeys.equals(immutableKeys), is(true));
+                immutableKeys, equalTo(mutableKeys));
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
                                                     + "If the manipulator needs to be parametarized, please understand that there needs to "
@@ -207,8 +197,8 @@ public class ManipulatorTest {
                 try {
                      optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
                 } catch (Exception e) {
-                    printExceptionBuildingData(container);
-                    return;
+                    printExceptionBuildingData(container, e);
+                    throw e;
                 }
                 if (!optional.isPresent()) {
                     printEmptyBuild(container);
@@ -247,8 +237,9 @@ public class ManipulatorTest {
         printRemaining(container, printer);
     }
 
-    private void printExceptionBuildingData(DataContainer container) {
+    private void printExceptionBuildingData(DataContainer container, Exception exception) {
         final PrettyPrinter printer = new PrettyPrinter(60).centre().add("Could not build data!").hr()
+            .add(exception)
             .add("Something something data....")
             .add()
             .add("Here's the provided container:");

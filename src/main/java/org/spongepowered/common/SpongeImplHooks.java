@@ -66,6 +66,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -74,6 +75,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.command.SpongeCommandFactory;
+import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -87,11 +89,13 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.MixinWorldServer;
+import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.FutureTask;
 import java.util.function.Predicate;
@@ -279,8 +283,8 @@ public final class SpongeImplHooks {
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
-                .source(task)
-                .buildAndSwitch())  {
+                .source(task))  {
+            context.buildAndSwitch();
             final Object o = Util.runTask(task, logger);
             return o;
         } catch (Exception e) {
@@ -431,5 +435,26 @@ public final class SpongeImplHooks {
 
     public static double getWorldMaxEntityRadius(IMixinWorldServer mixinWorldServer) {
         return 2.0D;
+    }
+
+    /**
+     * Provides the {@link Profession} to set onto the villager. Since forge has it's own
+     * villager profession system, sponge has to bridge the compatibility and
+     * the profession may not be "properly" registered.
+     * @param professionId
+     * @return
+     */
+    public static Profession validateProfession(int professionId) {
+        List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
+        for (Profession profession : professions) {
+            if (profession instanceof SpongeProfession) {
+                if (professionId == ((SpongeProfession) profession).type) {
+                    return profession;
+                }
+            }
+        }
+        throw new IllegalStateException("Invalid Villager profession id is present! Found: " + professionId
+                                        + " when the expected contain: " + professions);
+
     }
 }

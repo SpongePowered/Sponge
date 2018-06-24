@@ -605,13 +605,15 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("age", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("age").name("Age").query(of("Age")).build());
 
+        this.register("tags", Key.builder().type(TypeTokens.SET_STRING_VALUE_TOKEN).id("tags").name("Tags").query(of("Tags")).build());
+
         this.register("is_adult", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_adult").name("Is Adult").query(of("IsAdult")).build());
 
         this.register("is_baby", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_baby").name("Is Baby").query(of("IsBaby")).build());
 
         this.register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("health_scale").name("Health Scale").query(of("HealthScale")).build());
 
-        register("is_elytra_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("sponge:is_elytra_flying").name("Is Elytra Flying").query(of("ElytraFlying")).build());
+        register("is_elytra_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_elytra_flying").name("Is Elytra Flying").query(of("ElytraFlying")).build());
 
         // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
         Sponge.getCauseStackManager().popCause();
@@ -622,6 +624,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void registerAdditionalCatalog(Key<?> extraCatalog) {
         checkState(!SpongeDataManager.areRegistrationsComplete(), "Cannot this.register new Keys after Data Registration has completed!");
@@ -648,6 +651,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     private KeyRegistryModule() {
     }
 
+    @SuppressWarnings("rawtypes")
     public void registerKeyListeners() {
         for (Key<?> key : this.keyMap.values()) {
             ((SpongeKey) key).registerListeners();

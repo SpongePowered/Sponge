@@ -82,6 +82,10 @@ public class SpongeUserStorageService implements UserStorageService {
         return UserDiscoverer.create((com.mojang.authlib.GameProfile) profile);
     }
 
+    public User forceRecreateUser(GameProfile profile) {
+        return UserDiscoverer.forceRecreate((com.mojang.authlib.GameProfile) profile);
+    }
+
     @Override
     public Collection<GameProfile> getAll() {
         return UserDiscoverer.getAllProfiles();

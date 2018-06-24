@@ -40,7 +40,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     
     protected final Collection<InventoryProperty<?, ?>>[] properties;
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public DynamicLensCollectionImpl(int size) {
         this.lenses = new Lens[size];
         this.properties = new Collection[size];

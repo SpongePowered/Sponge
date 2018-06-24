@@ -68,6 +68,7 @@ import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -117,6 +118,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -282,7 +284,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public void onDeath(DamageSource cause) {
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
-        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread).isCancelled()) {
+        Optional<DestructEntityEvent.Death>
+                event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
+        if (event.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
         super.onDeath(cause);
@@ -521,6 +525,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param targetEntity The target entity
      */
     @Overwrite
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
         if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
@@ -667,11 +672,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                     final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
                                     try (final StackFrame frame = isMainthread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
                                         if (isMainthread) {
-                                            Sponge.getCauseStackManager().pushCause(sweepingAttackSource);
+                                            frame.pushCause(sweepingAttackSource);
                                         }
                                         final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
                                         if (isMainthread) {
-                                            Sponge.getCauseStackManager().addContext(EventContextKeys.WEAPON, heldSnapshot);
+                                            frame.addContext(EventContextKeys.WEAPON, heldSnapshot);
                                         }
                                         final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
                                                 .cause(Cause.of(EventContext.empty(), heldSnapshot))
@@ -807,10 +812,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
-                    .openContainer(container)
+                    .openContainer(container);
                     // intentionally missing the lastCursor to not double throw close event
-                    .buildAndSwitch();
                     StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                ctx.buildAndSwitch();
                 frame.pushCause(serverPlayer);
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
                 container.onContainerClosed(player);

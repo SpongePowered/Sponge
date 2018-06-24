@@ -36,6 +36,7 @@ import static org.spongepowered.api.command.args.GenericArguments.plugin;
 import static org.spongepowered.api.command.args.GenericArguments.seq;
 import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
+import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
@@ -127,6 +128,15 @@ public class SpongeCommandFactory {
     static final Text LIST_ITEM_TEXT = Text.of(TextColors.GRAY, "- ");
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
+    private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.EMPTY) {
+        @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+            throw args.createError(t("No subcommand was specified")); // this will never be visible, but just in case
+        }
+
+        @Override public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+            return ImmutableList.of();
+        }
+    };
     private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
     private static final Comparator<CommandMapping> COMMAND_COMPARATOR = Comparator.comparing(CommandMapping::getPrimaryAlias);
     private static final Text PAGE_KEY = Text.of("page");
@@ -159,9 +169,10 @@ public class SpongeCommandFactory {
      *
      * @return The newly created command
      */
+    @SuppressWarnings("deprecation")
     public static CommandSpec createSpongeCommand() {
         final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
-        final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren);
+        final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren, DUMMY_ELEMENT, true);
         nonFlagChildren.register(createSpongeVersionCommand(), "version");
         nonFlagChildren.register(createSpongeBlockInfoCommand(), "blockInfo");
         nonFlagChildren.register(createSpongeEntityInfoCommand(), "entityInfo");
