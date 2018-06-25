@@ -15,6 +15,10 @@ apply plugin: forgeGradlePlugin
 // Apply MixinGradle plugin to project
 apply plugin: 'org.spongepowered.mixin'
 
+dependencies {
+    testCompile 'org.spongepowered:lwts:1.0.0'
+}
+
 minecraft {
     version = minecraftVersion
     mappings = common.mcpMappings
@@ -129,6 +133,11 @@ configure([jar, devJar]) {
     // Append API revision to the SpongeAPI version
     dependsOn common.resolveApiRevision
 }
+
+test {
+    workingDir = {test.temporaryDir}
+}
+
 
 // Code style configuration
 sortAccessTransformers {
