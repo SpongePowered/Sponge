@@ -222,9 +222,6 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
-        checkNotNull(world, "world");
-        checkNotNull(type, "type");
-
         SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
         if (config == null || type == null || !config.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
