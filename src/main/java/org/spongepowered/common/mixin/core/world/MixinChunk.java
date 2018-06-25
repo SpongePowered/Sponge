@@ -96,8 +96,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -648,7 +646,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        final boolean requiresCapturing = peek.state.requiresBlockCapturing();
+        final boolean requiresCapturing = peek.state.requiresBlockBulkCaptures();
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {

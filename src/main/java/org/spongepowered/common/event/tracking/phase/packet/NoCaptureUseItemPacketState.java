@@ -42,7 +42,7 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean requiresBlockBulkCaptures() {
         return false;
     }
 

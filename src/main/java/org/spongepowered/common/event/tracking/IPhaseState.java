@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -39,9 +40,11 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -52,7 +55,9 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
@@ -200,7 +205,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, C context) {
+    default void postTrackBlock(BlockSnapshot snapshot, C context) {
 
     }
 
@@ -219,6 +224,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context,
         CauseStackManager.StackFrame frame) {
+        context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+        context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
     }
 
@@ -249,7 +256,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean alreadyCapturingBlockTicks(C context) {
         return false;
     }
-    default boolean requiresBlockCapturing() {
+    default boolean requiresBlockBulkCaptures() {
         return true;
     }
 
@@ -352,6 +359,63 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if this is an event listener state
      */
     default boolean isEvent() {
+        return false;
+    }
+
+    /**
+     * An alternative to {@link #requiresBlockBulkCaptures()} to where if capturing is expressly
+     * disabled, we can still track the block change through normal methods, and throw events,
+     * but we won't be capturing directly or delaying any block related physics.
+     *
+     * <p>If this and {@link #requiresBlockBulkCaptures()} both return {@code false}, vanilla
+     * mechanics will take place, and no tracking or capturing is taking place unless otherwise
+     * noted by
+     * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, WorldServer, PlayerTracker.Type)}</p>
+     *
+     * @return
+     */
+    default boolean requiresBlockTracking() {
+        return !requiresBlockBulkCaptures();
+    }
+
+    default boolean acceptBlockChangeAndThrowEvent(IMixinWorldServer mixinWorld, Chunk chunk,
+        IBlockState currentState, IBlockState newState, BlockPos pos,
+        BlockChangeFlag flag, C context) {
+        final WorldServer minecraftWorld = (WorldServer) mixinWorld;
+        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
+        final Block block = newState.getBlock();
+
+        if (!ShouldFire.CHANGE_BLOCK_EVENT) { // If we don't have to worry about any block events, don't bother
+            // Sponge End - continue with vanilla mechanics
+            final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+
+            if (iblockstate == null) {
+                return false;
+            }
+            // else { // Sponge - unnecessary formatting
+            if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+                // minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
+                minecraftWorld.checkLight(pos);
+                // minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
+            }
+
+            if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
+                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
+            }
+
+            if (flag.updateNeighbors()) {
+                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
+
+                if (newState.hasComparatorInputOverride()) {
+                    minecraftWorld.updateComparatorOutputLevel(pos, block);
+                }
+            } else if (!minecraftWorld.isRemote && flag.notifyObservers()) {
+                minecraftWorld.updateObservingBlocksAt(pos, block);
+            }
+
+            return true;
+
+        }
         return false;
     }
 }

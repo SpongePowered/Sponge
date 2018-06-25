@@ -40,7 +40,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
@@ -130,7 +129,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, BlockTickContext context) {
+    public void postTrackBlock(BlockSnapshot snapshot, BlockTickContext context) {
         if (context.shouldProcessImmediately()) {
             TrackingUtil.processBlockCaptures(context.getCapturedBlocks(), this, context);
             context.getCapturedBlockSupplier().get().remove(snapshot);

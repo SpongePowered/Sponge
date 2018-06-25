@@ -26,10 +26,24 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.world.BlockChange;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -50,7 +64,7 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean requiresBlockBulkCaptures() {
         return false;
     }
 
@@ -65,12 +79,6 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
-        BlockTickContext context) {
-        super.handleBlockChangeWithUser(blockChange, snapshotTransaction, context);
-    }
-
-    @Override
     public boolean doesCaptureEntityDrops() {
         return false;
     }
@@ -78,6 +86,28 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     @Override
     public boolean performOrCaptureItemDrop(BlockTickContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(BlockTickContext context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
+        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(locatableBlock);
+            associateAdditionalCauses(this, context, frame);
+            if (entity instanceof EntityXPOrb) {
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
+                entities.add(entity);
+                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            }
+            final List<org.spongepowered.api.entity.Entity> nonExpEntities = new ArrayList<>(1);
+            nonExpEntities.add(entity);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
+            return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
+        }
     }
 
     @Override

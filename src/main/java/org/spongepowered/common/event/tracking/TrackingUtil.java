@@ -388,7 +388,7 @@ public final class TrackingUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    static boolean trackBlockChange(PhaseTracker phaseTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState,
+    static boolean captureBulkBlockChange(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState,
         IBlockState newState, BlockPos pos, BlockChangeFlag flags, PhaseContext<?> phaseContext, IPhaseState<?> phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer world = WorldUtil.asNative(mixinWorld);
@@ -405,7 +405,7 @@ public final class TrackingUtil {
                 capturedSnapshots.remove(originalBlockSnapshot);
                 return false;
             }
-            ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, phaseTracker, phaseContext);
+            ((IPhaseState) phaseState).postTrackBlock(originalBlockSnapshot, phaseContext);
         } else {
             originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;

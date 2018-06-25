@@ -48,7 +48,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
@@ -154,7 +153,7 @@ public final class PhaseTracker {
                 // and resulting in a "runaway" phase state accumulation.
                 this.printRunawayPhase(state, phaseContext);
             }
-            if (!currentState.canSwitchTo(state) && state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
+            if (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
                 // This is to detect incompatible phase switches.
                 this.printPhaseIncompatibility(currentState, state);
             }
@@ -545,7 +544,8 @@ public final class PhaseTracker {
         return this.setBlockState(mixinWorld, pos, newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
     }
 
-    public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, BlockChangeFlag flag) {
+    @SuppressWarnings("rawtypes")
+    public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final net.minecraft.world.World minecraftWorld = WorldUtil.asNative(mixinWorld);
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
@@ -574,18 +574,27 @@ public final class PhaseTracker {
             // while a world is being changed unknowingly.
             this.printUnexpectedBlockChange();
         }
-        if (phaseState.requiresBlockCapturing()) {
+        if (phaseState.requiresBlockBulkCaptures()) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
-                return TrackingUtil.trackBlockChange(this, mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context, phaseState);
+                return TrackingUtil.captureBulkBlockChange(mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context, phaseState);
+            } catch (Exception | NoClassDefFoundError e) {
+                this.printBlockTrackingException(phaseData, phaseState, e);
+                return false;
+            }
+        }
+        if (phaseState.requiresBlockTracking()) {
+            try {
+                return ((IPhaseState) phaseState)
+                    .acceptBlockChangeAndThrowEvent(mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context);
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(phaseData, phaseState, e);
                 return false;
             }
         }
         // Sponge End - continue with vanilla mechanics
-        IBlockState iblockstate = chunk.setBlockState(pos, newState);
+        final IBlockState iblockstate = chunk.setBlockState(pos, newState);
 
         if (iblockstate == null) {
             return false;
