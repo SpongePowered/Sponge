@@ -44,7 +44,7 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean requiresBlockBulkCaptures() {
         return false;
     }
 

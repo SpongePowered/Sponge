@@ -68,7 +68,7 @@ public class TileChunkUnloadState extends BlockPhaseState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean requiresBlockBulkCaptures() {
         return false;
     }
 
