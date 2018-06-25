@@ -136,6 +136,7 @@ configure([jar, devJar]) {
 
 test {
     workingDir = {test.temporaryDir}
+    systemProperty 'mixin.env.disableRefMap', 'true'
 }
 
 
