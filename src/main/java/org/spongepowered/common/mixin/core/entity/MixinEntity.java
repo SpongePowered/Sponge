@@ -467,6 +467,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
+        checkWorldBorder(location.getExtent(), location.getPosition());
         if (isRemoved()) {
             return false;
         }
@@ -555,6 +556,7 @@ public abstract class MixinEntity implements IMixinEntity {
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
     public void setLocationAndAngles(Location<World> location) {
+        checkWorldBorder(location.getExtent(), location.getPosition());
         if (((Entity) this) instanceof EntityPlayerMP) {
             ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
@@ -567,6 +569,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public void setLocationAndAngles(Transform<World> transform) {
+        checkWorldBorder(transform.getExtent(), transform.getPosition());
         Vector3d position = transform.getPosition();
         EntityPlayerMP player = null;
         if (((Entity) this) instanceof EntityPlayerMP) {
@@ -647,6 +650,14 @@ public abstract class MixinEntity implements IMixinEntity {
             }
         }
         return relocated;
+    }
+
+    private void checkWorldBorder(World world, Vector3d location) {
+        AxisAlignedBB aabb = this.getEntityBoundingBox().offset(location.getX() - this.posX, location.getY() - this.posY,
+                location.getZ() - this.posZ);
+        if (!((net.minecraft.world.World) world).worldBorder.contains(aabb)) {
+            throw new IllegalArgumentException("Location " + location + " is outside the world border");
+        }
     }
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
