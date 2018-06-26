@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -37,6 +38,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -223,8 +226,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context,
-        CauseStackManager.StackFrame frame) {
+    default void associateAdditionalCauses(PhaseContext<?> context, CauseStackManager.StackFrame frame) {
         context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
         context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
@@ -458,7 +460,40 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context The context to re-check for captures
      */
-    default void performPostBlockChanges(C context) {
+    default void performPostBlockperformBlockAddedSpawns(C context) {
 
+    }
+
+    /**
+     * Specifically used when block changes have taken place in place (after block events are thrown),
+     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
+     * that every block change that is bulk captured would be iterated and the changes from those block changes
+     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
+     * physics correctly and allow mechanics to function that otherwise would not function correctly.
+     *
+     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
+     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
+     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
+     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
+     *
+     * @param context The context to re-check for captures
+     */
+    default void performPostBlockChangesForNotificationsAndNeighborUpdates(C context) {
+
+    }
+
+    /**
+     * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
+     * An example of this being used specially is for explosions.
+     *
+     * @param context
+     * @param transactions
+     * @param blockEvents
+     * @param mainEvents
+     * @return
+     */
+    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions,
+        List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
+        return SpongeEventFactory.createChangeBlockEventPost(Sponge.getCauseStackManager().getCurrentCause(), transactions);
     }
 }

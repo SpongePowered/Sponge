@@ -28,20 +28,38 @@ import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.CapturedSupplier;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("rawtypes")
 final class PostState extends GeneralState<UnwindingPhaseContext> {
+
+    private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
+        CapturedSupplier<BlockSnapshot> capturedBlockSupplier) {
+        postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
+            final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
+            ((IPhaseState) unwindingState).postProcessSpawns(unwindingPhaseContext, capturedEntities);
+        });
+        capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
+            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
+            TrackingUtil.processBlockCaptures(blockSnapshots, GeneralPhase.Post.UNWINDING, postContext);
+        });
+    }
 
     @Override
     public UnwindingPhaseContext createPhaseContext() {
@@ -132,7 +150,7 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
         if (!contextBlocks.isEmpty()) {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
             contextBlocks.clear();
-            GeneralPhase.processBlockTransactionListsPost(postContext, blockSnapshots, this, unwindingContext);
+            TrackingUtil.processBlockCaptures(blockSnapshots, this, postContext);
         }
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
@@ -158,7 +176,35 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void performPostBlockChanges(UnwindingPhaseContext context) {
-        this.unwind(context);
+    public void performPostBlockperformBlockAddedSpawns(UnwindingPhaseContext context) {
+        postBlockAddedSpawns(context, context.getUnwindingState(), context.getUnwindingContext(), context.getCapturedBlockSupplier());
+    }
+
+    @Override
+    public void performPostBlockChangesForNotificationsAndNeighborUpdates(UnwindingPhaseContext context) {
+        final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = context.getCapturedBlockSupplier();
+        capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
+            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
+            blocks.clear();
+            TrackingUtil.processBlockCaptures(blockSnapshots, this, context);
+        });
+    }
+
+    /**
+     * Specifically overridden to delegate to the unwinding state. Since the block physics processing is all handled in
+     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean)}.
+     *
+     * @param blockChange
+     * @param snapshotTransaction
+     * @param context
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
+        UnwindingPhaseContext context) {
+        final IPhaseState<?> unwindingState = context.getUnwindingState();
+        final PhaseContext unwindingContext = context.getUnwindingContext();
+        ((IPhaseState) unwindingState).handleBlockChangeWithUser(blockChange, snapshotTransaction, unwindingContext);
+
     }
 }

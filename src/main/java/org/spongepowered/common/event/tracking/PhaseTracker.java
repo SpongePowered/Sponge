@@ -65,7 +65,6 @@ import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseConte
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
-import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
