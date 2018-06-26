@@ -29,9 +29,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -39,13 +36,9 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
 

@@ -39,15 +39,14 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.CapturedMultiMapSupplier;
 import org.spongepowered.common.event.tracking.context.CapturedSupplier;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -164,20 +163,8 @@ public final class GeneralPhase extends TrackingPhase {
         if (!invalidTransactions.isEmpty()) {
             // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
             // or the events were cancelled), again in reverse order of which they were received.
-            for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
-                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-                if (unwindingState.tracksBlockSpecificDrops()) {
-                    // Cancel any block drops or harvests for the block change.
-                    // This prevents unnecessary spawns.
-                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
-                    if (location != null) {
-                        // Cancel any block drops performed, avoids any item drops, regardless
-                        final BlockPos pos = VecHelper.toBlockPos(location);
-                        postContext.getBlockDropSupplier().removeAllIfNotEmpty(pos);
-                    }
-                }
-            }
-            invalidTransactions.clear();
+            TrackingUtil.rollBackTransactions(unwindingState, postContext, invalidTransactions);
+            invalidTransactions.clear(); // Clear because we might re-enter for some reasons yet to be determined.
         }
         performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
@@ -188,8 +175,6 @@ public final class GeneralPhase extends TrackingPhase {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
-        final CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = postContext.getBlockDropSupplier();
-        final CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = postContext.getBlockItemDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
@@ -206,10 +191,8 @@ public final class GeneralPhase extends TrackingPhase {
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
             final BlockPos pos = VecHelper.toBlockPos(worldLocation);
-            capturedBlockDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
-                    .spawnItemDataForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext));
-            capturedBlockItemEntityDrops.acceptAndRemoveIfPresent(pos, items -> TrackingUtil
-                    .spawnItemEntitiesForBlockDrops(items, oldBlockSnapshot, unwindingPhaseContext));
+            TrackingUtil.performBlockEntitySpawns(postContext, oldBlockSnapshot, pos);
+
 
             final WorldServer world = WorldUtil.asNative(mixinWorld);
             SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);

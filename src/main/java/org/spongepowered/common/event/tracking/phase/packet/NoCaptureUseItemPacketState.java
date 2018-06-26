@@ -29,7 +29,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;

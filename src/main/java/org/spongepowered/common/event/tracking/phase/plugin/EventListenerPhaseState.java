@@ -33,7 +33,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
 
 import javax.annotation.Nullable;
 

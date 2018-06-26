@@ -52,7 +52,6 @@ import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -174,16 +173,8 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     
             // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
             // transactions of the preceeding block events)
-            for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
-                if (blockEvent.isCancelled()) {
-                    noCancelledTransactions = false;
-                    // Don't restore the transactions just yet, since we're just marking them as invalid for now
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                        transaction.setValid(false);
-                    }
-                }
-            }
-    
+            noCancelledTransactions = TrackingUtil.checkCancelledEvents(blockEvents, noCancelledTransactions);
+
             // Finally check the post event
             if (postEvent.isCancelled()) {
                 // Of course, if post is cancelled, just mark all transactions as invalid.
@@ -195,19 +186,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     
             // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
             // Because after, we will restore all the invalid transactions in reverse order.
-            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-                if (!transaction.isValid()) {
-                    invalid.add(transaction);
-                    final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
-                    if (location != null) {
-                        // Cancel any block drops performed, avoids any item drops, regardless
-                        final BlockPos pos = VecHelper.toBlockPos(location);
-                        context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
-                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
-                        context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
-                    }
-                }
-            }
+            TrackingUtil.clearInvalidTransactionDrops(context, postEvent, invalid);
     
             if (!invalid.isEmpty()) {
                 // We need to set this value and return it to signify that some transactions were cancelled
