@@ -114,10 +114,10 @@ shadowJar ext.shadowConfiguration = {
         include dependency('com.flowpowered:flow-math')
         include dependency('com.flowpowered:flow-noise')
 
-        include dependency('org.spongepowered:configurate-core')
-        include dependency('org.spongepowered:configurate-hocon')
-        include dependency('org.spongepowered:configurate-gson')
-        include dependency('org.spongepowered:configurate-yaml')
+        include dependency('ninja.leaping.configurate:configurate-core')
+        include dependency('ninja.leaping.configurate:configurate-hocon')
+        include dependency('ninja.leaping.configurate:configurate-gson')
+        include dependency('ninja.leaping.configurate:configurate-yaml')
 
         include dependency('org.yaml:snakeyaml')
 
