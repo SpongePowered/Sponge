@@ -74,10 +74,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.CapturedMultiMapSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -88,7 +86,6 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
@@ -525,7 +522,7 @@ public final class TrackingUtil {
         // case in point for WorldTick event listeners since the players are captured non-deterministically
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             try {
-                state.associateAdditionalCauses(state, context, frame);
+                state.associateAdditionalCauses(context, frame);
             } catch (Exception e) {
                 // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
                 // try catch to avoid bombing on performing block changes.
@@ -533,7 +530,7 @@ public final class TrackingUtil {
             // Creates the block events accordingly to the transaction arrays
             iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
             // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
-            final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents);
+            final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(state, context, transactionArrays, blockEvents, mainEvents);
 
             if (postEvent == null) { // Means that we have had no actual block changes apparently?
                 return false;
@@ -541,11 +538,9 @@ public final class TrackingUtil {
 
             final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
 
-            boolean noCancelledTransactions = true;
-
             // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
             // transactions of the preceeding block events)
-            noCancelledTransactions = checkCancelledEvents(blockEvents, noCancelledTransactions);
+            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, true);
 
             // Finally check the post event
             noCancelledTransactions = checkForCancelled(postEvent, noCancelledTransactions);
@@ -558,13 +553,14 @@ public final class TrackingUtil {
                 // We need to set this value and return it to signify that some transactions were cancelled
                 noCancelledTransactions = false;
                 rollBackTransactions(state, context, invalid);
+                invalid.clear(); // Clear because we might re-enter for some reasons yet to be determined.
 
             }
             return performBlockAdditions(postEvent.getTransactions(), state, context, noCancelledTransactions);
         }
     }
 
-    private static void createTransactionLists(List<BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+    public static void createTransactionLists(List<BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
         for (BlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
@@ -590,7 +586,7 @@ public final class TrackingUtil {
         return noCancelledTransactions;
     }
 
-    private static boolean checkForCancelled(ChangeBlockEvent.Post postEvent, boolean noCancelledTransactions) {
+    public static boolean checkForCancelled(ChangeBlockEvent.Post postEvent, boolean noCancelledTransactions) {
         if (postEvent.isCancelled()) {
             // Of course, if post is cancelled, just mark all transactions as invalid.
             noCancelledTransactions = false;
@@ -665,7 +661,6 @@ public final class TrackingUtil {
                                                 PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
-        // final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 // Rememver that this value needs to be set to false to return because of the fact that
@@ -682,10 +677,10 @@ public final class TrackingUtil {
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
             final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
 
+            // Handle item drops captured
             final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
-            // Handle item drops captured
-            final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
+            final BlockPos pos = VecHelper.toBlockPos(worldLocation);
             performBlockEntitySpawns(phaseContext, oldBlockSnapshot, pos);
 
             final WorldServer world = WorldUtil.asNative(mixinWorld);
@@ -701,10 +696,9 @@ public final class TrackingUtil {
             final Block newBlock = newState.getBlock();
             if (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && changeFlag.performBlockPhysics() && originalState.getBlock() != newBlock) {
                 newBlock.onBlockAdded(world, pos, newState);
-                ((IPhaseState) peek.state).performPostBlockChanges(peek.context);
+                ((IPhaseState) peek.state).performPostBlockperformBlockAddedSpawns(peek.context);
             }
 
-            //proxyBlockAccess.proceed();f
             ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
             if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
@@ -717,7 +711,7 @@ public final class TrackingUtil {
                 world.updateObservingBlocksAt(pos, newBlock);
             }
 
-            ((IPhaseState) peek.state).performPostBlockChanges(peek.context);
+            ((IPhaseState) peek.state).performPostBlockChangesForNotificationsAndNeighborUpdates(peek.context);
         }
         return noCancelledTransactions;
     }
@@ -807,8 +801,10 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Nullable
-    public static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+    public static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(IPhaseState<?> state,
+        PhaseContext<?> context, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
         if (!blockEvents.isEmpty()) {
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -819,7 +815,7 @@ public final class TrackingUtil {
                     }
                 }
                 final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
-                final ChangeBlockEvent.Post post = SpongeEventFactory.createChangeBlockEventPost(Sponge.getCauseStackManager().getCurrentCause(), transactions);
+                final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, blockEvents, mainEvents);
                 SpongeImpl.postEvent(post);
                 return post;
             }

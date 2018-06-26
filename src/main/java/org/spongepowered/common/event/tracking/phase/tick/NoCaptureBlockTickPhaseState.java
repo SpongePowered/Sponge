@@ -89,7 +89,7 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            associateAdditionalCauses(this, context, frame);
+            associateAdditionalCauses(context, frame);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
