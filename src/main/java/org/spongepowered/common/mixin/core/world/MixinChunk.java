@@ -184,7 +184,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
         this.chunkPos = new Vector3i(x, 0, z);
-        this.blockMin = SpongeChunkLayout.instance.toWorld(this.chunkPos).get();
+        this.blockMin = SpongeChunkLayout.instance.forceToWorld(this.chunkPos);
         this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
         this.biomeMin = new Vector3i(this.blockMin.getX(), 0, this.blockMin.getZ());
         this.biomeMax = new Vector3i(this.blockMax.getX(), 0, this.blockMax.getZ());

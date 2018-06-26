@@ -43,12 +43,12 @@ public abstract class MixinVec3i implements IMixinBlockPos {
 
     @Override
     public boolean isValidPosition() {
-        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000 && this.y >= 0 && this.y < 256;
+        return this.x >= -30000000 && this.z >= -30000000 && this.x <= 30000000 && this.z <= 30000000 && this.y >= 0 && this.y < 256;
     }
 
     @Override
     public boolean isValidXZPosition() {
-        return this.x >= -30000000 && this.z >= -30000000 && this.x < 30000000 && this.z < 30000000;
+        return this.x >= -30000000 && this.z >= -30000000 && this.x <= 30000000 && this.z <= 30000000;
     }
 
     @Override

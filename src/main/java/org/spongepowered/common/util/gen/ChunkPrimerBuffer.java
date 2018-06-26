@@ -59,9 +59,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     private static Vector3i getBlockStart(int chunkX, int chunkZ) {
-        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
-        return worldCoords.get();
+        return SpongeChunkLayout.instance.forceToWorld(chunkX, 0, chunkZ);
     }
 
     @Override

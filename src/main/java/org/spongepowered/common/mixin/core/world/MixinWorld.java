@@ -171,7 +171,7 @@ import javax.annotation.Nullable;
 public abstract class MixinWorld implements World, IMixinWorld {
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
+    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000);
     private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
     private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
     private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
@@ -390,19 +390,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
-        if (!containsBlock(x, y, z)) {
-            return BlockTypes.AIR.getDefaultState();
-        }
-        checkBlockBounds(x, y, z);
         return (BlockState) getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
-        if (!containsBlock(x, y, z)) {
-            return BlockTypes.AIR;
-        }
-        checkBlockBounds(x, y, z);
         // avoid intermediate object creation from using BlockState
         return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
     }
@@ -415,7 +407,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
-        checkBiomeBounds(x, y, z);
         return (BiomeType) this.getBiome(new BlockPos(x, y, z));
     }
 
@@ -717,8 +708,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
-        checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ExtentViewDownsize(this, newMin, newMax);
     }
 
@@ -795,7 +784,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
-        checkBlockBounds(x, y, z);
         final BlockPos pos = new BlockPos(x, y, z);
         final IBlockState state = getBlockState(pos);
         final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
