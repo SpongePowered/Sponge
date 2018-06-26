@@ -537,13 +537,9 @@ public final class PhaseTracker {
      *
      * @param pos The position of the block state to set
      * @param newState The new state
-     * @param flags The notification flags
+     * @param flag The notification flags
      * @return True if the block was successfully set (or captured)
      */
-    public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final int flags) {
-        return this.setBlockState(mixinWorld, pos, newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
-    }
-
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;

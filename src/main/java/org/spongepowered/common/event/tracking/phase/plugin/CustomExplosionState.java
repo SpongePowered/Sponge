@@ -51,7 +51,6 @@ import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -167,16 +166,8 @@ final class CustomExplosionState extends PluginPhaseState<ExplosionContext> impl
     
             // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
             // transactions of the preceeding block events)
-            for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
-                if (blockEvent.isCancelled()) {
-                    noCancelledTransactions = false;
-                    // Don't restore the transactions just yet, since we're just marking them as invalid for now
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                        transaction.setValid(false);
-                    }
-                }
-            }
-    
+            noCancelledTransactions = TrackingUtil.checkCancelledEvents(blockEvents, noCancelledTransactions);
+
             // Finally check the post event
             if (postEvent.isCancelled()) {
                 // Of course, if post is cancelled, just mark all transactions as invalid.

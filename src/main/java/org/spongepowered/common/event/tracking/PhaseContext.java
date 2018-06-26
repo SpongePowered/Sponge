@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;

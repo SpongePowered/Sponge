@@ -43,6 +43,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -55,12 +56,12 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -378,8 +379,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return !requiresBlockBulkCaptures();
     }
 
-    default boolean acceptBlockChangeAndThrowEvent(IMixinWorldServer mixinWorld, Chunk chunk,
-        IBlockState currentState, IBlockState newState, BlockPos pos,
+    default boolean acceptBlockChangeAndThrowEvent(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos,
         BlockChangeFlag flag, C context) {
         final WorldServer minecraftWorld = (WorldServer) mixinWorld;
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
@@ -414,8 +414,51 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             }
 
             return true;
+        }
+        // Sponge Start - Fall back to performing a singular block capture and throwing an event with all the
+        // reprocussions, such as neighbor notifications and whatnot. Entity spawns should also be
+        // properly handled since bulk captures technically should be disabled if reaching
+        // this point.
+        final SpongeBlockSnapshot originalBlockSnapshot;
+        final WorldServer world = WorldUtil.asNative(mixinWorld);
+        //final IBlockState actualState = currentState.getActualState(world, pos);
+        originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flag);
+        final List<BlockSnapshot> capturedSnapshots = new ArrayList<>();
+        final Block newBlock = newState.getBlock();
 
+        TrackingUtil.associateBlockChangeWithSnapshot(this, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+        if (originalBlockState == null) {
+            capturedSnapshots.remove(originalBlockSnapshot);
+            return false;
+        }
+        TrackingUtil.processBlockCaptures(capturedSnapshots, this, context);
+
+
+        if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
+//            world.profiler.startSection("checkLight");
+            world.checkLight(pos);
+//            world.profiler.endSection();
         }
         return false;
+    }
+
+    /**
+     * Specifically used when block changes have taken place in place (after block events are thrown),
+     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
+     * that every block change that is bulk captured would be iterated and the changes from those block changes
+     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
+     * physics correctly and allow mechanics to function that otherwise would not function correctly.
+     *
+     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
+     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
+     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
+     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
+     *
+     * @param context The context to re-check for captures
+     */
+    default void performPostBlockChanges(C context) {
+
     }
 }
