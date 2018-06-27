@@ -46,8 +46,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 final class ExplosionState extends GeneralState<ExplosionContext> implements IEntitySpecificItemDropsState<ExplosionContext> {
 
@@ -86,6 +84,11 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     }
 
     @Override
+    public boolean ignoresEntityCollisions() {
+        return true;
+    }
+
+    @Override
     public void unwind(ExplosionContext context) {
         final Explosion explosion = context.getSpongeExplosion();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -104,23 +107,20 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     }
 
     @Override
-    public ChangeBlockEvent.Post createChangeBlockPostEvent(ExplosionContext context, ImmutableList<Transaction<BlockSnapshot>> transactions,
-        List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
+    public ChangeBlockEvent.Post createChangeBlockPostEvent(ExplosionContext context, ImmutableList<Transaction<BlockSnapshot>> transactions) {
         return SpongeEventFactory.createExplosionEventPost(Sponge.getCauseStackManager().getCurrentCause(), context.getSpongeExplosion(), transactions);
     }
 
     @Override
     public boolean shouldCaptureBlockChangeOrSkip(ExplosionContext phaseContext,
         BlockPos pos) {
-        boolean match = false;
         final Vector3i blockPos = VecHelper.toVector3i(pos);
-        for (final Iterator<BlockSnapshot> iterator = phaseContext.getCapturedBlocks().iterator(); iterator.hasNext(); ) {
-            final BlockSnapshot capturedSnapshot = iterator.next();
+        for (final BlockSnapshot capturedSnapshot : phaseContext.getCapturedBlocks()) {
             if (capturedSnapshot.getPosition().equals(blockPos)) {
-                match = true;
+                return true;
             }
         }
-        return !match;
+        return false;
     }
 
     @Override

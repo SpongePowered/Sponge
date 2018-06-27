@@ -117,8 +117,8 @@ public final class TrackingUtil {
     public static final int PLACE_BLOCK_INDEX = 1;
     public static final int DECAY_BLOCK_INDEX = 2;
     public static final int CHANGE_BLOCK_INDEX = 3;
-    public static final int MULTI_CHANGE_INDEX = 4;
-    public static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
+    private static final int MULTI_CHANGE_INDEX = 4;
+    private static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
             builders ->
                     transaction -> {
                         final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
@@ -126,8 +126,8 @@ public final class TrackingUtil {
                         builders[MULTI_CHANGE_INDEX].add(transaction);
                     }
             ;
-    public static final int EVENT_COUNT = 5;
-    public static final Function<BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = (blockSnapshot) -> {
+    private static final int EVENT_COUNT = 5;
+    static final Function<BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = (blockSnapshot) -> {
         final Location<World> originalLocation = blockSnapshot.getLocation().get();
         final WorldServer worldServer = (WorldServer) originalLocation.getExtent();
         final BlockPos blockPos = VecHelper.toBlockPos(originalLocation);
@@ -414,9 +414,9 @@ public final class TrackingUtil {
 
 
         if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
-//            world.profiler.startSection("checkLight");
+            world.profiler.startSection("checkLight");
             world.checkLight(pos);
-//            world.profiler.endSection();
+            world.profiler.endSection();
         }
 
         return true;
@@ -462,7 +462,7 @@ public final class TrackingUtil {
     }
 
     @Nullable
-    public static User getNotifierOrOwnerFromBlock(WorldServer world, BlockPos blockPos) {
+    private static User getNotifierOrOwnerFromBlock(WorldServer world, BlockPos blockPos) {
         final IMixinChunk mixinChunk = (IMixinChunk) world.getChunkFromBlockCoords(blockPos);
         User notifier = mixinChunk.getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
@@ -540,10 +540,7 @@ public final class TrackingUtil {
 
             // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
             // transactions of the preceeding block events)
-            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, true);
-
-            // Finally check the post event
-            noCancelledTransactions = checkForCancelled(postEvent, noCancelledTransactions);
+            boolean noCancelledTransactions = checkCancelledEvents(blockEvents, postEvent);
 
             // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
             // Because after, we will restore all the invalid transactions in reverse order.
@@ -560,7 +557,7 @@ public final class TrackingUtil {
         }
     }
 
-    public static void createTransactionLists(List<BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
+    private static void createTransactionLists(List<BlockSnapshot> snapshots, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
         for (BlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
@@ -573,7 +570,8 @@ public final class TrackingUtil {
         }
     }
 
-    public static boolean checkCancelledEvents(List<ChangeBlockEvent> blockEvents, boolean noCancelledTransactions) {
+    private static boolean checkCancelledEvents(List<ChangeBlockEvent> blockEvents, ChangeBlockEvent.Post postEvent) {
+        boolean noCancelledTransactions = true;
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
                 noCancelledTransactions = false;
@@ -583,10 +581,6 @@ public final class TrackingUtil {
                 }
             }
         }
-        return noCancelledTransactions;
-    }
-
-    public static boolean checkForCancelled(ChangeBlockEvent.Post postEvent, boolean noCancelledTransactions) {
         if (postEvent.isCancelled()) {
             // Of course, if post is cancelled, just mark all transactions as invalid.
             noCancelledTransactions = false;
@@ -597,7 +591,7 @@ public final class TrackingUtil {
         return noCancelledTransactions;
     }
 
-    public static void clearInvalidTransactionDrops(PhaseContext<?> context, ChangeBlockEvent.Post postEvent,
+    private static void clearInvalidTransactionDrops(PhaseContext<?> context, ChangeBlockEvent.Post postEvent,
         List<Transaction<BlockSnapshot>> invalid) {
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
@@ -614,7 +608,7 @@ public final class TrackingUtil {
         }
     }
 
-    public static void rollBackTransactions(IPhaseState<?> state, PhaseContext<?> context, List<Transaction<BlockSnapshot>> invalid) {
+    private static void rollBackTransactions(IPhaseState<?> state, PhaseContext<?> context, List<Transaction<BlockSnapshot>> invalid) {
         // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
         // or the events were cancelled), again in reverse order of which they were received.
         for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
@@ -631,8 +625,8 @@ public final class TrackingUtil {
         }
     }
 
-    public static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
-            ChangeBlockEvent[] mainEvents) {
+    private static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
+        ChangeBlockEvent[] mainEvents) {
         for (BlockChange blockChange : BlockChange.values()) {
             if (blockChange == BlockChange.DECAY) { // Decay takes place after.
                 continue;
@@ -656,79 +650,96 @@ public final class TrackingUtil {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "ConstantConditions"})
-    public static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState<?> phaseState,
+    private static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState<?> phaseState,
                                                 PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         for (Transaction<BlockSnapshot> transaction : transactions) {
-            if (!transaction.isValid()) {
-                // Rememver that this value needs to be set to false to return because of the fact that
-                // a transaction was marked as invalid or cancelled. This is used primarily for
-                // things like portal creation, and if false, removes the portal from the cache
-                noCancelledTransactions = false;
-                continue; // Don't use invalidated block transactions during notifications, these only need to be restored
-            }
-            // Handle custom replacements
-            if (transaction.getCustom().isPresent()) {
-                transaction.getFinal().restore(true, BlockChangeFlags.NONE);
-            }
-
-            final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
-            final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
-
-            // Handle item drops captured
-            final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
-            final BlockPos pos = VecHelper.toBlockPos(worldLocation);
-            performBlockEntitySpawns(phaseContext, oldBlockSnapshot, pos);
-
-            final WorldServer world = WorldUtil.asNative(mixinWorld);
-            SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);
-            final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
-            final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
-            final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
-
-            // We call onBlockAdded here for blocks without a TileEntity.
-            // MixinChunk#setBlockState will call onBlockAdded for blocks 
-            // with a TileEntity or when capturing is not being done.
-            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-            final Block newBlock = newState.getBlock();
-            if (!SpongeImplHooks.hasBlockTileEntity(newBlock, newState) && changeFlag.performBlockPhysics() && originalState.getBlock() != newBlock) {
-                newBlock.onBlockAdded(world, pos, newState);
-                ((IPhaseState) peek.state).performPostBlockperformBlockAddedSpawns(peek.context);
-            }
-
-            ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
-
-            if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
-                world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
-            }
-
-            if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
-                mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
-            } else if (changeFlag.notifyObservers()) {
-                world.updateObservingBlocksAt(pos, newBlock);
-            }
-
-            ((IPhaseState) peek.state).performPostBlockChangesForNotificationsAndNeighborUpdates(peek.context);
+            noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, noCancelledTransactions);
         }
         return noCancelledTransactions;
     }
 
-    public static void performBlockEntitySpawns(PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot, BlockPos pos) {
-        // This is for pre-merged items
-        phaseContext.getBlockDropSupplier().acceptAndRemoveIfPresent(pos, items -> spawnItemDataForBlockDrops(items, oldBlockSnapshot,
-            phaseContext));
-        // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
-        phaseContext.getBlockItemDropSupplier().acceptAndRemoveIfPresent(pos, items -> spawnItemEntitiesForBlockDrops(items, oldBlockSnapshot,
-                phaseContext));
-        // This is for entities actually spawned
-        phaseContext.getPerBlockEntitySpawnSuppplier().acceptAndRemoveIfPresent(pos, items -> spawnEntitiesForBlock(items,
-            phaseContext));
+    /**
+     * The heart of all that is chaos. If you're reading this... well.. Let me explain it to you..
+     * Based on the provided transaction, pulling from the original block and new {@link IBlockState},
+     * we can perform physics such as {@link Block#onBlockAdded(net.minecraft.world.World, BlockPos, IBlockState)}
+     * and notify neighbors. It is important that this method is replicated based on a combination of
+     * {@link net.minecraft.world.World#setBlockState(BlockPos, IBlockState, int)} and
+     * {@link Chunk#setBlockState(BlockPos, IBlockState)} as various "physics" and "notification" operations
+     * are performed in precise order. This method is utilized in both bulk and non-bulk captures when
+     * an event is required to be thrown. The deterministic requirement to know whether a bulk capture
+     * is being performed or not is with the provided {@link IPhaseState} itself.
+     * @param transaction
+     * @param phaseState
+     * @param phaseContext
+     * @param noCancelledTransactions
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
+        boolean noCancelledTransactions) {
+        // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
+        // goes.
+        if (transaction.getCustom().isPresent()) {
+            transaction.getFinal().restore(true, BlockChangeFlags.NONE);
+        }
+
+        final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
+        final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
+
+        // Handle item drops captured
+        final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
+        final BlockPos pos = VecHelper.toBlockPos(worldLocation);
+        performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
+
+        final WorldServer world = WorldUtil.asNative(mixinWorld);
+        SpongeHooks.logBlockAction(world, oldBlockSnapshot.blockChange, transaction);
+        final SpongeBlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
+        final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
+        final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+
+        // We call onBlockAdded here for blocks without a TileEntity.
+        // MixinChunk#setBlockState will call onBlockAdded for blocks
+        // with a TileEntity or when capturing is not being done.
+        final Block newBlock = newState.getBlock();
+        if (originalState.getBlock() != newBlock && changeFlag.performBlockPhysics() && !SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
+            newBlock.onBlockAdded(world, pos, newState);
+            ((IPhaseState) phaseState).performOnBlockAddedSpawns(phaseContext);
+        }
+
+        ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
+
+        if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
+            world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
+        }
+
+        if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+            mixinWorld.spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, changeFlag);
+        } else if (changeFlag.notifyObservers()) {
+            world.updateObservingBlocksAt(pos, newBlock);
+        }
+
+        ((IPhaseState) phaseState).performPostBlockNotificationsAndNeighborUpdates(phaseContext);
+        return noCancelledTransactions;
     }
 
-    public static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, BlockSnapshot newBlockSnapshot,
+    private static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot, BlockPos pos) {
+        // This is for pre-merged items
+        if (state.doesCaptureEntitySpawns()) {
+            phaseContext.getBlockDropSupplier().acceptAndRemoveIfPresent(pos, items -> spawnItemDataForBlockDrops(items, oldBlockSnapshot,
+                phaseContext));
+            // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
+            phaseContext.getBlockItemDropSupplier().acceptAndRemoveIfPresent(pos, items -> spawnItemEntitiesForBlockDrops(items, oldBlockSnapshot,
+                phaseContext));
+            // This is for entities actually spawned
+            phaseContext.getPerBlockEntitySpawnSuppplier().acceptAndRemoveIfPresent(pos, items -> spawnEntitiesForBlock(items,
+                phaseContext));
+        }
+    }
+
+    private static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, BlockSnapshot newBlockSnapshot,
         PhaseContext<?> phaseContext) {
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = entityItems.stream()
@@ -803,10 +814,11 @@ public final class TrackingUtil {
 
     @SuppressWarnings("rawtypes")
     @Nullable
-    public static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(IPhaseState<?> state,
+    private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(IPhaseState<?> state,
         PhaseContext<?> context, ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
         if (!blockEvents.isEmpty()) {
+            final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
             try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 for (BlockChange blockChange : BlockChange.values()) {
                     final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
@@ -814,13 +826,26 @@ public final class TrackingUtil {
                         frame.pushCause(mainEvent);
                     }
                 }
-                final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[MULTI_CHANGE_INDEX];
-                final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions, blockEvents, mainEvents);
+                final ChangeBlockEvent.Post post = ((IPhaseState) state).createChangeBlockPostEvent(context, transactions);
                 SpongeImpl.postEvent(post);
                 return post;
             }
         }
         return null;
+    }
+
+    static void notifyNeighbors(BlockPos pos, IBlockState newState, net.minecraft.world.World minecraftWorld, Block block, IBlockState iblockstate,
+        boolean notifyNeighbors,
+        boolean notifyObservers) {
+        if (notifyNeighbors) {
+            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
+
+            if (newState.hasComparatorInputOverride()) {
+                minecraftWorld.updateComparatorOutputLevel(pos, block);
+            }
+        } else if (!minecraftWorld.isRemote && notifyObservers) {
+            minecraftWorld.updateObservingBlocksAt(pos, block);
+        }
     }
 
 }

@@ -596,9 +596,9 @@ public final class PhaseTracker {
         }
         // else { // Sponge - unnecessary formatting
         if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            // minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
+            minecraftWorld.profiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
-            // minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
+            minecraftWorld.profiler.endSection();
         }
 
         if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
@@ -766,11 +766,10 @@ public final class PhaseTracker {
      * <b>off thread</b>. The problem with doing this is that the PhaseTracker is
      * <b>not</b> thread safe, and capturing entities off thread is always bad.
      *
-     * @param mixinWorldServer The server the entity is being spawned into
      * @param entity The entity to spawn
      * @return True if the entity spawn is on the main thread.
      */
-    public static boolean validateEntitySpawn(IMixinWorldServer mixinWorldServer, Entity entity) {
+    public static boolean validateEntitySpawn(Entity entity) {
         if (Sponge.isServerAvailable() && (Sponge.getServer().isMainThread() || SpongeImpl.getServer().isServerStopped())) {
             return true;
         }

@@ -36,4 +36,13 @@ public class BasicGenerationState extends GeneralGenerationPhaseState<GenericGen
                 .addCaptures();
     }
 
+    @Override
+    public boolean requiresBlockBulkCaptures() {
+        return false;
+    }
+
+    @Override
+    public boolean requiresBlockTracking() {
+        return false;
+    }
 }
