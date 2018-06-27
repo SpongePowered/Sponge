@@ -61,9 +61,15 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
         return false;
     }
 
+    /**
+     * Even though we are not bulk capturing block changes, we want
+     * to perform singular block events.
+     *
+     * @return True because we want to still throw singular events.
+     */
     @Override
     public boolean doesBlockEventTracking() {
-        return false;
+        return true;
     }
 
     @Override
