@@ -145,4 +145,12 @@ public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack
     public boolean isSubsetOf(Collection<Lens<TInventory, ItemStack>> c) {
         return false;
     }
+
+    @Override
+    public SlotLens getSlotLens(int ordinal) {
+        if (ordinal != 0) {
+            throw new InvalidOrdinalException("Non-zero slot ordinal");
+        }
+        return this;
+    }
 }
