@@ -41,14 +41,14 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
     }
 
     @Override
-    public boolean requiresBlockBulkCaptures() {
-        return false;
-    }
-
-    @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
         BasicPacketContext context) {
         super.handleBlockChangeWithUser(blockChange, snapshotTransaction, context);
+    }
+
+    @Override
+    public boolean doesBulkBlockCapture() {
+        return false;
     }
 
     @Override

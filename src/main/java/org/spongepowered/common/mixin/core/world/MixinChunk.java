@@ -96,6 +96,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -587,6 +588,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     /**
      * @author blood - November 2015
      * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
+     * @author gabizou - Updated June 26th, 2018 - Bulk capturing changes
      *
      *
      * @param pos The position changing
@@ -596,6 +598,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
      *      as there's no block snapshot to change.
      * @return The changed block state if not null
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     @Nullable
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot, BlockChangeFlag flag) {
@@ -646,7 +649,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        final boolean requiresCapturing = peek.state.requiresBlockBulkCaptures();
+        final boolean isBulkCapturing = peek.state.doesBulkBlockCapture();
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
@@ -701,7 +704,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (!this.world.isRemote && currentBlock != newBlock) {
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
-            if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
+            if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (flag.performBlockPhysics()) {

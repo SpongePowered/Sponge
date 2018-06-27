@@ -95,10 +95,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public boolean requiresBlockBulkCaptures() {
+    public boolean doesBulkBlockCapture() {
         return false;
     }
-
 
     @Nullable
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,

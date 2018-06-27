@@ -53,7 +53,12 @@ class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
     }
 
     @Override
-    public boolean requiresBlockBulkCaptures() {
+    public boolean doesBulkBlockCapture() {
+        return false;
+    }
+
+    @Override
+    public boolean doesBlockEventTracking() {
         return false;
     }
 

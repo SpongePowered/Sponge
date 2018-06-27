@@ -117,7 +117,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean requiresBlockBulkCaptures() {
+    public boolean doesBulkBlockCapture() {
         return true;
     }
 
