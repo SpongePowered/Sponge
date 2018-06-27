@@ -26,11 +26,20 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.common.world.BlockChange;
+import net.minecraft.entity.item.EntityXPOrb;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 
-import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
 
@@ -44,8 +53,19 @@ class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture() {
         return false;
+    }
+
+    /**
+     * Even though we are not bulk capturing block changes, we want
+     * to perform singular block events.
+     *
+     * @return True because we want to still throw singular events.
+     */
+    @Override
+    public boolean doesBlockEventTracking() {
+        return true;
     }
 
     @Override
@@ -59,12 +79,6 @@ class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
-        TileEntityTickContext context) {
-        super.handleBlockChangeWithUser(blockChange, snapshotTransaction, context);
-    }
-
-    @Override
     public boolean doesCaptureEntityDrops() {
         return false;
     }
@@ -72,6 +86,49 @@ class NoCaptureTileEntityTickPhaseState extends TileEntityTickPhaseState {
     @Override
     public boolean performOrCaptureItemDrop(TileEntityTickContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
+    }
+
+    /**
+     * Since we're not bulk capturing, we're directly spawning entities and throwing events for it.
+     * Also checking whether spawn events need to be thrown. If they don't need to be thrown, just
+     * directly spawn the entity. Even without the event though, the notifiers/owners will still be
+     * checked and applied to the spawned entity.
+     *
+     * @param context The context
+     * @param entity The entity to spawn
+     * @param chunkX The chunk x position
+     * @param chunkZ The chunk y position
+     * @return True if the entity is spawned
+     */
+    @Override
+    public boolean spawnEntityOrCapture(TileEntityTickContext context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
+        final TileEntity tickingTile = context.getSource(TileEntity.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
+        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
+
+        if (!ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
+        // Separate experience from other entities
+        if (entity instanceof EntityXPOrb) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(tickingTile.getLocatableBlock());
+                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+                context.addNotifierAndOwnerToCauseStack(frame);
+                final ArrayList<org.spongepowered.api.entity.Entity> exp = new ArrayList<>(1);
+                exp.add(entity);
+                return SpongeCommonEventFactory.callSpawnEntity(exp, context);
+            }
+        }
+        final List<org.spongepowered.api.entity.Entity> nonExpEntities = new ArrayList<>(1);
+        nonExpEntities.add(entity);
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(tickingTile.getLocatableBlock());
+            frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
+            context.addNotifierAndOwnerToCauseStack(frame);
+            return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
+
+        }
     }
 
     @Override

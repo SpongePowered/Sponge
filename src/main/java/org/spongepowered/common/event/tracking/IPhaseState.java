@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,12 +38,19 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -53,9 +62,11 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -200,7 +211,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, C context) {
+    default void postTrackBlock(BlockSnapshot snapshot, C context) {
 
     }
 
@@ -217,8 +228,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default void associateAdditionalCauses(IPhaseState<?> state, PhaseContext<?> context,
-        CauseStackManager.StackFrame frame) {
+    default void associateAdditionalCauses(PhaseContext<?> context, CauseStackManager.StackFrame frame) {
+        context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+        context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
     }
 
@@ -249,7 +261,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean alreadyCapturingBlockTicks(C context) {
         return false;
     }
-    default boolean requiresBlockCapturing() {
+    default boolean doesBulkBlockCapture() {
         return true;
     }
 
@@ -353,5 +365,137 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default boolean isEvent() {
         return false;
+    }
+
+    /**
+     * An alternative to {@link #doesBulkBlockCapture()} to where if capturing is expressly
+     * disabled, we can still track the block change through normal methods, and throw events,
+     * but we won't be capturing directly or delaying any block related physics.
+     *
+     * <p>If this and {@link #doesBulkBlockCapture()} both return {@code false}, vanilla
+     * mechanics will take place, and no tracking or capturing is taking place unless otherwise
+     * noted by
+     * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, WorldServer, PlayerTracker.Type)}</p>
+     *
+     * @return True by default, false for things like world gen
+     */
+    default boolean doesBlockEventTracking() {
+        return true;
+    }
+
+    default boolean acceptBlockChangeAndThrowEvent(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos,
+        BlockChangeFlag flag, C context) {
+        final WorldServer minecraftWorld = (WorldServer) mixinWorld;
+        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
+        final Block block = newState.getBlock();
+
+        if (!ShouldFire.CHANGE_BLOCK_EVENT) { // If we don't have to worry about any block events, don't bother
+            // Sponge End - continue with vanilla mechanics
+            final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+
+            if (iblockstate == null) {
+                return false;
+            }
+            // else { // Sponge - unnecessary formatting
+            if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+                minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
+                minecraftWorld.checkLight(pos);
+                minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
+            }
+
+            if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
+                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
+            }
+
+            TrackingUtil.notifyNeighbors(pos, newState, minecraftWorld, block, iblockstate, flag.updateNeighbors(), flag.notifyObservers());
+
+            return true;
+        }
+        // Sponge Start - Fall back to performing a singular block capture and throwing an event with all the
+        // reprocussions, such as neighbor notifications and whatnot. Entity spawns should also be
+        // properly handled since bulk captures technically should be disabled if reaching
+        // this point.
+        final SpongeBlockSnapshot originalBlockSnapshot= mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flag);
+        final List<BlockSnapshot> capturedSnapshots = new ArrayList<>(1); // only need tone
+        final Block newBlock = newState.getBlock();
+
+        TrackingUtil.associateBlockChangeWithSnapshot(this, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+        if (originalBlockState == null) {
+            return false; // Return fast
+        }
+        final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot);
+        final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
+        // Create and throw normal event
+        final ChangeBlockEvent normalEvent =
+            originalBlockSnapshot.blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactions);
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.associateAdditionalCauses(context, frame);
+            SpongeImpl.postEvent(normalEvent);
+            frame.pushCause(normalEvent); // Because of our contract for post events
+            final ChangeBlockEvent.Post post = this.createChangeBlockPostEvent(context, transactions);
+            SpongeImpl.postEvent(post);
+            if (post == null) {
+                return false;
+            }
+            if (!transaction.isValid()) {
+                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
+                if (this.tracksBlockSpecificDrops()) {
+                    context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                }
+                return false; // Short circuit
+            }
+            // And now, proceed as normal.
+            return TrackingUtil.performTransactionProcess(transaction, this, context, false);
+        }
+    }
+
+    /**
+     * Specifically used when block changes have taken place in place (after block events are thrown),
+     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
+     * that every block change that is bulk captured would be iterated and the changes from those block changes
+     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
+     * physics correctly and allow mechanics to function that otherwise would not function correctly.
+     *
+     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
+     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
+     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
+     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
+     *
+     * @param context The context to re-check for captures
+     */
+    default void performOnBlockAddedSpawns(C context) {
+
+    }
+
+    /**
+     * Specifically used when block changes have taken place in place (after block events are thrown),
+     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
+     * that every block change that is bulk captured would be iterated and the changes from those block changes
+     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
+     * physics correctly and allow mechanics to function that otherwise would not function correctly.
+     *
+     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
+     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
+     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
+     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
+     *
+     * @param context The context to re-check for captures
+     */
+    default void performPostBlockNotificationsAndNeighborUpdates(C context) {
+
+    }
+
+    /**
+     * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
+     * An example of this being used specially is for explosions.
+     *
+     * @param context
+     * @param transactions
+     * @return
+     */
+    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+        return SpongeEventFactory.createChangeBlockEventPost(Sponge.getCauseStackManager().getCurrentCause(), transactions);
     }
 }

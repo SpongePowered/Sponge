@@ -44,9 +44,21 @@ class NoCaptureEntityTickPhaseState extends EntityTickPhaseState {
         return false;
     }
 
+
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture() {
         return false;
+    }
+
+    /**
+     * Even though we are not bulk capturing block changes, we want
+     * to perform singular block events.
+     *
+     * @return True because we want to still throw singular events.
+     */
+    @Override
+    public boolean doesBlockEventTracking() {
+        return true;
     }
 
     @Override

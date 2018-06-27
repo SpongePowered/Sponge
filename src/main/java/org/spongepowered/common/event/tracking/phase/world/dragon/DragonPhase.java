@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
 /* TODO - Expand dragon phases so that various things can be configurable

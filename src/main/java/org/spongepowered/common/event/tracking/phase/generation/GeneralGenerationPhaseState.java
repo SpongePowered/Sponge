@@ -101,7 +101,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture() {
         return false;
     }
 
@@ -118,6 +118,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     @Override
     public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
 
+    }
+
+    @Override
+    public boolean doesBlockEventTracking() {
+        return false;
     }
 
     @Override
