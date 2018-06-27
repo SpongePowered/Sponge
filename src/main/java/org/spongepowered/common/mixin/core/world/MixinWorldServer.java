@@ -1191,8 +1191,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
 
-        try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-                .explosion(explosion)) {
+        try (final PhaseContext<?> phaseContext = GeneralPhase.State.EXPLOSION.createPhaseContext()
+                .explosion((Explosion) explosion)) {
             phaseContext.buildAndSwitch();
             final Explosion mcExplosion;
             try {
@@ -1270,7 +1270,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntity(net.minecraft.entity.Entity entity) {
-        if (!PhaseTracker.validateEntitySpawn(this, (Entity) entity)) {
+        if (!PhaseTracker.validateEntitySpawn((Entity) entity)) {
             return true;
         }
         return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
@@ -1600,7 +1600,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "The entity cannot be null!");
-        if (!PhaseTracker.validateEntitySpawn(this, entity)) {
+        if (!PhaseTracker.validateEntitySpawn(entity)) {
             return true;
         }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -1701,7 +1701,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
-        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+        final Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
         // Sponge Start - Cause tracking
         try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()

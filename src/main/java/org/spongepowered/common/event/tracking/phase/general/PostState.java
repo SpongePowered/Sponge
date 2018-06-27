@@ -176,12 +176,12 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void performPostBlockperformBlockAddedSpawns(UnwindingPhaseContext context) {
+    public void performOnBlockAddedSpawns(UnwindingPhaseContext context) {
         postBlockAddedSpawns(context, context.getUnwindingState(), context.getUnwindingContext(), context.getCapturedBlockSupplier());
     }
 
     @Override
-    public void performPostBlockChangesForNotificationsAndNeighborUpdates(UnwindingPhaseContext context) {
+    public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context) {
         final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = context.getCapturedBlockSupplier();
         capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);

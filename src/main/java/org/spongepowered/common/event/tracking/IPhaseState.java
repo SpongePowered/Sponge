@@ -44,7 +44,9 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -396,24 +398,16 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             }
             // else { // Sponge - unnecessary formatting
             if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-                // minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
+                minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
                 minecraftWorld.checkLight(pos);
-                // minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
+                minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
             }
 
             if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
                 minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
             }
 
-            if (flag.updateNeighbors()) {
-                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
-
-                if (newState.hasComparatorInputOverride()) {
-                    minecraftWorld.updateComparatorOutputLevel(pos, block);
-                }
-            } else if (!minecraftWorld.isRemote && flag.notifyObservers()) {
-                minecraftWorld.updateObservingBlocksAt(pos, block);
-            }
+            TrackingUtil.notifyNeighbors(pos, newState, minecraftWorld, block, iblockstate, flag.updateNeighbors(), flag.notifyObservers());
 
             return true;
         }
@@ -421,29 +415,40 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         // reprocussions, such as neighbor notifications and whatnot. Entity spawns should also be
         // properly handled since bulk captures technically should be disabled if reaching
         // this point.
-        final SpongeBlockSnapshot originalBlockSnapshot;
-        final WorldServer world = WorldUtil.asNative(mixinWorld);
-        //final IBlockState actualState = currentState.getActualState(world, pos);
-        originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flag);
-        final List<BlockSnapshot> capturedSnapshots = new ArrayList<>();
+        final SpongeBlockSnapshot originalBlockSnapshot= mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flag);
+        final List<BlockSnapshot> capturedSnapshots = new ArrayList<>(1); // only need tone
         final Block newBlock = newState.getBlock();
 
         TrackingUtil.associateBlockChangeWithSnapshot(this, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
         if (originalBlockState == null) {
-            capturedSnapshots.remove(originalBlockSnapshot);
-            return false;
+            return false; // Return fast
         }
-        TrackingUtil.processBlockCaptures(capturedSnapshots, this, context);
-
-
-        if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
-//            world.profiler.startSection("checkLight");
-            world.checkLight(pos);
-//            world.profiler.endSection();
+        final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot);
+        final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
+        // Create and throw normal event
+        final ChangeBlockEvent normalEvent =
+            originalBlockSnapshot.blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactions);
+        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            this.associateAdditionalCauses(context, frame);
+            SpongeImpl.postEvent(normalEvent);
+            frame.pushCause(normalEvent); // Because of our contract for post events
+            final ChangeBlockEvent.Post post = this.createChangeBlockPostEvent(context, transactions);
+            SpongeImpl.postEvent(post);
+            if (post == null) {
+                return false;
+            }
+            if (!transaction.isValid()) {
+                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
+                if (this.tracksBlockSpecificDrops()) {
+                    context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
+                }
+                return false; // Short circuit
+            }
+            // And now, proceed as normal.
+            return TrackingUtil.performTransactionProcess(transaction, this, context, false);
         }
-        return false;
     }
 
     /**
@@ -460,7 +465,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context The context to re-check for captures
      */
-    default void performPostBlockperformBlockAddedSpawns(C context) {
+    default void performOnBlockAddedSpawns(C context) {
 
     }
 
@@ -478,7 +483,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context The context to re-check for captures
      */
-    default void performPostBlockChangesForNotificationsAndNeighborUpdates(C context) {
+    default void performPostBlockNotificationsAndNeighborUpdates(C context) {
 
     }
 
@@ -488,12 +493,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @param context
      * @param transactions
-     * @param blockEvents
-     * @param mainEvents
      * @return
      */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions,
-        List<ChangeBlockEvent> blockEvents, ChangeBlockEvent[] mainEvents) {
+    default ChangeBlockEvent.Post createChangeBlockPostEvent(C context, ImmutableList<Transaction<BlockSnapshot>> transactions) {
         return SpongeEventFactory.createChangeBlockEventPost(Sponge.getCauseStackManager().getCurrentCause(), transactions);
     }
 }

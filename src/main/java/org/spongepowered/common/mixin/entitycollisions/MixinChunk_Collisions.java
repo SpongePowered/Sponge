@@ -82,7 +82,7 @@ public class MixinChunk_Collisions {
     private <T extends Entity> boolean allowEntityCollision(List<T> listToFill) {
         if (this.world instanceof IMixinWorldServer) {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) this.world;
-            if (spongeWorld.isProcessingExplosion()) {
+            if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
                 // allow explosions
                 return true;
             }
