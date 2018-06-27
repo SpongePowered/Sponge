@@ -261,7 +261,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean alreadyCapturingBlockTicks(C context) {
         return false;
     }
-    default boolean requiresBlockBulkCaptures() {
+    default boolean doesBulkBlockCapture() {
         return true;
     }
 
@@ -368,19 +368,19 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * An alternative to {@link #requiresBlockBulkCaptures()} to where if capturing is expressly
+     * An alternative to {@link #doesBulkBlockCapture()} to where if capturing is expressly
      * disabled, we can still track the block change through normal methods, and throw events,
      * but we won't be capturing directly or delaying any block related physics.
      *
-     * <p>If this and {@link #requiresBlockBulkCaptures()} both return {@code false}, vanilla
+     * <p>If this and {@link #doesBulkBlockCapture()} both return {@code false}, vanilla
      * mechanics will take place, and no tracking or capturing is taking place unless otherwise
      * noted by
      * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, WorldServer, PlayerTracker.Type)}</p>
      *
-     * @return
+     * @return True by default, false for things like world gen
      */
-    default boolean requiresBlockTracking() {
-        return !requiresBlockBulkCaptures();
+    default boolean doesBlockEventTracking() {
+        return true;
     }
 
     default boolean acceptBlockChangeAndThrowEvent(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos,

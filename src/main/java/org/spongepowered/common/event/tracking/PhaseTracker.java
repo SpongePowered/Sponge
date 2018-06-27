@@ -569,7 +569,7 @@ public final class PhaseTracker {
             // while a world is being changed unknowingly.
             this.printUnexpectedBlockChange();
         }
-        if (phaseState.requiresBlockBulkCaptures()) {
+        if (((IPhaseState) phaseState).doesBulkBlockCapture()) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
@@ -579,7 +579,7 @@ public final class PhaseTracker {
                 return false;
             }
         }
-        if (phaseState.requiresBlockTracking()) {
+        if (phaseState.doesBlockEventTracking()) {
             try {
                 return ((IPhaseState) phaseState)
                     .acceptBlockChangeAndThrowEvent(mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context);

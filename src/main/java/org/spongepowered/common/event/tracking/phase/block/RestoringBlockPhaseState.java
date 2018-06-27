@@ -65,7 +65,12 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean requiresBlockBulkCaptures() {
+    public boolean doesBulkBlockCapture() {
+        return false;
+    }
+
+    @Override
+    public boolean doesBlockEventTracking() {
         return false;
     }
 }

@@ -101,7 +101,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean requiresBlockBulkCaptures() {
+    public boolean doesBulkBlockCapture() {
         return false;
     }
 
@@ -121,7 +121,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean requiresBlockTracking() {
+    public boolean doesBlockEventTracking() {
         return false;
     }
 

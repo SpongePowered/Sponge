@@ -49,6 +49,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 final class PostState extends GeneralState<UnwindingPhaseContext> {
 
+    @SuppressWarnings("unchecked")
     private static void postBlockAddedSpawns(UnwindingPhaseContext postContext, IPhaseState<?> unwindingState, PhaseContext<?> unwindingPhaseContext,
         CapturedSupplier<BlockSnapshot> capturedBlockSupplier) {
         postContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
@@ -116,14 +117,14 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     @SuppressWarnings("unchecked")
     @Override
     public void appendContextPreExplosion(ExplosionContext explosionContext, UnwindingPhaseContext context) {
-        final IPhaseState phaseState = context.getUnwindingState();
+        final IPhaseState<?> phaseState = context.getUnwindingState();
         final PhaseContext<?> unwinding = context.getUnwindingContext();
-        phaseState.appendContextPreExplosion(explosionContext, unwinding);
+        ((IPhaseState) phaseState).appendContextPreExplosion(explosionContext, unwinding);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void associateNeighborStateNotifier(UnwindingPhaseContext context, BlockPos sourcePos, Block block, BlockPos notifyPos,
+    public void associateNeighborStateNotifier(UnwindingPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
@@ -133,7 +134,7 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(UnwindingPhaseContext context) {
-        final IPhaseState unwindingState = context.getUnwindingState();
+        final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
         this.postDispatch(unwindingState, unwindingContext, context);
     }
@@ -194,9 +195,9 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
      * Specifically overridden to delegate to the unwinding state. Since the block physics processing is all handled in
      * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean)}.
      *
-     * @param blockChange
-     * @param snapshotTransaction
-     * @param context
+     * @param blockChange change
+     * @param snapshotTransaction the transaction
+     * @param context the context
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -205,6 +206,6 @@ final class PostState extends GeneralState<UnwindingPhaseContext> {
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext unwindingContext = context.getUnwindingContext();
         ((IPhaseState) unwindingState).handleBlockChangeWithUser(blockChange, snapshotTransaction, unwindingContext);
-
     }
+
 }
