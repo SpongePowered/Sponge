@@ -563,26 +563,27 @@ public final class PhaseTracker {
         // Now we need to do some of our own logic to see if we need to capture.
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState<?> phaseState = phaseData.state;
+        final PhaseContext<?> context = phaseData.context;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && isComplete) {
+        if (isComplete && SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) { // Fail fast.
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             this.printUnexpectedBlockChange();
         }
-        if (((IPhaseState) phaseState).doesBulkBlockCapture()) {
+        if (((IPhaseState) phaseState).doesBulkBlockCapture(context)) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
-                return TrackingUtil.captureBulkBlockChange(mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context, phaseState);
+                return TrackingUtil.captureBulkBlockChange(mixinWorld, chunk, currentState, newState, pos, flag, context, phaseState);
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(phaseData, phaseState, e);
                 return false;
             }
         }
-        if (phaseState.doesBlockEventTracking()) {
+        if (((IPhaseState) phaseState).doesBlockEventTracking(context)) {
             try {
-                return ((IPhaseState) phaseState)
-                    .acceptBlockChangeAndThrowEvent(mixinWorld, chunk, currentState, newState, pos, flag, phaseData.context);
+                return ((IPhaseState) phaseState).acceptBlockChangeAndThrowEvent(mixinWorld, chunk, currentState, newState, pos, flag,
+                    context);
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(phaseData, phaseState, e);
                 return false;

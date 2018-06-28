@@ -144,15 +144,15 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
             this.allowsEntityBulkCapture = false;
             this.allowsBlockEventCreation = false;
             this.allowsEntityEventCreation = false;
-            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(), k -> this.allowsBlockBulkCapture);
-            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(), k -> this.allowsEntityBulkCapture);
-            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(), k -> this.allowsBlockEventCreation);
-            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(), k -> this.allowsEntityEventCreation);
+            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
+            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
+            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
+            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
         } else {
-            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(), k -> true);
-            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(), k -> true);
-            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(), k -> true);
-            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(), k -> true);
+            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
         }
 
         if (entityTracker.autoPopulateData()) {

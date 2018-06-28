@@ -95,7 +95,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public boolean doesBulkBlockCapture() {
+    public boolean doesBulkBlockCapture(InventoryPacketContext context) {
         return false;
     }
 

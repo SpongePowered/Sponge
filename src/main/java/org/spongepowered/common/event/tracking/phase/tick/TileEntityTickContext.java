@@ -25,9 +25,23 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 
 public class TileEntityTickContext extends LocationBasedTickContext<TileEntityTickContext> {
     public TileEntityTickContext(IPhaseState<TileEntityTickContext> phaseState) {
         super(phaseState);
+    }
+
+    @Override
+    public TileEntityTickContext source(Object owner) {
+        super.source(owner);
+        if (owner instanceof IMixinTileEntity) {
+            final IMixinTileEntity mixinTileentity = (IMixinTileEntity) owner;
+            this.setBlockEvents(mixinTileentity.allowsBlockEventCreation())
+                .setBulkBlockCaptures(mixinTileentity.allowsBlockBulkCapture())
+                .setEntitySpawnEvents(mixinTileentity.allowsEntityEventCreation())
+                .setBulkEntityCaptures(mixinTileentity.allowsEntityBulkCapture());
+        }
+        return this;
     }
 }

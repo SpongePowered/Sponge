@@ -112,12 +112,12 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(P context) {
         return false;
     }
 
     @Override
-    public boolean doesBulkBlockCapture() {
+    public boolean doesBulkBlockCapture(P context) {
         return true;
     }
 

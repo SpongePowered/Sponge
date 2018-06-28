@@ -101,7 +101,7 @@ final class CloseWindowState extends BasicPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 }

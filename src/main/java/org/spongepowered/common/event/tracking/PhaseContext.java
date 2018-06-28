@@ -73,7 +73,6 @@ import javax.annotation.Nullable;
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     private static PhaseContext<?> EMPTY;
-
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      * @return
@@ -84,6 +83,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
         return EMPTY;
     }
+
+
 
     final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
@@ -103,6 +104,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable protected User owner;
     @Nullable protected User notifier;
     private boolean processImmediately;
+    private boolean allowsBlockEvents = true; // Defaults to allow block events
+    private boolean allowsEntityEvents = true;
+    private boolean allowsBulkBlockCaptures = true; // Defaults to allow block captures
+    private boolean allowsBulkEntityCaptures = true;
 
     @Nullable private Object source;
 
@@ -198,6 +203,42 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         this.entityItemDropsSupplier = new EntityItemDropsSupplier();
         this.entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
         return (P) this;
+    }
+
+    public P setBulkBlockCaptures(boolean captures) {
+        this.allowsBulkBlockCaptures = captures;
+        return (P) this;
+    }
+
+    public boolean allowsBulkBlockCaptures() {
+        return this.allowsBulkBlockCaptures;
+    }
+
+    public P setBlockEvents(boolean events) {
+        this.allowsBlockEvents = events;
+        return (P) this;
+    }
+
+    public boolean allowsBlockEvents() {
+        return this.allowsBlockEvents;
+    }
+
+    protected P setEntitySpawnEvents(boolean b) {
+        this.allowsEntityEvents = b;
+        return (P) this;
+    }
+
+    public boolean allowsEntityEvents() {
+        return this.allowsEntityEvents;
+    }
+
+    protected P setBulkEntityCaptures(boolean b) {
+        this.allowsBulkEntityCaptures = b;
+        return (P) this;
+    }
+
+    public boolean allowsBulkEntityCaptures() {
+        return this.allowsBulkEntityCaptures;
     }
 
     public P buildAndSwitch() {

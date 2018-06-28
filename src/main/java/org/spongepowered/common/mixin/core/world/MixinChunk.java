@@ -649,7 +649,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        final boolean isBulkCapturing = peek.state.doesBulkBlockCapture();
+        final boolean isBulkCapturing = ((IPhaseState) peek.state).doesBulkBlockCapture(peek.context);
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
@@ -728,8 +728,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 // If current owner exists, transfer it to newly created TE pos
                 // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
                 if (owner != null) {
-                    IMixinChunk spongeChunk = (IMixinChunk) this;
-                    spongeChunk.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                    this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
                 }
                 
                 // Sponge End

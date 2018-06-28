@@ -43,7 +43,7 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(E context) {
         return true;
     }
 

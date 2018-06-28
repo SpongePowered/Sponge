@@ -88,6 +88,15 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     protected void processCaptures(Entity tickingEntity, EntityTickContext phaseContext, CauseStackManager.StackFrame frame) {
         phaseContext.addNotifierAndOwnerToCauseStack(frame);
+        // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
+        if (phaseContext.allowsBulkBlockCaptures()) {
+            phaseContext.getCapturedBlockSupplier()
+                .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+        }
+        // And finally, if we're not capturing entities, there's nothing left for us to do.
+        if (!phaseContext.allowsBulkEntityCaptures()) {
+            return; // The rest of this method is all about entity captures
+        }
         phaseContext.getCapturedEntitySupplier()
                 .acceptAndClearIfNotEmpty(entities -> {
                     final List<Entity> experience = new ArrayList<>(entities.size());
@@ -155,25 +164,25 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
                     frame.removeContext(EventContextKeys.SPAWN_TYPE);
                 });
-        phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+        // This could be happening regardless whether block bulk captures are done or not.
+        // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()
-                .acceptIfNotEmpty(map -> {
-                    final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
-                    for (BlockSnapshot snapshot : capturedBlocks) {
-                        final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());
-                        final Collection<EntityItem> entityItems = map.get(blockPos);
-                        if (!entityItems.isEmpty()) {
-                            frame.pushCause(snapshot);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                            final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                            SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+            .acceptIfNotEmpty(map -> {
+                final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
+                for (BlockSnapshot snapshot : capturedBlocks) {
+                    final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());
+                    final Collection<EntityItem> entityItems = map.get(blockPos);
+                    if (!entityItems.isEmpty()) {
+                        frame.pushCause(snapshot);
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
 
-                            frame.popCause();
-                        }
+                        frame.popCause();
                     }
+                }
 
-                });
+            });
         phaseContext.getCapturedItemStackSupplier()
                 .acceptAndClearIfNotEmpty(drops -> {
                     final List<Entity> items = drops.stream()
@@ -333,6 +342,26 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if bulk block captures are usable for this entity type (default true)
+     */
+    @Override
+    public boolean doesBulkBlockCapture(EntityTickContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if block events are to be tracked by the specific type of entity (default is true)
+     */
+    @Override
+    public boolean doesBlockEventTracking(EntityTickContext context) {
+        return context.allowsBlockEvents();
     }
 
     @Override

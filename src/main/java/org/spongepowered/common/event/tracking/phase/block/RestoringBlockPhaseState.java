@@ -65,12 +65,12 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean doesBulkBlockCapture() {
+    public boolean doesBulkBlockCapture(GeneralizedContext context) {
         return false;
     }
 
     @Override
-    public boolean doesBlockEventTracking() {
+    public boolean doesBlockEventTracking(GeneralizedContext context) {
         return false;
     }
 }
