@@ -234,7 +234,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-    default boolean doesCaptureEntityDrops() {
+    default boolean doesCaptureEntityDrops(C context) {
         return false;
     }
 
@@ -261,7 +261,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean alreadyCapturingBlockTicks(C context) {
         return false;
     }
-    default boolean doesBulkBlockCapture() {
+    default boolean doesBulkBlockCapture(C context) {
         return true;
     }
 
@@ -338,7 +338,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if we are capturing, false if we are to let the item spawn
      */
     default boolean performOrCaptureItemDrop(C phaseContext, Entity entity, EntityItem entityitem) {
-        if (this.doesCaptureEntityDrops()) {
+        if (this.doesCaptureEntityDrops(phaseContext)) {
             if (this.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
                 // This has to be handled specially for the entity in forge environments to
@@ -368,18 +368,19 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * An alternative to {@link #doesBulkBlockCapture()} to where if capturing is expressly
+     * An alternative to {@link #doesBulkBlockCapture(PhaseContext)} to where if capturing is expressly
      * disabled, we can still track the block change through normal methods, and throw events,
      * but we won't be capturing directly or delaying any block related physics.
      *
-     * <p>If this and {@link #doesBulkBlockCapture()} both return {@code false}, vanilla
+     * <p>If this and {@link #doesBulkBlockCapture(PhaseContext)} both return {@code false}, vanilla
      * mechanics will take place, and no tracking or capturing is taking place unless otherwise
      * noted by
      * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, WorldServer, PlayerTracker.Type)}</p>
      *
      * @return True by default, false for things like world gen
+     * @param context
      */
-    default boolean doesBlockEventTracking() {
+    default boolean doesBlockEventTracking(C context) {
         return true;
     }
 

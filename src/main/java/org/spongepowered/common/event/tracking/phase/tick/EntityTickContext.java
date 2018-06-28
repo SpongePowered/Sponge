@@ -25,11 +25,25 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 public class EntityTickContext extends TickContext<EntityTickContext> {
 
     EntityTickContext(IPhaseState<EntityTickContext> phaseState) {
         super(phaseState);
+    }
+
+    @Override
+    public EntityTickContext source(Object owner) {
+        super.source(owner);
+        if (owner instanceof IMixinEntity) {
+            final IMixinEntity mixinEntity = (IMixinEntity) owner;
+            setBulkBlockCaptures(mixinEntity.allowsBlockBulkCapture());
+            setBlockEvents(mixinEntity.allowsBlockEventCreation());
+            setBulkEntityCaptures(mixinEntity.allowsEntityBulkCapture());
+            setEntitySpawnEvents(mixinEntity.allowsEntityEventCreation());
+        }
+        return super.source(owner);
     }
 
 }

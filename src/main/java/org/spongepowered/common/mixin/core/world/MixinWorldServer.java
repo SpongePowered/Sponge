@@ -1498,7 +1498,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @param <T> The type of entity list
      * @return The list of entities found
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class<? extends T> clazz, AxisAlignedBB aabb,
         @Nullable Predicate<? super T> filter) {
@@ -1531,10 +1531,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
         final PhaseContext<?> context = currentPhase.context;
         final IPhaseState<?> state = currentPhase.state;
-        if (state.doesCaptureEntityDrops() || state.allowEntitySpawns()) {
+        if (((IPhaseState) state).doesCaptureEntityDrops(context) || state.allowEntitySpawns()) {
             // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
             // they pass the predicate check
-            if (state.doesCaptureEntityDrops()) {
+            if (((IPhaseState) state).doesCaptureEntityDrops(context)) {
                 for (EntityItem entity : context.getCapturedItems()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
                     if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {

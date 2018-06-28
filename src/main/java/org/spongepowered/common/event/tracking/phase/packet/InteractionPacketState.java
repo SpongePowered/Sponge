@@ -91,7 +91,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 

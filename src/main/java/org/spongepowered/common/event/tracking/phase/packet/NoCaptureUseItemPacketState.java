@@ -47,12 +47,12 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
     }
 
     @Override
-    public boolean doesBulkBlockCapture() {
+    public boolean doesBulkBlockCapture(BasicPacketContext context) {
         return false;
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return false;
     }
 
