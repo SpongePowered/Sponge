@@ -180,8 +180,11 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     @SuppressWarnings("unused")
     private UserStorageService userStorageService;
     private Timing timing;
-    // If this entity should allow bulk captures
-    private boolean allowsCaptures = true;
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
 
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
@@ -278,7 +281,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private void onSpongeConstruction(net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {
             SpongeEntityType spongeEntityType = (SpongeEntityType) this.entityType;
-            this.allowsCaptures = spongeEntityType.allowsCaptures;
+            this.refreshCache();
             if (spongeEntityType.getEnumCreatureType() == null) {
                 for (EnumCreatureType type : EnumCreatureType.values()) {
                     if (SpongeImplHooks.isCreatureOfType((net.minecraft.entity.Entity) (Object) this, type)) {
@@ -1397,14 +1400,32 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Override
-    public boolean allowsCaptures() {
-        return this.allowsCaptures;
+    public boolean allowsBlockBulkCapture() {
+        return this.allowsBlockBulkCapture;
+    }
+
+    @Override
+    public boolean allowsEntityBulkCapture() {
+        return this.allowsEntityBulkCapture;
+    }
+
+    @Override
+    public boolean allowsBlockEventCreation() {
+        return this.allowsBlockEventCreation;
+    }
+
+    @Override
+    public boolean allowsEntityEventCreation() {
+        return this.allowsEntityEventCreation;
     }
 
     @Override
     public void refreshCache() {
         if (this.entityType != null) {
-            this.allowsCaptures = ((SpongeEntityType) this.entityType).allowsCaptures;
+            this.allowsBlockBulkCapture = ((SpongeEntityType) this.entityType).allowsBlockBulkCapture;
+            this.allowsEntityBulkCapture = ((SpongeEntityType) this.entityType).allowsEntityBulkCapture;
+            this.allowsBlockEventCreation = ((SpongeEntityType) this.entityType).allowsBlockEventCreation;
+            this.allowsEntityEventCreation = ((SpongeEntityType) this.entityType).allowsEntityEventCreation;
         }
     }
 

@@ -90,8 +90,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Nullable private User spongeOwner;
     private boolean hasSetOwner = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
-    // If this tileentity should allow bulk captures
-    private boolean allowsCaptures = true;
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
@@ -105,9 +108,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        if (this.tileType != null) {
-            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowsCaptures;
-        }
+        this.refreshCache();
     }
 
     @Intrinsic
@@ -352,14 +353,32 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public boolean allowsCaptures() {
-        return this.allowsCaptures;
+    public boolean allowsBlockBulkCapture() {
+        return this.allowsBlockBulkCapture;
+    }
+
+    @Override
+    public boolean allowsEntityBulkCapture() {
+        return this.allowsEntityBulkCapture;
+    }
+
+    @Override
+    public boolean allowsBlockEventCreation() {
+        return this.allowsBlockEventCreation;
+    }
+
+    @Override
+    public boolean allowsEntityEventCreation() {
+        return this.allowsEntityEventCreation;
     }
 
     @Override
     public void refreshCache() {
         if (this.tileType != null) {
-            this.allowsCaptures = ((SpongeTileEntityType) this.tileType).allowsCaptures;
+            this.allowsBlockBulkCapture = ((SpongeTileEntityType) this.tileType).allowsBlockBulkCapture;
+            this.allowsEntityBulkCapture = ((SpongeTileEntityType) this.tileType).allowsEntityBulkCapture;
+            this.allowsBlockEventCreation = ((SpongeTileEntityType) this.tileType).allowsBlockEventCreation;
+            this.allowsEntityEventCreation = ((SpongeTileEntityType) this.tileType).allowsEntityEventCreation;
         }
     }
 

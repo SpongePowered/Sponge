@@ -26,7 +26,13 @@ package org.spongepowered.common.interfaces;
 
 public interface IMixinTrackable {
 
-    boolean allowsCaptures();
+    boolean allowsBlockBulkCapture();
+
+    boolean allowsEntityBulkCapture();
+
+    boolean allowsBlockEventCreation();
+
+    boolean allowsEntityEventCreation();
 
     void refreshCache();
 }
