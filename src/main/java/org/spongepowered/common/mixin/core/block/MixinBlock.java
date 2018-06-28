@@ -114,8 +114,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean requiresBlockCapture = true;
     private static boolean canCaptureItems = true;
     private Timing timing;
-    // If this block should allow bulk captures
-    private boolean allowsCaptures = true;
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
 
     @Shadow private boolean needsRandomTick;
     @Shadow protected SoundType blockSoundType;
@@ -423,8 +426,23 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public boolean allowsCaptures() {
-        return this.allowsCaptures;
+    public boolean allowsBlockBulkCapture() {
+        return this.allowsBlockBulkCapture;
+    }
+
+    @Override
+    public boolean allowsEntityBulkCapture() {
+        return this.allowsEntityBulkCapture;
+    }
+
+    @Override
+    public boolean allowsBlockEventCreation() {
+        return this.allowsBlockEventCreation;
+    }
+
+    @Override
+    public boolean allowsEntityEventCreation() {
+        return this.allowsEntityEventCreation;
     }
 
     @Override
@@ -465,11 +483,21 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             modCapturing = new BlockTrackerModCategory();
             blockTracker.getModMappings().put(modId, modCapturing);
         }
+
         if (!modCapturing.isEnabled()) {
-            this.allowsCaptures = false;
-            modCapturing.getBlockCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsCaptures);
+            this.allowsBlockBulkCapture = false;
+            this.allowsEntityBulkCapture = false;
+            this.allowsBlockEventCreation = false;
+            this.allowsEntityEventCreation = false;
+            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockBulkCapture);
+            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityBulkCapture);
+            modCapturing.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsBlockEventCreation);
+            modCapturing.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> this.allowsEntityEventCreation);
         } else {
-            this.allowsCaptures = modCapturing.getBlockCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
+            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(), k -> true);
         }
 
         if (blockTracker.autoPopulateData()) {

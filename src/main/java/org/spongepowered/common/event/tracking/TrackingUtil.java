@@ -173,7 +173,7 @@ public final class TrackingUtil {
     }
 
     private static EntityTickContext getEntityTickContext(net.minecraft.entity.Entity entity, IMixinEntity mixinEntity) {
-        return mixinEntity.allowsCaptures() ? TickPhase.Tick.ENTITY.createPhaseContext()
+        return mixinEntity.allowsBlockBulkCapture() ? TickPhase.Tick.ENTITY.createPhaseContext()
             .source(entity) : TickPhase.Tick.NO_CAPTURE_ENTITY.createPhaseContext().source(entity);
     }
 
@@ -257,7 +257,7 @@ public final class TrackingUtil {
     }
 
     private static TileEntityTickContext getTileTickContext(ITickable tile, IMixinTileEntity mixinTileEntity) {
-        return mixinTileEntity.allowsCaptures() ? TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(tile) : TickPhase.Tick.NO_CAPTURE_TILE_ENTITY.createPhaseContext().source(tile);
+        return mixinTileEntity.allowsBlockBulkCapture() ? TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(tile) : TickPhase.Tick.NO_CAPTURE_TILE_ENTITY.createPhaseContext().source(tile);
     }
 
     @SuppressWarnings("rawtypes")
@@ -304,7 +304,7 @@ public final class TrackingUtil {
     }
 
     private static IPhaseState<BlockTickContext> getTickBlockContext(IMixinBlock mixinBlock, IPhaseState<BlockTickContext> block) {
-        return mixinBlock.requiresBlockCapture() && mixinBlock.allowsCaptures() ? block : TickPhase.Tick.NO_CAPTURE_BLOCK;
+        return mixinBlock.requiresBlockCapture() && mixinBlock.allowsBlockBulkCapture() ? block : TickPhase.Tick.NO_CAPTURE_BLOCK;
     }
 
     @SuppressWarnings("rawtypes")
@@ -381,7 +381,7 @@ public final class TrackingUtil {
     }
 
     private static IPhaseState<?> getBlockEventState(BlockEventData event, IMixinBlockEventData blockEvent) {
-        return blockEvent.getCaptureBlocks() && ((IMixinBlock) event.getBlock()).allowsCaptures() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
+        return blockEvent.getCaptureBlocks() && ((IMixinBlock) event.getBlock()).allowsBlockBulkCapture() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
     }
 
     @SuppressWarnings("rawtypes")

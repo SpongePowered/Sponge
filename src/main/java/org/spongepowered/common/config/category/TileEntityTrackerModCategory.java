@@ -36,15 +36,32 @@ public class TileEntityTrackerModCategory extends ConfigCategory {
 
     @Setting(value = "enabled", comment = "If 'false', all tracking for this mod will be disabled.")
     private boolean isEnabled = true;
-    @Setting(value = TrackerConfig.BULK_CAPTURES, comment = "Set to true to perform bulk capturing during tileentity ticks. (Default: true)")
-    private Map<String, Boolean> tileEntityCaptureMap = new HashMap<>();
+    @Setting(value = TrackerConfig.BLOCK_BULK_CAPTURE, comment = "Set to true to perform block bulk capturing during tileentity ticks. (Default: true)")
+    private Map<String, Boolean> blockBulkCaptureMap = new HashMap<>();
+    @Setting(value = TrackerConfig.ENTITY_BULK_CAPTURE, comment = "Set to true to perform entity bulk capturing during tileentity ticks. (Default: true)")
+    private Map<String, Boolean> entityBulkCaptureMap = new HashMap<>();
+    @Setting(value = TrackerConfig.BLOCK_EVENT_CREATION, comment = "Set to true to create and fire block events during tileentity ticks. (Default: true)")
+    private Map<String, Boolean> blockEventCreationMap = new HashMap<>();
+    @Setting(value = TrackerConfig.ENTITY_EVENT_CREATION, comment = "Set to true to create and fire entity events during tileentity ticks. (Default: true)")
+    private Map<String, Boolean> entityEventCreationMap = new HashMap<>();
 
     public boolean isEnabled() {
         return this.isEnabled;
     }
 
-    public Map<String, Boolean> getTileEntityCaptureMap() {
-        return this.tileEntityCaptureMap;
+    public Map<String, Boolean> getBlockBulkCaptureMap() {
+        return this.blockBulkCaptureMap;
     }
 
+    public Map<String, Boolean> getEntityBulkCaptureMap() {
+        return this.entityBulkCaptureMap;
+    }
+
+    public Map<String, Boolean> getBlockEventCreationMap() {
+        return this.blockEventCreationMap;
+    }
+
+    public Map<String, Boolean> getEntityEventCreationMap() {
+        return this.entityEventCreationMap;
+    }
 }

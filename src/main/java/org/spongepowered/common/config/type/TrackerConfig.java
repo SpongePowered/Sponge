@@ -33,7 +33,10 @@ import org.spongepowered.common.config.category.TileEntityTrackerCategory;
 @ConfigSerializable
 public class TrackerConfig extends ConfigBase {
 
-    public static final String BULK_CAPTURES = "bulk-captures";
+    public static final String BLOCK_BULK_CAPTURE = "block-bulk-capture";
+    public static final String ENTITY_BULK_CAPTURE = "entity-bulk-capture";
+    public static final String BLOCK_EVENT_CREATION = "block-event-creation";
+    public static final String ENTITY_EVENT_CREATION = "entity-block-creation";
 
     @Setting("block")
     private BlockTrackerCategory blockTracker = new BlockTrackerCategory();
