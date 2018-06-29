@@ -41,7 +41,6 @@ import org.spongepowered.api.data.manipulator.mutable.block.*;
 import org.spongepowered.api.data.manipulator.mutable.entity.*;
 import org.spongepowered.api.data.manipulator.mutable.item.*;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.*;
-import org.spongepowered.api.data.property.IntProperty;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
@@ -889,7 +888,7 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.EXIT_POSITION, new EndGatewayExitPositionValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXACT_TELEPORT, new EndGatewayExactTeleportValueProcessor());
         DataUtil.registerValueProcessor(Keys.SKIN, new SkinValueProcessor());
-        DataUtil.registerValueProcessor(Keys.UPDATE_GAME_PROFILE, new UpdateTabListValueProcessor());
+        DataUtil.registerValueProcessor(Keys.UPDATE_GAME_PROFILE, new UpdateGameProfileValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();

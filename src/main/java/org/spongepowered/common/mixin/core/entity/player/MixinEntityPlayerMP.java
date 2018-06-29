@@ -1495,7 +1495,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.updateGameProfileWithSkin();
         }
 
-
         this.updateSkin();
         return true;
     }
@@ -1522,6 +1521,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.updateTabListNoSkinChange();
         }
         this.updateGameProfile = updateGameProfile;
+    }
+
+    @Override
+    public boolean setSkin(ProfileProperty skin, boolean updateGameProfile) {
+        this.setUpdateGameProfile(updateGameProfile);
+        this.setSkin(skin);
+
+        return true;
     }
 
     private void restoreOriginalProfile() {

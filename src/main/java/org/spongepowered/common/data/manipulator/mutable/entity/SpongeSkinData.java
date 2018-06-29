@@ -49,6 +49,7 @@ public class SpongeSkinData extends AbstractData<SkinData, ImmutableSkinData> im
         super(SkinData.class);
         this.skin = skin;
         this.updateGameProfile = updateGameProfile;
+        this.registerGettersAndSetters();
     }
 
     @Override

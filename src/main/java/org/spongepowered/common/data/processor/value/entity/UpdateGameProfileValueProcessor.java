@@ -36,9 +36,9 @@ import org.spongepowered.common.interfaces.entity.IMixinSkinnable;
 
 import java.util.Optional;
 
-public class UpdateTabListValueProcessor extends AbstractSpongeValueProcessor<IMixinSkinnable, Boolean, Value<Boolean>> {
+public class UpdateGameProfileValueProcessor extends AbstractSpongeValueProcessor<IMixinSkinnable, Boolean, Value<Boolean>> {
 
-    public UpdateTabListValueProcessor() {
+    public UpdateGameProfileValueProcessor() {
         super(IMixinSkinnable.class, Keys.UPDATE_GAME_PROFILE);
     }
 

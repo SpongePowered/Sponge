@@ -51,35 +51,6 @@ public class SkinDataProcessor extends
 
     public static final ProfileProperty EMPTY_SKIN = (ProfileProperty) new Property(ProfileProperty.TEXTURES, "");
 
-    /*@Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof IMixinSkinnable) {
-            return ((IMixinSkinnable) container).removeSkin();
-        }
-        return DataTransactionResult.failNoData();
-
-    }
-
-    @Override
-    protected Value<ProfileProperty> constructValue(ProfileProperty actualValue) {
-        return new SpongeValue<>(Keys.SKIN, actualValue);
-    }
-
-    @Override
-    protected boolean set(IMixinSkinnable entity, ProfileProperty value) {
-        return entity.setSkin(value);
-    }
-
-    @Override
-    protected Optional<ProfileProperty> getVal(IMixinSkinnable entity) {
-        return Optional.ofNullable(entity.getSkin());
-    }
-
-    @Override
-    protected ImmutableValue<ProfileProperty> constructImmutableValue(ProfileProperty value) {
-        return new ImmutableSpongeValue<ProfileProperty>(Keys.SKIN, value);
-    }*/
-
     @Override
     protected SkinData createManipulator() {
         return new SpongeSkinData();

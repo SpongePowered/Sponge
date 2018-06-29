@@ -377,8 +377,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     @Override
-    public boolean setSkin(ProfileProperty skin, boolean updateTabList) {
-        this.setUpdateGameProfile(updateTabList);
+    public boolean setSkin(ProfileProperty skin, boolean updateGameProfile) {
+        this.setUpdateGameProfile(updateGameProfile);
         return this.setSkin(skin);
     }
 

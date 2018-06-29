@@ -39,7 +39,7 @@ public interface IMixinSkinnable {
 
     boolean setSkin(ProfileProperty skin);
 
-    boolean setSkin(ProfileProperty skin, boolean updateTabList);
+    boolean setSkin(ProfileProperty skin, boolean updateGameProfile);
 
     void setUpdateGameProfile(boolean updateTabList);
 
