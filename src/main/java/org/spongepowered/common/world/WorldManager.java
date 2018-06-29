@@ -421,7 +421,7 @@ public final class WorldManager {
         if (dimensionId != null) {
             ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
         } else if (((IMixinWorldInfo) worldInfo).getDimensionId() == null
-                || ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE
+                //|| ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
                 || getWorldByDimensionId(((IMixinWorldInfo) worldInfo).getDimensionId()).isPresent()) {
             // DimensionID is null or 0 or the dimensionID is already assinged to a loaded world
             ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
@@ -597,7 +597,8 @@ public final class WorldManager {
             }
         }
 
-        if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+        // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
+        if (((IMixinWorldInfo) properties).getDimensionId() == null /*|| ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE*/) {
             ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
         }
         setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
@@ -939,10 +940,11 @@ public final class WorldManager {
 
                 int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
 
-                if (dimensionId == Integer.MIN_VALUE) {
+                // TODO: Evaulate all uses of Integer.MIN_VALUE for dimension ids
+                /*if (dimensionId == Integer.MIN_VALUE) {
                     // temporary fix for existing worlds created with wrong dimension id
                     dimensionId = WorldManager.getNextFreeDimensionId();
-                }
+                }*/
                 // We do not handle Vanilla dimensions, skip them
                 if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
                     continue;
