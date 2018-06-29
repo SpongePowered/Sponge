@@ -1560,18 +1560,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void refreshSkinOnRespawn() {
-        /*if (!this.hasCustomSkin) {
-            return;
-        }*/
-        // We don't update the skin for other players, as this is done
-        // in MixinEntityTrackerEntry.
         this.updateSkinSelf();
     }
-
-    /*@Override
-    public void refreshSkinOnSpawnToOthers() {
-        this.updateSkinOthers();
-    }*/
 
     private void updateSkin() {
         this.updateSkinSelf();
@@ -1711,62 +1701,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             this.offer(Keys.VANISH, true);
             this.runDelay(2, () -> this.offer(Keys.VANISH, false));
         }
-
-
-        // If we're already vanished, there's no need to do anything.
-        // When we're unvanished, the proper skin will be displayed.
-
-        // However, if we're not vanished, we vanish and un-vanish outself
-        // in order to cause our player entity to respawn on other clients.
-        /*if (!this.isDead && !this.get(Keys.VANISH).get().booleanValue()) {
-            Map<UUID, TabListEntry> map = new HashMap<>();
-            if (!this.updateGameProfile) {
-                for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                    if (player == (EntityPlayerMP) (Object) this) {
-                        continue;
-                    }
-                    player.getTabList().getEntry(this.getUniqueID()).ifPresent(entry -> map.put(player.getUniqueId(), entry));
-                }
-            }
-
-            // Allow two ticks between vanishing and unvanishing
-            // to ensure that clients are actually updated
-
-            // We also allow ticks ticks between unvanishing and restoring
-            // the tab list to ensure that the spawn packet has been sent to the client
-
-            if (doVanish) {
-                this.offer(Keys.VANISH, true);
-                this.runDelay(2, () -> this.offer(Keys.VANISH, false));
-            }
-
-            this.runDelay(2, () -> {
-
-                if (doVanish) {
-                    this.offer(Keys.VANISH, false);
-                }
-                this.runDelay(2, () -> {
-
-                    if (!this.updateGameProfile) {
-
-                        // Restore the tab list
-                        for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                            if (player == (EntityPlayerMP) (Object) this) {
-                                continue;
-                            }
-                            SpongeClientWaiter.INSTANCE.waitForRenderTick(() -> {
-                                player.getTabList().removeEntry(this.getUniqueID());
-                                TabListEntry entry = map.get(player.getUniqueId());
-                                if (entry != null) {
-                                    player.getTabList().addEntry(entry);
-                                }
-                            }, (EntityPlayerMP) player);
-                        }
-                    }
-                });
-
-
-            });*/
     }
 
     // Adapted from MixinPlayerList#recreatePlayerEntity

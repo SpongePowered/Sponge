@@ -387,9 +387,6 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
                 ImmutableSpongeCareerData.class, new CareerDataProcessor());
 
-        /*DataUtil.registerDualProcessor(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
-                ImmutableSpongeSkinData.class, new SkinDataProcessor());*/
-
         DataUtil.registerDualProcessor(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
                 ImmutableSpongeExpOrbData.class, new ExpOrbDataProcessor());
 

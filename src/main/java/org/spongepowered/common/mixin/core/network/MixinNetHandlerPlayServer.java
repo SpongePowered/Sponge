@@ -425,12 +425,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         this.justTeleported = true;
     }
 
-    @Inject(method = "processPlayer", at =  @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketThreadUtil;checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V",
-                                                shift = At.Shift.AFTER))
-    public void onProcessPlayerStart(CPacketPlayer packetPlayer, CallbackInfo ci) {
-        SpongeClientWaiter.INSTANCE.onClientPacketPlayer(packetPlayer, this.player);
-    }
-
     /**
      * @author gabizou - June 22nd, 2016
      * @reason Sponge has to throw the movement events before we consider moving the player and there's

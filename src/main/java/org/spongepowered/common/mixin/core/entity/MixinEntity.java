@@ -335,7 +335,7 @@ public abstract class MixinEntity implements IMixinEntity {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeImpl.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(frame.getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
+                        createRideEntityEventDismount(frame.getCurrentCause(), type, (Entity) this.getRidingEntity()))) {
                     return false;
                 }
             }
@@ -374,10 +374,10 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Redirect(method = "setOnFireFromLava",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
-        )
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
+            )
     )
     private boolean onSpongeRedirectForBlockDamageSource(net.minecraft.entity.Entity entity, DamageSource source, float damage) {
         if (this.world.isRemote) { // Short circuit
@@ -386,7 +386,7 @@ public abstract class MixinEntity implements IMixinEntity {
         try {
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.LAVA);
+                    block.getMaterial() == Material.LAVA);
             DamageSource.LAVA = new MinecraftBlockDamageSource("lava", location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.LAVA, damage);
         } finally {
@@ -397,10 +397,10 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Redirect(method = "dealFireDamage",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
-        )
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"
+            )
     )
     private boolean onSpongeRedirectForFireDamage(net.minecraft.entity.Entity entity, DamageSource source, float damage) {
         if (this.world.isRemote) { // Short Circuit
@@ -409,7 +409,7 @@ public abstract class MixinEntity implements IMixinEntity {
         try {
             AxisAlignedBB bb = this.getEntityBoundingBox().grow(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
+                    block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
             DamageSource.IN_FIRE = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
             return entity.attackEntityFrom(DamageSource.IN_FIRE, damage);
         } finally {
@@ -516,7 +516,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     }
                 }
                 EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
-                    ((IMixinWorldServer) nmsWorld).getDimensionId());
+                        ((IMixinWorldServer) nmsWorld).getDimensionId());
             } else {
                 double distance = location.getPosition().distance(this.getPosition());
 
@@ -535,10 +535,10 @@ public abstract class MixinEntity implements IMixinEntity {
                         }
 
                         ((WorldServer) location.getExtent()).getChunkProvider()
-                            .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
+                                .loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                     }
                     entityPlayerMP.connection
-                        .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                            .setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
                     ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null); // Set last move to teleport target
                 } else {
                     setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
@@ -688,50 +688,14 @@ public abstract class MixinEntity implements IMixinEntity {
 
 
                     this.onUnVanish();
-                    /*if (((Object) this) instanceof EntityPlayerMP) {
-                        ((IMixinEntityPlayerMP) this).onSpawnToPlayers(Sponge.getServer().getOnlinePlayers());
-                    }*/
-
-                    // If we're not a player, or we're a player that doesn't need the tab list restored (regular gameprofile is the same as the tab list gameprofile)
-                    //if ((!(((Object) this) instanceof EntityPlayerMP)) || ((((Object) this) instanceof EntityPlayerMP) && ((IMixinEntityPlayerMP) this).shouldUpdateGameProfile())) {
-                        for (EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayers()) {
-                            if (((Object) this) == entityPlayerMP) {
-                                continue;
-                            }
-                            /*if (((Object) this) instanceof EntityPlayerMP) {
-                                Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
-                                entityPlayerMP.connection.sendPacket(packet);
-                            }*/
-                            Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
-                            entityPlayerMP.connection.sendPacket(newPacket);
-                        }
-                        //}
-                    /*} else { // Do tab list restoration
-                        Map<UUID, TabListEntry> map = new HashMap<>();
-                        for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                            if (player == (EntityPlayerMP) (Object) this) {
-                                continue;
-                            }
-                            player.getTabList().getEntry(this.getUniqueID()).ifPresent(entry -> map.put(player.getUniqueId(), entry));
+                    for (EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayers()) {
+                        if (((Object) this) == entityPlayerMP) {
+                            continue;
                         }
 
-                        this.runDelay(2, () -> {
-
-                            // Restore the tab list
-                            for (Player player : Sponge.getServer().getOnlinePlayers()) {
-                                if (player == (EntityPlayerMP) (Object) this) {
-                                    continue;
-                                }
-                                SpongeClientWaiter.INSTANCE.waitForRenderTick(() -> {
-                                    player.getTabList().removeEntry(this.getUniqueID());
-                                    TabListEntry entry = map.get(player.getUniqueId());
-                                    if (entry != null) {
-                                        player.getTabList().addEntry(entry);
-                                    }
-                                }, (EntityPlayerMP) player);
-                            }
-                        });
-                    }*/
+                        Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                        entityPlayerMP.connection.sendPacket(newPacket);
+                    }
 
                 }
             }
@@ -797,7 +761,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).connection != null) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).connection.setPlayerLocation(getPosition().getX(), getPosition().getY(),
-                getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
+                    getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
             if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
                 ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
@@ -1048,26 +1012,26 @@ public abstract class MixinEntity implements IMixinEntity {
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
-            .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
-            .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
+                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(DataQueries.ENTITY_CLASS, this.getClass().getName())
+                .set(Queries.WORLD_ID, transform.getExtent().getUniqueId().toString())
+                .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())
                 .set(Queries.POSITION_Z, transform.getPosition().getZ())
-            .getContainer()
-            .createView(DataQueries.ENTITY_ROTATION)
+                .getContainer()
+                .createView(DataQueries.ENTITY_ROTATION)
                 .set(Queries.POSITION_X, transform.getRotation().getX())
                 .set(Queries.POSITION_Y, transform.getRotation().getY())
                 .set(Queries.POSITION_Z, transform.getRotation().getZ())
-            .getContainer()
-            .createView(DataQueries.ENTITY_SCALE)
+                .getContainer()
+                .createView(DataQueries.ENTITY_SCALE)
                 .set(Queries.POSITION_X, transform.getScale().getX())
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
-            .getContainer()
-            .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
-            .set(DataQueries.UNSAFE_NBT, unsafeNbt);
+                .getContainer()
+                .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
+                .set(DataQueries.UNSAFE_NBT, unsafeNbt);
         final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
@@ -1153,7 +1117,7 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Redirect(method = "move",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;"
-                                                                        + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+            + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
         if (!((IMixinBlock) block).hasCollideLogic()) {
@@ -1275,7 +1239,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     private void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
-        double xOffset, double yOffset, double zOffset, int... p_175688_14_) {
+            double xOffset, double yOffset, double zOffset, int... p_175688_14_) {
         if (!this.isVanished) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
@@ -1283,7 +1247,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     private void runningSpawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
-        double xOffset, double yOffset, double zOffset, int... p_175688_14_) {
+            double xOffset, double yOffset, double zOffset, int... p_175688_14_) {
         if (!this.isVanished) {
             this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }

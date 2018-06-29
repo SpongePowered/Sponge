@@ -47,25 +47,6 @@ public class MixinSPacketPlayerListItem implements IMixinSPacketPlayerListItem {
 
     @Shadow @Final public List<SPacketPlayerListItem.AddPlayerData> players;
 
-    private static final String GET_GAME_PROFILE = "Lnet/minecraft/entity/player/EntityPlayerMP;getGameProfile()Lcom/mojang/authlib/GameProfile;";
-
-    /*private GameProfile replaceGameProfile(EntityPlayerMP player) {
-        return ((IMixinEntityPlayerMP) player).getCustomSkinProfile();
-    }*/
-
-    // We only replace game profiles send by Vanilla (or mods). Plugins using the TabList API
-    // do not have their specified GameProfile modified.
-
-    /*@Redirect(method = "<init>(Lnet/minecraft/network/play/server/SPacketPlayerListItem$Action;Ljava/lang/Iterable;)V", at = @At(value = "INVOKE", target = GET_GAME_PROFILE))
-    public GameProfile onGetGameProfileFirst(EntityPlayerMP player) {
-        return this.replaceGameProfile(player);
-    }
-
-    @Redirect(method = "<init>(Lnet/minecraft/network/play/server/SPacketPlayerListItem$Action;[Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = GET_GAME_PROFILE))
-    public GameProfile onGetGameProfileSecond(EntityPlayerMP player) {
-        return this.replaceGameProfile(player);
-    }*/
-
     @Override
     public void addEntry(GameProfile profile, int latency, GameType gameMode, @Nullable ITextComponent displayName) {
         this.players.add(((SPacketPlayerListItem) (Object) this).new AddPlayerData(profile, latency, gameMode, displayName));

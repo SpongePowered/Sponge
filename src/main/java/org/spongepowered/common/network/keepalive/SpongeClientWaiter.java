@@ -170,15 +170,4 @@ public class SpongeClientWaiter {
         return false;
     }
 
-    public void onClientPacketPlayer(CPacketPlayer packet, EntityPlayerMP player) {
-        /*
-        Deque<CallbackData> callbacks = this.callbacks.get(player.getUniqueID());
-        if (callbacks != null) {
-            CallbackData data = callbacks.peekFirst();
-            if (data != null && data.receivedPacketConfirm) {
-                callbacks.removeFirst().callback.run();
-            }
-        }*/
-    }
-
 }

@@ -97,18 +97,6 @@ import javax.annotation.Nullable;
  */
 public class EntityHuman extends EntityCreature implements TeamMember, IRangedAttackMob, IMixinSkinnable {
 
-    // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
-    // you can access this data once per minute, lets cache for 2 minutes
-    /*private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.MINUTES)
-            .build(new CacheLoader<UUID, PropertyMap>() {
-
-                @Override
-                public PropertyMap load(UUID uuid) throws Exception {
-                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
-                            .getProperties();
-                }
-            });*/
-
     // A queue of packets waiting to send to players tracking this human
     private final Map<UUID, List<Packet<?>[]>> playerPacketMap = Maps.newHashMap();
 
@@ -407,17 +395,6 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public DataTransactionResult removeSkin() {
         return DataTransactionResult.failNoData();
-
-        /*if (this.skinProperty == null) {
-            return DataTransactionResult.successNoData();
-        }
-        this.fakeProfile.getProperties().removeAll("textures");
-        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN, this.skinProperty);
-        this.skinProperty = null;
-        if (this.isAliveAndInWorld()) {
-            this.respawnOnClient();
-        }
-        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();*/
     }
 
     private boolean isAliveAndInWorld() {
