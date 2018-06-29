@@ -1070,7 +1070,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (this.hasChecked) {
             return this.isDefinitelyFake;
         }
-        this.isDefinitelyFake = this.isRemote || this.worldInfo == null || !(this instanceof IMixinWorldServer);
+        this.isDefinitelyFake = this.isRemote || this.worldInfo == null || this.worldInfo.getWorldName() == null ||!(this instanceof IMixinWorldServer);
         this.hasChecked = true;
         return this.isDefinitelyFake;
     }
