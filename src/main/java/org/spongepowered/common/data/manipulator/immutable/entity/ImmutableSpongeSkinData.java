@@ -37,6 +37,9 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkinData, SkinData> implements ImmutableSkinData {
 
+    private ProfileProperty skin;
+    private boolean updateTabList;
+
     private final ImmutableValue<ProfileProperty> skinValue;
     private final ImmutableValue<Boolean> updateTabListValue;
 
@@ -46,8 +49,11 @@ public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkin
 
     public ImmutableSpongeSkinData(ProfileProperty skin, boolean updateTabList) {
         super(ImmutableSkinData.class);
+        this.skin = skin;
+        this.updateTabList = updateTabList;
         this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN, SkinDataProcessor.EMPTY_SKIN, skin);
         this.updateTabListValue = ImmutableSpongeValue.<Boolean>cachedOf(Keys.UPDATE_GAME_PROFILE, false, (boolean) updateTabList);
+        this.registerGetters();
     }
 
     @Override
@@ -57,10 +63,10 @@ public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkin
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.SKIN, () -> this.skinValue);
+        registerFieldGetter(Keys.SKIN, () -> this.skin);
         registerKeyValue(Keys.SKIN, this::skin);
 
-        registerFieldGetter(Keys.UPDATE_GAME_PROFILE, () -> this.updateTabListValue);
+        registerFieldGetter(Keys.UPDATE_GAME_PROFILE, () -> this.updateTabList);
         registerKeyValue(Keys.UPDATE_GAME_PROFILE, this::updateGameProfile);
     }
 
