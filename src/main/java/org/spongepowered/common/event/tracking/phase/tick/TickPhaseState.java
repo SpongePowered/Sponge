@@ -109,7 +109,7 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
-    public abstract boolean spawnEntityOrCapture(C context, Entity entity, int chunkX, int chunkZ);
+    public abstract boolean performEntitySpawnOrCapture(C context, Entity entity, int chunkX, int chunkZ);
 
     private final String className = this.getClass().getSimpleName();
 

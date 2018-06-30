@@ -52,6 +52,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -76,18 +77,19 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -686,7 +688,7 @@ public final class TrackingUtil {
             ((IPhaseState) phaseState).performOnBlockAddedSpawns(phaseContext);
         }
 
-        ((IPhaseState) phaseState).handleBlockChangeWithUser(oldBlockSnapshot.blockChange, transaction, phaseContext);
+        ((IPhaseState) phaseState).postBlockTransactionApplication(oldBlockSnapshot.blockChange, transaction, phaseContext);
 
         if (changeFlag.isNotifyClients()) { // Always try to notify clients of the change.
             world.notifyBlockUpdate(pos, originalState, newState, changeFlag.getRawFlag());
@@ -825,4 +827,24 @@ public final class TrackingUtil {
         }
     }
 
+    public static void standardSpawnCapturedEntities(PhaseContext<?> context, StackFrame frame, List<Entity> entities) {
+        // Separate experience orbs from other entity drops
+        final List<Entity> experience = entities.stream()
+            .filter(entity -> entity instanceof ExperienceOrb)
+            .collect(Collectors.toList());
+        if (!experience.isEmpty()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+            SpongeCommonEventFactory.callSpawnEntity(experience, context);
+
+        }
+
+        // Now process other entities, this is separate from item drops specifically
+        final List<Entity> other = entities.stream()
+            .filter(entity -> !(entity instanceof ExperienceOrb))
+            .collect(Collectors.toList());
+        if (!other.isEmpty()) {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
+            SpongeCommonEventFactory.callSpawnEntity(experience, context);
+        }
+    }
 }

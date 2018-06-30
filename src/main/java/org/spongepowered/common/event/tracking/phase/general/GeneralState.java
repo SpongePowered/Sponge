@@ -48,7 +48,7 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
     }
 
     /**
-     * A duplicate of {@link IPhaseState#spawnEntityOrCapture(PhaseContext, Entity, int, int)}
+     * A duplicate of {@link IPhaseState#performEntitySpawnOrCapture(PhaseContext, Entity, int, int)}
      * such that the general states will not know what to do for entity spawns. Eventually, this is going to be centralized
      * so that it's not always delegated between the phases and phase states.
      *
@@ -64,7 +64,7 @@ abstract class GeneralState<G extends PhaseContext<G>> implements IPhaseState<G>
      * @return
      */
     @Override
-    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+    public boolean performEntitySpawnOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

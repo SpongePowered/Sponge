@@ -63,8 +63,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     private String name;
@@ -117,17 +115,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
                     if (!experience.isEmpty()) {
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                        if (EntityUtil.isEntityDead(tickingEntity)) {
-                            if (tickingEntity instanceof EntityLivingBase) {
-                                CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
-                                if (entry != null) {
-                                    if (entry.damageSrc != null) {
-                                        frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
-                                                (DamageSource) entry.damageSrc);
-                                    }
-                                }
-                            }
-                        }
+                        appendContextOfPossibleEntityDeath(tickingEntity, frame);
                         SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
                         frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
                     }
@@ -192,6 +180,20 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
                 });
+    }
+
+    private void appendContextOfPossibleEntityDeath(Entity tickingEntity, CauseStackManager.StackFrame frame) {
+        if (EntityUtil.isEntityDead(tickingEntity)) {
+            if (tickingEntity instanceof EntityLivingBase) {
+                CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
+                if (entry != null) {
+                    if (entry.damageSrc != null) {
+                        frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
+                                (DamageSource) entry.damageSrc);
+                    }
+                }
+            }
+        }
     }
 
     private void fireMovementEvents(net.minecraft.entity.Entity entity) {
@@ -261,20 +263,19 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         return new EntityTickContext(this).addCaptures();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> transaction,
+    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<BlockSnapshot> transaction,
         EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
             for (EntityHanging entityHanging : EntityUtil.findHangingEntities(EntityUtil.getMinecraftWorld(tickingEntity), blockPos)) {
                 if (entityHanging instanceof EntityItemFrame) {
-                    final EntityItemFrame frame = (EntityItemFrame) entityHanging;
-                    if (tickingEntity != null && !frame.isDead) {
-                        frame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
+                    final EntityItemFrame itemFrame = (EntityItemFrame) entityHanging;
+                    if (!itemFrame.isDead) {
+                        itemFrame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
                     }
-                    frame.setDead();
+                    itemFrame.setDead();
                 }
             }
         }
@@ -290,7 +291,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(EntityTickContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean performEntitySpawnOrCapture(EntityTickContext context, Entity entity, int chunkX, int chunkZ) {
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -298,16 +299,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             frame.pushCause(tickingEntity);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                if (EntityUtil.isEntityDead(tickingEntity)) {
-                    if (tickingEntity instanceof EntityLivingBase) {
-                        CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
-                        if (entry != null) {
-                            if (entry.damageSrc != null) {
-                                frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (DamageSource) entry.damageSrc);
-                            }
-                        }
-                    }
-                }
+                appendContextOfPossibleEntityDeath(tickingEntity, frame);
                 final List<Entity> experience = new ArrayList<>(1);
                 experience.add(entity);
 

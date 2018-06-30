@@ -94,7 +94,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (this.world.isRemote) {
             return;
         }
-        if (PhaseTracker.getInstance().getCurrentState().ignoresBlockTracking()) {
+        if (PhaseTracker.getInstance().getCurrentState().tracksOwnersAndNotifiers()) {
             // Don't track chunk gen
             return;
         }

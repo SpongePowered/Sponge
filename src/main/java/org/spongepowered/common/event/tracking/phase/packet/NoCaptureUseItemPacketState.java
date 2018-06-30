@@ -27,23 +27,12 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.common.world.BlockChange;
-
-import javax.annotation.Nullable;
 
 final class NoCaptureUseItemPacketState extends UseItemPacketState {
 
     @Override
     public boolean shouldCaptureBlockChangeOrSkip(BasicPacketContext phaseContext, BlockPos pos) {
         return false;
-    }
-
-    @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction,
-        BasicPacketContext context) {
-        super.handleBlockChangeWithUser(blockChange, snapshotTransaction, context);
     }
 
     @Override

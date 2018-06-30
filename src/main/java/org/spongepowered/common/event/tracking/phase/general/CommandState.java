@@ -171,7 +171,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CommandPhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean performEntitySpawnOrCapture(CommandPhaseContext context, Entity entity, int chunkX, int chunkZ) {
         // Instead of bulk capturing entities that are spawned in a command, some commands could potentially
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);

@@ -86,7 +86,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public void addNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void appendNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -138,7 +138,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean spawnEntityOrCapture(P context, Entity entity, int chunkX, int chunkZ) {
+    public boolean performEntitySpawnOrCapture(P context, Entity entity, int chunkX, int chunkZ) {
         return this.shouldCaptureEntity()
         ? context.getCapturedEntities().add(entity)
         : this.spawnEntity(context, entity, chunkX, chunkZ);
