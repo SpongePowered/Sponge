@@ -880,7 +880,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             .build();
 
         blockEvent.setTickBlock(locatable);
-        phaseState.addNotifierToBlockEvent(context, this, pos, blockEvent);
+        phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -1531,7 +1531,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
         final PhaseContext<?> context = currentPhase.context;
         final IPhaseState<?> state = currentPhase.state;
-        if (((IPhaseState) state).doesCaptureEntityDrops(context) || state.allowEntitySpawns()) {
+        if (((IPhaseState) state).doesCaptureEntityDrops(context) || state.doesAllowEntitySpawns()) {
             // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
             // they pass the predicate check
             if (((IPhaseState) state).doesCaptureEntityDrops(context)) {

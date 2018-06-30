@@ -147,7 +147,7 @@ public final class PhaseTracker {
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState<?> currentState = this.stack.peek().state;
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
-            if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
+            if (this.stack.size() > 6 && currentState.isNotReEntrant()) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
                 this.printRunawayPhase(state, phaseContext);
@@ -192,7 +192,8 @@ public final class PhaseTracker {
 
         }
 
-        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && state
+            .isNotReEntrant()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
             this.printRunnawayPhaseCompletion(state);
@@ -582,7 +583,7 @@ public final class PhaseTracker {
         }
         if (((IPhaseState) phaseState).doesBlockEventTracking(context)) {
             try {
-                return ((IPhaseState) phaseState).acceptBlockChangeAndThrowEvent(mixinWorld, chunk, currentState, newState, pos, flag,
+                return ((IPhaseState) phaseState).performBlockChange(mixinWorld, chunk, currentState, newState, pos, flag,
                     context);
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(phaseData, phaseState, e);
@@ -650,7 +651,7 @@ public final class PhaseTracker {
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         // Certain phases disallow entity spawns (such as block restoration)
-        if (!isForced && !phaseState.allowEntitySpawns()) {
+        if (!isForced && !phaseState.doesAllowEntitySpawns()) {
             return false;
         }
 
@@ -700,7 +701,7 @@ public final class PhaseTracker {
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
                 try {
-                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
+                    return ((IPhaseState) phaseState).performEntitySpawnOrCapture(context, entity, chunkX, chunkZ);
                 } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us

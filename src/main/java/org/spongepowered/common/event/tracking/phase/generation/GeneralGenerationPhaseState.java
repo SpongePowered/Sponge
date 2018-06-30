@@ -86,8 +86,8 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public final boolean isExpectedForReEntrance() {
-        return true;
+    public final boolean isNotReEntrant() {
+        return false;
     }
 
     @Override
@@ -97,6 +97,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
 
     @Override
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return true;
+    }
+
+    @Override
+    public boolean ignoresEntityCollisions() {
         return true;
     }
 
@@ -135,7 +140,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+    public boolean performEntitySpawnOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
