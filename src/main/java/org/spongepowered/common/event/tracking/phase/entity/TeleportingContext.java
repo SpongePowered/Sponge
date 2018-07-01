@@ -47,8 +47,9 @@ public class TeleportingContext extends EntityContext<TeleportingContext> {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "TargetTeleportWorld", this.targetWorld);
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "TargetTeleportWorld", this.targetWorld);
     }
 }

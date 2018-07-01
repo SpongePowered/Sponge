@@ -44,7 +44,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A generalized
+ * A generalized generation phase state. Used for entering populator world generation,
+ * new chunk generation, and world spawner entity spawning (since it is used as a populator).
+ * Generally does not capture or throw events unless necessary.
  */
 @SuppressWarnings("rawtypes")
 abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
@@ -86,6 +88,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
+    public boolean requiresPost() {
+        return false;
+    }
+
+    @Override
     public final boolean isNotReEntrant() {
         return false;
     }
@@ -111,7 +118,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns() {
+    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 
@@ -140,7 +147,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean performEntitySpawnOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(G context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

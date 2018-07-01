@@ -1063,7 +1063,7 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (((IPhaseState) currentState).performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
+            if (((IPhaseState) currentState).spawnItemOrCapture(phaseContext, entity, entityitem)) {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
@@ -1130,7 +1130,7 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (currentState.performOrCaptureItemDrop(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
+            if (currentState.spawnItemOrCapture(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
                 return entityitem;
             }
             // TODO - Investigate whether player drops are adding to the stat list in captures.

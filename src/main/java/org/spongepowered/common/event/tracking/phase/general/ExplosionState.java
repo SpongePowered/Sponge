@@ -79,7 +79,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns() {
+    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 
@@ -124,7 +124,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     }
 
     @Override
-    public boolean performEntitySpawnOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(ExplosionContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getBlockPosition().map(blockPos -> {
             // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
             final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();

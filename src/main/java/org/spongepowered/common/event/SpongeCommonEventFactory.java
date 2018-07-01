@@ -270,7 +270,7 @@ public class SpongeCommonEventFactory {
                 printer.add(" - " + entity);
             }
             printer.add("PhaseContext:");
-            context.printCustom(printer);
+            context.printCustom(printer, 4);
             printer.add();
             printer.add("Exception:");
             printer.add(e);

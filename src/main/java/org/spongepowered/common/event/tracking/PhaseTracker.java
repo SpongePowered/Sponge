@@ -86,6 +86,7 @@ import javax.annotation.Nullable;
 public final class PhaseTracker {
 
     private static final PhaseTracker INSTANCE = new PhaseTracker();
+    private boolean hasPrintedForTick = false;
 
     public static PhaseTracker getInstance() {
         return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
@@ -118,12 +119,12 @@ public final class PhaseTracker {
         .submit(SpongeImpl.getPlugin());
 
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
-        context.printCustom(printer);
+        context.printCustom(printer, 4);
 
     private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
         printer.add("    Context:");
-        data.context.printCustom(printer);
+        data.context.printCustom(printer, 4);
         data.context.printTrace(printer);
     };
 
@@ -206,10 +207,16 @@ public final class PhaseTracker {
         try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, context) ) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
             // will not attempt to close the phase context. If it is required,
-            // it already automaticaly pushes onto the phase stack, along with
+            // it already automatically pushes onto the phase stack, along with
             // a new list of capture lists
-            try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
+            try { // Yes this is a nested try, but in the event the current phase cannot be unwound,
+                  // at least unwind UNWINDING to process any captured objects so we're not totally without
+                  // loss of objects
                 ((IPhaseState) state).unwind(context);
+                if (!this.hasPrintedForTick) {
+                    this.hasPrintedForTick = true;
+                    this.printMessageWithCaughtException("Testing Phase Printout", "Just a printout", state, context, new Exception());
+                }
             } catch (Exception e) {
                 this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
@@ -396,7 +403,7 @@ public final class PhaseTracker {
             .add("The PhaseContext:")
             ;
         printer
-            .add(context.printCustom(printer));
+            .add(context.printCustom(printer, 4));
         printer.hr()
             .add("StackTrace:")
             .add(e);
@@ -701,7 +708,7 @@ public final class PhaseTracker {
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
                 try {
-                    return ((IPhaseState) phaseState).performEntitySpawnOrCapture(context, entity, chunkX, chunkZ);
+                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
                 } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
