@@ -69,14 +69,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
 
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
-        return state.getPhase() == TrackingPhases.GENERATION
-                || state.getPhase() == TrackingPhases.PLUGIN
-                || state == BlockPhase.State.RESTORING_BLOCKS
-                // Plugins can call commands during event listeners.
-                || state == GeneralPhase.State.COMMAND
-                // Decay can be caused when a block is performing a lot of
-                // changes in place
-                || state == BlockPhase.State.BLOCK_DECAY;
+        return state != this; // Basically, we don't want to cause issues if we're entering another state due to plugin listeners or anything else.
     }
 
     @Override

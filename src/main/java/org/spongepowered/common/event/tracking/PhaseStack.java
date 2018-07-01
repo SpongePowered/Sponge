@@ -46,39 +46,39 @@ final class PhaseStack {
     static final PhaseData EMPTY_DATA = new PhaseData(PhaseContext.empty(), GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
-    private final Deque<PhaseData> states;
+    private final Deque<PhaseData> phases;
 
     PhaseStack() {
         this(DEFAULT_QUEUE_SIZE);
     }
 
     private PhaseStack(int size) {
-        this.states = new ArrayDeque<>(size);
+        this.phases = new ArrayDeque<>(size);
     }
 
     PhaseData peek() {
-        final PhaseData phase = this.states.peek();
+        final PhaseData phase = this.phases.peek();
         return phase == null ? PhaseStack.EMPTY_DATA : phase;
     }
 
     IPhaseState<?> peekState() {
-        final PhaseData peek = this.states.peek();
+        final PhaseData peek = this.phases.peek();
         return peek == null ? GeneralPhase.State.COMPLETE : peek.state;
     }
 
     PhaseContext<?> peekContext() {
-        final PhaseData peek = this.states.peek();
+        final PhaseData peek = this.phases.peek();
         return peek == null ? PhaseContext.empty() : peek.context;
     }
 
     PhaseData pop() {
-        return this.states.pop();
+        return this.phases.pop();
     }
 
     private PhaseStack push(PhaseData tuple) {
         checkNotNull(tuple, "Tuple cannot be null!");
         checkArgument(tuple.context.isComplete(), "Phase context must be complete: %s", tuple);
-        this.states.push(tuple);
+        this.phases.push(tuple);
         return this;
     }
 
@@ -87,20 +87,20 @@ final class PhaseStack {
     }
 
     public void forEach(Consumer<PhaseData> consumer) {
-        this.states.forEach(consumer);
+        this.phases.forEach(consumer);
     }
 
     public boolean isEmpty() {
-        return this.states.isEmpty();
+        return this.phases.isEmpty();
     }
 
     public int size() {
-        return this.states.size();
+        return this.phases.size();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.states);
+        return Objects.hash(this.phases);
     }
 
     @Override
@@ -112,14 +112,46 @@ final class PhaseStack {
             return false;
         }
         final PhaseStack other = (PhaseStack) obj;
-        return Objects.equals(this.states, other.states);
+        return Objects.equals(this.phases, other.phases);
     }
 
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("states", this.states)
+                .add("phases", this.phases)
                 .toString();
     }
 
+    /**
+     * We basically want to iterate through the phases to determine if there's multiple of one state re-entering
+     * when it shouldn't. To do this, we have to build a miniature map based on arrays
+     * @param state
+     */
+    @SuppressWarnings("rawtypes")
+    public boolean checkForRunaways(IPhaseState<?> state) {
+        // first, check if the state is expected for re-entrance:
+        if (!state.isNotReEntrant()) {
+            return false;
+        }
+        final int totalCount = this.phases.size();
+        final IPhaseState<?>[] allStates = new IPhaseState[totalCount];
+        int i = 0;
+        // So first, we want to collect all the states into an array as they are pushed to the stack,
+        // which means that we should see the re-entrant phase pretty soon.
+        for (PhaseData data : this.phases) {
+            allStates[i++] = data.state;
+        }
+        // Now we can actually iterate through the array
+        for (int index = 0; index < allStates.length; index++) {
+            if (index < allStates.length - 1) { // We can't go further than the length, cause that's the top of the stack
+                if (allStates[index] == allStates[index + 1] && allStates[index] == state) {
+                    // Found a consecutive duplicate and can now print out
+                    return true;
+                }
+            }
+        }
+        return false;
+
+
+    }
 }
