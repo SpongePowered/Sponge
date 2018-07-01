@@ -46,7 +46,7 @@ final class NoCaptureUseItemPacketState extends UseItemPacketState {
     }
 
     @Override
-    public boolean performOrCaptureItemDrop(BasicPacketContext phaseContext, Entity entity, EntityItem entityitem) {
+    public boolean spawnItemOrCapture(BasicPacketContext phaseContext, Entity entity, EntityItem entityitem) {
         return false;
     }
 

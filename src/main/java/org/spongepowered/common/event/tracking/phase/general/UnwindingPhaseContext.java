@@ -76,9 +76,12 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "UnwindingState", this.unwindingState)
-            .add("    - %s: %s", "UnwindingContext", this.unwindingContext);
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$" + indent + "s", "");
+        super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "UnwindingState", this.unwindingState)
+            .add(s + "- %s: %s", "UnwindingContext", this.unwindingContext);
+        this.unwindingContext.printCustom(printer, indent * 2);
+        return printer;
     }
 }

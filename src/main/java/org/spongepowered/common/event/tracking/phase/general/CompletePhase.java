@@ -54,11 +54,6 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
     }
 
     @Override
-    public boolean requiresBlockPosTracking() {
-        return false;
-    }
-
-    @Override
     public boolean ignoresItemPreMerging() {
         return true;
     }

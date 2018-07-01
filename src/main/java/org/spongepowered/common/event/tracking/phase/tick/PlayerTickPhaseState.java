@@ -88,7 +88,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     }
 
     @Override
-    public boolean performEntitySpawnOrCapture(PlayerTickContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PlayerTickContext context, Entity entity, int chunkX, int chunkZ) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

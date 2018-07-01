@@ -216,7 +216,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    default boolean performEntitySpawnOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
+    default boolean spawnEntityOrCapture(C context, org.spongepowered.api.entity.Entity entity, int chunkX, int chunkZ) {
         final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
@@ -327,7 +327,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param entityitem The item to be dropped
      * @return True if we are capturing, false if we are to let the item spawn
      */
-    default boolean performOrCaptureItemDrop(C phaseContext, Entity entity, EntityItem entityitem) {
+    default boolean spawnItemOrCapture(C phaseContext, Entity entity, EntityItem entityitem) {
         if (this.doesCaptureEntityDrops(phaseContext)) {
             if (this.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
@@ -612,63 +612,183 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     *      wdaw
-     * @return
+     * Gets whether this state will need to perform any extra processing for
+     * scheduled block updates, specifically linking the block update event to
+     * the world, the state and possibly context. Usually only necessary for
+     * post states so that no extra processing takes place.
+     *
+     * @return False if scheduled block updates are normally processed
      */
     default boolean ignoresScheduledUpdates() {
         return false;
     }
+
+    /**
+     * Gets whether this state will specifically ignore attempting to merge {@link ItemStack}s
+     * within capture lists and avoid creating the {@link EntityItem} speicifcally. In some cases
+     * however, these items need to be directly created as entities for them to be acted upon
+     * during the phase process and therefor cannot be captured. Examples can include where
+     * mods are attempting to modify the captured entities by providing their own form of a
+     * "captured" loot bag of sorts.
+     *
+     * @return True if itemstack pre-merging is ignored
+     */
     default boolean ignoresItemPreMerging() {
         return false;
     }
 
+    /**
+     * Gets whether this state will capture the provided position block change, or not.
+     * This does not bypass the creation of the block changes, it just bypasses whether
+     * the block change is going to be captured. May be qualified for removal pending some
+     * cleanup with block captures and method duplications.
+     *
+     * @param phaseContext
+     * @param pos
+     * @return
+     */
     default boolean shouldCaptureBlockChangeOrSkip(C phaseContext, BlockPos pos) {
         return true;
     }
 
-
-
+    /**
+     * Gets whether this state is already capturing block tick changes, specifically in
+     * that some states (like post) will be smart enough to capture multiple changes for
+     * multiple block positions without the need to enter new phases. Currently gone unused
+     * since some refactor.
+     * // TODO - clean up usage? Find out where this came from and why it was used
+     *
+     * @param context
+     * @return
+     */
     default boolean alreadyCapturingBlockTicks(C context) {
         return false;
     }
+
+    /**
+     * Gets whether this state is already capturing custom entity spawns from plugins.
+     * Examples include listener states, post states, or explosion states.
+     *
+     * @return True if entity spawns are already expected to be processed
+     */
     default boolean alreadyCapturingEntitySpawns() {
         return false;
     }
+
+    /**
+     * Gets whether this state is already expecting to capture or process changes from
+     * entity ticks. Usually only used for Post states.
+     *
+     * @return True if entity tick processing is already handled in this state
+     */
     default boolean alreadyCapturingEntityTicks() {
         return false;
     }
+
+    /**
+     * Gets whether this state is already expecting to capture or process changes from
+     * tile entity ticks. Used in Post states. (this avoids re-entering new phases during post processing)
+     *
+     * @return True if entity tick processing is already handled in this state
+     */
     default boolean alreadyCapturingTileTicks() {
         return false;
     }
-    default boolean alreadyCapturingItemSpawns() {
+
+    /**
+     * Gets whether this state is alraedy expecting to capture or process item drops from
+     * blocks. Usually used for post states, explosions, interaction packets, and a few other cases.
+     *
+     * @return
+     */
+    default boolean alreadyProcessingBlockItemDrops() {
         return false;
     }
 
-
+    /**
+     * Gets whether this state is expecting to capture a block position. Used for explosions
+     * to determine where the origination of the explosion took place.
+     *
+     * @return True if a block position is going to be captured for explosions
+     */
     default boolean requiresBlockPosTracking() {
         return false;
     }
+
+    /**
+     * Gets whether this state requires a post state entry for any captured objects. Usually
+     * does not, get used uless this is already a post state, or an invalid packet state.
+     * TODO - Investigate whether world generation states could use this.
+     *
+     * @return True if this state is expecting to be unwound with an unwinding state to cpature additional changes
+     */
     default boolean requiresPost() {
         return true;
     }
 
 
+    /**
+     * Gets whether this state is going to complete itself for plugin provided
+     * changes. Used for BlockWorkers.
+     * TODO - Investigate whether we can enable listener phase states to handle
+     * this as well.
+     * @return True if this state does not need a custom block worker state for plugin changes
+     */
     default boolean handlesOwnStateCompletion() {
         return false;
     }
 
+    /**
+     * Appends the stack frame with any additional objects needed from the phase context. Currently
+     * only used for notifiers and owners. May expand further.
+     *
+     * @param context The context to populate from
+     * @param frame The frame to populate
+     */
     default void associateAdditionalCauses(PhaseContext<?> context, CauseStackManager.StackFrame frame) {
         context.getOwner().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
         context.getNotifier().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
     }
+
+    /**
+     * Associates any notifier/owner information from expected states that will assuredly provide
+     * said information. In some states, like world gen, there is no information to provide.
+     *
+     * @param unwindingContext The unwinding context providing context information
+     * @param sourcePos The source position performing the notification
+     * @param block The block type providing the notification
+     * @param notifyPos The notified position
+     * @param minecraftWorld The world
+     * @param notifier The tracker type (owner or notifier)
+     */
     default void associateNeighborStateNotifier(C unwindingContext, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
     }
+
+    /**
+     * Provides additional information from this state in the event an explosion is going to be
+     * performed, providing information like entity owners, notifiers, or potentially even sources
+     * from blocks.
+     *
+     * @param explosionContext The explosion context to populate
+     * @param currentPhaseData The current context to provide information
+     */
     default void appendContextPreExplosion(ExplosionContext explosionContext, C currentPhaseData) {
 
     }
+
+    /**
+     * Appends additional information from the block's position in the world to provide notifier/owner
+     * information. Overridden in world generation states to reduce chunk lookup costs and since
+     * world generation does not track owners/notifiers.
+     *
+     * @param mixinWorld The world reference
+     * @param pos The position being updated
+     * @param context The context
+     * @param phaseContext the block tick context being entered
+     */
     default void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, C context, BlockTickContext phaseContext) {
         final Chunk chunk = WorldUtil.asNative(mixinWorld).getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
@@ -677,11 +797,27 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);
         }
     }
+
+    /**
+     * Appends any additional information to the block tick context from this context.
+     *
+     * @param context
+     * @param mixinWorldServer
+     * @param pos
+     * @param blockEvent
+     */
     default void appendNotifierToBlockEvent(C context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
-
+    /**
+     * Attempts to capture the player using the item stack in this state. Some states do not care for
+     * this information. Usually packets do care and some scheduled tasks.
+     *
+     * @param itemStack
+     * @param playerIn
+     * @param context
+     */
     default void capturePlayerUsingStackToBreakBlock(ItemStack itemStack, EntityPlayerMP playerIn, C context) {
 
     }

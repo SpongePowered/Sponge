@@ -107,7 +107,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns() {
+    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 

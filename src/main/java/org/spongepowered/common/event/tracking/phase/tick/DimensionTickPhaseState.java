@@ -90,7 +90,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
 
      */
     @Override
-    public boolean performEntitySpawnOrCapture(DimensionContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(DimensionContext context, Entity entity, int chunkX, int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {

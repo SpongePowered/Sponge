@@ -59,6 +59,8 @@ final class EventListenerPhaseState extends ListenerPhaseState {
 
     }
 
+    // TODO - even listeners can be better managed with regards to entity captures and item drops.
+
     @Override
     public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {

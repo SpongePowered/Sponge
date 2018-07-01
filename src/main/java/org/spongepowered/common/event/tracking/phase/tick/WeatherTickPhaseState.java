@@ -59,7 +59,7 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     }
 
     @Override
-    public boolean performEntitySpawnOrCapture(TickContext.General context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(TickContext.General context, Entity entity, int chunkX, int chunkZ) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             final ArrayList<Entity> entities = new ArrayList<>();
