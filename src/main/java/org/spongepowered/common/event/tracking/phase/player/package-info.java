@@ -22,32 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
-
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.asm.util.PrettyPrinter;
-
-public class ExplosionContext extends PluginPhaseContext<ExplosionContext> {
-
-    private Explosion explosion;
-
-    public ExplosionContext() {
-        super(PluginPhase.State.CUSTOM_EXPLOSION);
-    }
-
-    public ExplosionContext explosion(Explosion explosion) {
-        this.explosion = explosion;
-        return this;
-    }
-
-    public Explosion getExplosion() {
-        return explosion;
-    }
-
-    @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "CustomExplosion", this.explosion)
-            ;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.event.tracking.phase.player;

@@ -22,38 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.category;
+package org.spongepowered.common.interfaces;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+public interface IMixinTrackable {
 
-import java.util.HashMap;
-import java.util.Map;
+    boolean allowsBlockBulkCapture();
 
-@ConfigSerializable
-public class BlockCapturingModCategory extends ConfigCategory {
+    boolean allowsEntityBulkCapture();
 
-    @Setting(value = "enabled", comment = "If 'false', all specific rules for this mod will be ignored.")
-    private boolean isEnabled = true;
-    @Setting(value = "block-tick-capturing", comment = "If 'true', individual capturing (i.e. skip bulk capturing) for scheduled ticks for \n"
-                                                     + "a block type will be performed.")
-    private Map<String, Boolean> blockMap = new HashMap<>();
+    boolean allowsBlockEventCreation();
 
-    public BlockCapturingModCategory() {
-    }
+    boolean allowsEntityEventCreation();
 
-    public BlockCapturingModCategory(String modId) {
-        if (modId.equals("extrautils2")) {
-            this.blockMap.put("redstoneclock", true);
-        }
-    }
-
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public Map<String, Boolean> getBlockMap() {
-        return this.blockMap;
-    }
-
+    void refreshCache();
 }

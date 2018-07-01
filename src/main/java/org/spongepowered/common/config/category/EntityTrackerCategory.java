@@ -22,49 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.blockcapturing;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeImpl;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BlockCapturingPlugin implements IMixinConfigPlugin {
+@ConfigSerializable
+public class EntityTrackerCategory extends ConfigCategory {
 
-    @Override
-    public void onLoad(String mixinPackage) {
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered entities will be added to this config with default settings.")
+    private boolean autoPopulate = false;
+
+    @Setting(value = "mods", comment = "Per-mod entity id mappings for controlling tracking behavior")
+    private Map<String, EntityTrackerModCategory> modMapping = new HashMap<>();
+
+    public Map<String, EntityTrackerModCategory> getModMappings() {
+        return this.modMapping;
     }
 
-    @Override
-    public String getRefMapperConfig() {
-        return null;
+    public EntityTrackerCategory() {
+        this.modMapping.put("minecraft", new EntityTrackerModCategory("minecraft"));
     }
 
-    @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-       return SpongeImpl.getGlobalConfig().getConfig().getModules().usesBlockCapturing();
+    public boolean autoPopulateData() {
+        return this.autoPopulate;
     }
 
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return null;
-    }
-
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
-
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
 }

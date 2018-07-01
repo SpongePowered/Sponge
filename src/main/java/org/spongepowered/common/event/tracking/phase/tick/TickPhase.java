@@ -31,14 +31,13 @@ public final class TickPhase extends TrackingPhase {
 
     public static final class Tick {
 
-        public static final IPhaseState<BlockTickContext> NO_CAPTURE_BLOCK = new NoCaptureBlockTickPhaseState("NoCaptureBlockTickPhase");
         public static final IPhaseState<BlockTickContext> BLOCK = new BlockTickPhaseState("BlockTickPhase");
         public static final IPhaseState<BlockTickContext> RANDOM_BLOCK = new BlockTickPhaseState("RandomBlockTickPhase");
 
-        public static final IPhaseState<EntityTickContext> ENTITY = new EntityTickPhaseState();
+        public static final IPhaseState<EntityTickContext> ENTITY = new EntityTickPhaseState("EntityTickPhase");
 
         public static final IPhaseState<DimensionContext> DIMENSION = new DimensionTickPhaseState();
-        public static final IPhaseState<TileEntityTickContext> TILE_ENTITY = new TileEntityTickPhaseState();
+        public static final IPhaseState<TileEntityTickContext> TILE_ENTITY = new TileEntityTickPhaseState("TileEntityTickPhase");
         public static final IPhaseState<BlockEventTickContext> BLOCK_EVENT = new BlockEventTickPhaseState();
         public static final IPhaseState<PlayerTickContext> PLAYER = new PlayerTickPhaseState();
         public static final IPhaseState<?> WEATHER = new WeatherTickPhaseState();

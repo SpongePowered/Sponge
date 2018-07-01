@@ -27,28 +27,28 @@ package org.spongepowered.common.config.category;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @ConfigSerializable
-public class BlockCapturingCategory extends ConfigCategory {
+public class PlayerBlockTracker extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with a default value.")
-    private boolean autoPopulate = false;
+    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
+                                        + "Note: This should only be disabled if you do not care who caused a block to change.")
+    private boolean enabled = true;
 
-    @Setting(value = "mods", comment = "Per-mod block id mappings for controlling capturing behavior")
-    private Map<String, BlockCapturingModCategory> modMapping = new HashMap<>();
+    @Setting(value = "block-blacklist", comment = "Block IDs that will be blacklisted for player block placement tracking.")
+    private List<String> blockBlacklist = new ArrayList<>();
 
-    public BlockCapturingCategory() {
-        this.modMapping.put("extrautils2", new BlockCapturingModCategory("extrautils2"));
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
-    public Map<String, BlockCapturingModCategory> getModMappings() {
-        return this.modMapping;
+    public void setEnabled(boolean flag) {
+        this.enabled = flag;
     }
 
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
+    public List<String> getBlockBlacklist() {
+        return this.blockBlacklist;
     }
-
 }

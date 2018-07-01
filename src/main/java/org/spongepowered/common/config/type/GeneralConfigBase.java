@@ -25,8 +25,8 @@
 package org.spongepowered.common.config.type;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.category.BlockCapturingCategory;
-import org.spongepowered.common.config.category.BlockTrackingCategory;
+import org.spongepowered.common.config.category.BlockTrackerCategory;
+import org.spongepowered.common.config.category.PlayerBlockTracker;
 import org.spongepowered.common.config.category.DebugCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.category.EntityCategory;
@@ -45,10 +45,8 @@ public class GeneralConfigBase extends ConfigBase {
     @Setting(value = "config-enabled", comment = "This setting does nothing in the global config. In dimension/world configs, it allows the config \n"
                                                + "to override config(s) that it inherits from")
     protected boolean configEnabled = false;
-    @Setting(value = "block-tracking")
-    private BlockTrackingCategory blockTracking = new BlockTrackingCategory();
-    @Setting(value = "block-capturing")
-    private BlockCapturingCategory blockCapturing = new BlockCapturingCategory();
+    @Setting(value = "player-block-tracker")
+    private PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
     @Setting
     private DebugCategory debug = new DebugCategory();
     @Setting(value = "entity")
@@ -69,12 +67,8 @@ public class GeneralConfigBase extends ConfigBase {
     @Setting
     private TimingsCategory timings = new TimingsCategory();
 
-    public BlockTrackingCategory getBlockTracking() {
-        return this.blockTracking;
-    }
-
-    public BlockCapturingCategory getBlockCapturing() {
-        return this.blockCapturing;
+    public PlayerBlockTracker getBlockTracking() {
+        return this.playerBlockTracker;
     }
 
     public DebugCategory getDebug() {

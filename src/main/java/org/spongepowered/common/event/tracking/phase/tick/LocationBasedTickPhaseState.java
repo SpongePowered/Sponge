@@ -38,7 +38,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -65,7 +64,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
+    public void postBlockTransactionApplication(BlockChange blockChange,
         Transaction<BlockSnapshot> snapshotTransaction, T context) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         final User user = context.getNotifier().orElse(null);

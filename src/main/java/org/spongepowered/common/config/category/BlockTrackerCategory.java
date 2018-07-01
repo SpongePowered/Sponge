@@ -22,18 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.blockcapturing;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.world.World;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IModData_BlockCapturing {
+import java.util.HashMap;
+import java.util.Map;
 
-    boolean processTickChangesImmediately();
+@ConfigSerializable
+public class BlockTrackerCategory extends ConfigCategory {
 
-    boolean requiresBlockCapturingRefresh();
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with default settings.")
+    private boolean autoPopulate = false;
 
-    void requiresBlockCapturingRefresh(boolean refresh);
+    @Setting(value = "mods", comment = "Per-mod block id mappings for controlling tracking behavior")
+    private Map<String, BlockTrackerModCategory> modMapping = new HashMap<>();
 
-    void initializeBlockCapturingState(World worldIn);
+    public BlockTrackerCategory() {
+        this.modMapping.put("minecraft", new BlockTrackerModCategory("minecraft"));
+        this.modMapping.put("extrautils2", new BlockTrackerModCategory("extrautils2"));
+    }
+
+    public Map<String, BlockTrackerModCategory> getModMappings() {
+        return this.modMapping;
+    }
+
+    public boolean autoPopulateData() {
+        return this.autoPopulate;
+    }
 
 }

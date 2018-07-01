@@ -26,8 +26,8 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
@@ -70,7 +70,7 @@ public class BlockPhaseState implements IPhaseState<GeneralizedContext> {
     }
 
     @Override
-    public boolean allowEntitySpawns() {
+    public boolean doesAllowEntitySpawns() {
         return true;
     }
 

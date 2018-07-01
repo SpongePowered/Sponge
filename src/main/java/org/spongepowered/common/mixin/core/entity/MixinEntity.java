@@ -124,6 +124,7 @@ import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinTrackable;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -149,7 +150,7 @@ import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = Entity.class, prefix = "entity$"))
-public abstract class MixinEntity implements IMixinEntity {
+public abstract class MixinEntity implements org.spongepowered.api.entity.Entity, IMixinEntity, IMixinTrackable {
 
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LAVA:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
@@ -178,6 +179,11 @@ public abstract class MixinEntity implements IMixinEntity {
     @SuppressWarnings("unused")
     private UserStorageService userStorageService;
     private Timing timing;
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
 
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow @Final private List<net.minecraft.entity.Entity> riddenByEntities;
@@ -268,6 +274,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private void onSpongeConstruction(net.minecraft.world.World worldIn, CallbackInfo ci) {
         if (this.entityType instanceof SpongeEntityType) {
             SpongeEntityType spongeEntityType = (SpongeEntityType) this.entityType;
+            this.refreshCache();
             if (spongeEntityType.getEnumCreatureType() == null) {
                 for (EnumCreatureType type : EnumCreatureType.values()) {
                     if (SpongeImplHooks.isCreatureOfType((net.minecraft.entity.Entity) (Object) this, type)) {
@@ -1367,4 +1374,35 @@ public abstract class MixinEntity implements IMixinEntity {
     public void setInvulnerable(boolean value) {
         this.invulnerable = value;
     }
+
+    @Override
+    public boolean allowsBlockBulkCapture() {
+        return this.allowsBlockBulkCapture;
+    }
+
+    @Override
+    public boolean allowsEntityBulkCapture() {
+        return this.allowsEntityBulkCapture;
+    }
+
+    @Override
+    public boolean allowsBlockEventCreation() {
+        return this.allowsBlockEventCreation;
+    }
+
+    @Override
+    public boolean allowsEntityEventCreation() {
+        return this.allowsEntityEventCreation;
+    }
+
+    @Override
+    public void refreshCache() {
+        if (this.entityType != null) {
+            this.allowsBlockBulkCapture = ((SpongeEntityType) this.entityType).allowsBlockBulkCapture;
+            this.allowsEntityBulkCapture = ((SpongeEntityType) this.entityType).allowsEntityBulkCapture;
+            this.allowsBlockEventCreation = ((SpongeEntityType) this.entityType).allowsBlockEventCreation;
+            this.allowsEntityEventCreation = ((SpongeEntityType) this.entityType).allowsEntityEventCreation;
+        }
+    }
+
 }

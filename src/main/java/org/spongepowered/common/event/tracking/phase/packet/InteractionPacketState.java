@@ -37,10 +37,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -93,7 +91,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 
@@ -109,7 +107,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns() {
+    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 

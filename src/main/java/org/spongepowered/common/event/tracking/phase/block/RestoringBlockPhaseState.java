@@ -45,7 +45,7 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean allowEntitySpawns() {
+    public boolean doesAllowEntitySpawns() {
         return false;
     }
 
@@ -65,7 +65,12 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture(GeneralizedContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean doesBlockEventTracking(GeneralizedContext context) {
         return false;
     }
 }

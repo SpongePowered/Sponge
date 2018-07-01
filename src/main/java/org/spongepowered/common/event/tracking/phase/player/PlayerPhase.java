@@ -22,33 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.event.tracking.phase.player;
 
-import net.minecraft.util.math.BlockPos;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
+public final class PlayerPhase extends TrackingPhase {
 
-    NoCaptureBlockTickPhaseState(String name) {
-        super(name);
+    public static final class State {
+
+        public static final IPhaseState<GeneralizedContext> PLAYER_LOGOUT = new PlayerLogoutPhaseState();
     }
 
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
-        return false;
+    public static PlayerPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    @Override
-    public boolean tracksBlockSpecificDrops() {
-        return false;
+    PlayerPhase() {
     }
 
-    @Override
-    public boolean requiresBlockCapturing() {
-        return false;
+    private static final class Holder {
+
+        static final PlayerPhase INSTANCE = new PlayerPhase();
     }
 
-    @Override
-    public boolean alreadyCapturingItemSpawns() {
-        return true;
-    }
 }
