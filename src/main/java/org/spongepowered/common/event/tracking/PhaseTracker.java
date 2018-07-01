@@ -86,7 +86,6 @@ import javax.annotation.Nullable;
 public final class PhaseTracker {
 
     private static final PhaseTracker INSTANCE = new PhaseTracker();
-    private boolean hasPrintedForTick = false;
 
     public static PhaseTracker getInstance() {
         return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
@@ -213,10 +212,6 @@ public final class PhaseTracker {
                   // at least unwind UNWINDING to process any captured objects so we're not totally without
                   // loss of objects
                 ((IPhaseState) state).unwind(context);
-                if (!this.hasPrintedForTick) {
-                    this.hasPrintedForTick = true;
-                    this.printMessageWithCaughtException("Testing Phase Printout", "Just a printout", state, context, new Exception());
-                }
             } catch (Exception e) {
                 this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
