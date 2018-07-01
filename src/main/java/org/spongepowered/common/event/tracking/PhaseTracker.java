@@ -140,6 +140,7 @@ public final class PhaseTracker {
 
     // ----------------- STATE ACCESS ----------------------------------
 
+    @SuppressWarnings("rawtypes")
     void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(state.getPhase(), "Phase cannot be null!");
@@ -147,12 +148,13 @@ public final class PhaseTracker {
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState<?> currentState = this.stack.peek().state;
         if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
-            if (this.stack.size() > 6 && currentState.isNotReEntrant()) {
-                // This printing is to detect possibilities of a phase not being cleared properly
-                // and resulting in a "runaway" phase state accumulation.
-                this.printRunawayPhase(state, phaseContext);
+            if (this.stack.size() > 6) {
+                if (this.stack.checkForRunaways(state)) {
+                    this.printRunawayPhase(state, phaseContext);
+                }
+
             }
-            if (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
+            if (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING && !currentState.canSwitchTo(state)) {
                 // This is to detect incompatible phase switches.
                 this.printPhaseIncompatibility(currentState, state);
             }
@@ -192,15 +194,14 @@ public final class PhaseTracker {
 
         }
 
-        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && state
-            .isNotReEntrant()) {
-            // This printing is to detect possibilities of a phase not being cleared properly
-            // and resulting in a "runaway" phase state accumulation.
-            this.printRunnawayPhaseCompletion(state);
+        if (SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() ) {
+            if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING)) {
+                // This printing is to detect possibilities of a phase not being cleared properly
+                // and resulting in a "runaway" phase state accumulation.
+                this.printRunnawayPhaseCompletion(state);
+            }
         }
-        this.stack.pop();
-        // If pop is called, the Deque will already throw an exception if there is no element
-        // so it's an error properly handled.
+
         final TrackingPhase phase = state.getPhase();
         final PhaseContext<?> context = currentPhaseData.context;
         try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, context) ) {
@@ -218,6 +219,10 @@ public final class PhaseTracker {
         } catch (Exception e) {
             this.printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
         }
+        // If pop is called, the Deque will already throw an exception if there is no element
+        // so it's an error properly handled.
+        this.stack.pop();
+
     }
 
     private void printRunnawayPhaseCompletion(IPhaseState<?> state) {
@@ -442,6 +447,7 @@ public final class PhaseTracker {
                  + "In cases like this, it is best to report to Sponge to get this\n"
                  + "change tracked correctly and accurately.").hr()
             .add("StackTrace:")
+            .add(new Exception())
             .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
