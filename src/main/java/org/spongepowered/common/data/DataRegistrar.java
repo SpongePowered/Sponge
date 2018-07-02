@@ -78,6 +78,7 @@ import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVani
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
+import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
@@ -192,6 +193,8 @@ public class DataRegistrar {
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
 
         dataManager.registerBuilder(Color.class, new Color.Builder());
+
+        dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
