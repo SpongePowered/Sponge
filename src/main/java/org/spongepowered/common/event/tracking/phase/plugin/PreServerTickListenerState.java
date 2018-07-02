@@ -69,4 +69,21 @@ final class PreServerTickListenerState extends ListenerPhaseState {
     public boolean doesDenyChunkRequests() {
         return true;
     }
+
+    @Override
+    public boolean doesBulkBlockCapture(ListenerPhaseContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(ListenerPhaseContext context) {
+        return false;
+    }
+
+
 }
