@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
@@ -54,8 +56,9 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     @SuppressWarnings("unchecked")
     @Override
     public void registerAdditionalCatalog(AdvancementTree advancementTree) {
+        checkState(ServerUtils.isCallingFromMainThread());
         super.register(advancementTree);
-        if (ServerUtils.isCallingFromMainThread() && PhaseTracker.getInstance().getCurrentState().isEvent()) {
+        if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();
             final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
             advancementList.getRootsSet().add(advancement);

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry.type.advancement;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
@@ -76,9 +78,10 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
 
     @Override
     public void registerAdditionalCatalog(Advancement advancement) {
+        checkState(ServerUtils.isCallingFromMainThread());
         super.register(advancement);
         ((IMixinAdvancement) advancement).setRegistered();
-        if (ServerUtils.isCallingFromMainThread() && PhaseTracker.getInstance().getCurrentState().isEvent()) {
+        if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
             final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
             advancementList.getAdvancements().put(mcAdv.getId(), mcAdv);

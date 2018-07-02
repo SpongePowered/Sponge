@@ -95,7 +95,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         // See https://github.com/SpongePowered/SpongeForge/issues/2191
         for (String[] reqs : requirements) {
             for (String req : reqs) {
-                if (criteriaIn.containsKey(req)) {
+                if (!criteriaIn.containsKey(req)) {
                     final String advName = getOptionalAdvancement()
                             .map(CatalogType::getId)
                             .orElse("unknown");
