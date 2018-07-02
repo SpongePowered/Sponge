@@ -91,6 +91,7 @@ import org.spongepowered.common.data.builder.manipulator.immutable.block.Immutab
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.property.store.common.InventoryPropertyStore;
 import org.spongepowered.common.effect.potion.PotionEffectContentUpdater;
+import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
@@ -217,6 +218,8 @@ public class DataRegistrar {
         dataManager.registerBuilder(ProfileProperty.class, new SpongeProfilePropertyBuilder());
 
         dataManager.registerBuilder(Color.class, new Color.Builder());
+
+        dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
