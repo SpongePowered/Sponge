@@ -75,6 +75,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -152,7 +153,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
     private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
-        if (!worldIn.isRemote) {
+        if (!((IMixinWorld) worldIn).isFake()) {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final PhaseData peek = phaseTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
