@@ -40,10 +40,10 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.util.SpongeUsernameCache;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -126,12 +127,18 @@ class UserDiscoverer {
         }
 
         // check username cache
-        final UUID uuid = SpongeUsernameCache.getLastKnownUUID(username);
-        if (uuid != null) {
-            return create(new GameProfile(uuid, username));
+        org.spongepowered.api.profile.GameProfile profile;
+        try {
+            profile = Sponge.getServer().getGameProfileManager().get(username).get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while looking up username " + username, e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof ProfileNotFoundException) {
+                return null;
+            }
+            throw new RuntimeException("Exception while looking up username " + username, e);
         }
-
-        return null;
+        return UserDiscoverer.findByProfile(profile);
     }
 
     static Collection<org.spongepowered.api.profile.GameProfile> getAllProfiles() {
