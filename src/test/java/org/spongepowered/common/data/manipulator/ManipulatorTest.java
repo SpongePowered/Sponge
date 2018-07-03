@@ -234,7 +234,7 @@ public class ManipulatorTest {
                     continue;
                 }
                 Class<?> paramType = builderSetter.getParameterTypes()[0];
-                Object param = this.createBuilderParam(builderType, builderSetter);
+                Object param = this.createBuilderParam(paramType);
 
                 builderSetter.invoke(builderObject, param);
             }
@@ -247,18 +247,18 @@ public class ManipulatorTest {
         }
     }
 
-    private Object createBuilderParam(Class<?> builderType, Method builderSetter) {
+    private Object createBuilderParam(Class<?> paramType) {
         // Many builder methods require that that integer parameters be greater than 0
-        if (builderType.equals(int.class) || builderType.equals(Integer.class)) {
+        if (paramType.equals(int.class) || paramType.equals(Integer.class)) {
             return 1;
         }
-        return this.createType(builderSetter.getParameterTypes()[0]);
+        return this.createType(paramType);
     }
 
     private boolean isBuilderSetter(Class<?> builderType, Class<?> type, Method method) {
         if (method.getReturnType().equals(builderType) && method.getParameterCount() == 1) {
             // Don't try to call any methods that take the type we're building
-            return !method.getParameterTypes()[0].equals(type) && !method.getName().equals("from");
+            return !method.getParameterTypes()[0].equals(type) && !method.getName().startsWith("from");
         }
         return false;
     }
