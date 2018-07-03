@@ -50,6 +50,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -68,6 +69,7 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.util.TypeTokenHelper;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -125,8 +127,14 @@ public final class DataUtil {
                     .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
             object = TextSerializers.PLAIN.deserialize(input);
         } else if (elementToken.isSubtypeOf(TypeToken.of(List.class))) {
-            object = dataView.getList(key.getQuery())
-                .orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
+            Optional<?> opt;
+            if (elementToken.isSubtypeOf(TypeTokens.LIST_DATA_SERIALIZEABLE_TOKEN)) {
+                Class<?> listElement = TypeTokenHelper.getGenericParam(elementToken, 0);
+                opt = dataView.getSerializableList(key.getQuery(), (Class) listElement);
+            } else {
+                opt = dataView.getList(key.getQuery());
+            }
+            object = opt.orElseThrow(() -> new InvalidDataException("Missing value for key: " + key.getId()));
         } else if (elementToken.isSubtypeOf(TypeToken.of(Set.class))) {
             final HashSet<Object> set = new HashSet<>();
             set.addAll(dataView.getList(key.getQuery()).orElse(Collections.emptyList()));

@@ -62,6 +62,8 @@ dependencies {
     }
 
     testCompile 'org.spongepowered:lwts:1.0.0'
+    // Taken from https://stackoverflow.com/a/7969292
+    testCompile api.sourceSets.test.output
 }
 
 uploadArchives {

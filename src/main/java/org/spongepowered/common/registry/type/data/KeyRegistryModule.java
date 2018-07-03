@@ -510,7 +510,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("exit_position", Key.builder().type(TypeTokens.VECTOR_3I_VALUE_TOKEN).id("exit_position").name("Exit Position").query(of("ExitPosition")).build());
 
-        this.register("exact_teleport", Key.builder().type(TypeTokens.VECTOR_3I_VALUE_TOKEN).id("exact_teleport").name("Exact Teleport").query(of("ExactTeleport")).build());
+        this.register("exact_teleport", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("exact_teleport").name("Exact Teleport").query(of("ExactTeleport")).build());
 
         this.register("structure_author", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("structure_author").name("Structure Author").query(of("StructureAuthor")).build());
 

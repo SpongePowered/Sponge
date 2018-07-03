@@ -28,6 +28,7 @@ import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -110,5 +111,25 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
                 .set(DataQueries.TRADE_OFFER_GRANTS_EXPERIENCE, this.doesGrantExperience())
                 .set(DataQueries.TRADE_OFFER_MAX_USES, this.getMaxTradeUses())
                 .set(DataQueries.TRADE_OFFER_USES, this.getUses());
+    }
+
+    // This is a little questionable, since we're mixing into a Mixnecraft class.
+    // However, Vanill adoesn't override equals(), so no one except plugins
+    // should be calling it,
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MerchantRecipe other = (MerchantRecipe) o;
+        return ItemStackComparators.ALL.compare((ItemStack) this.getItemToBuy(), (ItemStack) other.getItemToBuy()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) this.getSecondItemToBuy(), (ItemStack) other.getSecondItemToBuy()) == 0
+                && ItemStackComparators.ALL.compare((ItemStack) this.getItemToSell(), (ItemStack) other.getItemToSell()) == 0
+                && this.getToolUses() == other.getToolUses()
+                && this.getMaxTradeUses() == other.getMaxTradeUses()
+                && this.getRewardsExp() == other.getRewardsExp();
     }
 }

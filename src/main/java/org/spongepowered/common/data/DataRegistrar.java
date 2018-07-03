@@ -57,6 +57,7 @@ import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
@@ -125,6 +126,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
+import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -193,6 +195,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(GameProfile.class, new SpongeGameProfileBuilder());
 
         dataManager.registerBuilder(Color.class, new Color.Builder());
+        dataManager.registerBuilder(TradeOffer.class, new SpongeTradeOfferBuilder());
 
         dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
 
