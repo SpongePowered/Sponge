@@ -37,20 +37,12 @@ import java.util.List;
 
 public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOfferData, ImmutableTradeOfferData> implements TradeOfferData {
 
-    private List<TradeOffer> offers = Lists.newArrayList();
-
     public SpongeTradeOfferData() {
         this(Lists.newArrayList());
     }
 
     public SpongeTradeOfferData(List<TradeOffer> tradeOffers) {
         super(TradeOfferData.class, tradeOffers, Keys.TRADE_OFFERS, ImmutableSpongeTradeOfferData.class);
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-            .set(Keys.TRADE_OFFERS.getQuery(), this.offers);
     }
 
 }
