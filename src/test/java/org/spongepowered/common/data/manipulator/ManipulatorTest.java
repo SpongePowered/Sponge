@@ -28,6 +28,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.reflect.TypeToken;
+import org.checkerframework.checker.nullness.Opt;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -49,6 +51,7 @@ import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -73,6 +76,7 @@ public class ManipulatorTest {
         this.generateValues = generateValues;
     }
 
+    @SuppressWarnings("unchecked")
     private DataManipulator<?, ?> createManipulator() {
         try {
             final Constructor<?> ctor = this.manipulatorClass.getConstructor();
@@ -82,8 +86,8 @@ public class ManipulatorTest {
                 final Set<Key<?>> keys = manipulator.getKeys();
 
                 for (Key<?> key: keys) {
-                    Object value = createValueElement((Key) key);
-                    manipulator.set((Key) key, value);
+                    Optional<Object> value = createValueElement((Key) key);
+                    value.ifPresent(o -> manipulator.set((Key) key, o));
                 }
             }
             return manipulator;
@@ -170,12 +174,22 @@ public class ManipulatorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T createValueElement(Key<? extends BaseValue<T>> key) {
-        Class<T> elementClass = (Class<T>) key.getElementToken().getRawType();
-        if (CatalogType.class.isAssignableFrom(elementClass)) {
-            return (T) Sponge.getRegistry().getAllOf((Class<CatalogType>) elementClass).iterator().next();
+    private <T> Optional<T> createValueElement(Key<?> type) {
+        Class<T> elementClass = (Class<T>) type.getElementToken().getRawType();
+        if (Optional.class.isAssignableFrom(elementClass)) {
+            Class<?> wrappedType = (Class) ((ParameterizedType) type.getElementToken().getType()).getActualTypeArguments()[0];
+            // The innermost optional is the actual type of the Key. The outer optional
+            // indicates to the caller that we were able to create something for this key.
+            return (Optional) Optional.of(Optional.of(createType(wrappedType)));
+        }
+        return Optional.empty();
+    }
+
+    private <T> T createType(Class<T> type) {
+        if (CatalogType.class.isAssignableFrom(type)) {
+            return (T) Sponge.getRegistry().getAllOf((Class<CatalogType>) type).iterator().next();
         } else {
-            return (T) SpongeEventFactoryTest.mockParam(elementClass);
+            return (T) SpongeEventFactoryTest.mockParam(type);
         }
     }
 
