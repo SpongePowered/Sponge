@@ -65,9 +65,19 @@ class UserDiscoverer {
             .expireAfterAccess(1, TimeUnit.DAYS)
             .build();
 
+    // It's possible for plugins to create 'fake users' with UserStorageService#getOrCreate,
+    // whose names aren't registered with Mojang. To allow plugins to lookup
+    // these users with UserStorageService#get, we need to cache users by name as well as by UUID
+    private static final Cache<String, User> userByNameCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(1, TimeUnit.DAYS)
+            .build();
+
     static User create(GameProfile profile) {
         User user = (User) new SpongeUser(profile);
         userCache.put(profile.getId(), user);
+        if (profile.getName() != null) {
+            userByNameCache.put(profile.getName(), user);
+        }
         return user;
     }
 
@@ -116,6 +126,11 @@ class UserDiscoverer {
     }
 
     static User findByUsername(String username) {
+        User user = userByNameCache.getIfPresent(username);
+        if (user != null) {
+            return user;
+        }
+
         // check mojang cache
         PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
         HashSet<String> names = Sets.newHashSet(cache.getUsernames());
@@ -210,6 +225,7 @@ class UserDiscoverer {
         if (player != null) {
             final User user = player.getUserObject();
             userCache.put(uniqueId, user);
+            userByNameCache.put(user.getName(), user);
             return user;
         }
 
