@@ -36,6 +36,7 @@
         "block.MixinBlockBanner",
         "block.MixinBlockBannerHanging",
         "block.MixinBlockBannerStanding",
+        "block.MixinBlockBeacon",
         "block.MixinBlockBed",
         "block.MixinBlockBrewingStand",
         "block.MixinBlockButton",
