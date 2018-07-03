@@ -28,8 +28,10 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
@@ -42,12 +44,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
@@ -76,6 +80,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
+
+    @Shadow public abstract ChunkPos getPos();
 
     private Map<Integer, PlayerTracker> trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> trackedShortBlockPositions = new HashMap<>();
@@ -343,7 +349,22 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Inject(method = "onLoad", at = @At("HEAD"))
     private void startLoad(CallbackInfo callbackInfo) {
-        if (!this.world.isRemote) {
+        final boolean isFake = ((IMixinWorld) this.world).isFake();
+        if (!isFake) {
+            if (!SpongeImpl.isMainThread()) {
+                final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
+                    .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
+                                + " to the parented world for management. These operations are generally not"
+                                + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
+                                + " entities from another thread to the world is never ok.")
+                    .add()
+                    .add(" %s : %d, %d", "Chunk Pos", this.x, this.z)
+                    .add()
+                    .add(new Exception("Async Chunk Load Detected"))
+                    .log(SpongeImpl.getLogger(), Level.ERROR)
+                    ;
+                return;
+            }
             GenerationPhase.State.CHUNK_LOADING.createPhaseContext()
                     .source(this)
                     .world(this.world)
@@ -353,7 +374,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void endLoad(CallbackInfo callbackInfo) {
-        if (!this.world.isRemote) {
+        if (!((IMixinWorld) this.world).isFake() && SpongeImpl.isMainThread()) {
+            // IF we're not on the main thread,
             PhaseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
         }
     }
