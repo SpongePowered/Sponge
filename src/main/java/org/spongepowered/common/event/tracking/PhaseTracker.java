@@ -569,6 +569,7 @@ public final class PhaseTracker {
                 .add()
                 .add(new Exception("Async Block Change Detected"))
                 .log(SpongeImpl.getLogger(), Level.ERROR);
+            return false;
         }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final net.minecraft.world.World minecraftWorld = WorldUtil.asNative(mixinWorld);
