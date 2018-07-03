@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import org.checkerframework.checker.nullness.Opt;
 import org.junit.Test;
@@ -177,12 +178,20 @@ public class ManipulatorTest {
     private <T> Optional<T> createValueElement(Key<?> type) {
         Class<T> elementClass = (Class<T>) type.getElementToken().getRawType();
         if (Optional.class.isAssignableFrom(elementClass)) {
-            Class<?> wrappedType = (Class) ((ParameterizedType) type.getElementToken().getType()).getActualTypeArguments()[0];
+            Class<?> wrappedType = this.getGenericParam(type.getElementToken(), 0);
             // The innermost optional is the actual type of the Key. The outer optional
             // indicates to the caller that we were able to create something for this key.
             return (Optional) Optional.of(Optional.of(createType(wrappedType)));
+        } else if (List.class.isAssignableFrom(elementClass)) {
+            Class<?> wrappedType = this.getGenericParam(type.getElementToken(), 0);
+
+            return (Optional) Optional.of(Lists.newArrayList(createType(wrappedType)));
         }
         return Optional.empty();
+    }
+
+    private Class<?>  getGenericParam(TypeToken<?> token, int typeIndex) {
+        return (Class) ((ParameterizedType) token.getType()).getActualTypeArguments()[typeIndex];
     }
 
     private <T> T createType(Class<T> type) {
