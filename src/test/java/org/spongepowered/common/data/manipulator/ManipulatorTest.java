@@ -49,6 +49,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.SpongeEventFactoryTest;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.PEBKACException;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.util.TypeTokenHelper;
@@ -208,6 +209,11 @@ public class ManipulatorTest {
     }
 
     private boolean isBuildable(Class<?> type) {
+        // The 'child' methods on Text.Builder interact oddly
+        // with our code, so skip building Text for now
+        if (type == Text.class) {
+            return false;
+        }
         try {
             type.getMethod("builder");
             return true;
