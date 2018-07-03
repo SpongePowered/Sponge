@@ -39,6 +39,10 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unchecked", "rawtypes", "WeakerAccess"})
 public final class TypeTokenHelper {
 
+    public static Class<?>  getGenericParam(TypeToken<?> token, int typeIndex) {
+        return (Class) ((ParameterizedType) token.getType()).getActualTypeArguments()[typeIndex];
+    }
+
     public static boolean isAssignable(TypeToken<?> type, TypeToken<?> toType) {
         return isAssignable(type.getType(), toType.getType());
     }

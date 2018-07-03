@@ -67,6 +67,7 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.property.SlotSide;
 import org.spongepowered.api.item.inventory.property.StringProperty;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.text.BookView;
@@ -149,6 +150,7 @@ import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 import org.spongepowered.common.item.inventory.property.SlotPosImpl;
 import org.spongepowered.common.item.inventory.property.SlotSideImpl;
 import org.spongepowered.common.item.inventory.property.StringPropertyImpl;
+import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -218,6 +220,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(ProfileProperty.class, new SpongeProfilePropertyBuilder());
 
         dataManager.registerBuilder(Color.class, new Color.Builder());
+        dataManager.registerBuilder(TradeOffer.class, new SpongeTradeOfferBuilder());
 
         dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
 

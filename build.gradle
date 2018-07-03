@@ -60,6 +60,10 @@ dependencies {
     forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
         transitive = false
     }
+
+    testCompile 'org.spongepowered:lwts:1.0.0'
+    // Taken from https://stackoverflow.com/a/7969292
+    testCompile api.sourceSets.test.output
 }
 
 uploadArchives {
@@ -77,4 +81,5 @@ ext.shadedDevProject = api
 
 test {
     systemProperty 'lwts.tweaker', 'org.spongepowered.common.launch.TestTweaker'
+    workingDir = {test.temporaryDir}
 }
