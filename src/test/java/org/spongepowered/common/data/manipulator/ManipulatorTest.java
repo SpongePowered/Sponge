@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulator;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
@@ -45,14 +46,19 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.SpongeEventFactoryTest;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.PEBKACException;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.util.TypeTokenHelper;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -178,30 +184,78 @@ public class ManipulatorTest {
     private <T> Optional<T> createValueElement(Key<?> type) {
         Class<T> elementClass = (Class<T>) type.getElementToken().getRawType();
         if (Optional.class.isAssignableFrom(elementClass)) {
-            Class<?> wrappedType = this.getGenericParam(type.getElementToken(), 0);
+            Class<?> wrappedType = TypeTokenHelper.getGenericParam(type.getElementToken(), 0);
             // The innermost optional is the actual type of the Key. The outer optional
             // indicates to the caller that we were able to create something for this key.
             return (Optional) Optional.of(Optional.of(createType(wrappedType)));
         } else if (List.class.isAssignableFrom(elementClass)) {
-            Class<?> wrappedType = this.getGenericParam(type.getElementToken(), 0);
+            Class<?> wrappedType = TypeTokenHelper.getGenericParam(type.getElementToken(), 0);
 
             return (Optional) Optional.of(Lists.newArrayList(createType(wrappedType)));
         }
         return Optional.empty();
     }
 
-    private Class<?>  getGenericParam(TypeToken<?> token, int typeIndex) {
-        return (Class) ((ParameterizedType) token.getType()).getActualTypeArguments()[typeIndex];
-    }
 
     private <T> T createType(Class<T> type) {
         if (CatalogType.class.isAssignableFrom(type)) {
             return (T) Sponge.getRegistry().getAllOf((Class<CatalogType>) type).iterator().next();
+        } else if (isBuildable(type)) {
+            return (T) createFromBuilder(type);
         } else {
             return (T) SpongeEventFactoryTest.mockParam(type);
         }
     }
 
+    private boolean isBuildable(Class<?> type) {
+        try {
+            type.getMethod("builder");
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private Object createFromBuilder(Class<?> type) {
+        try {
+            Method methodbuilder = type.getMethod("builder");
+            Class<?> builderType = methodbuilder.getReturnType();
+            Method methodBuild = builderType.getMethod("build");
+            Object builderObject = methodbuilder.invoke(nullValue());
+
+            for (Method builderSetter: builderType.getMethods()) {
+                if (!this.isBuilderSetter(builderType, type, builderSetter)) {
+                    continue;
+                }
+                Class<?> paramType = builderSetter.getParameterTypes()[0];
+                Object param = this.createBuilderParam(builderType, builderSetter);
+
+                builderSetter.invoke(builderObject, param);
+            }
+
+            Object finalType = methodBuild.invoke(builderObject);
+            return finalType;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while creating builder for type " + type, e);
+        }
+    }
+
+    private Object createBuilderParam(Class<?> builderType, Method builderSetter) {
+        // Many builder methods require that that integer parameters be greater than 0
+        if (builderType.equals(int.class) || builderType.equals(Integer.class)) {
+            return 1;
+        }
+        return this.createType(builderSetter.getParameterTypes()[0]);
+    }
+
+    private boolean isBuilderSetter(Class<?> builderType, Class<?> type, Method method) {
+        if (method.getReturnType().equals(builderType) && method.getParameterCount() == 1) {
+            // Don't try to call any methods that take the type we're building
+            return !method.getParameterTypes()[0].equals(type) && !method.getName().equals("from");
+        }
+        return false;
+    }
     @SuppressWarnings("unchecked")
     @Test
     public void testSerialization() {
