@@ -57,7 +57,7 @@ public class SpongeUserStorageService implements UserStorageService {
     @Override
     public Optional<User> get(String lastKnownName) {
         checkNotNull(lastKnownName, "lastKnownName");
-        checkArgument(lastKnownName.length() >= 3 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
+        checkArgument(lastKnownName.length() > 0 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
         checkState(Sponge.isServerAvailable(), "Server is not available!");
         return Optional.ofNullable(UserDiscoverer.findByUsername(lastKnownName));
     }
