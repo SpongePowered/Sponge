@@ -258,7 +258,12 @@ public class ManipulatorTest {
     private boolean isBuilderSetter(Class<?> builderType, Class<?> type, Method method) {
         if (method.getReturnType().equals(builderType) && method.getParameterCount() == 1) {
             // Don't try to call any methods that take the type we're building
-            return !method.getParameterTypes()[0].equals(type) && !method.getName().startsWith("from");
+            Class<?> paramType = method.getParameterTypes()[0];
+            return !paramType.equals(type)
+                    && !paramType.equals(Class.class)
+                    && !paramType.equals(DataManipulator.class)
+                    && !paramType.equals(ImmutableDataManipulator.class)
+                    && !method.getName().startsWith("from");
         }
         return false;
     }
