@@ -227,7 +227,7 @@ public class ManipulatorTest {
                 if (!equals) {
                     printNonEqual(container, manipulator, deserialized);
                 }
-                assertThat(equals, is(true));
+                assertThat(manipulator, equalTo(deserialized));
             }
         } catch (Exception e) {
             throw new RuntimeException("There was an unknown exception trying to test " + this.dataName
