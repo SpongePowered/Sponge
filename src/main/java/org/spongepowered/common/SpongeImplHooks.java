@@ -460,4 +460,20 @@ public final class SpongeImplHooks {
 
     public static void onUseItemTick(EntityLivingBase entity, net.minecraft.item.ItemStack stack, int activeItemStackUseCount) {
     }
+
+    public static void onTETickStart(TileEntity te) {
+
+    }
+
+    public static void onTETickEnd(TileEntity te) {
+
+    }
+
+    public static void onEntityTickStart(Entity entity) {
+
+    }
+
+    public static void onEntityTickEnd(Entity entity) {
+
+    }
 }

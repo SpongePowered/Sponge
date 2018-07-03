@@ -1520,7 +1520,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
                 try {
+                    SpongeImplHooks.onEntityTickStart(entity2);
                     this.updateEntity(entity2);
+                    SpongeImplHooks.onEntityTickEnd(entity2);
                 } catch (Throwable throwable1) {
                     this.stopTimingTickEntityCrash(entity2); // Sponge
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
@@ -1569,8 +1571,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
                         this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
+                        SpongeImplHooks.onTETickStart(tileentity);
                         ((ITickable) tileentity).update();
                         //this.profiler.endSection();
+                        SpongeImplHooks.onTETickEnd(tileentity);
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
