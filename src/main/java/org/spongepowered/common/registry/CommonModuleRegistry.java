@@ -506,6 +506,7 @@ public final class CommonModuleRegistry {
             .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
+            .registerModule(WireAttachmentType.class, new WireAttachmentRegistryModule())
             .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())

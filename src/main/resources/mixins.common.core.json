@@ -175,6 +175,7 @@
         "data.types.MixinBlockQuartzEnumType",
         "data.types.MixinBlockRailBaseEnumRailDirection",
         "data.types.MixinBlockRedstoneComparatorMode",
+        "data.types.MixinBlockRedstoneWireAttachPosition",
         "data.types.MixinBlockSandEnumType",
         "data.types.MixinBlockSandStoneEnumType",
         "data.types.MixinBlockSilverfishEnumType",
