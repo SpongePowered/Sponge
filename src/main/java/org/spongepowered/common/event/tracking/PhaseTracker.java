@@ -86,6 +86,11 @@ import javax.annotation.Nullable;
 public final class PhaseTracker {
 
     private static final PhaseTracker INSTANCE = new PhaseTracker();
+    public static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
+                                                + "such that it follows the known fact that block changes MUST occur on the server "
+                                                + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
+                                                + "possible to change this fact and must be reported to the offending mod for async "
+                                                + "issues.";
 
     public static PhaseTracker getInstance() {
         return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
@@ -550,6 +555,21 @@ public final class PhaseTracker {
      */
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
+        if (!SpongeImpl.isMainThread()) {
+            // lol no, report the block change properly
+            new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
+                .addWrapped(ASYNC_BLOCK_CHANGE_MESSAGE)
+                .add()
+                .add(" %s : %s", "World", mixinWorld)
+                .add(" %s : %d, %d, %d", "Block Pos", pos.getX(), pos.getY(), pos.getZ())
+                .add(" %s : %s", "BlockState", newState)
+                .add()
+                .addWrapped("Sponge is not going to allow this block change to take place as doing so can "
+                            + "lead to further issues, not just with sponge or plugins, but other mods as well.")
+                .add()
+                .add(new Exception("Async Block Change Detected"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+        }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final net.minecraft.world.World minecraftWorld = WorldUtil.asNative(mixinWorld);
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
