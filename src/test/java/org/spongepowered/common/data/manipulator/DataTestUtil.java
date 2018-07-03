@@ -36,6 +36,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class DataTestUtil {
 
@@ -46,7 +47,13 @@ final class DataTestUtil {
         final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap = getDelegateMap();
         return delegateMap.entrySet().stream()
                 .filter(entry -> isValidForTesting(entry.getKey()))
-                .map(entry -> new Object[]{entry.getKey().getSimpleName(), entry.getKey(), manipulatorBuilderMap.get(entry.getKey())})
+                .flatMap(entry -> {
+                    String name = entry.getKey().getSimpleName();
+                    Class<? extends DataManipulator<?, ?>> key = entry.getKey();
+                    DataManipulatorBuilder<?, ?> builder = manipulatorBuilderMap.get(key);
+
+                    return Stream.of(new Object[]{name, key, builder, false}, new Object[]{name, key, builder, true});
+                })
                 .collect(Collectors.toList());
     }
 
