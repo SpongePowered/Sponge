@@ -449,15 +449,7 @@ public class SpongeHooks {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
         SpongeConfig<? extends GeneralConfigBase> activeConfig = mixinWorldServer.getActiveConfig();
         if (activeConfig == null || refresh) {
-            final SpongeConfig<WorldConfig> worldConfig = mixinWorldServer.getWorldConfig();
-            final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType()).getDimensionConfig();
-            if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
-                activeConfig = worldConfig;
-            } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-                activeConfig = dimensionConfig;
-            } else {
-                activeConfig = SpongeImpl.getGlobalConfig();
-            }
+            activeConfig = mixinWorldServer.getWorldConfig();
             mixinWorldServer.setActiveConfig(activeConfig);
         }
 
@@ -485,23 +477,14 @@ public class SpongeHooks {
 
         // No in-memory config objects, lookup from disk.
         final Path dimConfPath = dimensionPath.resolve("dimension.conf");
+        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfig());
 
         if (worldFolder != null) {
             final Path worldConfPath = dimensionPath.resolve(worldFolder).resolve("world.conf");
-
-            final SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID);
-            if (worldConfig.getConfig().isConfigEnabled()) {
-                return worldConfig;
-            }
+            return new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID, dimConfig);
         }
 
-        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID);
-        if (dimConfig.getConfig().isConfigEnabled()) {
-            return dimConfig;
-        }
-
-        // Neither in-memory or on-disk enabled configs. Go global.
-        return SpongeImpl.getGlobalConfig();
+        return dimConfig;
     }
 
     public static void refreshActiveConfigs() {

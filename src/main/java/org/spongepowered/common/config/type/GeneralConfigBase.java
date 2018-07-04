@@ -25,7 +25,6 @@
 package org.spongepowered.common.config.type;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.category.BlockTrackerCategory;
 import org.spongepowered.common.config.category.PlayerBlockTracker;
 import org.spongepowered.common.config.category.DebugCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
@@ -42,9 +41,6 @@ public class GeneralConfigBase extends ConfigBase {
 
     @Setting
     protected WorldCategory world = new WorldCategory();
-    @Setting(value = "config-enabled", comment = "This setting does nothing in the global config. In dimension/world configs, it allows the config \n"
-                                               + "to override config(s) that it inherits from")
-    protected boolean configEnabled = false;
     @Setting(value = "player-block-tracker")
     private PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
     @Setting
@@ -109,13 +105,5 @@ public class GeneralConfigBase extends ConfigBase {
 
     public TimingsCategory getTimings() {
         return this.timings;
-    }
-
-    public boolean isConfigEnabled() {
-        return this.configEnabled;
-    }
-
-    public void setConfigEnabled(boolean configEnabled) {
-        this.configEnabled = configEnabled;
     }
 }
