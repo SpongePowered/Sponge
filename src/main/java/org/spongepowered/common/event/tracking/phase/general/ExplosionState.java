@@ -114,13 +114,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     @Override
     public boolean shouldCaptureBlockChangeOrSkip(ExplosionContext phaseContext,
         BlockPos pos) {
-        final Vector3i blockPos = VecHelper.toVector3i(pos);
-        for (final BlockSnapshot capturedSnapshot : phaseContext.getCapturedBlocks()) {
-            if (capturedSnapshot.getPosition().equals(blockPos)) {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
 
     @Override
@@ -149,7 +143,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
 
     @Override
     public boolean doesCaptureEntitySpawns() {
-        return false;
+        return true;
     }
 
 }
