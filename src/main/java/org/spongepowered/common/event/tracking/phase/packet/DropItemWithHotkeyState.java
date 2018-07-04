@@ -59,7 +59,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(InventoryPacketContext context) {
         return true;
     }
 

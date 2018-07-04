@@ -27,33 +27,28 @@ package org.spongepowered.common.config.category;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @ConfigSerializable
-public class BlockCapturingModCategory extends ConfigCategory {
+public class PlayerBlockTracker extends ConfigCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', all specific rules for this mod will be ignored.")
-    private boolean isEnabled = true;
-    @Setting(value = "block-tick-capturing", comment = "If 'true', individual capturing (i.e. skip bulk capturing) for scheduled ticks for \n"
-                                                     + "a block type will be performed.")
-    private Map<String, Boolean> blockMap = new HashMap<>();
+    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
+                                        + "Note: This should only be disabled if you do not care who caused a block to change.")
+    private boolean enabled = true;
 
-    public BlockCapturingModCategory() {
-    }
-
-    public BlockCapturingModCategory(String modId) {
-        if (modId.equals("extrautils2")) {
-            this.blockMap.put("redstoneclock", true);
-        }
-    }
+    @Setting(value = "block-blacklist", comment = "Block IDs that will be blacklisted for player block placement tracking.")
+    private List<String> blockBlacklist = new ArrayList<>();
 
     public boolean isEnabled() {
-        return this.isEnabled;
+        return this.enabled;
     }
 
-    public Map<String, Boolean> getBlockMap() {
-        return this.blockMap;
+    public void setEnabled(boolean flag) {
+        this.enabled = flag;
     }
 
+    public List<String> getBlockBlacklist() {
+        return this.blockBlacklist;
+    }
 }

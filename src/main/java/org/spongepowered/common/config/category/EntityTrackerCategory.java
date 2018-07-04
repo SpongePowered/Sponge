@@ -31,20 +31,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class BlockCapturingCategory extends ConfigCategory {
+public class EntityTrackerCategory extends ConfigCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with a default value.")
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered entities will be added to this config with default settings.")
     private boolean autoPopulate = false;
 
-    @Setting(value = "mods", comment = "Per-mod block id mappings for controlling capturing behavior")
-    private Map<String, BlockCapturingModCategory> modMapping = new HashMap<>();
+    @Setting(value = "mods", comment = "Per-mod entity id mappings for controlling tracking behavior")
+    private Map<String, EntityTrackerModCategory> modMapping = new HashMap<>();
 
-    public BlockCapturingCategory() {
-        this.modMapping.put("extrautils2", new BlockCapturingModCategory("extrautils2"));
+    public Map<String, EntityTrackerModCategory> getModMappings() {
+        return this.modMapping;
     }
 
-    public Map<String, BlockCapturingModCategory> getModMappings() {
-        return this.modMapping;
+    public EntityTrackerCategory() {
+        this.modMapping.put("minecraft", new EntityTrackerModCategory("minecraft"));
     }
 
     public boolean autoPopulateData() {

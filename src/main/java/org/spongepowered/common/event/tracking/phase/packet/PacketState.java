@@ -34,11 +34,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -88,7 +86,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public void addNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void appendNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -114,12 +112,12 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(P context) {
         return false;
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture(P context) {
         return true;
     }
 

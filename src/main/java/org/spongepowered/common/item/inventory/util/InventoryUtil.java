@@ -66,7 +66,19 @@ public final class InventoryUtil {
                 return ((InventoryCrafting) inventory);
             }
         }
-        throw new IllegalStateException("Invalid CraftingGridInventory. Could not find InventoryCrafting.");
+
+        // Gather Debug Info...
+        StringBuilder sb = new StringBuilder();
+        sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
+          .append("Fabric was: ")
+          .append(fabric.getClass().getSimpleName()).append(" Name: ")
+          .append(fabric.getDisplayName() == null ? "unknown" : fabric.getDisplayName().get())
+          .append("Viewed:");
+        for (IInventory iInventory : fabric.allInventories()) {
+            sb.append("\n").append(iInventory.getClass().getName());
+        }
+
+        throw new IllegalStateException(sb.toString());
     }
 
     public static Optional<Inventory> getDoubleChestInventory(TileEntityChest chest) {

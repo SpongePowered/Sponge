@@ -29,7 +29,6 @@ import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -38,15 +37,14 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
 
@@ -104,19 +102,19 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public boolean spawnEntityOrCapture(BlockTickContext context, Entity entity, int chunkX, int chunkZ) {
         final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
-        final Optional<User> owner = context.getOwner();
-        final Optional<User> notifier = context.getNotifier();
+        if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            notifier.ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
-            owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
+            associateAdditionalCauses(context, frame);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                final ArrayList<Entity> entities = new ArrayList<>(1);
+                final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
                 entities.add(entity);
                 return SpongeCommonEventFactory.callSpawnEntity(entities, context);
             }
-            final List<Entity> nonExpEntities = new ArrayList<>(1);
+            final List<org.spongepowered.api.entity.Entity> nonExpEntities = new ArrayList<>(1);
             nonExpEntities.add(entity);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
@@ -130,12 +128,36 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public void postTrackBlock(BlockSnapshot snapshot, PhaseTracker tracker, BlockTickContext context) {
+    public void postTrackBlock(BlockSnapshot snapshot, BlockTickContext context) {
         if (context.shouldProcessImmediately()) {
             TrackingUtil.processBlockCaptures(context.getCapturedBlocks(), this, context);
             context.getCapturedBlockSupplier().get().remove(snapshot);
         }
+    }
 
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if bulk block captures are usable for this entity type (default true)
+     */
+    @Override
+    public boolean doesBulkBlockCapture(BlockTickContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if block events are to be tracked by the specific type of entity (default is true)
+     */
+    @Override
+    public boolean doesBlockEventTracking(BlockTickContext context) {
+        return context.allowsBlockEvents();
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(BlockTickContext context) {
+        return true; // Maybe make this configurable as well.
     }
 
     @Override

@@ -74,7 +74,7 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
 
 
     @Override
-    public void addNotifierToBlockEvent(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void appendNotifierToBlockEvent(ListenerPhaseContext context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 

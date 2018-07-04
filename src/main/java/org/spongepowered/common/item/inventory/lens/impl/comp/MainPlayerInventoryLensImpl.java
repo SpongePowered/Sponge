@@ -91,8 +91,8 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
             1 |H|H|H|H|H|H|H|H|H|
             */
 
-            this.addSpanningChild(this.grid);
             this.addSpanningChild(this.hotbar);
+            this.addSpanningChild(this.grid);
 
             // Shift slots so that Hotbar is always after the MainGrid
             ShiftedSlotProvider shiftedSlots = new ShiftedSlotProvider(slots, INVENTORY_WIDTH, INVENTORY_WIDTH * 4);

@@ -195,6 +195,7 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -879,7 +880,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             .build();
 
         blockEvent.setTickBlock(locatable);
-        phaseState.addNotifierToBlockEvent(context, this, pos, blockEvent);
+        phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -1190,8 +1191,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
 
-        try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-                .explosion(explosion)) {
+        try (final PhaseContext<?> phaseContext = GeneralPhase.State.EXPLOSION.createPhaseContext()
+                .explosion((Explosion) explosion)) {
             phaseContext.buildAndSwitch();
             final Explosion mcExplosion;
             try {
@@ -1269,7 +1270,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntity(net.minecraft.entity.Entity entity) {
-        if (!PhaseTracker.validateEntitySpawn(this, (Entity) entity)) {
+        if (!PhaseTracker.validateEntitySpawn((Entity) entity)) {
             return true;
         }
         return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
@@ -1291,7 +1292,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, flags);
+            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
         }
     }
 
@@ -1372,6 +1373,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         EnumSet<EnumFacing> directions = EnumSet.copyOf(NOTIFY_DIRECTIONS);
         directions.remove(skipSide);
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
+        notifyBlocksBasedOnEvent(pos, blockType, event);
+    }
+
+    private void notifyBlocksBasedOnEvent(BlockPos pos, Block blockType, @Nullable NotifyNeighborBlockEvent event) {
         if (event == null || !event.isCancelled()) {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             for (EnumFacing facing : EnumFacing.values()) {
@@ -1407,19 +1412,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
-        if (event == null || !event.isCancelled()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            for (EnumFacing facing : EnumFacing.values()) {
-                if (event != null) {
-                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                    if (!event.getNeighbors().keySet().contains(direction)) {
-                        continue;
-                    }
-                }
-
-                phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
-            }
-        }
+        notifyBlocksBasedOnEvent(pos, blockType, event);
 
         // Copied over to ensure observers retain functionality.
         if (updateObserverBlocks) {
@@ -1427,17 +1420,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> state = phaseTracker.getCurrentState();
-        if (state.alreadyCapturingEntityTicks()) {
-            entityIn.onUpdate();
-            return;
-        }
-        TrackingUtil.tickEntity(entityIn);
-        updateRotation(entityIn);
+        onCallEntityUpdate(entityIn); // maybe we should combine these injections/redirects?
     }
 
     @Override
@@ -1513,7 +1498,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @param <T> The type of entity list
      * @return The list of entities found
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class<? extends T> clazz, AxisAlignedBB aabb,
         @Nullable Predicate<? super T> filter) {
@@ -1546,10 +1531,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
         final PhaseContext<?> context = currentPhase.context;
         final IPhaseState<?> state = currentPhase.state;
-        if (state.doesCaptureEntityDrops() || state.allowEntitySpawns()) {
+        if (((IPhaseState) state).doesCaptureEntityDrops(context) || state.doesAllowEntitySpawns()) {
             // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
             // they pass the predicate check
-            if (state.doesCaptureEntityDrops()) {
+            if (((IPhaseState) state).doesCaptureEntityDrops(context)) {
                 for (EntityItem entity : context.getCapturedItems()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
                     if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
@@ -1615,7 +1600,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "The entity cannot be null!");
-        if (!PhaseTracker.validateEntitySpawn(this, entity)) {
+        if (!PhaseTracker.validateEntitySpawn(entity)) {
             return true;
         }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -1716,7 +1701,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
-        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+        final Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
         // Sponge Start - Cause tracking
         try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()

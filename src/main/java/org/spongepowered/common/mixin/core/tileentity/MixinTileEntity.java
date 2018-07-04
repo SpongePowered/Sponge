@@ -58,6 +58,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -89,6 +90,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Nullable private User spongeOwner;
     private boolean hasSetOwner = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
@@ -99,6 +105,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract Block getBlockType();
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Override @Shadow public abstract void markDirty();
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        this.refreshCache();
+    }
 
     @Intrinsic
     public void tile$markDirty() {
@@ -339,6 +350,36 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean allowsBlockBulkCapture() {
+        return this.allowsBlockBulkCapture;
+    }
+
+    @Override
+    public boolean allowsEntityBulkCapture() {
+        return this.allowsEntityBulkCapture;
+    }
+
+    @Override
+    public boolean allowsBlockEventCreation() {
+        return this.allowsBlockEventCreation;
+    }
+
+    @Override
+    public boolean allowsEntityEventCreation() {
+        return this.allowsEntityEventCreation;
+    }
+
+    @Override
+    public void refreshCache() {
+        if (this.tileType != null) {
+            this.allowsBlockBulkCapture = ((SpongeTileEntityType) this.tileType).allowsBlockBulkCapture;
+            this.allowsEntityBulkCapture = ((SpongeTileEntityType) this.tileType).allowsEntityBulkCapture;
+            this.allowsBlockEventCreation = ((SpongeTileEntityType) this.tileType).allowsBlockEventCreation;
+            this.allowsEntityEventCreation = ((SpongeTileEntityType) this.tileType).allowsEntityEventCreation;
+        }
     }
 
     @Override

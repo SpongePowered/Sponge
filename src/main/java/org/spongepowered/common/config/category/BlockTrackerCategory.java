@@ -22,33 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.util.math.BlockPos;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
+import java.util.HashMap;
+import java.util.Map;
 
-    NoCaptureBlockTickPhaseState(String name) {
-        super(name);
+@ConfigSerializable
+public class BlockTrackerCategory extends ConfigCategory {
+
+    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with default settings.")
+    private boolean autoPopulate = false;
+
+    @Setting(value = "mods", comment = "Per-mod block id mappings for controlling tracking behavior")
+    private Map<String, BlockTrackerModCategory> modMapping = new HashMap<>();
+
+    public BlockTrackerCategory() {
+        this.modMapping.put("minecraft", new BlockTrackerModCategory("minecraft"));
+        this.modMapping.put("extrautils2", new BlockTrackerModCategory("extrautils2"));
     }
 
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(BlockTickContext phaseContext, BlockPos pos) {
-        return false;
+    public Map<String, BlockTrackerModCategory> getModMappings() {
+        return this.modMapping;
     }
 
-    @Override
-    public boolean tracksBlockSpecificDrops() {
-        return false;
+    public boolean autoPopulateData() {
+        return this.autoPopulate;
     }
 
-    @Override
-    public boolean requiresBlockCapturing() {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyCapturingItemSpawns() {
-        return true;
-    }
 }

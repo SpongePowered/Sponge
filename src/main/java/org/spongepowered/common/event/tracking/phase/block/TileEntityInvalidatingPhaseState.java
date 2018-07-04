@@ -75,7 +75,12 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture(GeneralizedContext context) {
         return false;
+    }
+
+    @Override
+    public boolean doesBlockEventTracking(GeneralizedContext context) {
+        return true; // We still want to do block events.
     }
 }

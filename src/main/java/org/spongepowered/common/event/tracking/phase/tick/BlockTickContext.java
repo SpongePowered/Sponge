@@ -24,11 +24,27 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 
 public class BlockTickContext extends LocationBasedTickContext<BlockTickContext> {
 
     protected BlockTickContext(IPhaseState<BlockTickContext> phaseState) {
         super(phaseState);
+    }
+
+    @Override
+    public BlockTickContext source(Object owner) {
+        super.source(owner);
+        if (owner instanceof LocatableBlock) {
+            final IMixinBlock mixinBlock = BlockUtil.toMixin(((LocatableBlock) owner).getBlockState());
+            this.setBlockEvents(mixinBlock.allowsBlockEventCreation())
+                .setBulkBlockCaptures(mixinBlock.allowsBlockBulkCapture())
+                .setEntitySpawnEvents(mixinBlock.allowsEntityEventCreation())
+                .setBulkEntityCaptures(mixinBlock.allowsEntityBulkCapture());
+        }
+        return this;
     }
 }

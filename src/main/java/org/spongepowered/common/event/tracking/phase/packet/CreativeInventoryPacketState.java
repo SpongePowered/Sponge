@@ -37,7 +37,7 @@ final class CreativeInventoryPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         // We specifically capture because the entities are already
         // being captured in a drop event, and therefor will be
         // spawned manually into the world by the creative event handling.

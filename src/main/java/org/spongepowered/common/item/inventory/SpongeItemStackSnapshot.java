@@ -166,6 +166,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if(this.compound != null) {
             nativeStack.setTagCompound(this.compound.copy());
         }
+        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            ((ItemStack) nativeStack).offer(manipulator.asMutable());
+        }
         return ItemStackUtil.fromNative(nativeStack);
     }
 

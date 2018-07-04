@@ -111,7 +111,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData peek = phaseTracker.getCurrentPhaseData();
         final IPhaseState<?> phaseState = peek.state;
-        if (phaseState == null || !phaseState.isInteraction()) {
+        if (!phaseState.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
             if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, playerIn).isCancelled()) {
                 return true;

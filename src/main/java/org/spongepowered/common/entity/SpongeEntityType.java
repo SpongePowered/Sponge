@@ -30,6 +30,11 @@ import net.minecraft.entity.EnumCreatureType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.EntityTrackerCategory;
+import org.spongepowered.common.config.category.EntityTrackerModCategory;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
@@ -74,6 +79,11 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public int trackingRange;
     public int updateFrequency;
     public boolean sendsVelocityUpdates;
+    // Used by tracker config
+    public boolean allowsBlockBulkCapture = true;
+    public boolean allowsEntityBulkCapture = true;
+    public boolean allowsBlockEventCreation = true;
+    public boolean allowsEntityEventCreation = true;
 
     public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
         this(id, name.toLowerCase(Locale.ENGLISH), "minecraft", clazz, translation);
@@ -85,6 +95,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
         this.modId = modId.toLowerCase(Locale.ENGLISH);
+        this.initializeTrackerState();
     }
 
     private static Translation check(@Nullable Translation translation) {
@@ -117,6 +128,36 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
 
     public void setActivationRangeInitialized(boolean flag) {
         this.activationRangeInitialized = flag;
+    }
+
+    public void initializeTrackerState() {
+        SpongeConfig<TrackerConfig> trackerConfig = SpongeImpl.getTrackerConfig();
+        EntityTrackerCategory entityTracker = trackerConfig.getConfig().getEntityTracker();
+        EntityTrackerModCategory modCapturing = entityTracker.getModMappings().get(this.modId);
+
+        if (modCapturing == null) {
+            modCapturing = new EntityTrackerModCategory();
+            entityTracker.getModMappings().put(this.modId, modCapturing);
+        }
+        if (!modCapturing.isEnabled()) {
+            this.allowsBlockBulkCapture = false;
+            this.allowsEntityBulkCapture = false;
+            this.allowsBlockEventCreation = false;
+            this.allowsEntityEventCreation = false;
+            modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockBulkCapture);
+            modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityBulkCapture);
+            modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsBlockEventCreation);
+            modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> this.allowsEntityEventCreation);
+        } else {
+            this.allowsBlockBulkCapture = modCapturing.getBlockBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityBulkCapture = modCapturing.getEntityBulkCaptureMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsBlockEventCreation = modCapturing.getBlockEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+            this.allowsEntityEventCreation = modCapturing.getEntityEventCreationMap().computeIfAbsent(this.entityName.toLowerCase(Locale.ENGLISH), k -> true);
+        }
+
+        if (entityTracker.autoPopulateData()) {
+            trackerConfig.save();
+        }
     }
 
     @SuppressWarnings("unchecked")

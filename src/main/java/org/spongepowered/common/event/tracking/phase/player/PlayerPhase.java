@@ -22,32 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
+package org.spongepowered.common.event.tracking.phase.player;
 
-import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public class ExplosionContext extends PluginPhaseContext<ExplosionContext> {
+public final class PlayerPhase extends TrackingPhase {
 
-    private Explosion explosion;
+    public static final class State {
 
-    public ExplosionContext() {
-        super(PluginPhase.State.CUSTOM_EXPLOSION);
+        public static final IPhaseState<GeneralizedContext> PLAYER_LOGOUT = new PlayerLogoutPhaseState();
     }
 
-    public ExplosionContext explosion(Explosion explosion) {
-        this.explosion = explosion;
-        return this;
+    public static PlayerPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    public Explosion getExplosion() {
-        return explosion;
+    PlayerPhase() {
     }
 
-    @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "CustomExplosion", this.explosion)
-            ;
+    private static final class Holder {
+
+        static final PlayerPhase INSTANCE = new PlayerPhase();
     }
+
 }

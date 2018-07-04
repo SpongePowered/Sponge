@@ -22,32 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
-
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-
-public class WorldUnload extends GeneralState<GeneralizedContext> {
-
-    @Override
-    public boolean canSwitchTo(IPhaseState<?> state) {
-        return true;
-    }
-
-
-    @Override
-    public boolean shouldCaptureBlockChangeOrSkip(GeneralizedContext phaseContext, BlockPos pos) {
-        return false;
-    }
-
-    @Override
-    public GeneralizedContext createPhaseContext() {
-        return new GeneralizedContext(this);
-    }
-
-    @Override
-    public void unwind(GeneralizedContext context) {
-
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.event.tracking.phase.player;

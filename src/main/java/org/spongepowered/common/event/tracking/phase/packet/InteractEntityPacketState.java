@@ -79,7 +79,7 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 

@@ -41,6 +41,7 @@ import org.spongepowered.common.config.type.ConfigBase;
 import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.util.IpSet;
 
@@ -58,6 +59,7 @@ public class SpongeConfig<T extends ConfigBase> {
 
     public enum Type {
         CUSTOM_DATA(CustomDataConfig.class),
+        TRACKER(TrackerConfig.class),
         GLOBAL(GlobalConfig.class),
         DIMENSION(DimensionConfig.class),
         WORLD(WorldConfig.class);

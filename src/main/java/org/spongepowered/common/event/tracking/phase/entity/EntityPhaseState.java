@@ -43,10 +43,11 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> implements IP
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(E context) {
         return true;
     }
 
+    // TODO - Find out whether this is used anymore or not.
     @Nullable
     public net.minecraft.entity.Entity returnTeleportResult(PhaseContext<?> context, MoveEntityEvent.Teleport.Portal event) {
         return null;

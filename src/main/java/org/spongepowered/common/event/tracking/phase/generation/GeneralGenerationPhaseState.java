@@ -44,7 +44,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A generalized
+ * A generalized generation phase state. Used for entering populator world generation,
+ * new chunk generation, and world spawner entity spawning (since it is used as a populator).
+ * Generally does not capture or throw events unless necessary.
  */
 @SuppressWarnings("rawtypes")
 abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> implements IPhaseState<G> {
@@ -86,8 +88,13 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public final boolean isExpectedForReEntrance() {
-        return true;
+    public boolean requiresPost() {
+        return false;
+    }
+
+    @Override
+    public final boolean isNotReEntrant() {
+        return false;
     }
 
     @Override
@@ -101,12 +108,17 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean ignoresEntityCollisions() {
+        return true;
+    }
+
+    @Override
+    public boolean doesBulkBlockCapture(G context) {
         return false;
     }
 
     @Override
-    public boolean alreadyCapturingItemSpawns() {
+    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 
@@ -118,6 +130,11 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     @Override
     public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
 
+    }
+
+    @Override
+    public boolean doesBlockEventTracking(G context) {
+        return false;
     }
 
     @Override

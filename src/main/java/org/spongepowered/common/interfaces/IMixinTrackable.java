@@ -22,18 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.blockcapturing;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.world.World;
+public interface IMixinTrackable {
 
-public interface IModData_BlockCapturing {
+    boolean allowsBlockBulkCapture();
 
-    boolean processTickChangesImmediately();
+    boolean allowsEntityBulkCapture();
 
-    boolean requiresBlockCapturingRefresh();
+    boolean allowsBlockEventCreation();
 
-    void requiresBlockCapturingRefresh(boolean refresh);
+    boolean allowsEntityEventCreation();
 
-    void initializeBlockCapturingState(World worldIn);
-
+    void refreshCache();
 }
