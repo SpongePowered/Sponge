@@ -141,12 +141,6 @@ public class GlobalConfig extends GeneralConfigBase {
         return this.world;
     }
 
-    @Override
-    public boolean isConfigEnabled() {
-        // always return true as there is only 1 global config
-        return true;
-    }
-
     public PhaseTrackerCategory getPhaseTracker() {
         return this.causeTracker;
     }
