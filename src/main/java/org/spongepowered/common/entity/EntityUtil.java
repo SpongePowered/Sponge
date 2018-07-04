@@ -408,8 +408,9 @@ public final class EntityUtil {
                 // Only place entity in portal if one of the following are true :
                 // 1. The teleporter is custom. (not vanilla)
                 // 2. The last known portal vec is known. (Usually set after block collision)
+                // 3. The entity is traveling to end from a non-end world.
                 // Note: We must always use placeInPortal to support mods.
-                if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null) {
+                if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null || (!(fromWorld.provider instanceof WorldProviderEnd) && toWorld.provider instanceof WorldProviderEnd)) {
                     // In Forge, the entity dimension is already set by this point.
                     // To maintain compatibility with Forge mods, we temporarily
                     // set the entity's dimension to the current target dimension
