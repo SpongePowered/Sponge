@@ -246,9 +246,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Inject(method = "addEntity", at = @At("RETURN"))
     private void onChunkAddEntity(Entity entityIn, CallbackInfo ci) {
-        if (!entityIn.isDead) {
-            ((IMixinEntity) entityIn).setActiveChunk(this);
-        }
+        ((IMixinEntity) entityIn).setActiveChunk(this);
     }
 
     @Inject(method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
