@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
+public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICaptureSupplier {
     @Nullable private List<T> captured;
 
     CapturedSupplier() {
@@ -51,16 +51,17 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
 
     /**
      * Returns {@code true} if there are no captured objects.
-     * 
+     *
      * @return {@code true} if empty
      */
+    @Override
     public final boolean isEmpty() {
         return this.captured == null || this.captured.isEmpty();
     }
 
     /**
      * If not empty, activates the consumer then clears all captures.
-     * 
+     *
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<List<T>> consumer) {
@@ -74,7 +75,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     /**
      * If not empty, returns the captured {@link List}.
      * Otherwise, this will return the passed list.
-     * 
+     *
      * @param list The fallback list
      * @return If not empty, the captured list otherwise the fallback list
      */
@@ -88,7 +89,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
 
     /**
      * If not empty, returns a sequential stream of values associated with key.
-     * 
+     *
      * @param key The key
      * @return A sequential stream of values
      */

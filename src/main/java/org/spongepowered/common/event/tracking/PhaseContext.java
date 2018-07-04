@@ -51,6 +51,7 @@ import org.spongepowered.common.event.tracking.context.CapturedSupplier;
 import org.spongepowered.common.event.tracking.context.EntityItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.EntityItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
@@ -296,6 +297,24 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
 
+    public boolean notAllCapturesProcessed() {
+        return
+                isNonEmpty(this.blocksSupplier)
+                || isNonEmpty(this.blockItemDropsSupplier)
+                || isNonEmpty(this.blockItemEntityDropsSupplier)
+                || isNonEmpty(this.capturedItemsSupplier)
+                || isNonEmpty(this.capturedEntitiesSupplier)
+                || isNonEmpty(this.capturedItemStackSupplier)
+                || isNonEmpty(this.entityItemDropsSupplier)
+                || isNonEmpty(this.entityItemEntityDropsSupplier)
+                || isNonEmpty(this.blockEntitySpawnSupplier);
+    }
+
+    private boolean isNonEmpty(@Nullable ICaptureSupplier supplier) {
+        return supplier != null && !supplier.isEmpty();
+    }
+
+
     public boolean shouldProcessImmediately() {
         return this.processImmediately;
     }
@@ -501,4 +520,5 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                 .add(this.stackTrace);
         }
     }
+
 }
