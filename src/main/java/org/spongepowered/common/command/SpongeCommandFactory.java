@@ -61,6 +61,7 @@ import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
+import org.spongepowered.api.command.args.CommandFlags;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -84,9 +85,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.ConfigBase;
 import org.spongepowered.common.config.type.DimensionConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -171,7 +173,8 @@ public class SpongeCommandFactory {
      */
     @SuppressWarnings("deprecation")
     public static CommandSpec createSpongeCommand() {
-        final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
+        final ChildCommandElementExecutor trackerFlagChildren = new ChildCommandElementExecutor(null);
+        final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(trackerFlagChildren, DUMMY_ELEMENT, true);
         final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren, DUMMY_ELEMENT, true);
         nonFlagChildren.register(createSpongeVersionCommand(), "version");
         nonFlagChildren.register(createSpongeBlockInfoCommand(), "blockInfo");
@@ -182,12 +185,16 @@ public class SpongeCommandFactory {
         nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
         nonFlagChildren.register(createSpongeWhichCommand(), "which");
         flagChildren.register(createSpongeChunksCommand(), "chunks");
-        flagChildren.register(createSpongeConfigCommand(), "config");
-        flagChildren.register(createSpongeReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
-        flagChildren.register(createSpongeSaveCommand(), "save");
         flagChildren.register(createSpongeTpsCommand(), "tps");
+        trackerFlagChildren.register(createSpongeConfigCommand(), "config");
+        trackerFlagChildren.register(createSpongeReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
+        trackerFlagChildren.register(createSpongeSaveCommand(), "save");
 
         SpongeImplHooks.registerAdditionalCommands(flagChildren, nonFlagChildren);
+        CommandFlags.Builder flags = flags()
+                .flag("-global", "g")
+                .valueFlag(world(Text.of("world")), "-world", "w")
+                .valueFlag(dimension(Text.of("dimension")), "-dimension", "d");
 
         return CommandSpec.builder()
                 .description(Text.of("General Sponge command"))
@@ -203,11 +210,9 @@ public class SpongeCommandFactory {
                         INDENT, title("which"), LONG_INDENT, "List plugins that own a specific command\n",
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds\n",
                         SpongeImplHooks.getAdditionalCommandDescriptions()))
-                .arguments(firstParsing(nonFlagChildren, flags()
-                        .flag("-global", "g")
-                        .valueFlag(world(Text.of("world")), "-world", "w")
-                        .valueFlag(dimension(Text.of("dimension")), "-dimension", "d")
-                        .buildWith(flagChildren)))
+                .arguments(firstParsing(nonFlagChildren,
+                        flags.buildWith(flagChildren),
+                        flags.flag("-tracker", "t").buildWith(trackerFlagChildren)))
                 .executor(nonFlagChildren)
                 .build();
     }
@@ -222,7 +227,10 @@ public class SpongeCommandFactory {
 
         @Override
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-            int successes = 0;
+            return execute(src, args, 0);
+        }
+
+        public CommandResult execute(CommandSource src, CommandContext args, int successes) throws CommandException {
             if (args.hasAny("global")) {
                 src.sendMessage(Text.of("Global: ", processGlobal(SpongeImpl.getGlobalConfig(), src, args)));
                 ++successes;
@@ -266,8 +274,31 @@ public class SpongeCommandFactory {
             return process(config, source, args);
         }
 
-        protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
+        protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
             return Text.of("Unimplemented");
+        }
+    }
+
+    private abstract static class ConfigIncludingTrackerUsingExecutor extends ConfigUsingExecutor {
+
+        ConfigIncludingTrackerUsingExecutor(boolean requireWorldLoaded) {
+            super(requireWorldLoaded);
+        }
+
+        @Override
+        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+            int successes = 0;
+            if (args.hasAny("tracker")) {
+                src.sendMessage(Text.of("Tracker: ", processTracker(SpongeImpl.getTrackerConfig(), src, args)));
+                ++successes;
+            }
+
+            return execute(src, args, successes);
+        }
+
+        protected Text processTracker(SpongeConfig<TrackerConfig> config, CommandSource source, CommandContext args)
+                throws CommandException {
+            return process(config, source, args);
         }
     }
 
@@ -340,14 +371,17 @@ public class SpongeCommandFactory {
                 .build();
     }
 
+    // Tracker flag children
+
     private static CommandSpec createSpongeConfigCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Inspect the Sponge config"))
                 .arguments(seq(string(Text.of("key")), optional(string(Text.of("value")))))
                 .permission("sponge.command.config")
-                .executor(new ConfigUsingExecutor(false) {
+                .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                            throws CommandException {
                         final Optional<String> key = args.getOne("key");
                         final Optional<String> value = args.getOne("value");
                         if (config.getSetting(key.get()) == null || config.getSetting(key.get()).isVirtual()) {
@@ -372,9 +406,10 @@ public class SpongeCommandFactory {
         return CommandSpec.builder()
                 .description(Text.of("Reload the Sponge game"))
                 .permission("sponge.command.reload")
-                .executor(new ConfigUsingExecutor(false) {
+                .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                            throws CommandException {
                         config.reload();
                         SpongeHooks.refreshActiveConfigs();
                         return Text.of("Reloaded configuration");
@@ -387,9 +422,10 @@ public class SpongeCommandFactory {
         return CommandSpec.builder()
                 .description(Text.of("Save the configuration"))
                 .permission("sponge.command.save")
-                .executor(new ConfigUsingExecutor(false) {
+                .executor(new ConfigIncludingTrackerUsingExecutor(false) {
                     @Override
-                    protected Text process(SpongeConfig<? extends GeneralConfigBase> config, CommandSource source, CommandContext args) throws CommandException {
+                    protected Text process(SpongeConfig<? extends ConfigBase> config, CommandSource source, CommandContext args)
+                            throws CommandException {
                         config.save();
                         return Text.of("Saved");
                     }
