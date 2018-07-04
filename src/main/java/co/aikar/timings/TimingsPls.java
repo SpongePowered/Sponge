@@ -26,16 +26,25 @@ package co.aikar.timings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 
 final class TimingsPls {
     private static final Object2IntMap<EntityType> ENTITY_IDS = new Object2IntOpenHashMap<>();
+    private static final Object2IntMap<TileEntityType> TILE_ENTITY_IDS = new Object2IntOpenHashMap<>();
     private static final int NOT_FOUND = Integer.MIN_VALUE;
     private static int nextEntityId = 56991891; // Some random number
+    private static int nextTileEntityId = 13221456; // Some random number
 
     static {
         ENTITY_IDS.defaultReturnValue(NOT_FOUND);
+        int count = -1;
+        for (TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
+            TILE_ENTITY_IDS.put(tileEntityType, count++);
+        }
     }
 
     public static int getEntityId(final EntityType type) {
@@ -46,6 +55,18 @@ final class TimingsPls {
         if ((fake = ENTITY_IDS.getInt(type)) == NOT_FOUND) {
             fake = nextEntityId++;
             ENTITY_IDS.put(type, fake);
+        }
+        return fake;
+    }
+
+    public static int getTileEntityId(final TileEntityType type) {
+        if (type instanceof SpongeTileEntityType) {
+            return TILE_ENTITY_IDS.get(type);
+        }
+        int fake;
+        if ((fake = TILE_ENTITY_IDS.getInt(type)) == NOT_FOUND) {
+            fake = nextTileEntityId++;
+            TILE_ENTITY_IDS.put(type, fake);
         }
         return fake;
     }

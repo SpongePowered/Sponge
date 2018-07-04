@@ -101,6 +101,7 @@ public class FullServerTickHandler extends TimingHandler {
             TimingsManager.HISTORY.add(new TimingHistory());
             TimingsManager.resetTimings();
         }
+        TimingsExport.reportTimings();
     }
 
     boolean isViolated() {

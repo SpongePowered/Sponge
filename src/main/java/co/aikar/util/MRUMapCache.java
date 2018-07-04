@@ -33,8 +33,8 @@ import java.util.Set;
  * Implements a Most Recently Used cache in front of a backing map, to quickly
  * access the last accessed result.
  *
- * @param <K>
- * @param <V>
+ * @param <K> Key Type of the Map
+ * @param <V> Value Type of the Map
  */
 public class MRUMapCache<K, V> extends AbstractMap<K, V> {
 
@@ -119,10 +119,10 @@ public class MRUMapCache<K, V> extends AbstractMap<K, V> {
     /**
      * Wraps the specified map with a most recently used cache
      *
-     * @param map
-     * @param <K>
-     * @param <V>
-     * @return
+     * @param map Map to be wrapped
+     * @param <K> Key Type of the Map
+     * @param <V> Value Type of the Map
+     * @return Map
      */
     public static <K, V> Map<K, V> of(Map<K, V> map) {
         return new MRUMapCache<>(map);

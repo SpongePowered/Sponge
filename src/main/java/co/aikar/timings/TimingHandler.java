@@ -25,7 +25,7 @@
 package co.aikar.timings;
 
 import co.aikar.util.LoadingIntMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeImpl;
 
@@ -37,7 +37,7 @@ class TimingHandler implements Timing {
     final String name;
     private final boolean verbose;
 
-    final Int2ObjectMap<TimingData> children = new LoadingIntMap<>(TimingData.LOADER);
+    final Int2ObjectOpenHashMap<TimingData> children = new LoadingIntMap<>(TimingData::new);
 
     final TimingData record;
     private final TimingHandler groupHandler;
@@ -45,8 +45,8 @@ class TimingHandler implements Timing {
     private long start = 0;
     private int timingDepth = 0;
     private boolean added;
-    boolean timed;
-    boolean enabled;
+    protected boolean timed;
+    protected boolean enabled;
     private TimingHandler parent;
 
     TimingHandler(TimingIdentifier id) {
@@ -202,4 +202,20 @@ class TimingHandler implements Timing {
         return this == TimingsManager.FULL_SERVER_TICK || this == TimingsManager.TIMINGS_TICK;
     }
 
+    boolean isTimed() {
+        return timed;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    TimingData[] cloneChildren() {
+        final TimingData[] clonedChildren = new TimingData[children.size()];
+        int i = 0;
+        for (TimingData child : children.values()) {
+            clonedChildren[i++] = child.clone();
+        }
+        return clonedChildren;
+    }
 }
