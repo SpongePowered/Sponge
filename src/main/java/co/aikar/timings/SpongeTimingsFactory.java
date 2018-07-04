@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.TimingsCategory;
 
@@ -171,7 +173,12 @@ public class SpongeTimingsFactory implements TimingsFactory {
         if (sender == null) {
             sender = SpongeImpl.getGame().getServer().getConsole();
         }
-        TimingsExport.reportTimings(sender);
+        TimingsExport.requestingReport.add(MessageChannel.fixed(sender));
+    }
+
+    @Override
+    public void generateReport(MessageChannel channel) {
+        TimingsExport.requestingReport.add(channel);
     }
 
     public static long getCost() {

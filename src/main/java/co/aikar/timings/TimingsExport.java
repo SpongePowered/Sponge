@@ -30,22 +30,23 @@ import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import co.aikar.util.JSONUtil;
 import co.aikar.util.JSONUtil.JsonObjectBuilder;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.block.Block;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.SpongeImpl;
 
@@ -58,6 +59,7 @@ import java.lang.management.RuntimeMXBean;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
@@ -68,13 +70,15 @@ class TimingsExport extends Thread {
     private static final Joiner RUNTIME_FLAG_JOINER = Joiner.on(" ");
     private static final Joiner CONFIG_PATH_JOINER = Joiner.on(".");
 
-    private final CommandSource sender;
+    private final TimingsReportListener listeners;
     private final JsonObject out;
     private final TimingHistory[] history;
+    private static long lastReport = 0;
+    final static List<MessageChannel> requestingReport = Lists.newArrayList();
 
-    TimingsExport(CommandSource sender, JsonObject out, TimingHistory[] history) {
+    TimingsExport(TimingsReportListener listeners, JsonObject out, TimingHistory[] history) {
         super("Timings paste thread");
-        this.sender = sender;
+        this.listeners = listeners;
         this.out = out;
         this.history = history;
     }
@@ -88,7 +92,29 @@ class TimingsExport extends Thread {
      *
      * @param sender Who to report to
      */
-    static void reportTimings(CommandSource sender) {
+    static void reportTimings() {
+        if (requestingReport.isEmpty()) {
+            return;
+        }
+        TimingsReportListener listeners = new TimingsReportListener(requestingReport);
+
+        requestingReport.clear();
+        long now = System.currentTimeMillis();
+        final long lastReportDiff = now - lastReport;
+        if (lastReportDiff < 60000) {
+            listeners.send(Text.of(TextColors.RED, "Please wait at least 1 minute in between Timings reports. (" + (int)((60000 - lastReportDiff) / 1000) + " seconds)"));
+            listeners.done();
+            return;
+        }
+        final long lastStartDiff = now - TimingsManager.timingStart;
+        if (lastStartDiff < 180000) {
+            listeners.send(Text.of(TextColors.RED, "Please wait at least 3 minutes before generating a Timings report. Unlike Timings v1, v2 benefits from longer timings and is not as useful with short timings. (" + (int)((180000 - lastStartDiff) / 1000) + " seconds)"));
+            listeners.done();
+            return;
+        }
+        listeners.send(Text.of(TextColors.GREEN, "Preparing Timings Report..."));
+        lastReport = now;
+
         Platform platform = SpongeImpl.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
@@ -120,20 +146,20 @@ class TimingsExport extends Thread {
                     return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
                 })));
 
-        Set<BlockType> blockTypeSet = Sets.newHashSet();
+        Set<TileEntityType> tileEntityTypeSet = Sets.newHashSet();
         Set<EntityType> entityTypeSet = Sets.newHashSet();
 
         int size = HISTORY.size();
         TimingHistory[] history = new TimingHistory[size + 1];
         int i = 0;
         for (TimingHistory timingHistory : HISTORY) {
-            blockTypeSet.addAll(timingHistory.blockTypeSet);
+            tileEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
             entityTypeSet.addAll(timingHistory.entityTypeSet);
             history[i++] = timingHistory;
         }
 
         history[i] = new TimingHistory(); // Current snapshot
-        blockTypeSet.addAll(history[i].blockTypeSet);
+        tileEntityTypeSet.addAll(history[i].tileEntityTypeSet);
         entityTypeSet.addAll(history[i].entityTypeSet);
 
         JsonObjectBuilder handlersBuilder = JSONUtil.objectBuilder();
@@ -156,8 +182,8 @@ class TimingsExport extends Thread {
                 .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) -> {
                     return JSONUtil.singleObjectPair(entry.getValue(), entry.getKey());
                 }))
-                .add("tileentity", JSONUtil.mapArrayToObject(blockTypeSet, (blockType) -> {
-                    return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getId());
+                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) -> {
+                    return JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(tileEntityType), tileEntityType.getName());
                 }))
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> {
                     if (entityType == EntityTypes.UNKNOWN) {
@@ -182,7 +208,7 @@ class TimingsExport extends Thread {
         builder.add("config", JSONUtil.objectBuilder()
                 .add("sponge", serializeConfigNode(SpongeImpl.getGlobalConfig().getRootNode())));
 
-        new TimingsExport(sender, builder.build(), history).start();
+        new TimingsExport(listeners, builder.build(), history).start();
     }
 
     static long getCost() {
@@ -244,9 +270,16 @@ class TimingsExport extends Thread {
 
     @Override
     public synchronized void start() {
-        if (this.sender instanceof RconSource) {
-            this.sender.sendMessage(Text.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
-            this.sender.sendMessage(Text.of(TextColors.RED, "You should use ", TextColors.YELLOW,
+        boolean containsRconSource = false;
+        for (MessageReceiver receiver : this.listeners.getChannel().getMembers()) {
+            if (receiver instanceof RconSource) {
+                containsRconSource = true;
+                break;
+            }
+        }
+        if (containsRconSource) {
+            this.listeners.send(Text.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
+            this.listeners.send(Text.of(TextColors.RED, "You should use ", TextColors.YELLOW,
                     "/sponge timings report" + TextColors.RED, " in game or console."));
             run();
         } else {
@@ -256,11 +289,10 @@ class TimingsExport extends Thread {
 
     @Override
     public void run() {
-        this.sender.sendMessage(Text.of(TextColors.GREEN, "Preparing Timings Report..."));
-
         this.out.add("data", JSONUtil.mapArray(this.history, TimingHistory::export));
 
         String response = null;
+        String timingsURL = null;
         try {
             String hostname = "localhost";
             try {
@@ -287,30 +319,29 @@ class TimingsExport extends Thread {
             response = getResponse(con);
 
             if (con.getResponseCode() != 302) {
-                this.sender.sendMessage(Text.of(
+                this.listeners.send(Text.of(
                         TextColors.RED, "Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage()));
-                this.sender.sendMessage(Text.of(TextColors.RED, "Check your logs for more information"));
+                this.listeners.send(Text.of(TextColors.RED, "Check your logs for more information"));
                 if (response != null) {
                     SpongeImpl.getLogger().fatal(response);
                 }
                 return;
             }
 
-            String location = con.getHeaderField("Location");
-            this.sender.sendMessage(Text.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(location)), location));
-            if (!(this.sender instanceof ConsoleSource)) {
-                SpongeImpl.getLogger().info("View Timings Report: " + location);
-            }
+            timingsURL = con.getHeaderField("Location");
+            this.listeners.send(Text.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(timingsURL)), timingsURL));
 
             if (response != null && !response.isEmpty()) {
                 SpongeImpl.getLogger().info("Timing Response: " + response);
             }
         } catch (IOException ex) {
-            this.sender.sendMessage(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
+            this.listeners.send(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
             if (response != null) {
                 SpongeImpl.getLogger().fatal(response);
             }
             SpongeImpl.getLogger().fatal("Could not paste timings", ex);
+        } finally {
+            this.listeners.done(timingsURL);
         }
     }
 
@@ -328,7 +359,7 @@ class TimingsExport extends Thread {
             return bos.toString();
 
         } catch (IOException ex) {
-            this.sender.sendMessage(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
+            this.listeners.send(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
             SpongeImpl.getLogger().warn(con.getResponseMessage(), ex);
             return null;
         } finally {
