@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayListMultimap<K, V>> {
+public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayListMultimap<K, V>>, ICaptureSupplier {
 
     @Nullable private ArrayListMultimap<K, V> captured;
 
@@ -55,16 +55,17 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
 
     /**
      * Returns {@code true} if there are no captured objects.
-     * 
+     *
      * @return {@code true} if empty
      */
+    @Override
     public final boolean isEmpty() {
         return this.captured == null || this.captured.isEmpty();
     }
 
     /**
      * If not empty, activates the consumer then clears all captures.
-     * 
+     *
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
@@ -83,7 +84,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
 
     /**
      * If not empty, activates the {@link BiConsumer} with captures.
-     * 
+     *
      * @param biConsumer The consumer to activate
      */
     public final void acceptIfNotEmpty(BiConsumer<K, List<V>> biConsumer) {
@@ -101,7 +102,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
     /**
      * If not empty, activates the consumer with the captured
      * {@link ListMultimap}.
-     * 
+     *
      * @param consumer The consumer to activate
      */
     public final void acceptIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
@@ -113,7 +114,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
     /**
      * If not empty and key is present, removes the key then activates
      * the consumer with the captured {@link ListMultimap}.
-     * 
+     *
      * @param key The key to process and remove
      * @param consumer The consumer to activate
      */
@@ -142,10 +143,10 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
 
     /**
      * If not empty, removes all values associated with key.
-     * 
+     *
      * Note: If you require the list of removals, use
      * {@link #acceptAndRemoveIfPresent}
-     * 
+     *
      * @param key The key to remove
      */
     public final void removeAllIfNotEmpty(K key) {
@@ -159,7 +160,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
     /**
      * If not empty, returns the captured {@link ListMultimap}.
      * Otherwise, this will return the passed list.
-     * 
+     *
      * @param list The fallback list
      * @return If not empty, the captured list otherwise the fallback list
      */
@@ -169,7 +170,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
 
     /**
      * If not empty, returns a sequential stream of values associated with key.
-     * 
+     *
      * @param key The key
      * @return A sequential stream of values
      */
@@ -180,7 +181,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
 
     /**
      * If not empty and key is present, applies the function to the resulting values.
-     * 
+     *
      * @param key The key
      * @param function The function to apply
      * @return The function result or null if no key was found

@@ -71,8 +71,10 @@ import org.spongepowered.common.world.WorldUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
@@ -142,6 +144,7 @@ public final class PhaseTracker {
     private final List<IPhaseState<?>> printedExceptionsForEntities = new ArrayList<>();
     private final List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
     private final List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
+    private final Set<IPhaseState<?>> printedExceptionsForUnprocessedState = new HashSet<>();
 
     // ----------------- STATE ACCESS ----------------------------------
 
@@ -224,6 +227,7 @@ public final class PhaseTracker {
         } catch (Exception e) {
             this.printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
         }
+        this.checkPhaseContextProcessed(state, context);
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         this.stack.pop();
@@ -373,11 +377,11 @@ public final class PhaseTracker {
         }
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, Throwable e) {
+    public void printMessageWithCaughtException(String header, String subHeader, @Nullable Throwable e) {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
     }
 
-    private void printMessageWithCaughtException(String header, String subHeader, IPhaseState<?> state, PhaseContext<?> context, Throwable t) {
+    private void printMessageWithCaughtException(String header, String subHeader, IPhaseState<?> state, PhaseContext<?> context, @Nullable Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -385,8 +389,10 @@ public final class PhaseTracker {
         CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-        printer.add("Stacktrace:")
-                .add(t);
+        if (t != null) {
+            printer.add("Stacktrace:")
+                    .add(t);
+        }
         printer.add();
         this.generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
@@ -420,6 +426,24 @@ public final class PhaseTracker {
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
             this.printedExceptionsForState.add(context.state);
         }
+    }
+
+    private void checkPhaseContextProcessed(IPhaseState<?> state, PhaseContext<?> context) {
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && this.printedExceptionsForUnprocessedState.contains(state)) {
+            return;
+        }
+
+        if (context.notAllCapturesProcessed()) {
+            this.printUnprocessedPhaseContextObjects(state, context);
+            this.printedExceptionsForUnprocessedState.add(state);
+
+        }
+    }
+
+    private void printUnprocessedPhaseContextObjects(IPhaseState<?> state, PhaseContext<?> context) {
+        this.printMessageWithCaughtException("Failed to process all PhaseContext captured!",
+                "During the processing of a phase, certain objects were captured in a PhaseContext. All of them should have been removed from the PhaseContext by this point",
+                state, context, null);
     }
 
     private void printBlockTrackingException(PhaseData phaseData, IPhaseState<?> phaseState, Throwable e) {
