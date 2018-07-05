@@ -145,6 +145,7 @@ public final class PhaseTracker {
     private final List<Tuple<IPhaseState<?>, IPhaseState<?>>> completedIncorrectStates = new ArrayList<>();
     private final List<IPhaseState<?>> printedExceptionsForState = new ArrayList<>();
     private final Set<IPhaseState<?>> printedExceptionsForUnprocessedState = new HashSet<>();
+    private final Set<IPhaseState<?>> printedExceptionForMaximumProcessDepth = new HashSet<>();
 
     // ----------------- STATE ACCESS ----------------------------------
 
@@ -891,5 +892,23 @@ public final class PhaseTracker {
 
 
         return false;
+    }
+
+    public static boolean checkMaxBlockProcessingDepth(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
+        int maxDepth = SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().getMaxBlockProcessingDepth();
+        if (currentDepth < maxDepth) {
+            return false;
+        }
+
+        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && PhaseTracker.getInstance().printedExceptionForMaximumProcessDepth.contains(state)) {
+            // We still want to abort processing even if we're not logigng an error
+            return true;
+        }
+
+        PhaseTracker.getInstance().printedExceptionForMaximumProcessDepth.add(state);
+        PhaseTracker.getInstance().printMessageWithCaughtException("Maximum block processing depth exceeded!", String.format("Sponge is still trying to process captured blocks after %s iterations of depth-first processing."
+                + " This is likely due to a mod doing something unusual.", currentDepth), state, context, null);
+
+        return true;
     }
 }
