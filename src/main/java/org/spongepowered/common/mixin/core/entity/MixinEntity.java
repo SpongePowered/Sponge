@@ -39,6 +39,7 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -51,6 +52,7 @@ import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -83,6 +85,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -105,6 +108,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
@@ -130,6 +134,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -152,9 +157,6 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = Entity.class, prefix = "entity$"))
 public abstract class MixinEntity implements org.spongepowered.api.entity.Entity, IMixinEntity, IMixinTrackable {
 
-    private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LAVA:Lnet/minecraft/util/DamageSource;";
-    private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
-    private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;IN_FIRE:Lnet/minecraft/util/DamageSource;";
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
     @SuppressWarnings("unused")
@@ -168,7 +170,6 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
     private float origHeight;
-    @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
     private BlockState currentCollidingBlock;
@@ -1402,6 +1403,42 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
             this.allowsEntityBulkCapture = ((SpongeEntityType) this.entityType).allowsEntityBulkCapture;
             this.allowsBlockEventCreation = ((SpongeEntityType) this.entityType).allowsBlockEventCreation;
             this.allowsEntityEventCreation = ((SpongeEntityType) this.entityType).allowsEntityEventCreation;
+        }
+    }
+
+
+    @Inject(method = "setFire",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD, ordinal = 0),
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            cancellable = true)
+    private void onFire(int seconds, CallbackInfo ci, int i) {
+        if (((IMixinWorld) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+            return;
+        }
+        if (this.fire < 1) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+
+                frame.pushCause(this.getLocation().getExtent());
+                IgniteEntityEvent event = SpongeEventFactory.
+                        createIgniteEntityEvent(frame.getCurrentCause(), i, i, this);
+
+                if (SpongeImpl.postEvent(event)) {
+                    ci.cancel();
+                }
+            }
+        }
+    }
+
+    @Redirect(method = "onStruckByLightning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    private boolean onSpongeLightningDamage(net.minecraft.entity.Entity entity, DamageSource source, float damage, EntityLightningBolt lightningBolt) {
+        if (!this.world.isRemote) {
+            return entity.attackEntityFrom(source, damage);
+        }
+        try {
+            DamageSource.LIGHTNING_BOLT = new EntityDamageSource("lightningBolt", lightningBolt);
+            return entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, damage);
+        } finally {
+            DamageSource.LIGHTNING_BOLT = source;
         }
     }
 
