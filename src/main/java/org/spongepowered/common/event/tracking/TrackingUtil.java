@@ -315,7 +315,7 @@ public final class TrackingUtil {
                     .state((BlockState) state)
                     .build();
             frame.pushCause(locatable);
-            final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
+            final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
 
             // We have to associate any notifiers in case of scheduled block updates from other sources
             final PhaseData current = phaseTracker.getCurrentPhaseData();
