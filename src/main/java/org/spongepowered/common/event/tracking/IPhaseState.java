@@ -305,7 +305,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
                 return false; // Short circuit
             }
             // And now, proceed as normal.
-            return TrackingUtil.performTransactionProcess(transaction, this, context, false);
+            return TrackingUtil.performTransactionProcess(transaction, this, context, false, 0);
         }
     }
     /**
@@ -372,9 +372,16 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
      * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
      *
+     * Due the recursive nature of the "depth first" strategy, certain mod blocks may
+     * cause this method to infinite recurse if they generate new transactions on every pass through.
+     * To avoid a StackOverflowError (which causes us to lose all of the associated context),
+     * we track the current depth . If the processing depth exceeeds a configurable threshold,
+     * processing is aborted, and the current tracker state and phase data are logged.
+     *
      * @param context The context to re-check for captures
+     * @param currentDepth The current processing depth, to prevenet stack overflows
      */
-    default void performPostBlockNotificationsAndNeighborUpdates(C context) {
+    default void performPostBlockNotificationsAndNeighborUpdates(C context, int currentDepth) {
 
     }
 

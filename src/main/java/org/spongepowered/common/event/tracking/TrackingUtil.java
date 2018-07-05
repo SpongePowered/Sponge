@@ -465,6 +465,10 @@ public final class TrackingUtil {
         };
     }
 
+    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context) {
+        return processBlockCaptures(snapshots, state, context, 0);
+    }
+
     /**
      * Processes the given list of {@link BlockSnapshot}s and creates and throws and processes
      * the {@link ChangeBlockEvent}s as appropriately determined based on the {@link BlockChange}
@@ -479,7 +483,7 @@ public final class TrackingUtil {
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
-    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context) {
+    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
         if (snapshots.isEmpty()) {
             return false;
         }
@@ -532,7 +536,7 @@ public final class TrackingUtil {
                 invalid.clear(); // Clear because we might re-enter for some reasons yet to be determined.
 
             }
-            return performBlockAdditions(postEvent.getTransactions(), state, context, noCancelledTransactions);
+            return performBlockAdditions(postEvent.getTransactions(), state, context, noCancelledTransactions, currentDepth);
         }
     }
 
@@ -630,11 +634,11 @@ public final class TrackingUtil {
     }
 
     private static boolean performBlockAdditions(List<Transaction<BlockSnapshot>> transactions, IPhaseState<?> phaseState,
-                                                PhaseContext<?> phaseContext, boolean noCancelledTransactions) {
+                                                PhaseContext<?> phaseContext, boolean noCancelledTransactions, int currentDepth) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         for (Transaction<BlockSnapshot> transaction : transactions) {
-            noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, noCancelledTransactions);
+            noCancelledTransactions = performTransactionProcess(transaction, phaseState, phaseContext, noCancelledTransactions, currentDepth);
         }
         return noCancelledTransactions;
     }
@@ -653,11 +657,12 @@ public final class TrackingUtil {
      * @param phaseState
      * @param phaseContext
      * @param noCancelledTransactions
+     * @param currentDepth The current processing depth, to avoid stack overflows
      * @return
      */
     @SuppressWarnings("rawtypes")
     public static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
-        boolean noCancelledTransactions) {
+        boolean noCancelledTransactions, int currentDepth) {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
         if (transaction.getCustom().isPresent()) {
@@ -700,7 +705,7 @@ public final class TrackingUtil {
             world.updateObservingBlocksAt(pos, newBlock);
         }
 
-        ((IPhaseState) phaseState).performPostBlockNotificationsAndNeighborUpdates(phaseContext);
+        ((IPhaseState) phaseState).performPostBlockNotificationsAndNeighborUpdates(phaseContext, currentDepth + 1);
         return noCancelledTransactions;
     }
 

@@ -35,6 +35,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.CapturedSupplier;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -199,12 +200,15 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context) {
+    public void performPostBlockNotificationsAndNeighborUpdates(UnwindingPhaseContext context, int depth) {
+        if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
+            return;
+        }
         final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = context.getCapturedBlockSupplier();
         capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
             blocks.clear();
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, context);
+            TrackingUtil.processBlockCaptures(blockSnapshots, this, context, depth);
         });
     }
 

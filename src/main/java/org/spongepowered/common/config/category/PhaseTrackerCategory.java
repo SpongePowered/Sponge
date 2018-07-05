@@ -73,6 +73,20 @@ public class PhaseTrackerCategory extends ConfigCategory {
         return this.isVerbose;
     }
 
+    @Setting(value = "max-block-processing-depth", comment = "The maximum number of times to recursively process transactions in a single phase.\n"
+                                                           + "Some mods may interact badly with Sponge's block capturing system, causing Sponge to\n"
+                                                           + "end up capturing block transactions every time it tries to process an existing batch.\n"
+                                                            + "Due to the recursive nature of the depth-first processing that Sponge uses to handle block transactions,\n"
+                                                            + "this can result in a stack overflow, which causes us to lose all infomration about the original cause of the issue.\n"
+                                                            + "To prevent a stack overflow, Sponge tracks the current processing depth, and aborts processing when it exceeds\n"
+                                                            + "this threshold.\n"
+                                                            + "The default value should almost always work properly -  it's unlikely you'll ever have to change it.")
+    private int maxBlockProcessingDepth = 100;
+
+    public int getMaxBlockProcessingDepth() {
+        return this.maxBlockProcessingDepth;
+    }
+
     public boolean verboseErrors() {
         return this.verboseErrors;
     }
