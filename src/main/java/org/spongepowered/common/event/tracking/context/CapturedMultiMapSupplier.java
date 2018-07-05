@@ -220,7 +220,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("Captured", this.captured == null ? 0 : this.captured.size())
+                .add("Captured", this.captured)
                 .toString();
     }
 

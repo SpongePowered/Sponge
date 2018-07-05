@@ -118,7 +118,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICapture
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("Captured", this.captured == null ? 0 : this.captured.size())
+                .add("Captured", this.captured)
                 .toString();
     }
 }
