@@ -150,6 +150,8 @@ public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, Ite
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
     public SlotLens getSlotLens(int ordinal) {
         return null;
     }

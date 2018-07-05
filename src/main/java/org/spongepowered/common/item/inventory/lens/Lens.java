@@ -84,7 +84,6 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * Used by parent lenses when marshalling their spanning tree, queries
      * whether this lens has access to a slot with the specified absolute index.
      * 
-     * @param inv Inventory
      * @param index Absolute slot index
      * @return true if this lens has a path to the specified slot index
      */
@@ -156,6 +155,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      */
     void invalidate(Fabric<TInventory> inv);
 
+    @SuppressWarnings("rawtypes")
     SlotLens getSlotLens(int ordinal);
 
 }

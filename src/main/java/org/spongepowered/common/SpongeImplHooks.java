@@ -457,4 +457,20 @@ public final class SpongeImplHooks {
                                         + " when the expected contain: " + professions);
 
     }
+
+    public static void onTETickStart(TileEntity te) {
+
+    }
+
+    public static void onTETickEnd(TileEntity te) {
+
+    }
+
+    public static void onEntityTickStart(Entity entity) {
+
+    }
+
+    public static void onEntityTickEnd(Entity entity) {
+
+    }
 }

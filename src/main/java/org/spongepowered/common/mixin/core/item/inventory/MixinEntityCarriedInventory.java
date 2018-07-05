@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Optional;
 
+@SuppressWarnings("rawtypes")
 @Mixin(value = {
     EntityVillager.class,
     EntityMinecartContainer.class

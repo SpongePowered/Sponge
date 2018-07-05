@@ -201,6 +201,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
     public SlotLens getSlotLens(int ordinal) {
         LensHandle handle = this.getLensForOrdinal(ordinal);
         if (handle == null) {

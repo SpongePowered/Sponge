@@ -92,7 +92,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow @Final private InventoryBasic villagerInventory; // villagerInventory
 
     @Shadow public abstract void setProfession(int professionId); // setProfession
-    @Shadow public abstract void setCustomer(EntityPlayer player);
+    @Shadow public abstract void setCustomer(@Nullable EntityPlayer player);
     @Shadow public abstract boolean shadow$isTrading(); // isTrading
     @Shadow @Nullable public abstract EntityPlayer shadow$getCustomer(); // getCustomer
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
@@ -238,6 +238,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         manipulators.add(getCareerData());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this);

@@ -214,7 +214,7 @@ public final class SpongeImpl {
 
     public static SpongeConfig<TrackerConfig> getTrackerConfig() {
         if (trackerConfig == null) {
-            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID);
+            trackerConfig = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null);
         }
         return trackerConfig;
     }

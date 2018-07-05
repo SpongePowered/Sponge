@@ -52,7 +52,7 @@ public class ImmutableSpongeSkinData extends AbstractImmutableData<ImmutableSkin
         this.skin = skin;
         this.updateTabList = updateTabList;
         this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN, SkinDataProcessor.EMPTY_SKIN, skin);
-        this.updateTabListValue = ImmutableSpongeValue.<Boolean>cachedOf(Keys.UPDATE_GAME_PROFILE, false, (boolean) updateTabList);
+        this.updateTabListValue = ImmutableSpongeValue.<Boolean>cachedOf(Keys.UPDATE_GAME_PROFILE, false, updateTabList);
         this.registerGetters();
     }
 

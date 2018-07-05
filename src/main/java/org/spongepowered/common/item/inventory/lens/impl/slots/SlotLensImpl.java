@@ -146,6 +146,7 @@ public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack
         return false;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public SlotLens getSlotLens(int ordinal) {
         if (ordinal != 0) {
