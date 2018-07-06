@@ -1429,4 +1429,50 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
     }
 
+
+    @Redirect(method = "setFire",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
+    )
+    private void onFire(net.minecraft.entity.Entity entity, int ticks) {
+        if (((IMixinWorld) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+            this.fire = ticks; // Vanilla functionality
+            return;
+        }
+        if (this.fire < 1 && !this.isImmuneToFireForIgniteEvent()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+
+                frame.pushCause(this.getLocation().getExtent());
+                IgniteEntityEvent event = SpongeEventFactory.
+                        createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, this);
+
+                if (SpongeImpl.postEvent(event)) {
+                    this.fire = 0;
+                    return; // set fire ticks to 0
+                }
+                if (event.getOriginalFireTicks() != event.getFireTicks()) {
+                    // means someone edited the fire ticks.
+                    this.fire = event.getFireTicks();
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean isImmuneToFireForIgniteEvent() { // Since normal entities don't have the concept of having game modes...
+        return false;
+    }
+
+    @Redirect(method = "onStruckByLightning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    private boolean onSpongeLightningDamage(net.minecraft.entity.Entity entity, DamageSource source, float damage, EntityLightningBolt lightningBolt) {
+        if (!this.world.isRemote) {
+            return entity.attackEntityFrom(source, damage);
+        }
+        try {
+            DamageSource.LIGHTNING_BOLT = new EntityDamageSource("lightningBolt", lightningBolt);
+            return entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, damage);
+        } finally {
+            DamageSource.LIGHTNING_BOLT = source;
+        }
+    }
+
 }

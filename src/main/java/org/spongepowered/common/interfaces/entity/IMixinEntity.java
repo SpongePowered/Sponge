@@ -36,6 +36,7 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -54,6 +55,15 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
     boolean isInConstructPhase();
 
     void firePostConstructEvents();
+
+    /**
+     * Overridden method for Players to determine whether this entity is immune to fire
+     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
+     * take fire damage, nor do they light on fire.
+     *
+     * @return True if this entity is immune to fire.
+     */
+    boolean isImmuneToFireForIgniteEvent();
 
     boolean isTeleporting();
 
