@@ -48,7 +48,7 @@ public class DeathTest {
                 return CommandResult.success();
             }
             )
-            .build(), "toggleDeath");
+            .build(), "toggledeath");
     }
 
     @Listener
