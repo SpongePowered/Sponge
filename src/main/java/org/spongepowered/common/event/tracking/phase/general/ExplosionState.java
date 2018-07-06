@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
@@ -43,7 +42,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 
@@ -64,7 +62,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(ExplosionContext context) {
         return true;
     }
 

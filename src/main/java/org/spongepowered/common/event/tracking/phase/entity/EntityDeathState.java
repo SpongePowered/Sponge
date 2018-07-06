@@ -29,7 +29,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -39,7 +38,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +47,7 @@ import java.util.stream.Collectors;
 final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(EntityDeathContext context) {
         return true;
     }
 

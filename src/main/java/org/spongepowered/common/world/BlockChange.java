@@ -37,16 +37,12 @@ import javax.annotation.Nullable;
 
 public enum BlockChange {
 
-    BREAK("BreakEvent") {
+    BREAK() {
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
         }
 
-//        @Override
-//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-//            Sponge.getCauseStackManager().addContext("BreakEvent", mainEvent);
-//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -54,38 +50,27 @@ public enum BlockChange {
         }
     },
     DECAY() {
-        @Nullable
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventDecay(cause, transactions);
         }
     },
-    MODIFY("ModifyEvent") {
+    MODIFY() {
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
         }
-
-//        @Override
-//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-//            Sponge.getCauseStackManager().addContext("ModifyEvent", mainEvent);
-//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
             return category.blockModifyLogging();
         }
     },
-    PLACE("PlaceEvent") {
+    PLACE() {
         @Override
         public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
             return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions);
         }
-
-//        @Override
-//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-//            Sponge.getCauseStackManager().addContext("PlaceEvent", mainEvent);
-//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -93,41 +78,13 @@ public enum BlockChange {
         }
     };
 
-    public static BlockChange forEvent(ChangeBlockEvent event) {
-        if (event instanceof ChangeBlockEvent.Break) {
-            return BlockChange.BREAK;
-        } else if (event instanceof ChangeBlockEvent.Decay) {
-            return BlockChange.DECAY;
-        } else if (event instanceof ChangeBlockEvent.Modify) {
-            return BlockChange.MODIFY;
-        } else if (event instanceof ChangeBlockEvent.Place) {
-            return BlockChange.PLACE;
-        } else {
-            return null;
-        }
-    }
+    BlockChange() { }
 
-    private final String eventName;
-
-    BlockChange() {
-        this("");
-    }
-
-    BlockChange(String eventName) {
-        this.eventName = eventName;
-    }
-
-    public String getEventSuggestedName() {
-        return this.eventName;
-    }
 
     public boolean allowsLogging(LoggingCategory category) {
         return false;
     }
 
-    @Nullable
-    public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-        return null;
-    }
+    public abstract ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions);
 
 }

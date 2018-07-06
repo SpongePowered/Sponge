@@ -55,7 +55,7 @@ final class UnknownPacketState extends BasicPacketState implements IEntitySpecif
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(BasicPacketContext context) {
         return true;
     }
 

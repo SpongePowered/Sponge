@@ -58,7 +58,7 @@ public class TileChunkUnloadState extends BlockPhaseState {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
         return false;
     }
 

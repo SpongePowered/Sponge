@@ -86,7 +86,6 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.Inventory2DLensImpl;
@@ -148,11 +147,12 @@ public final class ContainerUtil {
      * @param z the z position
      * @param inventory The inventory to drop items from
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
         final IPhaseState<?> currentState = currentPhase.state;
-        if (currentState.tracksBlockSpecificDrops()) {
-            final PhaseContext<?> context = currentPhase.context;
+        final PhaseContext<?> context = currentPhase.context;
+        if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
             // this is where we could perform item stack pre-merging.
             // For development reasons, not performing any pre-merging except after the entity item spawns.
 

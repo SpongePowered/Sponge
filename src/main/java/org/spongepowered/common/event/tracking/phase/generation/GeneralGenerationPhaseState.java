@@ -32,7 +32,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
@@ -103,7 +102,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> imple
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+    public boolean ignoresBlockUpdateTick(G context) {
         return true;
     }
 

@@ -39,6 +39,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -824,7 +825,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData phaseData = phaseTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
-        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData)) {
+        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData.context)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -995,11 +996,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Nullable
     private NextTickListEntry tmpScheduledObj;
 
-    /*@Redirect(method = "updateBlockTick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
-    private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
-        this.onCreateScheduledBlockUpdate(sbu, priority);
-    }*/
 
     @Redirect(method = "updateBlockTick", // really scheduleUpdate
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
@@ -1309,26 +1305,75 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     /**
+     * @author gabizou - July 6th, 2018
+     * @reason Sponge needs to phase track stuff in
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    @Overwrite
+    public void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority) {
+        Material material = blockIn.getDefaultState().getMaterial();
+
+        if (this.scheduledUpdatesAreImmediate && material != Material.AIR) {
+            if (blockIn.requiresUpdates()) {
+                if (this.isAreaLoaded(pos.add(-8, -8, -8), pos.add(8, 8, 8))) {
+                    IBlockState iblockstate = this.getBlockState(pos);
+
+                    if (iblockstate.getMaterial() != Material.AIR && iblockstate.getBlock() == blockIn) {
+                        // Delegate to TrackingUtil:
+                        final PhaseData data = PhaseTracker.getInstance().getCurrentPhaseData();
+                        final IPhaseState<?> state = data.state;
+                        if (((IPhaseState) state).ignoresBlockUpdateTick(data.context)) {
+                            iblockstate.getBlock().updateTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
+                            return;
+                        }
+                        TrackingUtil.updateTickBlock(this, blockIn, pos, iblockstate, this.rand);
+                        // Sponge End
+                    }
+                }
+
+                return;
+            }
+
+            delay = 1;
+        }
+
+        NextTickListEntry nextticklistentry = new NextTickListEntry(pos, blockIn);
+
+        if (this.isBlockLoaded(pos)) {
+            if (material != Material.AIR) {
+                nextticklistentry.setScheduledTime((long) delay + this.worldInfo.getWorldTotalTime());
+                nextticklistentry.setPriority(priority);
+            }
+
+            if (!this.pendingTickListEntriesHashSet.contains(nextticklistentry)) {
+                this.pendingTickListEntriesHashSet.add(nextticklistentry);
+                this.pendingTickListEntriesTreeSet.add(nextticklistentry);
+            }
+        }
+    }
+
+    /**
      * @author gabizou - March 12th, 2016
      *
      * Technically an overwrite to properly track on *server* worlds.
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-        if (peek.state.ignoresBlockUpdateTick(peek)) {
-            state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
-            // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
-            // No seriously, if this is not set back to false, all future updates are processed immediately
-            // and various things get caught under the Unwinding Phase.
+        try {
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+            if (((IPhaseState) peek.state).ignoresBlockUpdateTick(peek.context)) {
+                state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
+                return;
+            }
+            TrackingUtil.updateTickBlock(this, state.getBlock(), pos, state, random);
+        } finally {
+            // Sponge end - need to ensure it will be reset to false
             this.scheduledUpdatesAreImmediate = false;
-            return;
         }
-        TrackingUtil.updateTickBlock(this, state.getBlock(), pos, state, random);
-        // Sponge end
-        this.scheduledUpdatesAreImmediate = false;
     }
 
     /**
