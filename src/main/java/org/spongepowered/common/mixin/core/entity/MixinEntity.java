@@ -108,7 +108,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
@@ -1407,26 +1406,36 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
 
-    @Inject(method = "setFire",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD, ordinal = 0),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            cancellable = true)
-    private void onFire(int seconds, CallbackInfo ci, int i) {
+    @Redirect(method = "setFire",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;fire:I", opcode = Opcodes.PUTFIELD)
+    )
+    private void onFire(net.minecraft.entity.Entity entity, int ticks) {
         if (((IMixinWorld) world).isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+            this.fire = ticks; // Vanilla functionality
             return;
         }
-        if (this.fire < 1) {
+        if (this.fire < 1 && !this.isImmuneToFireForIgniteEvent()) {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
                 frame.pushCause(this.getLocation().getExtent());
                 IgniteEntityEvent event = SpongeEventFactory.
-                        createIgniteEntityEvent(frame.getCurrentCause(), i, i, this);
+                        createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, this);
 
                 if (SpongeImpl.postEvent(event)) {
-                    ci.cancel();
+                    this.fire = 0;
+                    return; // set fire ticks to 0
+                }
+                if (event.getOriginalFireTicks() != event.getFireTicks()) {
+                    // means someone edited the fire ticks.
+                    this.fire = event.getFireTicks();
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isImmuneToFireForIgniteEvent() { // Since normal entities don't have the concept of having game modes...
+        return false;
     }
 
     @Redirect(method = "onStruckByLightning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))

@@ -170,6 +170,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     @Shadow protected abstract void spawnShoulderEntities();
+    @Shadow public abstract boolean isCreative();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -835,5 +836,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public boolean shouldRestoreInventory() {
         return this.shouldRestoreInventory;
+    }
+
+    @Override
+    public boolean isImmuneToFireForIgniteEvent() {
+        return this.isSpectator() || this.isCreative();
     }
 }
