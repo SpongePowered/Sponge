@@ -68,7 +68,7 @@ abstract class TickPhaseState<C extends TickContext<C>> implements IPhaseState<C
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(C context) {
         return true;
     }
 

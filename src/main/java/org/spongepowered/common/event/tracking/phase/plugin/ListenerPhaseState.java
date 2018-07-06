@@ -68,7 +68,7 @@ abstract class ListenerPhaseState extends PluginPhaseState<ListenerPhaseContext>
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(ListenerPhaseContext context) {
         return true;
     }
 

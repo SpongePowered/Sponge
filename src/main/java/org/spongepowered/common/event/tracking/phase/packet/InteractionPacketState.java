@@ -102,7 +102,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(BasicPacketContext context) {
         return true;
     }
 

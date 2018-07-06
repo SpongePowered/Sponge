@@ -93,8 +93,21 @@ public final class PhaseTracker {
                                                 + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
                                                 + "possible to change this fact and must be reported to the offending mod for async "
                                                 + "issues.";
+    public static final String ASYNC_TRACKER_ACCESS = "Sponge adapts the vanilla handling of various processes, such as setting a block "
+                                                      + "or spawning an entity. Sponge is designed around the concept that Minecraft is "
+                                                      + "primarily performing these operations on the \"server thread\". Because of this "
+                                                      + "Sponge is safeguarding common access to the PhaseTracker as the entrypoint for "
+                                                      + "performing these sort of changes.";
 
     public static PhaseTracker getInstance() {
+        if (!SpongeImpl.isMainThread()) {
+            // lol no, report the block change properly
+            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
+                .addWrapped(ASYNC_TRACKER_ACCESS)
+                .add()
+                .add(new Exception("Async Block Change Detected"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+        }
         return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
     }
 

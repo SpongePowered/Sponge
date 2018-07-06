@@ -70,7 +70,7 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
         return false;
     }
 

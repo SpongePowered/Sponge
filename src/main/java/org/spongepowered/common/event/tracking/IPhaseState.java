@@ -294,12 +294,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             frame.pushCause(normalEvent); // Because of our contract for post events
             final ChangeBlockEvent.Post post = this.createChangeBlockPostEvent(context, transactions);
             SpongeImpl.postEvent(post);
-            if (post == null) {
-                return false;
-            }
             if (!transaction.isValid()) {
                 transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-                if (this.tracksBlockSpecificDrops()) {
+                if (this.tracksBlockSpecificDrops(context)) {
                     context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
                 }
                 return false; // Short circuit
@@ -401,7 +398,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, boolean)}
+     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, boolean, int)}
      * or {@link PostState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
@@ -462,8 +459,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * <p>This has potential for being configurable on a block id based basis.</p>
      * @return Whether per-block drops are being captured
+     * @param context
      */
-    default boolean tracksBlockSpecificDrops() {
+    default boolean tracksBlockSpecificDrops(C context) {
         return false;
     }
     /**
@@ -611,10 +609,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * {@link Block#updateTick(net.minecraft.world.World, BlockPos, IBlockState, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
-     * @param phaseData The phase data currently present
+     * @param context The phase data currently present
      * @return True if it's going to be ignored
      */
-    default boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+    default boolean ignoresBlockUpdateTick(C context) {
         return false;
     }
 

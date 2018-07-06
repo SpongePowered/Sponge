@@ -109,7 +109,7 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(GeneralizedContext context) {
         return true;
     }
 }
