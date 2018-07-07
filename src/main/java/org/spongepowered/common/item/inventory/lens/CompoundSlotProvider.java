@@ -32,7 +32,7 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompoundSlotProvider implements SlotProvider {
+public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider {
 
     private final List<SlotLens> slotList = new ArrayList<>();
 
@@ -48,7 +48,7 @@ public class CompoundSlotProvider implements SlotProvider {
     }
 
     @Override
-    public SlotLens getSlot(int index) {
+    public SlotLens getSlotLens(int index) {
         return this.slotList.get(index);
     }
 

@@ -28,7 +28,6 @@ import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.MultiBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.Location;
@@ -40,11 +39,10 @@ import org.spongepowered.common.interfaces.IMixinMultiBlockCarrier;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.LargeChestInventoryLens;
 
 import java.util.ArrayList;
@@ -62,22 +60,17 @@ public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdap
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        return ReusableLens.getLens(LargeChestInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
+        return ReusableLens.getLens(LargeChestInventoryLens.class, this, this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
     private SlotProvider generateSlotProvider() {
-        return new SlotCollection.Builder().add(this.getFabric().getSize()).build();
+        return new SlotLensCollection.Builder().add(this.getFabric().getSize()).build();
     }
 
     @SuppressWarnings("unchecked")
     private LargeChestInventoryLens generateRootLens(SlotProvider slots) {
         return new LargeChestInventoryLens(this, slots);
-    }
-
-    @Override
-    public Inventory getChild(Lens lens) {
-        return null;
     }
 
     @Override

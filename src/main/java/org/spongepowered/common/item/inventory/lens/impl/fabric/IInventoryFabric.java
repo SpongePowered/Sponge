@@ -29,7 +29,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 
 import java.util.Collection;
 
@@ -47,7 +46,7 @@ public class IInventoryFabric extends MinecraftFabric {
     }
 
     @Override
-    public IInventory get(int index) {
+    public Object get(int index) {
         return this.inventory;
     }
 

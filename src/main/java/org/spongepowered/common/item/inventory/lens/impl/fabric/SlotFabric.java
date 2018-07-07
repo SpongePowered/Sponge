@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.fabric;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Collection;
@@ -48,7 +46,7 @@ public class SlotFabric extends MinecraftFabric {
     }
 
     @Override
-    public IInventory get(int index) {
+    public Object get(int index) {
         if (this.slot.inventory != null) {
             return this.slot.inventory;
         }

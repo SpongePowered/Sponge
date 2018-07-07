@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.inventory.lens.impl.struct;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.inventory.lens.Lens;
 
 import java.util.ArrayList;
@@ -136,4 +137,8 @@ public final class LensHandle {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.lens.toString();
+    }
 }

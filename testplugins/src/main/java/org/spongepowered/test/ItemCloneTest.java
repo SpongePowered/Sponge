@@ -57,12 +57,12 @@ public class ItemCloneTest {
             .executor((commandSource, commandContext) -> {
                 Player player = (Player) commandSource;
 
-                if (!player.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+                if (player.getItemInHand(HandTypes.MAIN_HAND).isEmpty()) {
                     player.sendMessages(Text.of(TextColors.RED, "You must be holding an item in hand to perform the data clone test"));
                     return CommandResult.empty();
                 }
 
-                final ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND).get();
+                final ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND);
                 final ItemStackSnapshot snapshot = item.createSnapshot();
                 String json = null;
 

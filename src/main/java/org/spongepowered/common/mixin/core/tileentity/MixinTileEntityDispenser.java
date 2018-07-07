@@ -38,7 +38,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 import java.util.Optional;
@@ -56,13 +56,13 @@ public abstract class MixinTileEntityDispenser extends MixinTileEntityLockableLo
 
     @SuppressWarnings("unchecked")
     private SlotProvider generateSlotProvider() {
-        return new SlotCollection.Builder().add(9).build();
+        return new SlotLensCollection.Builder().add(9).build();
     }
 
     @SuppressWarnings("unchecked")
     private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
-        return new GridInventoryLensImpl(0, 3, 3, 3, thisClass, slots);
+        return new GridInventoryLensImpl(0, 3, 3, thisClass, slots);
     }
 
     @Override

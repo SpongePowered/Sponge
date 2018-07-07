@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
@@ -39,6 +37,9 @@ import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapt
 import org.spongepowered.common.item.inventory.query.result.QueryResult;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Query {
 
@@ -67,7 +68,7 @@ public class Query {
 
     @SuppressWarnings("unchecked")
     public Inventory execute() {
-        return this.execute((ResultAdapterProvider) Query.defaultResultProvider);
+        return this.execute(Query.defaultResultProvider);
     }
 
     public Inventory execute(ResultAdapterProvider resultProvider) {
@@ -91,7 +92,7 @@ public class Query {
             return resultProvider.getResultAdapter(this.inventory, matches, this.adapter);
         }
 
-        return ((ResultAdapterProvider)Query.defaultResultProvider).getResultAdapter(this.inventory, matches, this.adapter);
+        return Query.defaultResultProvider.getResultAdapter(this.inventory, matches, this.adapter);
     }
 
     private MutableLensSet depthFirstSearch(Lens lens) {
@@ -128,7 +129,10 @@ public class Query {
     }
 
     private MutableLensSet reduce(Lens lens, MutableLensSet matches) {
-        if (lens.getSlots().equals(this.getSlots(matches)) && this.allLensesAreSlots(matches)) {
+        List<SlotLens> lensSlots = lens.getSlots();
+        Set<SlotLens> matchSlots = this.getSlots(matches);
+
+        if (lensSlots.size() == matchSlots.size() && this.allLensesAreSlots(matches) && matchSlots.containsAll(lensSlots) ) {
             matches.clear();
             matches.add(lens);
             return matches;
@@ -154,8 +158,8 @@ public class Query {
         return true;
     }
 
-    private IntSet getSlots(Collection<Lens> lenses) {
-        IntSet slots = new IntOpenHashSet();
+    private Set<SlotLens> getSlots(Collection<Lens> lenses) {
+        Set<SlotLens> slots = new HashSet<>();
         for (Lens lens : lenses) {
             slots.addAll(lens.getSlots());
         }

@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.interfaces.entity.player;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 
-import java.util.List;
-
-public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
+public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter, IMixinInventory {
 
     int getHeldItemIndex(EnumHand hand);
 
@@ -43,21 +40,6 @@ public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
      *      server
      */
     void setSelectedItem(int itemIndex, boolean notify);
-
-    /**
-     * Gets the first available slot id for itemstack.
-     *
-     * @param itemstack The itemstack attempting to be stored
-     * @return The slot id or -1 if no slot found.
-     */
-    int getFirstAvailableSlot(ItemStack itemstack);
-
-    /**
-     * Gets the captured transactions.
-     *
-     * @return The captured transactions.
-     */
-    List<SlotTransaction> getCapturedTransactions();
 
     /**
      * Sets whether to capture transactions.

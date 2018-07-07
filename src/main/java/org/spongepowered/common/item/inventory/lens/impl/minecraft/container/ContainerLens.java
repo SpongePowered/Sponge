@@ -26,9 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
 import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -44,33 +41,27 @@ public class ContainerLens extends RealLens {
     protected List<Lens> viewedInventories;
     private List<Lens> additonal;
 
-    public ContainerLens(InventoryAdapter adapter, SlotProvider slots,
-            List<Lens> lenses) {
+    public ContainerLens(InventoryAdapter adapter, SlotProvider slots, List<Lens> lenses) {
         this(adapter, slots, lenses, Collections.emptyList());
     }
 
-    public ContainerLens(InventoryAdapter adapter, SlotProvider slots,
-            List<Lens> lenses, List<Lens> additonal) {
+    public ContainerLens(InventoryAdapter adapter, SlotProvider slots, List<Lens> lenses, List<Lens> additonal) {
         this(adapter, slots);
         this.viewedInventories = lenses;
         this.additonal = additonal;
         this.init(slots);
     }
 
-    /**
-     * Do not forget to call init when using this constructor!
-     */
-    public ContainerLens(InventoryAdapter adapter, SlotProvider slots) {
-        super(0, adapter.getFabric().getSize(), adapter, slots);
+    private ContainerLens(InventoryAdapter adapter, SlotProvider slots) {
+        super(0, adapter.getFabric().getSize(), adapter.getClass());
         this.additonal = Collections.emptyList();
     }
 
-    @Override
     protected void init(SlotProvider slots) {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            this.addChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
+            this.addChild(slots.getSlotLens(slot), new SlotIndexImpl(ord, DELEGATE));
         }
 
         // Adding spanning children

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryEnderChest;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -36,6 +37,6 @@ public abstract class MixinInventoryEnderChest extends MixinInventoryBasic {
 
     @Override
     public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
-        return new GridInventoryLensImpl(0, 9, 3, 9, adapter.getSlotProvider());
+        return new GridInventoryLensImpl(0, 9, 3, adapter.getSlotProvider());
     }
 }

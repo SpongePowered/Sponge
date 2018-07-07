@@ -213,7 +213,7 @@ public class CustomInventoryTest {
             container.getProperty(Identifiable.class).ifPresent(i -> player.sendMessage(Text.of("Identifiable Inventory: ", i.getValue())));
             for (SlotTransaction trans : event.getTransactions()) {
                 Slot slot = trans.getSlot();
-                Slot realSlot = slot.transform();
+                Slot realSlot = slot.viewedSlot();
                 Integer slotClicked = slot.getProperty(SlotIndex.class, "slotindex").map(SlotIndex::getValue).orElse(-1);
                 player.sendMessage(Text.of("You clicked Slot ", slotClicked, " in ", container.getName(), "/", realSlot.parent().getName()));
             }

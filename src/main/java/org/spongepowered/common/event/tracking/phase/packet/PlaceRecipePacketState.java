@@ -80,7 +80,7 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
         List<SlotTransaction> previewTransactions = ((IMixinContainer) player.openContainer).getPreviewTransactions();
         if (previewTransactions.isEmpty()) {
             CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
-            SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek().orElse(ItemStack.empty())));
+            SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek()));
             previewTransactions.add(st);
         }
         SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),

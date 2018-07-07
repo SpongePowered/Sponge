@@ -35,6 +35,10 @@ public final class SlotPosImpl extends AbstractInventoryProperty<String, Vector2
         super(value, operator);
     }
 
+    public SlotPosImpl(int x, int y) {
+        this(new Vector2i(x, y), Operator.DELEGATE);
+    }
+
     @Override
     public int getX() {
         return this.getValue().getX();

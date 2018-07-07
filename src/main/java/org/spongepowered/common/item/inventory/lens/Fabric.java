@@ -48,7 +48,7 @@ public interface Fabric {
      * @param index
      * @return
      */
-    <TInventory> TInventory get(int index);
+    Object get(int index);
 
     ItemStack getStack(int index);
 

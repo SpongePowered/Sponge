@@ -53,10 +53,10 @@ import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
+import org.spongepowered.common.item.inventory.adapter.impl.SlotCollection;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.MinecraftFabric;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,11 +90,11 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter {
     @Nullable protected Inventory parent;
     protected Inventory next;
     protected List<Inventory> children = new ArrayList<Inventory>();
-    protected Iterable<Slot> slotIterator;
 
     private PluginContainer plugin = null;
 
     protected Fabric fabric;
+    private SlotCollection slotCollection;
 
     @Override
     public Inventory parent() {
@@ -106,36 +106,6 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter {
         return this.parent() == this ? this : this.parent().root();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T first() {
-        return (T) this.iterator().next();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T next() {
-        return (T) this.emptyInventory(); // TODO implement me
-    }
-
-    @Override
-    public Inventory getChild(int index) {
-        if (index < 0 || index >= this.getRootLens().getChildren().size()) {
-            throw new IndexOutOfBoundsException("No child at index: " + index);
-        }
-        while (index >= this.children.size()) {
-            this.children.add(null);
-        }
-        Inventory child = this.children.get(index);
-        if (child == null) {
-            child = this.getRootLens().getChildren().get(index).getAdapter(this.getFabric(), this);
-            this.children.set(index, child);
-        }
-        return child;
-    }
-
-    // TODO getChild with lens not implemented
-
     protected final EmptyInventory emptyInventory() {
         if (this.empty == null) {
             this.empty = new EmptyInventoryImpl(this);
@@ -143,13 +113,12 @@ public abstract class MixinTraitInventory implements MinecraftInventoryAdapter {
         return this.empty;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T extends Inventory> Iterable<T> slots() {
-        if (this.slotIterator == null) {
-            this.slotIterator = new SlotCollectionIterator(this, this.getFabric(), this.getRootLens(), this.getSlotProvider());
+    public List<Slot> slots() {
+        if (this.slotCollection == null) {
+            this.slotCollection = new SlotCollection(this, this.getFabric(), this.getRootLens(), this.getSlotProvider());
         }
-        return (Iterable<T>) this.slotIterator;
+        return this.slotCollection.slots();
     }
 
     @Intrinsic

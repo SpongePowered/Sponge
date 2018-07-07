@@ -31,32 +31,14 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 
-
 public class InventoryColumnLensImpl extends Inventory2DLensImpl implements InventoryColumnLens {
 
-    public InventoryColumnLensImpl(int base, int height, int stride, SlotProvider slots) {
-        this(base, height, stride, 0, 0, InventoryColumnAdapter.class, slots);
-    }
-
-    public InventoryColumnLensImpl(int base, int height, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        this(base, height, stride, 0, 0, adapterType, slots);
-    }
-    
     public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, SlotProvider slots) {
         this(base, height, stride, xBase, yBase, InventoryColumnAdapter.class, slots);
     }
     
     public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, 1, height, stride, xBase, yBase, adapterType, slots);
-    }
-    
-    @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        if (ordinal < 0 || ordinal >= this.size) {
-            return -1;
-        }
-
-        return this.base + (ordinal * this.stride);
     }
 
     @Override

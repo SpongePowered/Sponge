@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl;
+package org.spongepowered.common.item.inventory.lens.impl.fabric;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -34,15 +34,11 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.UnsupportedFabricException;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.SlotFabric;
 
 public abstract class MinecraftFabric implements Fabric {
 
     @SuppressWarnings("unchecked")
-    public static <TFabric> Fabric of(TFabric target) {
+    public static <TInventory> Fabric of(TInventory target) {
         checkNotNull(target, "Fabric target");
         if (target instanceof Fabric) {
             return (Fabric) target;
@@ -64,7 +60,7 @@ public abstract class MinecraftFabric implements Fabric {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static InventoryAdapter getAdapter(Fabric fabric, Inventory parent, int base, Class<? extends Inventory> adapterType) {
-        IInventory inventory = fabric.get(base);
+        Object inventory = fabric.get(base);
         if (inventory.getClass() == adapterType) {
             return ((InventoryAdapter) inventory);
         }

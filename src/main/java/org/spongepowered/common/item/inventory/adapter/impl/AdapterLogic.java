@@ -26,31 +26,26 @@ package org.spongepowered.common.item.inventory.adapter.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Streams;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.custom.CustomInventory;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public abstract class AdapterLogic{
+public abstract class AdapterLogic {
 
-    private AdapterLogic() {}
+    private AdapterLogic() {
+    }
 
     public static Optional<ItemStack> pollSequential(InventoryAdapter adapter) {
         return AdapterLogic.pollSequential(adapter.getFabric(), adapter.getRootLens());
@@ -96,6 +91,10 @@ public abstract class AdapterLogic{
             return ItemStackUtil.cloneDefensiveOptional(stack);
         }
 
+        if (lens.slotCount() > 0) {
+            return Optional.of(ItemStack.empty());
+        }
+
         return Optional.empty();
     }
 
@@ -132,6 +131,10 @@ public abstract class AdapterLogic{
             }
         }
 
+        if (result == null && lens.slotCount() > 0) {
+            return Optional.of(ItemStack.empty());
+        }
+
         return Optional.ofNullable(result);
     }
 
@@ -141,12 +144,14 @@ public abstract class AdapterLogic{
 
     public static InventoryTransactionResult insertSequential(Fabric inv, Lens lens, ItemStack stack) {
         if (lens == null) {
-            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
+            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack))
+                    .build();
         }
         try {
             return AdapterLogic.insertStack(inv, lens, stack);
         } catch (Exception ex) {
-           return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.ERROR).reject(ItemStackUtil.cloneDefensive(stack)).build();
+            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.ERROR).reject(ItemStackUtil.cloneDefensive(stack))
+                    .build();
         }
     }
 
@@ -159,10 +164,17 @@ public abstract class AdapterLogic{
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
+            ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
             int push = Math.min(remaining, maxStackSize);
-            if (lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
-                result.replace(ItemStackUtil.fromNative(old));
+            net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
+            if (lens.setStack(inv, ord, newStack)) {
+                InventoryAdapter adapter = lens.getAdapter(inv, null);
+                SlotTransaction trans = new SlotTransaction((Slot) adapter, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(newStack));
+                result.transaction(trans);
                 remaining -= push;
+
+                Slot slot = ((SlotAdapter) lens.getSlot(ord).getAdapter(inv, null));
+                result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(inv, ord))));
             }
         }
 
@@ -186,14 +198,21 @@ public abstract class AdapterLogic{
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
+
             int push = Math.min(remaining, maxStackSize);
             if (old.isEmpty() && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
+                Slot slot = ((SlotAdapter) lens.getSlot(ord).getAdapter(inv, null));
+                result.transaction(new SlotTransaction(slot, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(lens.getStack(inv, ord))));
             } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+                ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
                 push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                 old.setCount(old.getCount() + push);
                 remaining -= push;
+                Slot slot = ((SlotAdapter) lens.getSlot(ord).getAdapter(inv, null));
+                result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(inv, ord))));
             }
+
         }
 
         if (remaining == stack.getQuantity()) {
@@ -240,73 +259,7 @@ public abstract class AdapterLogic{
     }
 
     public static int getCapacity(Fabric inv, Lens lens) {
-        return lens.getSlots().size();
-    }
-
-    public static Collection<InventoryProperty<?, ?>> getProperties(InventoryAdapter adapter,
-            Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
-        return AdapterLogic.getProperties(adapter.getFabric(), adapter.getRootLens(), child, property);
-    }
-
-    public static Collection<InventoryProperty<?, ?>> getProperties(Fabric inv, Lens lens,
-            Inventory child, Class<? extends InventoryProperty<?, ?>> property) {
-
-        if (child instanceof InventoryAdapter) {
-            checkNotNull(property, "property");
-            int index = lens.getChildren().indexOf(((InventoryAdapter) child).getRootLens());
-            if (index > -1) {
-                return lens.getProperties(index).stream().filter(prop -> property.equals(prop.getClass()))
-                        .collect(Collectors.toCollection(ArrayList::new));
-            }
-        }
-
-        return Collections.emptyList();
-    }
-
-    static <T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter adapter, Class<T> property) {
-        adapter = inventoryRoot(adapter);
-        if (adapter instanceof CustomInventory) {
-            return ((CustomInventory) adapter).getProperties().values().stream().filter(p -> property.equals(p.getClass()))
-                    .map(property::cast).collect(Collectors.toList());
-        }
-        return Streams.stream(findRootProperty(adapter, property)).collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter adapter, Class<T> property, Object key) {
-        adapter = inventoryRoot(adapter);
-        if (adapter instanceof CustomInventory) {
-            InventoryProperty<?, ?> forKey = ((CustomInventory) adapter).getProperties().get(key);
-            if (forKey != null && property.equals(forKey.getClass())) {
-                return Optional.of((T) forKey);
-            }
-        }
-        return findRootProperty(adapter, property);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter adapter, Class<T> property) {
-        if (property == InventoryTitle.class) {
-            Text text = Text.of(adapter.getFabric().getDisplayName());
-            return (Optional<T>) Optional.of(InventoryTitle.of(text));
-        }
-        // TODO more properties of top level inventory
-        return Optional.empty();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static InventoryAdapter inventoryRoot(InventoryAdapter adapter) {
-        // Get Root Inventory
-        adapter = ((InventoryAdapter) adapter.root());
-        if (adapter instanceof Container) {
-            // If Root is a Container get the viewed inventory
-            Object first = adapter.getFabric().allInventories().iterator().next();
-            if (first instanceof CustomInventory) {
-                // if viewed inventory is a custom inventory get it instead
-                adapter = ((InventoryAdapter) first);
-            }
-        }
-        return adapter;
+        return lens.slotCount();
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack) {

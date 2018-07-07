@@ -174,7 +174,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 }
                 // No SlotTransaction was captured. So we add the clicked slot as a transaction
                 Slot slot = mixinContainer.getContainerSlot(packetIn.getSlotId());
-                ItemStackSnapshot item = slot.peek().map(ItemStack::createSnapshot).orElse(ItemStackSnapshot.NONE);
+                ItemStackSnapshot item = slot.peek().createSnapshot();
                 slotTransactions.add(new SlotTransaction(slot, item, item));
             }
 

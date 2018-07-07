@@ -37,8 +37,8 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
 @Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
@@ -49,13 +49,13 @@ public abstract class MixinInventoryBasic implements IInventory, LensProvider {
         if (this.getSizeInventory() == 0) {
             return new DefaultEmptyLens(adapter);
         }
-        return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.getSlotProvider());
+        return new DefaultIndexedLens(0, this.getSizeInventory(), adapter.getSlotProvider());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
-        return new SlotCollection.Builder().add(this.getSizeInventory()).build();
+        return new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
     }
 
 }

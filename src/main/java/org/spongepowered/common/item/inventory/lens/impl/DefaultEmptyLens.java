@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -42,8 +40,6 @@ import java.util.List;
 
 public class DefaultEmptyLens implements Lens {
 
-    private static final IntSet EMPTY_SLOT_SET = IntSets.EMPTY_SET;
-    
     protected final InventoryAdapter adapter;
     
     public DefaultEmptyLens(InventoryAdapter adapter) {
@@ -68,11 +64,6 @@ public class DefaultEmptyLens implements Lens {
     @Override
     public int slotCount() {
         return 0;
-    }
-
-    @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        return -1;
     }
 
     @Override
@@ -126,23 +117,23 @@ public class DefaultEmptyLens implements Lens {
     }
     
     @Override
-    public IntSet getSlots() {
-        return DefaultEmptyLens.EMPTY_SLOT_SET;
-    }
-    
-    @Override
-    public boolean hasSlot(int index) {
-        return false;
-    }
-    
-    @Override
     public Lens getParent() {
         return null;
     }
 
     @Override
     public Iterator<Lens> iterator() {
-        // TODO 
+        // TODO
+        return null;
+    }
+
+    @Override
+    public List<SlotLens> getSlots() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public SlotLens getSlot(int ordinal) {
         return null;
     }
 
@@ -152,4 +143,8 @@ public class DefaultEmptyLens implements Lens {
         return null;
     }
 
+    @Override
+    public String toString(int deep) {
+        return "EmptyLens";
+    }
 }

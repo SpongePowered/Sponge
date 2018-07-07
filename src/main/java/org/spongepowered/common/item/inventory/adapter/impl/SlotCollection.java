@@ -22,52 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory;
+package org.spongepowered.common.item.inventory.adapter.impl;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-public class InventoryIterator implements Iterator<Inventory> {
+public class SlotCollection {
     
-    protected final List<Lens> children;
-    
-    protected final Fabric inventory;
-    
-    protected final Inventory parent;
+    private Inventory parent;
 
-    protected int next = 0;
-
-    public InventoryIterator(Lens lens, Fabric inventory) {
-        this(lens, inventory, null);
-    }
+    private final Fabric inv;
     
-    public InventoryIterator(Lens lens, Fabric inventory, Inventory parent) {
-        this.children = lens.getSpanningChildren();
-        this.inventory = inventory;
+    private final List<Slot> slots;
+
+    public SlotCollection(Inventory parent, Fabric inv, Lens lens, SlotProvider slots) {
         this.parent = parent;
+        this.inv = inv;
+        this.slots = this.traverseSpanningTree(inv, lens, ImmutableList.builder()).build();
     }
-
-    @Override
-    public boolean hasNext() {
-        return this.next < this.children.size();
-    }
-
-    @Override
-    public Inventory next() {
-        try {
-            return this.children.get(this.next++).getAdapter(this.inventory, this.parent);
-        } catch (IndexOutOfBoundsException e) {
-            throw new NoSuchElementException();
+    
+    private Builder<Slot> traverseSpanningTree(Fabric inv, Lens lens, Builder<Slot> list) {
+        for (Lens child : lens.getSpanningChildren()) {
+            if (child instanceof SlotLens) {
+                list.add((SlotAdapter) child.getAdapter(inv, this.parent));
+            } else if (child.getSpanningChildren().size() > 0) {
+                this.traverseSpanningTree(inv, child, list);
+            }
         }
+        return list;
     }
 
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
+    public Fabric getFabric() {
+        return this.inv;
     }
+
+    public List<Slot> slots() {
+        return this.slots;
+    }
+    
 }

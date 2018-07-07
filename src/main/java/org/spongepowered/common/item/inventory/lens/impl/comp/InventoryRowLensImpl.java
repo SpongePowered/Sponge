@@ -34,31 +34,14 @@ import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
 
 public class InventoryRowLensImpl extends Inventory2DLensImpl implements InventoryRowLens {
 
-    public InventoryRowLensImpl(int base, int width, SlotProvider slots) {
-        this(base, width, 0, 0, InventoryRowAdapter.class, slots);
-    }
-
-    public InventoryRowLensImpl(int base, int width, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        this(base, width, 0, 0, adapterType, slots);
-    }
-    
     public InventoryRowLensImpl(int base, int width, int xBase, int yBase, SlotProvider slots) {
         this(base, width, xBase, yBase, InventoryRowAdapter.class, slots);
     }
     
     public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        super(base, width, 1, width, xBase, yBase, adapterType, slots);
+        super(base, width, 1, 1, xBase, yBase, adapterType, slots);
     }
     
-    @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        if (!this.checkOrdinal(ordinal)) {
-            return -1;
-        }
-
-        return this.base + ordinal;
-    }
-
     @Override
     public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new InventoryRowAdapter(inv, this, parent);

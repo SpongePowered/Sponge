@@ -30,21 +30,17 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.Inventory2D;
-import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.AdapterLogic;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Optional;
 
-public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inventory2D {
+public class Inventory2DAdapter extends VanillaAdapter implements Inventory2D {
 
     protected Inventory2DLens lens2d;
-
-    public Inventory2DAdapter(Fabric inventory, Inventory2DLens root) {
-        this(inventory, root, null);
-    }
 
     public Inventory2DAdapter(Fabric inventory, Inventory2DLens root, Inventory parent) {
         super(inventory, root, parent);
@@ -65,32 +61,32 @@ public class Inventory2DAdapter extends OrderedInventoryAdapter implements Inven
 
     @Override
     public Optional<Slot> getSlot(SlotPos pos) {
-        return VanillaAdapter.forSlot(this.inventory, this.getSlotLens(pos), this);
+        return VanillaAdapter.forSlot(this.fabric, this.getSlotLens(pos), this);
     }
 
     @Override
     public Optional<ItemStack> poll(SlotPos pos) {
-        return AdapterLogic.pollSequential(this.inventory, this.getSlotLens(pos));
+        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos));
     }
 
     @Override
     public Optional<ItemStack> poll(SlotPos pos, int limit) {
-        return AdapterLogic.pollSequential(this.inventory, this.getSlotLens(pos), limit);
+        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(pos), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(SlotPos pos) {
-        return AdapterLogic.peekSequential(this.inventory, this.getSlotLens(pos));
+        return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(pos));
     }
 
     @Override
     public Optional<ItemStack> peek(SlotPos pos, int limit) {
-        return AdapterLogic.peekSequential(this.inventory, this.getSlotLens(pos), limit);
+        return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(pos), limit);
     }
 
     @Override
     public InventoryTransactionResult set(SlotPos pos, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.inventory, this.getSlotLens(pos), stack);
+        return AdapterLogic.insertSequential(this.fabric, this.getSlotLens(pos), stack);
     }
 
 }

@@ -34,6 +34,7 @@ import net.minecraft.tileentity.IHopper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -60,7 +61,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 import java.util.ArrayList;
@@ -103,13 +104,13 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @SuppressWarnings("unchecked")
     private SlotProvider generateSlotProvider() {
-        return new SlotCollection.Builder().add(5).build();
+        return new SlotLensCollection.Builder().add(5).build();
     }
 
     @SuppressWarnings("unchecked")
     private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
-        return new GridInventoryLensImpl(0, 5, 1, 5, thisClass, slots);
+        return new GridInventoryLensImpl(0, 5, 1, thisClass, slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
@@ -117,7 +118,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         ((IMixinEntity) entityItem).getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
-                IMixinChunk spongeChunk = (IMixinChunk) ((IMixinTileEntity) te).getActiveChunk();
+                IMixinChunk spongeChunk = ((IMixinTileEntity) te).getActiveChunk();
                 spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
             }
         });

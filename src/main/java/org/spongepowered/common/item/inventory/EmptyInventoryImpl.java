@@ -32,9 +32,12 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -42,6 +45,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -78,34 +82,63 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public <T extends Inventory> Iterable<T> slots() {
-        return Collections.<T>emptyList();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T first() {
-        return (T) this;
+    public List<Slot> slots() {
+        return Collections.emptyList();
     }
 
     @Override
-    public Optional<ItemStack> poll() {
-        return Optional.<ItemStack>empty();
+    public ItemStack poll() {
+        return ItemStack.empty();
     }
 
     @Override
-    public Optional<ItemStack> poll(int limit) {
-        return Optional.<ItemStack>empty();
+    public ItemStack poll(int limit) {
+        return ItemStack.empty();
     }
 
     @Override
-    public Optional<ItemStack> peek() {
-        return Optional.<ItemStack>empty();
+    public ItemStack peek() {
+        return ItemStack.empty();
     }
 
     @Override
-    public Optional<ItemStack> peek(int limit) {
-        return Optional.<ItemStack>empty();
+    public ItemStack peek(int limit) {
+        return ItemStack.empty();
+    }
+
+    @Override
+    public List<Inventory> children() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Optional<ItemStack> poll(SlotIndex index) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ItemStack> poll(SlotIndex index, int limit) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ItemStack> peek(SlotIndex index) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ItemStack> peek(SlotIndex index, int limit) {
+        return Optional.empty();
+    }
+
+    @Override
+    public InventoryTransactionResult set(SlotIndex index, ItemStack stack) {
+        return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
+    }
+
+    @Override
+    public Optional<Slot> getSlot(SlotIndex index) {
+        return Optional.empty();
     }
 
     @Override
@@ -193,8 +226,17 @@ public class EmptyInventoryImpl implements EmptyInventory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Inventory> T query(QueryOperation<?>... operations) {
-        return (T) this;
+    public Inventory query(QueryOperation<?>... operations) {
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
+        if (EmptyInventory.class == inventoryType) {
+            return Optional.of((T) this);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -213,11 +255,6 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
-    public Iterator<Inventory> iterator() {
-        return new EmptyIterator();
-    }
-
-    @Override
     public Inventory parent() {
         return this.parent;
     }
@@ -225,12 +262,6 @@ public class EmptyInventoryImpl implements EmptyInventory {
     @Override
     public Inventory root() {
         return this.parent == this ? this : this.parent.root();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Inventory> T next() {
-        return (T) this;
     }
 
     @Override
@@ -256,5 +287,10 @@ public class EmptyInventoryImpl implements EmptyInventory {
     @Override
     public InventoryArchetype getArchetype() {
         return InventoryArchetypes.UNKNOWN;
+    }
+
+    @Override
+    public Optional<ViewableInventory> asViewable() {
+        return Optional.empty();
     }
 }

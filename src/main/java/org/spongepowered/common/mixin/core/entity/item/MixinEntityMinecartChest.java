@@ -42,6 +42,6 @@ public abstract class MixinEntityMinecartChest extends MixinEntityMinecartContai
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void onMinecartChestConstructed(CallbackInfo ci) {
         // Override default Lens with GridLens
-        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+        this.lens = new GridInventoryLensImpl(0, 9, 3, this.slots);
     }
 }

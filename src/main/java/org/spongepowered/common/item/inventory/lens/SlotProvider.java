@@ -28,6 +28,6 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public interface SlotProvider {
     
-    SlotLens getSlot(int index);
+    SlotLens getSlotLens(int index);
 
 }
