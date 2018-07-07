@@ -42,6 +42,8 @@ public final class TickPhase extends TrackingPhase {
         public static final IPhaseState<PlayerTickContext> PLAYER = new PlayerTickPhaseState();
         public static final IPhaseState<?> WEATHER = new WeatherTickPhaseState();
 
+        public static final IPhaseState<NeighborNotificationContext> NEIGHBOR_NOTIFY = new NeighborNotificationState("NeighborNotificationPhase");
+
         private Tick() { // No instances for you!
         }
     }
