@@ -54,6 +54,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -63,11 +64,14 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
+import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.util.ThreadUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
@@ -568,7 +572,17 @@ public final class PhaseTracker {
      */
     @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final BlockPos notifyPos,
-        final Block sourceBlock, @Nullable final BlockPos sourcePos) {
+        final Block sourceBlock, final BlockPos sourcePos) {
+        if (!SpongeImpl.isMainThread()) {
+            // lol no, report the block change properly
+            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
+                .addWrapped(ASYNC_TRACKER_ACCESS)
+                .add()
+                .add(new Exception("Async Block Notifcation Detected"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+            // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
+            return;
+        }
         final IBlockState iblockstate = ((WorldServer) mixinWorld).getBlockState(notifyPos);
 
         try {
@@ -577,9 +591,21 @@ public final class PhaseTracker {
             final IPhaseState<?> state = peek.state;
             ((IPhaseState) state).associateNeighborStateNotifier(peek.context,
                 sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
-            // Sponge End
+            final LocatableBlock block = LocatableBlock.builder()
+                .position(VecHelper.toVector3i(sourcePos))
+                .world((World) mixinWorld)
+                .build();
+            try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext()
+                .source(block)
+                .sourceBlock(sourceBlock)
+                .setNotifiedBlockPos(notifyPos)
+                .setNotifiedBlockState(iblockstate)
+                .setSourceNotification(sourcePos)) {
+                context.buildAndSwitch();
+                // Sponge End
 
-            iblockstate.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
+                iblockstate.neighborChanged(((WorldServer) mixinWorld), notifyPos, sourceBlock, sourcePos);
+            }
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
