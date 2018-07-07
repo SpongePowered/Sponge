@@ -53,6 +53,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -62,9 +63,11 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseContext;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
+import org.spongepowered.common.util.ThreadUtil;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
@@ -100,14 +103,6 @@ public final class PhaseTracker {
                                                       + "performing these sort of changes.";
 
     public static PhaseTracker getInstance() {
-        if (!SpongeImpl.isMainThread()) {
-            // lol no, report the block change properly
-            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
-                .addWrapped(ASYNC_TRACKER_ACCESS)
-                .add()
-                .add(new Exception("Async Block Change Detected"))
-                .log(SpongeImpl.getLogger(), Level.ERROR);
-        }
         return checkNotNull(INSTANCE, "PhaseTracker instance was illegally set to null!");
     }
 
@@ -164,6 +159,16 @@ public final class PhaseTracker {
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
+        if (!SpongeImpl.isMainThread()) {
+            // lol no, report the block change properly
+            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
+                .addWrapped(ASYNC_TRACKER_ACCESS)
+                .add()
+                .add(new Exception("Async Block Change Detected"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+            // Maybe? I don't think this is wise.
+            return;
+        }
         checkNotNull(state, "State cannot be null!");
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
@@ -196,6 +201,15 @@ public final class PhaseTracker {
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
     public void completePhase(IPhaseState<?> prevState) {
+        if (!SpongeImpl.isMainThread()) {
+            // lol no, report the block change properly
+            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
+                .addWrapped(ASYNC_TRACKER_ACCESS)
+                .add()
+                .add(new Exception("Async Block Change Detected"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+            return;
+        }
         final PhaseData currentPhaseData = this.stack.peek();
         final IPhaseState<?> state = currentPhaseData.state;
         final boolean isEmpty = this.stack.isEmpty();
@@ -658,7 +672,7 @@ public final class PhaseTracker {
             }
         }
         // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+        final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, chunk.getBlockState(pos), null, flag);
 
         if (iblockstate == null) {
             return false;

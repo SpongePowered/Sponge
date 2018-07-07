@@ -249,7 +249,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
         if (!ShouldFire.CHANGE_BLOCK_EVENT) { // If we don't have to worry about any block events, don't bother
             // Sponge End - continue with vanilla mechanics
-            final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+            // Also, call the direct method instead of letting the overwrites do their job, because we want to
+            // reduce the amount of nested calls
+            final IBlockState iblockstate = ((IMixinChunk) chunk).setBlockState(pos, newState, chunk.getBlockState(pos), null, flag);
 
             if (iblockstate == null) {
                 return false;
@@ -279,7 +281,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
         TrackingUtil.associateBlockChangeWithSnapshot(this, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
         if (originalBlockState == null) {
             return false; // Return fast
         }
