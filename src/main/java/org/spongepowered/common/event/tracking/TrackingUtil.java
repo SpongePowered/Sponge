@@ -71,6 +71,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
@@ -283,7 +284,9 @@ public final class TrackingUtil {
             ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
             // Now actually switch to the new phase
 
-            try (PhaseContext<?> context = phaseContext) {
+            try (final PhaseContext<?> context = phaseContext;
+                 final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
+                timing.startTiming();
                 context.buildAndSwitch();
                 block.updateTick(world, pos, state, random);
             } catch (Exception | NoClassDefFoundError e) {
@@ -375,7 +378,7 @@ public final class TrackingUtil {
 
             associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
                 capturedSnapshots.remove(originalBlockSnapshot);
                 return false;
@@ -384,7 +387,7 @@ public final class TrackingUtil {
         } else {
             originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
                 return false;
             }
