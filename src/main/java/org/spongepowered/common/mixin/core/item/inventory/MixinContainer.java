@@ -239,10 +239,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     org.spongepowered.api.item.inventory.Slot adapter = null;
                     try {
                         adapter = this.getContainerSlot(i);
+                        SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
                         if (this.shiftCraft) {
-                            this.capturedCraftShiftTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                            this.capturedCraftShiftTransactions.add(newTransaction);
                         } else {
-                            this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                            if (!this.capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
+                                SlotTransaction previewTransaction = this.capturedCraftPreviewTransactions.get(0);
+                                if (previewTransaction.equals(newTransaction)) {
+                                    newTransaction = previewTransaction;
+                                }
+                            }
+                            this.capturedSlotTransactions.add(newTransaction);
                         }
                     } catch (IndexOutOfBoundsException e) {
                         SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
