@@ -224,9 +224,11 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else if (!context.getCapturedEntitySupplier().isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                        SpongeCommonEventFactory.callSpawnEntity(context.getCapturedEntities(), context);
+                    } else {
+                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty((entities -> {
+                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
+                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                        }));
                     }
                 }
             }
