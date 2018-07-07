@@ -28,20 +28,17 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
+import org.spongepowered.common.item.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 
-public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements CraftingInventory {
+public class CraftingInventoryAdapter extends BasicInventoryAdapter implements CraftingInventory {
 
     protected final CraftingInventoryLens craftingLens;
     
     private CraftingGridInventory craftingGrid;
     private CraftingOutput result;
     
-    public CraftingInventoryAdapter(Fabric inventory, CraftingInventoryLens root) {
-        this(inventory, root, null);
-    }
-
     public CraftingInventoryAdapter(Fabric inventory, CraftingInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
         this.craftingLens = root;
@@ -50,7 +47,7 @@ public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements
     @Override
     public CraftingGridInventory getCraftingGrid() {
         if (this.craftingGrid == null) {
-            this.craftingGrid = (CraftingGridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.inventory, this);
+            this.craftingGrid = (CraftingGridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.fabric, this);
         }
         return this.craftingGrid;
     }
@@ -58,7 +55,7 @@ public class CraftingInventoryAdapter extends OrderedInventoryAdapter implements
     @Override
     public CraftingOutput getResult() {
         if (this.result == null) {
-            this.result = (CraftingOutput) this.craftingLens.getOutputSlot().getAdapter(this.inventory, this);
+            this.result = (CraftingOutput) this.craftingLens.getOutputSlot().getAdapter(this.fabric, this);
         }
         return this.result;
     }

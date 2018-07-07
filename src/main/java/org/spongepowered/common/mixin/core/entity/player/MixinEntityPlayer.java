@@ -792,7 +792,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (((IMixinInventoryPlayer) this.inventory).capturesTransactions()) {
             if (slotIn == EntityEquipmentSlot.MAINHAND) {
                 ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
-                Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
+                Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
                 ItemStack orig = this.inventory.offHandInventory.get(0);

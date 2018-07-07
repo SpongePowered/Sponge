@@ -43,8 +43,6 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -91,13 +89,14 @@ public class OfflineInventoryTest {
     private void run(UUID uuid) {
         User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).get(uuid).get();
         this.logger.info(user.getName() + " has an Inventory with:");
-        for (Inventory slot : user.getInventory()) {
-            slot.peek().ifPresent(stack -> this.logger.info(stack.getType().getId() + "x" + stack.getQuantity()));
+        for (Inventory slot : user.getInventory().children()) {
+            ItemStack stack = slot.peek();
+            this.logger.info(stack.getType().getId() + "x" + stack.getQuantity());
         }
-        user.getHelmet().ifPresent(s -> this.logger.info("Helmet: " + s.getType().getId()));
-        user.getChestplate().ifPresent(s -> this.logger.info("Chestplate: " + s.getType().getId()));
-        user.getLeggings().ifPresent(s -> this.logger.info("Leggings: " + s.getType().getId()));
-        user.getBoots().ifPresent(s -> this.logger.info("Boots: " + s.getType().getId()));
+        this.logger.info("Helmet: " + user.getHelmet().getType().getId());
+        this.logger.info("Chestplate: " + user.getChestplate().getType().getId());
+        this.logger.info("Leggings: " + user.getLeggings().getType().getId());
+        this.logger.info("Boots: " + user.getBoots().getType().getId());
 
         this.logger.info("and a hotbar full of diamonds!");
         for (Inventory inv : user.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(Hotbar.class)).slots()) {

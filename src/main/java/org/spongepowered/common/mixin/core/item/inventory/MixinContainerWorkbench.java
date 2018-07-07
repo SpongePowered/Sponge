@@ -32,9 +32,9 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 
@@ -48,14 +48,14 @@ public abstract class MixinContainerWorkbench extends MixinContainer implements 
     public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
         List<Lens> lenses = new ArrayList<>();
         lenses.add(new CraftingInventoryLensImpl(0, 1, 3, 3, inventory$getSlotProvider()));
-        lenses.add(new MainPlayerInventoryLensImpl(3 * 3 + 1, inventory$getSlotProvider(), true));
+        lenses.add(new PrimaryPlayerInventoryLens(3 * 3 + 1, inventory$getSlotProvider(), true));
         return new ContainerLens(adapter, inventory$getSlotProvider(), lenses);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
-        SlotCollection.Builder builder = new SlotCollection.Builder()
+        SlotLensCollection.Builder builder = new SlotLensCollection.Builder()
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
                 .add(9)
                 .add(36);

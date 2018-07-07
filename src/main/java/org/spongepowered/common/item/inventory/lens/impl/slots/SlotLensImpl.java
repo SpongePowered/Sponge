@@ -35,7 +35,6 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.InvalidOrdinalException;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -58,13 +57,7 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
     }
 
     public SlotLensImpl(int index, Class<? extends Inventory> adapterType) {
-        super(index, 1, adapterType, null);
-        this.availableSlots.add(this.getOrdinal(null));
-    }
-
-    @Override
-    protected final void init(SlotProvider slots) {
-        // No children
+        super(index, 1, adapterType);
     }
 
     @Override
@@ -93,35 +86,22 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        return (ordinal != 0) ? -1 : this.getOrdinal(inv);
-    }
-
-    @Override
-    public ItemStack getStack(Fabric inv, int ordinal) {
-        if (ordinal != 0) {
-            throw new InvalidOrdinalException("Non-zero slot ordinal");
-        }
-        return this.getStack(inv);
-    }
-
-    @Override
     public ItemStack getStack(Fabric inv) {
         return checkNotNull(inv, "Target inventory").getStack(this.base);
-    }
-
-    @Override
-    public boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
-        if (ordinal != 0) {
-            throw new InvalidOrdinalException("Non-zero slot ordinal");
-        }
-        return this.setStack(inv, stack);
     }
 
     @Override
     public boolean setStack(Fabric inv, ItemStack stack) {
         checkNotNull(inv, "Target inventory").setStack(this.base, stack);
         return true;
+    }
+
+    @Override
+    public SlotLens getSlot(int ordinal) {
+        if (ordinal != 0) {
+            throw new InvalidOrdinalException("Non-zero slot ordinal");
+        }
+        return this;
     }
 
     @Override
@@ -142,6 +122,21 @@ public class SlotLensImpl extends AbstractLens implements SlotLens {
     @Override
     public boolean isSubsetOf(Collection<Lens> c) {
         return false;
+    }
+
+    @Override
+    public List<SlotLens> getSlots() {
+        return Collections.singletonList(this);
+    }
+
+    @Override
+    public String toString(int deep) {
+        return "[" + this.base + "]";
+    }
+
+    @Override
+    public String toString() {
+        return this.toString(0);
     }
 
     @SuppressWarnings("rawtypes")

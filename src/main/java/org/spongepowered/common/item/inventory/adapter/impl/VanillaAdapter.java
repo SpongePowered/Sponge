@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 /**
  * Base Adapter based on the vanilla {@link IInventory}
  */
-public class VanillaAdapter extends AbstractInventoryAdapter {
+public class VanillaAdapter extends BasicInventoryAdapter {
 
     /**
      * Used to calculate {@link #getPlugin()}.

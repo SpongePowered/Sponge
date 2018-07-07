@@ -43,7 +43,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
@@ -57,14 +57,14 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
     @Shadow @Final private int inventoryHeight;
 
     protected Fabric fabric;
-    protected SlotCollection slots;
+    protected SlotLensCollection slots;
     protected Lens lens;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this);
-        this.slots = new SlotCollection.Builder().add(this.stackList.size()).build();
+        this.slots = new SlotLensCollection.Builder().add(this.stackList.size()).build();
         this.lens = rootLens(fabric, ((InventoryAdapter) this));
     }
 
@@ -74,7 +74,7 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
         if (this.stackList.size() == 0) {
             return new DefaultEmptyLens(adapter);
         }
-        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, this.slots);
+        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.slots);
     }
 
     @SuppressWarnings("unchecked")

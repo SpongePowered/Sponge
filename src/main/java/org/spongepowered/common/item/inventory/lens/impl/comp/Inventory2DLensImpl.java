@@ -28,17 +28,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.Property.Operator;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.Inventory2DAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
+import org.spongepowered.common.item.inventory.lens.impl.SlotBasedLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.property.SlotPosImpl;
 
-public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inventory2DLens {
+public class Inventory2DLensImpl extends SlotBasedLens implements Inventory2DLens {
 
     protected final int width;
     protected final int height;
@@ -50,58 +50,32 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
         this(base, width, height, width, Inventory2DAdapter.class, slots);
     }
 
-    public Inventory2DLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        this(base, width, height, width, adapterType, slots);
-    }
-
     public Inventory2DLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
-    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType,
+            SlotProvider slots) {
         super(base, width * height, rowStride, adapterType, slots);
 
         checkArgument(width > 0, "Invalid width: %s", width);
         checkArgument(height > 0, "Invalid height: %s", height);
-        checkArgument(rowStride >= width, "Invalid stride: stride=%s, width=%s", rowStride, width);
 
         this.width = width;
         this.height = height;
         this.xBase = xBase;
         this.yBase = yBase;
 
-        this.init(slots, true);
+        this.init(slots);
     }
 
-    @Override
-    protected void init(SlotProvider slots) {
-        //this.init(slots, true);
-    }
-
-    /**
-     * Basic initializer for two dimensional inventories. Adds child slots
-     * directly to this lens starting at {@link #base} and creating a
-     * rectangular array of slots {@link #width} by {@link #height} assuming
-     * that the target inventory is {@link #stride} slots wide.
-     *
-     * @param slots the provider of the slots
-     * @param spanning Set to true to create spanning slots, false to create
-     *      normal child slots
-     */
-    protected void init(SlotProvider slots, boolean spanning) {
-        for (int y = 0, ord = 0, slot = this.base; y < this.height; y++, slot += (this.stride - this.width)) {
-            for (int x = 0; x < this.width; x++, slot++, ord++) {
-                SlotLens slotLens = slots.getSlot(slot);
-//                System.err.printf(">> %s ord: %-4d x: %-4d y: %-4d slot: %-4d => %s\n",
-//                        this.getClass().getSimpleName(), ord, x, y, slot, slotLens.getClass().getSimpleName());
-                if (spanning) {
-                    this.addSpanningChild(slotLens, SlotIndex.of(ord), SlotPos.of(this.xBase + x, this.yBase + y));
-                } else {
-                    this.addChild(slotLens, SlotIndex.of(ord), SlotPos.of(this.xBase + x, this.yBase + y));
-                }
+    private void init(SlotProvider slots) {
+        for (int y = 0, slot = this.base; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++, slot += stride) {
+                SlotLens slotLens = slots.getSlotLens(slot);
+                this.addSpanningChild(slotLens, new SlotPosImpl(this.xBase + x, this.yBase + y));
             }
         }
-        super.cache();
     }
 
     @Override
@@ -124,17 +98,12 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     }
 
     @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        if (!this.checkOrdinal(ordinal)) {
-            return -1;
-        }
-
-        return this.base + ((ordinal / this.width) * this.stride) + (ordinal % this.width);
-    }
-
-    @Override
     public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new Inventory2DAdapter(inv, this, parent);
     }
 
+    @Override
+    public int getStride() {
+        return this.stride;
+    }
 }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-public interface EquipmentInventoryLens extends OrderedInventoryLens {
+import org.spongepowered.common.item.inventory.lens.Lens;
+
+public interface EquipmentInventoryLens extends Lens {
 
 }

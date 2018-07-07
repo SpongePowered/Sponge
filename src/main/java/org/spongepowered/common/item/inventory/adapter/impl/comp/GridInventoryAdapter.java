@@ -76,14 +76,14 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
 
     @Override
     public Optional<Slot> getSlot(int x, int y) {
-        return VanillaAdapter.forSlot(this.inventory, this.getSlotLens(x, y), this);
+        return VanillaAdapter.forSlot(this.fabric, this.getSlotLens(x, y), this);
     }
 
     @Override
     public Optional<InventoryRow> getRow(int y) {
         try {
             InventoryRowLens rowLens = this.gridLens.getRow(y);
-            return Optional.<InventoryRow>ofNullable((InventoryRow) rowLens.getAdapter(this.inventory, this));
+            return Optional.<InventoryRow>ofNullable((InventoryRow) rowLens.getAdapter(this.fabric, this));
         } catch (IndexOutOfBoundsException ex) {
             return Optional.<InventoryRow>empty();
         }
@@ -93,7 +93,7 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     public Optional<InventoryColumn> getColumn(int x) {
         try {
             InventoryColumnLens columnLens = this.gridLens.getColumn(x);
-            return Optional.<InventoryColumn>ofNullable((InventoryColumn) columnLens.getAdapter(this.inventory, this));
+            return Optional.<InventoryColumn>ofNullable((InventoryColumn) columnLens.getAdapter(this.fabric, this));
         } catch (IndexOutOfBoundsException ex) {
             return Optional.<InventoryColumn>empty();
         }
@@ -101,27 +101,27 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
 
     @Override
     public Optional<ItemStack> poll(int x, int y) {
-        return AdapterLogic.pollSequential(this.inventory, this.getSlotLens(x, y));
+        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(x, y));
     }
 
     @Override
     public Optional<ItemStack> poll(int x, int y, int limit) {
-        return AdapterLogic.pollSequential(this.inventory, this.getSlotLens(x, y), limit);
+        return AdapterLogic.pollSequential(this.fabric, this.getSlotLens(x, y), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y) {
-        return AdapterLogic.peekSequential(this.inventory, this.getSlotLens(x, y));
+        return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(x, y));
     }
 
     @Override
     public Optional<ItemStack> peek(int x, int y, int limit) {
-        return AdapterLogic.peekSequential(this.inventory, this.getSlotLens(x, y), limit);
+        return AdapterLogic.peekSequential(this.fabric, this.getSlotLens(x, y), limit);
     }
 
     @Override
     public InventoryTransactionResult set(int x, int y, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.inventory, this.getSlotLens(x, y), stack);
+        return AdapterLogic.insertSequential(this.fabric, this.getSlotLens(x, y), stack);
     }
 
 }

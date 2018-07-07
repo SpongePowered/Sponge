@@ -26,11 +26,7 @@ package org.spongepowered.common.item.inventory.lens.impl;
 
 import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
@@ -46,24 +42,23 @@ import java.util.List;
  * A compound-lens composed of multiple lenses.
  * Only contains slot-lenses.
  */
-public class CompoundLens extends ConceptualLens {
+public class CompoundLens extends SlotBasedLens {
 
     protected final List<Lens> inventories;
 
     private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider slots,
             List<Lens> lenses) {
-        super(0, size, adapterType, slots);
+        super(0, size, 1, adapterType, slots);
         this.inventories = lenses;
         this.init(slots);
     }
 
-    @Override
     protected void init(SlotProvider slots) {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            if (!this.children.contains(slots.getSlot(slot))) {
-                this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
+            if (!this.children.contains(slots.getSlotLens(slot))) {
+                this.addSpanningChild(slots.getSlotLens(slot), new SlotIndexImpl(ord, DELEGATE));
             }
         }
     }

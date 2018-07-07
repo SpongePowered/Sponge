@@ -22,11 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.item.inventory.lens.impl;
 
-public interface MainPlayerInventoryLens extends GridInventoryLens {
+import static com.google.common.base.Preconditions.checkArgument;
 
-    HotbarLens getHotbar();
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.adapter.impl.BasicInventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
-    GridInventoryLens getGrid();
+/**
+ * Lenses for inventory based on slots.
+ *
+ * <p>This lenses will usually return a new matching adapter (usually extending {@link BasicInventoryAdapter})</p>
+ */
+@SuppressWarnings("rawtypes")
+public abstract class SlotBasedLens extends AbstractLens {
+
+    protected final int stride;
+
+    public SlotBasedLens(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
+        super(base, size, adapterType);
+        checkArgument(stride > 0, "Invalid stride: %s", stride);
+        this.stride = stride;
+        this.init(slots);
+    }
+
+    private void init(SlotProvider slots) {
+        for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
+            this.addSpanningChild(slots.getSlotLens(slot), new SlotIndexImpl(ord));
+        }
+    }
+
+
+
+
 }

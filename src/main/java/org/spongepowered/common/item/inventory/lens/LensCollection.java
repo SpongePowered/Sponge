@@ -52,7 +52,7 @@ public interface LensCollection extends Iterable<Lens> {
      * Get all the properties for the specified lens (if contained in this
      * collection).
      * 
-     * @param index the lens index to fetch
+     * @param lens the lens to fetch
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */

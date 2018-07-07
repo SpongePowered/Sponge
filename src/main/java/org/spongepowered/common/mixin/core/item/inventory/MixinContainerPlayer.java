@@ -35,7 +35,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
@@ -58,7 +58,7 @@ public abstract class MixinContainerPlayer extends MixinContainer implements IMi
     @SuppressWarnings("unchecked")
     @Override
     public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
-        SlotCollection.Builder builder = new SlotCollection.Builder()
+        SlotLensCollection.Builder builder = new SlotLensCollection.Builder()
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
                 .add(4)
                 // TODO predicates for ItemStack/ItemType?

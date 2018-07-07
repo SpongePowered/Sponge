@@ -25,13 +25,17 @@
 package org.spongepowered.common.item.inventory.lens.comp;
 
 import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public interface Inventory2DLens extends OrderedInventoryLens {
+public interface Inventory2DLens extends Lens {
 
     int getWidth();
 
     int getHeight();
+
+    int getStride();
 
     SlotLens getSlot(SlotPos pos);
 

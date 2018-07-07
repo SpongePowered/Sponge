@@ -70,8 +70,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 /**
  * Implements things that are not implemented by mixins into this class. <p>This
  * class is concrete in order to create instances of User.</p>
@@ -229,12 +227,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     @Override
     public boolean canEquip(EquipmentType type) {
-        return getForInventory(p -> p.canEquip(type), u -> true); // TODO Inventory API
+        return this.getForInventory(p -> p.canEquip(type), u -> true);
     }
 
     @Override
-    public boolean canEquip(EquipmentType type, @Nullable ItemStack equipment) {
-        return getForInventory(p -> p.canEquip(type, equipment), u -> true); // TODO Inventory API
+    public boolean canEquip(EquipmentType type, ItemStack equipment) {
+        return this.getForInventory(p -> p.canEquip(type, equipment), u -> true);
     }
 
     @Override
@@ -243,7 +241,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public boolean equip(EquipmentType type, @Nullable ItemStack equipment) {
+    public boolean equip(EquipmentType type, ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.setForInventory(p -> p.equip(type, equipment), u -> u.setEquippedItem(type, equipment));
             return true;
@@ -257,19 +255,18 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
-
     @Override
-    public Optional<ItemStack> getItemInHand(HandType handType) {
+    public ItemStack getItemInHand(HandType handType) {
         if (handType == HandTypes.MAIN_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND));
+            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new));
         } else if (handType == HandTypes.OFF_HAND) {
-            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.OFF_HAND));
+            return this.getForInventory(p -> p.getItemInHand(handType), u -> u.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new));
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
 
     @Override
-    public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
+    public void setItemInHand(HandType handType, ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND) {
             this.setForInventory(p -> p.setItemInHand(handType, itemInHand), u -> u.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand));
         } else if (handType == HandTypes.OFF_HAND) {
@@ -277,6 +274,46 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }
+    }
+
+    @Override
+    public ItemStack getHelmet() {
+        return this.getEquipped(EquipmentTypes.HEADWEAR).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setHelmet(ItemStack helmet) {
+        this.equip(EquipmentTypes.HEADWEAR, helmet);
+    }
+
+    @Override
+    public ItemStack getChestplate() {
+        return this.getEquipped(EquipmentTypes.CHESTPLATE).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setChestplate(ItemStack chestplate) {
+        this.equip(EquipmentTypes.CHESTPLATE, chestplate);
+    }
+
+    @Override
+    public ItemStack getLeggings() {
+        return this.getEquipped(EquipmentTypes.LEGGINGS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setLeggings(ItemStack leggings) {
+        this.equip(EquipmentTypes.LEGGINGS, leggings);
+    }
+
+    @Override
+    public ItemStack getBoots() {
+        return this.getEquipped(EquipmentTypes.BOOTS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setBoots(ItemStack boots) {
+        this.equip(EquipmentTypes.BOOTS, boots);
     }
 
     @Override
@@ -372,7 +409,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return Optional.empty();
     }
 
-    private void setEquippedItem(EquipmentType type, @Nullable ItemStack item) {
+    private void setEquippedItem(EquipmentType type, ItemStack item) {
         if (type instanceof SpongeEquipmentType) {
             EntityEquipmentSlot[] slots = ((SpongeEquipmentType) type).getSlots();
             for (EntityEquipmentSlot slot : slots) {

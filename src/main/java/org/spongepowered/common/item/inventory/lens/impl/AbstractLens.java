@@ -29,16 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.ints.IntSets;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.InvalidLensDefinitionException;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.MutableLensCollection;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -52,30 +46,24 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 public abstract class AbstractLens implements Lens {
 
     protected final Class<? extends Inventory> adapterType;
     
     protected final int base;
-    
-    protected final IntSet availableSlots = new IntOpenHashSet();
-    
-    protected Lens parent;
-    
-    protected MutableLensCollection children;
-    
-    protected List<LensHandle> spanningChildren;
-    
-    protected int size;
-    
-    private int maxOrdinal = 0;
-    
-    public AbstractLens(int base, int size, InventoryAdapter adapter, SlotProvider slots) {
-        this(base, size, adapter.getClass(), slots);
-    }
+    protected final int size;
 
-    public AbstractLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
+    protected Lens parent;
+
+    protected MutableLensCollection children;
+
+    protected List<LensHandle> spanningChildren;
+
+    private int maxOrdinal = 0;
+
+    public AbstractLens(int base, int size, Class<? extends Inventory> adapterType) {
         checkArgument(base >= 0, "Invalid offset: %s", base);
         checkArgument(size > 0, "Invalid size: %s", size);
         checkNotNull(adapterType, "adapterType");
@@ -92,42 +80,29 @@ public abstract class AbstractLens implements Lens {
         this.spanningChildren = new ArrayList<>();
     }
 
-    @SuppressWarnings("unchecked")
-    protected void init(InventoryAdapter adapter, SlotProvider slots) {
-        try {
-            if (slots != null) {
-                this.init(slots);
-            } else if (adapter instanceof SlotProvider) {
-                this.init((SlotProvider) adapter);
-            } else {
-                this.init(index -> {
-                    throw new NoSuchElementException("Attempted to fetch slot at index " + index + " but no provider was available instancing " + AbstractLens.this);
-                });
-            }
-        } catch (NoSuchElementException ex) {
-            throw new InvalidLensDefinitionException("Invalid lens definition, the lens referenced slots which do not exist.", ex);
-        }
-    }
-
-    /**
-     * Initialise children
-     * 
-     * @param slots
-     */
-    protected abstract void init(SlotProvider slots);
-    
     protected void addChild(Lens lens, InventoryProperty<?, ?>... properties) {
         checkNotNull(lens, "Attempted to register a null lens");
         this.children.add(lens, properties);
-        this.availableSlots.addAll(lens.getSlots());
     }
     
     protected void addSpanningChild(Lens lens, InventoryProperty<?, ?>... properties) {
         this.addChild(lens, properties);
+
+        for (LensHandle spanningChild : this.spanningChildren) {
+            if (spanningChild.lens == lens) { // Spanning Child already exists
+                for (InventoryProperty<?, ?> property : properties) {
+                    // Just add properties
+                    spanningChild.setProperty(property);
+                }
+                return;
+            }
+        }
+
         LensHandle child = new LensHandle(lens, properties);
         this.spanningChildren.add(child);
         child.ordinal = this.maxOrdinal;
-        this.maxOrdinal += lens.getSlots().size();
+
+        this.maxOrdinal += lens.slotCount();
         if (lens instanceof AbstractLens) {
             ((AbstractLens) lens).setParent(this);
         }
@@ -146,52 +121,34 @@ public abstract class AbstractLens implements Lens {
     public Lens getParent() {
         return this.parent;
     }
-    
-    @Override
-    public IntSet getSlots() {
-        return IntSets.unmodifiable(this.availableSlots);
-    }
-    
-    @Override
-    public boolean hasSlot(int index) {
-        return this.availableSlots.contains(index);
-    }
-    
+
     @Override
     public Class<? extends Inventory> getAdapterType() {
         return this.adapterType;
     }
-    
-    @SuppressWarnings("unchecked")
-    @Override
-    public ItemStack getStack(Fabric inv, int ordinal) {
-        LensHandle lens = this.getLensForOrdinal(ordinal);
-        if (lens == null) {
-            return ((ItemStack) ItemStack.EMPTY);
+
+    public SlotLens getSlot(int ordinal) {
+        LensHandle handle = this.getLensForOrdinal(ordinal);
+        if (handle == null) {
+            return null;
         }
-        return lens.lens.getStack(inv, ordinal - lens.ordinal);
+        return handle.lens.getSlot(ordinal - handle.ordinal);
     }
-    
-    @Override
-    public boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
-        LensHandle lens = this.getLensForOrdinal(ordinal);
-        return lens != null && lens.lens.setStack(inv, ordinal - lens.ordinal, stack);
-    }
-    
-    protected LensHandle getLensForOrdinal(int ordinal) {
+
+    private LensHandle getLensForOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal > this.maxOrdinal) {
             return null;
         }
-        
+
+        // TODO slot lenshandle cache?
         for (LensHandle child : this.spanningChildren) {
             if (child.ordinal <= ordinal && (ordinal - child.ordinal) < child.lens.slotCount()) {
                 return child;
             }
         }
-        
+
         return null;
     }
-
     @SuppressWarnings("rawtypes")
     @Override
     public SlotLens getSlotLens(int ordinal) {
@@ -201,7 +158,32 @@ public abstract class AbstractLens implements Lens {
         }
         return handle.lens.getSlotLens(ordinal - handle.ordinal);
     }
-    
+    @Override
+    public List<SlotLens> getSlots() {
+        this.cacheSlots(this);
+        return this.slotCache.stream().map(lh -> lh.lens).map(SlotLens.class::cast).collect(Collectors.toList());
+    }
+
+    protected List<LensHandle> slotCache;
+
+    private void cacheSlots(Lens lens) {
+        if (this.slotCache != null) {
+            return;
+        }
+        this.slotCache = new ArrayList<>();
+        if (lens instanceof SlotLens) {
+            this.slotCache.add(new LensHandle(lens, lens.getProperties(0)));
+            return;
+        }
+        for (Lens child : lens.getSpanningChildren()) {
+            if (child instanceof SlotLens) {
+                this.slotCache.add(new LensHandle(child, lens.getProperties(child)));
+            } else {
+                this.cacheSlots(child);
+            }
+        }
+    }
+
     @Override
     public List<Lens> getChildren() {
         return Collections.unmodifiableList(this.children);
@@ -254,20 +236,57 @@ public abstract class AbstractLens implements Lens {
     public Iterator<Lens> iterator() {
         return this.children.iterator();
     }
-
-    @Override
-    public int getRealIndex(Fabric inv, int ordinal) {
-        LensHandle child = this.getLensForOrdinal(ordinal);
-        return child.lens.getRealIndex(inv, ordinal - child.ordinal);
-    }
-
+    
     @Override
     public int getMaxStackSize(Fabric inv) {
         return inv.getMaxStackSize();
     }
 
-    protected boolean checkOrdinal(int ordinal) {
-        return ordinal >= 0 && ordinal < this.size;
+    /**
+     * Adds missing spanning slots for basic support
+     *
+     * @param base The last added slot
+     * @param slots The slot provider
+     */
+    protected void addMissingSpanningSlots(int base, SlotProvider slots) {
+
+        int additionalSlots = this.size - base;
+        if (additionalSlots > 0) {
+            this.addSpanningChild(new DefaultIndexedLens(base, additionalSlots, slots));
+        }
     }
 
+    // Helpers for Debugging
+
+    public static final int LIMIT = 2;
+
+    @Override
+    public String toString(int deep) {
+        String result = ident(deep) + this.getClass().getSimpleName() + ": (" + this.size + ") base:" + this.base + "\n";
+        if (!this.children.isEmpty() && deep < LIMIT) {
+            result += ident(deep) + "Children: ";
+            for (Lens child : this.children) {
+                for (LensHandle spanningChild : this.spanningChildren) {
+                    if (spanningChild.lens == child) {
+                        result += "\n" + ident(deep) + "(Spanning)";
+                    }
+                }
+                result += child.toString(deep + 1);
+            }
+        }
+        return result;
+    }
+
+    private String ident(int deep) {
+        String ident = "";
+        for (int i = 0; i < deep; i++) {
+            ident += "-";
+        }
+        return ident;
+    }
+
+    @Override
+    public String toString() {
+        return toString(0);
+    }
 }

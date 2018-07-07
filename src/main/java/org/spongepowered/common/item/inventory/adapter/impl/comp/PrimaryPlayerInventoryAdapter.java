@@ -22,29 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.slots;
+package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.common.interfaces.inventory.IMixinSlot;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
+import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
+import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 
-public class FakeSlotLensImpl extends SlotLensImpl {
+public class PrimaryPlayerInventoryAdapter extends VanillaAdapter implements PrimaryPlayerInventory {
 
-    private Slot slot;
+    private final PrimaryPlayerInventoryLens root;
 
-    public FakeSlotLensImpl(Slot slot) {
-        super(Integer.MAX_VALUE);
-        this.slot = slot;
+    public PrimaryPlayerInventoryAdapter(Fabric inv, PrimaryPlayerInventoryLens lens, Inventory parent) {
+        super(inv, lens, parent);
+        this.root = lens;
     }
 
     @Override
-    public ItemStack getStack(Fabric inv) {
-        return this.slot.getStack();
+    public Hotbar getHotbar() {
+        return ((Hotbar) this.root.getHotbar().getAdapter(this.fabric, this));
     }
 
     @Override
-    public boolean setStack(Fabric inv, ItemStack stack) {
-        throw new IllegalStateException(String.format("Cannot set stack for invalid slot %s with id %s!", this.slot, ((IMixinSlot) this.slot).getSlotIndex()));
+    public GridInventory asGrid() {
+        return ((GridInventory) this.root.getFullGrid().getAdapter(this.fabric, this));
+    }
+
+    @Override
+    public GridInventory getStorage() {
+        return ((GridInventory) this.root.getMain().getAdapter(this.fabric, this));
     }
 }

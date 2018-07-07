@@ -98,10 +98,8 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -144,7 +142,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -411,15 +408,17 @@ public class SpongeCommonEventFactory {
             return Collections.emptyList();
         }
         List<SlotTransaction> trans = new ArrayList<>();
-        Iterator<Inventory> it = inv.slots().iterator();
-        for (int i = 0; i < inventory.getSizeInventory(); i++) {
-            org.spongepowered.api.item.inventory.Slot slot = (org.spongepowered.api.item.inventory.Slot) it.next();
+
+        List<org.spongepowered.api.item.inventory.Slot> slots = inv.slots();
+        for (int i = 0; i < slots.size(); i++) {
+            org.spongepowered.api.item.inventory.Slot slot = slots.get(i);
             ItemStack newStack = inventory.getStackInSlot(i);
             ItemStack prevStack = previous[i];
             if (!ItemStack.areItemStacksEqual(newStack, prevStack)) {
                 trans.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(prevStack), ItemStackUtil.snapshotOf(newStack)));
             }
         }
+
         return trans;
     }
 
@@ -999,7 +998,7 @@ public class SpongeCommonEventFactory {
                 && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             org.spongepowered.api.item.inventory.Slot slot = ((IMixinContainer) player.openContainer).getContainerSlot(packetIn.getSlotId());
             if (slot != null) {
-                ItemStackSnapshot clickedItem = slot.peek().map(org.spongepowered.api.item.inventory.ItemStack::createSnapshot).orElse(ItemStackSnapshot.NONE);
+                ItemStackSnapshot clickedItem = slot.peek().createSnapshot();
                 SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
@@ -1105,8 +1104,6 @@ public class SpongeCommonEventFactory {
             }
         }
 
-
-
         try {
             if (displayName != null) {
                 ((IMixinEntityPlayerMP) player).setContainerDisplay(displayName);
@@ -1137,6 +1134,9 @@ public class SpongeCommonEventFactory {
                 }
             } else if (inventory instanceof IInventory) {
                 player.displayGUIChest(((IInventory) inventory));
+            } else if (inventory instanceof org.spongepowered.api.item.inventory.Container) {
+                // TODO maybe make it work later
+                return null;
             } else {
                 return null;
             }
@@ -1265,18 +1265,13 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return;
         }
-        Inventory ordered = inv.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
-        if (!(ordered instanceof OrderedInventory)) {
-            ordered = ordered.iterator().next();
-        }
-        if (ordered instanceof OrderedInventory) {
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
-            if (slot.isPresent()) {
-                SlotTransaction trans = new SlotTransaction(slot.get(),
-                        ItemStackUtil.snapshotOf(originalStack),
-                        ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-                captureIn.getCapturedTransactions().add(trans);
-            }
+
+        Optional<org.spongepowered.api.item.inventory.Slot> slot = inv.getSlot(SlotIndex.of(index));
+        if (slot.isPresent()) {
+            SlotTransaction trans = new SlotTransaction(slot.get(),
+                    ItemStackUtil.snapshotOf(originalStack),
+                    ItemStackUtil.snapshotOf(slot.get().peek()));
+            captureIn.getCapturedTransactions().add(trans);
         }
         // else inventory was missing the slot for some reason
     }
@@ -1296,22 +1291,18 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return transaction.get();
         }
-        Inventory ordered = inv.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
-        if (!(ordered instanceof OrderedInventory)) {
-            ordered = ordered.iterator().next();
-        }
-        if (ordered instanceof OrderedInventory) {
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
-            if (slot.isPresent()) {
-                ItemStackSnapshot original = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-                ItemStack remaining = transaction.get();
-                if (remaining.isEmpty()) {
-                    ItemStackSnapshot replacement = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-                    captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
-                }
-                return remaining;
+
+        Optional<org.spongepowered.api.item.inventory.Slot> slot = inv.getSlot(SlotIndex.of(index));
+        if (slot.isPresent()) {
+            ItemStackSnapshot original = ItemStackUtil.snapshotOf(slot.get().peek());
+            ItemStack remaining = transaction.get();
+            if (remaining.isEmpty()) {
+                ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(slot.get().peek());
+                captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
             }
+            return remaining;
         }
+
         // else inventory was missing the slot for some reason
         return transaction.get();
     }

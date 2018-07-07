@@ -30,7 +30,6 @@ import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
 /**
  * A delegating Lens used in Containers. Provides ordered inventory access.
@@ -41,14 +40,13 @@ public class DelegatingLens extends AbstractLens {
     private Lens delegate;
 
     public DelegatingLens(int base, Lens lens, SlotProvider slots) {
-        super(base, lens.slotCount(), VanillaAdapter.class, slots);
+        super(base, lens.slotCount(), VanillaAdapter.class);
         this.delegate = lens;
         this.init(slots);
     }
 
-    @Override
     protected void init(SlotProvider slots) {
-        this.addSpanningChild(new OrderedInventoryLensImpl(this.base, this.size, 1, slots));
+        this.addSpanningChild(new DefaultIndexedLens(this.base, this.size, slots));
         this.addChild(delegate);
     }
 

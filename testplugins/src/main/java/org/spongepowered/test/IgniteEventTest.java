@@ -30,6 +30,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
 
 @Plugin(authors = "gabizou", name = "Ignite Test", id = "ignitetest", description = IgniteEventTest.DESCRIPTION, version = "0.0.0")
@@ -39,11 +40,10 @@ public class IgniteEventTest {
 
     @Listener
     public void onIgnite(IgniteEntityEvent entityEvent, @Getter("getTargetEntity") Player player) {
-        player.getItemInHand(HandTypes.MAIN_HAND).ifPresent(item -> {
-            if (item.getType() == ItemTypes.BLAZE_ROD) {
-                entityEvent.setFireTicks(600);
-            }
-        });
+        ItemStack item = player.getItemInHand(HandTypes.MAIN_HAND);
+        if (item.getType() == ItemTypes.BLAZE_ROD) {
+            entityEvent.setFireTicks(600);
+        }
     }
 
 }

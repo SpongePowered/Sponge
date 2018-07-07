@@ -22,18 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.interfaces;
 
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import net.minecraft.inventory.Container;
 
+public interface IMixinInteractable extends IMixinInventory {
 
-public interface OrderedInventoryLens extends Lens {
-
-    int getStride();
-
-    SlotLens getSlot(int ordinal);
-
-    boolean hasSlotRealIndex(int index);
+    void addContainer(Container container);
+    void removeContainer(Container container);
 
 }

@@ -25,37 +25,30 @@
 package org.spongepowered.common.item.inventory.lens.impl;
 
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 
 /**
  * Lenses for real Inventories like {@link TileEntityLockable} and {@link Container}.
  *
  * <p>When possible this lens will return the real {@link InventoryAdapter} as opposed to some kind of Wrapper Adapter</p>
  */
-@SuppressWarnings("rawtypes")
 public abstract class RealLens extends AbstractLens {
 
-    public RealLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        super(base, size, adapterType, slots);
-    }
-
-    public RealLens(int base, int size, InventoryAdapter adapter, SlotProvider slots) {
-        super(base, size, adapter, slots);
+    public RealLens(int base, int size, Class<? extends Inventory> adapterType) {
+        super(base, size, adapterType);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
-        IInventory base = inv.get(this.base);
-        if (!(base instanceof InventoryAdapter)) {
-            return new VanillaAdapter(inv, this, parent);
+        Object base = inv.get(this.base);
+        if (base instanceof InventoryAdapter) {
+            return (InventoryAdapter) base;
         }
-        return ((InventoryAdapter) base);
+        return new VanillaAdapter(inv, this, parent);
     }
 }

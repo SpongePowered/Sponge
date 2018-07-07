@@ -106,6 +106,7 @@ import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.property.SlotSide;
 import org.spongepowered.api.item.inventory.property.StringProperty;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -187,13 +188,14 @@ import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.common.item.inventory.InventoryTransactionResultImpl;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
-import org.spongepowered.common.item.inventory.property.IdentifieableImpl;
+import org.spongepowered.common.item.inventory.property.IdentifiableImpl;
 import org.spongepowered.common.item.inventory.property.IntPropertyImpl;
 import org.spongepowered.common.item.inventory.property.InventoryCapacityImpl;
 import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
@@ -272,7 +274,6 @@ import org.spongepowered.common.world.gen.builders.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public final class CommonModuleRegistry {
@@ -402,11 +403,12 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(IntProperty.Builder.class, IntPropertyImpl.BuilderImpl::new)
             .registerBuilderSupplier(SlotIndex.Builder.class, SlotIndexImpl.BuilderImpl::new)
             .registerBuilderSupplier(InventoryCapacity.Builder.class, InventoryCapacityImpl.BuilderImpl::new)
-            .registerBuilderSupplier(Identifiable.Builder.class, IdentifieableImpl.BuilderImpl::new)
+            .registerBuilderSupplier(Identifiable.Builder.class, IdentifiableImpl.BuilderImpl::new)
             .registerBuilderSupplier(GuiIdProperty.Builder.class, GuiIdPropertyImpl.BuilderImpl::new)
             .registerBuilderSupplier(EquipmentSlotType.Builder.class, EquipmentSlotTypeImpl.BuilderImpl::new)
             .registerBuilderSupplier(InventoryDimension.Builder.class, InventoryDimensionImpl.BuilderImpl::new)
             .registerBuilderSupplier(InventoryTitle.Builder.class, InventoryTitleImpl.BuilderImpl::new)
+            .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
         ;
     }
 

@@ -22,29 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl;
+package org.spongepowered.common.item.inventory.property;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.GridInventory;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.api.data.Property;
+import org.spongepowered.api.item.inventory.property.Identifiable;
+import org.spongepowered.api.util.Coerce;
 
-/**
- * Lenses for inventory concepts like {@link OrderedInventory} or {@link GridInventory}.
- *
- * <p>This lenses will usually return a new matching adapter (usually extending {@link AbstractInventoryAdapter})</p>
- */
-@SuppressWarnings("rawtypes")
-public abstract class ConceptualLens extends AbstractLens {
+import java.util.UUID;
 
-    public ConceptualLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        super(base, size, adapterType, slots);
+public final class IdentifiableImpl extends AbstractInventoryProperty<String, UUID> implements Identifiable {
+
+    public IdentifiableImpl(UUID value, Operator operator) {
+        super(value, operator);
     }
 
-    public ConceptualLens(int base, int size, InventoryAdapter adapter, SlotProvider slots) {
-        super(base, size, adapter, slots);
+    @Override
+    public int compareTo(Property<?, ?> other) {
+        if (other == null) {
+            return 1;
+        }
+
+        return this.getValue().toString().compareTo(Coerce.toString(other.getValue()));
     }
 
+    public static final class BuilderImpl extends PropertyBuilderImpl<UUID, Identifiable, Identifiable.Builder> implements Identifiable.Builder {
+
+        @Override
+        public Identifiable build() {
+            return new IdentifiableImpl(this.value, this.operator);
+        }
+    }
 }

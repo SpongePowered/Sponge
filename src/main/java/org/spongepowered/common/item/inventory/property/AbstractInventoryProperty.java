@@ -26,6 +26,16 @@ package org.spongepowered.common.item.inventory.property;
 
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
+import org.spongepowered.api.item.inventory.property.GuiIdProperty;
+import org.spongepowered.api.item.inventory.property.Identifiable;
+import org.spongepowered.api.item.inventory.property.InventoryCapacity;
+import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.property.SlotSide;
+import org.spongepowered.api.item.inventory.property.StringProperty;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -47,6 +57,20 @@ public abstract class AbstractInventoryProperty<K, V> implements InventoryProper
 
     public static void register(Class<? extends InventoryProperty> property, Class<? extends InventoryProperty> propertyImpl) {
         defaultKeys.put(propertyImpl, property.getSimpleName().toLowerCase(Locale.ENGLISH));
+    }
+
+    static {
+        register(EquipmentSlotType.class, EquipmentSlotTypeImpl.class);
+        register(GuiIdProperty.class, GuiIdPropertyImpl.class);
+        register(Identifiable.class, IdentifiableImpl.class);
+        register(org.spongepowered.api.item.inventory.property.IntProperty.class, IntPropertyImpl.class);
+        register(InventoryDimension.class, InventoryDimensionImpl.class);
+        register(InventoryTitle.class, InventoryTitleImpl.class);
+        register(SlotPos.class, SlotPosImpl.class);
+        register(SlotSide.class, SlotSideImpl.class);
+        register(StringProperty.class, StringPropertyImpl.class);
+        register(InventoryCapacity.class, InventoryCapacityImpl.class);
+        register(SlotIndex.class, SlotIndexImpl.class);
     }
 
     /**

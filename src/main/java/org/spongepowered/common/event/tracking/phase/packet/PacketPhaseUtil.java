@@ -59,7 +59,7 @@ public final class PacketPhaseUtil {
             if (openContainer == null) {
                 slot.set(((org.spongepowered.api.item.inventory.ItemStack) originalStack));
             } else {
-                final int slotNumber = slot.slotNumber;
+                final int slotNumber = slot.getOrdinal();
                 final Slot nmsSlot = openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
                     nmsSlot.putStack(originalStack);

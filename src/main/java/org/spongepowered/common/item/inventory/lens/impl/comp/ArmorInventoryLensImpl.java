@@ -26,30 +26,49 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.RealLens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.lens.impl.SlotBasedLens;
 import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
-import java.util.Map;
 import java.util.Optional;
 
-public class EquipmentInventoryLensImpl extends RealLens implements EquipmentInventoryLens {
+public class ArmorInventoryLensImpl extends SlotBasedLens implements EquipmentInventoryLens {
 
-    public EquipmentInventoryLensImpl(Map<EquipmentType, SlotLens> lenses) {
-        super(0, lenses.size(), EquipmentInventoryAdapter.class);
-        this.init(lenses);
+    public ArmorInventoryLensImpl(int base, SlotProvider slots, boolean isContainer) {
+        super(base, 4, 1, EquipmentInventoryAdapter.class, slots);
+        if (isContainer) {
+            this.initContainer(slots);
+        } else {
+            this.initInventory(slots);
+        }
     }
 
-    private void init(Map<EquipmentType, SlotLens> lenses) {
-        for (Map.Entry<EquipmentType, SlotLens> entry : lenses.entrySet()) {
-            this.addSpanningChild(entry.getValue(), new EquipmentSlotTypeImpl(entry.getKey()));
-        }
+    private void initInventory(SlotProvider slots) {
+        int index = this.base;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
+    }
+
+    private void initContainer(SlotProvider slots) {
+        int index = this.base;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+        index += this.stride;
+        this.addSpanningChild(slots.getSlotLens(index), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
     }
 
     @SuppressWarnings("rawtypes")

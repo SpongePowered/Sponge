@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -41,14 +40,6 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
         this(base, width, 0, 0, HotbarAdapter.class, slots);
     }
 
-    public HotbarLensImpl(int base, int width, Class<? extends Inventory> adapterType, SlotProvider slots) {
-        this(base, width, 0, 0, adapterType, slots);
-    }
-    
-    public HotbarLensImpl(int base, int width, int xBase, int yBase, SlotProvider slots) {
-        this(base, width, xBase, yBase, HotbarAdapter.class, slots);
-    }
-    
     public HotbarLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, width, xBase, yBase, adapterType, slots);
     }
@@ -70,9 +61,10 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
 
     @Override
     public void setSelectedSlotIndex(Fabric inv, int index) {
-        inv.allInventories().stream().filter(inner -> inner instanceof IMixinInventoryPlayer).forEach(inner -> {
-            ((IMixinInventoryPlayer) inner).setSelectedItem(index, true);
-        });
+        inv.allInventories().stream()
+                .filter(IMixinInventoryPlayer.class::isInstance)
+                .map(IMixinInventoryPlayer.class::cast)
+                .forEach(inner -> inner.setSelectedItem(index, true));
     }
 
 }

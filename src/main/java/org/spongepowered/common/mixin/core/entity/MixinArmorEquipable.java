@@ -35,11 +35,9 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.ArmorEquipable;
-import org.spongepowered.api.entity.Equipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -51,8 +49,7 @@ import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
 @Mixin({EntityArmorStand.class, EntityGiantZombie.class, EntityPlayerMP.class, AbstractSkeleton.class, EntityZombie.class, EntityHuman.class})
-@Implements(@Interface(iface = ArmorEquipable.class, prefix = "equipable$"))
-public abstract class MixinArmorEquipable extends MixinEntityLivingBase implements Equipable {
+public abstract class MixinArmorEquipable extends MixinEntityLivingBase implements ArmorEquipable {
 
     @Override
     public boolean canEquip(EquipmentType type) {
@@ -95,14 +92,56 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase implemen
         return false;
     }
 
-    public Optional<ItemStack> equipable$getItemInHand(HandType handType) {
+    @Override
+    public ItemStack getItemInHand(HandType handType) {
         checkNotNull(handType, "HandType cannot be null!");
         final net.minecraft.item.ItemStack nmsItem = this.getHeldItem((EnumHand) (Object) handType);
-        return Optional.ofNullable(nmsItem.isEmpty() ? null : ((ItemStack) nmsItem.copy()));
+        return ItemStackUtil.fromNative(nmsItem);
     }
 
-    public void equipable$setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
+    @Override
+    public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
         checkNotNull(handType, "HandType cannot be null!");
         this.setHeldItem((EnumHand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
+    }
+
+    @Override
+    public ItemStack getHelmet() {
+        return this.getEquipped(EquipmentTypes.HEADWEAR).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setHelmet(ItemStack helmet) {
+        this.equip(EquipmentTypes.HEADWEAR, helmet);
+    }
+
+    @Override
+    public ItemStack getChestplate() {
+        return this.getEquipped(EquipmentTypes.CHESTPLATE).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setChestplate(ItemStack chestplate) {
+        this.equip(EquipmentTypes.CHESTPLATE, chestplate);
+    }
+
+    @Override
+    public ItemStack getLeggings() {
+        return this.getEquipped(EquipmentTypes.LEGGINGS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setLeggings(ItemStack leggings) {
+        this.equip(EquipmentTypes.LEGGINGS, leggings);
+    }
+
+    @Override
+    public ItemStack getBoots() {
+        return this.getEquipped(EquipmentTypes.BOOTS).orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    public void setBoots(ItemStack boots) {
+        this.equip(EquipmentTypes.BOOTS, boots);
     }
 }

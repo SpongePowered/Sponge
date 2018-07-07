@@ -36,9 +36,9 @@ import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
 import javax.annotation.Nullable;
 
@@ -72,9 +72,13 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private ReusableLens<?> getReusableLens()
     {
-        if (this.reusableLens != null) {
-            return this.reusableLens;
+        if (this.reusableLens == null) {
+            this.reusableLens = generateLens();
         }
+        return this.reusableLens;
+    }
+
+    private ReusableLens<?> generateLens() {
         if (this instanceof ReusableLensProvider) {
             return ((ReusableLensProvider) this).generateLens(this.getFabric(), this);
         }
@@ -83,12 +87,12 @@ public abstract class MixinTraitAdapter implements MinecraftInventoryAdapter {
             Lens lens = ((LensProvider) this).rootLens(this.getFabric(), this);
             return new ReusableLens<>(this.slots, lens);
         }
-        SlotCollection slots = new SlotCollection.Builder().add(this.getFabric().getSize()).build();
+        SlotLensCollection slots = new SlotLensCollection.Builder().add(this.getFabric().getSize()).build();
         Lens lens;
         if (this.getFabric().getSize() == 0) {
             lens = new DefaultEmptyLens(this);
         } else {
-            lens = new OrderedInventoryLensImpl(0, this.getFabric().getSize(), 1, slots);
+            lens = new DefaultIndexedLens(0, this.getFabric().getSize(), slots);
         }
         return new ReusableLens<>(slots, lens);
     }

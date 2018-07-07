@@ -139,17 +139,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
-import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
-import org.spongepowered.common.item.inventory.property.GuiIdPropertyImpl;
-import org.spongepowered.common.item.inventory.property.IdentifieableImpl;
-import org.spongepowered.common.item.inventory.property.IntPropertyImpl;
-import org.spongepowered.common.item.inventory.property.InventoryCapacityImpl;
-import org.spongepowered.common.item.inventory.property.InventoryDimensionImpl;
-import org.spongepowered.common.item.inventory.property.InventoryTitleImpl;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
-import org.spongepowered.common.item.inventory.property.SlotPosImpl;
-import org.spongepowered.common.item.inventory.property.SlotSideImpl;
-import org.spongepowered.common.item.inventory.property.StringPropertyImpl;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
@@ -941,18 +930,17 @@ public class DataRegistrar {
         propertyRegistry.register(EyeHeightProperty.class, new EyeHeightPropertyStore());
 
         // Inventory Properties
-        propertyRegistry.register(EquipmentSlotType.class, new InventoryPropertyStore<>(EquipmentSlotType.class, EquipmentSlotTypeImpl.class));
-        propertyRegistry.register(GuiIdProperty.class, new InventoryPropertyStore<>(GuiIdProperty.class, GuiIdPropertyImpl.class));
-        propertyRegistry.register(Identifiable.class, new InventoryPropertyStore<>(Identifiable.class, IdentifieableImpl.class));
-        propertyRegistry.register(org.spongepowered.api.item.inventory.property.IntProperty.class, new InventoryPropertyStore<>(
-                org.spongepowered.api.item.inventory.property.IntProperty.class, IntPropertyImpl.class));
-        propertyRegistry.register(InventoryDimension.class, new InventoryPropertyStore<>(InventoryDimension.class, InventoryDimensionImpl.class));
-        propertyRegistry.register(InventoryTitle.class, new InventoryPropertyStore<>(InventoryTitle.class, InventoryTitleImpl.class));
-        propertyRegistry.register(SlotPos.class, new InventoryPropertyStore<>(SlotPos.class, SlotPosImpl.class));
-        propertyRegistry.register(SlotSide.class, new InventoryPropertyStore<>(SlotSide.class, SlotSideImpl.class));
-        propertyRegistry.register(StringProperty.class, new InventoryPropertyStore<>(StringProperty.class, StringPropertyImpl.class));
-        propertyRegistry.register(InventoryCapacity.class, new InventoryPropertyStore<>(InventoryCapacity.class, InventoryCapacityImpl.class));
-        propertyRegistry.register(SlotIndex.class, new InventoryPropertyStore<>(SlotIndex.class, SlotIndexImpl.class));
+        propertyRegistry.register(EquipmentSlotType.class, new InventoryPropertyStore<>(EquipmentSlotType.class));
+        propertyRegistry.register(GuiIdProperty.class, new InventoryPropertyStore<>(GuiIdProperty.class));
+        propertyRegistry.register(Identifiable.class, new InventoryPropertyStore<>(Identifiable.class));
+        propertyRegistry.register(org.spongepowered.api.item.inventory.property.IntProperty.class, new InventoryPropertyStore<>(org.spongepowered.api.item.inventory.property.IntProperty.class));
+        propertyRegistry.register(InventoryDimension.class, new InventoryPropertyStore<>(InventoryDimension.class));
+        propertyRegistry.register(InventoryTitle.class, new InventoryPropertyStore<>(InventoryTitle.class));
+        propertyRegistry.register(SlotPos.class, new InventoryPropertyStore<>(SlotPos.class));
+        propertyRegistry.register(SlotSide.class, new InventoryPropertyStore<>(SlotSide.class));
+        propertyRegistry.register(StringProperty.class, new InventoryPropertyStore<>(StringProperty.class));
+        propertyRegistry.register(InventoryCapacity.class, new InventoryPropertyStore<>(InventoryCapacity.class));
+        propertyRegistry.register(SlotIndex.class, new InventoryPropertyStore<>(SlotIndex.class));
     }
 
 }

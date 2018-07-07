@@ -35,5 +35,4 @@ public interface SlotLens extends Lens {
     boolean setStack(Fabric inv, ItemStack stack);
 
     int getOrdinal(Fabric inv);
-    
 }

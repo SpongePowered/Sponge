@@ -36,8 +36,8 @@ import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAd
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -47,8 +47,8 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric
 public abstract class MixinEntityMinecartContainer extends MixinEntityMinecart implements ILockableContainer, ILootContainer {
 
     protected Fabric fabric = new IInventoryFabric(this);
-    protected SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-    protected Lens lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, this.slots);
+    protected SlotLensCollection slots = new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
+    protected Lens lens = new DefaultIndexedLens(0, this.getSizeInventory(), this.slots);
 
     @SuppressWarnings("unchecked")
     public SlotProvider inventory$getSlotProvider() {

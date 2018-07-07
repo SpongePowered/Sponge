@@ -29,8 +29,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 
-import javax.annotation.Nullable;
-
 /**
  * If {@link Inventory} represents the "idea" of an inventory, then an
  * {@link InventoryAdapter} represents the reality of one. All <i>Inventory
@@ -56,10 +54,5 @@ public interface InventoryAdapter extends Inventory {
     Lens getRootLens();
 
     Fabric getFabric();
-
-    Inventory getChild(int index);
-
-    @Nullable
-    Inventory getChild(Lens lens);
 
 }

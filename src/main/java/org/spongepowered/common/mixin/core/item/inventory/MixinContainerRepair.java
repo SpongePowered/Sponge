@@ -33,21 +33,21 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
 @Mixin(ContainerRepair.class)
 public abstract class MixinContainerRepair extends MixinContainer implements LensProvider {
 
     @Override
     public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
-        return new OrderedInventoryLensImpl(0, 3, 1, inventory$getSlotProvider());
+        return new DefaultIndexedLens(0, 3, inventory$getSlotProvider());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
-        SlotCollection.Builder builder = new SlotCollection.Builder()
+        SlotLensCollection.Builder builder = new SlotLensCollection.Builder()
                 .add(2, InputSlotAdapter.class)
                 .add(1, OutputSlotAdapter.class);
         return builder.build();

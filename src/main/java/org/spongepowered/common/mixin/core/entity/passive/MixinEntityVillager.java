@@ -58,6 +58,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
@@ -65,8 +66,8 @@ import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAd
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
@@ -95,7 +96,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
     private Fabric fabric;
-    private SlotCollection slots;
+    private SlotLensCollection slots;
     private Lens lens;
 
     @Nullable private Profession profession;
@@ -109,8 +110,8 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this.villagerInventory);
-        this.slots = new SlotCollection.Builder().add(8).build();
-        this.lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);
+        this.slots = new SlotLensCollection.Builder().add(8).build();
+        this.lens = new DefaultIndexedLens(0, 8, this.slots);
     }
 
     @SuppressWarnings("unchecked")

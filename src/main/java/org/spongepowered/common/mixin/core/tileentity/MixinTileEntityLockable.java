@@ -51,9 +51,9 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
 import java.util.List;
 import java.util.Optional;
@@ -127,8 +127,8 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
     @SuppressWarnings("unchecked")
     @Override
     public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
-        SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-        OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+        SlotLensCollection slots = new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
+        DefaultIndexedLens lens = new DefaultIndexedLens(0, this.getSizeInventory(), slots);
         return new ReusableLens<>(slots, lens);
     }
 

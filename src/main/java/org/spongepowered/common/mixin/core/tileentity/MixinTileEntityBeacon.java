@@ -45,7 +45,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapt
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
@@ -71,14 +71,14 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     private SlotProvider generateSlotProvider() {
         InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
-        return new SlotCollection.Builder()
+        return new SlotLensCollection.Builder()
                 .add(InputSlotAdapter.class, i -> lens)
                 .build();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private InputSlotLens generateRootLens(SlotProvider slots) {
-        return ((InputSlotLens) slots.getSlot(0));
+        return ((InputSlotLens) slots.getSlotLens(0));
     }
 
     @Override
