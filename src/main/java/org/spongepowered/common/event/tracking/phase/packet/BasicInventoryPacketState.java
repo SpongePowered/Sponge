@@ -39,7 +39,6 @@ import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
@@ -170,9 +169,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             Sponge.getCauseStackManager().pushCause(openContainer);
             Sponge.getCauseStackManager().pushCause(player);
             final ClickInventoryEvent inventoryEvent;
-            inventoryEvent =
-                this
-                    .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
+            inventoryEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction,
                         Lists.newArrayList(slotTransactions),
                         capturedItems,
                         usedButton);
@@ -223,29 +220,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
                     } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
-                    } else if (inventoryEvent instanceof ClickInventoryEvent.Drag) {
-                        int increment;
-
-                        increment = slotTransactions.stream()
-                            .filter((t) -> !t.isValid())
-                            .mapToInt((t) -> t.getFinal().getQuantity())
-                            .sum();
-
-                        final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
-                        cursor.setQuantity(cursor.getQuantity() + increment);
-                        PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
-                    } else if (inventoryEvent instanceof ClickInventoryEvent.Double && !(inventoryEvent instanceof ClickInventoryEvent.Shift)) {
-                        int decrement;
-
-                        decrement = slotTransactions.stream()
-                            .filter((t) -> !t.isValid())
-                            .mapToInt((t) -> t.getOriginal().getQuantity())
-                            .sum();
-
-                        final ItemStack cursor = inventoryEvent.getCursorTransaction().getFinal().createStack();
-                        cursor.setQuantity(cursor.getQuantity() - decrement);
-                        PacketPhaseUtil.handleCustomCursor(player, cursor.createSnapshot());
                     }
+
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else if (!context.getCapturedEntitySupplier().isEmpty()) {
