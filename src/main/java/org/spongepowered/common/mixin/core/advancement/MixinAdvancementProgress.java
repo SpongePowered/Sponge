@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.PlayerAdvancements;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.Progressable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -88,6 +89,22 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
 
     @Inject(method = "update", at = @At("RETURN"))
     private void onUpdate(Map<String, Criterion> criteriaIn, String[][] requirements, CallbackInfo ci) {
+        // Validate the requirements to check whether their
+        // criterion actually exists, prevents bugs when mods
+        // accidentally use non existent requirements
+        // See https://github.com/SpongePowered/SpongeForge/issues/2191
+        for (String[] reqs : requirements) {
+            for (String req : reqs) {
+                if (!criteriaIn.containsKey(req)) {
+                    final String advName = getOptionalAdvancement()
+                            .map(CatalogType::getId)
+                            .orElse("unknown");
+                    throw new IllegalStateException("Found a requirement which does not exist in the criteria, "
+                            + req + " could not be found for the advancement: " + advName);
+                }
+            }
+        }
+        // Update the progress map
         updateProgressMap();
     }
 
@@ -96,8 +113,13 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         if (!ServerUtils.isCallingFromMainThread()) {
             return;
         }
-        this.progressMap = new HashMap<>();
-        processProgressMap(getAdvancement().getCriterion(), this.progressMap);
+        final Optional<Advancement> advancement = getOptionalAdvancement();
+        if (advancement.isPresent()) {
+            this.progressMap = new HashMap<>();
+            processProgressMap(advancement.get().getCriterion(), this.progressMap);
+        } else {
+            this.progressMap = null;
+        }
     }
 
     private Map<AdvancementCriterion, ICriterionProgress> getProgressMap() {
@@ -279,11 +301,22 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         }
     }
 
-    @Override
-    public Advancement getAdvancement() {
+    /**
+     * Gets the {@link Advancement} without checking if it's still
+     * loaded on the server.
+     *
+     * @return The advancement
+     */
+    private Optional<Advancement> getOptionalAdvancement() {
         checkServer();
         checkState(this.advancement != null, "The advancement is not yet initialized");
-        return AdvancementRegistryModule.getInstance().getById(this.advancement).get();
+        return AdvancementRegistryModule.getInstance().getById(this.advancement);
+    }
+
+    @Override
+    public Advancement getAdvancement() {
+        return getOptionalAdvancement().orElseThrow(() -> new IllegalStateException(
+                "The advancement of this advancement progress is unloaded: " + this.advancement));
     }
 
     @Override

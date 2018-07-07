@@ -53,6 +53,7 @@ import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.GameRegistryEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -215,6 +216,11 @@ public class AdvancementTest {
                     .build();
             event.register(this.suicidalAdvancement);
         });
+    }
+
+    @Listener
+    public void onPlayerJoin(ClientConnectionEvent.Join event) {
+        event.getTargetEntity().getProgress(this.rootAdvancement).grant();
     }
 
     @Listener

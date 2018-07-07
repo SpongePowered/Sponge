@@ -49,7 +49,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.advancement.ICriterion;
-import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -119,7 +118,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         } else {
             // Wait to set the parent until the advancement is registered
             this.tempParent = parentIn;
-            this.parent = SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT;
+            this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
         }
         // This is only possible when REGISTER_ADVANCEMENTS_ON_CONSTRUCT is true
         if (parentIn == null) {
@@ -248,6 +247,8 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             return;
         }
         this.parent = this.tempParent;
+        // The child didn't get added yet to it's actual parent
+        this.parent.addChild((Advancement) (Object) this);
         this.tempParent = null;
     }
 
@@ -257,7 +258,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (this.tempParent != null) {
             return Optional.of((org.spongepowered.api.advancement.Advancement) this.tempParent);
         }
-        if (this.parent == SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
+        if (this.parent == AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT) {
             return Optional.empty();
         }
         return Optional.ofNullable((org.spongepowered.api.advancement.Advancement) this.parent);
