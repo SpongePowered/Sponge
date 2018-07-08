@@ -105,7 +105,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
-        if (!this.isMainThread()) {
+        if (!this.isMainThread() && !AdvancementRegistryModule.getInstance().isInInitialRegistration()) {
             return;
         }
         if (displayIn != null) {
