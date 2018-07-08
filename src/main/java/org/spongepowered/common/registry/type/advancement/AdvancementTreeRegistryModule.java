@@ -56,7 +56,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     @SuppressWarnings("unchecked")
     @Override
     public void registerAdditionalCatalog(AdvancementTree advancementTree) {
-        checkState(ServerUtils.isCallingFromMainThread());
+        checkState(ServerUtils.isCallingFromMainThread() || AdvancementRegistryModule.getInstance().isInInitialRegistration());
         super.register(advancementTree);
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();

@@ -35,6 +35,7 @@ import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
@@ -45,6 +46,7 @@ import org.spongepowered.common.util.ServerUtils;
 import java.util.Map;
 
 @CustomRegistrationPhase
+@RegistrationDependency(CriterionRegistryModule.class)
 public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
         implements AdditionalCatalogRegistryModule<Advancement> {
 
@@ -54,15 +56,9 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     private static final String[][] dummyRequirements = {{ dummyCriterionName }};
 
     // Putting it here to make sure that initialized outside any of the events to prevent it from being registered
-    public static final net.minecraft.advancements.Advancement DUMMY_ROOT_ADVANCEMENT = new net.minecraft.advancements.Advancement(
-            new ResourceLocation("sponge", "dummy_root"), null, null,
-            AdvancementRewards.EMPTY, dummyCriteria, dummyRequirements) {
-        @Override
-        public void addChild(net.minecraft.advancements.Advancement child) {
-            // Prevent children to be added so that there
-            // aren't any leftover references from this instance
-        }
-    };
+    public static net.minecraft.advancements.Advancement DUMMY_ROOT_ADVANCEMENT;
+
+    private boolean inInitialRegistration;
 
     public static AdvancementRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -76,9 +72,33 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         this.catalogTypeMap.clear();
     }
 
+    public boolean isInInitialRegistration() {
+        return this.inInitialRegistration;
+    }
+
+    @Override
+    public void registerDefaults() {
+        this.inInitialRegistration = true;
+        try {
+            DUMMY_ROOT_ADVANCEMENT = new net.minecraft.advancements.Advancement(
+                    new ResourceLocation("sponge", "dummy_root"), null, null,
+                    AdvancementRewards.EMPTY, dummyCriteria, dummyRequirements) {
+
+                @Override
+                public void addChild(net.minecraft.advancements.Advancement child) {
+                    // Prevent children to be added so that there
+                    // aren't any leftover references from this instance
+                }
+            };
+        } finally {
+            this.inInitialRegistration = false;
+        }
+
+    }
+
     @Override
     public void registerAdditionalCatalog(Advancement advancement) {
-        checkState(ServerUtils.isCallingFromMainThread());
+        checkState(ServerUtils.isCallingFromMainThread() || this.isInInitialRegistration());
         super.register(advancement);
         ((IMixinAdvancement) advancement).setRegistered();
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
