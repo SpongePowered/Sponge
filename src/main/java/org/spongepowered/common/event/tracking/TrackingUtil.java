@@ -821,20 +821,6 @@ public final class TrackingUtil {
         return null;
     }
 
-    static void notifyNeighbors(BlockPos pos, IBlockState newState, net.minecraft.world.World minecraftWorld, Block block, IBlockState iblockstate,
-        boolean notifyNeighbors,
-        boolean notifyObservers) {
-        if (notifyNeighbors) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, block);
-            }
-        } else if (!minecraftWorld.isRemote && notifyObservers) {
-            minecraftWorld.updateObservingBlocksAt(pos, block);
-        }
-    }
-
     public static void standardSpawnCapturedEntities(PhaseContext<?> context, StackFrame frame, List<Entity> entities) {
         // Separate experience orbs from other entity drops
         final List<Entity> experience = entities.stream()
