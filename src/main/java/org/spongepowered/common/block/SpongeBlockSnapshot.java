@@ -103,12 +103,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private SpongeBlockChangeFlag changeFlag;
     public BlockChange blockChange; // used for post event
 
-    // Internal use for restores
-    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, SpongeBlockChangeFlag flag) {
-        this(builder);
-        this.changeFlag = flag;
-    }
-
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.extendedState = builder.extendedState;
@@ -130,7 +124,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.keyValueMap = tileBuilder.build();
         this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
         this.compound = builder.compound == null ? null : builder.compound.copy();
-        this.changeFlag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+        this.changeFlag = builder.flag;
     }
 
     @Override

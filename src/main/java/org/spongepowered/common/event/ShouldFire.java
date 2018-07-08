@@ -75,4 +75,5 @@ public class ShouldFire {
 
     public static boolean IGNITE_ENTITY_EVENT = false;
     public static boolean NOTIFY_NEIGHBOR_BLOCK_EVENT = false;
+    public static boolean EXPLOSION_EVENT_PRE = false;
 }

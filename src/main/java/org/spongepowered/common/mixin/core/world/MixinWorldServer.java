@@ -1703,7 +1703,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
-        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) updateFlag);
+        this.builder.flag(updateFlag);
+        return new SpongeBlockSnapshot(this.builder);
     }
 
     /**
@@ -1740,11 +1741,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             // Sponge Start - More cause tracking
             // Set up the pre event
-            final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.world.explosion.Explosion) explosion, this);
-            if (SpongeImpl.postEvent(event)) {
-                this.processingExplosion = false;
-                return explosion;
+            if (ShouldFire.EXPLOSION_EVENT_PRE) {
+                final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                    (org.spongepowered.api.world.explosion.Explosion) explosion, this);
+                if (SpongeImpl.postEvent(event)) {
+                    this.processingExplosion = false;
+                    return explosion;
+                }
             }
             // Sponge End
 
