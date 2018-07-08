@@ -435,6 +435,7 @@
         "status.MixinServerStatusResponseVersion",
         "text.MixinTextComponentBase",
         "text.MixinTextComponentScore",
+        "text.MixinTextComponentKeybind",
         "text.MixinTextComponentSelector",
         "text.MixinTextComponentString",
         "text.MixinTextComponentTranslation",
