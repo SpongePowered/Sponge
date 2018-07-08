@@ -142,7 +142,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
      */
     @Override
     public boolean doesBulkBlockCapture(BlockTickContext context) {
-        return false;
+        return context.allowsBulkBlockCaptures();
     }
 
     /**
