@@ -226,89 +226,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Accepts and performs a proposed block change, usually because {@link #doesBlockEventTracking(PhaseContext)}
-     * is returning {@code true} in the sense that we are wanting to throw an event at the very least for the
-     * proposed block change. This is however, not considering bulk block captures, as bulk block captures is
-     * checked previously with {@link #doesBulkBlockCapture(PhaseContext)} and calls another method through
-     * the {@link TrackingUtil#captureBulkBlockChange(IMixinWorldServer, Chunk, IBlockState, IBlockState, BlockPos, BlockChangeFlag, PhaseContext, IPhaseState)}.
-     *
-     * @param mixinWorld The world server
-     * @param chunk The chunk
-     * @param currentState The current state in the chunk
-     * @param newState The new block state
-     * @param pos The postiion being changed
-     * @param flag The block change flag, already converted
-     * @param context The phase context
-     * @return True if the block change was successful, false if it was denied
-     */
-    default boolean performBlockChange(IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos,
-        BlockChangeFlag flag, C context) {
-        final WorldServer minecraftWorld = (WorldServer) mixinWorld;
-        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final Block block = newState.getBlock();
-
-        if (!ShouldFire.CHANGE_BLOCK_EVENT) { // If we don't have to worry about any block events, don't bother
-            // Sponge End - continue with vanilla mechanics
-            final IBlockState iblockstate = chunk.setBlockState(pos, newState);
-
-            if (iblockstate == null) {
-                return false;
-            }
-            // else { // Sponge - unnecessary formatting
-            if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-                minecraftWorld.profiler.startSection("checkLight"); // Sponge - we don't need to us the profiler
-                minecraftWorld.checkLight(pos);
-                minecraftWorld.profiler.endSection(); // Sponge - We don't need to use the profiler
-            }
-
-            if (spongeFlag.isNotifyClients() && chunk.isPopulated()) {
-                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, spongeFlag.getRawFlag());
-            }
-
-            TrackingUtil.notifyNeighbors(pos, newState, minecraftWorld, block, iblockstate, flag.updateNeighbors(), flag.notifyObservers());
-
-            return true;
-        }
-        // Sponge Start - Fall back to performing a singular block capture and throwing an event with all the
-        // reprocussions, such as neighbor notifications and whatnot. Entity spawns should also be
-        // properly handled since bulk captures technically should be disabled if reaching
-        // this point.
-        final SpongeBlockSnapshot originalBlockSnapshot= mixinWorld.createSpongeBlockSnapshot(currentState, currentState, pos, flag);
-        final List<BlockSnapshot> capturedSnapshots = new ArrayList<>(1); // only need tone
-        final Block newBlock = newState.getBlock();
-
-        TrackingUtil.associateBlockChangeWithSnapshot(this, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
-        if (originalBlockState == null) {
-            return false; // Return fast
-        }
-        final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot);
-        final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
-        // Create and throw normal event
-        final ChangeBlockEvent normalEvent =
-            originalBlockSnapshot.blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactions);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            this.associateAdditionalCauses(context, frame);
-            SpongeImpl.postEvent(normalEvent);
-            frame.pushCause(normalEvent); // Because of our contract for post events
-            final ChangeBlockEvent.Post post = this.createChangeBlockPostEvent(context, transactions);
-            SpongeImpl.postEvent(post);
-            if (post == null) {
-                return false;
-            }
-            if (!transaction.isValid()) {
-                transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-                if (this.tracksBlockSpecificDrops()) {
-                    context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
-                }
-                return false; // Short circuit
-            }
-            // And now, proceed as normal.
-            return TrackingUtil.performTransactionProcess(transaction, this, context, false, 0);
-        }
-    }
-    /**
      * A phase specific method that determines whether it is needed to capture the entity based onto the
      * entity-specific lists of drops, or a generalized list of drops.
      *
@@ -401,7 +318,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, boolean)}
+     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, IPhaseState, PhaseContext, boolean, int)}
      * or {@link PostState#postBlockTransactionApplication(BlockChange, Transaction, UnwindingPhaseContext)} due to
      * delegation to the underlying context during post processing of reactionary
      * side effects (like water spread from a bucket).
@@ -462,8 +379,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * <p>This has potential for being configurable on a block id based basis.</p>
      * @return Whether per-block drops are being captured
+     * @param context
      */
-    default boolean tracksBlockSpecificDrops() {
+    default boolean tracksBlockSpecificDrops(C context) {
         return false;
     }
     /**
@@ -611,10 +529,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * {@link Block#updateTick(net.minecraft.world.World, BlockPos, IBlockState, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
-     * @param phaseData The phase data currently present
+     * @param context The phase data currently present
      * @return True if it's going to be ignored
      */
-    default boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+    default boolean ignoresBlockUpdateTick(C context) {
         return false;
     }
 

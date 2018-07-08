@@ -52,7 +52,7 @@ final class ChangingToDimensionState extends EntityPhaseState<TeleportingContext
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops() {
+    public boolean tracksBlockSpecificDrops(TeleportingContext context) {
         return true;
     }
 

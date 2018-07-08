@@ -105,6 +105,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -645,9 +646,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         final int modifiedY = yPos & 15;
         extendedblockstorage.set(xPos, modifiedY, zPos, newState);
 
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseData peek = phaseTracker.getCurrentPhaseData();
-        final boolean isBulkCapturing = ((IPhaseState) peek.state).doesBulkBlockCapture(peek.context);
+
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.world.isRemote) {
@@ -699,7 +698,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        if (!this.world.isRemote && currentBlock != newBlock) {
+        if (!((IMixinWorld) this.world).isFake() && currentBlock != newBlock) {
+            final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
+            final boolean isBulkCapturing = ((IPhaseState) peek.state).doesBulkBlockCapture(peek.context);
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
             if (!isBulkCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
@@ -720,13 +721,15 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
             if (tileentity == null) {
                 // Sponge Start - use SpongeImplHooks for forge compatibility
-                // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
-                tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
-                final User owner = peek.context.getOwner().orElse(null);
-                // If current owner exists, transfer it to newly created TE pos
-                // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
-                if (owner != null) {
-                    this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                if (!((IMixinWorld) this.world).isFake()) { // Surround with a server check
+                    // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
+                    tileentity = SpongeImplHooks.createTileEntity(newBlock, this.world, newState);
+                    final User owner = PhaseTracker.getInstance().getCurrentContext().getOwner().orElse(null);
+                    // If current owner exists, transfer it to newly created TE pos
+                    // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
+                    if (owner != null) {
+                        this.addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                    }
                 }
                 
                 // Sponge End

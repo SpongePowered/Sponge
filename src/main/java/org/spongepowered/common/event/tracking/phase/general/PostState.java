@@ -34,12 +34,9 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.CapturedSupplier;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
@@ -79,13 +76,13 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+    public boolean ignoresBlockUpdateTick(UnwindingPhaseContext context) {
         return true;
     }
 
     @Override
     public boolean ignoresScheduledUpdates() {
-        return true;
+        return false;
     }
 
     @Override
@@ -204,6 +201,7 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
         if (PhaseTracker.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }
+        context.setBulkBlockCaptures(false);
         final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = context.getCapturedBlockSupplier();
         capturedBlockSupplier.acceptAndClearIfNotEmpty(blocks -> {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
@@ -212,9 +210,25 @@ public final class PostState extends GeneralState<UnwindingPhaseContext> {
         });
     }
 
+    @Override
+    public boolean doesBulkBlockCapture(UnwindingPhaseContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    /**
+     * We want to allow the post state to do it's own thing and avoid entering extra states for block
+     * ticking from unwinds.
+     * @param context
+     * @return
+     */
+    @Override
+    public boolean alreadyCapturingBlockTicks(UnwindingPhaseContext context) {
+        return true;
+    }
+
     /**
      * Specifically overridden to delegate to the unwinding state. Since the block physics processing is all handled in
-     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean)}.
+     * {@link TrackingUtil#performBlockAdditions(List, IPhaseState, PhaseContext, boolean, int)}.
      *
      * @param blockChange change
      * @param snapshotTransaction the transaction

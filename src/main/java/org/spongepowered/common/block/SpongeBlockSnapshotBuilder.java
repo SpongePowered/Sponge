@@ -44,6 +44,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -132,13 +133,13 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public BlockSnapshot.Builder creator(UUID uuid) {
+    public SpongeBlockSnapshotBuilder creator(UUID uuid) {
         this.creatorUuid = checkNotNull(uuid);
         return this;
     }
 
     @Override
-    public BlockSnapshot.Builder notifier(UUID uuid) {
+    public SpongeBlockSnapshotBuilder notifier(UUID uuid) {
         this.notifierUuid = checkNotNull(uuid);
         return this;
     }
@@ -170,7 +171,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     @Override
-    public <V> BlockSnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> SpongeBlockSnapshotBuilder add(Key<? extends BaseValue<V>> key, V value) {
         checkNotNull(key, "key");
         checkState(this.blockState != null);
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
@@ -180,8 +181,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         return this;
     }
 
-    public SpongeBlockSnapshotBuilder flag(SpongeBlockChangeFlag flag) {
-        this.flag = flag;
+    public SpongeBlockSnapshotBuilder flag(BlockChangeFlag flag) {
+        this.flag = (SpongeBlockChangeFlag) flag;
         return this;
     }
 

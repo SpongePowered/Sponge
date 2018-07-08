@@ -71,13 +71,13 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.entity.BasicEntityContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -284,7 +284,9 @@ public final class TrackingUtil {
             ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
             // Now actually switch to the new phase
 
-            try (PhaseContext<?> context = phaseContext) {
+            try (final PhaseContext<?> context = phaseContext;
+                 final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
+                timing.startTiming();
                 context.buildAndSwitch();
                 block.updateTick(world, pos, state, random);
             } catch (Exception | NoClassDefFoundError e) {
@@ -376,7 +378,7 @@ public final class TrackingUtil {
 
             associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
                 capturedSnapshots.remove(originalBlockSnapshot);
                 return false;
@@ -385,7 +387,7 @@ public final class TrackingUtil {
         } else {
             originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot, BlockChangeFlags.ALL);
             if (originalBlockState == null) {
                 return false;
             }
@@ -591,12 +593,13 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static void rollBackTransactions(IPhaseState<?> state, PhaseContext<?> context, List<Transaction<BlockSnapshot>> invalid) {
         // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
         // or the events were cancelled), again in reverse order of which they were received.
         for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
             transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-            if (state.tracksBlockSpecificDrops()) {
+            if (((IPhaseState) state).tracksBlockSpecificDrops(context)) {
                 // Cancel any block drops or harvests for the block change.
                 // This prevents unnecessary spawns.
                 final Location<World> location = transaction.getOriginal().getLocation().orElse(null);
@@ -617,19 +620,15 @@ public final class TrackingUtil {
             if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
                 final ChangeBlockEvent event = blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
-                if (event != null) {
-                    SpongeImpl.postEvent(event);
-                    blockEvents.add(event);
-                }
+                SpongeImpl.postEvent(event);
+                blockEvents.add(event);
             }
         }
         if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
             final ChangeBlockEvent event = BlockChange.DECAY.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
             mainEvents[BlockChange.DECAY.ordinal()] = event;
-            if (event != null) {
-                SpongeImpl.postEvent(event);
-                blockEvents.add(event);
-            }
+            SpongeImpl.postEvent(event);
+            blockEvents.add(event);
         }
     }
 
@@ -653,15 +652,15 @@ public final class TrackingUtil {
      * are performed in precise order. This method is utilized in both bulk and non-bulk captures when
      * an event is required to be thrown. The deterministic requirement to know whether a bulk capture
      * is being performed or not is with the provided {@link IPhaseState} itself.
-     * @param transaction
-     * @param phaseState
-     * @param phaseContext
-     * @param noCancelledTransactions
+     * @param transaction The transaction to perform
+     * @param phaseState The currently working phase state
+     * @param phaseContext The currently working phase context
+     * @param noCancelledTransactions Whether there's any cancelled transactions
      * @param currentDepth The current processing depth, to avoid stack overflows
-     * @return
+     * @return True if the block transaction was successful
      */
     @SuppressWarnings("rawtypes")
-    public static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
+    static boolean performTransactionProcess(Transaction<BlockSnapshot> transaction, IPhaseState<?> phaseState, PhaseContext<?> phaseContext,
         boolean noCancelledTransactions, int currentDepth) {
         // Handle custom replacements - these need to get actually set onto the chunk, but ignored as far as tracking
         // goes.
@@ -673,7 +672,11 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
 
         // Handle item drops captured
-        final Location<World> worldLocation = oldBlockSnapshot.getLocation().get();
+        final Location<World> worldLocation = oldBlockSnapshot.getLocation().orElseThrow(() -> {
+            final IllegalStateException exception = new IllegalStateException("BlockSnapshot with Invalid Location");
+            PhaseTracker.getInstance().printMessageWithCaughtException("BlockSnapshot does not have a valid location object, usually because the world is unloaded!", "", exception);
+            return exception;
+        });
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldLocation.getExtent();
         final BlockPos pos = VecHelper.toBlockPos(worldLocation);
         performBlockEntitySpawns(phaseState, phaseContext, oldBlockSnapshot, pos);
@@ -816,20 +819,6 @@ public final class TrackingUtil {
             }
         }
         return null;
-    }
-
-    static void notifyNeighbors(BlockPos pos, IBlockState newState, net.minecraft.world.World minecraftWorld, Block block, IBlockState iblockstate,
-        boolean notifyNeighbors,
-        boolean notifyObservers) {
-        if (notifyNeighbors) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, block);
-            }
-        } else if (!minecraftWorld.isRemote && notifyObservers) {
-            minecraftWorld.updateObservingBlocksAt(pos, block);
-        }
     }
 
     public static void standardSpawnCapturedEntities(PhaseContext<?> context, StackFrame frame, List<Entity> entities) {

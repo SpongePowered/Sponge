@@ -36,6 +36,8 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.VecHelper;
 
@@ -63,7 +65,7 @@ public final class BlockUtil {
         if (notifyNeighbors) { // delegate to world
             return setBlockState(chunk.getWorld(), position, state, true);
         }
-        return chunk.setBlockState(position, toNative(state)) != null;
+        return ((IMixinChunk) chunk).setBlockState(position, toNative(state), chunk.getBlockState(position), null, BlockChangeFlags.ALL.withUpdateNeighbors(notifyNeighbors)) != null;
     }
 
     public static IBlockState toNative(BlockState state) {

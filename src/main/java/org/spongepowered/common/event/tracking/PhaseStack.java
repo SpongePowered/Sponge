@@ -125,10 +125,10 @@ final class PhaseStack {
     /**
      * We basically want to iterate through the phases to determine if there's multiple of one state re-entering
      * when it shouldn't. To do this, we have to build a miniature map based on arrays
-     * @param state
+     * @param state The phase state to check
      */
     @SuppressWarnings("rawtypes")
-    public boolean checkForRunaways(IPhaseState<?> state) {
+    boolean checkForRunaways(IPhaseState<?> state) {
         // first, check if the state is expected for re-entrance:
         if (!state.isNotReEntrant()) {
             return false;
