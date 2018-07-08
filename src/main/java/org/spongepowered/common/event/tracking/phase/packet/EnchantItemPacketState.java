@@ -90,6 +90,7 @@ public class EnchantItemPacketState extends BasicInventoryPacketState {
         for (EntityItem entityItem : context.getCapturedItems()) {
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
+        context.getCapturedItems().clear();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             Sponge.getCauseStackManager().pushCause(player);
             Sponge.getCauseStackManager().pushCause(openContainer);
