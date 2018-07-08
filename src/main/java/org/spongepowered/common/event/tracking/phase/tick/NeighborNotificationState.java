@@ -112,6 +112,11 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
     }
 
     @Override
+    public boolean isNotReEntrant() {
+        return false;
+    }
+
+    @Override
     public void postTrackBlock(BlockSnapshot snapshot, NeighborNotificationContext context) {
     }
 

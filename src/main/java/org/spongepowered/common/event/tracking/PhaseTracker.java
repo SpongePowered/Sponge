@@ -53,12 +53,12 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -70,7 +70,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
-import org.spongepowered.common.util.ThreadUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
@@ -878,21 +877,21 @@ public final class PhaseTracker {
      * @param entity The entity to spawn
      * @return True if the entity spawn is on the main thread.
      */
-    public static boolean validateEntitySpawn(Entity entity) {
+    public static boolean isEntitySpawnInvalid(Entity entity) {
         if (Sponge.isServerAvailable() && (Sponge.getServer().isMainThread() || SpongeImpl.getServer().isServerStopped())) {
-            return true;
+            return false;
         }
         // We aren't in the server thread at this point, and an entity is spawning on the server....
         // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().captureEntitiesAsync()) {
             // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
             if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
-                return false;
+                return true;
             }
             // Just checking if we've already printed once about it.
             // If we have, we don't want to print any more times.
             if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().verboseErrors() && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
-                return false;
+                return true;
             }
             // Otherwise, let's print out either the first time, or several more times.
             new PrettyPrinter(60)
@@ -912,18 +911,18 @@ public final class PhaseTracker {
                 .add(new Exception("Async entity spawn attempt"))
                 .trace(SpongeImpl.getLogger(), Level.WARN);
             PhaseTracker.getInstance().hasPrintedAsyncEntities = true;
-            return false;
+            return true;
         }
         ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
         // At this point we can print an exception about it, if we are told to.
         // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose()) {
-            return false;
+            return true;
         }
         // Just checking if we've already printed once about it.
         // If we have, we don't want to print any more times.
         if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().verboseErrors() && PhaseTracker.getInstance().hasPrintedAsyncEntities) {
-            return false;
+            return true;
         }
         // Otherwise, let's print out either the first time, or several more times.
         new PrettyPrinter(60)
@@ -944,23 +943,26 @@ public final class PhaseTracker {
         PhaseTracker.getInstance().hasPrintedAsyncEntities = true;
 
 
-        return false;
+        return true;
     }
 
     public static boolean checkMaxBlockProcessingDepth(IPhaseState<?> state, PhaseContext<?> context, int currentDepth) {
-        int maxDepth = SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().getMaxBlockProcessingDepth();
+        final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker();
+        int maxDepth = trackerConfig.getMaxBlockProcessingDepth();
         if (currentDepth < maxDepth) {
             return false;
         }
 
-        if (!SpongeImpl.getGlobalConfig().getConfig().getPhaseTracker().isVerbose() && PhaseTracker.getInstance().printedExceptionForMaximumProcessDepth.contains(state)) {
+        final PhaseTracker tracker = PhaseTracker.getInstance();
+        if (!trackerConfig.isVerbose() && tracker.printedExceptionForMaximumProcessDepth.contains(state)) {
             // We still want to abort processing even if we're not logigng an error
             return true;
         }
 
-        PhaseTracker.getInstance().printedExceptionForMaximumProcessDepth.add(state);
-        PhaseTracker.getInstance().printMessageWithCaughtException("Maximum block processing depth exceeded!", String.format("Sponge is still trying to process captured blocks after %s iterations of depth-first processing."
-                + " This is likely due to a mod doing something unusual.", currentDepth), state, context, null);
+        tracker.printedExceptionForMaximumProcessDepth.add(state);
+        final String message = String.format("Sponge is still trying to process captured blocks after %s iterations of depth-first processing."
+                                            + " This is likely due to a mod doing something unusual.", currentDepth);
+        tracker.printMessageWithCaughtException("Maximum block processing depth exceeded!", message, state, context, null);
 
         return true;
     }
