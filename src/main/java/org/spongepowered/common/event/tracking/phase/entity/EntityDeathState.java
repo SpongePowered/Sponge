@@ -138,6 +138,9 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 }
 
             });
+
+            context.getCapturedBlockSupplier()
+                    .acceptAndClearIfNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, this, context));
         }
     }
 
