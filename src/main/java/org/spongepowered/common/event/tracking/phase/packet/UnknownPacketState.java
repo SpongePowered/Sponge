@@ -75,7 +75,7 @@ final class UnknownPacketState extends BasicPacketState implements IEntitySpecif
                 SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
         }
-        context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
             final PrettyPrinter printer = new PrettyPrinter(80);
             printer.add("Processing An Unknown Packet for Entity Drops").centre().hr();
             printer.add("The item stacks captured are: ");
@@ -88,7 +88,7 @@ final class UnknownPacketState extends BasicPacketState implements IEntitySpecif
             }
             printer.trace(System.err);
         });
-        context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                 final UUID entityUuid = entry.getKey();
                 final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);

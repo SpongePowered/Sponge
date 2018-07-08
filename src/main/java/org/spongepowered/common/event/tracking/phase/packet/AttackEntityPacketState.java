@@ -105,7 +105,7 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
             });
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-        context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                 final UUID key = entry.getKey();
                 final Optional<Entity> affectedEntity = spongeWorld.getEntity(key);
@@ -138,7 +138,7 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
                 }
             }
         });
-        context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
