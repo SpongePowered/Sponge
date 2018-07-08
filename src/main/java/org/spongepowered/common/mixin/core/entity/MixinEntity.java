@@ -1031,7 +1031,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         }
         return list;
     }
-    
+
     @Override
     public DataHolder copy() {
         if ((Object) this instanceof Player) {
@@ -1425,10 +1425,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
                     this.fire = 0;
                     return; // set fire ticks to 0
                 }
-                if (event.getOriginalFireTicks() != event.getFireTicks()) {
-                    // means someone edited the fire ticks.
-                    this.fire = event.getFireTicks();
-                }
+                this.fire = event.getFireTicks();
             }
         }
     }
