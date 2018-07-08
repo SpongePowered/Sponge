@@ -107,7 +107,7 @@ final class InteractAtEntityPacketState extends BasicPacketState implements IEnt
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                 SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
-            context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact At Entity").centre().hr();
                 printer.add("The item stacks captured are: ");

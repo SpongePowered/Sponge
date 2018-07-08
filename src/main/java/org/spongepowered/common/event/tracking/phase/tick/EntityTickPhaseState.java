@@ -155,7 +155,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         // This could be happening regardless whether block bulk captures are done or not.
         // Would depend on whether entity captures are done.
         phaseContext.getBlockItemDropSupplier()
-            .acceptIfNotEmpty(map -> {
+            .acceptAndClearIfNotEmpty(map -> {
                 final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                 for (BlockSnapshot snapshot : capturedBlocks) {
                     final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getLocation().get());

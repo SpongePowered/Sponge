@@ -132,7 +132,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
                     return;
                 }
             } else {
-                phaseContext.getBlockItemDropSupplier().acceptIfNotEmpty(map -> {
+                phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                     if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
 
                         for (BlockSnapshot blockChange : capturedBlcoks) {
@@ -179,7 +179,7 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
                     }
                 });
             phaseContext.getPerEntityItemDropSupplier()
-                .acceptIfNotEmpty(map -> {
+                .acceptAndClearIfNotEmpty(map -> {
                     if (map.isEmpty()) {
                         return;
                     }

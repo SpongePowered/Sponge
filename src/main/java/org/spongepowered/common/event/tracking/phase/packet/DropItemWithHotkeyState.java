@@ -109,7 +109,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     mixinContainer.setCaptureInventory(false);
                 });
             context.getPerEntityItemDropSupplier()
-                .acceptIfNotEmpty(itemMapping -> {
+                .acceptAndClearIfNotEmpty(itemMapping -> {
 
                 });
             final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
@@ -124,9 +124,9 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (Entity currentEntity : capturedEntities) {
-                currentEntity.setCreator(playerMP.getUniqueID());   
+                currentEntity.setCreator(playerMP.getUniqueID());
             }
-    
+
             // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding
             // 'control')
             ClickInventoryEvent.Drop event = usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID

@@ -123,7 +123,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
             frame.pushCause(sender);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             phaseContext.getPerEntityItemDropSupplier()
-                    .acceptIfNotEmpty(uuidItemStackMultimap -> {
+                    .acceptAndClearIfNotEmpty(uuidItemStackMultimap -> {
                         for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
                             final UUID key = entry.getKey();
                             @Nullable
