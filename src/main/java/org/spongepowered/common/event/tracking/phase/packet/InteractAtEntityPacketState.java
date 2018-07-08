@@ -120,7 +120,7 @@ final class InteractAtEntityPacketState extends BasicPacketState implements IEnt
                 }
                 printer.trace(System.err);
             });
-            context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
                     final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
