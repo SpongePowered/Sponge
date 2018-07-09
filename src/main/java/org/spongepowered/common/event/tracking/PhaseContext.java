@@ -299,6 +299,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
 
     public boolean notAllCapturesProcessed() {
+        // we can safely pop the frame here since this is only called when we're checking for processing
+
         return
                 isNonEmpty(this.blocksSupplier)
                 || isNonEmpty(this.blockItemDropsSupplier)
