@@ -907,8 +907,10 @@ public class SpongeCommonEventFactory {
 
             if (!(entity instanceof EntityPlayer)) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
-                Optional<User> user = spongeEntity.getCreatorUser();
-                user.ifPresent(user1 -> frame.addContext(EventContextKeys.OWNER, user1));
+                User user = spongeEntity.getCreatorUser().orElse(null);
+                if (user != null) {
+                    frame.addContext(EventContextKeys.OWNER, user);
+                }
             }
 
             // TODO: Add target side support
@@ -919,10 +921,10 @@ public class SpongeCommonEventFactory {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                     final PhaseData peek = phaseTracker.getCurrentPhaseData();
-                    final Optional<User> notifier = peek.context.getNotifier();
-                    if (notifier.isPresent()) {
-                        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
-                        spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                    final User notifier = peek.context.getNotifier().orElse(null);
+                    if (notifier != null) {
+                        IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
+                        spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
                     }
                 }
             }
