@@ -87,6 +87,10 @@ import javax.annotation.Nullable;
 public interface IPhaseState<C extends PhaseContext<C>> {
 
     BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<?>> DEFAULT_OWNER_NOTIFIER = (frame, cxt) -> {
+        if (cxt.usedFrame != null) {
+            throw new IllegalStateException("PhaseContext Already has a StackFrame Refernce!");
+        }
+        cxt.usedFrame = frame; // WE NEED TO STORE THIS SO WE CAN PROPERLY POP THE FRAME
         if (cxt.owner != null) {
             frame.addContext(EventContextKeys.OWNER, cxt.owner);
         }
