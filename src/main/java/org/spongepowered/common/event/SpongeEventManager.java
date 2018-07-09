@@ -376,7 +376,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @SuppressWarnings({"ConstantConditions", "unchecked", "rawtypes"})
-    protected RegisteredListener.Cache getHandlerCache(Event event) {
+    public RegisteredListener.Cache getHandlerCache(Event event) {
         checkNotNull(event, "event");
         final Class<? extends Event> eventClass = event.getClass();
         final EventType<? extends Event> eventType;
