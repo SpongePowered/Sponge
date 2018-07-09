@@ -120,4 +120,6 @@ public interface IMixinChunk {
     CopyOnWriteArrayList<Short> getQueuedLightingUpdates(EnumSkyBlock type);
 
     void markChunkDirty();
+
+    boolean isActive();
 }

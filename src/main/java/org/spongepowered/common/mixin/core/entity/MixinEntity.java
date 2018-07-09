@@ -1390,7 +1390,7 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         final IMixinChunk chunk = this.getActiveChunk();
         // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
         // See https://github.com/SpongePowered/SpongeVanilla/issues/344
-        if (chunk != null && !chunk.isPersistedChunk() && (chunk.isQueuedForUnload() || chunk.getScheduledForUnload() != -1)) {
+        if (chunk != null && !chunk.isActive()) {
             return false;
         }
 

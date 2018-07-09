@@ -393,6 +393,10 @@ public class EntityActivationRange {
             return true;
         }
 
+        if (!activeChunk.isActive()) {
+            return false;
+        }
+
         // If in forced chunk or is player
         if (activeChunk.isPersistedChunk() || (!SpongeImplHooks.isFakePlayer(entity) && entity instanceof EntityPlayerMP)) {
             return true;

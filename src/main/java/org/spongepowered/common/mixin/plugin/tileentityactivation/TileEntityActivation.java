@@ -201,6 +201,10 @@ public class TileEntityActivation {
             return true;
         }
 
+        if (!activeChunk.isActive()) {
+            return false;
+        }
+
         long currentTick = SpongeImpl.getServer().getTickCounter();
         IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
         boolean isActive = activeChunk.isPersistedChunk() || spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();

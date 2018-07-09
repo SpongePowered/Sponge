@@ -372,7 +372,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         if (chunk == null) {
             return false;
         }
-        if (!chunk.isPersistedChunk() && (chunk.isQueuedForUnload() || chunk.getScheduledForUnload() != -1)) {
+        if (!chunk.isActive()) {
             return false;
         }
 
