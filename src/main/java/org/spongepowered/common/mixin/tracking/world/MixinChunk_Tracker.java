@@ -49,6 +49,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -131,10 +133,13 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
-        if (!SpongeHooks.getActiveConfig((WorldServer) this.world).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
-            SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
-        } else {
-            SpongeHooks.logBlockTrack(this.world, block, pos, user, false);
+        final SpongeConfig<? extends GeneralConfigBase> activeConfig = SpongeHooks.getActiveConfig((WorldServer) this.world);
+        if (activeConfig.getConfig().getLogging().blockTrackLogging()) {
+            if (!activeConfig.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
+                SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
+            } else {
+                SpongeHooks.logBlockTrack(this.world, block, pos, user, false);
+            }
         }
 
         final IMixinWorldInfo worldInfo = (IMixinWorldInfo) this.world.getWorldInfo();
