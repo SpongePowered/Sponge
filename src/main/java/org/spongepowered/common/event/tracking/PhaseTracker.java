@@ -197,6 +197,7 @@ public final class PhaseTracker {
             }
         }
 
+        SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext, ((IPhaseState) state).getFrameModifier());
         this.stack.push(state, phaseContext);
     }
 

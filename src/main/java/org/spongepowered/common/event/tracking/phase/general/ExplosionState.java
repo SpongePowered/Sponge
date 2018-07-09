@@ -41,11 +41,16 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IEntitySpecificItemDropsState;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 final class ExplosionState extends GeneralState<ExplosionContext> implements IEntitySpecificItemDropsState<ExplosionContext> {
+
+    public final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) -> frame.pushCause(context.getExplosion()));
 
     @Override
     public ExplosionContext createPhaseContext() {
@@ -54,6 +59,11 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
             .addEntityDropCaptures()
             .addBlockCaptures()
             .populateFromCurrentState();
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, ExplosionContext> getFrameModifier() {
+        return this.EXPLOSION_MODIFIER;
     }
 
     @Override
@@ -88,20 +98,16 @@ final class ExplosionState extends GeneralState<ExplosionContext> implements IEn
 
     @Override
     public void unwind(ExplosionContext context) {
-        final Explosion explosion = context.getSpongeExplosion();
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            context.addNotifierAndOwnerToCauseStack(frame);
-            frame.pushCause(explosion);
-            context.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-            context.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        try (CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()){
-                            smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
-                            SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                        }
-                    });
-        }
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        context.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> {
+                try (CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
+                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+                }
+            });
+
     }
 
     @Override

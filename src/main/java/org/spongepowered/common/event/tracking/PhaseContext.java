@@ -109,6 +109,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     private boolean allowsEntityEvents = true;
     private boolean allowsBulkBlockCaptures = true; // Defaults to allow block captures
     private boolean allowsBulkEntityCaptures = true;
+    @Nullable CauseStackManager.StackFrame usedFrame = null;
 
     @Nullable private Object source;
 
