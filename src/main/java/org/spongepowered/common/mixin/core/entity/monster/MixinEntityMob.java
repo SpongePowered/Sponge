@@ -50,6 +50,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
 import java.util.ArrayList;
@@ -148,8 +149,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     protected boolean isValidLightLevel()
     {
         final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-        final IMixinChunk chunk = this.getActiveChunk();
-        if (chunk == null || !chunk.isActive()) {
+        final Chunk chunk = ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+        if (chunk == null || !((IMixinChunk) chunk).isActive()) {
             return false;
         }
 
@@ -164,10 +165,10 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
             if (this.world.isThundering()) {
                 int j = this.world.getSkylightSubtracted();;
                 this.world.setSkylightSubtracted(10);
-                passes = !((IMixinWorldServer) this.world).isLightLevel((Chunk) chunk, blockpos, this.rand.nextInt(9));
+                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.setSkylightSubtracted(j);
             } else { 
-                passes = !((IMixinWorldServer) this.world).isLightLevel((Chunk) chunk, blockpos, this.rand.nextInt(9)); 
+                passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9)); 
             }
 
             return passes;
