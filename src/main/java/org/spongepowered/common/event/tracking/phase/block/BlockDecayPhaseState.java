@@ -38,15 +38,23 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.WorldUtil;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 final class BlockDecayPhaseState extends BlockPhaseState {
+
+    public final BiConsumer<StackFrame, GeneralizedContext> BLOCK_DECAY_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
+        final LocatableBlock locatable = context.getSource(LocatableBlock.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
+        frame.pushCause(locatable);
+    });
 
     BlockDecayPhaseState() {
     }
@@ -55,6 +63,11 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     public GeneralizedContext createPhaseContext() {
         return super.createPhaseContext()
             .addCaptures();
+    }
+
+    @Override
+    public BiConsumer<StackFrame, GeneralizedContext> getFrameModifier() {
+        return this.BLOCK_DECAY_MODIFIER;
     }
 
     @SuppressWarnings("unchecked")
@@ -67,7 +80,6 @@ final class BlockDecayPhaseState extends BlockPhaseState {
 
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatable);
-            context.addNotifierAndOwnerToCauseStack(frame);
 
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));

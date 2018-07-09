@@ -36,18 +36,23 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.ThreadUtil;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -65,7 +70,12 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     @Nullable private Cause cached_cause;
     @Nullable private EventContext cached_ctx;
     private boolean pendingProviders = false;
-    private List<Consumer<StackFrame>> phaseContextProviders = new ArrayList<>();
+    /**
+     * Specifically a Deque because we need to replicate
+     * the stack iteration from the bottom of the stack
+     * to the top when pushing frames.
+     */
+    private Deque<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> phaseContextProviders = new ArrayDeque<>();
 
     @Inject
     private SpongeCauseStackManager() { }
@@ -106,10 +116,16 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             return; // we've done our work already
         }
         this.pendingProviders = false;
-        for (Consumer<StackFrame> phaseContextProvider : this.phaseContextProviders) {
+        for (Iterator<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
+            final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> tuple = iterator.next();
             final StackFrame frame = pushCauseFrame(); // these should auto close
-            phaseContextProvider.accept(frame); // the frame will be auto closed by the phase context.
+            tuple.getSecond().accept(frame, tuple.getFirst()); // The frame will be auto closed by the phase context
         }
+        // Clear the list since everything is now loaded.
+        // PhaseStates will handle automatically closing their frames
+        // and then any new phase states that get entered can still be lazily loaded afterwards, while
+        // we take advantage of the already made modifications are being tracked by the stack manager
+        this.phaseContextProviders.clear();
     }
 
     @Override
@@ -301,15 +317,16 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         return Optional.ofNullable((T) existing);
     }
 
-    public SpongeCauseStackManager registerPhaseContextProvider(Consumer<StackFrame> consumer) {
+    public void registerPhaseContextProvider(PhaseContext<?> context, BiConsumer<StackFrame, PhaseContext<?>> consumer) {
         enforceMainThread();
         checkNotNull(consumer, "Consumer");
         // Reset our cached objects
-        this.pendingProviders = true; // Reset the cache
+        this.pendingProviders = true; //I Reset the cache
         this.cached_cause = null; // Reset the cache
         this.cached_ctx = null; // Reset the cache
-        this.phaseContextProviders.add(consumer);
-        return this;
+        // Since we cannot rely on the PhaseStack being tied to this stack of providers,
+        // we have to make the tuple to tie the phase context to provide the consumer.
+        this.phaseContextProviders.push(Tuple.of(context, consumer));
     }
 
     // TODO could pool these for more fasts
