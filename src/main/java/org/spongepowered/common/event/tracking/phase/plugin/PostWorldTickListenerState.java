@@ -51,7 +51,7 @@ final class PostWorldTickListenerState extends ListenerPhaseState {
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getCapturedPlayer().ifPresent(player ->
                 ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
-                        .setBlockNotifier(notifyPos, player.getUniqueId())
+                        .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }
 
