@@ -40,17 +40,20 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.ThreadUtil;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 @Singleton
-public class SpongeCauseStackManager implements CauseStackManager {
+public final class SpongeCauseStackManager implements CauseStackManager {
 
     public static final boolean DEBUG_CAUSE_FRAMES = Boolean.valueOf(System.getProperty("sponge.debugcauseframes", "false"));
 
@@ -59,8 +62,10 @@ public class SpongeCauseStackManager implements CauseStackManager {
     private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
 
     private int min_depth = 0;
-    private Cause cached_cause;
-    private EventContext cached_ctx;
+    @Nullable private Cause cached_cause;
+    @Nullable private EventContext cached_ctx;
+    private boolean pendingProviders = false;
+    private List<Consumer<StackFrame>> phaseContextProviders = new ArrayList<>();
 
     @Inject
     private SpongeCauseStackManager() { }
@@ -74,10 +79,13 @@ public class SpongeCauseStackManager implements CauseStackManager {
                     ThreadUtil.getDescription(SpongeImpl.getServer().serverThread)
             ));
         }
+        if (this.pendingProviders) {
+            checkProviders();
+        }
     }
 
     private static boolean isPermittedThread() {
-        return Sponge.getServer().isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
+        return SpongeImpl.isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
     }
 
     @Override
@@ -91,6 +99,17 @@ public class SpongeCauseStackManager implements CauseStackManager {
             }
         }
         return this.cached_cause;
+    }
+
+    private void checkProviders() {
+        if (!this.pendingProviders) {
+            return; // we've done our work already
+        }
+        this.pendingProviders = false;
+        for (Consumer<StackFrame> phaseContextProvider : this.phaseContextProviders) {
+            final StackFrame frame = pushCauseFrame(); // these should auto close
+            phaseContextProvider.accept(frame); // the frame will be auto closed by the phase context.
+        }
     }
 
     @Override
@@ -280,6 +299,17 @@ public class SpongeCauseStackManager implements CauseStackManager {
             }
         }
         return Optional.ofNullable((T) existing);
+    }
+
+    public SpongeCauseStackManager registerPhaseContextProvider(Consumer<StackFrame> consumer) {
+        enforceMainThread();
+        checkNotNull(consumer, "Consumer");
+        // Reset our cached objects
+        this.pendingProviders = true; // Reset the cache
+        this.cached_cause = null; // Reset the cache
+        this.cached_ctx = null; // Reset the cache
+        this.phaseContextProviders.add(consumer);
+        return this;
     }
 
     // TODO could pool these for more fasts
