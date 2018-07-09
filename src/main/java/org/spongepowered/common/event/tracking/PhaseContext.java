@@ -438,6 +438,38 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.captureBlockPos;
     }
 
+    public boolean hasCaptures() {
+        if (this.blocksSupplier != null && !this.blocksSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.blockEntitySpawnSupplier != null && !this.blockEntitySpawnSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.blockItemDropsSupplier != null && !this.blockItemDropsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.blockItemEntityDropsSupplier != null && !this.blockItemEntityDropsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.capturedEntitiesSupplier != null && !this.capturedEntitiesSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.capturedItemsSupplier != null && !this.capturedItemsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.capturedItemStackSupplier!= null && !this.capturedItemStackSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.entityItemDropsSupplier != null && !this.entityItemDropsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.entityItemEntityDropsSupplier != null && !this.entityItemEntityDropsSupplier.isEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public Optional<BlockPos> getBlockPosition() {
         return getCaptureBlockPos()
                 .getPos();

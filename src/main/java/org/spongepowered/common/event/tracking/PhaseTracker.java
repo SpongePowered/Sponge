@@ -258,7 +258,9 @@ public final class PhaseTracker {
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound,
                   // at least unwind UNWINDING to process any captured objects so we're not totally without
                   // loss of objects
-                ((IPhaseState) state).unwind(context);
+                if (context.hasCaptures()) {
+                    ((IPhaseState) state).unwind(context);
+                }
             } catch (Exception e) {
                 this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
