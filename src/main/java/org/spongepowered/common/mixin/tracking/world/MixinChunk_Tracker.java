@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.tracking.world;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -51,6 +53,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -80,6 +83,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Shadow @Final private World world;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
+    @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
 
     @Shadow public abstract ChunkPos getPos();
 
@@ -107,6 +111,24 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         // Don't track fake players
         if (user instanceof EntityPlayerMP && SpongeImplHooks.isFakePlayer((EntityPlayerMP) user)) {
             return;
+        }
+        // Update TE tracking cache
+        if (block instanceof ITileEntityProvider) {
+            final TileEntity tileEntity = this.tileEntities.get(pos);
+            if (tileEntity != null) {
+                IMixinTileEntity spongeTile = (IMixinTileEntity) tileEntity;
+                if (trackerType == PlayerTracker.Type.NOTIFIER) {
+                    if (spongeTile.getSpongeNotifier() == user) {
+                        return;
+                    }
+                    spongeTile.setSpongeNotifier(user);
+                } else { 
+                    if (spongeTile.getSpongeOwner() == user) {
+                        return;
+                    }
+                    spongeTile.setSpongeOwner(user);
+                }
+            }
         }
 
         if (!SpongeHooks.getActiveConfig((WorldServer) this.world).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
@@ -136,6 +158,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
                     playerTracker.ownerIndex = indexForUniqueId;
+                    playerTracker.notifierIndex = indexForUniqueId;
                 } else {
                     playerTracker.notifierIndex = indexForUniqueId;
                 }

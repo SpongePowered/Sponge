@@ -225,20 +225,20 @@ public final class TrackingUtil {
             frame.pushCause(tile);
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-            chunk.getBlockNotifier(pos)
-                    .ifPresent(notifier -> {
-                        frame.addContext(EventContextKeys.NOTIFIER, notifier);
-                        phaseContext.notifier(notifier);
-                    });
+            final User blockNotifier = mixinTileEntity.getSpongeNotifier();
+            if (blockNotifier != null) {
+                frame.addContext(EventContextKeys.NOTIFIER, blockNotifier);
+                phaseContext.notifier(blockNotifier);
+            }
 
             // Allow the tile entity to validate the owner of itself. As long as the tile entity
             // chunk is already loaded and activated, and the tile entity has already loaded
             // the owner of itself.
-            final Optional<User> blockOwner = mixinTileEntity.getSpongeOwner();
-            blockOwner.ifPresent(owner -> {
-                frame.addContext(EventContextKeys.OWNER, blockOwner.get());
-                phaseContext.owner(blockOwner.get());
-            });
+            final User blockOwner = mixinTileEntity.getSpongeOwner();
+            if (blockOwner != null) {
+                frame.addContext(EventContextKeys.OWNER, blockOwner);
+                phaseContext.owner(blockOwner);
+            }
             // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
             // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
 
