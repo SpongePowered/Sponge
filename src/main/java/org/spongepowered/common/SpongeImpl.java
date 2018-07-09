@@ -89,14 +89,12 @@ public final class SpongeImpl {
     @Nullable private static SpongeConfigSaveManager configSaveManager;
     @Nullable private static PluginContainer minecraftPlugin;
 
-    @Inject private static SpongeGame game;
-
-    @Inject private static SpongeGameRegistry registry;
-    @Inject private static SpongeDataManager dataManager;
-    @Inject private static SpongePropertyRegistry propertyRegistry;
-
-    @Inject private static SpongeScheduler scheduler;
-    @Inject private static SpongeCauseStackManager causeStackManager;
+    @Inject @Nullable private static SpongeGame game;
+    @Inject @Nullable private static SpongeGameRegistry registry;
+    @Inject @Nullable private static SpongeDataManager dataManager;
+    @Inject @Nullable private static SpongePropertyRegistry propertyRegistry;
+    @Inject @Nullable private static SpongeScheduler scheduler;
+    @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
 

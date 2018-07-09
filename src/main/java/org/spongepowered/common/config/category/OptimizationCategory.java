@@ -71,6 +71,13 @@ public class OptimizationCategory extends ConfigCategory {
                                                               + "See https://bugs.mojang.com/browse/MC-128547 for more information.\n")
     private boolean enchantmentLeak = true;
 
+    @Setting(value = "faster-thread-checks", comment = "If 'true', allows for Sponge to make better assumptinos on single threaded\n"
+                                                       + "operations with relation to various checks for server threaded operations.\n"
+                                                       + "This is default to true due to Sponge being able to precisely inject when\n"
+                                                       + "the server thread is available. This should make an already fast operation\n"
+                                                       + "much faster for better thread checks to ensure stability of sponge's systems.")
+    private boolean fasterThreadChecks = true;
+
     public OptimizationCategory() {  
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
@@ -121,5 +128,9 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useEnchantmentHelperFix() {
         return this.enchantmentLeak;
+    }
+
+    public boolean useFastThreadChecks() {
+        return this.fasterThreadChecks;
     }
 }
