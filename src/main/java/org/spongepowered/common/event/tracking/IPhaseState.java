@@ -218,6 +218,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     void unwind(C phaseContext);
 
+    default void popStackFrameIfPresent(C context) {
+        if (context.usedFrame != null) {
+            Sponge.getCauseStackManager().popCauseFrame(context.usedFrame);
+        }
+    }
+
     /**
      * Based on whether this state is allowed to capture entity spawns in bulk
      * for later processing in {@link #unwind(PhaseContext)}, or whether entities

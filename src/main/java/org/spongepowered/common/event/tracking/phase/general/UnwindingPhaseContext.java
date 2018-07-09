@@ -37,7 +37,7 @@ public final class UnwindingPhaseContext extends GeneralPhaseContext<UnwindingPh
 
     @Nullable
     public static UnwindingPhaseContext unwind(IPhaseState<?> state, PhaseContext<?> context) {
-        if (!state.requiresPost()) {
+        if (!state.requiresPost() || context.hasCaptures()) {
             return null;
         }
         return new UnwindingPhaseContext(state, context)
