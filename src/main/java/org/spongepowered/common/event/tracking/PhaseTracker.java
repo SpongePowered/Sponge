@@ -765,7 +765,8 @@ public final class PhaseTracker {
                         return false; // Short circuit
                     }
                     // And now, proceed as normal.
-                    return TrackingUtil.performTransactionProcess(transaction, phaseState, context, false, 0);
+                    // If we've gotten this far, the transaction wasn't cancelled, so pass 'noCancelledTransactions' as 'true'
+                    return TrackingUtil.performTransactionProcess(transaction, phaseState, context, true, 0);
                 }
             } catch (Exception | NoClassDefFoundError e) {
                 this.printBlockTrackingException(phaseData, phaseState, e);
