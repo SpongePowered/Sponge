@@ -714,7 +714,7 @@ public final class TrackingUtil {
 
     private static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot, BlockPos pos) {
         // This is for pre-merged items
-        if (state.doesCaptureEntitySpawns()) {
+        if (state.doesCaptureEntitySpawns() || ((IPhaseState) state).doesCaptureEntityDrops(phaseContext)) {
             phaseContext.getBlockDropSupplier().acceptAndRemoveIfPresent(pos, items -> spawnItemDataForBlockDrops(items, oldBlockSnapshot,
                 phaseContext));
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
