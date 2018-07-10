@@ -148,24 +148,14 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = tickContext;
+        try (final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
         ) {
 
             mixinEntity.getNotifierUser()
-                    .ifPresent(notifier -> {
-                        frame.addContext(EventContextKeys.NOTIFIER, notifier);
-                        context.notifier(notifier);
-                    });
+                    .ifPresent(context::notifier);
             mixinEntity.getCreatorUser()
-                    .ifPresent(owner -> {
-                        if (mixinEntity instanceof EntityFallingBlock) {
-                            frame.pushCause(owner);
-                        }
-                        frame.addContext(EventContextKeys.OWNER, owner);
-                        context.owner(owner);
-                    });
+                    .ifPresent(context::owner);
             context.buildAndSwitch();
             entityTiming.startTiming();
             entity.onUpdate();
@@ -183,23 +173,15 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+        try (
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
              ) {
             entityTiming.startTiming();
-            frame.pushCause(entity);
             mixinEntity.getNotifierUser()
-                .ifPresent(notifier -> {
-                    frame.addContext(EventContextKeys.NOTIFIER, notifier);
-                    context.notifier(notifier);
-                });
+                .ifPresent(context::notifier);
             mixinEntity.getCreatorUser()
-                .ifPresent(creator -> {
-                    frame.addContext(EventContextKeys.OWNER, creator);
-                    context.owner(creator);
-
-                });
+                .ifPresent(context::owner);
             context.buildAndSwitch();
             entity.updateRidden();
         } catch (Exception | NoClassDefFoundError e) {
@@ -220,25 +202,18 @@ public final class TrackingUtil {
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+        try (
              final PhaseContext<?> phaseContext = context) {
-            frame.pushCause(tile);
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-            final User blockNotifier = mixinTileEntity.getSpongeNotifier();
-            if (blockNotifier != null) {
-                frame.addContext(EventContextKeys.NOTIFIER, blockNotifier);
-                phaseContext.notifier(blockNotifier);
-            }
+            chunk.getBlockNotifier(pos)
+                    .ifPresent(phaseContext::notifier);
 
             // Allow the tile entity to validate the owner of itself. As long as the tile entity
             // chunk is already loaded and activated, and the tile entity has already loaded
             // the owner of itself.
-            final User blockOwner = mixinTileEntity.getSpongeOwner();
-            if (blockOwner != null) {
-                frame.addContext(EventContextKeys.OWNER, blockOwner);
-                phaseContext.owner(blockOwner);
-            }
+            final Optional<User> blockOwner = mixinTileEntity.getSpongeOwner();
+            blockOwner.ifPresent(phaseContext::owner);
             // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
             // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
 

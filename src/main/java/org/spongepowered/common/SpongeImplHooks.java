@@ -114,6 +114,10 @@ public final class SpongeImplHooks {
         return true;
     }
 
+    public static boolean isClientAvailable() {
+        return false;
+    }
+
     public static boolean isDeobfuscatedEnvironment() {
         return true;
     }

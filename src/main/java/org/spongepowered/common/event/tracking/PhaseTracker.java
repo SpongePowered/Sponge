@@ -264,7 +264,6 @@ public final class PhaseTracker {
                 if (context.hasCaptures()) {
                     ((IPhaseState) state).unwind(context);
                 }
-                ((IPhaseState) state).popStackFrameIfPresent(context);
             } catch (Exception e) {
                 this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
