@@ -28,7 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -38,6 +40,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -530,6 +533,15 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Override
     public void close() { // Should never throw an exception
         PhaseTracker.getInstance().completePhase(this.state);
+        if (this.usedFrame == null && SpongeImplHooks.isMainThread()) {
+            // So, this part is interesting... Since the used frame is null, that means
+            // the cause stack manager still has the refernce of this context/phase, we have
+            // to "pop off" the list.
+            SpongeImpl.getCauseStackManager().popFrameMutator(this);
+        }
+        if (this.usedFrame != null) {
+            Sponge.getCauseStackManager().popCauseFrame(this.usedFrame);
+        }
     }
 
 

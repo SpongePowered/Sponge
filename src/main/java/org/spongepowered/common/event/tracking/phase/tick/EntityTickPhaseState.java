@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -72,6 +73,9 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
             frame.pushCause(tickingEntity);
+            if (tickingEntity instanceof EntityFallingBlock) {
+                context.getOwner().ifPresent(frame::pushCause);
+            }
         });
 
     private String name;

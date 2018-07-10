@@ -376,7 +376,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     private void endLoad(CallbackInfo callbackInfo) {
         if (!((IMixinWorld) this.world).isFake() && SpongeImplHooks.isMainThread()) {
             // IF we're not on the main thread,
-            PhaseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
+            PhaseTracker.getInstance().getCurrentContext().close();
         }
     }
 

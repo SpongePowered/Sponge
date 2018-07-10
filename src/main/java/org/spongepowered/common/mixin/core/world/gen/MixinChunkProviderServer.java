@@ -195,12 +195,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", shift = Shift.AFTER))
     private void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().getCurrentContext().close();
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
     private void onError(CallbackInfoReturnable<Chunk> ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().getCurrentContext().close();
     }
 
     private boolean canDenyChunkRequest() {

@@ -213,7 +213,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
                 throw new IllegalStateException("Cause Stack Frame Corruption! Attempted to pop a frame that was not on the stack.");
             }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
-                .add("Found %d frames left on the stack. Clearing them all.", new Object[]{offset + 1});
+                .add("Found %n frames left on the stack. Clearing them all.", new Object[]{offset + 1});
             if (!DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
@@ -230,7 +230,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             while (offset >= 0) {
                 CauseStackFrameImpl f = this.frames.peek();
                 if (DEBUG_CAUSE_FRAMES && offset > 0) {
-                    printer.add("   Stack frame in position %n:", offset);
+                    printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stack_debug);
                 }
                 popCauseFrame(f);
@@ -315,8 +315,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         return Optional.ofNullable((T) existing);
     }
 
-    public void registerPhaseContextProvider(PhaseContext<?> context, BiConsumer<StackFrame, PhaseContext<?>> consumer) {
-        enforceMainThread();
+    public int registerPhaseContextProvider(PhaseContext<?> context, BiConsumer<StackFrame, PhaseContext<?>> consumer) {
         checkNotNull(consumer, "Consumer");
         // Reset our cached objects
         this.pendingProviders = true; //I Reset the cache
@@ -325,6 +324,23 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         // Since we cannot rely on the PhaseStack being tied to this stack of providers,
         // we have to make the tuple to tie the phase context to provide the consumer.
         this.phaseContextProviders.push(Tuple.of(context, consumer));
+        return this.phaseContextProviders.size();
+    }
+
+    public void popFrameMutator(PhaseContext<?> context) {
+        final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> peek = this.phaseContextProviders.peek();
+        if (peek == null) {
+            new PrettyPrinter(60).add("???Null context???").centre().hr()
+                .add(new Exception())
+                .trace(System.err);
+            return;
+        }
+        if (peek.getFirst() != context) {
+            // there's an exception to be thrown or printed out at least, basically a copy of popFrame.
+            System.err.println("oops. corrupted phase context providers!");
+        }
+        this.phaseContextProviders.pop();
+
     }
 
     // TODO could pool these for more fasts

@@ -53,12 +53,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public abstract class PacketState<P extends PacketContext<P>> implements IPhaseState<P> {
+
+
+    private BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+        frame.pushCause(ctx.packetPlayer);
+    });
 
     PacketState() {
 
     }
+
 
     protected static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
         List<Entity> entities = event.getEntities();
@@ -69,6 +76,11 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
         for (Entity entity : entities) {
             EntityUtil.processEntitySpawn(entity, () -> Optional.of(player.getUniqueID()));
         }
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, P> getFrameModifier() {
+        return this.BASIC_PACKET_MODIFIER;
     }
 
     @Override

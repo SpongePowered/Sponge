@@ -67,7 +67,7 @@ public class MixinAdvancementList implements IMixinAdvancementList {
             target = "Ljava/util/Map;size()I", remap = false))
     private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (!SpongeImplHooks.isMainThread()) {// should fire might not be working for this || !ShouldFire.GAME_REGISTRY_REGSTER_EVENT_REGISTER) {
+        if (!SpongeImplHooks.isMainThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
             return;
         }
 
