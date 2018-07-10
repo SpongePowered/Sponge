@@ -169,7 +169,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -197,7 +197,9 @@ public final class PhaseTracker {
             }
         }
 
-        SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext, ((IPhaseState) state).getFrameModifier());
+        if (Sponge.isServerAvailable()) {
+            SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext, ((IPhaseState) state).getFrameModifier());
+        }
         this.stack.push(state, phaseContext);
     }
 
@@ -212,7 +214,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
     public void completePhase(IPhaseState<?> prevState) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -583,7 +585,7 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -643,7 +645,7 @@ public final class PhaseTracker {
      */
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
                 .addWrapped(ASYNC_BLOCK_CHANGE_MESSAGE)

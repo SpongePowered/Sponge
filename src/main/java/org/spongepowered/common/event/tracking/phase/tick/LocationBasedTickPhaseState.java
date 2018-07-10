@@ -30,27 +30,41 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.function.BiConsumer;
+
 import javax.annotation.Nullable;
 
 abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
+    private final BiConsumer<CauseStackManager.StackFrame, T> LOCATION_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) -> {
+            final LocatableBlock tickingEntity = context.getSource(LocatableBlock.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a LocatableBlock!", context));
+            frame.pushCause(tickingEntity);
+        });
+
     LocationBasedTickPhaseState() {
     }
 
-    abstract Location<World> getLocationSourceFromContext(PhaseContext<?> context);
-
     abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, T> getFrameModifier() {
+        return this.LOCATION_MODIFIER;
+    }
 
     @Override
     public void associateNeighborStateNotifier(T context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,

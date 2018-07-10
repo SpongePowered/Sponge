@@ -310,7 +310,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // Sponge Start - short circuit up top to reduce indentation as necessary
         final boolean doTileDrops = worldIn.getGameRules().getBoolean("doTileDrops");
 
-        if (worldIn.isRemote || !SpongeImpl.isMainThread() || stack.isEmpty() || !doTileDrops) {
+        if (worldIn.isRemote || !SpongeImplHooks.isMainThread() || stack.isEmpty() || !doTileDrops) {
             return;
         }
         // Double check we aren't performing drops during restores.

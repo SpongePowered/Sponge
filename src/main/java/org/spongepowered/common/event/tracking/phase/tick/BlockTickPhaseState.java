@@ -30,12 +30,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -67,28 +64,19 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    Location<World> getLocationSourceFromContext(PhaseContext<?> context) {
-        return context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context)).getLocation();
-    }
-
-    @Override
     public void unwind(BlockTickContext context) {
-        final LocatableBlock locatableBlock = context.requireSource(LocatableBlock.class);
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(locatableBlock);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             context.getCapturedBlockSupplier()
                     .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
             context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
                         SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
-        }
+
     }
 
     @Override
@@ -107,7 +95,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         }
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(locatableBlock);
-            associateAdditionalCauses(context, frame);
             if (entity instanceof EntityXPOrb) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);

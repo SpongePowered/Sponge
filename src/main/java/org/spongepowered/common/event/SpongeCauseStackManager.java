@@ -39,21 +39,19 @@ import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.ThreadUtil;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -95,7 +93,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     }
 
     private static boolean isPermittedThread() {
-        return SpongeImpl.isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
+        return SpongeImplHooks.isMainThread() || Thread.currentThread().getName().equals("Server Shutdown Thread");
     }
 
     @Override

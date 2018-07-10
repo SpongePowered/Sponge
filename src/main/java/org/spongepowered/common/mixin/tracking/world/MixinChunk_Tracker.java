@@ -351,7 +351,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     private void startLoad(CallbackInfo callbackInfo) {
         final boolean isFake = ((IMixinWorld) this.world).isFake();
         if (!isFake) {
-            if (!SpongeImpl.isMainThread()) {
+            if (!SpongeImplHooks.isMainThread()) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
                     .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
                                 + " to the parented world for management. These operations are generally not"
@@ -374,7 +374,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     @Inject(method = "onLoad", at = @At("RETURN"))
     private void endLoad(CallbackInfo callbackInfo) {
-        if (!((IMixinWorld) this.world).isFake() && SpongeImpl.isMainThread()) {
+        if (!((IMixinWorld) this.world).isFake() && SpongeImplHooks.isMainThread()) {
             // IF we're not on the main thread,
             PhaseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
         }
