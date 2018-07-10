@@ -37,7 +37,6 @@ import net.minecraft.block.BlockRedstoneLight;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
@@ -202,20 +201,21 @@ public final class TrackingUtil {
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
-        try (
-             final PhaseContext<?> phaseContext = context) {
+        try (final PhaseContext<?> phaseContext = context) {
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-            chunk.getBlockNotifier(pos)
-                    .ifPresent(phaseContext::notifier);
+            final User blockNotifier = mixinTileEntity.getSpongeNotifier();
+            if (blockNotifier != null) {
+                phaseContext.notifier(blockNotifier);
+            }
 
             // Allow the tile entity to validate the owner of itself. As long as the tile entity
             // chunk is already loaded and activated, and the tile entity has already loaded
             // the owner of itself.
-            final Optional<User> blockOwner = mixinTileEntity.getSpongeOwner();
-            blockOwner.ifPresent(phaseContext::owner);
-            // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
-            // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
+            final User blockOwner = mixinTileEntity.getSpongeOwner();
+            if (blockOwner != null) {
+                phaseContext.owner(blockOwner);
+            }
 
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
@@ -233,40 +233,37 @@ public final class TrackingUtil {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(world);
-            if (ShouldFire.TICK_BLOCK_EVENT) {
-                BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
-                final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(frame.getCurrentCause(), snapshot);
-                SpongeImpl.postEvent(event);
-                if(event.isCancelled()) {
-                    return;
-                }
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return;
             }
+        }
 
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build();
-            frame.pushCause(locatable);
-            final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
+        final LocatableBlock locatable = LocatableBlock.builder()
+            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
+            .state((BlockState) state)
+            .build();
+        final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
 
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
 
-            // We have to associate any notifiers in case of scheduled block updates from other sources
-            final PhaseData current = phaseTracker.getCurrentPhaseData();
-            final IPhaseState<?> currentState = current.state;
-            ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
-            // Now actually switch to the new phase
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseData current = phaseTracker.getCurrentPhaseData();
+        final IPhaseState<?> currentState = current.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
+        // Now actually switch to the new phase
 
-            try (final PhaseContext<?> context = phaseContext;
-                 final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
-                timing.startTiming();
-                context.buildAndSwitch();
-                block.updateTick(world, pos, state, random);
-            } catch (Exception | NoClassDefFoundError e) {
-                phaseTracker.printExceptionFromPhase(e, phaseContext);
-            }
+        try (final PhaseContext<?> context = phaseContext;
+             final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
+            timing.startTiming();
+            context.buildAndSwitch();
+            block.updateTick(world, pos, state, random);
+        } catch (Exception | NoClassDefFoundError e) {
+            phaseTracker.printExceptionFromPhase(e, phaseContext);
+
         }
     }
 
@@ -276,11 +273,9 @@ public final class TrackingUtil {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(world);
             if (ShouldFire.TICK_BLOCK_EVENT) {
                 final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
-                final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(frame.getCurrentCause(), currentTickBlock);
+                final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
                 SpongeImpl.postEvent(event);
                 if(event.isCancelled()) {
                     return;
@@ -291,7 +286,6 @@ public final class TrackingUtil {
                     .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
                     .state((BlockState) state)
                     .build();
-            frame.pushCause(locatable);
             final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
 
             // We have to associate any notifiers in case of scheduled block updates from other sources
