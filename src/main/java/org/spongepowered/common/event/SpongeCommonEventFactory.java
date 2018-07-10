@@ -924,6 +924,9 @@ public class SpongeCommonEventFactory {
                     final User notifier = peek.context.getNotifier().orElse(null);
                     if (notifier != null) {
                         IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
+                        if (spongeChunk == null) {
+                            spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
+                        }
                         spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
                     }
                 }
