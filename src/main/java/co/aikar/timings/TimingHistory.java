@@ -101,7 +101,7 @@ public class TimingHistory {
 
                 for (Entity entity : chunk.getEntities()) {
                     if (entity.getType() == null) {
-                        SpongeImpl.getLogger().error("Entity is not registered {}", entity);
+                        SpongeImpl.getLogger().error("Entity is not registered {} - class {}", entity, entity.getClass());
                         continue;
                     }
                     data.entityCounts.get(entity.getType()).increment();
@@ -109,7 +109,7 @@ public class TimingHistory {
 
                 for (TileEntity tileEntity : chunk.getTileEntities()) {
                     if (tileEntity.getType() == null) {
-                        SpongeImpl.getLogger().error("TileEntity is not registered {}", tileEntity);
+                        SpongeImpl.getLogger().error("TileEntity is not registered {} - class {}", tileEntity, tileEntity.getClass());
                         continue;
                     }
                     data.tileEntityCounts.get(tileEntity.getType()).increment();
