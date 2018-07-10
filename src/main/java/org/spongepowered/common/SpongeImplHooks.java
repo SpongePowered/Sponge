@@ -65,6 +65,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -472,5 +473,12 @@ public final class SpongeImplHooks {
 
     public static void onEntityTickEnd(Entity entity) {
 
+    }
+
+    public static boolean isMainThread() {
+        // Return true when the server isn't yet initialized, this means on a client
+        // that the game is still being loaded. This is needed to support initialization
+        // events with cause tracking.
+        return !Sponge.isServerAvailable() || Sponge.getServer().isMainThread();
     }
 }

@@ -31,11 +31,11 @@ import net.minecraft.advancements.AdvancementList;
 import net.minecraft.advancements.AdvancementManager;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
-import org.spongepowered.common.util.ServerUtils;
 
 @CustomRegistrationPhase
 public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<AdvancementTree>
@@ -56,7 +56,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     @SuppressWarnings("unchecked")
     @Override
     public void registerAdditionalCatalog(AdvancementTree advancementTree) {
-        checkState(ServerUtils.isCallingFromMainThread() || AdvancementRegistryModule.getInstance().isInInitialRegistration());
+        checkState(SpongeImplHooks.isMainThread() || AdvancementRegistryModule.getInstance().isInInitialRegistration());
         super.register(advancementTree);
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             final Advancement advancement = (Advancement) advancementTree.getRootAdvancement();

@@ -52,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ICriterionProgress;
 import org.spongepowered.common.advancement.SpongeAndCriterion;
 import org.spongepowered.common.advancement.SpongeAndCriterionProgress;
@@ -65,7 +66,6 @@ import org.spongepowered.common.interfaces.advancement.IMixinCriterion;
 import org.spongepowered.common.interfaces.advancement.IMixinCriterionProgress;
 import org.spongepowered.common.interfaces.advancement.IMixinPlayerAdvancements;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
-import org.spongepowered.common.util.ServerUtils;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -84,7 +84,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
     @Nullable private PlayerAdvancements playerAdvancements;
 
     private void checkServer() {
-        checkState(ServerUtils.isCallingFromMainThread());
+        checkState(SpongeImplHooks.isMainThread());
     }
 
     @Inject(method = "update", at = @At("RETURN"))
@@ -110,7 +110,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
 
     @Override
     public void updateProgressMap() {
-        if (!ServerUtils.isCallingFromMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             return;
         }
         final Optional<Advancement> advancement = getOptionalAdvancement();
@@ -156,7 +156,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      */
     @Inject(method = "isDone", at = @At("HEAD"), cancellable = true)
     private void onIsDone(CallbackInfoReturnable<Boolean> ci) {
-        if (!ServerUtils.isCallingFromMainThread()) { // Use vanilla behavior on the client
+        if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(get(getAdvancement().getCriterion()).map(Progressable::achieved).orElse(false));
@@ -169,7 +169,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      */
     @Inject(method = "grantCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
     private void onGrantCriterion(String criterionIn, CallbackInfoReturnable<Boolean> ci) {
-        if (!ServerUtils.isCallingFromMainThread()) { // Use vanilla behavior on the client
+        if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(spongeGrantCriterion(criterionIn));
@@ -224,7 +224,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      */
     @Inject(method = "revokeCriterion(Ljava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
     private void revokeCriterion(String criterionIn, CallbackInfoReturnable<Boolean> ci) {
-        if (!ServerUtils.isCallingFromMainThread()) { // Use vanilla behavior on the client
+        if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
         ci.setReturnValue(spongeRevokeCriterion(criterionIn));
@@ -293,7 +293,7 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
 
     @Override
     public void invalidateAchievedState() {
-        if (!ServerUtils.isCallingFromMainThread()) { // Ignore on the client
+        if (!SpongeImplHooks.isMainThread()) { // Ignore on the client
             return;
         }
         for (ICriterionProgress progress : getProgressMap().values()) {
