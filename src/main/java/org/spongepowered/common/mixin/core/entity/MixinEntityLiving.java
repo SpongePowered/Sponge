@@ -29,7 +29,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -112,7 +111,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Override
     public void firePostConstructEvents() {
         super.firePostConstructEvents();
-        if (ShouldFire.AI_TASK_EVENT_ADD) {
+        if (ShouldFire.A_I_TASK_EVENT_ADD) {
             handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
             handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
         }

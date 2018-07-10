@@ -87,7 +87,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
-                .setBlockNotifier(notifyPos, player.getUniqueId()));
+                .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
     }
 
     @Override

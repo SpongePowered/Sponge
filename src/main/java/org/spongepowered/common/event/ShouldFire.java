@@ -35,13 +35,13 @@ public class ShouldFire {
     // For example, if no listeners are registed for SpawnEntityEvent,
     // but one is registered for SpawnEntityEvent.SPAWNER, both
     // SPAWN_ENTITY_EVENT and SPAWN_ENTITY_EVENT_SPAWNER will be true
-    // However, SPAWN_ENTITY_EVENT_CHUNKLOAD will be false
+    // However, SPAWN_ENTITY_EVENT_CHUNK_LOAD will be false
 
-    public static boolean AI_TASK_EVENT_ADD = false;
-    public static boolean AI_TASK_EVENT_REMOVE = false;
+    public static boolean A_I_TASK_EVENT_ADD = false;
+    public static boolean A_I_TASK_EVENT_REMOVE = false;
 
     public static boolean SPAWN_ENTITY_EVENT = false;
-    public static boolean SPAWN_ENTITY_EVENT_CHUNKLOAD = false;
+    public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
     public static boolean SPAWN_ENTITY_EVENT_SPAWNER = false;
     public static boolean SPAWN_ENTITY_EVENT_CUSTOM = false;
 

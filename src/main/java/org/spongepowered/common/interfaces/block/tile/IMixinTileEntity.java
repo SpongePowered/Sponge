@@ -37,8 +37,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinTrackable;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 public interface IMixinTileEntity extends IMixinTrackable {
@@ -105,9 +103,15 @@ public interface IMixinTileEntity extends IMixinTrackable {
 
     void setSpongeOwner(@Nullable User owner);
 
-    Optional<User> getSpongeOwner();
+    void setSpongeNotifier(@Nullable User notifier);
+
+    @Nullable User getSpongeOwner();
+
+    @Nullable User getSpongeNotifier();
 
     boolean hasSetOwner();
+
+    boolean hasSetNotifier();
 
     @Nullable IMixinChunk getActiveChunk();
 

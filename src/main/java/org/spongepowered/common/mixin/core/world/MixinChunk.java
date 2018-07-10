@@ -1278,6 +1278,19 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public boolean isActive() {
+        if (this.isPersistedChunk()) {
+            return true;
+        }
+
+        if (!this.loaded || this.isQueuedForUnload() || this.getScheduledForUnload() != -1) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("World", this.world)

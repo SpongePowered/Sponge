@@ -29,8 +29,10 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.event.SpongeEventFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
@@ -117,6 +119,7 @@ public class ListenerChecker {
         this.clazz = clazz;
         for (Field field: this.clazz.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
+                this.checkFieldValid(field);
                 this.fields.put(field.getName(), field);
                 if (ALL_TRUE) {
                     if (DEBUG) {
@@ -128,7 +131,32 @@ public class ListenerChecker {
                         e.printStackTrace();
                     }
                 }
+            } else {
+                throw new IllegalStateException(String.format("ShouldFire filed %s must be public and static!", field));
             }
+        }
+    }
+
+    private void checkFieldValid(Field field) {
+        String name = field.getName();
+
+        boolean found = false;
+        for (Method eventMethod: SpongeEventFactory.class.getMethods()) {
+            // Not all fields will directly correspond to an event in SpongeEventFactory.
+            // For example, SpongeEventFactory has no method to create a ChangeBlockEvent,
+            // (only methods for its subtypes), but ShouldFire.CHANGE_BLOCK_EVENT exists, and is valid
+            // Therefore, we check all superinterfaces of each listed event.
+            for (TypeToken<?> eventType: TypeToken.of(eventMethod.getReturnType()).getTypes()) {
+                String eventMethodName = getName(eventType.getRawType());
+                if (name.equals(eventMethodName)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            throw new IllegalStateException(String.format("ShouldFire field %s does not correspond to any SpongeAPI event! Check that the field is written in UPPER_CASE_UNDERSCORE format.", field));
         }
     }
 

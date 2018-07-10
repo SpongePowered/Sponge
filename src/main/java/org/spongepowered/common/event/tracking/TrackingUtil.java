@@ -206,14 +206,18 @@ public final class TrackingUtil {
              final PhaseContext<?> phaseContext = context) {
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-            chunk.getBlockNotifier(pos)
-                    .ifPresent(phaseContext::notifier);
+            final User blockNotifier = mixinTileEntity.getSpongeNotifier();
+            if (blockNotifier != null) {
+]                phaseContext.notifier(blockNotifier);
+            }
 
             // Allow the tile entity to validate the owner of itself. As long as the tile entity
             // chunk is already loaded and activated, and the tile entity has already loaded
             // the owner of itself.
-            final Optional<User> blockOwner = mixinTileEntity.getSpongeOwner();
-            blockOwner.ifPresent(phaseContext::owner);
+            final User blockOwner = mixinTileEntity.getSpongeOwner();
+            if (blockOwner != null) {
+                phaseContext.owner(blockOwner);
+            }
             // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
             // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
 
@@ -689,7 +693,7 @@ public final class TrackingUtil {
 
     private static void performBlockEntitySpawns(IPhaseState<?> state, PhaseContext<?> phaseContext, SpongeBlockSnapshot oldBlockSnapshot, BlockPos pos) {
         // This is for pre-merged items
-        if (state.doesCaptureEntitySpawns()) {
+        if (state.doesCaptureEntitySpawns() || ((IPhaseState) state).doesCaptureEntityDrops(phaseContext)) {
             phaseContext.getBlockDropSupplier().acceptAndRemoveIfPresent(pos, items -> spawnItemDataForBlockDrops(items, oldBlockSnapshot,
                 phaseContext));
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.

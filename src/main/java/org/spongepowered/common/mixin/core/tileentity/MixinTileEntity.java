@@ -72,7 +72,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -86,9 +85,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing timing;
     @Nullable private LocatableBlock locatableBlock;
-    // caches owner to avoid constant lookups in chunk
+    // caches owner and notifier to avoid constant lookups in chunk
     @Nullable private User spongeOwner;
+    @Nullable private User spongeNotifier;
     private boolean hasSetOwner = false;
+    private boolean hasSetNotifier = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
     // Used by tracker config
     private boolean allowsBlockBulkCapture = true;
@@ -309,21 +310,47 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public Optional<User> getSpongeOwner() {
-        Optional<User> blockOwner;
+    public User getSpongeOwner() {
         if (!this.hasSetOwner()) {
             IMixinChunk activeChunk = this.getActiveChunk();
             if (activeChunk != null) {
-                blockOwner = activeChunk.getBlockOwner(pos);
-                this.setSpongeOwner(blockOwner.orElse(null));
+                this.setSpongeOwner(activeChunk.getBlockOwner(pos).orElse(null));
             }
         }
-        return Optional.ofNullable(this.spongeOwner);
+        return this.spongeOwner;
     }
 
     @Override
     public boolean hasSetOwner() {
         return this.hasSetOwner;
+    }
+
+    @Override
+    public void setSpongeNotifier(@Nullable User notifier) {
+        if (notifier == null) {
+            this.spongeNotifier = null;
+            this.hasSetNotifier = false;
+            return;
+        }
+        this.spongeNotifier = notifier;
+        this.hasSetNotifier = true;
+    }
+
+    @Nullable
+    @Override
+    public User getSpongeNotifier() {
+        if (!this.hasSetNotifier()) {
+            IMixinChunk activeChunk = this.getActiveChunk();
+            if (activeChunk != null) {
+                this.setSpongeNotifier(activeChunk.getBlockNotifier(pos).orElse(null));
+            }
+        }
+        return this.spongeNotifier;
+    }
+
+    @Override
+    public boolean hasSetNotifier() {
+        return this.hasSetNotifier;
     }
 
     @Override
@@ -345,7 +372,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         if (chunk == null) {
             return false;
         }
-        if (!chunk.isPersistedChunk() && (chunk.isQueuedForUnload() || chunk.getScheduledForUnload() != -1)) {
+        if (!chunk.isActive()) {
             return false;
         }
 
