@@ -340,6 +340,11 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             System.err.println("oops. corrupted phase context providers!");
         }
         this.phaseContextProviders.pop();
+        if (this.phaseContextProviders.isEmpty()) {
+            // if we're empty, we don't need to bother with the context providers
+            // because there's nothing to push.
+            this.pendingProviders = false;
+        }
 
     }
 
