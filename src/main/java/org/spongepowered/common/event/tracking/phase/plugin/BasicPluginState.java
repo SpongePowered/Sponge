@@ -24,10 +24,28 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import org.spongepowered.api.event.CauseStackManager;
+
+import java.util.function.BiConsumer;
+
 public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, BasicPluginContext> PLUGIN_MODIFIER = super.getFrameModifier()
+        .andThen((frame, context) -> {
+            frame.pushCause(context.source(Object.class));
+            if (context.container != null) {
+                frame.pushCause(context.container);
+            }
+        });
+
     @Override
     public BasicPluginContext createPhaseContext() {
         return new BasicPluginContext(this);
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicPluginContext> getFrameModifier() {
+        return this.PLUGIN_MODIFIER;
     }
 
     @Override

@@ -113,7 +113,13 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         if (!this.pendingProviders) {
             return; // we've done our work already
         }
+        // This is the first time we're calling it, we want to reset it before
+        // we have the chance to re-enter and cause frame corruption.
         this.pendingProviders = false;
+        // Then, we want to inversely iterate the stack (from bottom to top)
+        // to properly mimic as though the frames were created at the time of the
+        // phase switches. It does not help the debugging of cause frames
+        // except for this method call-point.
         for (Iterator<Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
             final Tuple<PhaseContext<?>, BiConsumer<StackFrame, PhaseContext<?>>> tuple = iterator.next();
             final StackFrame frame = pushCauseFrame(); // these should auto close

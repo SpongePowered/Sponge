@@ -273,34 +273,36 @@ public final class TrackingUtil {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
-            if (ShouldFire.TICK_BLOCK_EVENT) {
-                final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
-                final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
-                SpongeImpl.postEvent(event);
-                if(event.isCancelled()) {
-                    return;
-                }
-            }
-
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build();
-            final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
-
-            // We have to associate any notifiers in case of scheduled block updates from other sources
-            final PhaseData current = phaseTracker.getCurrentPhaseData();
-            final IPhaseState<?> currentState = current.state;
-            ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
-            // Now actually switch to the new phase
-            try (PhaseContext<?> context = phaseContext) {
-                context.buildAndSwitch();
-                block.randomTick(world, pos, state, random);
-            } catch (Exception | NoClassDefFoundError e) {
-                phaseTracker.printExceptionFromPhase(e, phaseContext);
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            final TickBlockEvent
+                event =
+                SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return;
             }
         }
+
+        final LocatableBlock locatable = LocatableBlock.builder()
+            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
+            .state((BlockState) state)
+            .build();
+        final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
+
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseData current = phaseTracker.getCurrentPhaseData();
+        final IPhaseState<?> currentState = current.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
+        // Now actually switch to the new phase
+        try (PhaseContext<?> context = phaseContext) {
+            context.buildAndSwitch();
+            block.randomTick(world, pos, state, random);
+        } catch (Exception | NoClassDefFoundError e) {
+            phaseTracker.printExceptionFromPhase(e, phaseContext);
+        }
     }
+
 
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
