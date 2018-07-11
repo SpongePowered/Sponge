@@ -78,39 +78,39 @@ final class BlockDecayPhaseState extends BlockPhaseState {
         final Location<World> worldLocation = locatable.getLocation();
         final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(locatable);
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
-            context.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
+        context.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
+                final List<Entity> entities = items.stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            });
+        context.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                SpongeCommonEventFactory.callSpawnEntity(entities, context);
 
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            context.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        final List<Entity> entities = items.stream()
-                            .map(EntityUtil::fromNative)
-                            .collect(Collectors.toList());
-                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                    });
-            context.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
+            });
+        context.getCapturedItemStackSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                final List<EntityItem> items = drops.stream()
+                    .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
+                    .collect(Collectors.toList());
+                final List<Entity> entities = (List<Entity>) (List<?>) items;
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom
+                        event =
+                        SpongeEventFactory.createDropItemEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
+                        EntityUtil.processEntitySpawnsFromEvent(context, event);
+                    }
+                }
+            });
 
-                    });
-            context.getCapturedItemStackSupplier()
-                    .acceptAndClearIfNotEmpty(drops -> {
-                        final List<EntityItem> items = drops.stream()
-                                .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
-                                .collect(Collectors.toList());
-                        final List<Entity> entities = (List<Entity>) (List<?>) items;
-                        if (!entities.isEmpty()) {
-                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                EntityUtil.processEntitySpawnsFromEvent(context, event);
-                            }
-                        }
-                    });
-        }
     }
 }

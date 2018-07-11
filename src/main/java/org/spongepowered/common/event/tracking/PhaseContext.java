@@ -534,6 +534,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Override
     public void close() { // Should never throw an exception
+        if (this.isEmpty()) {
+            // We aren't ever supposed to close here...
+            PhaseTracker.getInstance()
+                .printMessageWithCaughtException("Closing an empty Phasecontext",
+                    "We should never be closing an empty phase context (or complete phase) This is likely an error from sponge.",
+                    new IllegalStateException("Closing empty phase context"));
+            return;
+        }
         PhaseTracker.getInstance().completePhase(this.state);
         if (this.usedFrame == null && SpongeImplHooks.isMainThread()) {
             // So, this part is interesting... Since the used frame is null, that means

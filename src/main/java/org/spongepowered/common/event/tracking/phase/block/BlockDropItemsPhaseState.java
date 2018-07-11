@@ -44,11 +44,25 @@ import org.spongepowered.common.world.WorldUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 final class BlockDropItemsPhaseState extends BlockPhaseState {
 
+    private final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> BLOCK_DROP_MODIFIER = super.getFrameModifier()
+        .andThen((frame, ctx) -> {
+            final BlockSnapshot blockSnapshot = ctx.getSource(BlockSnapshot.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", ctx));
+            frame.pushCause(blockSnapshot);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        });
+
     BlockDropItemsPhaseState() {
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+        return this.BLOCK_DROP_MODIFIER;
     }
 
     @Override
@@ -61,51 +75,51 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(GeneralizedContext context) {
+
+        context.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
+                final ArrayList<Entity> entities = new ArrayList<>();
+                for (EntityItem item : items) {
+                    entities.add(EntityUtil.fromNative(item));
+                }
+                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            });
+        context.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
         final BlockSnapshot blockSnapshot = context.getSource(BlockSnapshot.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(blockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            context.addNotifierAndOwnerToCauseStack(frame);
-            context.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        final ArrayList<Entity> entities = new ArrayList<>();
-                        for (EntityItem item : items) {
-                            entities.add(EntityUtil.fromNative(item));
-                        }
-                        SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-                    });
-            context.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
-            frame.removeContext(EventContextKeys.SPAWN_TYPE);
-            final Location<World> worldLocation = blockSnapshot.getLocation().get();
-            final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
+            .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
+        final Location<World> worldLocation = blockSnapshot.getLocation().get();
+        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) worldLocation.getExtent());
 
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            context.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-            context.getCapturedItemStackSupplier()
-                    .acceptAndClearIfNotEmpty(drops -> {
-                        final List<EntityItem> items = drops.stream()
-                                .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
-                                .collect(Collectors.toList());
-                        final List<Entity> entities = (List<Entity>) (List<?>) items;
-                        if (!entities.isEmpty()) {
-                            SpongeCommonEventFactory.callDropItemCustom(entities, context);
-                        }
-                        drops.clear();
+        context.getCapturedBlockSupplier()
+            .acceptAndClearIfNotEmpty(blocks -> {
+                TrackingUtil.processBlockCaptures(blocks, this, context);
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            });
+        context.getCapturedItemStackSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                final List<EntityItem> items = drops.stream()
+                    .map(drop -> drop.create(WorldUtil.asNative(mixinWorld)))
+                    .collect(Collectors.toList());
+                final List<Entity> entities = (List<Entity>) (List<?>) items;
+                if (!entities.isEmpty()) {
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                    SpongeCommonEventFactory.callDropItemCustom(entities, context);
+                }
+                drops.clear();
 
-                    });
-            context.getBlockDropSupplier()
-                .acceptAndClearIfNotEmpty(drops -> {
-                    for (BlockPos key : drops.asMap().keySet()) {
-                        final List<ItemDropData> values = drops.get(key);
-                        if (!values.isEmpty()) {
-                            TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, context);
-                        }
+            });
+        context.getBlockDropSupplier()
+            .acceptAndClearIfNotEmpty(drops -> {
+                for (BlockPos key : drops.asMap().keySet()) {
+                    final List<ItemDropData> values = drops.get(key);
+                    if (!values.isEmpty()) {
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+                        TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, context);
                     }
-                });
-        }
+                }
+            });
+
     }
 
     @Override

@@ -30,13 +30,21 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 final class RestoringBlockPhaseState extends BlockPhaseState {
 
     RestoringBlockPhaseState() {
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+        return (BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER;
     }
 
     @Override

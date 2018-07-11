@@ -48,22 +48,17 @@ final class DispensePhaseState extends BlockPhaseState {
 
     @Override
     public void unwind(GeneralizedContext phaseContext) {
-        final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(blockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-            phaseContext.addNotifierAndOwnerToCauseStack(frame);
-            phaseContext.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
-                    });
-            phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
-                    });
-        }
+            .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+        phaseContext.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
+            });
+        phaseContext.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+            });
     }
 }
