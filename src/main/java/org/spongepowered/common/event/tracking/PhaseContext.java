@@ -58,7 +58,9 @@ import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,7 +78,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    private static PhaseContext<?> EMPTY;
+    @Nullable private static PhaseContext<?> EMPTY;
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      * @return
@@ -112,7 +114,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     private boolean allowsEntityEvents = true;
     private boolean allowsBulkBlockCaptures = true; // Defaults to allow block captures
     private boolean allowsBulkEntityCaptures = true;
-    @Nullable CauseStackManager.StackFrame usedFrame = null;
+    @Nullable Deque<CauseStackManager.StackFrame> usedFrame;
 
     @Nullable private Object source;
 
@@ -540,7 +542,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             SpongeImpl.getCauseStackManager().popFrameMutator(this);
         }
         if (this.usedFrame != null) {
-            Sponge.getCauseStackManager().popCauseFrame(this.usedFrame);
+            this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
+            this.usedFrame.clear();
+            this.usedFrame = null;
         }
     }
 

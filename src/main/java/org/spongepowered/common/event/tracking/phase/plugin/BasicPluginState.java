@@ -32,7 +32,7 @@ public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, BasicPluginContext> PLUGIN_MODIFIER = super.getFrameModifier()
         .andThen((frame, context) -> {
-            frame.pushCause(context.source(Object.class));
+            context.getSource(Object.class).ifPresent(frame::pushCause);
             if (context.container != null) {
                 frame.pushCause(context.container);
             }
