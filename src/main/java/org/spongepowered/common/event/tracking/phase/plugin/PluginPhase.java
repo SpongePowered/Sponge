@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
 public final class PluginPhase extends TrackingPhase {
@@ -45,6 +46,7 @@ public final class PluginPhase extends TrackingPhase {
         public static final IPhaseState<ListenerPhaseContext> POST_WORLD_TICK_LISTENER = new PostWorldTickListenerState();
         public static final IPhaseState<ListenerPhaseContext> PRE_SERVER_TICK_LISTENER = new PreServerTickListenerState();
         public static final IPhaseState<ListenerPhaseContext> POST_SERVER_TICK_LISTENER = new PostServerTickListenerState();
+        public static final IPhaseState<ListenerPhaseContext> EVENT_BUS = new EventListenerPhaseState();
 
         private Listener() {
         }

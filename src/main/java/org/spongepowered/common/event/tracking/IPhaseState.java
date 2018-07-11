@@ -48,6 +48,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -67,6 +68,7 @@ import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldUtil;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -86,16 +88,16 @@ import javax.annotation.Nullable;
  */
 public interface IPhaseState<C extends PhaseContext<C>> {
 
-    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<?>> DEFAULT_OWNER_NOTIFIER = (frame, cxt) -> {
-        if (cxt.usedFrame != null) {
-            throw new IllegalStateException("PhaseContext Already has a StackFrame Refernce!");
+    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<?>> DEFAULT_OWNER_NOTIFIER = (frame, ctx) -> {
+        if (ctx.usedFrame == null) {
+            ctx.usedFrame = new ArrayDeque<>();
         }
-        cxt.usedFrame = frame; // WE NEED TO STORE THIS SO WE CAN PROPERLY POP THE FRAME
-        if (cxt.owner != null) {
-            frame.addContext(EventContextKeys.OWNER, cxt.owner);
+        ctx.usedFrame.push(frame); // WE NEED TO STORE THIS SO WE CAN PROPERLY POP THE FRAME
+        if (ctx.owner != null) {
+            frame.addContext(EventContextKeys.OWNER, ctx.owner);
         }
-        if (cxt.notifier != null) {
-            frame.addContext(EventContextKeys.NOTIFIER, cxt.notifier);
+        if (ctx.notifier != null) {
+            frame.addContext(EventContextKeys.NOTIFIER, ctx.notifier);
         }
     };
 
