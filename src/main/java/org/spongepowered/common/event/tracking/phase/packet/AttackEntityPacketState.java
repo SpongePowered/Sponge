@@ -53,11 +53,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 final class AttackEntityPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
+
+    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
+        ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
+        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsed().createSnapshot());
+    });
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> getFrameModifier() {
+        return this.ATTACK_MODIFIER;
+    }
 
     @Override
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {

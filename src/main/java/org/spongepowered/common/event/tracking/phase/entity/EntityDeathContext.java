@@ -56,15 +56,6 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
         super.close();
     }
 
-    public DamageSource getDamageSource() {
-        return damageSource;
-    }
-
-    public EntityDeathContext setDamageSource(DamageSource damageSource) {
-        this.damageSource = damageSource;
-        return this;
-    }
-
     @Override
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$"+indent+"s", "");

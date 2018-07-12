@@ -888,13 +888,15 @@ public final class PhaseTracker {
             // will not actively capture entity spawns, but will still throw events for them. Some phases
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
-                try {
-                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
-                } catch (Exception | NoClassDefFoundError e) {
-                    // Just in case something really happened, we should print a nice exception for people to
-                    // paste us
-                    this.printExceptionSpawningEntity(context, e);
-                    return false;
+                if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                    try {
+                        return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
+                    } catch (Exception | NoClassDefFoundError e) {
+                        // Just in case something really happened, we should print a nice exception for people to
+                        // paste us
+                        this.printExceptionSpawningEntity(context, e);
+                        return false;
+                    }
                 }
             }
             // Sponge end - continue on with the checks.
