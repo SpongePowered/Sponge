@@ -33,6 +33,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.UserListBans;
+import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
@@ -50,14 +51,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 class UserDiscoverer {
 
@@ -158,14 +159,15 @@ class UserDiscoverer {
 
     static Collection<org.spongepowered.api.profile.GameProfile> getAllProfiles() {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
-        Set<org.spongepowered.api.profile.GameProfile> profiles = Sets.newHashSet();
+        final Map<UUID, org.spongepowered.api.profile.GameProfile> profiles = new HashMap<>();
 
         // Add all cached profiles
-        profiles.addAll(userCache.asMap().values().stream().map(User::getProfile).collect(Collectors.toList()));
+        userCache.asMap().values().stream().map(User::getProfile).forEach(p -> profiles.put(p.getUniqueId(), p));
 
         // Add all known profiles from the data files
         SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
+        final PlayerProfileCache profileCache = SpongeImpl.getServer().getPlayerProfileCache();
         for (String playerUuid : uuids) {
 
             // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
@@ -183,23 +185,44 @@ class UserDiscoverer {
                 continue;
             }
 
-            final GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(uuid);
+            final GameProfile profile = profileCache.getProfileByUUID(uuid);
             if (profile != null) {
-                profiles.add((org.spongepowered.api.profile.GameProfile) profile);
+                profiles.put(profile.getId(), (org.spongepowered.api.profile.GameProfile) profile);
             }
         }
 
         // Add all whitelisted users
-        final UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
-        profiles.addAll(whiteList.getValues().values().stream().map(entry -> (org.spongepowered.api.profile.GameProfile) entry.value)
-                .collect(Collectors.toList()));
+        // Note: as the equality check in GameProfile requires both the UUID and name to be equal, we have to filter
+        // out the game profiles by UUID only in the whitelist and ban list. If we don't, we end up with two GameProfiles
+        // with the same UUID but different names, one of which is potentially invalid. For some
+        // We assume that the cache is superior to the whitelist/banlist.
+        //
+        // See https://github.com/SpongePowered/SpongeCommon/issues/1989
+        addToProfiles(SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers().getValues().values(), profiles, profileCache);
+        addToProfiles(SpongeImpl.getServer().getPlayerList().getBannedPlayers().getValues().values(), profiles, profileCache);
+        return profiles.values();
+    }
 
-        // Add all banned users
-        final UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
-        profiles.addAll(banList.getValues().values().stream().filter(entry -> entry != null).map(entry -> (org.spongepowered.api.profile.GameProfile)
-                entry.value).collect(Collectors.toList()));
+    private static void addToProfiles(
+            final Collection<? extends UserListEntry<GameProfile>> gameProfiles,
+            final Map<UUID, org.spongepowered.api.profile.GameProfile> profiles,
+            final PlayerProfileCache profileCache) {
 
-        return profiles;
+        gameProfiles.stream()
+                .filter(x -> !profiles.containsKey(x.value.getId()))
+                .map(entry -> entry.value)
+                .forEach(x -> {
+                    // Get the known name, if it doesn't exist, then we don't add it - we assume no user backing
+                    GameProfile profile = profileCache.getProfileByUUID(x.getId());
+                    if (profile == null) {
+                        // the name could be valid in this case (e.g. old ban that has dropped off the cache),
+                        // so we add it to the Mojang cache
+                        profile = x;
+                        profileCache.addEntry(profile);
+                    }
+
+                    profiles.put(profile.getId(), (org.spongepowered.api.profile.GameProfile) profile);
+                });
     }
 
     static boolean delete(UUID uniqueId) {
