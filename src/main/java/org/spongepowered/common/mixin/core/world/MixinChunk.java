@@ -529,6 +529,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             return;
         }
 
+        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
+            return;
+        }
+
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, entityIn, listToFill);
         final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
 

@@ -792,24 +792,4 @@ public final class TrackingUtil {
         return null;
     }
 
-    public static void standardSpawnCapturedEntities(PhaseContext<?> context, StackFrame frame, List<Entity> entities) {
-        // Separate experience orbs from other entity drops
-        final List<Entity> experience = entities.stream()
-            .filter(entity -> entity instanceof ExperienceOrb)
-            .collect(Collectors.toList());
-        if (!experience.isEmpty()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-
-        }
-
-        // Now process other entities, this is separate from item drops specifically
-        final List<Entity> other = entities.stream()
-            .filter(entity -> !(entity instanceof ExperienceOrb))
-            .collect(Collectors.toList());
-        if (!other.isEmpty()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
-            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-        }
-    }
 }

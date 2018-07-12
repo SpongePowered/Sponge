@@ -66,7 +66,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     public EntityPlayerMP getPacketPlayer() {
-        return packetPlayer;
+        return this.packetPlayer;
     }
 
     public Player getSpongePlayer() {
@@ -74,15 +74,15 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     public <K extends Packet<?>> K getPacket() {
-        return (K) packet;
+        return (K) this.packet;
     }
 
     public ItemStackSnapshot getCursor() {
-        return cursor;
+        return this.cursor;
     }
 
     public boolean getIgnoringCreative() {
-        return ignoreCreative;
+        return this.ignoreCreative;
     }
 
     public P itemUsed(ItemStack stack) {
@@ -91,7 +91,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     public ItemStack getItemUsed() {
-        return itemUsed;
+        return this.itemUsed;
     }
 
     @Override
