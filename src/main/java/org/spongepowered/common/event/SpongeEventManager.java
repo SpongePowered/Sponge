@@ -100,7 +100,7 @@ public class SpongeEventManager implements EventManager {
      * <p>The cache is currently entirely invalidated if handlers are added or
      * removed.</p>
      */
-    private final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
+    protected final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
             Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
 
     @Inject

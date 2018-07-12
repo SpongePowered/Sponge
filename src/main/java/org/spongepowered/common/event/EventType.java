@@ -43,6 +43,10 @@ public final class EventType<T extends Event> {
         this.eventType = eventType;
     }
 
+    public EventType(Class<T> eventType) {
+        this(eventType, null);
+    }
+
     public Class<T> getType() {
         return this.eventType;
     }
