@@ -35,12 +35,17 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
     }
 
     public int getHighlightedSlotId() {
-        return highlightedSlotId;
+        return this.highlightedSlotId;
     }
 
     public InventoryPacketContext setHighlightedSlotId(int highlightedSlotId) {
         this.highlightedSlotId = highlightedSlotId;
         return this;
+    }
+
+    @Override
+    public boolean hasCaptures() {
+        return true; // We have to return true due to inventories being tracked.
     }
 
     @Override
