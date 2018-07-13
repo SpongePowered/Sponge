@@ -128,7 +128,8 @@ public class PacketUtil {
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
-                PhaseContext<?> context = PhaseContext.empty();
+                // At the very least make an unknown packet state case.
+                PhaseContext<?> context = PacketPhase.General.UNKNOWN.createPhaseContext();
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
                     context = packetState.createPhaseContext()
                         .source(packetPlayer)
