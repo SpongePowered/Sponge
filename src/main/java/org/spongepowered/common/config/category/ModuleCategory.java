@@ -61,6 +61,13 @@ public class ModuleCategory extends ConfigCategory {
     @Setting(value = "movement-checks", comment = "Allows configuring Vanilla movement and speed checks")
     private boolean movementChecks = false;
 
+    @Setting(value = "broken-mod", comment = "Enables experimental fixes for broken mods")
+    private boolean brokenMods = false;
+
+    public boolean useBrokenMods() {
+        return this.brokenMods;
+    }
+
     public boolean usePluginBungeeCord() {
         return this.pluginBungeeCord;
     }
