@@ -61,15 +61,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 final class CommandState extends GeneralState<CommandPhaseContext> implements IEntitySpecificItemDropsState<CommandPhaseContext> {
 
+    private final BiConsumer<StackFrame, CommandPhaseContext> COMMAND_MODIFIER = super.getFrameModifier()
+        .andThen((frame, ctx) -> {
+            ctx.getSource(Object.class).ifPresent(frame::pushCause);
+        });
+
     @Override
     public CommandPhaseContext createPhaseContext() {
         return new CommandPhaseContext(this);
+    }
+
+    @Override
+    public BiConsumer<StackFrame, CommandPhaseContext> getFrameModifier() {
+        return this.COMMAND_MODIFIER;
     }
 
     @Override
@@ -93,12 +104,13 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
     @Override
     public void unwind(CommandPhaseContext phaseContext) {
         Optional<EntityPlayer> playerSource = phaseContext.getSource(EntityPlayer.class);
+        final CauseStackManager csm = Sponge.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
             ((IMixinInventoryPlayer) playerSource.get().inventory).setCapture(false);
             List<SlotTransaction> list = ((IMixinInventoryPlayer) playerSource.get().inventory).getCapturedTransactions();
             if (!list.isEmpty()) {
-                ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(Sponge.getCauseStackManager().getCurrentCause(),
+                ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
                         ((Inventory) playerSource.get().inventory), list);
                 SpongeImpl.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
@@ -108,66 +120,71 @@ final class CommandState extends GeneralState<CommandPhaseContext> implements IE
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(sender);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        // TODO the entity spawn causes are not likely valid,
-                        // need to investigate further.
-                        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
-                    });
-        }
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(sender);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            phaseContext.getPerEntityItemDropSupplier()
-                    .acceptAndClearIfNotEmpty(uuidItemStackMultimap -> {
-                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
-                            final UUID key = entry.getKey();
-                            @Nullable
-                            net.minecraft.entity.Entity foundEntity = null;
-                            for (WorldServer worldServer : WorldManager.getWorlds()) {
-                                final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
-                                if (entityFromUuid != null) {
-                                    foundEntity = entityFromUuid;
-                                    break;
-                                }
-                            }
-                            final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
-                            if (!affectedEntity.isPresent()) {
-                                continue;
-                            }
-                            final Collection<ItemDropData> itemStacks = entry.getValue();
-                            if (itemStacks.isEmpty()) {
-                                return;
-                            }
-                            final List<ItemDropData> items = new ArrayList<>();
-                            items.addAll(itemStacks);
-                            itemStacks.clear();
+            .acceptAndClearIfNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
+        phaseContext.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities ->
+            {
+                // TODO the entity spawn causes are not likely valid,
+                // need to investigate further.
+                csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
 
-                            final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
-                            if (!items.isEmpty()) {
-                                final List<Entity> itemEntities = items.stream()
-                                        .map(data -> data.create(minecraftWorld))
-                                        .map(EntityUtil::fromNative)
-                                        .collect(Collectors.toList());
-                                frame.pushCause(affectedEntity.get());
-                                final DropItemEvent.Destruct destruct =
-                                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
-                                SpongeImpl.postEvent(destruct);
-                                frame.popCause();
-                                if (!destruct.isCancelled()) {
-                                    final boolean isPlayer = sender instanceof Player;
-                                    final Player player = isPlayer ? (Player) sender : null;
-                                    EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUniqueId() : null));
-                                }
-
-                            }
+                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+            });
+        phaseContext.getPerEntityItemDropSupplier()
+            .acceptAndClearIfNotEmpty(uuidItemStackMultimap ->
+            {
+                for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet())
+                {
+                    final UUID key = entry.getKey();
+                    @Nullable
+                    net.minecraft.entity.Entity foundEntity = null;
+                    for (WorldServer worldServer : WorldManager.getWorlds())
+                    {
+                        final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
+                        if (entityFromUuid != null)
+                        {
+                            foundEntity = entityFromUuid;
+                            break;
                         }
-                    });
-        }
+                    }
+                    final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
+                    if (!affectedEntity.isPresent())
+                    {
+                        continue;
+                    }
+                    final Collection<ItemDropData> itemStacks = entry.getValue();
+                    if (itemStacks.isEmpty())
+                    {
+                        return;
+                    }
+                    final List<ItemDropData> items = new ArrayList<>();
+                    items.addAll(itemStacks);
+                    itemStacks.clear();
+
+                    final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
+                    if (!items.isEmpty())
+                    {
+                        csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+
+                        final List<Entity> itemEntities = items.stream()
+                            .map(data -> data.create(minecraftWorld))
+                            .map(EntityUtil::fromNative)
+                            .collect(Collectors.toList());
+                        csm.pushCause(affectedEntity.get());
+                        final DropItemEvent.Destruct destruct =
+                            SpongeEventFactory.createDropItemEventDestruct(csm.getCurrentCause(), itemEntities);
+                        SpongeImpl.postEvent(destruct);
+                        csm.popCause();
+                        if (!destruct.isCancelled())
+                        {
+                            final boolean isPlayer = sender instanceof Player;
+                            final Player player = isPlayer ? (Player) sender : null;
+                            EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUniqueId() : null));
+                        }
+
+                    }
+                }
+            });
     }
 
     @Override

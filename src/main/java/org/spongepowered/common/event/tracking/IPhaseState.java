@@ -60,6 +60,7 @@ import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseConte
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -770,6 +771,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
 
-
-
+    default void provideNotifierForNeighbors(C context, NeighborNotificationContext context1) {
+        if (context.owner != null) { // If the owner is set, at least set the owner
+            context1.notifier(context.owner);
+        }
+        // otherwise, set whatever the latest notifier was.
+        if (context.notifier != null) {
+            context1.notifier(context.notifier);
+        }
+    }
 }

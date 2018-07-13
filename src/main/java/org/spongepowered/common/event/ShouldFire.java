@@ -79,4 +79,5 @@ public class ShouldFire {
     public static boolean GAME_REGISTRY_EVENT_REGISTER = false;
     public static boolean LOAD_CHUNK_EVENT = false;
     public static boolean COLLIDE_ENTITY_EVENT = false;
+    public static boolean SEND_COMMAND_EVENT = false;
 }
