@@ -69,11 +69,10 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     public void associateNeighborStateNotifier(T context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
-        final User user = context.getNotifier().orElse(null);
-        if (user != null) {
+        context.getNotifier().ifPresent(user -> {
             final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
-        }
+        });
     }
 
     @Override

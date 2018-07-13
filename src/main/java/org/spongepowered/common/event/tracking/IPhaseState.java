@@ -771,13 +771,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
 
-    default void provideNotifierForNeighbors(C context, NeighborNotificationContext context1) {
+    default void provideNotifierForNeighbors(C context, NeighborNotificationContext notification) {
         if (context.owner != null) { // If the owner is set, at least set the owner
-            context1.notifier(context.owner);
+            notification.owner = context.owner;
         }
         // otherwise, set whatever the latest notifier was.
         if (context.notifier != null) {
-            context1.notifier(context.notifier);
+            notification.notifier = context.notifier;
         }
     }
 }
