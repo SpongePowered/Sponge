@@ -92,7 +92,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
 
 
-    final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
+    protected final IPhaseState<? extends P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;

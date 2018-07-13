@@ -28,10 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.Container;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.interfaces.IMixinContainer;
+
+import javax.annotation.Nullable;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
-    private Container container;
+    @Nullable private Container container;
 
     public BasicPacketContext(PacketState<? extends BasicPacketContext> state) {
         super(state);
@@ -43,11 +46,13 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
     }
 
     public Container getOpenContainer() {
-        return checkNotNull(container, "Open Container was null!");
+        return checkNotNull(this.container, "Open Container was null!");
     }
 
-    public Container getContainer() {
-        return container;
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean hasCaptures() {
+        return (this.container != null && ((IMixinContainer) this.container).capturingInventory()) || this.state.isInteraction();
     }
 
     @Override
