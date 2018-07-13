@@ -820,11 +820,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
-                    .openContainer(container);
-                    // intentionally missing the lastCursor to not double throw close event
-                    StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    .openContainer(container)) {
+                // intentionally missing the lastCursor to not double throw close event
                 ctx.buildAndSwitch();
-                frame.pushCause(serverPlayer);
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
                 container.onContainerClosed(player);
                 SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, serverPlayer, cursor, ItemStackSnapshot.NONE, false);
