@@ -611,7 +611,12 @@ public final class PhaseTracker {
                 .sourceBlock(sourceBlock)
                 .setNotifiedBlockPos(notifyPos)
                 .setNotifiedBlockState(iblockstate)
-                .setSourceNotification(sourcePos)) {
+                .setSourceNotification(sourcePos)
+
+            ) {
+                // Since the notifier may have just been set from the previous state, we can
+                // ask it to contribute to our state
+                ((IPhaseState) state).provideNotifierForNeighbors(peek.context, context);
                 context.buildAndSwitch();
                 // Sponge End
 

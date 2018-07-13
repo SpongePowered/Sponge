@@ -50,11 +50,10 @@ import javax.annotation.Nullable;
 abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
     private final BiConsumer<CauseStackManager.StackFrame, T> LOCATION_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) -> {
-            final LocatableBlock tickingEntity = context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a LocatableBlock!", context));
-            frame.pushCause(tickingEntity);
-        });
+        super.getFrameModifier().andThen((frame, context) ->
+            context.getSource(LocatableBlock.class)
+                .ifPresent(frame::pushCause)
+        );
 
     LocationBasedTickPhaseState() {
     }
