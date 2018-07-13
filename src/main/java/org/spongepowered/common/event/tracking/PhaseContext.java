@@ -28,7 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -38,6 +40,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -55,7 +58,9 @@ import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -73,7 +78,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    private static PhaseContext<?> EMPTY;
+    @Nullable private static PhaseContext<?> EMPTY;
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      * @return
@@ -109,6 +114,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     private boolean allowsEntityEvents = true;
     private boolean allowsBulkBlockCaptures = true; // Defaults to allow block captures
     private boolean allowsBulkEntityCaptures = true;
+    @Nullable Deque<CauseStackManager.StackFrame> usedFrame;
 
     @Nullable private Object source;
 
@@ -298,6 +304,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
 
     public boolean notAllCapturesProcessed() {
+        // we can safely pop the frame here since this is only called when we're checking for processing
+
         return
                 isNonEmpty(this.blocksSupplier)
                 || isNonEmpty(this.blockItemDropsSupplier)
@@ -438,6 +446,38 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.captureBlockPos;
     }
 
+    public boolean hasCaptures() {
+        if (this.blocksSupplier != null && !this.blocksSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.blockEntitySpawnSupplier != null && !this.blockEntitySpawnSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.blockItemDropsSupplier != null && !this.blockItemDropsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.blockItemEntityDropsSupplier != null && !this.blockItemEntityDropsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.capturedEntitiesSupplier != null && !this.capturedEntitiesSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.capturedItemsSupplier != null && !this.capturedItemsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.capturedItemStackSupplier!= null && !this.capturedItemStackSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.entityItemDropsSupplier != null && !this.entityItemDropsSupplier.isEmpty()) {
+            return true;
+        }
+        if (this.entityItemEntityDropsSupplier != null && !this.entityItemEntityDropsSupplier.isEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public Optional<BlockPos> getBlockPosition() {
         return getCaptureBlockPos()
                 .getPos();
@@ -494,7 +534,26 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     @Override
     public void close() { // Should never throw an exception
+        if (this.isEmpty()) {
+            // We aren't ever supposed to close here...
+            PhaseTracker.getInstance()
+                .printMessageWithCaughtException("Closing an empty Phasecontext",
+                    "We should never be closing an empty phase context (or complete phase) This is likely an error from sponge.",
+                    new IllegalStateException("Closing empty phase context"));
+            return;
+        }
         PhaseTracker.getInstance().completePhase(this.state);
+        if (this.usedFrame == null && SpongeImplHooks.isMainThread()) {
+            // So, this part is interesting... Since the used frame is null, that means
+            // the cause stack manager still has the refernce of this context/phase, we have
+            // to "pop off" the list.
+            SpongeImpl.getCauseStackManager().popFrameMutator(this);
+        }
+        if (this.usedFrame != null) {
+            this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
+            this.usedFrame.clear();
+            this.usedFrame = null;
+        }
     }
 
 

@@ -43,6 +43,8 @@ final class EventListenerPhaseState extends ListenerPhaseState {
     EventListenerPhaseState() {
     }
 
+
+
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
         phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {

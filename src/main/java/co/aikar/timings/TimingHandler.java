@@ -28,6 +28,7 @@ import co.aikar.util.LoadingIntMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 
 class TimingHandler implements Timing {
 
@@ -99,7 +100,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (SpongeImplHooks.isMainThread()) {
             stopTiming();
         }
     }
@@ -125,7 +126,7 @@ class TimingHandler implements Timing {
         }
 
         if (--this.timingDepth == 0 && this.start != 0) {
-            if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            if (!SpongeImplHooks.isMainThread()) {
                 SpongeImpl.getLogger().fatal("stopTiming called async for " + this.name);
                 new Throwable().printStackTrace();
                 this.start = 0;

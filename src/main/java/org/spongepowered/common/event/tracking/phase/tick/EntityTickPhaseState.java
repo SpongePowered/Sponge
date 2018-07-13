@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -53,6 +54,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.util.VecHelper;
@@ -61,14 +63,30 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, EntityTickContext> ENTITY_TICK_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) -> {
+            final Entity tickingEntity = context.getSource(Entity.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
+            frame.pushCause(tickingEntity);
+            if (tickingEntity instanceof EntityFallingBlock) {
+                context.getOwner().ifPresent(frame::pushCause);
+            }
+        });
 
     private String name;
 
     EntityTickPhaseState(String name) {
         this.name = name;
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, EntityTickContext> getFrameModifier() {
+        return this.ENTITY_TICK_MODIFIER;
     }
 
     @SuppressWarnings("unchecked")

@@ -24,10 +24,19 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
+import java.util.function.BiConsumer;
+
 final class CompletePhase extends GeneralState<GeneralizedContext> {
+
+    public static final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>
+        EMPTY_MODIFIER =
+        (stackFrame, generalizedContext) -> {
+        };
+
     @Override
     public boolean canSwitchTo(IPhaseState<?> state) {
         return true;
@@ -41,6 +50,11 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
     @Override
     public void unwind(GeneralizedContext context) {
 
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+        return EMPTY_MODIFIER;
     }
 
     @Override

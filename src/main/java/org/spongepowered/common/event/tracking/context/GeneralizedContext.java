@@ -32,7 +32,4 @@ public class GeneralizedContext extends PhaseContext<GeneralizedContext> {
         super(state);
     }
 
-
-
-
 }

@@ -95,6 +95,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -281,7 +282,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
+        if (ShouldFire.LOAD_CHUNK_EVENT) {
+            SpongeImpl.postEvent(SpongeEventFactory.createLoadChunkEvent(Sponge.getCauseStackManager().getCurrentCause(), (Chunk) this));
+        }
         if (!this.world.isRemote) {
             SpongeHooks.logChunkLoad(this.world, this.chunkPos);
         }
@@ -523,6 +526,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         if (listToFill.size() == 0) {
+            return;
+        }
+
+        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
             return;
         }
 
@@ -947,7 +954,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     )
     private void onPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (!this.world.isRemote) {
-            PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            PhaseTracker.getInstance().getCurrentContext().close();
         }
     }
 

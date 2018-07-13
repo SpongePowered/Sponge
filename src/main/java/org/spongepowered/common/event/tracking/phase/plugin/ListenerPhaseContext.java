@@ -52,10 +52,6 @@ public class ListenerPhaseContext extends PluginPhaseContext<ListenerPhaseContex
         return this;
     }
 
-    public IMixinWorldTickEvent getTickEvent() {
-        return (IMixinWorldTickEvent) this.object;
-    }
-
     public ListenerPhaseContext player() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         checkState(this.capturePlayer == null, "Already capturing a player object!");

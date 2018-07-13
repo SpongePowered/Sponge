@@ -169,7 +169,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings("rawtypes")
     void switchToPhase(IPhaseState<?> state, PhaseContext<?> phaseContext) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -197,6 +197,9 @@ public final class PhaseTracker {
             }
         }
 
+        if (Sponge.isServerAvailable()) {
+            SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext, ((IPhaseState) state).getFrameModifier());
+        }
         this.stack.push(state, phaseContext);
     }
 
@@ -211,7 +214,7 @@ public final class PhaseTracker {
 
     @SuppressWarnings({"rawtypes", "unused", "try"})
     public void completePhase(IPhaseState<?> prevState) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -258,7 +261,9 @@ public final class PhaseTracker {
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound,
                   // at least unwind UNWINDING to process any captured objects so we're not totally without
                   // loss of objects
-                ((IPhaseState) state).unwind(context);
+                if (context.hasCaptures()) {
+                    ((IPhaseState) state).unwind(context);
+                }
             } catch (Exception e) {
                 this.printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
@@ -579,7 +584,7 @@ public final class PhaseTracker {
     @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final IMixinWorldServer mixinWorld, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(ASYNC_TRACKER_ACCESS)
@@ -606,7 +611,12 @@ public final class PhaseTracker {
                 .sourceBlock(sourceBlock)
                 .setNotifiedBlockPos(notifyPos)
                 .setNotifiedBlockState(iblockstate)
-                .setSourceNotification(sourcePos)) {
+                .setSourceNotification(sourcePos)
+
+            ) {
+                // Since the notifier may have just been set from the previous state, we can
+                // ask it to contribute to our state
+                ((IPhaseState) state).provideNotifierForNeighbors(peek.context, context);
                 context.buildAndSwitch();
                 // Sponge End
 
@@ -639,7 +649,7 @@ public final class PhaseTracker {
      */
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final IMixinWorldServer mixinWorld, final BlockPos pos, final IBlockState newState, final BlockChangeFlag flag) {
-        if (!SpongeImpl.isMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async Block Change").centre().hr()
                 .addWrapped(ASYNC_BLOCK_CHANGE_MESSAGE)
@@ -883,13 +893,15 @@ public final class PhaseTracker {
             // will not actively capture entity spawns, but will still throw events for them. Some phases
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
-                try {
-                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
-                } catch (Exception | NoClassDefFoundError e) {
-                    // Just in case something really happened, we should print a nice exception for people to
-                    // paste us
-                    this.printExceptionSpawningEntity(context, e);
-                    return false;
+                if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                    try {
+                        return ((IPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
+                    } catch (Exception | NoClassDefFoundError e) {
+                        // Just in case something really happened, we should print a nice exception for people to
+                        // paste us
+                        this.printExceptionSpawningEntity(context, e);
+                        return false;
+                    }
                 }
             }
             // Sponge end - continue on with the checks.

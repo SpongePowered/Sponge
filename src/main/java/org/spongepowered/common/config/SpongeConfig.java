@@ -34,6 +34,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import ninja.leaping.configurate.transformation.ConfigurationTransformation;
 import ninja.leaping.configurate.util.ConfigurationNodeWalker;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
@@ -186,6 +187,12 @@ public class SpongeConfig<T extends ConfigBase> {
             if (cleanupConfig(loadedNode)) {
                 this.loader.save(loadedNode);
             }
+            // This is where we can inject versioning.
+//            ConfigurationTransformation.versionedBuilder()
+//                .addVersion(2, ConfigurationTransformation.builder()
+//                    .addAction(path("optimizations",  "faster-thread-checks"), (input, value) -> {
+//                    })
+//                ).build();
 
             // store "what's in the file" separately in memory
             this.fileData = loadedNode;
@@ -203,6 +210,10 @@ public class SpongeConfig<T extends ConfigBase> {
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to load configuration", e);
         }
+    }
+
+    private static Object[] path(Object... path) {
+        return path;
     }
 
     private void populateInstance() throws ObjectMappingException {

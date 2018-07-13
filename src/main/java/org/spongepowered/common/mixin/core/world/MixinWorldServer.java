@@ -369,7 +369,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
     private void onCreateBonusChestEnd(CallbackInfo ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().getCurrentContext().close();
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)

@@ -51,18 +51,9 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
         if (!currentPhaseData.context.equals(this)) {
             // at most we should be at a depth of 1.
             // should attempt to complete the existing one to wrap up, before exiting fully.
-            PhaseTracker.getInstance().completePhase(currentPhaseData.state);
+            currentPhaseData.context.close();
         }
         super.close();
-    }
-
-    public DamageSource getDamageSource() {
-        return damageSource;
-    }
-
-    public EntityDeathContext setDamageSource(DamageSource damageSource) {
-        this.damageSource = damageSource;
-        return this;
     }
 
     @Override

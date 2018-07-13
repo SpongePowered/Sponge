@@ -37,7 +37,6 @@ import net.minecraft.block.BlockRedstoneLight;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
@@ -148,24 +147,14 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final EntityTickContext context = tickContext;
+        try (final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
         ) {
 
             mixinEntity.getNotifierUser()
-                    .ifPresent(notifier -> {
-                        frame.addContext(EventContextKeys.NOTIFIER, notifier);
-                        context.notifier(notifier);
-                    });
+                    .ifPresent(context::notifier);
             mixinEntity.getCreatorUser()
-                    .ifPresent(owner -> {
-                        if (mixinEntity instanceof EntityFallingBlock) {
-                            frame.pushCause(owner);
-                        }
-                        frame.addContext(EventContextKeys.OWNER, owner);
-                        context.owner(owner);
-                    });
+                    .ifPresent(context::owner);
             context.buildAndSwitch();
             entityTiming.startTiming();
             entity.onUpdate();
@@ -183,23 +172,15 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext().source(entity);
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+        try (
              final EntityTickContext context = tickContext;
              final Timing entityTiming = mixinEntity.getTimingsHandler()
              ) {
             entityTiming.startTiming();
-            frame.pushCause(entity);
             mixinEntity.getNotifierUser()
-                .ifPresent(notifier -> {
-                    frame.addContext(EventContextKeys.NOTIFIER, notifier);
-                    context.notifier(notifier);
-                });
+                .ifPresent(context::notifier);
             mixinEntity.getCreatorUser()
-                .ifPresent(creator -> {
-                    frame.addContext(EventContextKeys.OWNER, creator);
-                    context.owner(creator);
-
-                });
+                .ifPresent(context::owner);
             context.buildAndSwitch();
             entity.updateRidden();
         } catch (Exception | NoClassDefFoundError e) {
@@ -220,14 +201,11 @@ public final class TrackingUtil {
         }
 
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext().source(mixinTileEntity);
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-             final PhaseContext<?> phaseContext = context) {
-            frame.pushCause(tile);
+        try (final PhaseContext<?> phaseContext = context) {
 
             // Add notifier and owner so we don't have to perform lookups during the phases and other processing
             final User blockNotifier = mixinTileEntity.getSpongeNotifier();
             if (blockNotifier != null) {
-                frame.addContext(EventContextKeys.NOTIFIER, blockNotifier);
                 phaseContext.notifier(blockNotifier);
             }
 
@@ -236,11 +214,8 @@ public final class TrackingUtil {
             // the owner of itself.
             final User blockOwner = mixinTileEntity.getSpongeOwner();
             if (blockOwner != null) {
-                frame.addContext(EventContextKeys.OWNER, blockOwner);
                 phaseContext.owner(blockOwner);
             }
-            // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
-            // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
 
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
@@ -258,40 +233,37 @@ public final class TrackingUtil {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(world);
-            if (ShouldFire.TICK_BLOCK_EVENT) {
-                BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
-                final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(frame.getCurrentCause(), snapshot);
-                SpongeImpl.postEvent(event);
-                if(event.isCancelled()) {
-                    return;
-                }
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return;
             }
+        }
 
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build();
-            frame.pushCause(locatable);
-            final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
+        final LocatableBlock locatable = LocatableBlock.builder()
+            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
+            .state((BlockState) state)
+            .build();
+        final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext().source(locatable);
 
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
 
-            // We have to associate any notifiers in case of scheduled block updates from other sources
-            final PhaseData current = phaseTracker.getCurrentPhaseData();
-            final IPhaseState<?> currentState = current.state;
-            ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
-            // Now actually switch to the new phase
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseData current = phaseTracker.getCurrentPhaseData();
+        final IPhaseState<?> currentState = current.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
+        // Now actually switch to the new phase
 
-            try (final PhaseContext<?> context = phaseContext;
-                 final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
-                timing.startTiming();
-                context.buildAndSwitch();
-                block.updateTick(world, pos, state, random);
-            } catch (Exception | NoClassDefFoundError e) {
-                phaseTracker.printExceptionFromPhase(e, phaseContext);
-            }
+        try (final PhaseContext<?> context = phaseContext;
+             final Timing timing = BlockUtil.toMixin(state).getTimingsHandler()) {
+            timing.startTiming();
+            context.buildAndSwitch();
+            block.updateTick(world, pos, state, random);
+        } catch (Exception | NoClassDefFoundError e) {
+            phaseTracker.printExceptionFromPhase(e, phaseContext);
+
         }
     }
 
@@ -301,37 +273,36 @@ public final class TrackingUtil {
         final WorldServer world = WorldUtil.asNative(mixinWorld);
         final World apiWorld = WorldUtil.fromNative(world);
 
-        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(world);
-            if (ShouldFire.TICK_BLOCK_EVENT) {
-                final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
-                final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(frame.getCurrentCause(), currentTickBlock);
-                SpongeImpl.postEvent(event);
-                if(event.isCancelled()) {
-                    return;
-                }
-            }
-
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build();
-            frame.pushCause(locatable);
-            final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
-
-            // We have to associate any notifiers in case of scheduled block updates from other sources
-            final PhaseData current = phaseTracker.getCurrentPhaseData();
-            final IPhaseState<?> currentState = current.state;
-            ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
-            // Now actually switch to the new phase
-            try (PhaseContext<?> context = phaseContext) {
-                context.buildAndSwitch();
-                block.randomTick(world, pos, state, random);
-            } catch (Exception | NoClassDefFoundError e) {
-                phaseTracker.printExceptionFromPhase(e, phaseContext);
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.NONE);
+            final TickBlockEvent
+                event =
+                SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return;
             }
         }
+
+        final LocatableBlock locatable = LocatableBlock.builder()
+            .location(new Location<>(apiWorld, pos.getX(), pos.getY(), pos.getZ()))
+            .state((BlockState) state)
+            .build();
+        final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext().source(locatable);
+
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseData current = phaseTracker.getCurrentPhaseData();
+        final IPhaseState<?> currentState = current.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(mixinWorld, pos, current.context, phaseContext);
+        // Now actually switch to the new phase
+        try (PhaseContext<?> context = phaseContext) {
+            context.buildAndSwitch();
+            block.randomTick(world, pos, state, random);
+        } catch (Exception | NoClassDefFoundError e) {
+            phaseTracker.printExceptionFromPhase(e, phaseContext);
+        }
     }
+
 
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
@@ -821,24 +792,4 @@ public final class TrackingUtil {
         return null;
     }
 
-    public static void standardSpawnCapturedEntities(PhaseContext<?> context, StackFrame frame, List<Entity> entities) {
-        // Separate experience orbs from other entity drops
-        final List<Entity> experience = entities.stream()
-            .filter(entity -> entity instanceof ExperienceOrb)
-            .collect(Collectors.toList());
-        if (!experience.isEmpty()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-
-        }
-
-        // Now process other entities, this is separate from item drops specifically
-        final List<Entity> other = entities.stream()
-            .filter(entity -> !(entity instanceof ExperienceOrb))
-            .collect(Collectors.toList());
-        if (!other.isEmpty()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
-            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-        }
-    }
 }

@@ -82,80 +82,78 @@ public class PacketUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
-                frame.pushCause(packetPlayer);
-                // If true, logic was handled in Pre so return
-                if (firePreEvents(packetIn, packetPlayer)) {
-                    return;
-                }
-                boolean ignoreCreative = false;
+            EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+            // If true, logic was handled in Pre so return
+            if (firePreEvents(packetIn, packetPlayer)) {
+                return;
+            }
+            boolean ignoreCreative = false;
 
-                // This is another horrible hack required since the client sends a C10 packet for every slot
-                // containing an itemstack after a C16 packet in the following scenarios :
-                // 1. Opening creative inventory after initial server join.
-                // 2. Opening creative inventory again after making a change in previous inventory open.
-                //
-                // This is done in order to sync client inventory to server and would be fine if the C10 packet
-                // included an Enum of some sort that defined what type of sync was happening.
-                // TODO 1.12-pre2 is something here still needed
-    //            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
-    //                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
-    //            } else
-                if (creativeCheck(packetIn, packetPlayer)) {
+            // This is another horrible hack required since the client sends a C10 packet for every slot
+            // containing an itemstack after a C16 packet in the following scenarios :
+            // 1. Opening creative inventory after initial server join.
+            // 2. Opening creative inventory again after making a change in previous inventory open.
+            //
+            // This is done in order to sync client inventory to server and would be fine if the C10 packet
+            // included an Enum of some sort that defined what type of sync was happening.
+            // TODO 1.12-pre2 is something here still needed
+            //            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
+            //                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
+            //            } else
+            if (creativeCheck(packetIn, packetPlayer)) {
 
-                    long packetDiff = System.currentTimeMillis() - lastInventoryOpenPacketTimeStamp;
-                    // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
-                    if (packetDiff < 100) {
-                        ignoreCreative = true;
-                    }
-                }
-
-                // Don't process movement capture logic if player hasn't moved
-                boolean ignoreMovementCapture = false;
-                if (packetIn instanceof CPacketPlayer) {
-                    CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
-                    if (movingPacket instanceof CPacketPlayer.Rotation) {
-                        ignoreMovementCapture = true;
-                    } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
-                        ignoreMovementCapture = true;
-                    }
-                }
-                if (ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
-                    packetIn.processPacket(netHandler);
-                } else {
-                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                    final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-                    IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
-                    if (packetState == null) {
-                        throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
-                    }
-                    PhaseContext<?> context = PhaseContext.empty();
-                    if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                        context = packetState.createPhaseContext()
-                            .source(packetPlayer)
-                            .packetPlayer(packetPlayer)
-                            .packet(packetIn)
-                            .cursor(cursor)
-                            .ignoreCreative(ignoreCreative);
-
-                        TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
-                        context.owner((Player) packetPlayer);
-                        context.notifier((Player) packetPlayer);
-                    }
-                    try (PhaseContext<?> packetContext = context) {
-                        packetContext.buildAndSwitch();
-                        packetIn.processPacket(netHandler);
-
-                    }
-
-                    if (packetIn instanceof CPacketClientStatus) {
-                        // update the reference of player
-                        packetPlayer = ((NetHandlerPlayServer) netHandler).player;
-                    }
-                    ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(ItemStack.EMPTY);
+                long packetDiff = System.currentTimeMillis() - lastInventoryOpenPacketTimeStamp;
+                // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
+                if (packetDiff < 100) {
+                    ignoreCreative = true;
                 }
             }
+
+            // Don't process movement capture logic if player hasn't moved
+            boolean ignoreMovementCapture = false;
+            if (packetIn instanceof CPacketPlayer) {
+                CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
+                if (movingPacket instanceof CPacketPlayer.Rotation) {
+                    ignoreMovementCapture = true;
+                } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
+                    ignoreMovementCapture = true;
+                }
+            }
+            if (ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
+                packetIn.processPacket(netHandler);
+            } else {
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                IPhaseState<? extends PacketContext<?>> packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                if (packetState == null) {
+                    throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
+                }
+                PhaseContext<?> context = PhaseContext.empty();
+                if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
+                    context = packetState.createPhaseContext()
+                        .source(packetPlayer)
+                        .packetPlayer(packetPlayer)
+                        .packet(packetIn)
+                        .cursor(cursor)
+                        .ignoreCreative(ignoreCreative);
+
+                    TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
+                    context.owner((Player) packetPlayer);
+                    context.notifier((Player) packetPlayer);
+                }
+                try (PhaseContext<?> packetContext = context) {
+                    packetContext.buildAndSwitch();
+                    packetIn.processPacket(netHandler);
+
+                }
+
+                if (packetIn instanceof CPacketClientStatus) {
+                    // update the reference of player
+                    packetPlayer = ((NetHandlerPlayServer) netHandler).player;
+                }
+                ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(ItemStack.EMPTY);
+            }
+
         } else { // client
             packetIn.processPacket(netHandler);
         }

@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ICriterion;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
@@ -59,7 +60,6 @@ import org.spongepowered.common.registry.type.advancement.AdvancementRegistryMod
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.ServerUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,7 +97,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     private boolean isMainThread() {
-        return ServerUtils.isCallingFromMainThread() || AdvancementRegistryModule.getInstance().isInInitialRegistration();
+        return SpongeImplHooks.isMainThread() || AdvancementRegistryModule.getInstance().isInInitialRegistration();
     }
 
     @SuppressWarnings("ConstantConditions")

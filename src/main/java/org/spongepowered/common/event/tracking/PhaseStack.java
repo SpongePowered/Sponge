@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  */
 final class PhaseStack {
 
-    static final PhaseData EMPTY_DATA = new PhaseData(PhaseContext.empty(), GeneralPhase.State.COMPLETE);
+    private static final PhaseData EMPTY_DATA = new PhaseData(PhaseContext.empty(), GeneralPhase.State.COMPLETE);
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
     private final Deque<PhaseData> phases;

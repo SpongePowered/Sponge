@@ -30,4 +30,6 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
     public CommandPhaseContext(IPhaseState<CommandPhaseContext> state) {
         super(state);
     }
+
+    // Maybe we could provide the command?
 }

@@ -35,6 +35,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
 
@@ -46,6 +47,12 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     @Override
     public void unwind(GeneralizedContext context) {
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+        return (BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER;
     }
 
     @Override

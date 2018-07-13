@@ -47,14 +47,10 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -64,18 +60,20 @@ import org.spongepowered.common.event.tracking.phase.general.UnwindingPhaseConte
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.tracking.world.MixinChunk_Tracker;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldUtil;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -90,6 +88,19 @@ import javax.annotation.Nullable;
  * either errors or runaway states not being unwound).
  */
 public interface IPhaseState<C extends PhaseContext<C>> {
+
+    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<?>> DEFAULT_OWNER_NOTIFIER = (frame, ctx) -> {
+        if (ctx.usedFrame == null) {
+            ctx.usedFrame = new ArrayDeque<>();
+        }
+        ctx.usedFrame.push(frame); // WE NEED TO STORE THIS SO WE CAN PROPERLY POP THE FRAME
+        if (ctx.owner != null) {
+            frame.addContext(EventContextKeys.OWNER, ctx.owner);
+        }
+        if (ctx.notifier != null) {
+            frame.addContext(EventContextKeys.NOTIFIER, ctx.notifier);
+        }
+    };
 
     /**
      * A near useless method, except in some logic where we want a "global"
@@ -108,6 +119,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return The new phase context
      */
     C createPhaseContext();
+
+    /**
+     * Gets the frame modifier for default frame modifications, like pushing
+     * the source of the phase, owner, notifier, etc. of the context. Used specifically
+     * for lazy evaluating stack frames to push causes and contexts guaranteed at any point
+     * in this state.
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    default BiConsumer<CauseStackManager.StackFrame, C> getFrameModifier() {
+        return (BiConsumer<CauseStackManager.StackFrame, C>) DEFAULT_OWNER_NOTIFIER; // Default does nothing
+    }
 
     /**
      * A sanity check for phase states to be able to say "hey, I didn't expect to
@@ -748,6 +771,13 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
 
-
-
+    default void provideNotifierForNeighbors(C context, NeighborNotificationContext notification) {
+        if (context.owner != null) { // If the owner is set, at least set the owner
+            notification.owner = context.owner;
+        }
+        // otherwise, set whatever the latest notifier was.
+        if (context.notifier != null) {
+            notification.notifier = context.notifier;
+        }
+    }
 }

@@ -292,8 +292,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
 
         // Double check that the PhaseTracker is already capturing the Death phase
-        try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null;
-             final EntityDeathContext context = createOrNullDeathPhase(isMainThread, frame, cause)) {
+        try (final EntityDeathContext context = createOrNullDeathPhase(isMainThread, cause)) {
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
@@ -367,15 +366,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Nullable
-    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, @Nullable StackFrame frame, DamageSource source) {
+    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, DamageSource source) {
         boolean tracksEntityDeaths = false;
-        if (((IMixinWorld) this.world).isFake() || !isMainThread || frame == null) { // Short circuit to avoid erroring on handling
+        if (((IMixinWorld) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
         final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentPhaseData().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
-            frame.pushCause(this);
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext()
                 .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
                 .source(this);
@@ -573,8 +571,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         }
 
                         // Sponge Start - notify the cause tracker
-                        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                             final EntityDeathContext context = createOrNullDeathPhase(true, frame, source)) {
+                        try (final EntityDeathContext context = createOrNullDeathPhase(true, source)) {
                             if (context != null) {
                                 context.buildAndSwitch();
                             }

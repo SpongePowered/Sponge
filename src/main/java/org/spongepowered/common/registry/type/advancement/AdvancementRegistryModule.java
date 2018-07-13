@@ -36,12 +36,12 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
-import org.spongepowered.common.util.ServerUtils;
 
 import java.util.Map;
 
@@ -98,7 +98,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
 
     @Override
     public void registerAdditionalCatalog(Advancement advancement) {
-        checkState(ServerUtils.isCallingFromMainThread() || this.isInInitialRegistration());
+        checkState(SpongeImplHooks.isMainThread() || this.isInInitialRegistration());
         super.register(advancement);
         ((IMixinAdvancement) advancement).setRegistered();
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
