@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
@@ -64,12 +63,12 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(InputSlotLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
         return new SlotCollection.Builder()
@@ -78,7 +77,7 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private InputSlotLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private InputSlotLens generateRootLens(SlotProvider slots) {
         return ((InputSlotLens) slots.getSlot(0));
     }
 

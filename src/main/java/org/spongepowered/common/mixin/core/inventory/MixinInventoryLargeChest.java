@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -55,7 +53,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Mixin(InventoryLargeChest.class)
-public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdapter<IInventory>, CarriedInventory<MultiBlockCarrier>, ReusableLensProvider<IInventory, ItemStack>,
+public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdapter, CarriedInventory<MultiBlockCarrier>, ReusableLensProvider,
         IMixinMultiBlockCarrier {
 
     @Shadow @Final public ILockableContainer upperChest;
@@ -63,22 +61,22 @@ public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdap
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(LargeChestInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(this.getFabric().getSize()).build();
     }
 
     @SuppressWarnings("unchecked")
-    private LargeChestInventoryLens generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private LargeChestInventoryLens generateRootLens(SlotProvider slots) {
         return new LargeChestInventoryLens(this, slots);
     }
 
     @Override
-    public Inventory getChild(Lens<IInventory, ItemStack> lens) {
+    public Inventory getChild(Lens lens) {
         return null;
     }
 

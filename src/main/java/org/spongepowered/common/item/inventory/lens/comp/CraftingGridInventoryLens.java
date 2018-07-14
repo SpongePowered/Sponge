@@ -24,6 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-public interface CraftingGridInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+public interface CraftingGridInventoryLens extends GridInventoryLens {
 
 }

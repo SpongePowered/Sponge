@@ -42,7 +42,7 @@ public class IInventoryFabric extends MinecraftFabric {
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
+    public Collection<?> allInventories() {
         return ImmutableSet.of(this.inventory);
     }
 

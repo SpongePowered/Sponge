@@ -35,16 +35,13 @@ import java.util.Iterator;
 /**
  * A relationship between a lens and properties for the lens when viewed through
  * another, primarily used as elements in lens collections.
- *  
- * @param <TInventory>
- * @param <TStack>
  */
-public final class LensHandle<TInventory, TStack> {
+public final class LensHandle {
 
     /**
      * The lens
      */
-    public Lens<TInventory, TStack> lens;
+    public Lens lens;
     
     /**
      * Ordinal, when required 
@@ -70,7 +67,7 @@ public final class LensHandle<TInventory, TStack> {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    public LensHandle(Lens lens, InventoryProperty<?, ?>... properties) {
         this.lens = lens;
         if (properties != null && properties.length > 0) {
             this.properties = new ArrayList<>();
@@ -85,7 +82,7 @@ public final class LensHandle<TInventory, TStack> {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens<TInventory, TStack> lens, Collection<InventoryProperty<?, ?>> properties) {
+    public LensHandle(Lens lens, Collection<InventoryProperty<?, ?>> properties) {
         this.lens = lens;
         if (properties != null && properties.size() > 0) {
             this.properties = new ArrayList<>(properties);

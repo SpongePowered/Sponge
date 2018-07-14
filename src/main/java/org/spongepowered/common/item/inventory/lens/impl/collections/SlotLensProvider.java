@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
-import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 @FunctionalInterface
-public interface SlotLensProvider<TInventory> {
+public interface SlotLensProvider {
 
-    SlotLens<TInventory, ItemStack> createSlotLens(int slotIndex);
+    SlotLens createSlotLens(int slotIndex);
 
 }

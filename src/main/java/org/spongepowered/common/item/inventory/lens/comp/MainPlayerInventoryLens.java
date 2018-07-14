@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-public interface MainPlayerInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+public interface MainPlayerInventoryLens extends GridInventoryLens {
 
-    HotbarLens<TInventory, TStack> getHotbar();
+    HotbarLens getHotbar();
 
-    GridInventoryLens<TInventory, TStack> getGrid();
+    GridInventoryLens getGrid();
 }

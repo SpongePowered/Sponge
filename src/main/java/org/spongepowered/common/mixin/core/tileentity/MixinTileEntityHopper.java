@@ -34,7 +34,6 @@ import net.minecraft.tileentity.IHopper;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -98,17 +97,17 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(5).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
         return new GridInventoryLensImpl(0, 5, 1, 5, thisClass, slots);
     }

@@ -30,6 +30,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.query.SpongeQueryOperation;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 public abstract class ItemStackQueryOperation<T> extends SpongeQueryOperation<T> {
 
@@ -41,13 +42,10 @@ public abstract class ItemStackQueryOperation<T> extends SpongeQueryOperation<T>
     }
 
     @Override
-    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
         if (lens instanceof SlotLens) {
             @SuppressWarnings("unchecked")
-            ItemStack stack = ((SlotLens<TInventory, ItemStack>) lens).getStack(inventory);
-            if (stack == null) {
-                return false;
-            }
+            ItemStack stack = ItemStackUtil.fromNative(((SlotLens) lens).getStack(inventory));
             if (this.matches(stack, this.arg)) {
                 return true;
             }

@@ -26,6 +26,6 @@ package org.spongepowered.common.item.inventory.query;
 
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 
-public interface Result<TInventory, TStack> extends InventoryAdapter<TInventory, TStack> {
+public interface Result extends InventoryAdapter {
 
 }

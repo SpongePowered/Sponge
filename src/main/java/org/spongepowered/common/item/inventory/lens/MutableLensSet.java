@@ -28,8 +28,8 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 
 import java.util.Set;
 
-public interface MutableLensSet<TInventory, TStack> extends Set<Lens<TInventory, TStack>>, DynamicLensCollection<TInventory, TStack> {
+public interface MutableLensSet extends Set<Lens>, DynamicLensCollection {
     
-    void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties);
+    void add(Lens lens, InventoryProperty<?, ?>... properties);
 
 }

@@ -40,25 +40,25 @@ import org.spongepowered.common.item.inventory.query.result.QueryResult;
 
 import java.util.Collection;
 
-public class Query<TInventory, TStack> {
+public class Query {
 
-    public interface ResultAdapterProvider<TInventory, TStack> {
+    public interface ResultAdapterProvider {
 
-        QueryResult<TInventory, TStack> getResultAdapter(Fabric<TInventory> inventory, MutableLensSet<TInventory, TStack> matches, Inventory parent);
+        QueryResult getResultAdapter(Fabric inventory, MutableLensSet matches, Inventory parent);
 
     }
 
-    private static ResultAdapterProvider<?, ?> defaultResultProvider = new MinecraftResultAdapterProvider();
+    private static ResultAdapterProvider defaultResultProvider = new MinecraftResultAdapterProvider();
 
-    private final InventoryAdapter<TInventory, TStack> adapter;
+    private final InventoryAdapter adapter;
 
-    private final Fabric<TInventory> inventory;
+    private final Fabric inventory;
 
-    private final Lens<TInventory, TStack> lens;
+    private final Lens lens;
 
     private final QueryOperation<?>[] queries;
 
-    private Query(InventoryAdapter<TInventory, TStack> adapter, QueryOperation<?>[] queries) {
+    private Query(InventoryAdapter adapter, QueryOperation<?>[] queries) {
         this.adapter = adapter;
         this.inventory = adapter.getFabric();
         this.lens = adapter.getRootLens();
@@ -67,10 +67,10 @@ public class Query<TInventory, TStack> {
 
     @SuppressWarnings("unchecked")
     public Inventory execute() {
-        return this.execute((ResultAdapterProvider<TInventory, TStack>) Query.defaultResultProvider);
+        return this.execute((ResultAdapterProvider) Query.defaultResultProvider);
     }
 
-    public Inventory execute(ResultAdapterProvider<TInventory, TStack> resultProvider) {
+    public Inventory execute(ResultAdapterProvider resultProvider) {
         if (this.matches(this.lens, null, this.inventory)) {
             return this.lens.getAdapter(this.inventory, this.adapter);
         }
@@ -79,7 +79,7 @@ public class Query<TInventory, TStack> {
     }
 
     @SuppressWarnings("unchecked")
-    private Inventory toResult(ResultAdapterProvider<TInventory, TStack> resultProvider, MutableLensSet<TInventory, TStack> matches) {
+    private Inventory toResult(ResultAdapterProvider resultProvider, MutableLensSet matches) {
         if (matches.isEmpty()) {
             return new EmptyInventoryImpl(this.adapter);
         }
@@ -91,13 +91,13 @@ public class Query<TInventory, TStack> {
             return resultProvider.getResultAdapter(this.inventory, matches, this.adapter);
         }
 
-        return ((ResultAdapterProvider<TInventory, TStack>)Query.defaultResultProvider).getResultAdapter(this.inventory, matches, this.adapter);
+        return ((ResultAdapterProvider)Query.defaultResultProvider).getResultAdapter(this.inventory, matches, this.adapter);
     }
 
-    private MutableLensSet<TInventory, TStack> depthFirstSearch(Lens<TInventory, TStack> lens) {
-        MutableLensSet<TInventory, TStack> matches = new MutableLensSetImpl<TInventory, TStack>(true);
+    private MutableLensSet depthFirstSearch(Lens lens) {
+        MutableLensSet matches = new MutableLensSetImpl(true);
 
-        for (Lens<TInventory, TStack> child : lens.getChildren()) {
+        for (Lens child : lens.getChildren()) {
             if (child == null) {
                 continue;
             }
@@ -118,7 +118,7 @@ public class Query<TInventory, TStack> {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+    private boolean matches(Lens lens, Lens parent, Fabric inventory) {
         for (QueryOperation<?> operation : this.queries) {
             if (((SpongeQueryOperation) operation).matches(lens, parent, inventory)) {
                 return true;
@@ -127,14 +127,14 @@ public class Query<TInventory, TStack> {
         return false;
     }
 
-    private MutableLensSet<TInventory, TStack> reduce(Lens<TInventory, TStack> lens, MutableLensSet<TInventory, TStack> matches) {
+    private MutableLensSet reduce(Lens lens, MutableLensSet matches) {
         if (lens.getSlots().equals(this.getSlots(matches)) && this.allLensesAreSlots(matches)) {
             matches.clear();
             matches.add(lens);
             return matches;
         }
 
-        for (Lens<TInventory, TStack> child : lens.getChildren()) {
+        for (Lens child : lens.getChildren()) {
             if (child == null || !child.isSubsetOf(matches)) {
                 continue;
             }
@@ -145,8 +145,8 @@ public class Query<TInventory, TStack> {
         return matches;
     }
 
-    private boolean allLensesAreSlots(MutableLensSet<TInventory, TStack> lenses) {
-        for (Lens<TInventory, TStack> lens : lenses) {
+    private boolean allLensesAreSlots(MutableLensSet lenses) {
+        for (Lens lens : lenses) {
             if (!(lens instanceof SlotLens)) {
                 return false;
             }
@@ -154,19 +154,19 @@ public class Query<TInventory, TStack> {
         return true;
     }
 
-    private IntSet getSlots(Collection<Lens<TInventory, TStack>> lenses) {
+    private IntSet getSlots(Collection<Lens> lenses) {
         IntSet slots = new IntOpenHashSet();
-        for (Lens<TInventory, TStack> lens : lenses) {
+        for (Lens lens : lenses) {
             slots.addAll(lens.getSlots());
         }
         return slots;
     }
 
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, QueryOperation<?>... queries) {
-        return new Query<>(adapter, queries);
+    public static Query compile(InventoryAdapter adapter, QueryOperation<?>... queries) {
+        return new Query(adapter, queries);
     }
 
-    public static void setDefaultResultProvider(ResultAdapterProvider<?, ?> defaultResultProvider) {
+    public static void setDefaultResultProvider(ResultAdapterProvider defaultResultProvider) {
         Query.defaultResultProvider = defaultResultProvider;
     }
 

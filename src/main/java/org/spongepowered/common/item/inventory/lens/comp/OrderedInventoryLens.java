@@ -24,17 +24,15 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 
-public interface OrderedInventoryLens<TInventory, TStack> extends Lens<TInventory, TStack> {
+public interface OrderedInventoryLens extends Lens {
 
     int getStride();
 
-    SlotLens<IInventory, ItemStack> getSlot(int ordinal);
+    SlotLens getSlot(int ordinal);
 
     boolean hasSlotRealIndex(int index);
 

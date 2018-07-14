@@ -46,10 +46,8 @@ import java.util.List;
 
 /**
  * Base Lens for Slots
- *
- * @param <TInventory>
  */
-public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack> implements SlotLens<TInventory, ItemStack> {
+public class SlotLensImpl extends AbstractLens implements SlotLens {
 
     public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");
 
@@ -65,42 +63,42 @@ public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack
     }
 
     @Override
-    protected final void init(SlotProvider<TInventory, ItemStack> slots) {
+    protected final void init(SlotProvider slots) {
         // No children
     }
 
     @Override
-    public Translation getName(Fabric<TInventory> inv) {
+    public Translation getName(Fabric inv) {
         return SlotLensImpl.SLOT_NAME;
     }
 
     @Override
-    public InventoryAdapter<TInventory, ItemStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
-        return new SlotAdapter<>(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+        return new SlotAdapter(inv, this, parent);
     }
 
     @Override
-    public List<Lens<TInventory, ItemStack>> getChildren() {
+    public List<Lens> getChildren() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Lens<TInventory, ItemStack>> getSpanningChildren() {
+    public List<Lens> getSpanningChildren() {
         return Collections.emptyList();
     }
 
     @Override
-    public int getOrdinal(Fabric<TInventory> inv) {
+    public int getOrdinal(Fabric inv) {
         return this.base;
     }
 
     @Override
-    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric inv, int ordinal) {
         return (ordinal != 0) ? -1 : this.getOrdinal(inv);
     }
 
     @Override
-    public ItemStack getStack(Fabric<TInventory> inv, int ordinal) {
+    public ItemStack getStack(Fabric inv, int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
@@ -108,12 +106,12 @@ public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack
     }
 
     @Override
-    public ItemStack getStack(Fabric<TInventory> inv) {
+    public ItemStack getStack(Fabric inv) {
         return checkNotNull(inv, "Target inventory").getStack(this.base);
     }
 
     @Override
-    public boolean setStack(Fabric<TInventory> inv, int ordinal, ItemStack stack) {
+    public boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
@@ -121,13 +119,13 @@ public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack
     }
 
     @Override
-    public boolean setStack(Fabric<TInventory> inv, ItemStack stack) {
+    public boolean setStack(Fabric inv, ItemStack stack) {
         checkNotNull(inv, "Target inventory").setStack(this.base, stack);
         return true;
     }
 
     @Override
-    public Lens<TInventory, ItemStack> getLens(int index) {
+    public Lens getLens(int index) {
         return this;
     }
 
@@ -137,12 +135,12 @@ public class SlotLensImpl<TInventory> extends AbstractLens<TInventory, ItemStack
     }
 
     @Override
-    public boolean has(Lens<TInventory, ItemStack> lens) {
+    public boolean has(Lens lens) {
         return false;
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<TInventory, ItemStack>> c) {
+    public boolean isSubsetOf(Collection<Lens> c) {
         return false;
     }
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.inventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,19 +42,19 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 
 @Mixin(value = {InventoryBasic.class, InventoryCraftResult.class})
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
-public abstract class MixinInventoryBasic implements IInventory, LensProvider<IInventory, ItemStack> {
+public abstract class MixinInventoryBasic implements IInventory, LensProvider {
 
     @Override
-    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
         if (this.getSizeInventory() == 0) {
-            return new DefaultEmptyLens<>(adapter);
+            return new DefaultEmptyLens(adapter);
         }
         return new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, adapter.getSlotProvider());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
         return new SlotCollection.Builder().add(this.getSizeInventory()).build();
     }
 

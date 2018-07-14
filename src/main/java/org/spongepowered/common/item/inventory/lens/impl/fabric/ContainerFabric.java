@@ -65,7 +65,7 @@ public class ContainerFabric extends MinecraftFabric {
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
+    public Collection<?> allInventories() {
         return this.all;
     }
 

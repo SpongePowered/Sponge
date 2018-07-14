@@ -36,25 +36,25 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<Lens<TInventory, TStack>> implements MutableLensCollection<TInventory, TStack> {
+public class MutableLensCollectionImpl extends AbstractList<Lens> implements MutableLensCollection {
 
-    protected final List<LensHandle<TInventory, TStack>> lenses;
+    protected final List<LensHandle> lenses;
     
     private final boolean allowRemove;
     
     private boolean resizeSemaphore = false;
 
     public MutableLensCollectionImpl(int initialCapacity, boolean allowRemove) {
-        this.lenses = new ArrayList<LensHandle<TInventory, TStack>>(initialCapacity);
+        this.lenses = new ArrayList<>(initialCapacity);
         this.allowRemove = allowRemove;
         this.resize(initialCapacity);
     }
     
     @Override
-    public void add(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    public void add(Lens lens, InventoryProperty<?, ?>... properties) {
         int idx = this.indexOf(lens);
         if (idx == -1) {
-            this.lenses.add(new LensHandle<TInventory, TStack>(lens, properties));
+            this.lenses.add(new LensHandle(lens, properties));
         } else {
             for (InventoryProperty<?, ?> property : properties) {
                 this.getHandle(idx).setProperty(property);
@@ -63,15 +63,15 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
     
     @Override
-    public void add(int index, Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    public void add(int index, Lens lens, InventoryProperty<?, ?>... properties) {
         if (index >= this.size()) {
             this.resize(index - 1);
         }
-        this.lenses.add(index, new LensHandle<TInventory, TStack>(lens, properties));
+        this.lenses.add(index, new LensHandle(lens, properties));
     }
     
     @Override
-    public void add(int index, Lens<TInventory, TStack> lens) {
+    public void add(int index, Lens lens) {
         this.add(index, lens, (InventoryProperty<?, ?>) null);
     }
     
@@ -79,16 +79,16 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
         assert !this.resizeSemaphore;
         this.resizeSemaphore = true;
         for (int index = this.lenses.size(); index < size; index++) {
-            this.lenses.add(index, new LensHandle<TInventory, TStack>());
+            this.lenses.add(index, new LensHandle());
         }
         this.resizeSemaphore = false;
     }
     
-    protected final LensHandle<TInventory, TStack> getHandle(int index) {
+    protected final LensHandle getHandle(int index) {
         return this.getHandle(index, false);
     }
     
-    protected final LensHandle<TInventory, TStack> getHandle(int index, boolean autoResize) {
+    protected final LensHandle getHandle(int index, boolean autoResize) {
         if (index >= this.lenses.size()) {
             if (!autoResize) {
                 throw new IndexOutOfBoundsException("Index: " + index);
@@ -99,7 +99,7 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
 
     @Override
-    public void setProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property) {
+    public void setProperty(Lens lens, InventoryProperty<?, ?> property) {
         this.setProperty(this.indexOf(lens), property);
     }
 
@@ -110,7 +110,7 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
     
     @Override
-    public void removeProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property) {
+    public void removeProperty(Lens lens, InventoryProperty<?, ?> property) {
         this.removeProperty(this.indexOf(lens), property);
     }
     
@@ -121,22 +121,22 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
     
     @Override
-    public Lens<TInventory, TStack> get(int index) {
+    public Lens get(int index) {
         return this.getLens(index);
     }
 
     @Override
-    public Lens<TInventory, TStack> getLens(int index) {
+    public Lens getLens(int index) {
         return this.lenses.get(index).lens;
     }
     
     @Override
-    public Lens<TInventory, TStack> remove(int index) {
+    public Lens remove(int index) {
         if (!this.allowRemove) {
             throw new UnsupportedOperationException();
         }
         
-        LensHandle<TInventory, TStack> old = this.lenses.remove(index);
+        LensHandle old = this.lenses.remove(index);
         return (old != null) ? old.lens : null;
     }
     
@@ -185,7 +185,7 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> child) {
+    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
         int index = this.indexOf(child);
         if (index < 0) {
             return Collections.<InventoryProperty<?, ?>>emptyList();
@@ -194,13 +194,13 @@ public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
 
     @Override
-    public boolean has(Lens<TInventory, TStack> lens) {
+    public boolean has(Lens lens) {
         return this.contains(lens);
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c) {
-        for (Iterator<Lens<TInventory, TStack>> iter = this.iterator(); iter.hasNext();) {
+    public boolean isSubsetOf(Collection<Lens> c) {
+        for (Iterator<Lens> iter = this.iterator(); iter.hasNext();) {
             if (!c.contains(iter.next())) {
                 return false;
             }

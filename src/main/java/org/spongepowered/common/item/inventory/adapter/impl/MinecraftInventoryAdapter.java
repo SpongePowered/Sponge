@@ -52,7 +52,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
-public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<TInventory, net.minecraft.item.ItemStack> {
+public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @Override
     default Translation getName() {
@@ -196,7 +196,7 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
 
     @Override
     default Iterator<Inventory> iterator() {
-        return new InventoryIterator<>(this.getRootLens(), this.getFabric(), this);
+        return new InventoryIterator(this.getRootLens(), this.getFabric(), this);
     }
 
     @SuppressWarnings("unchecked")
@@ -221,7 +221,7 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
             provider.add((InventoryAdapter) inv);
         }
         CompoundLens lens = lensBuilder.build(provider);
-        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, this);
+        InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
         return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
     }

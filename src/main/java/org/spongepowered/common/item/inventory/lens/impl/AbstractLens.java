@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventory, TStack> {
+public abstract class AbstractLens implements Lens {
 
     protected final Class<? extends Inventory> adapterType;
     
@@ -61,21 +61,21 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     
     protected final IntSet availableSlots = new IntOpenHashSet();
     
-    protected Lens<TInventory, TStack> parent; 
+    protected Lens parent;
     
-    protected MutableLensCollection<TInventory, TStack> children;
+    protected MutableLensCollection children;
     
-    protected List<LensHandle<TInventory, TStack>> spanningChildren;
+    protected List<LensHandle> spanningChildren;
     
     protected int size;
     
     private int maxOrdinal = 0;
     
-    public AbstractLens(int base, int size, InventoryAdapter<TInventory, TStack> adapter, SlotProvider<TInventory, TStack> slots) {
+    public AbstractLens(int base, int size, InventoryAdapter adapter, SlotProvider slots) {
         this(base, size, adapter.getClass(), slots);
     }
 
-    public AbstractLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<TInventory, TStack> slots) {
+    public AbstractLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
         checkArgument(base >= 0, "Invalid offset: %s", base);
         checkArgument(size > 0, "Invalid size: %s", size);
         checkNotNull(adapterType, "adapterType");
@@ -88,17 +88,17 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     }
 
     protected void prepare() {
-        this.children = new MutableLensCollectionImpl<>(0, false);
+        this.children = new MutableLensCollectionImpl(0, false);
         this.spanningChildren = new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
-    protected void init(InventoryAdapter<TInventory, TStack> adapter, SlotProvider<TInventory, TStack> slots) {
+    protected void init(InventoryAdapter adapter, SlotProvider slots) {
         try {
             if (slots != null) {
                 this.init(slots);
             } else if (adapter instanceof SlotProvider) {
-                this.init((SlotProvider<TInventory, TStack>) adapter);
+                this.init((SlotProvider) adapter);
             } else {
                 this.init(index -> {
                     throw new NoSuchElementException("Attempted to fetch slot at index " + index + " but no provider was available instancing " + AbstractLens.this);
@@ -114,36 +114,36 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
      * 
      * @param slots
      */
-    protected abstract void init(SlotProvider<TInventory, TStack> slots);
+    protected abstract void init(SlotProvider slots);
     
-    protected void addChild(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    protected void addChild(Lens lens, InventoryProperty<?, ?>... properties) {
         checkNotNull(lens, "Attempted to register a null lens");
         this.children.add(lens, properties);
         this.availableSlots.addAll(lens.getSlots());
     }
     
-    protected void addSpanningChild(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    protected void addSpanningChild(Lens lens, InventoryProperty<?, ?>... properties) {
         this.addChild(lens, properties);
-        LensHandle<TInventory, TStack> child = new LensHandle<TInventory, TStack>(lens, properties);
+        LensHandle child = new LensHandle(lens, properties);
         this.spanningChildren.add(child);
         child.ordinal = this.maxOrdinal;
         this.maxOrdinal += lens.getSlots().size();
         if (lens instanceof AbstractLens) {
-            ((AbstractLens<TInventory, TStack>) lens).setParent(this);
+            ((AbstractLens) lens).setParent(this);
         }
     }
     
-    protected void setParent(Lens<TInventory, TStack> parent) {
+    protected void setParent(Lens parent) {
         this.parent = parent;
     }
     
     @Override
-    public Translation getName(Fabric<TInventory> inv) {
+    public Translation getName(Fabric inv) {
         return inv.getDisplayName();
     }
     
     @Override
-    public Lens<TInventory, TStack> getParent() {
+    public Lens getParent() {
         return this.parent;
     }
     
@@ -164,26 +164,26 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     
     @SuppressWarnings("unchecked")
     @Override
-    public TStack getStack(Fabric<TInventory> inv, int ordinal) {
-        LensHandle<TInventory, TStack> lens = this.getLensForOrdinal(ordinal);
+    public ItemStack getStack(Fabric inv, int ordinal) {
+        LensHandle lens = this.getLensForOrdinal(ordinal);
         if (lens == null) {
-            return ((TStack) ItemStack.EMPTY);
+            return ((ItemStack) ItemStack.EMPTY);
         }
         return lens.lens.getStack(inv, ordinal - lens.ordinal);
     }
     
     @Override
-    public boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack) {
-        LensHandle<TInventory, TStack> lens = this.getLensForOrdinal(ordinal);
+    public boolean setStack(Fabric inv, int ordinal, ItemStack stack) {
+        LensHandle lens = this.getLensForOrdinal(ordinal);
         return lens != null && lens.lens.setStack(inv, ordinal - lens.ordinal, stack);
     }
     
-    protected LensHandle<TInventory, TStack> getLensForOrdinal(int ordinal) {
+    protected LensHandle getLensForOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal > this.maxOrdinal) {
             return null;
         }
         
-        for (LensHandle<TInventory, TStack> child : this.spanningChildren) {
+        for (LensHandle child : this.spanningChildren) {
             if (child.ordinal <= ordinal && (ordinal - child.ordinal) < child.lens.slotCount()) {
                 return child;
             }
@@ -203,14 +203,14 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     }
     
     @Override
-    public List<Lens<TInventory, TStack>> getChildren() {
+    public List<Lens> getChildren() {
         return Collections.unmodifiableList(this.children);
     }
 
     @Override
-    public List<Lens<TInventory, TStack>> getSpanningChildren() {
-        Builder<Lens<TInventory, TStack>> listBuilder = ImmutableList.<Lens<TInventory, TStack>>builder();
-        for (LensHandle<TInventory, TStack> child : this.spanningChildren) {
+    public List<Lens> getSpanningChildren() {
+        Builder<Lens> listBuilder = ImmutableList.<Lens>builder();
+        for (LensHandle child : this.spanningChildren) {
             listBuilder.add(child.lens);
         }
         return listBuilder.build();
@@ -222,7 +222,7 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     }
     
     @Override
-    public Lens<TInventory, TStack> getLens(int index) {
+    public Lens getLens(int index) {
         return this.children.getLens(index);
     }
 
@@ -232,7 +232,7 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> child) {
+    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
         int index = this.children.indexOf(child);
         if (index < 0) {
             throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
@@ -241,28 +241,28 @@ public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventor
     }
 
     @Override
-    public boolean has(Lens<TInventory, TStack> lens) {
+    public boolean has(Lens lens) {
         return this.children.contains(lens);
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c) {
+    public boolean isSubsetOf(Collection<Lens> c) {
         return this.children.isSubsetOf(c);
     }
 
     @Override
-    public Iterator<Lens<TInventory, TStack>> iterator() {
+    public Iterator<Lens> iterator() {
         return this.children.iterator();
     }
 
     @Override
-    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
-        LensHandle<TInventory, TStack> child = this.getLensForOrdinal(ordinal);
+    public int getRealIndex(Fabric inv, int ordinal) {
+        LensHandle child = this.getLensForOrdinal(ordinal);
         return child.lens.getRealIndex(inv, ordinal - child.ordinal);
     }
 
     @Override
-    public int getMaxStackSize(Fabric<TInventory> inv) {
+    public int getMaxStackSize(Fabric inv) {
         return inv.getMaxStackSize();
     }
 

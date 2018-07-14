@@ -48,20 +48,18 @@ import javax.annotation.Nullable;
  * adapters!</i> From this basic premise we can see that nothing should ever
  * directly implement the {@link Inventory} interface, "real" inventories should
  * always implement this interface instead.</p>
- * 
- * @param <TInventory>
  */
-public interface InventoryAdapter<TInventory, TStack> extends Inventory {
+public interface InventoryAdapter extends Inventory {
     
-    SlotProvider<TInventory, TStack> getSlotProvider();
+    SlotProvider getSlotProvider();
 
-    Lens<TInventory, TStack> getRootLens();
+    Lens getRootLens();
 
-    Fabric<TInventory> getFabric();
+    Fabric getFabric();
 
     Inventory getChild(int index);
 
     @Nullable
-    Inventory getChild(Lens<TInventory, TStack> lens);
+    Inventory getChild(Lens lens);
 
 }

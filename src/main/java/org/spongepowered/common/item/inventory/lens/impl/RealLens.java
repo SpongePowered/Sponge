@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityLockable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -40,19 +39,19 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
  * <p>When possible this lens will return the real {@link InventoryAdapter} as opposed to some kind of Wrapper Adapter</p>
  */
 @SuppressWarnings("rawtypes")
-public abstract class RealLens extends AbstractLens<IInventory, ItemStack> {
+public abstract class RealLens extends AbstractLens {
 
-    public RealLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public RealLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, size, adapterType, slots);
     }
 
-    public RealLens(int base, int size, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public RealLens(int base, int size, InventoryAdapter adapter, SlotProvider slots) {
         super(base, size, adapter, slots);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         IInventory base = inv.get(this.base);
         if (!(base instanceof InventoryAdapter)) {
             return new VanillaAdapter(inv, this, parent);

@@ -29,9 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -60,7 +58,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
@@ -97,9 +94,9 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow @Nullable public abstract EntityPlayer shadow$getCustomer(); // getCustomer
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
-    private Fabric<IInventory> fabric;
+    private Fabric fabric;
     private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
+    private Lens lens;
 
     @Nullable private Profession profession;
 
@@ -117,15 +114,15 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     @SuppressWarnings("unchecked")
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+    public SlotProvider inventory$getSlotProvider() {
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+    public Lens inventory$getRootLens() {
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
+    public Fabric inventory$getFabric() {
         return this.fabric;
     }
 

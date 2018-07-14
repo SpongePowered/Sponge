@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
@@ -39,13 +37,13 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
  * <p>This lenses will usually return a new matching adapter (usually extending {@link AbstractInventoryAdapter})</p>
  */
 @SuppressWarnings("rawtypes")
-public abstract class ConceptualLens extends AbstractLens<IInventory, ItemStack> {
+public abstract class ConceptualLens extends AbstractLens {
 
-    public ConceptualLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public ConceptualLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, size, adapterType, slots);
     }
 
-    public ConceptualLens(int base, int size, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public ConceptualLens(int base, int size, InventoryAdapter adapter, SlotProvider slots) {
         super(base, size, adapter, slots);
     }
 

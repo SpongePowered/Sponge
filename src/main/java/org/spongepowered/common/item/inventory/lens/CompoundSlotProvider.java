@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -34,14 +32,14 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider<TInventory, TStack>  {
+public class CompoundSlotProvider implements SlotProvider {
 
-    private final List<SlotLens<TInventory, TStack>> slotList = new ArrayList<>();
+    private final List<SlotLens> slotList = new ArrayList<>();
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public CompoundSlotProvider add(InventoryAdapter<TInventory, TStack> adapter) {
+    public CompoundSlotProvider add(InventoryAdapter adapter) {
         for (Inventory slot : adapter.slots()) {
-            SlotLens slotLens = ((SlotLens<IInventory, ItemStack>) ((SlotAdapter) slot).getRootLens());
+            SlotLens slotLens = ((SlotLens) ((SlotAdapter) slot).getRootLens());
             if (!this.slotList.contains(slotLens)) {
                 this.slotList.add(slotLens);
             }
@@ -50,7 +48,7 @@ public class CompoundSlotProvider<TInventory, TStack> implements SlotProvider<TI
     }
 
     @Override
-    public SlotLens<TInventory, TStack> getSlot(int index) {
+    public SlotLens getSlot(int index) {
         return this.slotList.get(index);
     }
 

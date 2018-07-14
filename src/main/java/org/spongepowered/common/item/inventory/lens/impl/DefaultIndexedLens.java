@@ -37,32 +37,32 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
-public class DefaultIndexedLens<TInventory> extends AbstractLens<TInventory, ItemStack> {
+public class DefaultIndexedLens extends AbstractLens {
 
-    public DefaultIndexedLens(int offset, int size, Class<? extends Inventory> adapterType, SlotProvider<TInventory, ItemStack> slots) {
+    public DefaultIndexedLens(int offset, int size, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(offset, size, adapterType, slots);
         this.init(slots);
     }
 
-    public DefaultIndexedLens(int offset, int size, InventoryAdapter<TInventory, ItemStack> adapter, SlotCollection<TInventory> slots) {
+    public DefaultIndexedLens(int offset, int size, InventoryAdapter adapter, SlotCollection slots) {
         super(offset, size, adapter, slots);
         this.init(slots);
     }
 
     @Override
-    protected void init(SlotProvider<TInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         for (int slot = 0; slot < this.size; slot++) {
             this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(slot, DELEGATE));
         }
     }
     
     @Override
-    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric inv, int ordinal) {
         return ordinal >= this.base + this.size ? -1 : Math.max(-1, this.base + ordinal);
     }
 
     @Override
-    public InventoryAdapter<TInventory, ItemStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
-        return new AbstractInventoryAdapter<>(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+        return new AbstractInventoryAdapter(inv, this, parent);
     }
 }

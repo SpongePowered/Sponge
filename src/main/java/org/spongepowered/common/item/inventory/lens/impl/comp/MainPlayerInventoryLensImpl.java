@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.MainPlayerInventoryAdapter;
@@ -36,7 +34,7 @@ import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 import org.spongepowered.common.item.inventory.lens.comp.MainPlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implements MainPlayerInventoryLens<IInventory, ItemStack> {
+public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implements MainPlayerInventoryLens {
 
     private static final int MAIN_INVENTORY_HEIGHT = 3;
     private static final int INVENTORY_WIDTH = 9;
@@ -45,11 +43,11 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     private GridInventoryLensImpl grid;
     private boolean isContainer;
 
-    public MainPlayerInventoryLensImpl(int base, SlotProvider<IInventory, ItemStack> slots, boolean isContainer) {
+    public MainPlayerInventoryLensImpl(int base, SlotProvider slots, boolean isContainer) {
         this(base, MainPlayerInventoryAdapter.class, slots, isContainer);
     }
 
-    public MainPlayerInventoryLensImpl(int base, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots, boolean isContainer) {
+    public MainPlayerInventoryLensImpl(int base, Class<? extends Inventory> adapterType, SlotProvider slots, boolean isContainer) {
         super(base, 9, 4, adapterType, slots);
         this.isContainer = isContainer;
 
@@ -57,10 +55,10 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
     }
 
-    private void lateInit(SlotProvider<IInventory, ItemStack> slots) {
+    private void lateInit(SlotProvider slots) {
         int base = this.base;
 
         if (this.isContainer) {
@@ -104,20 +102,20 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
         this.cache();
     }
 
-    private class ShiftedSlotProvider implements SlotProvider<IInventory, ItemStack> {
+    private class ShiftedSlotProvider implements SlotProvider {
 
-        private final SlotProvider<IInventory, ItemStack> provider;
+        private final SlotProvider provider;
         private final int shiftBy;
         private final int shiftAt;
 
-        public ShiftedSlotProvider(SlotProvider<IInventory, ItemStack> provider, int shiftBy, int shiftAt) {
+        public ShiftedSlotProvider(SlotProvider provider, int shiftBy, int shiftAt) {
             this.provider = provider;
             this.shiftBy = shiftBy;
             this.shiftAt = shiftAt;
         }
 
         @Override
-        public SlotLens<IInventory, ItemStack> getSlot(int index) {
+        public SlotLens getSlot(int index) {
             index = index + this.shiftBy;
             if (index >= this.shiftAt) {
                 index -= this.shiftAt;
@@ -127,21 +125,21 @@ public class MainPlayerInventoryLensImpl extends GridInventoryLensImpl implement
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots, boolean spanning) {
+    protected void init(SlotProvider slots, boolean spanning) {
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> fabric, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
         return new MainPlayerInventoryAdapter(fabric, this, parent);
     }
 
     @Override
-    public HotbarLens<IInventory, ItemStack> getHotbar() {
+    public HotbarLens getHotbar() {
         return this.hotbar;
     }
 
     @Override
-    public GridInventoryLens<IInventory, ItemStack> getGrid() {
+    public GridInventoryLens getGrid() {
         return this.grid;
     }
 }

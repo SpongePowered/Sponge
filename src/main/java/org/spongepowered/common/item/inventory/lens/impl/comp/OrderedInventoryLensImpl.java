@@ -27,8 +27,6 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.Property.Operator.DELEGATE;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -45,17 +43,17 @@ import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedInventoryLens<IInventory, ItemStack> {
+public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedInventoryLens {
 
     protected final int stride;
     
-    protected final List<LensHandle<IInventory, ItemStack>> slotCache = new ArrayList<>();
+    protected final List<LensHandle> slotCache = new ArrayList<>();
 
-    public OrderedInventoryLensImpl(int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots) {
+    public OrderedInventoryLensImpl(int base, int size, int stride, SlotProvider slots) {
         this(base, size, stride, OrderedInventoryAdapter.class, slots);
     }
 
-    public OrderedInventoryLensImpl(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public OrderedInventoryLensImpl(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, size, adapterType, slots);
         checkArgument(stride > 0, "Invalid stride: %s", stride);
         this.stride = stride;
@@ -63,19 +61,19 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     }
 
     protected void cache() {
-        for (LensHandle<IInventory, ItemStack> child : this.spanningChildren) {
+        for (LensHandle child : this.spanningChildren) {
             this.cache0(child.lens);
         }
     }
 
-    private void cache0(Lens<IInventory, ItemStack> lens) {
+    private void cache0(Lens lens) {
         if (lens instanceof SlotLens) {
-            this.slotCache.add(new LensHandle<>(lens, lens.getProperties(0)));
+            this.slotCache.add(new LensHandle(lens, lens.getProperties(0)));
             return;
         }
-        for (Lens<IInventory, ItemStack> child : lens.getSpanningChildren()) {
+        for (Lens child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
-                this.slotCache.add(new LensHandle<>(child, lens.getProperties(child)));
+                this.slotCache.add(new LensHandle(child, lens.getProperties(child)));
             } else {
                 this.cache0(child);
             }
@@ -88,12 +86,12 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     }
 
     @Override
-    public SlotLens<IInventory, ItemStack> getSlot(int ordinal) {
-        return (SlotLens<IInventory, ItemStack>) this.slotCache.get(ordinal).lens;
+    public SlotLens getSlot(int ordinal) {
+        return (SlotLens) this.slotCache.get(ordinal).lens;
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
             this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(ord, DELEGATE));
         }
@@ -101,7 +99,7 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     }
 
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric inv, int ordinal) {
         if (!this.checkOrdinal(ordinal)) {
             return -1;
         }
@@ -115,7 +113,7 @@ public class OrderedInventoryLensImpl extends ConceptualLens implements OrderedI
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new OrderedInventoryAdapter(inv, this, parent);
     }
 }
