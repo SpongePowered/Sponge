@@ -59,7 +59,9 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
 
 
     private BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
-        frame.pushCause(ctx.packetPlayer);
+        if (ctx.packetPlayer != null) {
+            frame.pushCause(ctx.packetPlayer);
+        }
     });
 
     PacketState() {
