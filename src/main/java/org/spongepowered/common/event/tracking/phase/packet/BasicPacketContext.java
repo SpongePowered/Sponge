@@ -52,7 +52,7 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean hasCaptures() {
-        return (this.container != null && ((IMixinContainer) this.container).capturingInventory()) || this.state.isInteraction();
+        return true; // Just blindly call unwind regardless.
     }
 
     @Override
