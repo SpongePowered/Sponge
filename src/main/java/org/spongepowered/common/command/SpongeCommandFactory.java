@@ -91,6 +91,7 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -560,9 +561,15 @@ public class SpongeCommandFactory {
                 .arguments(optionalWeak(literal(Text.of("reload"), "reload")), optional(plugin(Text.of("plugin"))))
                 .executor((src, args) -> {
                     if (args.hasAny("reload") && src.hasPermission("sponge.command.plugins.reload")) {
-                        src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
                         Sponge.getCauseStackManager().pushCause(src);
-                        SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()));
+                        if (args.hasAny("plugin")) {
+                            PluginContainer plugin = args.<PluginContainer>getOne("plugin").get();
+                            src.sendMessage(Text.of("Sending reload event to " + plugin.getId() + ". Please wait."));
+                            ((SpongeEventManager) Sponge.getEventManager()).post(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()), plugin);
+                        } else {
+                            src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
+                            SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()));
+                        }
                         Sponge.getCauseStackManager().popCause();
                         src.sendMessage(Text.of("Reload complete!"));
                     } else if (args.hasAny("plugin")) {
