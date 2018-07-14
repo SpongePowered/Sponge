@@ -40,6 +40,8 @@ public class ShouldFire {
     public static boolean A_I_TASK_EVENT_ADD = false;
     public static boolean A_I_TASK_EVENT_REMOVE = false;
 
+    public static boolean ANIMATE_HAND_EVENT = false;
+
     public static boolean SPAWN_ENTITY_EVENT = false;
     public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
     public static boolean SPAWN_ENTITY_EVENT_SPAWNER = false;

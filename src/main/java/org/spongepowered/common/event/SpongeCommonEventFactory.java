@@ -749,7 +749,7 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
+    public static InteractItemEvent.Primary callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
         @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
@@ -770,7 +770,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
+    public static InteractItemEvent.Secondary callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
             @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
