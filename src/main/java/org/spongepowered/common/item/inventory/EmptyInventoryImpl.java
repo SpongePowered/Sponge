@@ -36,9 +36,7 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.observer.Observer;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -49,7 +47,7 @@ import java.util.Optional;
 /**
  * Bottom type / empty results set for inventory queries.
  */
-public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEventArgs> {
+public class EmptyInventoryImpl implements EmptyInventory {
 
     public static final Translation EMPTY_NAME = new SpongeTranslation("inventory.empty.title");
 
@@ -242,10 +240,6 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     @Override
     public Translation getName() {
         return EmptyInventoryImpl.EMPTY_NAME;
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     @Override

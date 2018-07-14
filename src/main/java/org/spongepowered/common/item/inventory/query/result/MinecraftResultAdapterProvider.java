@@ -50,11 +50,6 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
             public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
                 return MinecraftQueryResultAdapter.this;
             }
-
-            @Override
-            public void invalidate(Fabric<IInventory> inv) {
-                super.invalidate(inv);
-            }
         }
 
         public MinecraftQueryResultAdapter(Fabric<IInventory> inventory, Inventory parent) {

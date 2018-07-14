@@ -65,7 +65,6 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLe
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -205,10 +204,6 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
             this.offhand = (SlotAdapter) ((PlayerInventoryLens) this.lens).getOffhandLens().getAdapter(this.inventory, this);
         }
         return this.offhand;
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     @SuppressWarnings("unchecked")

@@ -52,7 +52,6 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
 import java.util.Optional;
 
@@ -138,10 +137,6 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
             this.offhand = (SlotAdapter) this.lens.getOffhandLens().getAdapter(this.inventory, this);
         }
         return this.offhand;
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     @SuppressWarnings("unchecked")

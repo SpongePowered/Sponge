@@ -42,7 +42,6 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
@@ -170,10 +169,6 @@ public class AbstractInventoryAdapter<TInventory> implements MinecraftInventoryA
     public Inventory getChild(Lens<TInventory, ItemStack> lens) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     private EmptyInventory emptyInventory() {

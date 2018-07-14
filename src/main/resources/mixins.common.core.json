@@ -380,7 +380,6 @@
         "item.inventory.MixinTraitAdapter",
         "item.inventory.MixinSlot",
         "item.inventory.MixinSlotCrafting",
-        "item.inventory.TraitInventoryObservable",
         "item.recipe.crafting.MixinIngredient",
         "item.recipe.crafting.MixinIRecipe",
         "item.recipe.crafting.MixinShapedRecipes",

@@ -45,7 +45,6 @@ import org.spongepowered.common.item.inventory.custom.CustomLens;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
 import java.util.List;
 import java.util.Map;
@@ -81,10 +80,6 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<
     @Override
     public Inventory getChild(Lens<IInventory, ItemStack> lens) {
         return null; // TODO ?
-    }
-
-    @Override
-    public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
     @Override

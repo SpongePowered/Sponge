@@ -149,13 +149,6 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      */
     boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
     
-    /**
-     * Invalidate this lens for the supplied inventory, notify all observers
-     * 
-     * @param inv inventory
-     */
-    void invalidate(Fabric<TInventory> inv);
-
     SlotLens getSlotLens(int ordinal);
 
 }

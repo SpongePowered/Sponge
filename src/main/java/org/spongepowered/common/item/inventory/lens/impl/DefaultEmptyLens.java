@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, ItemStack> {
+public class DefaultEmptyLens<TInventory> implements Lens<TInventory, ItemStack> {
 
     private static final IntSet EMPTY_SLOT_SET = IntSets.EMPTY_SET;
     
@@ -98,10 +98,6 @@ public class DefaultEmptyLens<TInventory> extends ObservableLens<TInventory, Ite
     @Override
     public List<Lens<TInventory, ItemStack>> getSpanningChildren() {
         return Collections.<Lens<TInventory, ItemStack>>emptyList();
-    }
-
-    @Override
-    public void invalidate(Fabric<TInventory> inv) {
     }
 
     @Override
