@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
@@ -43,6 +44,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -64,10 +66,12 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
@@ -167,7 +171,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     //     public WorldInfo(NBTTagCompound nbt)
-    @Inject(method = "<init>*", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN") )
     private void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
         if (!SpongeCommonEventFactory.convertingMapFormat) {
             this.onConstructionCommon();
@@ -175,7 +179,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     //     public WorldInfo(WorldSettings settings, String name)
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At("RETURN"))
     private void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
         if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
             this.isValid = false;
@@ -208,7 +212,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     //     public WorldInfo(WorldInfo worldInformation)
-    @Inject(method = "<init>*", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At("RETURN") )
     private void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
         this.onConstructionCommon();
 
@@ -426,9 +430,21 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         return (Difficulty) (Object) this.difficulty;
     }
 
-    @Inject(method = "setDifficulty", at = @At("HEAD"))
+    @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
     private void onSetDifficultyVanilla(EnumDifficulty newDifficulty, CallbackInfo ci) {
         this.hasCustomDifficulty = true;
+        if (newDifficulty == null) {
+            // This is an error from someone
+            new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
+                .add("Someone (not Sponge) is attempting to set a null difficulty to this WorldInfo setup! Please report to the mod/plugin author!")
+                .add()
+                .addWrapped(60, " %s : %s", "WorldInfo", this)
+                .add()
+                .add(new Exception("Stacktrace"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+            ci.cancel(); // We cannot let the null set the field.
+            return;
+        }
 
         // If the difficulty is set, we need to sync it to the players in the world attached to the worldinfo (if any)
         WorldManager.getWorlds()
@@ -875,5 +891,23 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     private void saveConfig() {
         this.getOrCreateWorldConfig().save();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("levelName", this.levelName)
+            .add("terrainType", this.terrainType)
+            .add("uuid", this.uuid)
+            .add("dimensionId", this.dimensionId)
+            .add("dimensionType", this.dimensionType)
+            .add("spawnX", this.spawnX)
+            .add("spawnY", this.spawnY)
+            .add("spawnZ", this.spawnZ)
+            .add("gameType", this.gameType)
+            .add("hardcore", this.hardcore)
+            .add("difficulty", this.difficulty)
+            .add("isMod", this.isMod)
+            .toString();
     }
 }
