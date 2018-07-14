@@ -32,16 +32,18 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    EntityPlayerMP packetPlayer;
-    Packet<?> packet;
-    private ItemStackSnapshot cursor;
+    @Nullable EntityPlayerMP packetPlayer;
+    @Nullable Packet<?> packet;
+    @Nullable private ItemStackSnapshot cursor;
+    @Nullable private ItemStack itemUsed;
     private boolean ignoreCreative;
-    private ItemStack itemUsed;
 
-    protected PacketContext(PacketState<? extends P> state) {
+    PacketContext(PacketState<? extends P> state) {
         super(state);
     }
 
