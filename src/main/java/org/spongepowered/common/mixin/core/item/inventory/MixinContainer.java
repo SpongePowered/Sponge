@@ -245,10 +245,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                             if (!this.capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
                                 SlotTransaction previewTransaction = this.capturedCraftPreviewTransactions.get(0);
                                 if (previewTransaction.equals(newTransaction)) {
-                                    newTransaction = previewTransaction;
+                                    newTransaction = null;
                                 }
                             }
-                            this.capturedSlotTransactions.add(newTransaction);
+                            if (newTransaction != null) {
+                                this.capturedSlotTransactions.add(newTransaction);
+                            }
                         }
                     } catch (IndexOutOfBoundsException e) {
                         SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);

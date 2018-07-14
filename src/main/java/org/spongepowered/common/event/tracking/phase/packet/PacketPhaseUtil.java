@@ -34,6 +34,7 @@ import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -66,7 +67,10 @@ public final class PacketPhaseUtil {
             }
         }
         if (openContainer != null) {
+            boolean capture = ((IMixinContainer) openContainer).capturingInventory();
+            ((IMixinContainer) openContainer).setCaptureInventory(false);
             openContainer.detectAndSendChanges();
+            ((IMixinContainer) openContainer).setCaptureInventory(capture);
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
             if (eventCancelled && player.openContainer == openContainer && player instanceof EntityPlayerMP) {
