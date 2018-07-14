@@ -123,11 +123,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         checkNotNull(lens, "Attempted to register a null lens");
         this.children.add(lens, properties);
         this.availableSlots.addAll(lens.getSlots());
-        
-        if (lens instanceof ObservableLens) {
-            ((ObservableLens<TInventory, TStack>) lens).addObserver(this);
-        }
-        
+
         this.raise(new InventoryEventArgs(Type.LENS_ADDED, this));
     }
     
