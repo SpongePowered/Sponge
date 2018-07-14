@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.ILockableContainer;
@@ -71,17 +69,17 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(27).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
         return new GridInventoryLensImpl(0, 9, 3, 9, thisClass, slots);
     }

@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends OrderedInventoryLens<TInventory, TStack> {
+public interface CraftingInventoryLens extends OrderedInventoryLens {
 
-    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
+    CraftingGridInventoryLens getCraftingGrid();
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
+    CraftingOutputSlotLens getOutputSlot();
 
-    TStack getOutputStack(Fabric<TInventory> inv);
+    ItemStack getOutputStack(Fabric inv);
 
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
+    boolean setOutputStack(Fabric inv, ItemStack stack);
 
 }

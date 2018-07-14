@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl.collections;
 
 import static com.google.common.base.Preconditions.*;
 
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.util.Tuple;
@@ -43,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInventory, ItemStack> implements SlotProvider<TInventory, ItemStack> {
+public class SlotCollection extends DynamicLensCollectionImpl implements SlotProvider {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static class Builder {
@@ -126,26 +125,26 @@ public class SlotCollection<TInventory> extends DynamicLensCollectionImpl<TInven
     }
 
     @SuppressWarnings("rawtypes")
-    private SlotLens<TInventory, ItemStack> createSlotLens(int slotIndex) {
+    private SlotLens createSlotLens(int slotIndex) {
         return this.builder == null ? new SlotLensImpl(slotIndex, SlotAdapter.class) : this.builder.getProvider(slotIndex).createSlotLens(slotIndex);
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public SlotLens<TInventory, ItemStack> getSlot(int index) {
-        return (SlotLens<TInventory, ItemStack>) this.get(index);
+    public SlotLens getSlot(int index) {
+        return (SlotLens) this.get(index);
     }
 
-    public Iterable<Slot> getIterator(InventoryAdapter<TInventory, ItemStack> adapter) {
+    public Iterable<Slot> getIterator(InventoryAdapter adapter) {
         return this.getIterator(adapter, adapter.getFabric(), adapter.getRootLens());
     }
 
-    public Iterable<Slot> getIterator(Inventory parent, InventoryAdapter<TInventory, ItemStack> adapter) {
+    public Iterable<Slot> getIterator(Inventory parent, InventoryAdapter adapter) {
         return this.getIterator(parent, adapter.getFabric(), adapter.getRootLens());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Iterable<Slot> getIterator(Inventory parent, Fabric<TInventory> inv, Lens<TInventory, ItemStack> lens) {
+    private Iterable<Slot> getIterator(Inventory parent, Fabric inv, Lens lens) {
         return new SlotCollectionIterator(parent, inv, lens, this);
     }
 

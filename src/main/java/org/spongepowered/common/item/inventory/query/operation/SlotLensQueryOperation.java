@@ -43,7 +43,7 @@ public final class SlotLensQueryOperation extends SpongeQueryOperation<Immutable
 
     @SuppressWarnings("rawtypes")
     @Override
-    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
         for (Inventory inv : this.inventories) {
             for (Inventory slot : inv.slots()) {
                 if (((SlotAdapter) slot).getRootLens().equals(lens)) {

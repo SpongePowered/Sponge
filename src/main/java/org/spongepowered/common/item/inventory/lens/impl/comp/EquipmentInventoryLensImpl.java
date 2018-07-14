@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -40,9 +38,9 @@ import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 
 import java.util.Optional;
 
-public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens<IInventory, ItemStack> {
+public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens {
 
-    public EquipmentInventoryLensImpl(int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots,
+    public EquipmentInventoryLensImpl(int base, int size, int stride, SlotProvider slots,
             boolean isContainer) {
         super(base, size, stride, EquipmentInventoryAdapter.class, slots);
         if (isContainer) {
@@ -53,10 +51,10 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
     }
 
-    private void initInventory(SlotProvider<IInventory, ItemStack> slots) {
+    private void initInventory(SlotProvider slots) {
         int index = this.base;
         int ord = 0;
         this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.BOOTS));
@@ -70,7 +68,7 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
         this.cache();
     }
 
-    private void initContainer(SlotProvider<IInventory, ItemStack> slots) {
+    private void initContainer(SlotProvider slots) {
         int index = this.base;
         int ord = 0;
         this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
@@ -86,7 +84,7 @@ public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl impleme
 
     @SuppressWarnings("rawtypes")
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         ArmorEquipable carrier = null;
         if (parent instanceof CarriedInventory) {
             Optional opt = ((CarriedInventory) parent).getCarrier();

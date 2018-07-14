@@ -24,18 +24,12 @@
  */
 package org.spongepowered.common.item.inventory.lens;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 
-/**
- * @param <TInventory>
- * @param <TStack>
- */
-public interface LensProvider<TInventory, TStack> {
+public interface LensProvider {
 
-    Lens<TInventory, TStack> rootLens(Fabric<TInventory> fabric, InventoryAdapter<TInventory, TStack> adapter);
+    Lens rootLens(Fabric fabric, InventoryAdapter adapter);
 
-    SlotProvider<IInventory, ItemStack> slotProvider(Fabric<TInventory> fabric, InventoryAdapter<TInventory, TStack> adapter);
+    SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter);
     
 }

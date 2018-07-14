@@ -26,8 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import static org.spongepowered.api.item.ItemTypes.BLAZE_POWDER;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.slot.OutputSlot;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -42,18 +40,18 @@ public class BrewingStandInventoryLens extends RealLens {
     private InputSlotLensImpl ingredient;
     private InputSlotLensImpl fuel;
 
-    public BrewingStandInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public BrewingStandInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
         super(0, adapter.getFabric().getSize(), adapter.getClass(), slots);
         this.init(slots);
     }
 
-    public BrewingStandInventoryLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public BrewingStandInventoryLens(int base, InventoryAdapter adapter, SlotProvider slots) {
         super(base, adapter.getFabric().getSize(), adapter.getClass(), slots);
         this.init(slots);
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
 
         this.potions = new OrderedInventoryLensImpl(0, 3, 1, OutputSlot.class, slots);
         this.ingredient = new InputSlotLensImpl(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients

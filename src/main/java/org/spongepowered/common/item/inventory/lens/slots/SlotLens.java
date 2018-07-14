@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.item.inventory.lens.slots;
 
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 
-public interface SlotLens<TInventory, TStack> extends Lens<TInventory, TStack> {
+public interface SlotLens extends Lens {
 
-    TStack getStack(Fabric<TInventory> inv);
+    ItemStack getStack(Fabric inv);
 
-    boolean setStack(Fabric<TInventory> inv, TStack stack);
+    boolean setStack(Fabric inv, ItemStack stack);
 
-    int getOrdinal(Fabric<TInventory> inv);
+    int getOrdinal(Fabric inv);
     
 }

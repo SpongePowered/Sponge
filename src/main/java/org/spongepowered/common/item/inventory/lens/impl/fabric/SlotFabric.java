@@ -43,7 +43,7 @@ public class SlotFabric extends MinecraftFabric {
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
+    public Collection<?> allInventories() {
         return Collections.emptyList();
     }
 

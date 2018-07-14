@@ -26,8 +26,6 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Property.Operator;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
@@ -39,7 +37,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inventory2DLens<IInventory, net.minecraft.item.ItemStack> {
+public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inventory2DLens {
 
     protected final int width;
     protected final int height;
@@ -47,19 +45,19 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     protected final int xBase;
     protected final int yBase;
 
-    public Inventory2DLensImpl(int base, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
+    public Inventory2DLensImpl(int base, int width, int height, SlotProvider slots) {
         this(base, width, height, width, Inventory2DAdapter.class, slots);
     }
 
-    public Inventory2DLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public Inventory2DLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, width, adapterType, slots);
     }
 
-    public Inventory2DLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public Inventory2DLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
-    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, width * height, rowStride, adapterType, slots);
 
         checkArgument(width > 0, "Invalid width: %s", width);
@@ -75,7 +73,7 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         //this.init(slots, true);
     }
 
@@ -89,10 +87,10 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
      * @param spanning Set to true to create spanning slots, false to create
      *      normal child slots
      */
-    protected void init(SlotProvider<IInventory, ItemStack> slots, boolean spanning) {
+    protected void init(SlotProvider slots, boolean spanning) {
         for (int y = 0, ord = 0, slot = this.base; y < this.height; y++, slot += (this.stride - this.width)) {
             for (int x = 0; x < this.width; x++, slot++, ord++) {
-                SlotLens<IInventory, ItemStack> slotLens = slots.getSlot(slot);
+                SlotLens slotLens = slots.getSlot(slot);
 //                System.err.printf(">> %s ord: %-4d x: %-4d y: %-4d slot: %-4d => %s\n",
 //                        this.getClass().getSimpleName(), ord, x, y, slot, slotLens.getClass().getSimpleName());
                 if (spanning) {
@@ -116,16 +114,16 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     }
 
     @Override
-    public SlotLens<IInventory, ItemStack> getSlot(SlotPos pos) {
+    public SlotLens getSlot(SlotPos pos) {
         if (pos.getOperator() != Operator.EQUAL) {
             return null;
         }
 
-        return (SlotLens<IInventory, ItemStack>) this.spanningChildren.get(pos.getY()).lens.getLens(pos.getX());
+        return (SlotLens) this.spanningChildren.get(pos.getY()).lens.getLens(pos.getX());
     }
 
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric inv, int ordinal) {
         if (!this.checkOrdinal(ordinal)) {
             return -1;
         }
@@ -134,7 +132,7 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new Inventory2DAdapter(inv, this, parent);
     }
 

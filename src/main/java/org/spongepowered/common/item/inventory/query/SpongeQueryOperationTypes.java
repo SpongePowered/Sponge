@@ -33,7 +33,7 @@ import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOper
 
 public final class SpongeQueryOperationTypes {
 
-    public static final QueryOperationType<Lens<?, ?>> LENS = new SpongeQueryOperationType<>("lens", LensQueryOperation::new);
+    public static final QueryOperationType<Lens> LENS = new SpongeQueryOperationType<>("lens", LensQueryOperation::new);
 
     public static final QueryOperationType<ImmutableSet<Inventory>> SLOT_LENS = new SpongeQueryOperationType<>("slot_lens",
             SlotLensQueryOperation::new);

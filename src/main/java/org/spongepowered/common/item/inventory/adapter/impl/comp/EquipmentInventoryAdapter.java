@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -42,15 +41,15 @@ import java.util.Optional;
 public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implements EquipmentInventory {
 
     private final ArmorEquipable carrier;
-    private final EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> lens;
+    private final EquipmentInventoryLens lens;
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
+    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric inventory, EquipmentInventoryLens root) {
         super(inventory, root);
         this.carrier = carrier;
         this.lens = root;
     }
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric inventory, EquipmentInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
         this.carrier = carrier;
         this.lens = root;

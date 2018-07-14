@@ -46,8 +46,8 @@ public class CompoundFabric extends MinecraftFabric {
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
-        Set<IInventory> inv = new HashSet<>();
+    public Collection<?> allInventories() {
+        Set<Object> inv = new HashSet<>();
         inv.addAll(this.fabric1.allInventories());
         inv.addAll(this.fabric2.allInventories());
         return inv;

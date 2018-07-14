@@ -34,9 +34,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<Lens<TInventory, TStack>> implements DynamicLensCollection<TInventory, TStack> {
+public class DynamicLensCollectionImpl extends AbstractList<Lens> implements DynamicLensCollection {
 
-    protected final Lens<TInventory, TStack>[] lenses;
+    protected final Lens[] lenses;
     
     protected final Collection<InventoryProperty<?, ?>>[] properties;
 
@@ -47,7 +47,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
 
     @Override
-    public void setProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property) {
+    public void setProperty(Lens lens, InventoryProperty<?, ?> property) {
         this.setProperty(this.indexOf(lens), property);
     }
 
@@ -63,7 +63,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
     
     @Override
-    public void removeProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property) {
+    public void removeProperty(Lens lens, InventoryProperty<?, ?> property) {
         this.removeProperty(this.indexOf(lens), property);
     }
     
@@ -85,12 +85,12 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
 
     @Override
-    public Lens<TInventory, TStack> get(int index) {
+    public Lens get(int index) {
         return this.getLens(index);
     }
     
     @Override
-    public Lens<TInventory, TStack> getLens(int index) {
+    public Lens getLens(int index) {
         this.checkIndex(index);
         return this.lenses[index];
     }
@@ -133,7 +133,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
     
     @Override
-    public Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> child) {
+    public Collection<InventoryProperty<?, ?>> getProperties(Lens child) {
         int index = this.indexOf(child);
         if (index < 0) {
             return Collections.emptyList();
@@ -142,12 +142,12 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     }
 
     @Override
-    public boolean has(Lens<TInventory, TStack> lens) {
+    public boolean has(Lens lens) {
         return this.contains(lens);
     }
 
     @Override
-    public boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c) {
+    public boolean isSubsetOf(Collection<Lens> c) {
         return c.containsAll(this);
     }
 

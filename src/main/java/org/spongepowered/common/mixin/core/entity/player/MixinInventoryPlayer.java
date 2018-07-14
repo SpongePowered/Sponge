@@ -100,8 +100,8 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     private boolean doCapture = false;
 
     protected SlotCollection slots;
-    protected Fabric<IInventory> inventory;
-    protected Lens<IInventory, ItemStack> lens;
+    protected Fabric inventory;
+    protected Lens lens;
 
     private Player carrier;
     private HotbarAdapter hotbar;
@@ -163,17 +163,17 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     }
 
     @Override
-    public Lens<IInventory, net.minecraft.item.ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric<IInventory> getFabric() {
+    public Fabric getFabric() {
         return this.inventory;
     }
 
     @Override
-    public Inventory getChild(Lens<IInventory, ItemStack> lens) {
+    public Inventory getChild(Lens lens) {
         return null;
     }
 
@@ -208,7 +208,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 

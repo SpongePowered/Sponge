@@ -25,11 +25,8 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.interfaces.inventory.IMixinContainerPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -44,10 +41,10 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlo
 import org.spongepowered.common.item.inventory.lens.impl.slots.EquipmentSlotLensImpl;
 
 @Mixin(ContainerPlayer.class)
-public abstract class MixinContainerPlayer extends MixinContainer implements IMixinContainerPlayer, LensProvider<IInventory, ItemStack> {
+public abstract class MixinContainerPlayer extends MixinContainer implements IMixinContainerPlayer, LensProvider {
 
     @Override
-    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
         return new ContainerPlayerInventoryLens(adapter, inventory$getSlotProvider());
     }
 
@@ -60,7 +57,7 @@ public abstract class MixinContainerPlayer extends MixinContainer implements IMi
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
         SlotCollection.Builder builder = new SlotCollection.Builder()
                 .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
                 .add(4)

@@ -67,7 +67,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -132,9 +131,9 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
     private List<SlotTransaction> capturedCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> capturedCraftPreviewTransactions = new ArrayList<>();
-    private Fabric<IInventory> fabric;
-    private SlotProvider<IInventory, ItemStack> slots;
-    private Lens<IInventory, ItemStack> lens;
+    private Fabric fabric;
+    private SlotProvider slots;
+    private Lens lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
     private InventoryArchetype archetype;
@@ -169,7 +168,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
         // If we know the lens, we can cache the adapters now
         if (this.lens != null) {
-            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollectionIterator<>(this, this.fabric, this.lens, this.slots)) {
+            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollectionIterator(this, this.fabric, this.lens, this.slots)) {
                 this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
             }
         }
@@ -516,17 +515,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         return this.shiftCraft;
     }
 
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+    public SlotProvider inventory$getSlotProvider() {
         this.spongeInit();
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+    public Lens inventory$getRootLens() {
         this.spongeInit();
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
+    public Fabric inventory$getFabric() {
         this.spongeInit();
         return this.fabric;
     }

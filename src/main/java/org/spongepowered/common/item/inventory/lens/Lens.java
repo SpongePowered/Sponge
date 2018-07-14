@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.inventory.lens;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -43,16 +44,13 @@ import java.util.List;
  * part of the lens's spanning set. For query purposes, the lens may have other
  * child lenses which provide other ways of looking at the same collection of
  * slots, however most of the time access is via the spanning set.</p>
- * 
- * @param <TInventory>
- * @param <TStack>
  */
-public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TStack> {
+public interface Lens extends LensCollection {
     
     /**
      * Returns the <em>primary</em> parent lens of this lens. Can be null. 
      */
-    Lens<TInventory, TStack> getParent();
+    Lens getParent();
     
     /**
      * Get the corresponding adapter type for this lens
@@ -66,12 +64,12 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * 
      * @return adapter for this lens
      */
-    InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent);
+    InventoryAdapter getAdapter(Fabric inv, Inventory parent);
     
     /**
      * Returns the display name of this lens 
      */
-    Translation getName(Fabric<TInventory> inv);
+    Translation getName(Fabric inv);
     
     /**
      * Get the number of slots referenced by this lens
@@ -104,7 +102,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param ordinal 
      * @return the "real" slot index (ordinal), or -1 for invalid indices
      */
-    int getRealIndex(Fabric<TInventory> inv, int ordinal);
+    int getRealIndex(Fabric inv, int ordinal);
     
     /**
      * Gets the itemstack for the specified slot ordinal. Returns null if the
@@ -115,7 +113,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param ordinal slot ordinal
      * @return the item stack in the specified slot
      */
-    TStack getStack(Fabric<TInventory> inv, int ordinal);
+    ItemStack getStack(Fabric inv, int ordinal);
     
     /**
      * Get the maximum stack size from the target inventory
@@ -123,21 +121,21 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param inv
      * @return
      */
-    int getMaxStackSize(Fabric<TInventory> inv);
+    int getMaxStackSize(Fabric inv);
 
     /**
      * Get child lenses of this lens
      * 
      * @return
      */
-    List<Lens<TInventory, TStack>> getChildren();
+    List<Lens> getChildren();
     
     /**
      * Get child lenses of this lens
      * 
      * @return
      */
-    List<Lens<TInventory, TStack>> getSpanningChildren();
+    List<Lens> getSpanningChildren();
     
     /**
      * Set the stack at the specified offset 
@@ -147,7 +145,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param stack
      * @return
      */
-    boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
+    boolean setStack(Fabric inv, int ordinal, ItemStack stack);
     
     SlotLens getSlotLens(int ordinal);
 

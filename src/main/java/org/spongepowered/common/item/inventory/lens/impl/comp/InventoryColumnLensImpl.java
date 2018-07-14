@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.InventoryColumnAdapter;
@@ -34,26 +32,26 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 
 
-public class InventoryColumnLensImpl extends Inventory2DLensImpl implements InventoryColumnLens<IInventory, net.minecraft.item.ItemStack> {
+public class InventoryColumnLensImpl extends Inventory2DLensImpl implements InventoryColumnLens {
 
-    public InventoryColumnLensImpl(int base, int height, int stride, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryColumnLensImpl(int base, int height, int stride, SlotProvider slots) {
         this(base, height, stride, 0, 0, InventoryColumnAdapter.class, slots);
     }
 
-    public InventoryColumnLensImpl(int base, int height, int stride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryColumnLensImpl(int base, int height, int stride, Class<? extends Inventory> adapterType, SlotProvider slots) {
         this(base, height, stride, 0, 0, adapterType, slots);
     }
     
-    public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, SlotProvider slots) {
         this(base, height, stride, xBase, yBase, InventoryColumnAdapter.class, slots);
     }
     
-    public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, 1, height, stride, xBase, yBase, adapterType, slots);
     }
     
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
+    public int getRealIndex(Fabric inv, int ordinal) {
         if (ordinal < 0 || ordinal >= this.size) {
             return -1;
         }
@@ -62,7 +60,7 @@ public class InventoryColumnLensImpl extends Inventory2DLensImpl implements Inve
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new InventoryColumnAdapter(inv, this, parent);
     }
     

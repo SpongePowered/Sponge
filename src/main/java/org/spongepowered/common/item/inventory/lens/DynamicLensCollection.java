@@ -29,17 +29,15 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 /**
  * A type of Lens collection whose members are fixed but properties for member
  * lenses can be modified.
- * 
- * @param <TInventory>
  */
-public interface DynamicLensCollection<TInventory, TStack> extends LensCollection<TInventory, TStack> {
+public interface DynamicLensCollection extends LensCollection {
 
     void setProperty(int index, InventoryProperty<?, ?> property);
     
-    void setProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property);
+    void setProperty(Lens lens, InventoryProperty<?, ?> property);
 
     void removeProperty(int index, InventoryProperty<?, ?> property);
     
-    void removeProperty(Lens<TInventory, TStack> lens, InventoryProperty<?, ?> property);
+    void removeProperty(Lens lens, InventoryProperty<?, ?> property);
     
 }

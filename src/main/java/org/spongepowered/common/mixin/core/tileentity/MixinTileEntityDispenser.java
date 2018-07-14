@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -52,17 +50,17 @@ public abstract class MixinTileEntityDispenser extends MixinTileEntityLockableLo
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         return new SlotCollection.Builder().add(9).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
         return new GridInventoryLensImpl(0, 3, 3, 3, thisClass, slots);
     }

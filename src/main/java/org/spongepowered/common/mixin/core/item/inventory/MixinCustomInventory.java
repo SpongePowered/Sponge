@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -53,7 +51,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("rawtypes")
 @Mixin(CustomInventory.class)
-public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<IInventory>, Inventory, CarriedInventory<Carrier> {
+public abstract class MixinCustomInventory implements MinecraftInventoryAdapter, Inventory, CarriedInventory<Carrier> {
 
     @Shadow(remap = false) protected InventoryArchetype archetype;
     @Shadow(remap = false) private InventoryBasic inv;
@@ -73,12 +71,12 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Inventory getChild(Lens<IInventory, ItemStack> lens) {
+    public Inventory getChild(Lens lens) {
         return null; // TODO ?
     }
 
@@ -99,7 +97,7 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter<
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 }

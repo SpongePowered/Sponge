@@ -59,7 +59,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @Mixin(SpongeUserInventory.class)
-public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter<IInventory>, UserInventory<User> {
+public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdapter, UserInventory<User> {
 
     @Shadow(remap = false) @Final public NonNullList<ItemStack> mainInventory;
     @Shadow(remap = false) @Final public NonNullList<ItemStack> armorInventory;
@@ -70,7 +70,7 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     @Shadow public abstract int getSizeInventory();
 
     protected SlotCollection slots;
-    protected Fabric<IInventory> inventory;
+    protected Fabric inventory;
     protected PlayerInventoryLens lens;
 
     @Nullable private User carrier;
@@ -96,17 +96,17 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
     }
 
     @Override
-    public Lens<IInventory, ItemStack> getRootLens() {
+    public Lens getRootLens() {
         return this.lens;
     }
 
     @Override
-    public Fabric<IInventory> getFabric() {
+    public Fabric getFabric() {
         return this.inventory;
     }
 
     @Override
-    public Inventory getChild(Lens<IInventory, ItemStack> lens) {
+    public Inventory getChild(Lens lens) {
         return null;
     }
 
@@ -141,7 +141,7 @@ public abstract class MixinSpongeUserInventory implements MinecraftInventoryAdap
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+    public SlotProvider getSlotProvider() {
         return this.slots;
     }
 

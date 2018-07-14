@@ -50,15 +50,15 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric
 @SuppressWarnings("rawtypes")
 @Mixin(InventoryCrafting.class)
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
-public abstract class MixinInventoryCrafting implements IInventory, LensProvider<IInventory, ItemStack> {
+public abstract class MixinInventoryCrafting implements IInventory, LensProvider {
 
     @Shadow @Final private NonNullList<ItemStack> stackList;
     @Shadow @Final private int inventoryWidth;
     @Shadow @Final private int inventoryHeight;
 
-    protected Fabric<IInventory> fabric;
+    protected Fabric fabric;
     protected SlotCollection slots;
-    protected Lens<IInventory, ItemStack> lens;
+    protected Lens lens;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -70,23 +70,23 @@ public abstract class MixinInventoryCrafting implements IInventory, LensProvider
 
     @SuppressWarnings("unchecked")
     @Override
-    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
         if (this.stackList.size() == 0) {
-            return new DefaultEmptyLens<>(adapter);
+            return new DefaultEmptyLens(adapter);
         }
         return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, this.slots);
     }
 
     @SuppressWarnings("unchecked")
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+    public SlotProvider inventory$getSlotProvider() {
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+    public Lens inventory$getRootLens() {
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
+    public Fabric inventory$getFabric() {
         return this.fabric;
     }
 

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.custom;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
@@ -47,7 +45,7 @@ public class CustomLens extends RealLens {
     private InventoryArchetype archetype;
     private Map<String, InventoryProperty<?, ?>> properties;
 
-    public CustomLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots, InventoryArchetype archetype,
+    public CustomLens(InventoryAdapter adapter, SlotProvider slots, InventoryArchetype archetype,
             Map<String, InventoryProperty<?, ?>> properties) {
         super(0, adapter.getFabric().getSize(), adapter, slots);
         this.archetype = archetype;
@@ -56,7 +54,7 @@ public class CustomLens extends RealLens {
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         // TODO this logic should not be done here (see PR #1010)
         // but for now this will have to do:
         InventoryProperty<?, ?> size = this.properties.get(CustomInventory.INVENTORY_DIMENSION);
@@ -76,7 +74,7 @@ public class CustomLens extends RealLens {
         }
     }
 
-    private int addLensFor(InventoryArchetype archetype, int base, SlotProvider<IInventory, ItemStack> slots) {
+    private int addLensFor(InventoryArchetype archetype, int base, SlotProvider slots) {
         Optional<InventoryProperty<String, ?>> size = archetype.getProperty(CustomInventory.INVENTORY_DIMENSION);
         if (!size.isPresent()) {
             size = archetype.getProperty(CustomInventory.INVENTORY_CAPACITY);
@@ -96,8 +94,8 @@ public class CustomLens extends RealLens {
         return slotCount;
     }
 
-    private int addLensFor(InventoryProperty<?, ?> size, int base, SlotProvider<IInventory, ItemStack> slots) {
-        Lens<IInventory, ItemStack> lens;
+    private int addLensFor(InventoryProperty<?, ?> size, int base, SlotProvider slots) {
+        Lens lens;
         int slotCount;
         if (size instanceof InventoryDimension) {
             InventoryDimension dimension = ((InventoryDimension) size);

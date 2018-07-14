@@ -25,9 +25,6 @@
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -54,10 +51,10 @@ public class PlayerInventoryLens extends RealLens {
 
     private MainPlayerInventoryLensImpl main;
     private EquipmentInventoryLensImpl equipment;
-    private SlotLens<IInventory, ItemStack> offhand;
+    private SlotLens offhand;
     private final boolean isContainer;
 
-    public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public PlayerInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
         super(0, adapter.getFabric().getSize(), adapter, slots);
         this.isContainer = false;
         this.init(slots);
@@ -70,14 +67,14 @@ public class PlayerInventoryLens extends RealLens {
      * @param size The size
      * @param slots The slots
      */
-    public PlayerInventoryLens(int base, int size, SlotProvider<IInventory, ItemStack> slots) {
+    public PlayerInventoryLens(int base, int size, SlotProvider slots) {
         super(base, size, PlayerInventory.class, slots);
         this.isContainer = true;
         this.init(slots);
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
             this.addChild(slots.getSlot(slot), new SlotIndex(ord));
@@ -106,7 +103,7 @@ public class PlayerInventoryLens extends RealLens {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         if (this.isContainer && inv instanceof ContainerFabric) {
             // If Lens is for Container extract the PlayerInventory
             Container container = ((ContainerFabric) inv).getContainer();
@@ -118,7 +115,7 @@ public class PlayerInventoryLens extends RealLens {
         return super.getAdapter(inv, parent);
     }
 
-    private void finishInit(SlotProvider<IInventory, ItemStack> slots, int base) {
+    private void finishInit(SlotProvider slots, int base) {
         this.addSpanningChild(this.main);
         this.addSpanningChild(this.equipment);
         this.addSpanningChild(this.offhand);
@@ -130,15 +127,15 @@ public class PlayerInventoryLens extends RealLens {
         }
     }
 
-    public MainPlayerInventoryLens<IInventory, ItemStack> getMainLens() {
+    public MainPlayerInventoryLens getMainLens() {
         return this.main;
     }
 
-    public EquipmentInventoryLens<IInventory, ItemStack> getEquipmentLens() {
+    public EquipmentInventoryLens getEquipmentLens() {
         return this.equipment;
     }
 
-    public SlotLens<IInventory, ItemStack> getOffhandLens() {
+    public SlotLens getOffhandLens() {
         return this.offhand;
     }
 }

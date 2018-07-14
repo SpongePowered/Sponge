@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -44,17 +42,17 @@ import java.util.List;
  */
 public class CompoundLens extends ConceptualLens {
 
-    protected final List<Lens<IInventory, ItemStack>> inventories;
+    protected final List<Lens> inventories;
 
-    private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots,
-            List<Lens<IInventory, ItemStack>> lenses) {
+    private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider slots,
+            List<Lens> lenses) {
         super(0, size, adapterType, slots);
         this.inventories = lenses;
         this.init(slots);
     }
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
@@ -65,7 +63,7 @@ public class CompoundLens extends ConceptualLens {
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new VanillaAdapter(inv, this, parent);
     }
 
@@ -75,7 +73,7 @@ public class CompoundLens extends ConceptualLens {
 
     public static class Builder {
 
-        private final List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
+        private final List<Lens> lenses = new ArrayList<>();
 
         @SuppressWarnings({"rawtypes", "unchecked"})
         public Builder add(Lens lens) {
