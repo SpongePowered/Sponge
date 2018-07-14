@@ -45,9 +45,6 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensCollectionImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs.Type;
-import org.spongepowered.common.util.observer.Observer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,7 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TInventory, TStack> implements Observer<InventoryEventArgs> {
+public abstract class AbstractLens<TInventory, TStack> implements Lens<TInventory, TStack> {
 
     protected final Class<? extends Inventory> adapterType;
     
@@ -123,12 +120,6 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         checkNotNull(lens, "Attempted to register a null lens");
         this.children.add(lens, properties);
         this.availableSlots.addAll(lens.getSlots());
-        
-        if (lens instanceof ObservableLens) {
-            ((ObservableLens<TInventory, TStack>) lens).addObserver(this);
-        }
-        
-        this.raise(new InventoryEventArgs(Type.LENS_ADDED, this));
     }
     
     protected void addSpanningChild(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
@@ -262,21 +253,6 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     @Override
     public Iterator<Lens<TInventory, TStack>> iterator() {
         return this.children.iterator();
-    }
-    
-    @Override
-    public void notify(Object source, InventoryEventArgs e) {
-        if (e.type == Type.LENS_INVALIDATED || e.type == Type.SLOT_CONTENT_CHANGED) {
-            this.raise(e);
-        }
-        if (e.type == Type.LENS_ADDED && source instanceof Lens && this.children.contains(source)) {
-            this.availableSlots.addAll(((Lens<?, ?>)source).getSlots());
-        }
-    }        
-
-    @Override
-    public void invalidate(Fabric<TInventory> inv) {
-        this.raise(new InventoryEventArgs(Type.LENS_INVALIDATED, this));
     }
 
     @Override

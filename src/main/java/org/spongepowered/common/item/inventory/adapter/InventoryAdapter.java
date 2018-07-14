@@ -28,8 +28,6 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
-import org.spongepowered.common.util.observer.Observer;
 
 import javax.annotation.Nullable;
 
@@ -53,7 +51,7 @@ import javax.annotation.Nullable;
  * 
  * @param <TInventory>
  */
-public interface InventoryAdapter<TInventory, TStack> extends Inventory, Observer<InventoryEventArgs> {
+public interface InventoryAdapter<TInventory, TStack> extends Inventory {
     
     SlotProvider<TInventory, TStack> getSlotProvider();
 
