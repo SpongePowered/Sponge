@@ -240,13 +240,10 @@ public class SpongeCommonEventFactory {
     }
 
     public static void callDropItemDestruct(List<Entity> entities, PhaseContext<?> context) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
-            SpongeImpl.postEvent(destruct);
-            if (!destruct.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(context, destruct);
-            }
+        final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        SpongeImpl.postEvent(destruct);
+        if (!destruct.isCancelled()) {
+            EntityUtil.processEntitySpawnsFromEvent(context, destruct);
         }
     }
 

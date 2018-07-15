@@ -83,6 +83,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         // WE have to handle per-item entity drops and entity item drops before we handle other entity spawns
         // the reason we have to do it this way is because forge allows for item drops to potentially spawn
         // other entities at the same time.
+        boolean hasCaptures = !context.getPerEntityItemEntityDropSupplier().isEmpty();
         context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
             final ArrayList<Entity> entities = new ArrayList<>();
             for (EntityItem item : items) {
@@ -108,7 +109,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
 
         // Forge always fires a living drop event even if nothing was captured
         // This allows mods such as Draconic Evolution to add items to the drop list
-        if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
+        if (!hasCaptures) {
             final ArrayList<Entity> entities = new ArrayList<>();
             Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 

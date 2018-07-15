@@ -98,6 +98,7 @@ import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -494,18 +495,24 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                Sponge.getCauseStackManager().pushCause(player);
-                MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
-                SpongeImpl.postEvent(event);
-                Sponge.getCauseStackManager().popCause();
-                if (event.isCancelled()) {
-                    mixinPlayer.setLocationAndAngles(fromTransform);
-                    this.lastMoveLocation = from;
-                    ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
-                    return true;
-                } else if (!event.getToTransform().equals(toTransform)) {
-                    mixinPlayer.setLocationAndAngles(event.getToTransform());
-                    this.lastMoveLocation = event.getToTransform().getLocation();
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        Sponge.getCauseStackManager().pushCause(player);
+                        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
+                        SpongeImpl.postEvent(event);
+                        Sponge.getCauseStackManager().popCause();
+                        if (event.isCancelled()) {
+                            mixinPlayer.setLocationAndAngles(fromTransform);
+                            this.lastMoveLocation = from;
+                            ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
+                            return true;
+                        }
+                        toTransform = event.getToTransform();
+                    }
+                }
+                if (!toTransform.equals(toTransform)) {
+                    mixinPlayer.setLocationAndAngles(toTransform);
+                    this.lastMoveLocation = toTransform.getLocation();
                     ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
                     return true;
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
@@ -515,7 +522,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     ((IMixinEntityPlayerMP) this.player).setVelocityOverride(null);
                     return true;
                 } else {
-                    this.lastMoveLocation = event.getToTransform().getLocation();
+                    this.lastMoveLocation = toTransform.getLocation();
                 }
                 this.resendLatestResourcePackRequest();
             }
@@ -710,7 +717,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"))
+    @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
     public void onProcessTryUseItem(CPacketPlayerTryUseItem packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
         long packetDiff = System.currentTimeMillis() - lastTryBlockPacketTimeStamp;
