@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.interfaces.IMixinContainer;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
@@ -45,7 +46,33 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
 
     @Override
     public boolean hasCaptures() {
-        return true; // We have to return true due to inventories being tracked.
+        if (!((IMixinContainer) this.packetPlayer.openContainer).getPreviewTransactions().isEmpty()) {
+            return true;
+        }
+        if (!((IMixinContainer) this.packetPlayer.openContainer).getCapturedTransactions().isEmpty()) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.DROP_ITEMS) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.DROP_ITEM_OUTSIDE_WINDOW) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.OPEN_INVENTORY) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.PLACE_RECIPE) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.SWAP_HAND_ITEMS) {
+            return true;
+        }
+        if (this.state == PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL) {
+            return true;
+        }
+        ((IMixinContainer) this.packetPlayer.openContainer).setCaptureInventory(false);
+
+        return super.hasCaptures();
     }
 
     @Override

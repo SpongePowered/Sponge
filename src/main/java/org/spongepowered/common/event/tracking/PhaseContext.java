@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
@@ -57,6 +58,7 @@ import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -473,6 +475,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
         if (this.entityItemEntityDropsSupplier != null && !this.entityItemEntityDropsSupplier.isEmpty()) {
             return true;
+        }
+        if (this.source != null && this.source instanceof EntityPlayer) {
+            if (((IMixinInventoryPlayer) ((EntityPlayer) this.source).inventory).getCapturedTransactions().size() > 0) {
+                return true;
+            }
         }
 
         return false;

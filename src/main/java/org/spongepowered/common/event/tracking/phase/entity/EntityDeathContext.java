@@ -56,6 +56,11 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
         super.close();
     }
 
+    public boolean hasCaptures() {
+        // Required for forge mods, such as Draconic Evolution, as drop events must always be fired even when empty
+        return true;
+    }
+
     @Override
     public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
         String s = String.format("%1$"+indent+"s", "");
