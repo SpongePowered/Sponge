@@ -156,9 +156,10 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
      */
     @Inject(method = "isDone", at = @At("HEAD"), cancellable = true)
     private void onIsDone(CallbackInfoReturnable<Boolean> ci) {
-        if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
+        if (this.advancement == null || !SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
+
         final Advancement advancement = getOptionalAdvancement().orElse(null);
         if (advancement != null) {
             ci.setReturnValue(get(advancement.getCriterion()).map(Progressable::achieved).orElse(false));
