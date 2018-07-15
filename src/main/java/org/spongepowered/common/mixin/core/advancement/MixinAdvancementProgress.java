@@ -159,7 +159,10 @@ public class MixinAdvancementProgress implements org.spongepowered.api.advanceme
         if (!SpongeImplHooks.isMainThread()) { // Use vanilla behavior on the client
             return;
         }
-        ci.setReturnValue(get(getAdvancement().getCriterion()).map(Progressable::achieved).orElse(false));
+        final Advancement advancement = getOptionalAdvancement().orElse(null);
+        if (advancement != null) {
+            ci.setReturnValue(get(advancement.getCriterion()).map(Progressable::achieved).orElse(false));
+        }
     }
 
     /**
