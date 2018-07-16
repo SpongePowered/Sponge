@@ -93,7 +93,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -135,6 +134,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
+    @Shadow private boolean serverStopped;
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worlds;
@@ -761,6 +761,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
     public Object onCall(Callable<?> callable) throws Exception {
+        // This method can be called async while server is stopping
+        if (this.serverStopped && !SpongeImplHooks.isMainThread()) {
+            return callable.call();
+        }
+
         Object value;
         try (BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext()
                 .source(callable)) {
