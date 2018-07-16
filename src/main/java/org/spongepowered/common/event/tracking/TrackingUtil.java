@@ -158,6 +158,9 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entityTiming.startTiming();
             entity.onUpdate();
+            if (ShouldFire.MOVE_ENTITY_EVENT) {
+                SpongeCommonEventFactory.callMoveEntityEvent(entity);
+            }
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
         }
@@ -183,6 +186,9 @@ public final class TrackingUtil {
                 .ifPresent(context::owner);
             context.buildAndSwitch();
             entity.updateRidden();
+            if (ShouldFire.MOVE_ENTITY_EVENT) {
+                SpongeCommonEventFactory.callMoveEntityEvent(entity);
+            }
         } catch (Exception | NoClassDefFoundError e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, tickContext);
         }

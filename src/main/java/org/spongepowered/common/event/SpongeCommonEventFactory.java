@@ -34,6 +34,7 @@ import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -64,6 +65,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -83,6 +85,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -843,6 +846,74 @@ public class SpongeCommonEventFactory {
         }
     }
 
+    public static MoveEntityEvent callMoveEntityEvent(net.minecraft.entity.Entity entity) {
+        // Ignore movement event if entity is dead, a projectile, or item.
+        // Note: Projectiles are handled with CollideBlockEvent.Impact
+        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+            return null;
+        }
+
+        Entity spongeEntity = (Entity) entity;
+
+        if (entity.lastTickPosX != entity.posX
+            || entity.lastTickPosY != entity.posY
+            || entity.lastTickPosZ != entity.posZ
+            || entity.rotationPitch != entity.prevRotationPitch
+            || entity.rotationYaw != entity.prevRotationYaw) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(entity);
+                // yes we have a move event.
+                final double currentPosX = entity.posX;
+                final double currentPosY = entity.posY;
+                final double currentPosZ = entity.posZ;
+    
+                final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
+                final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
+    
+                Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
+                Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
+                final Transform<World> oldTransform = new Transform<>(spongeEntity.getWorld(), oldPositionVector, oldRotationVector,
+                        spongeEntity.getScale());
+                final Transform<World> newTransform = new Transform<>(spongeEntity.getWorld(), currentPositionVector, currentRotationVector,
+                        spongeEntity.getScale());
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), oldTransform, newTransform, spongeEntity);
+    
+                if (SpongeImpl.postEvent(event)) {
+                    entity.posX = entity.lastTickPosX;
+                    entity.posY = entity.lastTickPosY;
+                    entity.posZ = entity.lastTickPosZ;
+                    entity.rotationPitch = entity.prevRotationPitch;
+                    entity.rotationYaw = entity.prevRotationYaw;
+                } else {
+                    Vector3d newPosition = event.getToTransform().getPosition();
+                    if (!newPosition.equals(currentPositionVector)) {
+                        entity.posX = newPosition.getX();
+                        entity.posY = newPosition.getY();
+                        entity.posZ = newPosition.getZ();
+                    }
+                    if (!event.getToTransform().getRotation().equals(currentRotationVector)) {
+                        entity.rotationPitch = (float) currentRotationVector.getX();
+                        entity.rotationYaw = (float) currentRotationVector.getY();
+                    }
+                    //entity.setPositionWithRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
+                        /*
+                        Some thoughts from gabizou: The interesting thing here is that while this is only called
+                        in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
+                        of the entity being handled here. The interesting issue is that since we are setting the transform,
+                        the rider entity (and the rest of the rider entities) are being updated as well with the new position
+                        and potentially world, which results in a dirty world usage (since the world transfer is handled by
+                        us). Now, the thing is, the previous position is not updated either, and likewise, the current position
+                        is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
+                        logic.
+                         */
+                    //((Entity) entity).setTransform(event.getToTransform());
+                }
+                return event;
+            }
+        }
+
+        return null;
+    }
     public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source, boolean isMainThread) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;

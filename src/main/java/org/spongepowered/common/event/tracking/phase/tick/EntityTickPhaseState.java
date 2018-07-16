@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
@@ -40,21 +38,15 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.util.VecHelper;
@@ -96,9 +88,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(tickingEntity);
-
             this.processCaptures(tickingEntity, phaseContext, frame);
-            this.fireMovementEvents(EntityUtil.toNative(tickingEntity));
         }
     }
 
@@ -210,68 +200,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                                 (DamageSource) entry.damageSrc);
                     }
                 }
-            }
-        }
-    }
-
-    private void fireMovementEvents(net.minecraft.entity.Entity entity) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
-            return;
-        }
-        Entity spongeEntity = (Entity) entity;
-
-        if (entity.lastTickPosX != entity.posX
-            || entity.lastTickPosY != entity.posY
-            || entity.lastTickPosZ != entity.posZ
-            || entity.rotationPitch != entity.prevRotationPitch
-            || entity.rotationYaw != entity.prevRotationYaw) {
-            // yes we have a move event.
-            final double currentPosX = entity.posX;
-            final double currentPosY = entity.posY;
-            final double currentPosZ = entity.posZ;
-
-            final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
-            final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
-
-            Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
-            Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-            final Transform<World> oldTransform = new Transform<>(spongeEntity.getWorld(), oldPositionVector, oldRotationVector,
-                    spongeEntity.getScale());
-            final Transform<World> newTransform = new Transform<>(spongeEntity.getWorld(), currentPositionVector, currentRotationVector,
-                    spongeEntity.getScale());
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), oldTransform, newTransform, spongeEntity);
-
-            if (SpongeImpl.postEvent(event)) {
-                entity.posX = entity.lastTickPosX;
-                entity.posY = entity.lastTickPosY;
-                entity.posZ = entity.lastTickPosZ;
-                entity.rotationPitch = entity.prevRotationPitch;
-                entity.rotationYaw = entity.prevRotationYaw;
-            } else {
-                Vector3d newPosition = event.getToTransform().getPosition();
-                if (!newPosition.equals(currentPositionVector)) {
-                    entity.posX = newPosition.getX();
-                    entity.posY = newPosition.getY();
-                    entity.posZ = newPosition.getZ();
-                }
-                if (!event.getToTransform().getRotation().equals(currentRotationVector)) {
-                    entity.rotationPitch = (float) currentRotationVector.getX();
-                    entity.rotationYaw = (float) currentRotationVector.getY();
-                }
-                //entity.setPositionWithRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
-                    /*
-                    Some thoughts from gabizou: The interesting thing here is that while this is only called
-                    in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
-                    of the entity being handled here. The interesting issue is that since we are setting the transform,
-                    the rider entity (and the rest of the rider entities) are being updated as well with the new position
-                    and potentially world, which results in a dirty world usage (since the world transfer is handled by
-                    us). Now, the thing is, the previous position is not updated either, and likewise, the current position
-                    is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
-                    logic.
-                     */
-                //((Entity) entity).setTransform(event.getToTransform());
             }
         }
     }
