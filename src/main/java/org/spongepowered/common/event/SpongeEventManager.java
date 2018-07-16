@@ -457,6 +457,8 @@ public class SpongeEventManager implements EventManager {
     }
 
     public boolean post(Event event, PluginContainer plugin) {
-        return post(event, getHandlerCache(event).getListeners().stream().filter(l -> l.getPlugin().equals(plugin)).collect(Collectors.toList()));
+        return post(event, getHandlerCache(event).getListeners().stream()
+                .filter(l -> l.getPlugin().equals(plugin))
+                .collect(Collectors.toList()));
     }
 }
