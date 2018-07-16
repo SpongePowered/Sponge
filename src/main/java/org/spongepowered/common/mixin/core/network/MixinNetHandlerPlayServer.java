@@ -155,7 +155,6 @@ import javax.annotation.Nullable;
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMixinNetHandlerPlayServer {
 
     private static final String UPDATE_SIGN = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;";
-    private static long lastTryBlockPacketTimeStamp = 0;
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager netManager;
@@ -718,7 +717,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
     public void onProcessTryUseItem(CPacketPlayerTryUseItem packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-        long packetDiff = System.currentTimeMillis() - lastTryBlockPacketTimeStamp;
+        long packetDiff = System.currentTimeMillis() - SpongeCommonEventFactory.lastTryBlockPacketTimeStamp;
         // If the time between packets is small enough, use the last result.
         if (packetDiff < 100) {
             // Use previous result and avoid firing a second event
@@ -732,7 +731,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public void onProcessTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
         // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
         // Only track the timestamps to support our block animation events
-        lastTryBlockPacketTimeStamp = System.currentTimeMillis();
+        SpongeCommonEventFactory.lastTryBlockPacketTimeStamp = System.currentTimeMillis();
         SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
 
     }

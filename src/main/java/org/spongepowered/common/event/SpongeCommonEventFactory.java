@@ -173,6 +173,7 @@ public class SpongeCommonEventFactory {
     // For animation packet
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
+    public static long lastTryBlockPacketTimeStamp = 0;
     public static boolean lastInteractItemOnBlockCancelled = false;
     public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
