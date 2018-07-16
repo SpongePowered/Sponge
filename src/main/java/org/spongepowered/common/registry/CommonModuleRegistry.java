@@ -46,6 +46,7 @@ import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.item.ItemGroup;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataFormat;
@@ -458,6 +459,7 @@ public final class CommonModuleRegistry {
             .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
             .registerModule(Hinge.class, new HingeRegistryModule())
             .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
+            .registerModule(ItemGroup.class, new ItemGroupRegistryModule())
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
             .registerModule(new LocaleRegistryModule())
             .registerModule(LogAxis.class, new LogAxisRegistryModule())

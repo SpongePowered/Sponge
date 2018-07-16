@@ -161,6 +161,7 @@
         "command.server.MixinCommandSummon",
         "command.server.MixinCommandTeleport",
         "command.server.MixinCommandTP",
+        "creativetab.MixinCreativeTabs",
         "data.MixinCustomDataHolder",
         "data.MixinDataHolder",
         "data.MixinPropertyHolder",
