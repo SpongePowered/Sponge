@@ -32,7 +32,8 @@ import org.spongepowered.api.item.ItemGroup;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Plugin(id = "item_group_test", name = "Item Group Test", version = "0.0.0", description = ItemGroupTest.DESCRIPTION)
 public class ItemGroupTest {
@@ -41,7 +42,7 @@ public class ItemGroupTest {
 
     @Listener
     public void onUseItem(InteractItemEvent.Secondary event, @First Player player) {
-        Optional<ItemGroup> ig = event.getItemStack().getType().getItemGroup();
-        player.sendMessage(Text.of("This item is in the item group: " + ig.map(ItemGroup::getName).orElse("none")));
+        Collection<ItemGroup> itemGroups = event.getItemStack().getType().getItemGroups();
+        player.sendMessage(Text.of("This item is in the item group(s): " + itemGroups.stream().map(ItemGroup::getName).collect(Collectors.joining(", "))));
     }
 }
