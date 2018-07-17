@@ -38,7 +38,6 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -127,7 +126,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow public abstract String getUnlocalizedName();
     @Shadow public abstract Material getMaterial(IBlockState state);
-    @Shadow public abstract CreativeTabs getCreativeTabToDisplayOn();
     @Shadow public abstract IBlockState shadow$getDefaultState();
     @Shadow public abstract boolean shadow$getTickRandomly();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
