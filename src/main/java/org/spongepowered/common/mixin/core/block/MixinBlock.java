@@ -64,7 +64,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.api.item.ItemGroup;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -216,11 +215,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public Optional<ItemType> getItem() {
         ItemType itemType = (ItemType) Item.getItemFromBlock((Block) (Object) this);
         return Items.AIR.equals(itemType) ? Optional.empty() : Optional.of(itemType);
-    }
-
-    @Override
-    public Optional<ItemGroup> getItemGroup() {
-        return Optional.ofNullable((ItemGroup) getCreativeTabToDisplayOn());
     }
 
     @Override
