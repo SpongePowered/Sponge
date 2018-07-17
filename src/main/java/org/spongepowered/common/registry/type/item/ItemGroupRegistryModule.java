@@ -72,7 +72,8 @@ public class ItemGroupRegistryModule implements CatalogRegistryModule<ItemGroup>
 
     @AdditionalRegistration
     public void customRegistration() {
-        for (ItemGroup itemGroup : this.itemGroupMap.values()) {
+        for (CreativeTabs creativeTab : CreativeTabs.CREATIVE_TAB_ARRAY) {
+            ItemGroup itemGroup = (ItemGroup) creativeTab;
             String key = itemGroup.getId().toLowerCase(Locale.ENGLISH);
             if (!this.itemGroupMap.containsKey(key)) {
                 this.itemGroupMap.put(key, itemGroup);
