@@ -68,7 +68,7 @@ public abstract class MixinContainerPlayer extends MixinContainer implements IMi
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.LEGGINGS))
                 .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.BOOTS))
                 .add(36)
-                .add(1);
+                .add(EquipmentSlotAdapter.class, index -> new EquipmentSlotLensImpl(index, i -> true, t -> true, e -> e == EquipmentTypes.OFF_HAND));
 
         if (this.offHandSlot == -1) {
             this.offHandSlot = builder.size() - 1;
