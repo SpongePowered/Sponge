@@ -52,7 +52,14 @@ public class MutableLensCollectionImpl extends AbstractList<Lens> implements Mut
     
     @Override
     public void add(Lens lens, InventoryProperty<?, ?>... properties) {
-        this.lenses.add(new LensHandle(lens, properties));
+        int idx = this.indexOf(lens);
+        if (idx == -1) {
+            this.lenses.add(new LensHandle(lens, properties));
+        } else {
+            for (InventoryProperty<?, ?> property : properties) {
+                this.getHandle(idx).setProperty(property);
+            }
+        }
     }
     
     @Override

@@ -28,6 +28,8 @@ import net.minecraft.inventory.Container;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -83,17 +85,31 @@ public class PlayerInventoryLens extends RealLens {
         int base = this.base;
         if (this.isContainer) {
             this.equipment = new EquipmentInventoryLensImpl(base, EQUIPMENT, 1, slots, true);
+            this.addChild(slots.getSlot(base + 0), new EquipmentSlotType(EquipmentTypes.HEADWEAR));
+            this.addChild(slots.getSlot(base + 1), new EquipmentSlotType(EquipmentTypes.CHESTPLATE));
+            this.addChild(slots.getSlot(base + 2), new EquipmentSlotType(EquipmentTypes.LEGGINGS));
+            this.addChild(slots.getSlot(base + 3), new EquipmentSlotType(EquipmentTypes.BOOTS));
             base += EQUIPMENT; // 4
             this.main = new MainPlayerInventoryLensImpl(base, slots, true);
             base += this.main.slotCount();
             this.offhand = slots.getSlot(base);
+            this.addChild(slots.getSlot(base), new EquipmentSlotType(EquipmentTypes.OFF_HAND));
             base += OFFHAND;
         } else {
             this.main = new MainPlayerInventoryLensImpl(base, slots, false);
             base += this.main.slotCount();
             this.equipment = new EquipmentInventoryLensImpl(base, EQUIPMENT, 1, slots, false);
+
+            this.addChild(slots.getSlot(base + 0), new EquipmentSlotType(EquipmentTypes.BOOTS));
+            this.addChild(slots.getSlot(base + 1), new EquipmentSlotType(EquipmentTypes.LEGGINGS));
+            this.addChild(slots.getSlot(base + 2), new EquipmentSlotType(EquipmentTypes.CHESTPLATE));
+            this.addChild(slots.getSlot(base + 3), new EquipmentSlotType(EquipmentTypes.HEADWEAR));
+
             base += EQUIPMENT;
             this.offhand = slots.getSlot(base);
+
+            this.addChild(slots.getSlot(base), new EquipmentSlotType(EquipmentTypes.OFF_HAND));
+
             base += OFFHAND;
         }
 
