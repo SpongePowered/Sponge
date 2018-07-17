@@ -30,6 +30,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import org.spongepowered.api.item.ItemGroup;
 import org.spongepowered.api.item.ItemGroups;
 import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
@@ -67,5 +68,15 @@ public class ItemGroupRegistryModule implements CatalogRegistryModule<ItemGroup>
         this.itemGroupMap.put("redstone", (ItemGroup) CreativeTabs.REDSTONE);
         this.itemGroupMap.put("tools", (ItemGroup) CreativeTabs.TOOLS);
         this.itemGroupMap.put("transportation", (ItemGroup) CreativeTabs.TRANSPORTATION);
+    }
+
+    @AdditionalRegistration
+    public void customRegistration() {
+        for (ItemGroup itemGroup : this.itemGroupMap.values()) {
+            String key = itemGroup.getId().toLowerCase(Locale.ENGLISH);
+            if (!this.itemGroupMap.containsKey(key)) {
+                this.itemGroupMap.put(key, itemGroup);
+            }
+        }
     }
 }
