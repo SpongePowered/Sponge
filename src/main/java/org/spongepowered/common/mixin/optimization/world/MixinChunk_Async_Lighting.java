@@ -330,7 +330,12 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                     chunk.checkLightSide(enumfacing.getOpposite());
                 }
 
-                this.setSkylightUpdated();
+                for (int i = 0; i < this.updateSkylightColumns.length; ++i)
+                {
+                    this.updateSkylightColumns[i] = true;
+                }
+
+                this.recheckGapsAsync(neighbors);
             }
         }
     }
