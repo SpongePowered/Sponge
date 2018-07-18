@@ -50,7 +50,7 @@ public class FireworkShapeRegistryModule implements CatalogRegistryModule<Firewo
     @Override
     public Optional<FireworkShape> getById(String id) {
         id = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        if (id.contains(":")) {
+        if (!id.contains(":")) {
             id = "minecraft:" + id;
         }
         return Optional.ofNullable(this.fireworkShapeMap.get(id));
