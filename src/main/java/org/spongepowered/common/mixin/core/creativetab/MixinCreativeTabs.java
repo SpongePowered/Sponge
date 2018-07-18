@@ -33,8 +33,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 @Mixin(CreativeTabs.class)
 public abstract class MixinCreativeTabs implements ItemGroup {
+
+    @Nullable private Translation translation;
 
     @Shadow @Final private String tabLabel;
 
@@ -45,12 +49,15 @@ public abstract class MixinCreativeTabs implements ItemGroup {
 
     @Override
     public String getName() {
-        return getId();
+        return getTranslation().get();
     }
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation("itemGroup." + this.tabLabel);
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("itemGroup." + this.tabLabel);
+        }
+        return this.translation;
     }
 
     @Override
