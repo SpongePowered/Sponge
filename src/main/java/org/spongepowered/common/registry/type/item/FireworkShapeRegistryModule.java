@@ -32,6 +32,7 @@ import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
+import org.spongepowered.common.item.SpongeFireworkShape;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,7 +49,11 @@ public class FireworkShapeRegistryModule implements CatalogRegistryModule<Firewo
 
     @Override
     public Optional<FireworkShape> getById(String id) {
-        return Optional.ofNullable(this.fireworkShapeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        id = checkNotNull(id).toLowerCase(Locale.ENGLISH);
+        if (id.contains(":")) {
+            id = "minecraft:" + id;
+        }
+        return Optional.ofNullable(this.fireworkShapeMap.get(id));
     }
 
     @Override
@@ -58,8 +63,7 @@ public class FireworkShapeRegistryModule implements CatalogRegistryModule<Firewo
 
     @Override
     public void registerDefaults() {
-        this.fireworkShapeMap.putAll(FireworkUtils.shapeMapping.values()
-        .stream()
-        .collect(Collectors.toMap(shape -> shape.getId().toLowerCase(Locale.ENGLISH), Function.identity())));
+        this.fireworkShapeMap.putAll(FireworkUtils.shapeMapping.values().stream()
+                .collect(Collectors.toMap(SpongeFireworkShape::getId, Function.identity())));
     }
 }

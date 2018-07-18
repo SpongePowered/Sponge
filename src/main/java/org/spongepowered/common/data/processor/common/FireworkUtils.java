@@ -49,11 +49,11 @@ import java.util.Optional;
 public class FireworkUtils {
 
     public static final BiMap<Byte, SpongeFireworkShape> shapeMapping = ImmutableBiMap.<Byte, SpongeFireworkShape>builder()
-            .put((byte) 0, new SpongeFireworkShape((byte) 0, "BALL"))
-            .put((byte) 1, new SpongeFireworkShape((byte) 1, "LARGE_BALL"))
-            .put((byte) 2, new SpongeFireworkShape((byte) 2, "STAR"))
-            .put((byte) 3, new SpongeFireworkShape((byte) 3, "CREEPER"))
-            .put((byte) 4, new SpongeFireworkShape((byte) 4, "BURST"))
+            .put((byte) 0, new SpongeFireworkShape("minecraft:ball", "Ball"))
+            .put((byte) 1, new SpongeFireworkShape("minecraft:large_ball", "Large Ball"))
+            .put((byte) 2, new SpongeFireworkShape("minecraft:star", "Star"))
+            .put((byte) 3, new SpongeFireworkShape("minecraft:creeper", "Creeper"))
+            .put((byte) 4, new SpongeFireworkShape("minecraft:burst", "Burst"))
             .build();
 
     public static ItemStack getItem(EntityFireworkRocket firework) {
