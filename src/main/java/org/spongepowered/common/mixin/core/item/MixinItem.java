@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockType;
@@ -33,6 +34,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
+import org.spongepowered.api.item.ItemGroup;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,6 +45,8 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +61,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Shadow public abstract int getItemStackLimit();
     @Shadow public abstract String getUnlocalizedName();
+    @Shadow @Nullable public abstract CreativeTabs getCreativeTab();
 
     // A item stack used to retrieve properties
     @Nullable private org.spongepowered.api.item.inventory.ItemStack propertyItemStack;
@@ -69,6 +74,11 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Override
     public String getName() {
         return getId();
+    }
+
+    @Override
+    public Collection<ItemGroup> getItemGroups() {
+        return Collections.singleton((ItemGroup) getCreativeTab());
     }
 
     @Override
