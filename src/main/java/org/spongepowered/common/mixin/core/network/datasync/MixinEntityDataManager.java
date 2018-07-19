@@ -102,7 +102,7 @@ public abstract class MixinEntityDataManager {
                         try {
                             value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
                         } catch (Exception e) {
-                            // Worst case scenario, we don't wnat to cause an issue, so we just set the value
+                            // Worst case scenario, we don't want to cause an issue, so we just set the value
                             value = incomingValue;
                         }
                     }

@@ -24,11 +24,32 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.spongepowered.api.world.Chunk;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
-public class GenericGenerationContext extends GenerationContext<GenericGenerationContext> {
+public class ChunkLoadContext extends GenerationContext<ChunkLoadContext> {
 
-    GenericGenerationContext(IPhaseState<? extends GenericGenerationContext> state) {
+    private Chunk chunk;
+
+    public ChunkLoadContext(IPhaseState<? extends ChunkLoadContext> state) {
         super(state);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ChunkLoadContext chunk(net.minecraft.world.chunk.Chunk chunk) {
+        this.chunk = (Chunk) chunk;
+        return this;
+    }
+
+    public final org.spongepowered.api.world.Chunk getChunk() {
+        return this.chunk;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "Chunk", this.chunk);
     }
 }

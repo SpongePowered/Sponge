@@ -22,51 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.entity;
+package org.spongepowered.common.data.datasync.entity;
 
 import net.minecraft.entity.EntityAgeable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.util.OptBool;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.List;
 import java.util.Optional;
 
-public class IsAdultValueProcessor extends AbstractSpongeValueProcessor<EntityAgeable, Boolean, Value<Boolean>> {
+public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
 
-    public IsAdultValueProcessor() {
-        super(EntityAgeable.class, Keys.IS_ADULT);
+    public EntityBabyConverter() {
+        super(EntityAgeable.BABY);
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.IS_ADULT, true, actualValue);
+    public Optional<DataTransactionResult> createTransaction(Boolean currentValue, Boolean value) {
+        return Optional.of(DataTransactionResult.builder()
+            .replace(ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, false, !currentValue))
+            .success(ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, false, !value))
+            .result(DataTransactionResult.Type.SUCCESS)
+            .build());
     }
 
     @Override
-    protected boolean set(EntityAgeable container, Boolean adult) {
-        container.setGrowingAge(adult ? DataConstants.ADULT : DataConstants.CHILD);
-        return true;
-    }
-
-    @Override
-    protected Optional<Boolean> getVal(EntityAgeable container) {
-        return OptBool.of((Boolean) !container.isChild());
-    }
-
-    @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, true, value);
-    }
-
-    @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+    public Boolean getValueFromEvent(Boolean originalValue, List<ImmutableValue<?>> immutableValues) {
+        for (ImmutableValue<?> value : immutableValues) {
+            if (value.getKey() == Keys.IS_ADULT) {
+                return !(Boolean) value.get();
+            }
+        }
+        return originalValue;
     }
 }

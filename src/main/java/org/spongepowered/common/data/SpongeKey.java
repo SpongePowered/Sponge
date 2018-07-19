@@ -100,7 +100,7 @@ public final class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         if (this.listeners == null) {
             this.listeners = new ArrayList<>();
         }
-        this.listeners.add(new KeyBasedDataListener<>(holderFilter, listener, getCurrentContainer()));
+        this.listeners.add(new KeyBasedDataListener<>(holderFilter, this, listener, getCurrentContainer()));
     }
 
     @Override

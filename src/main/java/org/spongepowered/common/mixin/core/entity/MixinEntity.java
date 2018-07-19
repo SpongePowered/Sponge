@@ -261,6 +261,8 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
 
     @Shadow private boolean invulnerable;
 
+    @Shadow protected boolean inPortal;
+
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
         if (worldIn instanceof IMixinWorldServer) {

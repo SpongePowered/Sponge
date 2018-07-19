@@ -25,10 +25,37 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.passive.EntityAnimal;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.Ageable;
+import org.spongepowered.api.entity.living.animal.Animal;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.ShouldFire;
+
+import java.util.Optional;
 
 @Mixin(EntityAgeable.class)
 public abstract class MixinEntityAgeable extends MixinEntityCreature implements Ageable {
 
+    @Inject(method = "setGrowingAge", at = @At("RETURN"))
+    private void callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
+        if (age == 0) {
+            this.callReadyToMateEvent();
+        }
+    }
+
+    private void callReadyToMateEvent() {
+        if (ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((EntityAgeable) (Object) this) instanceof EntityAnimal) {
+            final BreedEntityEvent.ReadyToMate event =
+                SpongeEventFactory.createBreedEntityEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), Optional.empty(), (Animal)
+                    this);
+            SpongeImpl.postEvent(event);
+        }
+    }
 }

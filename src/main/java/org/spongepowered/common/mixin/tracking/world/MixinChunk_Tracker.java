@@ -396,6 +396,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             GenerationPhase.State.CHUNK_LOADING.createPhaseContext()
                     .source(this)
                     .world(this.world)
+                    .chunk((net.minecraft.world.chunk.Chunk) (Object) this)
                     .buildAndSwitch();
         }
     }

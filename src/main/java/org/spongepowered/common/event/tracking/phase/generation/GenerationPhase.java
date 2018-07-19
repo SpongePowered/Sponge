@@ -49,7 +49,7 @@ public final class GenerationPhase extends TrackingPhase {
     @SuppressWarnings("unchecked")
     public static final class State {
 
-        public static final IPhaseState<GenericGenerationContext> CHUNK_LOADING = new BasicGenerationState("CHUNK_LOADING").bake();
+        public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState().bake();
 
         public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState().bake();
 

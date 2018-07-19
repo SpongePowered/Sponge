@@ -44,6 +44,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeKey;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.data.datasync.entity.EntityAirConverter;
+import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
 import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
@@ -697,6 +698,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
             objects.add(new EntityAirConverter());
             objects.add(new EntityCustomNameConverter());
             objects.add(new EntityNoGravityConverter());
+            objects.add(new EntityBabyConverter());
             return objects;
         })
         .build();

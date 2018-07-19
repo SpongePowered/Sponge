@@ -25,27 +25,29 @@
 package org.spongepowered.common.data;
 
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 
-public class KeyBasedDataListener<E extends DataHolder> implements EventListener<ChangeDataHolderEvent.ValueChange> {
-
+public final class KeyBasedDataListener<E extends DataHolder> implements EventListener<ChangeDataHolderEvent.ValueChange> {
 
     private final Class<E> holderType;
+    private final Key<?> key;
     private final EventListener<ChangeDataHolderEvent.ValueChange> listener;
     private final PluginContainer owner;
 
-    KeyBasedDataListener(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener,
-        PluginContainer currentContainer) {
+    KeyBasedDataListener(final Class<E> holderFilter, final Key<?> key, final EventListener<ChangeDataHolderEvent.ValueChange> listener,
+        final PluginContainer currentContainer) {
         this.holderType = holderFilter;
+        this.key = key;
         this.listener = listener;
         this.owner = currentContainer;
     }
 
     @Override
     public void handle(ChangeDataHolderEvent.ValueChange event) throws Exception {
-        if (this.holderType.isInstance(event.getTargetHolder())) {
+        if (this.holderType.isInstance(event.getTargetHolder()) && event.getEndResult().getSuccessfulData().stream().anyMatch(v -> v.getKey() == this.key)) {
             this.listener.handle(event);
         }
     }

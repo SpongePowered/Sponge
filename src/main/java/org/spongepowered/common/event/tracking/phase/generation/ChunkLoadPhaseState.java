@@ -24,11 +24,28 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.api.event.CauseStackManager;
 
-public class GenericGenerationContext extends GenerationContext<GenericGenerationContext> {
+import java.util.function.BiConsumer;
 
-    GenericGenerationContext(IPhaseState<? extends GenericGenerationContext> state) {
-        super(state);
+public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<ChunkLoadContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> CHUNK_LOAD_MODIFIER =
+        super.getFrameModifier().andThen((frame, context) -> {
+            frame.pushCause(context.getChunk());
+        });
+
+    public ChunkLoadPhaseState() {
+        super("CHUNK_LOAD");
+    }
+
+    @Override
+    public ChunkLoadContext createPhaseContext() {
+        return new ChunkLoadContext(this);
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, ChunkLoadContext> getFrameModifier() {
+        return this.CHUNK_LOAD_MODIFIER;
     }
 }
