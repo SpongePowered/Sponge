@@ -78,6 +78,11 @@ public abstract class MixinCriterionProgress implements ICriterionProgress, IMix
     }
 
     @Override
+    public boolean isCriterionAvailable() {
+        return this.criterion != null;
+    }
+
+    @Override
     public AdvancementCriterion getCriterion() {
         checkState(this.criterion != null, "The criterion is not yet initialized");
         return this.criterion;
