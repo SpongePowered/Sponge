@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -88,6 +89,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     // caches owner and notifier to avoid constant lookups in chunk
     @Nullable private User spongeOwner;
     @Nullable private User spongeNotifier;
+    private boolean isTicking = false;
     private boolean hasSetOwner = false;
     private boolean hasSetNotifier = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
@@ -289,9 +291,16 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public LocatableBlock getLocatableBlock() {
         if (this.locatableBlock == null) {
+            final Chunk chunk = (Chunk) this.activeChunk.get();
+            BlockState blockState = null;
+            if (chunk != null) {
+                blockState = (BlockState) chunk.getBlockState(this.pos);
+            } else {
+                blockState = this.getBlock();
+            }
             this.locatableBlock = LocatableBlock.builder()
                     .location(new Location<World>((World) this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
-                    .state(this.getBlock())
+                    .state(blockState)
                     .build();
         }
 
@@ -361,6 +370,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public void setActiveChunk(@Nullable IMixinChunk chunk) {
+        if (chunk == null && this.world != null && !this.world.isRemote && !this.isValid()) {
+            if (this.isTicking) {
+                // If a TE is currently ticking, delay clearing active chunk until when invalidated until finished
+                // This is done to avoid issues during unwind when calling getActiveChunk
+                // Note: This occurs with TE's such as pistons that invalidate during movement
+                return;
+            }
+        }
         this.activeChunk = new WeakReference<IMixinChunk>(chunk);
     }
 
@@ -377,6 +394,16 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isTicking() {
+        return this.isTicking;
+    }
+
+    @Override
+    public void setIsTicking(boolean ticking) {
+        this.isTicking = ticking;
     }
 
     @Override

@@ -226,12 +226,18 @@ public final class TrackingUtil {
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
+            mixinTileEntity.setIsTicking(true);
             try (Timing timing = mixinTileEntity.getTimingsHandler().startTiming()) {
                 tile.update();
+            }
+            // We delay clearing active chunk if TE is invalidated during tick so we must remove it after
+            if (tileEntity.isInvalid()) {
+                mixinTileEntity.setActiveChunk(null);
             }
         } catch (Exception e) {
             PhaseTracker.getInstance().printExceptionFromPhase(e, context);
         }
+        mixinTileEntity.setIsTicking(false);
     }
 
     @SuppressWarnings("rawtypes")

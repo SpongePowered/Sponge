@@ -118,4 +118,8 @@ public interface IMixinTileEntity extends IMixinTrackable {
     void setActiveChunk(IMixinChunk chunk);
 
     boolean shouldTick();
+
+    boolean isTicking();
+
+    void setIsTicking(boolean ticking);
 }
