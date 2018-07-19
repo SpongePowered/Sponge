@@ -61,7 +61,6 @@ import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.command.args.CommandFlags;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -191,10 +190,6 @@ public class SpongeCommandFactory {
         trackerFlagChildren.register(createSpongeSaveCommand(), "save");
 
         SpongeImplHooks.registerAdditionalCommands(flagChildren, nonFlagChildren);
-        CommandFlags.Builder flags = flags()
-                .flag("-global", "g")
-                .valueFlag(world(Text.of("world")), "-world", "w")
-                .valueFlag(dimension(Text.of("dimension")), "-dimension", "d");
 
         return CommandSpec.builder()
                 .description(Text.of("General Sponge command"))
@@ -211,8 +206,13 @@ public class SpongeCommandFactory {
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds\n",
                         SpongeImplHooks.getAdditionalCommandDescriptions()))
                 .arguments(firstParsing(nonFlagChildren,
-                        flags.buildWith(flagChildren),
-                        flags.flag("-tracker", "t").buildWith(trackerFlagChildren)))
+                        flags().flag("-global", "g")
+                                .valueFlag(world(Text.of("world")), "-world", "w")
+                                .valueFlag(dimension(Text.of("dimension")), "-dimension", "d").buildWith(flagChildren),
+                        flags().flag("-global", "g")
+                                .valueFlag(world(Text.of("world")), "-world", "w")
+                                .valueFlag(dimension(Text.of("dimension")), "-dimension", "d")
+                                .flag("-tracker", "t").buildWith(trackerFlagChildren)))
                 .executor(nonFlagChildren)
                 .build();
     }
