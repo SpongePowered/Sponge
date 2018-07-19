@@ -78,7 +78,12 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public Collection<ItemGroup> getItemGroups() {
-        return Collections.singleton((ItemGroup) getCreativeTab());
+        CreativeTabs creativeTab = getCreativeTab();
+        if (creativeTab == null) {
+            return Collections.emptySet();
+        } else {
+            return Collections.singleton((ItemGroup) creativeTab);
+        }
     }
 
     @Override
