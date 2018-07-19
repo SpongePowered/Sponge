@@ -10,7 +10,7 @@ git:
   submodules: false
 before_install: scripts/travis-initialize-submodules
 
-install: ./gradlew setupDecompWorkspace
+install: ./gradlew setupCIWorkspace
 script: ./gradlew build
 
 notifications:
