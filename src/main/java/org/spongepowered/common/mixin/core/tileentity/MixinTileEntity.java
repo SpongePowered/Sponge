@@ -372,7 +372,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public void setActiveChunk(@Nullable IMixinChunk chunk) {
         if (chunk == null && this.world != null && !this.world.isRemote && !this.isValid()) {
             if (this.isTicking) {
-                // If a TE is currently ticking, delay clearing active chunk until when invalidated until finished
+                // If a TE is currently ticking and has been invalidated, delay clearing active chunk until finished
                 // This is done to avoid issues during unwind when calling getActiveChunk
                 // Note: This occurs with TE's such as pistons that invalidate during movement
                 return;
