@@ -83,7 +83,8 @@ public class MixinPlayerAdvancements implements IMixinPlayerAdvancements {
     @Redirect(method = "registerListeners(Lnet/minecraft/advancements/Advancement;)V", at = @At(value = "INVOKE", ordinal = 0,
             target = "Lnet/minecraft/advancements/CriterionProgress;isObtained()Z"))
     private boolean onUnregisterListenersGetProgress(CriterionProgress progress) {
-        if (SpongeImplHooks.isFakePlayer(this.player)) {
+        final IMixinCriterionProgress mixinCriterionProgress = (IMixinCriterionProgress) progress;
+        if (SpongeImplHooks.isFakePlayer(this.player) || !mixinCriterionProgress.isCriterionAvailable()) {
             return progress.isObtained();
         }
 
