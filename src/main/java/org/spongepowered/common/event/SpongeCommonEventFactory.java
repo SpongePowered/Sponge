@@ -1065,11 +1065,11 @@ public class SpongeCommonEventFactory {
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
             if (((IMixinContainer) player.openContainer).getCapturedTransactions().isEmpty() && packetIn.getSlotId() >= 0
                     && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-                Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
+                org.spongepowered.api.item.inventory.Slot slot = ((IMixinContainer)player.openContainer).getContainerSlot(packetIn.getSlotId());
                 if (slot != null) {
-                    ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.getStack());
+                    ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty()));
                     ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getStack());
-                    SlotTransaction slotTransaction = new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, replacement);
+                    SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, replacement);
                     ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
                 }
             }
