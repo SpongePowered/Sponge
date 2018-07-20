@@ -81,7 +81,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -200,7 +199,6 @@ import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModul
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.border.PlayerBorderListener;
@@ -265,6 +263,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int blockEventCacheIndex;
     @Shadow private int updateEntityTick;
 
+    @Shadow protected abstract void saveLevel() throws MinecraftException;
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
@@ -964,12 +963,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
-    private boolean onTicktick(IChunkProvider chunkProvider) {
-        // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
-        return this.chunkGCTickInterval <= 0 && chunkProvider.tick();
-    }
-
     // Chunk GC
     @Override
     public void doChunkGC() {
@@ -1025,21 +1018,49 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
-    private boolean canChunkProviderSave(ChunkProviderServer chunkProviderServer) {
-        if (chunkProviderServer.canSave()) {
-            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Sponge.getCauseStackManager().getCurrentCause(), this));
-            return true;
-        }
-        return false;
-    }
+    /**
+     * @author blood - July 20th, 2017
+     * @reason This method is critical as it handles world saves and whether to queue chunks for unload if GC is enabled.
+     * It has been overwritten to make it easier to manage for future updates.
+     *
+     * @param all Whether to save all chunks
+     * @param progressCallback The save progress callback
+     */
+    @Overwrite
+    public void saveAllChunks(boolean all, @Nullable IProgressUpdate progressCallback) throws MinecraftException
+    {
+        ChunkProviderServer chunkproviderserver = this.getChunkProvider();
 
-    @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
-    private void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
-        Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Sponge.getCauseStackManager().getCurrentCause(), this));
-        // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
-        if (this.chunkGCTickInterval > 0) {
-            ci.cancel();
+        if (chunkproviderserver.canSave())
+        {
+            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Sponge.getCauseStackManager().getCurrentCause(), this));
+            if (progressCallback != null)
+            {
+                progressCallback.displaySavingString("Saving level");
+            }
+
+            this.saveLevel();
+
+            if (progressCallback != null)
+            {
+                progressCallback.displayLoadingString("Saving chunks");
+            }
+
+            chunkproviderserver.saveChunks(all);
+            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Sponge.getCauseStackManager().getCurrentCause(), this));
+
+            // The chunk GC handles all queuing for chunk unloads so we return here to avoid it during a save.
+            if (this.chunkGCTickInterval > 0) {
+                return;
+            }
+
+            for (Chunk chunk : Lists.newArrayList(chunkproviderserver.getLoadedChunks()))
+            {
+                if (chunk != null && !this.playerChunkMap.contains(chunk.x, chunk.z))
+                {
+                    chunkproviderserver.queueUnload(chunk);
+                }
+            }
         }
     }
 

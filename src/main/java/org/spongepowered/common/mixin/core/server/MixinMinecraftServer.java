@@ -33,7 +33,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
-import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
@@ -557,45 +556,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
-    }
-
-    // All chunk unload queuing needs to be processed BEFORE the future tasks are run as mods/plugins may have tasks that request chunks.
-    // This prevents a situation where a chunk is requested to load then unloads at end of tick.
-    @Inject(method = "updateTimeLightAndEntities", at = @At("HEAD"))
-    public void onUpdateTimeLightAndEntitiesHead(CallbackInfo ci) {
-        for (int i = 0; i < this.worlds.length; ++i)
-        {
-            WorldServer worldServer = this.worlds[i];
-            // ChunkGC needs to be processed before a world tick in order to guarantee any chunk  queued for unload
-            // can still be marked active and avoid unload if accessed during the same tick.
-            // Note: This injection must come before Forge's pre world tick event or it will cause issues with mods.
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
-            if (spongeWorld.getChunkGCTickInterval() > 0) {
-                spongeWorld.doChunkGC();
-            }
-            // Moved from PlayerChunkMap to avoid chunks from unloading after being requested in same tick
-            if (worldServer.getPlayerChunkMap().players.isEmpty())
-            {
-                WorldProvider worldprovider = worldServer.provider;
-
-                if (!worldprovider.canRespawnHere())
-                {
-                    worldServer.getChunkProvider().queueUnloadAll();
-                }
-            }
-        }
-    }
-
-    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getEntityTracker()Lnet/minecraft/entity/EntityTracker;"))
-    public EntityTracker onUpdateTimeLightAndEntitiesGetEntityTracker(WorldServer worldServer) {
-        // Chunk unloads must run after a world tick to guarantee any chunks accessed during the world tick have
-        // been marked active and will not unload.
-        // Note: This injection must come after Forge's post world tick event or it will cause issues with mods.
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
-        if (spongeWorld.getChunkGCTickInterval() > 0) {
-            worldServer.getChunkProvider().tick();
-        }
-        return worldServer.getEntityTracker();
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
