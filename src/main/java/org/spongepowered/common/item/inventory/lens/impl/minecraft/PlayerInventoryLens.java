@@ -87,17 +87,27 @@ public class PlayerInventoryLens extends RealLens {
         int base = this.base;
         if (this.isContainer) {
             this.equipment = new EquipmentInventoryLensImpl(base, EQUIPMENT, 1, slots, true);
+            this.addChild(slots.getSlot(base + 0), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
+            this.addChild(slots.getSlot(base + 1), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+            this.addChild(slots.getSlot(base + 2), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+            this.addChild(slots.getSlot(base + 3), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
             base += EQUIPMENT; // 4
             this.main = new MainPlayerInventoryLensImpl(base, slots, true);
             base += this.main.slotCount();
             this.offhand = slots.getSlot(base);
+            this.addChild(slots.getSlot(base), new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
             base += OFFHAND;
         } else {
             this.main = new MainPlayerInventoryLensImpl(base, slots, false);
             base += this.main.slotCount();
             this.equipment = new EquipmentInventoryLensImpl(base, EQUIPMENT, 1, slots, false);
+            this.addChild(slots.getSlot(base + 0), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
+            this.addChild(slots.getSlot(base + 1), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+            this.addChild(slots.getSlot(base + 2), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+            this.addChild(slots.getSlot(base + 3), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
             base += EQUIPMENT;
             this.offhand = slots.getSlot(base);
+            this.addChild(slots.getSlot(base), new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
             base += OFFHAND;
         }
 
