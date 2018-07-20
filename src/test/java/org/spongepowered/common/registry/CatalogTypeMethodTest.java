@@ -26,22 +26,22 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.stats.StatBase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translatable;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.interfaces.MojangTranslatable;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,39 +50,19 @@ public class CatalogTypeMethodTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(CatalogTypeMethodTest.class);
 
-    @Parameterized.Parameters(name = "{index} Catalog Type: {0} Id : {3} Method: {5} ({6})")
+    private static final boolean verbose = false;
+
+    private static String last = "";
+
+    @Parameterized.Parameters(name = "{index} Catalog Type: {0} | Key: {3} | Method: {5} | ({6})")
     public static Iterable<Object[]> data() throws Exception {
         return RegistryTestUtil.generateCatalogTypeMethodTestObjects();
     }
 
-    // TODO: Fix this list
-    private static final Set<String> ignoredFailures = ImmutableSet.<String>builder()
-            .add("org.spongepowered.common.statistic.SpongeEntityStatistic#getEntityType()")
-            .add("org.spongepowered.common.world.gen.SpongePopulatorType#getTranslation()")
-            .add("net.minecraft.util.EnumHand#getTranslation()")
-            // AbstractMethodErrors
-            .add("net.minecraft.block.BlockDirt$DirtType#getTranslation()")
-            .add("net.minecraft.block.BlockPistonExtension$EnumPistonType#getTranslation()")
-            .add("net.minecraft.block.BlockPrismarine$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockQuartz$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockSand$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockSandStone$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockStone$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockStoneBrick$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockStoneSlab$EnumType#getTranslation()")
-            .add("net.minecraft.block.BlockStoneSlabNew$EnumType#getTranslation()")
-            .add("net.minecraft.item.ItemArmor$ArmorMaterial#getRepairItemType()")
-            .build();
-
-    // Ignored translation prefixes + whether it was provided by sponge
-    private static final Map<String, Boolean> ignoredTranslationPrefixes = ImmutableMap.<String, Boolean>builder()
-            .put("sponge.statistic.type.", true)
-            .put("item.", false)
-            .put("entity.", false)
-            .put("stat.", false)
-            .put("tile.", false)
-            .put("potion.effect.missing", false) // Needs API changes
-            .put("gameMode.", false)
+    private static final Set<String> ignoredMojangTranslations = ImmutableSet.<String>builder()
+            .add("tile.stone.name", "tile.sapling.name", "tile.prismarine.name", "tile.sponge.name",
+                    "tile.cobbleWall.name", "tile.banner.name", "tile.stoneSlab2.name"
+            )
             .build();
 
     @Parameterized.Parameter(0)
@@ -92,7 +72,7 @@ public class CatalogTypeMethodTest {
     @Parameterized.Parameter(2)
     public CatalogType catalogType;
     @Parameterized.Parameter(3)
-    public String catalogId;
+    public String catalogKey;
     @Parameterized.Parameter(4)
     public Method method;
     @Parameterized.Parameter(5)
@@ -102,35 +82,38 @@ public class CatalogTypeMethodTest {
 
     @Test
     public void testCatalogMethodImpl() throws Throwable {
+        if (!last.equals(this.catalogKey)) {
+            last = this.catalogKey;
+            testKeyAndName(this.catalogType);
+
+            if (this.catalogType instanceof Translatable) {
+                testTranslation((Translatable) this.catalogType);
+            }
+        }
+
         try {
-            try {
-                testResult(checkNotNull(this.method.invoke(this.catalogType), "return value"));
-            } catch (InvocationTargetException e) {
-                // Unwrap exception to avoid useless stacktrace entries
-                if (e.getCause() != null) {
-                    throw e.getCause();
-                }
-                throw e;
+            testResult(checkNotNull(this.method.invoke(this.catalogType), "return value"));
+        } catch (InvocationTargetException e) {
+            // Unwrap exception to avoid useless stacktrace entries
+            if (e.getCause() != null) {
+                throw e.getCause();
             }
-        } catch (Throwable t) {
-            if (ignoredFailures.contains(this.implementationClass + "#" + this.method.getName() + "()")) {
-//                LOG.warn("Catalog Type: {} Id : {} has broken Method: {} ({}): {}", this.name, this.catalogId, this.methodName,
-//                        this.implementationClass, t);
-                return;
-            }
-            throw t;
+            throw e;
         }
     }
 
     private void testResult(Object object) {
-        checkNotNull(object, "contained value");
         if (object instanceof Optional) {
-            ((Optional<?>) object).ifPresent(this::testResult);
+            if (((Optional) object).isPresent()) {
+                this.testResult(((Optional) object).get());
+            }
         }
+
         if (object instanceof Iterable) {
             int index = 0;
             for (Object elem : (Iterable<?>) object) {
                 try {
+                    checkNotNull(elem, "contained value");
                     testResult(elem);
                     index++;
                 } catch (Throwable t) {
@@ -138,32 +121,58 @@ public class CatalogTypeMethodTest {
                 }
             }
         }
-        if (object instanceof Translatable) {
-            testResult(((Translatable) object).getTranslation());
+
+        if (object instanceof CatalogType) {
+            testKeyAndName((CatalogType) object);
         }
-        if (object instanceof Translation) {
-            Translation translation = (Translation) object;
-            String translationId = checkNotNull(translation.getId(), "translationId");
-            String translated = checkNotNull(translation.get(), "translated");
-            if (translationId.equals(translated)) {
-                boolean ignore = false;
-                boolean silent = false;
-                for (Entry<String, Boolean> entry : ignoredTranslationPrefixes.entrySet()) {
-                    if (translationId.startsWith(entry.getKey())) {
-                        ignore = true;
-                        silent = entry.getValue();
-                    }
+
+        if (object instanceof Translatable) {
+            testTranslation((Translatable) object);
+        }
+    }
+
+    private void testKeyAndName(CatalogType object) {
+        String name = object.getName();
+        CatalogKey key = object.getKey();
+
+        if (key.getValue().indexOf(':') != -1) {
+            LOG.warn("Duplicate namespace. Catalog Type: {} | Key: {} | Name: {} | ({})", object.getClass().getSimpleName(), key, name, this.implementationClass);
+        }
+
+        if (name.equals(key.toString())) {
+            LOG.warn("Keys and names should NEVER be the same. Catalog Type: {} | Key: {} | Name: {} | ({})", object.getClass().getSimpleName(), key, name, this.implementationClass);
+        }
+
+        if (key.getValue().chars().anyMatch(c -> Character.isLetter(c) && Character.isUpperCase(c))) {
+            LOG.warn("Key is not lowercase. Catalog Type: {} | Key: {} | ({})", object.getClass().getSimpleName(), key, this.implementationClass);
+        }
+
+    }
+
+    private void testTranslation(Translatable object) {
+        Translation translation = object.getTranslation();
+
+        if (translation != object.getTranslation()) {
+            LOG.warn("Translation is not lazyloaded. Catalog Type: {} | Translation: {} | ({})", object.getClass().getSimpleName(), object.getTranslation(), this.implementationClass);
+        }
+
+        String mojang;
+        if (object instanceof MojangTranslatable) {
+            mojang = ((MojangTranslatable) object).getMojangTranslation();
+            if (!translation.get().equals(mojang) && !ignoredMojangTranslations.contains(mojang)) {
+                if (object instanceof StatBase) {
+                    //Wait for statistics PR
+                    return;
                 }
-                if (silent) {
-                    // Do nothing
-                } else if (ignore) {
-//                    LOG.warn("Catalog Type: {} Id : {} fails to provide translation: '{}' in {} ({})",
-//                            this.name, this.catalogId, translationId, this.methodName, this.implementationClass);
-                } else {
-                    throw new RuntimeException("No translation present for " + translationId);
-                }
+                LOG.warn("Inconsistency with Mojang translation. Catalog Type: {} | Mojang: {} | Sponge: {} | ({})", object.getClass().getSimpleName(), mojang, translation.get(), this.implementationClass);
+            }
+
+        } else {
+            if (verbose) {
+                LOG.warn("Unable to retrieve Mojang translation for Catalog Type: {} | Translation id: {} | Sponge: {} | ({})", object.getClass().getSimpleName(), translation.getId(), translation.get(), this.implementationClass);
             }
         }
+
     }
 
 }

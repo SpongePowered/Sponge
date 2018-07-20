@@ -24,31 +24,19 @@
  */
 package org.spongepowered.common.launch.mixin;
 
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.item.ItemType;
+import net.minecraft.world.EnumDifficulty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.MojangTranslatable;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(value = Item.class, remap = false)
-public abstract class MixinItem implements MojangTranslatable {
+@Mixin(value = EnumDifficulty.class, remap = false)
+public abstract class MixinEnumDifficulty implements MojangTranslatable {
 
     @Shadow public abstract String getTranslationKey();
 
-    // Register items
-    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
-    private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
-        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
-    }
-
     @Override
     public String getMojangTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + ".name").get();
+        return new SpongeTranslation(this.getTranslationKey()).get();
     }
 }

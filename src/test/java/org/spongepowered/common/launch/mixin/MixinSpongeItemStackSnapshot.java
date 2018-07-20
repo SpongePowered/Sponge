@@ -25,30 +25,24 @@
 package org.spongepowered.common.launch.mixin;
 
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.MojangTranslatable;
-import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-@Mixin(value = Item.class, remap = false)
-public abstract class MixinItem implements MojangTranslatable {
+@Mixin(value = SpongeItemStackSnapshot.class, remap = false)
+public abstract class MixinSpongeItemStackSnapshot implements MojangTranslatable {
 
-    @Shadow public abstract String getTranslationKey();
+    @Shadow @Final private transient ItemStack privateStack;
 
-    // Register items
-    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
-    private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
-        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
-    }
+    @Shadow public abstract ItemType getType();
 
     @Override
     public String getMojangTranslation() {
-        return new SpongeTranslation(this.getTranslationKey() + ".name").get();
+        return ((Item) this.getType()).getItemStackDisplayName(ItemStackUtil.toNative(this.privateStack));
     }
 }
