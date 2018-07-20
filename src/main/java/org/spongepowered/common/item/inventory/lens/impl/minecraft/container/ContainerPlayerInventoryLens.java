@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +51,11 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
         final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
         final PlayerInventoryLens player = new PlayerInventoryLens(base, this.size - base, slots);
+        this.addChild(slots.getSlot(base + 0), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
+        this.addChild(slots.getSlot(base + 1), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+        this.addChild(slots.getSlot(base + 2), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+        this.addChild(slots.getSlot(base + 3), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
+        this.addChild(slots.getSlot(base + 4 + 4 * 9), new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
 
         this.viewedInventories = new ArrayList<>(Arrays.asList(crafting, player));
 
