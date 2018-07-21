@@ -70,4 +70,6 @@ public interface IMixinContainer extends IMixinInventory {
     void setInUse(boolean inUse);
     boolean isInUse();
 
+    boolean capturePossible();
+
 }
