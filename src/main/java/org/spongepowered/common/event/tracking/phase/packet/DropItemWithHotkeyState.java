@@ -55,7 +55,7 @@ import java.util.List;
 final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
     DropItemWithHotkeyState() {
-        super(PacketPhase.MODE_DROP | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_ANYWHERE);
+        super(PacketPhase.MODE_DROP | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_INSIDE_WINDOW);
     }
 
     @Override

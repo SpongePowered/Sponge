@@ -112,6 +112,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
         public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState();
         public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
+        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowNoOpState();
         public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
         public static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
         public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
@@ -145,6 +146,7 @@ public final class PacketPhase extends TrackingPhase {
                 .add(MIDDLE_INVENTORY_CLICK)
                 .add(DROP_ITEM_OUTSIDE_WINDOW)
                 .add(DROP_ITEM_WITH_HOTKEY)
+                .add(DROP_ITEM_OUTSIDE_WINDOW_NOOP)
                 .add(DROP_ITEMS)
                 .add(DROP_INVENTORY)
                 .add(SWITCH_HOTBAR_NUMBER_PRESS)

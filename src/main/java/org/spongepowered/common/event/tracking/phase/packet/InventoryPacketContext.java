@@ -70,6 +70,18 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         if (this.state == PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL) {
             return true;
         }
+        // Fire events even without captures
+        if (this.state == PacketPhase.Inventory.PRIMARY_INVENTORY_CLICK
+         || this.state == PacketPhase.Inventory.SECONDARY_INVENTORY_CLICK
+         || this.state == PacketPhase.Inventory.MIDDLE_INVENTORY_CLICK
+         || this.state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY
+         || this.state == PacketPhase.Inventory.PRIMARY_INVENTORY_SHIFT_CLICK
+         || this.state == PacketPhase.Inventory.SECONDARY_INVENTORY_SHIFT_CLICK
+         || this.state == PacketPhase.Inventory.SWITCH_HOTBAR_NUMBER_PRESS
+         || this.state == PacketPhase.Inventory.DROP_ITEM_OUTSIDE_WINDOW_NOOP
+        ) {
+            return true;
+        }
         ((IMixinContainer) this.packetPlayer.openContainer).setCaptureInventory(false);
 
         return super.hasCaptures();

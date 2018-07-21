@@ -105,12 +105,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private boolean spectatorChest;
     private boolean dirty = true;
     private boolean dropCancelled = false;
+
     @Nullable private ItemStackSnapshot itemStackSnapshot;
     @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
     private boolean firePreview;
     @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
     private boolean inUse = false;
+
+    private boolean captureSuccess = false;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -215,6 +218,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Overwrite
     public void detectAndSendChanges() {
         this.detectAndSendChanges(false);
+        this.captureSuccess = true; // Detect mod overrides
+    }
+
+    @Override
+    public boolean capturePossible() {
+        return this.captureSuccess;
     }
 
     @Override
