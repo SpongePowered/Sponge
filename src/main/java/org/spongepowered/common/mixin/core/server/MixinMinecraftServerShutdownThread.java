@@ -22,24 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.server;
 
-import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.world.WorldServer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 
-public interface IMixinMinecraftServer {
+@Mixin(targets = "net/minecraft/server/MinecraftServer$4")
+public class MixinMinecraftServerShutdownThread {
 
-    DataFixer getDataFixer();
+    @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;stopServer()V"), remap = false)
+    private void onStopServer(DedicatedServer server) {
+        if (Sponge.isServerAvailable() && ((MinecraftServer) Sponge.getServer()).isServerRunning()) {
+            ((IMixinMinecraftServer) server).spongeStopServer();
+        }
+    }
 
-    long[] getWorldTickTimes(int dimensionId);
-
-    void putWorldTickTimes(int dimensionId, long[] tickTimes);
-
-    void removeWorldTickTimes(int dimensionId);
-
-    void prepareSpawnArea(WorldServer worldServer);
-
-    void setSaveEnabled(boolean enabled);
-
-    void spongeStopServer();
 }

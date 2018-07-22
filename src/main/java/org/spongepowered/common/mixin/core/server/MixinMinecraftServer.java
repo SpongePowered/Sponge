@@ -161,6 +161,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
 
+    @Shadow protected abstract void stopServer();
+
     @Nullable private List<String> currentTabCompletionOptions;
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -580,7 +582,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     side = result.sideHit;
                 }
 
-                Sponge.getCauseStackManager().pushCause(player); 
+                Sponge.getCauseStackManager().pushCause(player);
                 if (!player.getHeldItemMainhand().isEmpty()) {
                     if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND,
                             result == null ? null : VecHelper.toVector3d(result.hitVec), blockSnapshot).isCancelled()) {
@@ -685,6 +687,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
         }
     }
+
+    @Override
+    public void spongeStopServer() {
+        this.stopServer();
+    }
+
 
     @Override
     public int getPlayerIdleTimeout() {
