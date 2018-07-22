@@ -22,23 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.registry.type.advancement;
 
-import net.minecraft.advancements.AdvancementManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinPlayerList;
-import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
-import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(AdvancementManager.class)
-public class MixinAdvancementManager {
+import java.util.HashMap;
 
-    @Inject(method = "reload", at = @At("RETURN"))
-    private void onReloadReturn(CallbackInfo ci) {
-        ((IMixinPlayerList) SpongeImpl.getServer().getPlayerList()).reloadAdvancementProgress();
+public final class AdvancementMap extends HashMap<ResourceLocation, Advancement> {
+
+    @Override
+    public Advancement put(ResourceLocation key, Advancement value) {
+        final Advancement old = super.put(key, value);
+        if (SpongeImplHooks.isMainThread() && old != value) {
+            AdvancementRegistryModule.getInstance().registerSilently(value);
+        }
+        return old;
+    }
+
+    @Override
+    public Advancement remove(Object key) {
+        final Advancement old = super.remove(key);
+        if (SpongeImplHooks.isMainThread() && old != null) {
+            AdvancementRegistryModule.getInstance().remove(old);
+        }
+        return old;
+    }
+
+    @Override
+    public void clear() {
+        if (SpongeImplHooks.isMainThread()) {
+            AdvancementRegistryModule.getInstance().clear();
+        }
+        super.clear();
     }
 }
