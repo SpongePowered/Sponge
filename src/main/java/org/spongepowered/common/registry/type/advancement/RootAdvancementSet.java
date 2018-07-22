@@ -22,23 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancement;
+package org.spongepowered.common.registry.type.advancement;
 
-import net.minecraft.advancements.AdvancementManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinPlayerList;
-import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
-import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
+import net.minecraft.advancements.Advancement;
+import org.spongepowered.common.SpongeImplHooks;
 
-@Mixin(AdvancementManager.class)
-public class MixinAdvancementManager {
+import java.util.LinkedHashSet;
 
-    @Inject(method = "reload", at = @At("RETURN"))
-    private void onReloadReturn(CallbackInfo ci) {
-        ((IMixinPlayerList) SpongeImpl.getServer().getPlayerList()).reloadAdvancementProgress();
+public final class RootAdvancementSet extends LinkedHashSet<Advancement> {
+
+    @Override
+    public boolean add(Advancement advancement) {
+        if (super.add(advancement)) {
+            if (SpongeImplHooks.isMainThread()) {
+                AdvancementTreeRegistryModule.getInstance().registerSilently(advancement);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        if (super.remove(o)) {
+            if (SpongeImplHooks.isMainThread()) {
+                AdvancementTreeRegistryModule.getInstance().remove((Advancement) o);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        if (SpongeImplHooks.isMainThread()) {
+            AdvancementTreeRegistryModule.getInstance().clear();
+        }
     }
 }

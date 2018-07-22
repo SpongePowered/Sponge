@@ -37,7 +37,6 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
 import org.spongepowered.common.registry.CustomRegistrationPhase;
@@ -45,6 +44,7 @@ import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistry
 
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 @CustomRegistrationPhase
 @RegistrationDependency(CriterionRegistryModule.class)
 public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<Advancement>
@@ -58,8 +58,6 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     // Putting it here to make sure that initialized outside any of the events to prevent it from being registered
     public static net.minecraft.advancements.Advancement DUMMY_ROOT_ADVANCEMENT;
 
-    private boolean inInitialRegistration;
-
     public static AdvancementRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
@@ -68,52 +66,50 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
         super("minecraft");
     }
 
-    public void clear() {
-        this.catalogTypeMap.clear();
-    }
-
-    public boolean isInInitialRegistration() {
-        return this.inInitialRegistration;
+    private static IMixinAdvancementList getAdvancementList() {
+        return (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
     }
 
     @Override
     public void registerDefaults() {
-        this.inInitialRegistration = true;
-        try {
-            DUMMY_ROOT_ADVANCEMENT = new net.minecraft.advancements.Advancement(
-                    new ResourceLocation("sponge", "dummy_root"), null, null,
-                    AdvancementRewards.EMPTY, dummyCriteria, dummyRequirements) {
-
-                @Override
-                public void addChild(net.minecraft.advancements.Advancement child) {
-                    // Prevent children to be added so that there
-                    // aren't any leftover references from this instance
-                }
-            };
-        } finally {
-            this.inInitialRegistration = false;
-        }
-
+        DUMMY_ROOT_ADVANCEMENT = new net.minecraft.advancements.Advancement(
+                new ResourceLocation("sponge", "dummy_root"), null, null,
+                AdvancementRewards.EMPTY, dummyCriteria, dummyRequirements) {
+            @Override
+            public void addChild(net.minecraft.advancements.Advancement child) {
+                // Prevent children to be added so that there
+                // aren't any leftover references from this instance
+            }
+        };
     }
 
     @Override
     public void registerAdditionalCatalog(Advancement advancement) {
-        checkState(SpongeImplHooks.isMainThread() || this.isInInitialRegistration());
-        super.register(advancement);
+        checkState(SpongeImplHooks.isMainThread());
         ((IMixinAdvancement) advancement).setRegistered();
-        if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
-            final IMixinAdvancementList advancementList = (IMixinAdvancementList) AdvancementManager.ADVANCEMENT_LIST;
-            advancementList.getAdvancements().put(mcAdv.getId(), mcAdv);
-            // If the parent != null, that means that its not a root advancement
-            if (mcAdv.getParent() != null && mcAdv.getParent() != DUMMY_ROOT_ADVANCEMENT &&
-                    advancementList.getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
-                final AdvancementList.Listener listener = advancementList.getListener();
-                if (listener != null) {
-                    listener.nonRootAdvancementAdded(mcAdv);
-                }
+        final net.minecraft.advancements.Advancement mcAdv = (net.minecraft.advancements.Advancement) advancement;
+        final IMixinAdvancementList advList = getAdvancementList();
+        advList.getAdvancements().put(mcAdv.getId(), mcAdv);
+        // If the parent != null, that means that its not a root advancement
+        if (mcAdv.getParent() != null && mcAdv.getParent() != DUMMY_ROOT_ADVANCEMENT &&
+                advList.getNonRootsSet().add(mcAdv)) { // Only update if the root wasn't already present for some reason
+            final AdvancementList.Listener listener = advList.getListener();
+            if (listener != null) {
+                listener.nonRootAdvancementAdded(mcAdv);
             }
         }
+    }
+
+    void registerSilently(net.minecraft.advancements.Advancement advancement) {
+        super.register((Advancement) advancement);
+    }
+
+    void remove(net.minecraft.advancements.Advancement advancement) {
+        this.catalogTypeMap.remove(advancement.getId().toString());
+    }
+
+    void clear() {
+        this.catalogTypeMap.clear();
     }
 
     private static final class Holder {

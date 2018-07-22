@@ -76,7 +76,6 @@ import javax.annotation.Nullable;
 public class MixinAdvancement implements org.spongepowered.api.advancement.Advancement, IMixinAdvancement {
 
     @Shadow @Final @Mutable @Nullable private Advancement parent;
-    @Shadow @Final private ResourceLocation id;
     @Shadow @Final @Mutable private String[][] requirements;
     @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
@@ -97,7 +96,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     }
 
     private boolean isMainThread() {
-        return SpongeImplHooks.isMainThread() || AdvancementRegistryModule.getInstance().isInInitialRegistration();
+        return SpongeImplHooks.isMainThread();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -117,9 +116,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
-        if (!PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            AdvancementRegistryModule.getInstance().registerAdditionalCatalog(this);
-        } else {
+        if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             // Wait to set the parent until the advancement is registered
             this.tempParent = parentIn;
             this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
