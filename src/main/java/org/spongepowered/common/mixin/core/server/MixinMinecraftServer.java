@@ -161,7 +161,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
 
-    @Shadow protected abstract void stopServer();
 
     @Nullable private List<String> currentTabCompletionOptions;
     private ResourcePack resourcePack;
@@ -688,9 +687,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
     }
 
-    @Override
-    public void spongeStopServer() {
-        this.stopServer();
+    @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
+    public void onStopServer(CallbackInfo ci) {
+        // If the server is already stopping, don't allow stopServer to be called off the main thread
+        // (from the shutdown handler thread in MinecraftServer)
+        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !Sponge.getServer().isMainThread())) {
+            ci.cancel();
+        }
     }
 
 
