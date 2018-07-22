@@ -575,6 +575,7 @@
     "server": [
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient",
+        "server.MixinMinecraftServerShutdownThread",
         "server.MixinDedicatedPlayerList",
         "server.MixinDedicatedServer",
         "server.management.MixinUserList"
