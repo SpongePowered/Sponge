@@ -1468,6 +1468,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
+    public void onDestroyBlock(BlockPos pos, boolean dropBlock, CallbackInfoReturnable<Boolean> cir) {
+        if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
+            cir.setReturnValue(false);
+        }
+    }
+
+    @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         onCallEntityUpdate(entityIn); // maybe we should combine these injections/redirects?
     }

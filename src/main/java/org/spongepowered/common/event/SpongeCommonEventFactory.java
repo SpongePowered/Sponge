@@ -163,10 +163,7 @@ public class SpongeCommonEventFactory {
     public static boolean playerInteractItemChanged = false;
     // Set if any of the events fired during interaction with a block (open
     public static boolean interactBlockEventCancelled = false;
-    // inventory or interact block) were cancelled
-    @Nullable private static ChangeBlockEvent.Pre DUMMY_BLOCK_PRE_EVENT = null;
 
-    // Dummy ChangeBlockEvent.Pre
     public static int lastAnimationPacketTick = 0;
     // For animation packet
     public static int lastSecondaryPacketTick = 0;
@@ -511,15 +508,7 @@ public class SpongeCommonEventFactory {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final PhaseData data = phaseTracker.getCurrentPhaseData();
             if (source == null) {
-                source = data.context.getSource(LocatableBlock.class).orElse(null);
-                if (source == null) {
-                    // safety measure, return a dummy event
-                    if (DUMMY_BLOCK_PRE_EVENT == null) {
-                        DUMMY_BLOCK_PRE_EVENT =
-                            SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), ImmutableList.of());
-                    }
-                    return DUMMY_BLOCK_PRE_EVENT;
-                }
+                source = data.context.getSource() == null ? worldIn : data.context.getSource();
             }
 
             EntityPlayer player = null;
