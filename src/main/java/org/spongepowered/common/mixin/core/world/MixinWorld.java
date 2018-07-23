@@ -1135,6 +1135,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // These are overriden in MixinWorldServer where they should be.
 
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playEvent(ILnet/minecraft/util/math/BlockPos;I)V"), cancellable = true)
+    public void onDestroyBlock(BlockPos pos, boolean dropBlock, CallbackInfoReturnable<Boolean> cir) {
+        
+    }
+
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         entityIn.onUpdate();

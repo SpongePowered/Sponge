@@ -344,6 +344,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Optional.empty();
     }
 
+    @Nullable
+    public Object getSource() {
+        return this.source;
+    }
+
     public <T> T requireSource(Class<T> targetClass) {
         return getSource(targetClass)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
