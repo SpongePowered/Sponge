@@ -392,6 +392,7 @@
         "network.MixinPacketBuffer",
         "network.packet.MixinSPacketScoreboardObjective",
         "network.packet.MixinSPacketResourcePackSend",
+        "network.play.server.MixinSPacketChunkData",
         "network.play.server.MixinSPacketPlayerListItem",
         "network.play.server.MixinSPacketWorldBorder",
         "network.datasync.MixinDataParameter",
