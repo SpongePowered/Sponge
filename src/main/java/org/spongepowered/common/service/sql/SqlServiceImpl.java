@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.service.sql;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Objects;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -104,14 +106,19 @@ public class SqlServiceImpl implements SqlService, Closeable {
         });
     }
 
-    private final LoadingCache<ConnectionInfo, HikariDataSource> connectionCache =
-            CacheBuilder.newBuilder().removalListener(new RemovalListener<ConnectionInfo, HikariDataSource>() {
-                @Override
-                public void onRemoval(RemovalNotification<ConnectionInfo, HikariDataSource> notification) {
-                    HikariDataSource source = notification.getValue();
-                    if (source != null) {
-                        source.close();
-                    }
+    @Nullable private LoadingCache<ConnectionInfo, HikariDataSource> connectionCache;
+
+    public SqlServiceImpl() {
+        this.buildConnectionCache();
+    }
+
+    public void buildConnectionCache() {
+        this.connectionCache = null;
+        this.connectionCache =
+            CacheBuilder.newBuilder().removalListener((RemovalListener<ConnectionInfo, HikariDataSource>) notification -> {
+                HikariDataSource source = notification.getValue();
+                if (source != null) {
+                    source.close();
                 }
             }).build(new CacheLoader<ConnectionInfo, HikariDataSource>() {
                 @Override
@@ -130,15 +137,17 @@ public class SqlServiceImpl implements SqlService, Closeable {
                     return new HikariDataSource(config);
                 }
             });
-
+    }
     @Override
     public DataSource getDataSource(String jdbcConnection) throws SQLException {
-        return getDataSource(null, jdbcConnection);
+        return this.getDataSource(null, jdbcConnection);
     }
 
     @Override
     public DataSource getDataSource(@Nullable Object plugin, String jdbcConnection) throws SQLException {
-        jdbcConnection = getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
+        checkNotNull(this.connectionCache);
+
+        jdbcConnection = this.getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
         PluginContainer container = null;
         if (plugin != null) {
             container = Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> {
@@ -158,7 +167,9 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
     @Override
     public void close() throws IOException {
-        this.connectionCache.invalidateAll();
+        if (this.connectionCache != null) {
+            this.connectionCache.invalidateAll();
+        }
     }
 
     public static class ConnectionInfo {
