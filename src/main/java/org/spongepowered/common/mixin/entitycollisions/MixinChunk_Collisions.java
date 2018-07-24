@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.entitycollisions;
 
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -40,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
@@ -56,6 +58,10 @@ public class MixinChunk_Collisions {
             CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
         if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
+            return;
+        }
+        // Run hook in EntityLivingBase to support maxEntityCramming
+        if (entityIn != null && entityIn instanceof EntityLivingBase && ((IMixinEntityLivingBase) entityIn).isRunningCollideWithNearby()) {
             return;
         }
 
@@ -81,26 +87,29 @@ public class MixinChunk_Collisions {
 
     private <T extends Entity> boolean allowEntityCollision(List<T> listToFill) {
         if (this.world instanceof IMixinWorldServer) {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) this.world;
             if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
                 // allow explosions
                 return true;
             }
 
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
-            LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class).orElse(null);
-            if (locatable != null) {
-                BlockType blockType =locatable.getLocation().getBlockType();
-                IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
+            final Object source = phaseContext.getSource();
+            if (source == null) {
+                return true;
+            }
+
+            if (source instanceof LocatableBlock) {
+                final LocatableBlock locatable = (LocatableBlock) source;
+                final BlockType blockType =locatable.getLocation().getBlockType();
+                final IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
                 if (spongeBlock.requiresCollisionsCacheRefresh()) {
                     spongeBlock.initializeCollisionState(this.world);
                     spongeBlock.requiresCollisionsCacheRefresh(false);
                 }
 
                 return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
-            }
-            IModData_Collisions spongeEntity = phaseContext.getSource(IModData_Collisions.class).orElse(null);
-            if (spongeEntity != null) {
+            } else if (source instanceof IModData_Collisions) {
+                final IModData_Collisions spongeEntity = (IModData_Collisions) source;
                 if (spongeEntity.requiresCollisionsCacheRefresh()) {
                     spongeEntity.initializeCollisionState(this.world);
                     spongeEntity.requiresCollisionsCacheRefresh(false);
@@ -108,6 +117,7 @@ public class MixinChunk_Collisions {
 
                 return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
             }
+
             return true;
         }
 

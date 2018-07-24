@@ -65,7 +65,6 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -82,6 +81,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -107,6 +107,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
@@ -126,6 +127,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
 
     private int maxAir = 300;
+    private boolean runningCollideWithNearby = false;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -260,6 +262,40 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public Text getTeamRepresentation() {
         return Text.of(this.getUniqueID().toString());
+    }
+
+    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V"))
+    public void onLivingUpdateBeforeCollide(CallbackInfo ci) {
+        this.runningCollideWithNearby = true;
+    }
+
+    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithNearbyEntities()V", shift = Shift.AFTER))
+    public void onLivingUpdateAfterCollide(CallbackInfo ci) {
+        this.runningCollideWithNearby = false;
+    }
+
+    @Override
+    public boolean isRunningCollideWithNearby() {
+        return this.runningCollideWithNearby;
+    }
+
+    // This injection allows maxEntityCramming to be applied first before checking for max collisions
+    @Inject(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithEntity(Lnet/minecraft/entity/Entity;)V"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+    protected void onCollideWithNearbyEntities(CallbackInfo ci, List<Entity> list, int maxEntityCramming, int index, Entity entityIn) {
+        // ignore players and entities with parts (ex. EnderDragon)
+        if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
+            return;
+        }
+
+        final IModData_Collisions spongeEntity = (IModData_Collisions) this;
+        if (spongeEntity.requiresCollisionsCacheRefresh()) {
+            spongeEntity.initializeCollisionState(this.world);
+            spongeEntity.requiresCollisionsCacheRefresh(false);
+        }
+
+        if (spongeEntity.getMaxCollisions() >= 0 && list.size() >= spongeEntity.getMaxCollisions()) {
+            ci.cancel();
+        }
     }
 
     /**
