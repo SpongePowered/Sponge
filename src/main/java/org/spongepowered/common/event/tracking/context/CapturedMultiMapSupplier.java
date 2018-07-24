@@ -69,9 +69,10 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ArrayLi
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
-        if (!this.isEmpty()) {
-            consumer.accept(this.captured);
+        if (this.captured != null && this.captured.isEmpty()) {
+            final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
             this.captured.clear();
+            consumer.accept(consumed);
         }
     }
 
