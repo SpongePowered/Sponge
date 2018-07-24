@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
@@ -61,7 +60,7 @@ public class MixinChunk_Collisions {
             return;
         }
         // Run hook in EntityLivingBase to support maxEntityCramming
-        if (entityIn != null && entityIn instanceof EntityLivingBase && ((IMixinEntityLivingBase) entityIn).isRunningCollideWithNearby()) {
+        if (entityIn != null && entityIn instanceof EntityLivingBase && ((IModData_Collisions) entityIn).isRunningCollideWithNearby()) {
             return;
         }
 

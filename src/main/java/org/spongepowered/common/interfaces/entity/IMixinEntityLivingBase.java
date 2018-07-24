@@ -63,6 +63,4 @@ public interface IMixinEntityLivingBase {
 
     void resetDeathEventsPosted();
 
-    boolean isRunningCollideWithNearby();
-
 }
