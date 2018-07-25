@@ -129,6 +129,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
                     config.setDriverClassName(key.getDriverClassName());
                     // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
                     config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
+                    config.setLeakDetectionThreshold(60 * 1000);
                     Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
                     if (driverSpecificProperties != null) {
                         config.setDataSourceProperties(driverSpecificProperties);
