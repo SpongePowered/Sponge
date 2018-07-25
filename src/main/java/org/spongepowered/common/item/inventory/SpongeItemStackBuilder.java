@@ -277,7 +277,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         }
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
         final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
-        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
+        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).orElseThrow(() -> new IllegalStateException("Unable to find item with id: " + itemTypeId));
         final int damage = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count, damage);
         if (container.contains(DataQueries.UNSAFE_NBT)) {
