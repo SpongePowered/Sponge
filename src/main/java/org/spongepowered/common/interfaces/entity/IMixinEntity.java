@@ -40,6 +40,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinTrackable;
 
@@ -161,6 +162,19 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
     void setInvulnerable(boolean value);
 
     default void clearWrappedCaptureList() {
+
+    }
+
+    /**
+     * @author gabizou - July 26th, 2018
+     * @reason Due to vanilla logic, a block is removed *after* the held item is set,
+     * so, when the block event gets cancelled, we don't have a chance to cancel the
+     * enderman pickup. Specifically applies to Enderman so far, may have other uses
+     * in the future.
+     *
+     * @param phaseContext The context, for whatever reason in the future
+     */
+    default void onCancelledBlockChange(EntityTickContext phaseContext) {
 
     }
 }

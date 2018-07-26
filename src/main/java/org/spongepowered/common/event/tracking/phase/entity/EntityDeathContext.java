@@ -56,6 +56,7 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
         super.close();
     }
 
+    @Override
     public boolean hasCaptures() {
         // Required for forge mods, such as Draconic Evolution, as drop events must always be fired even when empty
         return true;

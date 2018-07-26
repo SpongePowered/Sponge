@@ -39,6 +39,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -1359,6 +1360,63 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     /**
+     * @author gabizou - July 25th, 2018
+     * @reason Technically an overwrite for {@link World#destroyBlock(BlockPos, boolean)}
+     * so that we can artificially capture/associate entity spawns from the proposed block
+     * destruction when the actual block event is thrown, whether captures are taking
+     * place or not. In the context of "if block changes are not captured", we do still need
+     * to associate the drops before the actual block is removed
+     *
+     * @param pos
+     * @param dropBlock
+     * @return
+     */
+    @Override
+    public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
+        IBlockState iblockstate = this.getBlockState(pos);
+        Block block = iblockstate.getBlock();
+
+        if (iblockstate.getMaterial() == Material.AIR) {
+            return false;
+        }
+        // Sponge Start - Fire the change block pre here, before we bother with drops. If the pre is cancelled, just don't bother.
+        if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
+                return false;
+            }
+        }
+        // Sponge End
+        this.playEvent(2001, pos, Block.getStateId(iblockstate));
+
+        if (dropBlock) {
+            // Sponge Start - since we are going to perform block drops, we need
+            // to notify the current phase state and find out if capture pos is to be used.
+            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+            final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentState();
+            final boolean isCapturingBlockDrops = state.alreadyProcessingBlockItemDrops();
+            final BlockPos previousPos;
+            if (isCapturingBlockDrops) {
+                previousPos = context.getCaptureBlockPos().getPos().orElse(null);
+                context.getCaptureBlockPos().setPos(pos);
+            } else {
+                previousPos = null;
+            }
+            // Sponge End
+            block.dropBlockAsItem((WorldServer) (Object) this, pos, iblockstate, 0);
+            // Sponge Start
+            if (isCapturingBlockDrops) {
+                // we need to reset the capture pos because we've been capturing item and entity drops this way.
+                context.getCaptureBlockPos().setPos(previousPos);
+            }
+            // Sponge End
+
+        }
+
+        // Sponge - reduce the call stack by calling the more direct method.
+        return this.setBlockState(pos, Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
+    }
+
+    /**
      * @author gabizou - March 12th, 2016
      *
      * Technically an overwrite to properly track on *server* worlds.
@@ -1402,7 +1460,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Check for listeners.
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
             final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-            notifyBlocksBasedOnEvent(pos, blockType, event);
+            if (event == null || !event.isCancelled()) {
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                for (EnumFacing facing : EnumFacing.values()) {
+                    if (event != null) {
+                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                        if (!event.getNeighbors().keySet().contains(direction)) {
+                            continue;
+                        }
+                    }
+
+                    phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
+                }
+            }
             return;
         }
 
@@ -1414,22 +1484,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(direction), blockType, pos);
         }
 
-    }
-
-    private void notifyBlocksBasedOnEvent(BlockPos pos, Block blockType, @Nullable NotifyNeighborBlockEvent event) {
-        if (event == null || !event.isCancelled()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            for (EnumFacing facing : EnumFacing.values()) {
-                if (event != null) {
-                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                    if (!event.getNeighbors().keySet().contains(direction)) {
-                        continue;
-                    }
-                }
-
-                phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
-            }
-        }
     }
 
     /**
@@ -1453,7 +1507,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
             final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
-            notifyBlocksBasedOnEvent(pos, blockType, event);
+            if (event == null || !event.isCancelled()) {
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                for (EnumFacing facing : EnumFacing.values()) {
+                    if (event != null) {
+                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                        if (!event.getNeighbors().keySet().contains(direction)) {
+                            continue;
+                        }
+                    }
+
+                    phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
+                }
+            }
         } else {
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (EnumFacing direction : NOTIFY_DIRECTIONS) {
@@ -1600,6 +1666,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 for (Entity entity : context.getCapturedEntities()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
                     if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                        list.add((T) entity);
+                    }
+                }
+            }
+            if (((IPhaseState) state).doesBulkBlockCapture(context)) {
+                for (net.minecraft.entity.Entity entity : context.getPerBlockEntitySpawnSuppplier().get().values()) {
+                    // We can ignore the type check because we're already checking the instance class of the entity.
+                    if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
                         list.add((T) entity);
                     }
                 }

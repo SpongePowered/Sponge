@@ -87,6 +87,7 @@ import org.spongepowered.common.config.category.BlockTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -360,10 +361,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 // TODO: Change source to LocatableBlock
                 PhaseContext<?> context = BlockPhase.State.BLOCK_DROP_ITEMS.createPhaseContext()
                         .source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, BlockChangeFlags.PHYSICS_OBSERVER));
-
-                // unused, to be removed and re-located when phase context is cleaned up
-                //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
-                //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos));
                 // use current notifier and owner if available
                 User notifier = phaseTracker.getCurrentContext().getNotifier().orElse(null);
                 User owner = phaseTracker.getCurrentContext().getOwner().orElse(null);
@@ -378,16 +375,29 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
     }
 
+    @Nullable private PhaseData data = null; // Soft reference for the methods between this
+
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     private void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune,
         CallbackInfo ci) {
         if (!((IMixinWorld) worldIn).isFake()) {
+            if (this.data == null) {
+                // means that we didn't need to capture before
+                return;
+            }
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            final IPhaseState<?> currentState = phaseTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !phaseTracker.getCurrentContext().isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
+            if (phaseTracker.getCurrentPhaseData() != this.data) {
+                // illegal state exception maybe?
+                this.data = null;
+                return;
+            }
+            final PhaseData data = this.data;
+            final IPhaseState<?> currentState = data.state;
+            final boolean shouldEnterBlockDropPhase = !data.context.isCapturingBlockItemDrops() && !currentState.alreadyProcessingBlockItemDrops() && !currentState.isWorldGeneration();
             if (shouldEnterBlockDropPhase) {
                 phaseTracker.getCurrentContext().close();
             }
+            this.data = null;
         }
     }
 
