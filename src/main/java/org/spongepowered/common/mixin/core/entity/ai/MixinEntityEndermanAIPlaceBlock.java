@@ -110,6 +110,8 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
                     return false;
                 }
             }
+            return true;
         }
+        return false;
     }
 }
