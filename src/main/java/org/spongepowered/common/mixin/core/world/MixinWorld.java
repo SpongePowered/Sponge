@@ -288,6 +288,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null; // Shadowed
     }
     @Shadow public abstract int getHeight(int x, int z);
+    @Shadow public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
+        return false; // shadowed
+    }
+    @Shadow protected abstract void playEvent(int i, BlockPos pos, int stateId);
 
     // @formatter:on
 

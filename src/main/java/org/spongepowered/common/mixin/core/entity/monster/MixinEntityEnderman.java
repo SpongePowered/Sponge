@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.EntityEnderman;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -33,13 +34,21 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityEnderman.class)
 public abstract class MixinEntityEnderman extends MixinEntityMob implements Enderman {
+
+    @Shadow @Nullable public abstract IBlockState getHeldBlockState();
+
+    @Shadow public abstract void setHeldBlockState(@Nullable IBlockState state);
 
     @Redirect(method = "teleportTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EntityEnderman;attemptTeleport(DDD)Z"))
     public boolean redirectTeleportTo(EntityEnderman entityEnderman, double x, double y, double z) {
@@ -57,5 +66,20 @@ public abstract class MixinEntityEnderman extends MixinEntityMob implements Ende
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(ScreamingData.class).get());
+    }
+
+    /**
+     * @author gabizou - July 26th, 2018
+     * @reason Due to vanilla logic, a block is removed *after* the held item is set,
+     * so, when the block event gets cancelled, we don't have a chance to cancel the
+     * enderman pickup.
+     *
+     * @param phaseContext The context, for whatever reason in the future
+     */
+    @Override
+    public void onCancelledBlockChange(EntityTickContext phaseContext) {
+        if (this.getHeldBlockState() != null) {
+            this.setHeldBlockState(null);
+        }
     }
 }

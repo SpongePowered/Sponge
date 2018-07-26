@@ -55,6 +55,7 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -97,7 +98,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
             phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+                .acceptAndClearIfNotEmpty(blockSnapshots -> {
+                    if (!TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext)) {
+                        EntityUtil.toMixin(tickingEntity).onCancelledBlockChange(phaseContext);
+                    }
+                });
         }
         // And finally, if we're not capturing entities, there's nothing left for us to do.
         if (!phaseContext.allowsBulkEntityCaptures()) {
@@ -238,8 +243,27 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     public boolean spawnEntityOrCapture(EntityTickContext context, Entity entity, int chunkX, int chunkZ) {
+        // Always need our source
         final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
+
+        // Now to actually do something....
+        if (context.allowsBulkEntityCaptures()) {
+            // We need to check if any blocks are being broken at the moment. If they are, we need to
+            // put them in the associated block pos multimap, because the block change may not have
+            // occurred yet.
+            // Refer to https://github.com/SpongePowered/SpongeCommon/issues/1443
+            // Look at net.minecraft.world.World#breakBlock
+            final Optional<BlockPos> pos = context.getCaptureBlockPos().getPos();
+            if (pos.isPresent()) {
+                return context.getPerBlockEntitySpawnSuppplier().get().put(pos.get(), EntityUtil.toNative(entity));
+            } else {
+                return context.getCapturedEntities().add(entity);
+            }
+            // Otherwise... we'll just spawn them normally.
+        }
+        // It kinda sucks we have to make the cause frame here, but if we're already here, we are
+        // effectively already going to throw an event, and we're configured not to bulk capture.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack(frame);
             frame.pushCause(tickingEntity);
@@ -280,6 +304,11 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     @Override
     public boolean doesCaptureEntitySpawns() {
         return false;
+    }
+
+    @Override
+    public boolean alreadyProcessingBlockItemDrops() {
+        return true;
     }
 
     /**

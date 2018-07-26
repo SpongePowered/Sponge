@@ -99,16 +99,23 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;
 
+    // Single type bulk captures
     @Nullable private CapturedBlocksSupplier blocksSupplier;
-    @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
-    @Nullable private BlockItemEntityDropsSupplier blockItemEntityDropsSupplier;
     @Nullable private CapturedItemsSupplier capturedItemsSupplier;
     @Nullable private CapturedEntitiesSupplier capturedEntitiesSupplier;
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
+
+    // Per block captures (useful for things like explosions to capture multiple targets at a time)
+    @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
+    @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
+    @Nullable private BlockItemEntityDropsSupplier blockItemEntityDropsSupplier;
+    @Nullable private CaptureBlockPos captureBlockPos;
+
+    // Per entity captures (useful for things like explosions to capture multiple targets at a time)
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
-    @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
-    @Nullable private CaptureBlockPos captureBlockPos;
+
+    // General
     @Nullable protected User owner;
     @Nullable protected User notifier;
     private boolean processImmediately;
@@ -189,6 +196,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         this.capturedItemStackSupplier = new CapturedItemStackSupplier();
 
         this.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        this.captureBlockPos = new CaptureBlockPos();
         return (P) this;
     }
 
