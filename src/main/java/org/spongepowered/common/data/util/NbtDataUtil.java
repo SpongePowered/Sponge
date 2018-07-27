@@ -76,6 +76,7 @@ public final class NbtDataUtil {
         public static final String IS_FLYING = "flying";
 
         public static final String INVENTORY = "Inventory";
+        public static final String ENDERCHEST_INVENTORY = "EnderItems";
 
         public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
     }
