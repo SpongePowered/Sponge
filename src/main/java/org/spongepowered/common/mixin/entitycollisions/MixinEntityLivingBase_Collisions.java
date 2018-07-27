@@ -28,9 +28,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
@@ -38,7 +40,9 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModDat
 import java.util.List;
 
 @Mixin(EntityLivingBase.class)
-public class MixinEntityLivingBase_Collisions extends MixinEntity_Collisions {
+public abstract class MixinEntityLivingBase_Collisions extends MixinEntity_Collisions {
+
+    @Shadow protected abstract void collideWithEntity(Entity entityIn);
 
     private boolean runningCollideWithNearby = false;
 
@@ -58,21 +62,27 @@ public class MixinEntityLivingBase_Collisions extends MixinEntity_Collisions {
     }
 
     // This injection allows maxEntityCramming to be applied first before checking for max collisions
-    @Inject(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;collideWithEntity(Lnet/minecraft/entity/Entity;)V"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    protected void onCollideWithNearbyEntities(CallbackInfo ci, List<Entity> list, int maxEntityCramming, int index, Entity entityIn) {
-        // ignore players and entities with parts (ex. EnderDragon)
-        if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
-            return;
-        }
+    @Redirect(method = "collideWithNearbyEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    protected int onCollideWithNearbyEntities(List<Entity> list) {
+        for (Entity entity: list) {
+            // ignore players and entities with parts (ex. EnderDragon)
+            if (this.world.isRemote || entity == null || entity instanceof EntityPlayer || entity.getParts() != null) {
+                continue;
+            }
 
-        final IModData_Collisions spongeEntity = (IModData_Collisions) this;
-        if (spongeEntity.requiresCollisionsCacheRefresh()) {
-            spongeEntity.initializeCollisionState(this.world);
-            spongeEntity.requiresCollisionsCacheRefresh(false);
-        }
+            final IModData_Collisions spongeEntity = (IModData_Collisions) this;
+            if (spongeEntity.requiresCollisionsCacheRefresh()) {
+                spongeEntity.initializeCollisionState(this.world);
+                spongeEntity.requiresCollisionsCacheRefresh(false);
+            }
 
-        if (spongeEntity.getMaxCollisions() >= 0 && list.size() >= spongeEntity.getMaxCollisions()) {
-            ci.cancel();
+            if (spongeEntity.getMaxCollisions() >= 0 && list.size() >= spongeEntity.getMaxCollisions()) {
+                // Don't process any more collisions
+                break;
+            }
+            this.collideWithEntity(entity);
         }
+        // We always return '0' to prevent the original loop from running.
+        return 0;
     }
 }
