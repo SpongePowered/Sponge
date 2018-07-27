@@ -31,6 +31,8 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -53,11 +55,14 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -70,7 +75,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     EntityType entityType;
 
     @Nullable UUID entityId;
-    @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
+    @Nullable List<ImmutableDataManipulator<?, ?>> customManipulators;
+    @Nullable List<ImmutableDataManipulator<?, ?>> vanillaManipulators;
     @Nullable NBTTagCompound compound;
     @Nullable List<ImmutableValue<?>> values;
     @Nullable WeakReference<Entity> entityReference;
@@ -94,7 +100,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     public SpongeEntitySnapshotBuilder type(EntityType entityType) {
         this.entityType = checkNotNull(entityType);
         this.compound = null;
-        this.manipulators = null;
+        this.vanillaManipulators = null;
+        this.customManipulators = null;
         this.entityId = null;
         return this;
     }
@@ -130,10 +137,10 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.scale = entity.getTransform().getScale();
         this.entityType = entity.getType();
         this.entityId = entity.getUniqueId();
-        this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) entity).getCustomManipulators()) {
-            addManipulator(manipulator.asImmutable());
-        }
+        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
+        ((IMixinEntity) entity).supplyVanillaManipulators(list);
+        this.vanillaManipulators = list.stream().map(DataManipulator::asImmutable).collect(Collectors.toList());
+        this.customManipulators = ((IMixinCustomDataHolder) entity).getCustomManipulators().stream().map(DataManipulator::asImmutable).collect(Collectors.toList());
         this.compound = new NBTTagCompound();
         ((net.minecraft.entity.Entity) entity).writeToNBT(this.compound);
         return this;
@@ -150,12 +157,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
         final Optional<DataProcessor<?, ?>> optional = DataUtil.getImmutableProcessor((Class) manipulator.getClass());
-        if (optional.isPresent()) {
-            if (optional.get().supports(this.entityType)) {
-                addManipulator(manipulator);
-            } else {
-                return this;
-            }
+        if (optional.isPresent() && optional.get().supports(this.entityType)) {
+            addManipulator(manipulator);
         }
         return this;
     }
@@ -172,24 +175,17 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     }
 
     private void addManipulator(ImmutableDataManipulator<?, ?> manipulator) {
-        if (this.manipulators == null) {
-            this.manipulators = Lists.newArrayList();
+        if (this.customManipulators == null) {
+            this.customManipulators = Lists.newArrayList();
+        } else {
+            this.customManipulators.removeIf(m -> m.getClass().equals(manipulator.getClass()));
         }
-        int replaceIndex = -1;
-        for (ImmutableDataManipulator<?, ?> existing : this.manipulators) {
-            replaceIndex++;
-            if (existing.getClass().equals(manipulator.getClass())) {
-                break;
-            }
-        }
-        if (replaceIndex != -1) {
-            this.manipulators.remove(replaceIndex);
-        }
-        this.manipulators.add(manipulator);
+        this.customManipulators.add(manipulator);
     }
 
     @Override
     public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
+        reset();
         this.entityType = holder.getType();
         this.worldId = holder.getWorldUniqueId();
         if (holder.getUniqueId().isPresent()) {
@@ -202,31 +198,18 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             this.rotation = optional.get().getRotation();
             this.scale = optional.get().getScale();
         }
-        this.manipulators = Lists.newArrayList();
         for (ImmutableDataManipulator<?, ?> manipulator : holder.getContainers()) {
             add(manipulator);
         }
         if (holder instanceof SpongeEntitySnapshot) {
             this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);
+            this.vanillaManipulators = ((SpongeEntitySnapshot) holder).getVanillaManipulators().orElse(null);
         }
         return this;
     }
 
     public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
-        this.entityType = ((Entity) minecraftEntity).getType();
-        this.worldId = ((Entity) minecraftEntity).getWorld().getUniqueId();
-        this.entityId = minecraftEntity.getUniqueID();
-        final Transform<World> transform = ((Entity) minecraftEntity).getTransform();
-        this.position = transform.getPosition();
-        this.rotation = transform.getRotation();
-        this.scale = transform.getScale();
-        this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) minecraftEntity).getCustomManipulators()) {
-            addManipulator(manipulator.asImmutable());
-        }
-        this.compound = new NBTTagCompound();
-        minecraftEntity.writeToNBT(this.compound);
-        return this;
+        return from(EntityUtil.fromNative(minecraftEntity));
     }
 
     public SpongeEntitySnapshotBuilder unsafeCompound(NBTTagCompound compound) {
@@ -243,7 +226,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.scale = null;
         this.entityType = null;
         this.entityId = null;
-        this.manipulators = null;
+        this.vanillaManipulators = null;
+        this.customManipulators = null;
         this.compound = null;
         this.entityReference = null;
         return this;
@@ -252,7 +236,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Override
     public EntitySnapshot build() {
         EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
-        if(this.values != null) {
+        if (this.values != null) {
             for (ImmutableValue<?> value : this.values) {
                 snapshot = snapshot.with(value).orElse(snapshot);
             }
@@ -272,10 +256,20 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         final String entityTypeId = container.getString(DataQueries.ENTITY_TYPE).get();
         this.entityType = SpongeImpl.getRegistry().getType(EntityType.class, entityTypeId).get();
 
+        ImmutableList.Builder<ImmutableDataManipulator<?, ?>> list = ImmutableList.builder();
+
+        Entity entity = Sponge.getServer().getWorld(this.worldId).get().createEntity(this.entityType, this.position);
+        List<DataManipulator<?, ?>> temp = new ArrayList<>();
+        DataContainer cont = container.copy();
+        ((IMixinEntity) entity).supplyVanillaManipulators(temp);
+        temp.forEach(m -> {
+            Optional<? extends DataManipulator> opt = m.from(cont);
+            opt.ifPresent(manipulator -> list.add(manipulator.asImmutable()));
+        });
+        this.vanillaManipulators = list.build();
+
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-            this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
-        } else {
-            this.manipulators = ImmutableList.of();
+            this.customManipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
         }
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             this.compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());

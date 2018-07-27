@@ -66,6 +66,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
@@ -142,6 +143,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -1045,6 +1047,14 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
+        }
+        final List<DataManipulator<?, ?>> vanilla = new ArrayList<>();
+        this.supplyVanillaManipulators(vanilla);
+        if (!vanilla.isEmpty()) {
+            vanilla.forEach(m -> m.getKeys().forEach(k -> {
+                Optional<?> val = m.get((Key) k);
+                val.ifPresent(value -> container.set(k.getQuery(), value));
+            }));
         }
         return container;
     }
