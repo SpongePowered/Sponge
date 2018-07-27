@@ -170,10 +170,13 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     private SpongeUser loadEnderInventory() {
-        if (this.nbt.hasKey(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 9))
-        {
-            NBTTagList nbttaglist1 = this.nbt.getTagList(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 10);
-            this.enderChest.loadInventoryFromNBT(nbttaglist1);
+        if (this.enderChest == null) {
+            this.enderChest = new SpongeUserInventoryEnderchest(this);
+            if (this.nbt.hasKey(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 9))
+            {
+                NBTTagList nbttaglist1 = this.nbt.getTagList(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 10);
+                this.enderChest.loadInventoryFromNBT(nbttaglist1);
+            }
         }
         return this;
     }
