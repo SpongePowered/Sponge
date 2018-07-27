@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -44,6 +45,7 @@ import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -100,6 +102,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
 
     private SpongeUserInventory inventory; // lazy load when accessing inventory
+    private InventoryEnderChest enderChest; // lazy load when accessing inventory
     private NBTTagCompound nbt;
 
     public SpongeUser(GameProfile profile) {
@@ -166,10 +169,21 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this;
     }
 
+    private SpongeUser loadEnderInventory() {
+        if (this.nbt.hasKey(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 9))
+        {
+            NBTTagList nbttaglist1 = this.nbt.getTagList(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, 10);
+            this.enderChest.loadInventoryFromNBT(nbttaglist1);
+        }
+        return this;
+    }
+
     public void writeToNbt(NBTTagCompound compound) {
 
         this.loadInventory();
+        this.loadEnderInventory();
         compound.setTag(NbtDataUtil.Minecraft.INVENTORY, this.inventory.writeToNBT(new NBTTagList()));
+        compound.setTag(NbtDataUtil.Minecraft.ENDERCHEST_INVENTORY, this.enderChest.saveInventoryToNBT());
         compound.setInteger(NbtDataUtil.Minecraft.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
         compound.setTag(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.newDoubleNBTList(this.posX, this.posY, this.posZ));
@@ -257,6 +271,10 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return this.getForInventory(Player::getInventory, u -> ((CarriedInventory) u.inventory));
     }
 
+    public Inventory getEnderChestInventory() {
+        this.loadEnderInventory();
+        return ((Inventory) this.enderChest);
+    }
 
     @Override
     public Optional<ItemStack> getItemInHand(HandType handType) {
