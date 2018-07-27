@@ -612,6 +612,7 @@ public final class PhaseTracker {
                 .setNotifiedBlockPos(notifyPos)
                 .setNotifiedBlockState(iblockstate)
                 .setSourceNotification(sourcePos)
+                 .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
 
             ) {
                 // Since the notifier may have just been set from the previous state, we can

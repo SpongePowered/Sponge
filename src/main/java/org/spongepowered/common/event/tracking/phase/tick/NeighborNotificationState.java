@@ -129,7 +129,7 @@ class NeighborNotificationState extends LocationBasedTickPhaseState<NeighborNoti
      */
     @Override
     public boolean doesBlockEventTracking(NeighborNotificationContext context) {
-        return true;
+        return context.allowsBlockEvents();
     }
 
 
