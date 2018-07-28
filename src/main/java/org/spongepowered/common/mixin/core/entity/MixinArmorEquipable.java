@@ -69,9 +69,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase implemen
                 throw new IllegalArgumentException("Only EquipmentTypes for a single Slot are possible");
             }
             net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
-            if (!nmsItem.isEmpty()) {
-                return Optional.of(ItemStackUtil.fromNative(nmsItem));
-            }
+            return Optional.of(ItemStackUtil.fromNative(nmsItem));
         }
         return Optional.empty();
     }
