@@ -72,9 +72,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase implemen
                 throw new IllegalArgumentException("Only EquipmentTypes for a single Slot are possible");
             }
             net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
-            if (!nmsItem.isEmpty()) {
-                return Optional.of(ItemStackUtil.fromNative(nmsItem));
-            }
+            return Optional.of(ItemStackUtil.fromNative(nmsItem));
         }
         return Optional.empty();
     }
@@ -98,7 +96,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase implemen
     public Optional<ItemStack> equipable$getItemInHand(HandType handType) {
         checkNotNull(handType, "HandType cannot be null!");
         final net.minecraft.item.ItemStack nmsItem = this.getHeldItem((EnumHand) (Object) handType);
-        return Optional.ofNullable(nmsItem.isEmpty() ? null : ((ItemStack) nmsItem.copy()));
+        return Optional.of(ItemStackUtil.fromNative(nmsItem));
     }
 
     public void equipable$setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
