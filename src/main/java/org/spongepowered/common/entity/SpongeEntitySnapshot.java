@@ -29,7 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.Sponge;
@@ -81,8 +83,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final Vector3d scale;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> vanillaManipulators;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> customManipulators;
-    private final ImmutableSet<Key<?>> keys;
-    private final ImmutableSet<ImmutableValue<?>> values;
+
+    private final ImmutableBiMap<Key<?>, ImmutableValue<?>> map;
     @Nullable private final NBTTagCompound compound;
     @Nullable private final WeakReference<Entity> entityReference;
     // TODO write optimization to lazy load and evaluate all of the manipulators
@@ -93,29 +95,30 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.entityType = builder.entityType;
         this.entityUuid = builder.entityId;
         if (builder.vanillaManipulators != null) {
-            final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
-            final ImmutableSet.Builder<ImmutableValue<?>> valueBuilder = ImmutableSet.builder();
-            builder.vanillaManipulators.forEach(m -> {
-                valueBuilder.addAll(m.getValues());
-                keyBuilder.addAll(m.getKeys());
-            });
+            final ImmutableBiMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableBiMap.builder();
+            for (ImmutableDataManipulator<?, ?> manipulator : builder.vanillaManipulators) {
+                for (Key key : manipulator.getKeys()) {
+                    mapBuilder.put(key, (ImmutableValue<?>) manipulator.getValue(key).get());
+                }
+            }
             if (builder.customManipulators != null) {
-                builder.customManipulators.forEach(m -> {
-                    valueBuilder.addAll(m.getValues());
-                    keyBuilder.addAll(m.getKeys());
-                });
+                for (ImmutableDataManipulator<?, ?> manipulator : builder.customManipulators) {
+                    for (Key key : manipulator.getKeys()) {
+                        mapBuilder.put(key, (ImmutableValue<?>) manipulator.getValue(key).get());
+                    }
+                }
+            }
+            this.map = mapBuilder.build();
+            if (builder.customManipulators != null) {
                 this.customManipulators = ImmutableList.copyOf(builder.customManipulators);
             } else {
                 this.customManipulators = ImmutableList.of();
             }
             this.vanillaManipulators = ImmutableList.copyOf(builder.vanillaManipulators);
-            this.keys = keyBuilder.build();
-            this.values = valueBuilder.build();
         } else {
             this.vanillaManipulators = ImmutableList.of();
             this.customManipulators = ImmutableList.of();
-            this.keys = ImmutableSet.of();
-            this.values = ImmutableSet.of();
+            this.map = ImmutableBiMap.of();
         }
         this.compound = builder.compound == null ? null : builder.compound.copy();
         this.worldUuid = builder.worldId;
@@ -342,30 +345,26 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        checkNotNull(key);
-        for (ImmutableValue<?> value : this.values) {
-            if (value.getKey().equals(key)) {
-                return Optional.of((E) value.get());
-            }
+        ImmutableValue<?> value = this.map.get(key);
+        if (value == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of((E) value.get());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
-        checkNotNull(key);
-        for (ImmutableValue<?> value : this.values) {
-            if (value.getKey().equals(key)) {
-                return Optional.of((V) value.asMutable());
-            }
+        ImmutableValue<?> value = this.map.get(key);
+        if (value == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of((V) value.asMutable());
     }
 
     @Override
     public boolean supports(Key<?> key) {
-        return this.keys.contains(key);
+        return this.map.containsKey(key);
     }
 
     @Override
@@ -375,12 +374,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Set<Key<?>> getKeys() {
-        return this.keys;
+        return this.map.keySet();
     }
 
     @Override
     public Set<ImmutableValue<?>> getValues() {
-        return this.values;
+        return this.map.values();
     }
 
     @Override

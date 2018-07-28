@@ -198,8 +198,11 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             this.rotation = optional.get().getRotation();
             this.scale = optional.get().getScale();
         }
-        for (ImmutableDataManipulator<?, ?> manipulator : holder.getContainers()) {
-            add(manipulator);
+        if (!holder.getContainers().isEmpty()) {
+            if (this.customManipulators == null) {
+                this.customManipulators = new ArrayList<>();
+            }
+            this.customManipulators.addAll(holder.getContainers());
         }
         if (holder instanceof SpongeEntitySnapshot) {
             this.compound = ((SpongeEntitySnapshot) holder).getCompound().orElse(null);
