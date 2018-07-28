@@ -141,6 +141,7 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
         this.rotationYaw = ((float) rotation.getY()) % 360.0F;
     }
 
+    @Override
     public Inventory getEnderChestInventory() {
         this.loadEnderInventory();
         return ((Inventory) this.enderChest);

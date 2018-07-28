@@ -229,7 +229,7 @@ public abstract class AdapterLogic{
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
             net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-            items += !stack.isEmpty() ? stack.getCount() : 0;
+            items += stack.getCount();
         }
 
         return items;
