@@ -36,7 +36,6 @@ import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import java.util.function.Predicate;
 
-
 public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlotLens {
 
     public InputSlotLensImpl(int index) {

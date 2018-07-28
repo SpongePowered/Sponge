@@ -30,30 +30,20 @@ import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.MutableLensSet;
-import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensSetImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
-import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
-import org.spongepowered.common.item.inventory.query.result.QueryResult;
+import org.spongepowered.common.item.inventory.query.result.QueryResultAdapter;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 public class Query {
 
-    public interface ResultAdapterProvider {
-
-        QueryResult getResultAdapter(Fabric inventory, MutableLensSet matches, Inventory parent);
-
-    }
-
-    private static ResultAdapterProvider defaultResultProvider = new MinecraftResultAdapterProvider();
-
     private final InventoryAdapter adapter;
 
-    private final Fabric inventory;
+    private final Fabric fabric;
 
     private final Lens lens;
 
@@ -61,42 +51,33 @@ public class Query {
 
     private Query(InventoryAdapter adapter, QueryOperation<?>[] queries) {
         this.adapter = adapter;
-        this.inventory = adapter.getFabric();
+        this.fabric = adapter.getFabric();
         this.lens = adapter.getRootLens();
         this.queries = queries;
     }
 
-    @SuppressWarnings("unchecked")
     public Inventory execute() {
-        return this.execute(Query.defaultResultProvider);
-    }
-
-    public Inventory execute(ResultAdapterProvider resultProvider) {
-        if (this.matches(this.lens, null, this.inventory)) {
-            return this.lens.getAdapter(this.inventory, this.adapter);
+        if (this.matches(this.lens, null, this.fabric)) {
+            return this.lens.getAdapter(this.fabric, this.adapter);
         }
 
-        return this.toResult(resultProvider, this.reduce(this.lens, this.depthFirstSearch(this.lens)));
+        return this.toResult(this.reduce(this.lens, this.depthFirstSearch(this.lens)));
     }
 
     @SuppressWarnings("unchecked")
-    private Inventory toResult(ResultAdapterProvider resultProvider, MutableLensSet matches) {
+    private Inventory toResult(Set<Lens> matches) {
         if (matches.isEmpty()) {
             return new EmptyInventoryImpl(this.adapter);
         }
         if (matches.size() == 1) {
-            return matches.getLens(0).getAdapter(this.inventory, this.adapter);
+            return matches.iterator().next().getAdapter(this.fabric, this.adapter);
         }
 
-        if (resultProvider != null) {
-            return resultProvider.getResultAdapter(this.inventory, matches, this.adapter);
-        }
-
-        return Query.defaultResultProvider.getResultAdapter(this.inventory, matches, this.adapter);
+        return new QueryResultAdapter(this.fabric, this.adapter, matches);
     }
 
-    private MutableLensSet depthFirstSearch(Lens lens) {
-        MutableLensSet matches = new MutableLensSetImpl(true);
+    private Set<Lens> depthFirstSearch(Lens lens) {
+        Set<Lens> matches = new LinkedHashSet<>();
 
         for (Lens child : lens.getChildren()) {
             if (child == null) {
@@ -105,7 +86,7 @@ public class Query {
             if (!child.getChildren().isEmpty()) {
                 matches.addAll(this.depthFirstSearch(child));
             }
-            if (this.matches(child, lens, this.inventory)) {
+            if (this.matches(child, lens, this.fabric)) {
                 matches.add(child);
             }
         }
@@ -128,7 +109,7 @@ public class Query {
         return false;
     }
 
-    private MutableLensSet reduce(Lens lens, MutableLensSet matches) {
+    private Set<Lens> reduce(Lens lens, Set<Lens> matches) {
         List<SlotLens> lensSlots = lens.getSlots();
         Set<SlotLens> matchSlots = this.getSlots(matches);
 
@@ -149,7 +130,7 @@ public class Query {
         return matches;
     }
 
-    private boolean allLensesAreSlots(MutableLensSet lenses) {
+    private boolean allLensesAreSlots(Set<Lens> lenses) {
         for (Lens lens : lenses) {
             if (!(lens instanceof SlotLens)) {
                 return false;
@@ -168,10 +149,6 @@ public class Query {
 
     public static Query compile(InventoryAdapter adapter, QueryOperation<?>... queries) {
         return new Query(adapter, queries);
-    }
-
-    public static void setDefaultResultProvider(ResultAdapterProvider defaultResultProvider) {
-        Query.defaultResultProvider = defaultResultProvider;
     }
 
 }

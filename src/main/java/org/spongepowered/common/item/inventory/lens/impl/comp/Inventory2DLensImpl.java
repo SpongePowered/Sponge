@@ -54,8 +54,7 @@ public class Inventory2DLensImpl extends SlotBasedLens implements Inventory2DLen
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
-    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType,
-            SlotProvider slots) {
+    protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, width * height, rowStride, adapterType, slots);
 
         checkArgument(width > 0, "Invalid width: %s", width);

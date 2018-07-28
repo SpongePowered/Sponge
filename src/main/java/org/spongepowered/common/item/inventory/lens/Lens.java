@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.text.translation.Translation;
@@ -32,7 +31,6 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 

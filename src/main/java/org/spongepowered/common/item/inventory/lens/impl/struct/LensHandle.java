@@ -115,9 +115,9 @@ public final class LensHandle {
 
     public void setProperty(InventoryProperty<?, ?> property) {
         if (this.properties == null) {
-            this.properties = new ArrayList<InventoryProperty<?, ?>>();
+            this.properties = new ArrayList<>();
         } else {
-            this.removeMatchingProperties( property);
+            this.removeMatchingProperties(property);
         }
         this.properties.add(property);
     }
@@ -129,12 +129,7 @@ public final class LensHandle {
     }
 
     private void removeMatchingProperties(InventoryProperty<?, ?> property) {
-        for (Iterator<InventoryProperty<?, ?>> iter = this.properties.iterator(); iter.hasNext();) {
-            InventoryProperty<?, ?> prop = iter.next();
-            if (prop.getClass() == property.getClass() && prop.getKey().equals(property.getKey())) {
-                iter.remove();
-            }
-        }
+        this.properties.removeIf(prop -> prop.getClass() == property.getClass() && prop.getKey().equals(property.getKey()));
     }
 
     @Override

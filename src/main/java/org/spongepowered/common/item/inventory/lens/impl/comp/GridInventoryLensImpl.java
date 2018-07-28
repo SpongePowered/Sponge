@@ -39,7 +39,6 @@ import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridInventoryLens {
 
     protected List<LensHandle> rows;
@@ -88,7 +87,5 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
     public InventoryAdapter getAdapter(Fabric fabric, Inventory parent) {
         return ObjectUtils.firstNonNull(MinecraftFabric.getAdapter(fabric, parent, this.base, this.adapterType), new GridInventoryAdapter(fabric, this, parent));
     }
-
-
 
 }

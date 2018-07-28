@@ -164,11 +164,6 @@ public class HeldHandSlotLensImpl implements EquipmentSlotLens {
     }
 
     @Override
-    public Iterator<Lens> iterator() {
-        return Collections.emptyListIterator();
-    }
-
-    @Override
     public SlotLens getSlotLens(int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");

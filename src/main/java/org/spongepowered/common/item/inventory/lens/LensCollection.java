@@ -27,9 +27,10 @@ package org.spongepowered.common.item.inventory.lens;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-
-public interface LensCollection extends Iterable<Lens> {
+public interface LensCollection {
     
     /**
      * Gets the lens at the specified index in this collection
@@ -76,5 +77,7 @@ public interface LensCollection extends Iterable<Lens> {
      * @return
      */
     boolean isSubsetOf(Collection<Lens> c);
+
+    List<Lens> getChildren();
     
 }
