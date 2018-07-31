@@ -100,7 +100,7 @@ public final class TileEntityTypeRegistryModule
     }
 
     @SuppressWarnings("unchecked")
-    public void doTileEntityRegistration(Class<?> clazz, String name) {
+    public TileEntityType doTileEntityRegistration(Class<?> clazz, String name) {
         final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
         boolean canTick = true;
         try {
@@ -120,6 +120,7 @@ public final class TileEntityTypeRegistryModule
                 new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, tileId, canTick, modId);
 
         TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
+        return tileEntityType;
     }
 
     TileEntityTypeRegistryModule() {
