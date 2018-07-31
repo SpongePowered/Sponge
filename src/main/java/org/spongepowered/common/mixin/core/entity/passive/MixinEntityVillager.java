@@ -72,6 +72,7 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -231,7 +232,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getCareerData());
     }

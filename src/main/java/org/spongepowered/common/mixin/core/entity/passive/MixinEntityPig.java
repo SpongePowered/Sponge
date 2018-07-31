@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityPig.class)
@@ -53,7 +54,7 @@ public abstract class MixinEntityPig extends MixinEntityAnimal implements Pig {
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(this.getPigSaddleData());
     }

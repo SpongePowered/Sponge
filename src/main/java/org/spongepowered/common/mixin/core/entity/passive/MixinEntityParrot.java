@@ -48,6 +48,7 @@ import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.ParrotVariantRegistryModule;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -84,7 +85,7 @@ public abstract class MixinEntityParrot extends MixinEntityTameable implements P
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
         manipulators.add(getParrotData());

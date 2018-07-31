@@ -30,6 +30,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,11 +38,8 @@ import java.util.Optional;
 public abstract class MixinTileEntityFlowerPot extends MixinTileEntity implements FlowerPot {
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<RepresentedItemData> flowerItemData = get(RepresentedItemData.class);
-        if (flowerItemData.isPresent()) {
-            manipulators.add(flowerItemData.get());
-        }
+        get(RepresentedItemData.class).ifPresent(manipulators::add);
     }
 }

@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,13 +53,10 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
     @Shadow public abstract com.mojang.authlib.GameProfile shadow$getPlayerProfile();
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getSkullData());
-        Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);
-        if (profileData.isPresent()) {
-            manipulators.add(profileData.get());
-        }
+        get(RepresentedPlayerData.class).ifPresent(manipulators::add);
     }
 
     @Intrinsic

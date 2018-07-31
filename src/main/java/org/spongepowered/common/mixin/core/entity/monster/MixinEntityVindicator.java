@@ -35,6 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJohnnyData
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.monster.IMixinVindicator;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityVindicator.class)
@@ -48,7 +49,7 @@ public abstract class MixinEntityVindicator extends MixinEntityMob implements IM
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeJohnnyData(this.johnny));
     }

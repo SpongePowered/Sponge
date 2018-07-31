@@ -57,6 +57,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityHanging;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -152,7 +153,7 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging,
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getDirectionalData());
     }

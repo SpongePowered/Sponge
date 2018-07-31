@@ -41,6 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.HorseColorRegistryModule;
 import org.spongepowered.common.registry.type.entity.HorseStyleRegistryModule;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityHorse.class)
@@ -63,7 +64,7 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getHorseData());
     }

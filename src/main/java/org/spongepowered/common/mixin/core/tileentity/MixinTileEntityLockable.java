@@ -55,6 +55,7 @@ import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,16 +91,10 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<LockableData> lockData = get(LockableData.class);
-        if (lockData.isPresent()) {
-            manipulators.add(lockData.get());
-        }
-        Optional<InventoryItemData> inventoryData = get(InventoryItemData.class);
-        if (inventoryData.isPresent()) {
-            manipulators.add(inventoryData.get());
-        }
+        get(LockableData.class).ifPresent(manipulators::add);
+        get(InventoryItemData.class).ifPresent(manipulators::add);
         if (((TileEntityLockable) (Object) this).hasCustomName()) {
             manipulators.add(get(DisplayNameData.class).get());
         }

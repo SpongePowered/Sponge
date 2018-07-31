@@ -36,6 +36,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntitySlime.class)
@@ -59,7 +60,7 @@ public abstract class MixinEntitySlime extends MixinEntityLiving implements Slim
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getSlimeData());
     }

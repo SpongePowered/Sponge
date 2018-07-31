@@ -48,6 +48,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCol
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -164,12 +165,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<ConnectedDirectionData> connectedChestData = get(ConnectedDirectionData.class);
-        if (connectedChestData.isPresent()) {
-            manipulators.add(connectedChestData.get());
-        }
+        get(ConnectedDirectionData.class).ifPresent(manipulators::add);
     }
 
     @Override

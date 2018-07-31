@@ -52,6 +52,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -99,7 +100,7 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
         manipulators.add(getOcelotData());

@@ -44,6 +44,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -86,7 +87,7 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
         manipulators.add(new SpongeAggressiveData(this.isAngry()));

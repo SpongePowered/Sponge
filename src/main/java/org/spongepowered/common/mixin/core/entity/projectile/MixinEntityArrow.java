@@ -45,6 +45,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -80,7 +81,8 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
         manipulators.add(getKnockbackData());
     }
 

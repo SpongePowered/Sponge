@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlammableData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityBlaze.class)
@@ -47,7 +48,7 @@ public abstract class MixinEntityBlaze extends MixinEntityMob implements Blaze {
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(new SpongeFlammableData(this.isBurning()));
     }

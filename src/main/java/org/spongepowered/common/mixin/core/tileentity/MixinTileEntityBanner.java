@@ -53,6 +53,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @NonnullByDefault
@@ -82,7 +83,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getBannerData());
     }

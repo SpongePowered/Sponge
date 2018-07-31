@@ -38,6 +38,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.interfaces.IMixinMobSpawner;
 
+import java.util.Collection;
 import java.util.List;
 
 @NonnullByDefault
@@ -81,7 +82,7 @@ public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implemen
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getMobSpawnerData());
     }

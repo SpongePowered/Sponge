@@ -41,6 +41,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 import org.spongepowered.common.interfaces.entity.IMixinAnger;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityPigZombie.class)
@@ -90,7 +91,7 @@ public abstract class MixinEntityPigZombie extends MixinEntityZombie implements 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getAngerData());
         manipulators.add(new SpongeAggressiveData(isAngry()));

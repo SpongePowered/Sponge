@@ -38,6 +38,7 @@ import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.registry.type.entity.RabbitTypeRegistryModule;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityRabbit.class)
@@ -56,7 +57,7 @@ public abstract class MixinEntityRabbit extends MixinEntityAnimal implements Rab
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getRabbitData());
     }

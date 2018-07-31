@@ -72,7 +72,9 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -256,18 +258,17 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         CustomDataNbtUtil.writeCustomData(compound, this);
     }
 
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        this.supplyVanillaManipulators(list);
+        final Set<DataManipulator<?, ?>> manipulators = new HashSet<>();
+        supplyVanillaManipulators(manipulators);
         if (this instanceof IMixinCustomDataHolder) {
-            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+            manipulators.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
         }
-        return list;
+        return manipulators;
     }
 
     @Override

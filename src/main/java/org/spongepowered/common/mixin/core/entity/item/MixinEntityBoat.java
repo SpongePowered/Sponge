@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import java.util.Collection;
 import java.util.List;
 
 // TODO 1.9: Refactor this for boat overhaul
@@ -116,7 +117,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     }*/
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(TreeData.class).get());
     }

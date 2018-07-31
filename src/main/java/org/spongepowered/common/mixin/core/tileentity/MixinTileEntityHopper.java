@@ -65,6 +65,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCol
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -131,12 +132,9 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<CooldownData> cooldownData = get(CooldownData.class);
-        if (cooldownData.isPresent()) {
-            manipulators.add(cooldownData.get());
-        }
+        get(CooldownData.class).ifPresent(manipulators::add);
     }
 
     // Call PreEvents

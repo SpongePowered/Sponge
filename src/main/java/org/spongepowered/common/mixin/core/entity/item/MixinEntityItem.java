@@ -57,6 +57,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityItem.class)
@@ -238,7 +239,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getItemData());
     }

@@ -45,6 +45,7 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinTrackable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -96,7 +97,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixi
         return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
     }
 
-    default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    default void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
     }
 
     /**

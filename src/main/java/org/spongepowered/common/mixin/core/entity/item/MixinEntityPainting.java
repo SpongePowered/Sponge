@@ -38,6 +38,7 @@ import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.MixinEntityHanging;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityPainting.class)
@@ -56,7 +57,7 @@ public abstract class MixinEntityPainting extends MixinEntityHanging implements 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getArtData());
     }

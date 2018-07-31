@@ -146,6 +146,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -432,13 +433,10 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        Optional<VehicleData> vehicleData = get(VehicleData.class);
-        if (vehicleData.isPresent()) {
-            manipulators.add(vehicleData.get());
-        }
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
+        get(VehicleData.class).ifPresent(manipulators::add);
         if (this.fire > 0) {
-            manipulators.add(get(IgniteableData.class).get());
+            get(IgniteableData.class).ifPresent(manipulators::add);
         }
         manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
     }
@@ -1048,25 +1046,25 @@ public abstract class MixinEntity implements org.spongepowered.api.entity.Entity
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
-        final List<DataManipulator<?, ?>> vanilla = new ArrayList<>();
-        this.supplyVanillaManipulators(vanilla);
-        if (!vanilla.isEmpty()) {
-            vanilla.forEach(m -> m.getKeys().forEach(k -> {
-                Optional<?> val = m.get((Key) k);
+        final Set<DataManipulator<?, ?>> vanilla = new HashSet<>();
+        supplyVanillaManipulators(vanilla);
+        for (DataManipulator<?, ?> m : vanilla) {
+            for (Key k : m.getKeys()) {
+                Optional<?> val = m.get(k);
                 val.ifPresent(value -> container.set(k.getQuery(), value));
-            }));
+            }
         }
         return container;
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        final List<DataManipulator<?, ?>> list = Lists.newArrayList();
-        this.supplyVanillaManipulators(list);
+        final Set<DataManipulator<?, ?>> set = new HashSet<>();
+        supplyVanillaManipulators(set);
         if (this instanceof IMixinCustomDataHolder && ((IMixinCustomDataHolder) this).hasManipulators()) {
-            list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
+            set.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
         }
-        return list;
+        return set;
     }
 
     @Override

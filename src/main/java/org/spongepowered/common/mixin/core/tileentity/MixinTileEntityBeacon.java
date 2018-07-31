@@ -49,6 +49,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCol
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
+import java.util.Collection;
 import java.util.List;
 
 @NonnullByDefault
@@ -115,7 +116,7 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getBeaconData());
     }

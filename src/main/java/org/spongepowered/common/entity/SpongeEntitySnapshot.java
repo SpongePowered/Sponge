@@ -81,8 +81,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final Vector3d position;
     private final Vector3d rotation;
     private final Vector3d scale;
-    private final ImmutableList<ImmutableDataManipulator<?, ?>> vanillaManipulators;
-    private final ImmutableList<ImmutableDataManipulator<?, ?>> customManipulators;
+    private final ImmutableSet<ImmutableDataManipulator<?, ?>> vanillaManipulators;
+    private final ImmutableSet<ImmutableDataManipulator<?, ?>> customManipulators;
 
     private final ImmutableBiMap<Key<?>, ImmutableValue<?>> map;
     @Nullable private final NBTTagCompound compound;
@@ -95,6 +95,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.entityType = builder.entityType;
         this.entityUuid = builder.entityId;
         if (builder.vanillaManipulators != null) {
+            this.vanillaManipulators = ImmutableSet.copyOf(builder.vanillaManipulators);
             final ImmutableBiMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableBiMap.builder();
             for (ImmutableDataManipulator<?, ?> manipulator : builder.vanillaManipulators) {
                 for (Key key : manipulator.getKeys()) {
@@ -102,22 +103,19 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 }
             }
             if (builder.customManipulators != null) {
+                this.customManipulators = ImmutableSet.copyOf(builder.customManipulators);
                 for (ImmutableDataManipulator<?, ?> manipulator : builder.customManipulators) {
                     for (Key key : manipulator.getKeys()) {
                         mapBuilder.put(key, (ImmutableValue<?>) manipulator.getValue(key).get());
                     }
                 }
+            } else {
+                this.customManipulators = ImmutableSet.of();
             }
             this.map = mapBuilder.build();
-            if (builder.customManipulators != null) {
-                this.customManipulators = ImmutableList.copyOf(builder.customManipulators);
-            } else {
-                this.customManipulators = ImmutableList.of();
-            }
-            this.vanillaManipulators = ImmutableList.copyOf(builder.vanillaManipulators);
         } else {
-            this.vanillaManipulators = ImmutableList.of();
-            this.customManipulators = ImmutableList.of();
+            this.vanillaManipulators = ImmutableSet.of();
+            this.customManipulators = ImmutableSet.of();
             this.map = ImmutableBiMap.of();
         }
         this.compound = builder.compound == null ? null : builder.compound.copy();
@@ -171,7 +169,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators() {
-        return this.customManipulators;
+        return ImmutableList.copyOf(this.customManipulators);
     }
 
     @Override
@@ -182,12 +180,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.customManipulators);
-        final DataContainer container = DataContainer.createNew();
-        this.vanillaManipulators.forEach(m -> m.getKeys().forEach(k -> {
-            Optional<?> val = m.get((Key) k);
-            val.ifPresent(value -> container.set(k.getQuery(), value));
-        }));
-        container.set(Queries.CONTENT_VERSION, getContentVersion())
+        final DataContainer container = DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(Queries.WORLD_ID, this.worldUuid.toString())
                 .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
                 .createView(DataQueries.SNAPSHOT_WORLD_POSITION)
@@ -212,6 +206,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         }
         if (this.compound != null) {
             container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+        }
+
+        for (ImmutableDataManipulator<?, ?> manipulator : this.vanillaManipulators) {
+            for (Key k : manipulator.getKeys()) {
+                manipulator.get(k).ifPresent(value -> container.set(k.getQuery(), value));
+            }
         }
 
         return container;
@@ -267,7 +267,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public <E> Optional<EntitySnapshot> transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
         checkNotNull(key);
         checkNotNull(function);
-        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        ImmutableValue<?> value = this.map.get(key);
+        if (value == null || value.equals(function.apply((E) value))) {
+            return Optional.empty();
+        }
+        final ImmutableSet.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableSet.builder();
         boolean createNew = false;
         for (ImmutableDataManipulator<?, ?> manipulator : this.customManipulators) {
             if (manipulator.supports(key)) {
@@ -316,7 +320,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         if (!supports(containerClass)) {
             return Optional.empty();
         }
-        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        final ImmutableSet.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableSet.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : this.customManipulators) {
             if (!containerClass.isAssignableFrom(manipulator.getClass())) {
                 builder.add(manipulator);
@@ -485,7 +489,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 .toString();
     }
 
-    public Optional<ImmutableList<ImmutableDataManipulator<?, ?>>> getVanillaManipulators() {
-        return Optional.ofNullable(this.vanillaManipulators);
+    public Optional<ImmutableSet<ImmutableDataManipulator<?, ?>>> getVanillaManipulators() {
+        return Optional.of(this.vanillaManipulators);
     }
 }

@@ -38,6 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,12 +87,9 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<RepresentedItemData> recordItemData = get(RepresentedItemData.class);
-        if (recordItemData.isPresent()) {
-            manipulators.add(recordItemData.get());
-        }
+        get(RepresentedItemData.class).ifPresent(manipulators::add);
     }
 
 }

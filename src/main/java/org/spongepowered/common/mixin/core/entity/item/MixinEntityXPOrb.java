@@ -37,6 +37,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityXPOrb.class)
@@ -70,7 +71,7 @@ public abstract class MixinEntityXPOrb extends MixinEntity implements Experience
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(experienceHeld());
     }

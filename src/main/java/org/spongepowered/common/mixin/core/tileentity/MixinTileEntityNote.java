@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
 
+import java.util.Collection;
 import java.util.List;
 
 @NonnullByDefault
@@ -49,7 +50,7 @@ public abstract class MixinTileEntityNote extends MixinTileEntity implements Not
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getNoteData());
     }

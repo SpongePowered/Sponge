@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
+import java.util.Collection;
 import java.util.List;
 
 @NonnullByDefault
@@ -52,7 +53,7 @@ public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity im
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         if (((TileEntityEnchantmentTable) (Object) this).hasCustomName()) {
             manipulators.add(get(DisplayNameData.class).get());

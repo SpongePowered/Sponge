@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mixin(EntityMinecartCommandBlock.class)
@@ -48,7 +49,8 @@ public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecar
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    public void supplyVanillaManipulators(Collection<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
         manipulators.add(getCommandData());
     }
 
