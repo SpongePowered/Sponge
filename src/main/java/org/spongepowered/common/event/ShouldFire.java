@@ -31,11 +31,19 @@ public class ShouldFire {
     // For example: SpawnEntityEvent.Spawner becomes SPAWN_ENTITY_EVENT_SPAWNER
     // DropItemEvent becomes DROP_ITEM_EVENT
 
-    // Each boolean includes all subevents
+    // Each boolean includes all super-events
     // For example, if no listeners are registed for SpawnEntityEvent,
     // but one is registered for SpawnEntityEvent.SPAWNER, both
     // SPAWN_ENTITY_EVENT and SPAWN_ENTITY_EVENT_SPAWNER will be true
     // However, SPAWN_ENTITY_EVENT_CHUNK_LOAD will be false
+    //
+    // Guidlines for users of ShouldFire:
+    // You must always check a flag that either corresponds directly
+    // to the event you're firing, or to a supertype of the event.
+    // For example, when firing DropItemEvent.Dispense, you can check
+    // ShouldFire.DROP_ITEM_EVENT_DISPENSE or ShouldFire.SPAWN_ENTITY_EVENT
+    // However, you may *not* check ShouldFire.SPAWN_ENTITY_EVENT_CUSTOM,
+    // since SpawnEntityEvent.CUSTOM is not in the hierarchy of DropItemEvent.DISPENSE
 
     public static boolean A_I_TASK_EVENT_ADD = false;
     public static boolean A_I_TASK_EVENT_REMOVE = false;
