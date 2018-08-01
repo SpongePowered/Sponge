@@ -41,6 +41,7 @@ import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.MovementChecksCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.category.SqlCategory;
+import org.spongepowered.common.config.category.StatisticsCategory;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
 import org.spongepowered.common.util.IpSet;
 
@@ -91,6 +92,9 @@ public class GlobalConfig extends GeneralConfigBase {
 
     @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
     private BrokenModCategory brokenMods = new BrokenModCategory();
+
+    @Setting(value = "statistics-collection")
+    private StatisticsCategory statisticsCategory = new StatisticsCategory();
 
     public GlobalConfig() {
         super();
@@ -161,4 +165,7 @@ public class GlobalConfig extends GeneralConfigBase {
         return this.movementChecks;
     }
 
+    public StatisticsCategory getStatisticsCategory() {
+        return this.statisticsCategory;
+    }
 }

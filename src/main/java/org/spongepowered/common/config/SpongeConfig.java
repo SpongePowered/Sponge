@@ -34,7 +34,6 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import ninja.leaping.configurate.transformation.ConfigurationTransformation;
 import ninja.leaping.configurate.util.ConfigurationNodeWalker;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
@@ -304,6 +303,16 @@ public class SpongeConfig<T extends ConfigBase> {
             upd.setValue(value);
             populateInstance();
             saveNow();
+            return upd;
+        }, ForkJoinPool.commonPool());
+    }
+
+    public <V> CompletableFuture<CommentedConfigurationNode> updateSetting(String key, V value, TypeToken<V> token) {
+        return Functional.asyncFailableFuture(() -> {
+            CommentedConfigurationNode upd = getSetting(key);
+            upd.setValue(token, value);
+            populateInstance();
+            save();
             return upd;
         }, ForkJoinPool.commonPool());
     }

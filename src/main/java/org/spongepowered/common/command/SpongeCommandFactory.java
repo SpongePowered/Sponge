@@ -41,6 +41,7 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -48,6 +49,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandCallable;
@@ -68,6 +70,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
@@ -76,6 +79,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.SpongeApiTranslationHelper;
 import org.spongepowered.api.util.StartsWithPredicate;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -84,6 +88,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.StatisticsCategory;
 import org.spongepowered.common.config.type.ConfigBase;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -111,8 +116,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -129,6 +136,9 @@ public class SpongeCommandFactory {
     static final Text NEWLINE_TEXT = Text.newLine();
     static final Text LIST_ITEM_TEXT = Text.of(TextColors.GRAY, "- ");
     static final Text UNKNOWN = Text.of("UNKNOWN");
+    private static final Text ENABLED_TEXT = Text.of(TextColors.GREEN, "enabled");
+    private static final Text DISABLED_TEXT = Text.of(TextColors.RED, "disabled");
+    private static final Text FAILED_TEXT = Text.of(TextColors.RED, "Failed to set config entry.");
 
     private static final CommandElement DUMMY_ELEMENT = new CommandElement(Text.empty()) {
         @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
@@ -143,6 +153,8 @@ public class SpongeCommandFactory {
     private static final Comparator<CommandMapping> COMMAND_COMPARATOR = Comparator.comparing(CommandMapping::getPrimaryAlias);
     private static final Text PAGE_KEY = Text.of("page");
     private static final Text COMMAND_KEY = Text.of("command");
+    private static final Text PLUGIN_KEY = Text.of("plugin");
+    private static final Text ENABLED_KEY = Text.of("enabled");
     private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY) {
 
         @Nullable
@@ -166,6 +178,14 @@ public class SpongeCommandFactory {
     };
     private static final Text NOT_FOUND = Text.of("notFound");
 
+    private static final Map<String, Tristate> ENABLED_CHOICES = ImmutableMap.<String, Tristate>builder()
+            .put("enable", Tristate.TRUE)
+            .put("enabled", Tristate.TRUE)
+            .put("disabled", Tristate.FALSE)
+            .put("disable", Tristate.FALSE)
+            .put("default", Tristate.UNDEFINED)
+            .build();
+
     /**
      * Create a new instance of the Sponge command structure.
      *
@@ -184,6 +204,7 @@ public class SpongeCommandFactory {
         nonFlagChildren.register(createSpongePluginsCommand(), "plugins");
         nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
         nonFlagChildren.register(createSpongeWhichCommand(), "which");
+        nonFlagChildren.register(createSpongeStatsCommand(), "stats");
         flagChildren.register(createSpongeChunksCommand(), "chunks");
         flagChildren.register(createSpongeTpsCommand(), "tps");
         trackerFlagChildren.register(createSpongeConfigCommand(), "config");
@@ -205,6 +226,7 @@ public class SpongeCommandFactory {
                         INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins\n",
                         INDENT, title("which"), LONG_INDENT, "List plugins that own a specific command\n",
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds\n",
+                        INDENT, title("stats"), LONG_INDENT, "Gets or sets permission for statistics plugins to operate\n",
                         SpongeImplHooks.getAdditionalCommandDescriptions()))
                 .arguments(firstParsing(nonFlagChildren,
                         flags().flag("-global", "g")
@@ -878,6 +900,101 @@ public class SpongeCommandFactory {
 
                     return CommandResult.success();
                 }).build();
+    }
+
+    private static CommandCallable createSpongeStatsCommand() {
+        return CommandSpec.builder()
+                .arguments(
+                        GenericArguments.optional(GenericArguments.onlyOne(GenericArguments.plugin(Text.of(PLUGIN_KEY)))),
+                        GenericArguments.optional(GenericArguments.onlyOne(
+                                GenericArguments.choicesInsensitive(Text.of(ENABLED_KEY), ENABLED_CHOICES))))
+                .description(Text.of("Gets or sets permission for statistics plugins to operate."))
+                .executor((source, context) -> {
+                    SpongeConfig<GlobalConfig> config = SpongeImpl.getGlobalConfig();
+                    StatisticsCategory category = config.getConfig().getStatisticsCategory();
+                    if (!context.hasAny(PLUGIN_KEY)) {
+                        // No plugins means that we deal with global state
+                        if (category.isGloballyEnabled()) {
+                            source.sendMessage(Text.of("Stats collection default permission is currently ", ENABLED_TEXT));
+                        } else {
+                            source.sendMessage(Text.of("Stats collection default permission is currently ", DISABLED_TEXT));
+                        }
+                    } else {
+                        PluginContainer container = context.requireOne(PLUGIN_KEY);
+                        if (context.hasAny(ENABLED_KEY)) {
+                            Tristate stateToSet = context.requireOne(ENABLED_KEY);
+                            if (stateToSet == Tristate.UNDEFINED) {
+                                // set to default
+                                setPermissions(category, container, category.isGloballyEnabled())
+                                        .handle((node, exception) -> {
+                                            if (exception == null) {
+                                                createMessageTask(
+                                                        source,
+                                                        Text.of("Stats collection for ", container.getName(),
+                                                                " is now set to the default value (",
+                                                                category.isGloballyEnabled() ? ENABLED_TEXT : DISABLED_TEXT, ")"));
+                                            } else {
+                                                createMessageTask(source, FAILED_TEXT);
+                                            }
+
+                                            return node;
+                                        });
+
+                            } else if (stateToSet == Tristate.TRUE) {
+                                setPermissions(category, container, true)
+                                        .handle((node, exception) -> {
+                                            if (exception == null) {
+                                                createMessageTask(
+                                                        source,
+                                                        Text.of("Set stats collection for ", container.getName(), " to ", ENABLED_TEXT));
+                                            } else {
+                                                createMessageTask(source, FAILED_TEXT);
+                                            }
+
+                                            return node;
+                                        });
+                            } else { // it's false
+                                setPermissions(category, container, false)
+                                        .handle((node, exception) -> {
+                                            if (exception == null) {
+                                                createMessageTask(
+                                                        source,
+                                                        Text.of("Set stats collection for ", container.getName(), " to ", DISABLED_TEXT));
+                                            } else {
+                                                createMessageTask(source, FAILED_TEXT);
+                                            }
+
+                                            return node;
+                                        });
+                            }
+                            config.save();
+                        } else {
+                            boolean state = category.getPluginPermission(container).orElseGet(category::isGloballyEnabled);
+                            if (state) {
+                                source.sendMessage(Text.of("Stats collection for ", container.getName(), " is currently ", ENABLED_TEXT));
+                            } else {
+                                source.sendMessage(Text.of("Stats collection for ", container.getName(), " is currently ", DISABLED_TEXT));
+                            }
+                        }
+                    }
+
+                    return CommandResult.success();
+                })
+                .build();
+    }
+
+    private static CompletableFuture<CommentedConfigurationNode> setPermissions(
+            StatisticsCategory category,
+            PluginContainer container,
+            boolean enabled) {
+
+        Map<String, Boolean> permissions = category.getPluginPermissions();
+        permissions.put(container.getId(), enabled);
+        return SpongeHooks.savePluginsInStatsConfig(permissions);
+    }
+
+    private static void createMessageTask(final CommandSource source, final Text message) {
+        Task.builder().execute(() -> source.sendMessage(message)).submit(SpongeImpl.getPlugin());
     }
 
     /**
