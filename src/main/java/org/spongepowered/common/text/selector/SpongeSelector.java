@@ -102,22 +102,22 @@ public class SpongeSelector implements Selector {
     }
 
     @Override
-    public List<Entity> resolve(CommandSource origin) {
+    public ImmutableSet<Entity> resolve(CommandSource origin) {
         return new SelectorResolver(this, origin).resolve();
     }
 
     @Override
-    public List<Entity> resolve(Extent... extents) {
+    public ImmutableSet<Entity> resolve(Extent... extents) {
         return resolve(ImmutableSet.copyOf(extents));
     }
 
     @Override
-    public List<Entity> resolve(Collection<? extends Extent> extents) {
+    public ImmutableSet<Entity> resolve(Collection<? extends Extent> extents) {
         return new SelectorResolver(this, extents).resolve();
     }
 
     @Override
-    public List<Entity> resolve(Location<World> location) {
+    public ImmutableSet<Entity> resolve(Location<World> location) {
         Builder selector = Selector.builder().from(this);
         if (!this.has(ArgumentTypes.POSITION.x())) {
             selector.add(ArgumentTypes.POSITION.x(), location.getPosition().getFloorX());

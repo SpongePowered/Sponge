@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.util;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
-
-import com.google.common.collect.ImmutableSet;
 
 public class OptionalUtils {
 
-    public static <E> Set<E> asSet(Optional<E> opt) {
-        return opt.map(v -> ImmutableSet.of(v)).orElseGet(() -> ImmutableSet.of());
+    public static <E> Collection<E> asSet(Optional<E> opt) {
+        if (opt.isPresent()) {
+            return Collections.singleton(opt.get());
+        }
+        return Collections.emptySet();
     }
 
 }
