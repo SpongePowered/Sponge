@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.common;
+package org.spongepowered.test;
 
-import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.action.CollideEvent;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
 
-/**
- * A superclass for targeting specific {@link Entity} hierarchical types,
- * since we can
- * @param <E>
- * @param <ValueType>
- * @param <ValueClassType>
- * @param <Manipulator>
- * @param <Immutable>
- */
-public abstract class AbstractEntitySingleDataProcessor<E extends Entity, ValueType, ValueClassType extends BaseValue<ValueType>,
-    Manipulator extends DataManipulator<Manipulator, Immutable>, Immutable extends ImmutableDataManipulator<Immutable, Manipulator>>
-    extends AbstractSingleDataSingleTargetProcessor<E, ValueType, ValueClassType, Manipulator, Immutable> {
+@Plugin(id = "thrown-potion-test", name = "Thrown Potion Test", description = "A plugin testing that thrown potions have items", version = "0.0.0")
+public class ThrownPotionTest {
 
-    public AbstractEntitySingleDataProcessor(Class<E> entityClass, Key<ValueClassType> key) {
-        super(key, entityClass);
+
+    @Listener
+    public void onPotionThrown(CollideEvent event, @First ThrownPotion potion) {
+        final RepresentedItemData potionItemData = potion.getPotionItemData();
+        Sponge.getServer().getBroadcastChannel().send(Text.of(potionItemData.item().get()));
     }
-    
+
 }

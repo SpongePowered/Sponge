@@ -275,6 +275,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, new RepresentedItemDataProcessor());
 
+        DataUtil.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, new ThrownPotionItemDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(HorseData.class, SpongeHorseData.class, ImmutableHorseData.class,
                 ImmutableSpongeHorseData.class, new HorseDataProcessor());
 

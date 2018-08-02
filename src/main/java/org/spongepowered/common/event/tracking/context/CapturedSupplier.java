@@ -66,7 +66,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>>, ICapture
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<List<T>> consumer) {
-        if (this.captured != null && !this.captured.isEmpty()) {
+        if (!this.isEmpty()) {
             final List<T> consumed = new ArrayList<>(this.captured);
             this.captured.clear(); // We should be clearing after it is processed. Avoids extraneous issues
             consumer.accept(consumed);
