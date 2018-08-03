@@ -253,6 +253,9 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(ExplosionRadiusData.class, SpongeExplosionRadiusData.class, ImmutableExplosionRadiusData.class,
                 ImmutableSpongeExplosionRadiusData.class, new ExplosionRadiusDataProcessor());
 
+        DataUtil.registerDualProcessor(ActiveItemData.class, SpongeActiveItemData.class, ImmutableActiveItemData.class,
+                ImmutableSpongeActiveItemData.class, new ActiveItemDataProcessor());
+
         DataUtil.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
                 ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, new FireworkEffectDataProcessor());
 

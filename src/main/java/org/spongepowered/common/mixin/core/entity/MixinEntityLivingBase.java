@@ -1210,4 +1210,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     // End implementation of UseItemStackEvent
 
+    @Override
+    public ItemStackSnapshot getActiveItemSnapshot() {
+        return ItemStackUtil.snapshotOf(this.activeItemStack);
+    }
+
+    @Override
+    public void stopTheActiveHand() {
+        stopActiveHand();
+    }
+
 }
