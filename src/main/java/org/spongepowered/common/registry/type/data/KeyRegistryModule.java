@@ -612,7 +612,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("health_scale", Key.builder().type(TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN).id("health_scale").name("Health Scale").query(of("HealthScale")).build());
 
-        register("is_elytra_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_elytra_flying").name("Is Elytra Flying").query(of("ElytraFlying")).build());
+        this.register("is_elytra_flying", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("is_elytra_flying").name("Is Elytra Flying").query(of("ElytraFlying")).build());
+
+        this.register("active_item", Key.builder().type(TypeTokens.ITEM_SNAPSHOT_VALUE_TOKEN).id("active_item").name("Active Item").query(of("ActiveItem")).build());
 
         // All sponge provided keys are belong to sponge. Other plugins are going to have their own keys with their own plugin containers
         Sponge.getCauseStackManager().popCause();
