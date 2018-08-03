@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -73,15 +74,18 @@ class UserDiscoverer {
             .expireAfterAccess(1, TimeUnit.DAYS)
             .build();
 
+    // If a user doesn't exist, we should not put it into the cache, instead, we track it here.
+    private static final Set<UUID> nonExistentUsers = new HashSet<>();
+
     static User create(GameProfile profile) {
         User user = (User) new SpongeUser(profile);
         userCache.put(profile.getId(), user);
         if (profile.getName() != null) {
             userByNameCache.put(profile.getName(), user);
         }
+        nonExistentUsers.remove(profile.getId());
         return user;
     }
-
 
     static User forceRecreate(GameProfile profile) {
         SpongeUser user = (SpongeUser) userCache.getIfPresent(profile.getId());
@@ -112,6 +116,7 @@ class UserDiscoverer {
         }
         user = getOnlinePlayer(uniqueId);
         if (user != null) {
+            nonExistentUsers.remove(profile.getUniqueId());
             return user;
         }
         user = getFromStoredData(profile);
@@ -185,6 +190,8 @@ class UserDiscoverer {
                 continue;
             }
 
+            // it exists, so we make sure to remove the uuid from the map (it may have been added manually in the meantime)
+            nonExistentUsers.remove(uuid);
             final GameProfile profile = profileCache.getProfileByUUID(uuid);
             if (profile != null) {
                 profiles.put(profile.getId(), (org.spongepowered.api.profile.GameProfile) profile);
@@ -256,14 +263,28 @@ class UserDiscoverer {
     }
 
     private static User getFromStoredData(org.spongepowered.api.profile.GameProfile profile) {
-        // Always cache user to avoid constant lookups in storage when file does not exist
-        final User user = create((GameProfile) profile);
-        // Note: Uses the overworld's player data
-        final File dataFile = getPlayerDataFile(profile.getUniqueId());
-        if (dataFile == null) {
+        // if we already saw there was no stored data, then there is no stored data!
+        if (nonExistentUsers.contains(profile.getUniqueId())) {
             return null;
         }
 
+        // Note: Uses the overworld's player data
+        final File dataFile = getPlayerDataFile(profile.getUniqueId());
+        if (dataFile == null) {
+            // Tell the discoverer that we found nothing so we don't need to make this check in the future
+            nonExistentUsers.add(profile.getUniqueId());
+            return null;
+        }
+
+        // Create the user, this will cache it too.
+        // Note: this was previously before the data file check. This had the unfortunate side effect of
+        // creating a user when the user wasn't asked to be created (UserStorageService#get). The effect
+        // was that the first get call would return Optional#empty, but the second would return a user
+        // when a user wasn't expected to be created (that's what getOrCreate is for!)
+        //
+        // A call to create(GameProfile) will remove the profile UUID from nonExistentUsers, as the user
+        // now exists!
+        final User user = create((GameProfile) profile);
         try {
             ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
         } catch (IOException e) {
