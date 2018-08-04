@@ -136,6 +136,10 @@ final class InteractionPacketState extends BasicPacketState implements IEntitySp
             if (hasBlocks) {
                 if (!TrackingUtil.processBlockCaptures(capturedBlcoks, this, phaseContext)) {
                     // Stop entities like XP from being spawned
+                    phaseContext.getBlockItemDropSupplier().get().clear();
+                    phaseContext.getCapturedItems().clear();
+                    phaseContext.getPerEntityItemDropSupplier().get().clear();
+                    phaseContext.getCapturedEntities().clear();
                     return;
                 }
             } else {
