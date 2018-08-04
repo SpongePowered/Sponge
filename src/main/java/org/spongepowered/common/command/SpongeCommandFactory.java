@@ -563,7 +563,10 @@ public class SpongeCommandFactory {
                     if (args.hasAny("reload") && src.hasPermission("sponge.command.plugins.reload")) {
                         Sponge.getCauseStackManager().pushCause(src);
                         if (args.hasAny("plugin")) {
-                            PluginContainer plugin = args.<PluginContainer>getOne("plugin").get();
+                            PluginContainer plugin = args.<PluginContainer>getOne("plugin")
+                                    .orElseThrow(() -> new CommandException(
+                                            Text.of("More than one plugin was matched by the input, please be more specific.")));
+
                             src.sendMessage(Text.of("Sending reload event to " + plugin.getId() + ". Please wait."));
                             ((SpongeEventManager) Sponge.getEventManager()).post(SpongeEventFactory.createGameReloadEvent(Sponge.getCauseStackManager().getCurrentCause()), plugin);
                         } else {
@@ -922,4 +925,5 @@ public class SpongeCommandFactory {
         }
         return Text.of(text, " ", description.orElse(mapping.getCallable().getUsage(source)));
     }
+
 }
