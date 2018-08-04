@@ -270,6 +270,11 @@ public class EmptyInventoryImpl implements EmptyInventory {
     }
 
     @Override
+    public InventoryTransactionResult offer(SlotIndex index, ItemStack stack) {
+        return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
+    }
+
+    @Override
     public InventoryTransactionResult set(ItemStack stack) {
         return InventoryTransactionResult.builder().type(Type.FAILURE).reject(stack).build();
     }

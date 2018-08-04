@@ -294,4 +294,9 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter {
     default InventoryTransactionResult set(SlotIndex index, org.spongepowered.api.item.inventory.ItemStack stack) {
         return AdapterLogic.insertSequential(this.getFabric(), this.getSlotLens(index), stack);
     }
+
+    @Override
+    default InventoryTransactionResult offer(SlotIndex index, org.spongepowered.api.item.inventory.ItemStack stack) {
+        return AdapterLogic.appendSequential(this.getFabric(), this.getSlotLens(index), stack);
+    }
 }

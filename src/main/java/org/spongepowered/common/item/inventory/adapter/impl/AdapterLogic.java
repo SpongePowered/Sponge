@@ -190,6 +190,9 @@ public abstract class AdapterLogic {
     }
 
     public static InventoryTransactionResult appendSequential(Fabric inv, Lens lens, ItemStack stack) {
+        if (lens == null) {
+            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
+        }
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
