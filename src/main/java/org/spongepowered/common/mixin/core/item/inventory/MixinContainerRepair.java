@@ -35,13 +35,21 @@ import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(ContainerRepair.class)
 public abstract class MixinContainerRepair extends MixinContainer implements LensProvider {
 
     @Override
     public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
-        return new DefaultIndexedLens(0, 3, inventory$getSlotProvider());
+        List<Lens> lenses = new ArrayList<>();
+        lenses.add(new DefaultIndexedLens(0, 3, inventory$getSlotProvider()));
+        lenses.add(new PrimaryPlayerInventoryLens(3, inventory$getSlotProvider(), true));
+        return new ContainerLens(adapter, inventory$getSlotProvider(), lenses);
     }
 
     @SuppressWarnings("unchecked")
@@ -49,7 +57,8 @@ public abstract class MixinContainerRepair extends MixinContainer implements Len
     public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
         SlotLensCollection.Builder builder = new SlotLensCollection.Builder()
                 .add(2, InputSlotAdapter.class)
-                .add(1, OutputSlotAdapter.class);
+                .add(1, OutputSlotAdapter.class)
+                .add(36);
         return builder.build();
     }
 }
