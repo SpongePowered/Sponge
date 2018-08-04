@@ -93,7 +93,7 @@ public class Inventory2DLensImpl extends SlotBasedLens implements Inventory2DLen
             return null;
         }
 
-        return (SlotLens) this.spanningChildren.get(pos.getY()).lens.getLens(pos.getX());
+        return (SlotLens) this.spanningChildren.get((pos.getY() - this.yBase) * this.width + (pos.getX() - this.xBase)).lens;
     }
 
     @Override
