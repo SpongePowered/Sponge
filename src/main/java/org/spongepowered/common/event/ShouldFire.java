@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 public class ShouldFire {
 
+
     // Format is event class name with underscores
     // For example: SpawnEntityEvent.Spawner becomes SPAWN_ENTITY_EVENT_SPAWNER
     // DropItemEvent becomes DROP_ITEM_EVENT
@@ -34,24 +35,31 @@ public class ShouldFire {
     // For example, if no listeners are registed for SpawnEntityEvent,
     // but one is registered for SpawnEntityEvent.SPAWNER, both
     // SPAWN_ENTITY_EVENT and SPAWN_ENTITY_EVENT_SPAWNER will be true
-    // However, SPAWN_ENTITY_EVENT_CHUNKLOAD will be false
+    // However, SPAWN_ENTITY_EVENT_CHUNK_LOAD will be false
 
-    public static boolean AI_TASK_EVENT_ADD = false;
-    public static boolean AI_TASK_EVENT_REMOVE = false;
+    public static boolean A_I_TASK_EVENT_ADD = false;
+    public static boolean A_I_TASK_EVENT_REMOVE = false;
+
+    public static boolean ANIMATE_HAND_EVENT = false;
 
     public static boolean SPAWN_ENTITY_EVENT = false;
-    public static boolean SPAWN_ENTITY_EVENT_CHUNKLOAD = false;
+    public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
     public static boolean SPAWN_ENTITY_EVENT_SPAWNER = false;
     public static boolean SPAWN_ENTITY_EVENT_CUSTOM = false;
 
     public static boolean CHANGE_BLOCK_EVENT = false;
+    public static boolean CHANGE_BLOCK_EVENT_PRE = false;
+    public static boolean CHANGE_BLOCK_EVENT_MODIFY = false;
     public static boolean CHANGE_BLOCK_EVENT_BREAK = false;
     public static boolean CHANGE_BLOCK_EVENT_PLACE = false;
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
 
+    public static boolean IGNITE_ENTITY_EVENT = false;
     public static boolean DROP_ITEM_EVENT = false;
     public static boolean DROP_ITEM_EVENT_DESTRUCT = false;
     public static boolean DROP_ITEM_EVENT_DISPENSE = false;
+
+    public static boolean MOVE_ENTITY_EVENT = false;
 
     public static boolean RIDE_ENTITY_EVENT = false;
     public static boolean RIDE_ENTITY_EVENT_MOUNT = false;
@@ -69,4 +77,12 @@ public class ShouldFire {
     public static boolean CHANGE_INVENTORY_EVENT_TRANSFER_POST = false;
 
     public static boolean TICK_BLOCK_EVENT = false;
+
+    public static boolean NOTIFY_NEIGHBOR_BLOCK_EVENT = false;
+    public static boolean EXPLOSION_EVENT_PRE = false;
+
+    public static boolean GAME_REGISTRY_EVENT_REGISTER = false;
+    public static boolean LOAD_CHUNK_EVENT = false;
+    public static boolean COLLIDE_ENTITY_EVENT = false;
+    public static boolean SEND_COMMAND_EVENT = false;
 }

@@ -27,6 +27,7 @@ package co.aikar.timings;
 import static co.aikar.timings.TimingsManager.FULL_SERVER_TICK;
 import static co.aikar.timings.TimingsManager.MINUTE_REPORTS;
 
+import co.aikar.timings.TimingHistory.RegionData.RegionId;
 import co.aikar.util.JSONUtil;
 import co.aikar.util.LoadingMap;
 import co.aikar.util.MRUMapCache;
@@ -34,9 +35,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.block.Block;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -67,7 +67,7 @@ public class TimingHistory {
     final MinuteReport[] minuteReports;
 
     final TimingHistoryEntry[] entries;
-    final Set<BlockType> blockTypeSet = Sets.newHashSet();
+    final Set<TileEntityType> tileEntityTypeSet = Sets.newHashSet();
     final Set<EntityType> entityTypeSet = Sets.newHashSet();
     final JsonObject worlds;
 
@@ -85,7 +85,7 @@ public class TimingHistory {
             ticks += mp.ticksRecord.timed;
         }
         this.totalTicks = ticks;
-        this.totalTime = FULL_SERVER_TICK.record.totalTime;
+        this.totalTime = FULL_SERVER_TICK.record.getTotalTime();
         this.entries = new TimingHistoryEntry[TimingsManager.HANDLERS.size()];
 
         int i = 0;
@@ -93,46 +93,107 @@ public class TimingHistory {
             this.entries[i++] = new TimingHistoryEntry(handler);
         }
 
-        final Map<EntityType, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
-        final Map<BlockType, Counter> tileEntityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
         // Information about all loaded chunks/entities
         this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorlds(), (world) -> {
+            Map<RegionId, RegionData> regions = LoadingMap.newHashMap(RegionData.LOADER);
             return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
-                entityCounts.clear();
-                tileEntityCounts.clear();
+                RegionData data = regions.get(new RegionId(chunk.getPosition().getX(), chunk.getPosition().getZ()));
 
                 for (Entity entity : chunk.getEntities()) {
                     if (entity.getType() == null) {
-                        SpongeImpl.getLogger().error("Entity is not registered {}", entity);
                         continue;
                     }
-                    entityCounts.get(entity.getType()).increment();
+                    data.entityCounts.get(entity.getType()).increment();
                 }
 
                 for (TileEntity tileEntity : chunk.getTileEntities()) {
-                    tileEntityCounts.get(tileEntity.getBlock().getType()).increment();
+                    if (tileEntity.getType() == null) {
+                        continue;
+                    }
+                    data.tileEntityCounts.get(tileEntity.getType()).increment();
                 }
 
-                if (tileEntityCounts.isEmpty() && entityCounts.isEmpty()) {
+                if (data.tileEntityCounts.isEmpty() && data.entityCounts.isEmpty()) {
                     return null;
                 }
                 return JSONUtil.arrayOf(
                         chunk.getPosition().getX(),
                         chunk.getPosition().getZ(),
-                        JSONUtil.mapArrayToObject(entityCounts.entrySet(), (entry) -> {
+                        JSONUtil.mapArrayToObject(data.entityCounts.entrySet(), (entry) -> {
                             if (entry.getKey() == EntityTypes.UNKNOWN) {
                                 return null;
                             }
                             this.entityTypeSet.add(entry.getKey());
                             return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entry.getKey()), entry.getValue().count());
                         }),
-                        JSONUtil.mapArrayToObject(tileEntityCounts.entrySet(), (entry) -> {
-                            this.blockTypeSet.add(entry.getKey());
-                            return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) entry.getKey()), entry.getValue().count());
+                        JSONUtil.mapArrayToObject(data.tileEntityCounts.entrySet(), (entry) -> {
+                            this.tileEntityTypeSet.add(entry.getKey());
+                            return JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(entry.getKey()), entry.getValue().count());
                         }));
             }));
         });
+    }
+    static class RegionData {
+        final RegionId regionId;
+        @SuppressWarnings("Guava")
+        static Function<RegionId, RegionData> LOADER = new Function<RegionId, RegionData>() {
+            @Override
+            public RegionData apply(RegionId id) {
+                return new RegionData(id);
+            }
+        };
+        RegionData(RegionId id) {
+            this.regionId = id;
+        }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            RegionData that = (RegionData) o;
+
+            return regionId.equals(that.regionId);
+
+        }
+
+        final Map<EntityType, Counter> entityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
+        final Map<TileEntityType, Counter> tileEntityCounts = MRUMapCache.of(LoadingMap.of(Maps.newHashMap(), Counter.loader()));
+
+        @Override
+        public int hashCode() {
+            return regionId.hashCode();
+        }
+
+        static class RegionId {
+            final int x, z;
+            final long regionId;
+            RegionId(int x, int z) {
+                this.x = x >> 5 << 5;
+                this.z = z >> 5 << 5;
+                this.regionId = ((long) (this.x) << 32) + (this.z >> 5 << 5) - Integer.MIN_VALUE;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                RegionId regionId1 = (RegionId) o;
+
+                return regionId == regionId1.regionId;
+
+            }
+
+            @Override
+            public int hashCode() {
+                return (int) (regionId ^ (regionId >>> 32));
+            }
+        }
     }
 
     public static void resetTicks(boolean fullReset) {

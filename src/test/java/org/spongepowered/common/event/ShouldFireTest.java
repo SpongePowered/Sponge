@@ -70,14 +70,14 @@ public class ShouldFireTest extends InjectedTest {
         SpawnListener listener = new SpawnListener();
 
         Assert.assertFalse("SPAWN_ENTITY_EVENT is not false!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNKLOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNKLOAD);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
         this.eventManager.registerListeners(this.plugin, listener);
         Assert.assertTrue("SPAWN_ENTITY_EVENT is not true!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNKLOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNKLOAD);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
 
         this.eventManager.unregisterListeners(listener);
         Assert.assertFalse("SPAWN_ENTITY_EVENT is not false!", ShouldFire.SPAWN_ENTITY_EVENT);
-        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNKLOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNKLOAD);
+        Assert.assertFalse("SPAWN_ENTITY_EVENT_CHUNK_LOAD is not false!", ShouldFire.SPAWN_ENTITY_EVENT_CHUNK_LOAD);
     }
 
     @Test

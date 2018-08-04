@@ -144,6 +144,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
                 for (Entity e : strike.getEntities()) {
                     ((net.minecraft.entity.Entity) e).onStruckByLightning((EntityLightningBolt) (Object) this);
                 }
+                SpongeImpl.postEvent(SpongeEventFactory.createExpireEntityEvent(frame.getCurrentCause(), this));
                 SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }
         }

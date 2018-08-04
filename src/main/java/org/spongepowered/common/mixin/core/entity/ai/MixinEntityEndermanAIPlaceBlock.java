@@ -24,15 +24,34 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.util.VecHelper;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +65,8 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
      *  @reason - Due to Forge's changes, there's no clear redirect or injection
      *  point where Sponge can add the griefer checks. The original redirect aimed
      *  at the gamerule check, but this can suffice for now.
+     * @author gabizou - July 26th, 2018
+     * @reason Adds sanity check for calling a change block event pre
      *
      * @param entityEnderman
      * @return
@@ -61,5 +82,36 @@ public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
     private IBlockState onCanGrief(EntityEnderman entityEnderman) {
         final IBlockState heldBlockState = entityEnderman.getHeldBlockState();
         return ((IMixinGriefer) this.enderman).canGrief() ? heldBlockState : null;
+    }
+
+    /**
+     * @author gabizou - July 26th, 2018
+     * @reason Makes enderman check for block changes before they can place their blocks.
+     * This allows plugins to cancel the event regardless without issue.
+     *
+     * @param blockState The block state being placed
+     * @param world The world
+     * @param pos the position
+     * @param toPlace The block being placed
+     * @param old The old state
+     * @param state The new state
+     * @return True if the state is a full cube, and the event didnt get cancelled
+     */
+    @Redirect(method = "canPlaceBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/state/IBlockState;isFullCube()Z"))
+    private boolean onUpdateCancel(IBlockState blockState, World world, BlockPos pos, Block toPlace, IBlockState old, IBlockState state) {
+        if (state.isFullCube()) {
+            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+                final Location<org.spongepowered.api.world.World> location = VecHelper.toLocation(world, pos);
+                final List<Location<org.spongepowered.api.world.World>> list = new ArrayList<>(1);
+                list.add(location);
+                final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+                final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);
+                if (SpongeImpl.postEvent(event)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

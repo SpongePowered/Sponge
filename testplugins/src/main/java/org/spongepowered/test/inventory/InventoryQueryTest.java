@@ -121,7 +121,7 @@ public class InventoryQueryTest {
         CommandSpec inventoryTransform = CommandSpec.builder()
                 .executor((src, args) -> {
                     Inventory inventory = getPlayerInventory(src);
-                    inventory.transform(InventoryTransformations.PLAYER_MAIN_HOTBAR_FIRST)
+                    inventory.transform(InventoryTransformations.PLAYER_PRIMARY_HOTBAR_FIRST)
                              .transform(InventoryTransformations.REVERSE).offer(ItemStack.of(ItemTypes.PAPER, 46));
 
                     src.sendMessage(Text.of("Added paper to hotbar last."));
@@ -160,9 +160,8 @@ public class InventoryQueryTest {
         Preconditions.checkState(wornSlots.capacity() == 4, "Worn Slots should be 4 but is " + wornSlots.capacity());
 
         Inventory equipped = EquipmentSlotType.of(EquipmentTypes.EQUIPPED).queryIn(inventory);
-        // 4 armor slots + OFF_HAND
-        // TODO MAIN_HAND lens?
-        Preconditions.checkState(equipped.capacity() == 5, "Equipped Slots should be 5 but is " + equipped.capacity());
+        // 4 armor slots + OFF_HAND + MAIN_HAND
+        Preconditions.checkState(equipped.capacity() == 6, "Equipped Slots should be 6 but is " + equipped.capacity());
     }
 
 }

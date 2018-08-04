@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.common.event.tracking.PhaseData;
-
 public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericGenerationContext> {
 
     public WorldSpawnerPhaseState() {
@@ -44,7 +42,7 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+    public boolean ignoresBlockUpdateTick(GenericGenerationContext context) {
         return false;
     }
 }

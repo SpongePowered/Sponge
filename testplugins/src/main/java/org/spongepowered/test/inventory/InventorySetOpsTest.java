@@ -36,12 +36,15 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.property.SlotPos;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.InventoryColumn;
 import org.spongepowered.api.item.inventory.type.InventoryRow;
 import org.spongepowered.api.plugin.Plugin;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -58,6 +61,7 @@ public class InventorySetOpsTest {
     public void onStart(GameStartedServerEvent event) {
         testIntersect();
         testUnion();
+        testSlotOps();
     }
 
     @SuppressWarnings("deprecation")
@@ -78,23 +82,21 @@ public class InventorySetOpsTest {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void testIntersect() {
         Inventory chest = Inventory.builder().build(this);
         Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
-        Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).first();
-        Inventory firstCol = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryColumn.class)).first();
+        Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).children().get(0);
+        Inventory firstCol = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryColumn.class)).children().get(0);
         Inventory intersection = firstSlots.intersect(firstCol).intersect(firstRow);
         Preconditions.checkState(intersection.capacity() == 1, "This should be the first slot only!");
     }
 
-    @SuppressWarnings("deprecation")
     private void testUnion() {
 
         Inventory chest = Inventory.builder().build(this);
         Inventory firstSlots = chest.query(QueryOperationTypes.INVENTORY_PROPERTY.of(SlotIndex.of(0)));
-        Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).first();
-        GridInventory grid = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(GridInventory.class));
+        Inventory firstRow = chest.query(QueryOperationTypes.INVENTORY_TYPE.of(InventoryRow.class)).children().get(0);
+        GridInventory grid = (GridInventory) chest.query(QueryOperationTypes.INVENTORY_TYPE.of(GridInventory.class));
         InventoryColumn firstCol = grid.getColumn(0).get();
         InventoryColumn secondCol = grid.getColumn(1).get();
         Inventory union = firstSlots.union(firstCol).union(firstRow);
@@ -103,6 +105,40 @@ public class InventorySetOpsTest {
         Preconditions.checkState(union.capacity() == 11, "This should include all eleven slot of the first row and column!");
         Preconditions.checkState(union2.capacity() == 11, "This should include all eleven slot of the first row and column!");
         Preconditions.checkState(union3.capacity() == 6, "This should include all six slot of the first 2 columns!");
+    }
+
+    private void testSlotOps() {
+        Inventory chest = Inventory.builder().build(this);
+        chest.offer(ItemStack.of(ItemTypes.DIAMOND, 10));
+        chest.offer(ItemStack.of(ItemTypes.DIRT, 1));
+        chest.set(SlotIndex.of(2), ItemStack.of(ItemTypes.DIAMOND, 20));
+
+        ItemStack stack10 = chest.peek();
+        Preconditions.checkState(stack10.getQuantity() == 10, "Peeked quantity is not 10");
+
+        Optional<ItemStack> stack20 = chest.peek(SlotIndex.of(2));
+        Preconditions.checkState(stack20.get().getQuantity() == 20, "Peeked quantity is not 20");
+
+        ItemStack stack16 = chest.peek(16);
+        Preconditions.checkState(stack16.getQuantity() == 16, "Peeked quantity is not 16");
+
+        stack16 = chest.poll(16);
+        Preconditions.checkState(stack16.getQuantity() == 16, "Polled quantity is not 16");
+
+        ItemStack stack14 = SlotIndex.of(2).queryIn(chest).peek();
+        Preconditions.checkState(stack14.getQuantity() == 14, "Remaining Diamonds is not 14");
+
+        chest.clear();
+        Preconditions.checkState(!chest.peek(SlotIndex.of(35)).isPresent(), "Slot does exist");
+        Preconditions.checkState(chest.peek().isEmpty(), "Item is not empty");
+
+        chest.offer(ItemStack.of(ItemTypes.DIRT, 1));
+        chest.offer(ItemStack.of(ItemTypes.DIAMOND, 10));
+
+        chest.poll();
+        stack10 = chest.peek();
+        Preconditions.checkState(stack10.getQuantity() == 10, "Peeked quantity is not 10");
+
     }
 
 }

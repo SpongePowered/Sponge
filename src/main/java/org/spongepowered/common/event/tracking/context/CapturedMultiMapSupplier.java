@@ -28,7 +28,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -38,7 +40,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMultimap<K, V>> {
+public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMultimap<K, V>>, ICaptureSupplier {
 
     @Nullable private ArrayListMultimap<K, V> captured;
 
@@ -55,44 +57,47 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
 
     /**
      * Returns {@code true} if there are no captured objects.
-     * 
+     *
      * @return {@code true} if empty
      */
+    @Override
     public final boolean isEmpty() {
         return this.captured == null || this.captured.isEmpty();
     }
 
     /**
      * If not empty, activates the consumer then clears all captures.
-     * 
+     *
      * @param consumer The consumer to activate
      */
     public final void acceptAndClearIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
-        if (!this.isEmpty()) {
-            consumer.accept(this.captured);
+        if (this.captured != null && !this.captured.isEmpty()) {
+            final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
             this.captured.clear();
+            consumer.accept(consumed);
         }
     }
 
     public final void acceptAndClearIfNotEmpty(BiConsumer<K, V> consumer) {
-        if (!this.isEmpty()) {
-            this.captured.forEach(consumer);
+        if (this.captured != null && !this.captured.isEmpty()) {
+            final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
             this.captured.clear();
+            consumed.forEach(consumer);
         }
     }
 
     /**
      * If not empty, activates the {@link BiConsumer} with captures.
-     * 
+     *
      * @param biConsumer The consumer to activate
      */
     public final void acceptIfNotEmpty(BiConsumer<K, List<V>> biConsumer) {
-        if (!this.isEmpty()) {
-            for (K key : this.captured.asMap().keySet()) {
-                final List<V> values = this.captured.get(key);
-                if (!values.isEmpty()) {
-                    // Note that this will cause the consumer to be called for each key
-                    biConsumer.accept(key, values);
+        if (this.captured != null && !this.captured.isEmpty()) {
+            final ListMultimap<K, V> consumed = ArrayListMultimap.create(this.captured);
+            this.captured.clear();
+            for (Map.Entry<K, Collection<V>> entry : consumed.asMap().entrySet()) {
+                if (!entry.getValue().isEmpty()) {
+                    biConsumer.accept(entry.getKey(), (List<V>) entry.getValue());
                 }
             }
         }
@@ -101,11 +106,11 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
     /**
      * If not empty, activates the consumer with the captured
      * {@link ListMultimap}.
-     * 
+     *
      * @param consumer The consumer to activate
      */
     public final void acceptIfNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
-        if (!this.isEmpty()) {
+        if (this.captured != null && !this.captured.isEmpty()) {
             consumer.accept(this.captured);
         }
     }
@@ -113,12 +118,12 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
     /**
      * If not empty and key is present, removes the key then activates
      * the consumer with the captured {@link ListMultimap}.
-     * 
+     *
      * @param key The key to process and remove
      * @param consumer The consumer to activate
      */
     public final void acceptAndRemoveIfPresent(K key, Consumer<List<V>> consumer) {
-        if (!this.isEmpty()) {
+        if (this.captured != null && !this.captured.isEmpty()) {
             final List<V> values = this.captured.removeAll(key);
             if (!values.isEmpty()) {
                 consumer.accept(values);
@@ -142,10 +147,10 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
 
     /**
      * If not empty, removes all values associated with key.
-     * 
+     *
      * Note: If you require the list of removals, use
      * {@link #acceptAndRemoveIfPresent}
-     * 
+     *
      * @param key The key to remove
      */
     public final void removeAllIfNotEmpty(K key) {
@@ -159,7 +164,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
     /**
      * If not empty, returns the captured {@link ListMultimap}.
      * Otherwise, this will return the passed list.
-     * 
+     *
      * @param list The fallback list
      * @return If not empty, the captured list otherwise the fallback list
      */
@@ -169,7 +174,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
 
     /**
      * If not empty, returns a sequential stream of values associated with key.
-     * 
+     *
      * @param key The key
      * @return A sequential stream of values
      */
@@ -180,7 +185,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMul
 
     /**
      * If not empty and key is present, applies the function to the resulting values.
-     * 
+     *
      * @param key The key
      * @param function The function to apply
      * @return The function result or null if no key was found

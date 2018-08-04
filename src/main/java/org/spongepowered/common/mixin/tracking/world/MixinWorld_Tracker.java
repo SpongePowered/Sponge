@@ -43,11 +43,11 @@ import javax.annotation.Nullable;
 public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
-    @Shadow protected IChunkProvider chunkProvider;
+    @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -60,7 +60,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return Optional.empty();
         }
@@ -73,7 +73,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -84,7 +84,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }

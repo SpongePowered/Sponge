@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -58,6 +59,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -71,7 +73,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -85,10 +86,18 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     @Nullable private Timing timing;
     @Nullable private LocatableBlock locatableBlock;
-    // caches owner to avoid constant lookups in chunk
+    // caches owner and notifier to avoid constant lookups in chunk
     @Nullable private User spongeOwner;
+    @Nullable private User spongeNotifier;
+    private boolean isTicking = false;
     private boolean hasSetOwner = false;
+    private boolean hasSetNotifier = false;
     private WeakReference<IMixinChunk> activeChunk = new WeakReference<>(null);
+    // Used by tracker config
+    private boolean allowsBlockBulkCapture = true;
+    private boolean allowsEntityBulkCapture = true;
+    private boolean allowsBlockEventCreation = true;
+    private boolean allowsEntityEventCreation = true;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World world;
@@ -99,6 +108,11 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract Block getBlockType();
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Override @Shadow public abstract void markDirty();
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        this.refreshCache();
+    }
 
     @Intrinsic
     public void tile$markDirty() {
@@ -277,9 +291,16 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public LocatableBlock getLocatableBlock() {
         if (this.locatableBlock == null) {
+            final Chunk chunk = (Chunk) this.activeChunk.get();
+            BlockState blockState = null;
+            if (chunk != null) {
+                blockState = (BlockState) chunk.getBlockState(this.pos);
+            } else {
+                blockState = this.getBlock();
+            }
             this.locatableBlock = LocatableBlock.builder()
                     .location(new Location<World>((World) this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
-                    .state(this.getBlock())
+                    .state(blockState)
                     .build();
         }
 
@@ -298,21 +319,47 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public Optional<User> getSpongeOwner() {
-        Optional<User> blockOwner;
+    public User getSpongeOwner() {
         if (!this.hasSetOwner()) {
             IMixinChunk activeChunk = this.getActiveChunk();
             if (activeChunk != null) {
-                blockOwner = activeChunk.getBlockOwner(pos);
-                this.setSpongeOwner(blockOwner.orElse(null));
+                this.setSpongeOwner(activeChunk.getBlockOwner(pos).orElse(null));
             }
         }
-        return Optional.ofNullable(this.spongeOwner);
+        return this.spongeOwner;
     }
 
     @Override
     public boolean hasSetOwner() {
         return this.hasSetOwner;
+    }
+
+    @Override
+    public void setSpongeNotifier(@Nullable User notifier) {
+        if (notifier == null) {
+            this.spongeNotifier = null;
+            this.hasSetNotifier = false;
+            return;
+        }
+        this.spongeNotifier = notifier;
+        this.hasSetNotifier = true;
+    }
+
+    @Nullable
+    @Override
+    public User getSpongeNotifier() {
+        if (!this.hasSetNotifier()) {
+            IMixinChunk activeChunk = this.getActiveChunk();
+            if (activeChunk != null) {
+                this.setSpongeNotifier(activeChunk.getBlockNotifier(pos).orElse(null));
+            }
+        }
+        return this.spongeNotifier;
+    }
+
+    @Override
+    public boolean hasSetNotifier() {
+        return this.hasSetNotifier;
     }
 
     @Override
@@ -323,6 +370,14 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public void setActiveChunk(@Nullable IMixinChunk chunk) {
+        if (chunk == null && this.world != null && !this.world.isRemote && !this.isValid()) {
+            if (this.isTicking) {
+                // If a TE is currently ticking and has been invalidated, delay clearing active chunk until finished
+                // This is done to avoid issues during unwind when calling getActiveChunk
+                // Note: This occurs with TE's such as pistons that invalidate during movement
+                return;
+            }
+        }
         this.activeChunk = new WeakReference<IMixinChunk>(chunk);
     }
 
@@ -334,11 +389,51 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         if (chunk == null) {
             return false;
         }
-        if (!chunk.isPersistedChunk() && (chunk.isQueuedForUnload() || chunk.getScheduledForUnload() != -1)) {
+        if (!chunk.isActive()) {
             return false;
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isTicking() {
+        return this.isTicking;
+    }
+
+    @Override
+    public void setIsTicking(boolean ticking) {
+        this.isTicking = ticking;
+    }
+
+    @Override
+    public boolean allowsBlockBulkCapture() {
+        return this.allowsBlockBulkCapture;
+    }
+
+    @Override
+    public boolean allowsEntityBulkCapture() {
+        return this.allowsEntityBulkCapture;
+    }
+
+    @Override
+    public boolean allowsBlockEventCreation() {
+        return this.allowsBlockEventCreation;
+    }
+
+    @Override
+    public boolean allowsEntityEventCreation() {
+        return this.allowsEntityEventCreation;
+    }
+
+    @Override
+    public void refreshCache() {
+        if (this.tileType != null) {
+            this.allowsBlockBulkCapture = ((SpongeTileEntityType) this.tileType).allowsBlockBulkCapture;
+            this.allowsEntityBulkCapture = ((SpongeTileEntityType) this.tileType).allowsEntityBulkCapture;
+            this.allowsBlockEventCreation = ((SpongeTileEntityType) this.tileType).allowsBlockEventCreation;
+            this.allowsEntityEventCreation = ((SpongeTileEntityType) this.tileType).allowsEntityEventCreation;
+        }
     }
 
     @Override

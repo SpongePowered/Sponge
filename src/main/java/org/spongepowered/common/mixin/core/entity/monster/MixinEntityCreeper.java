@@ -137,6 +137,10 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
     private void onStateChange(int state, CallbackInfo ci) {
         setFuseDuration(this.fuseDuration);
+        if (this.world.isRemote) {
+            return;
+        }
+
         if (!isPrimed() && state == STATE_PRIMED && !shouldPrime()) {
             ci.cancel();
         } else if (isPrimed() && state == STATE_IDLE && !shouldDefuse()) {
@@ -148,6 +152,10 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
     private void postStateChange(int state, CallbackInfo ci) {
+        if (this.world.isRemote) {
+            return;
+        }
+
         if (this.stateDirty) {
             if (state == STATE_PRIMED) {
                 postPrime();

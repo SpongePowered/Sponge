@@ -60,7 +60,7 @@ public final class EnchantmentTest {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
                             final Player player = (Player) src;
-                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty());
+                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
                             if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }
@@ -86,7 +86,7 @@ public final class EnchantmentTest {
                                 throw new CommandException(Text.of(TextColors.RED, "You must be a player to use this command!"));
                             }
                             final Player player = (Player) src;
-                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty());
+                            final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
                             if (!itemStack.supports(Keys.ITEM_ENCHANTMENTS)) {
                                 throw new CommandException(Text.of(TextColors.RED, "This item does not support item enchantments."));
                             }

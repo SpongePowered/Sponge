@@ -387,7 +387,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("expiration_ticks", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("expiration_ticks").name("Expiration Ticks").query(of("ExpirationTicks")).build());
 
-        this.register("skin_unique_id", Key.builder().type(TypeTokens.UUID_VALUE_TOKEN).id("skin_uuid").name("Skin UUID").query(of("SkinUUID")).build());
+        this.register("skin", Key.builder().type(TypeTokens.PROFILE_PROPERTY_VALUE_TOKEN).id("skin").name("Skin").query(of("Skin")).build());
+
+        this.register("update_game_profile", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("update_game_profile").name("Update Game Profile").query(of("UpdateGameProfile")).build());
 
         this.register("moisture", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("moisture").name("Moisture").query(of("Moisture")).build());
 
@@ -510,7 +512,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("exit_position", Key.builder().type(TypeTokens.VECTOR_3I_VALUE_TOKEN).id("exit_position").name("Exit Position").query(of("ExitPosition")).build());
 
-        this.register("exact_teleport", Key.builder().type(TypeTokens.VECTOR_3I_VALUE_TOKEN).id("exact_teleport").name("Exact Teleport").query(of("ExactTeleport")).build());
+        this.register("exact_teleport", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("exact_teleport").name("Exact Teleport").query(of("ExactTeleport")).build());
 
         this.register("structure_author", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("structure_author").name("Structure Author").query(of("StructureAuthor")).build());
 

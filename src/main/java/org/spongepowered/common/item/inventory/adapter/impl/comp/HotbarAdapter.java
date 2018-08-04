@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -32,25 +31,25 @@ import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 
 public class HotbarAdapter extends InventoryRowAdapter implements Hotbar {
 
-    protected HotbarLens<IInventory, net.minecraft.item.ItemStack> hotbarLens;
+    protected HotbarLens hotbarLens;
 
-    public HotbarAdapter(Fabric<IInventory> inventory, HotbarLens<IInventory, net.minecraft.item.ItemStack> root) {
+    public HotbarAdapter(Fabric inventory, HotbarLens root) {
         this(inventory, root, null);
     }
 
-    public HotbarAdapter(Fabric<IInventory> inventory, HotbarLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public HotbarAdapter(Fabric inventory, HotbarLens root, Inventory parent) {
         super(inventory, root, parent);
         this.hotbarLens = root;
     }
 
     @Override
     public int getSelectedSlotIndex() {
-        return this.hotbarLens.getSelectedSlotIndex(this.inventory);
+        return this.hotbarLens.getSelectedSlotIndex(this.fabric);
     }
 
     @Override
     public void setSelectedSlotIndex(int index) {
-        this.hotbarLens.setSelectedSlotIndex(this.inventory, index);
+        this.hotbarLens.setSelectedSlotIndex(this.fabric, index);
     }
 
 }

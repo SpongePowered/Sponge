@@ -172,4 +172,9 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     public boolean requiresCollisionsCacheRefresh() {
         return this.refreshCache;
     }
+
+    @Override
+    public boolean isRunningCollideWithNearby() {
+        return false;
+    }
 }

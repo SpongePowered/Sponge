@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import com.google.common.collect.Lists;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityLockable;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.LockCode;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
@@ -39,14 +37,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
-import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,22 +51,19 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.ReusableLensProvider;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityLockable.class)
 @Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$"),
              @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),})
-public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory, ReusableLensProvider<IInventory, ItemStack> {
+public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory, ReusableLensProvider {
 
     @Shadow private LockCode code;
 
@@ -135,9 +126,9 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        SlotCollection slots = new SlotCollection.Builder().add(this.getSizeInventory()).build();
-        OrderedInventoryLensImpl lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, slots);
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
+        SlotLensCollection slots = new SlotLensCollection.Builder().add(this.getSizeInventory()).build();
+        DefaultIndexedLens lens = new DefaultIndexedLens(0, this.getSizeInventory(), slots);
         return new ReusableLens<>(slots, lens);
     }
 

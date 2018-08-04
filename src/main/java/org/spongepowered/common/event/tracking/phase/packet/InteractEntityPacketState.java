@@ -79,7 +79,7 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 
@@ -125,7 +125,7 @@ final class InteractEntityPacketState extends BasicPacketState implements IEntit
             });
         }
         phaseContext.getPerEntityItemDropSupplier()
-            .acceptIfNotEmpty(map -> {
+            .acceptAndClearIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
                 printer.add("The item stacks captured are: ");

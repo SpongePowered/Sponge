@@ -34,7 +34,7 @@ import java.util.List;
 public class TimingsCategory extends ConfigCategory {
 
     @Setting
-    private boolean verbose = true;
+    private boolean verbose = false;
 
     @Setting
     private boolean enabled = true;

@@ -34,7 +34,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
@@ -80,7 +79,7 @@ final class InteractAtEntityPacketState extends BasicPacketState implements IEnt
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
         return true;
     }
 
@@ -108,7 +107,7 @@ final class InteractAtEntityPacketState extends BasicPacketState implements IEnt
                 final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                 SpongeCommonEventFactory.callSpawnEntity(items, context);
             });
-            context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact At Entity").centre().hr();
                 printer.add("The item stacks captured are: ");
@@ -121,7 +120,7 @@ final class InteractAtEntityPacketState extends BasicPacketState implements IEnt
                 }
                 printer.trace(System.err);
             });
-            context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
+            context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
                     final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);

@@ -37,12 +37,6 @@ import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistr
 @Mixin(AdvancementManager.class)
 public class MixinAdvancementManager {
 
-    @Inject(method = "reload", at = @At("HEAD"))
-    private void onReloadHead(CallbackInfo ci) {
-        AdvancementTreeRegistryModule.getInstance().clear();
-        AdvancementRegistryModule.getInstance().clear();
-    }
-
     @Inject(method = "reload", at = @At("RETURN"))
     private void onReloadReturn(CallbackInfo ci) {
         ((IMixinPlayerList) SpongeImpl.getServer().getPlayerList()).reloadAdvancementProgress();

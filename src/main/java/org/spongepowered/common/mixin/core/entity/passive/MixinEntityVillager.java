@@ -29,9 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -68,8 +66,8 @@ import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAd
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
@@ -92,14 +90,14 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow @Final private InventoryBasic villagerInventory; // villagerInventory
 
     @Shadow public abstract void setProfession(int professionId); // setProfession
-    @Shadow public abstract void setCustomer(EntityPlayer player);
+    @Shadow public abstract void setCustomer(@Nullable EntityPlayer player);
     @Shadow public abstract boolean shadow$isTrading(); // isTrading
     @Shadow @Nullable public abstract EntityPlayer shadow$getCustomer(); // getCustomer
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
-    private Fabric<IInventory> fabric;
-    private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
+    private Fabric fabric;
+    private SlotLensCollection slots;
+    private Lens lens;
 
     @Nullable private Profession profession;
 
@@ -112,20 +110,20 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onSpongeConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this.villagerInventory);
-        this.slots = new SlotCollection.Builder().add(8).build();
-        this.lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);
+        this.slots = new SlotLensCollection.Builder().add(8).build();
+        this.lens = new DefaultIndexedLens(0, 8, this.slots);
     }
 
     @SuppressWarnings("unchecked")
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+    public SlotProvider inventory$getSlotProvider() {
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+    public Lens inventory$getRootLens() {
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
+    public Fabric inventory$getFabric() {
         return this.fabric;
     }
 
@@ -238,6 +236,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         manipulators.add(getCareerData());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this);

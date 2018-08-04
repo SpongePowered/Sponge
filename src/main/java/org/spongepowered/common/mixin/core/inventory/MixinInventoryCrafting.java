@@ -43,50 +43,50 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 
 @SuppressWarnings("rawtypes")
 @Mixin(InventoryCrafting.class)
 @Implements(value = @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
-public abstract class MixinInventoryCrafting implements IInventory, LensProvider<IInventory, ItemStack> {
+public abstract class MixinInventoryCrafting implements IInventory, LensProvider {
 
     @Shadow @Final private NonNullList<ItemStack> stackList;
     @Shadow @Final private int inventoryWidth;
     @Shadow @Final private int inventoryHeight;
 
-    protected Fabric<IInventory> fabric;
-    protected SlotCollection slots;
-    protected Lens<IInventory, ItemStack> lens;
+    protected Fabric fabric;
+    protected SlotLensCollection slots;
+    protected Lens lens;
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstructed(CallbackInfo ci) {
         this.fabric = new IInventoryFabric(this);
-        this.slots = new SlotCollection.Builder().add(this.stackList.size()).build();
+        this.slots = new SlotLensCollection.Builder().add(this.stackList.size()).build();
         this.lens = rootLens(fabric, ((InventoryAdapter) this));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
         if (this.stackList.size() == 0) {
-            return new DefaultEmptyLens<>(adapter);
+            return new DefaultEmptyLens(adapter);
         }
-        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.inventoryWidth, this.slots);
+        return new CraftingGridInventoryLensImpl(0, this.inventoryWidth, this.inventoryHeight, this.slots);
     }
 
     @SuppressWarnings("unchecked")
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+    public SlotProvider inventory$getSlotProvider() {
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+    public Lens inventory$getRootLens() {
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
+    public Fabric inventory$getFabric() {
         return this.fabric;
     }
 

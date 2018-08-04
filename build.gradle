@@ -44,7 +44,7 @@ dependencies {
         exclude module: 'spongeapi'
     }
     compile 'org.ow2.asm:asm-debug-all:5.2'
-    jarinjar('org.spongepowered:mixin:0.7.10-SNAPSHOT') {
+    jarinjar('org.spongepowered:mixin:0.7.11-SNAPSHOT') {
         exclude module: 'launchwrapper'
     }
 
@@ -61,7 +61,8 @@ dependencies {
         transitive = false
     }
 
-    testCompile 'org.spongepowered:lwts:1.0.0'
+    // Taken from https://stackoverflow.com/a/7969292
+    testCompile api.sourceSets.test.output
 }
 
 uploadArchives {
@@ -79,5 +80,4 @@ ext.shadedDevProject = api
 
 test {
     systemProperty 'lwts.tweaker', 'org.spongepowered.common.launch.TestTweaker'
-    workingDir = {test.temporaryDir}
 }

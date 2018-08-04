@@ -48,6 +48,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -110,13 +111,17 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @Override
     public void registerAdditionalCatalog(BlockType extraCatalog) {
-        this.blockTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
-        registerBlockTrait(extraCatalog.getId(), extraCatalog);
+        this.registerCustomBlock(extraCatalog.getId(), extraCatalog);
     }
 
     public void registerFromGameData(String id, BlockType blockType) {
+        this.registerCustomBlock(id, blockType);
+    }
+
+    private void registerCustomBlock(String id, BlockType blockType) {
         this.blockTypeMappings.put(id.toLowerCase(Locale.ENGLISH), blockType);
         registerBlockTrait(id, blockType);
+        ((IMixinBlock) blockType).initializeTrackerState();
     }
 
 

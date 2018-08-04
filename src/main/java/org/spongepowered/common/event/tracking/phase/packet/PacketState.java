@@ -34,11 +34,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -55,12 +53,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public abstract class PacketState<P extends PacketContext<P>> implements IPhaseState<P> {
+
+
+    private BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+        if (ctx.packetPlayer != null) {
+            frame.pushCause(ctx.packetPlayer);
+        }
+    });
 
     PacketState() {
 
     }
+
 
     protected static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
         List<Entity> entities = event.getEntities();
@@ -74,13 +81,19 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
+    public BiConsumer<CauseStackManager.StackFrame, P> getFrameModifier() {
+        return this.BASIC_PACKET_MODIFIER;
+    }
+
+    @Override
     public final TrackingPhase getPhase() {
         return TrackingPhases.PACKET;
     }
 
     @Override
     public void unwind(P phaseContext) {
-        // DO NOTHING - basically some packets don't really need special handling.
+        phaseContext.getCapturedBlockSupplier()
+                .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
     }
 
     public boolean matches(int packetState) {
@@ -88,7 +101,7 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public void addNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void appendNotifierToBlockEvent(P context, IMixinWorldServer mixinWorldServer, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -114,12 +127,12 @@ public abstract class PacketState<P extends PacketContext<P>> implements IPhaseS
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(P context) {
         return false;
     }
 
     @Override
-    public boolean requiresBlockCapturing() {
+    public boolean doesBulkBlockCapture(P context) {
         return true;
     }
 

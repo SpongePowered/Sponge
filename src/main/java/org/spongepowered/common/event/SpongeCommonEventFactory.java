@@ -34,6 +34,7 @@ import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -64,6 +65,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -83,6 +85,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ai.SetAITargetEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -98,10 +101,8 @@ import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
-import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -144,7 +145,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -163,14 +163,12 @@ public class SpongeCommonEventFactory {
     public static boolean playerInteractItemChanged = false;
     // Set if any of the events fired during interaction with a block (open
     public static boolean interactBlockEventCancelled = false;
-    // inventory or interact block) were cancelled
-    @Nullable private static ChangeBlockEvent.Pre DUMMY_BLOCK_PRE_EVENT = null;
 
-    // Dummy ChangeBlockEvent.Pre
     public static int lastAnimationPacketTick = 0;
     // For animation packet
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
+    public static long lastTryBlockPacketTimeStamp = 0;
     public static boolean lastInteractItemOnBlockCancelled = false;
     public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
@@ -243,13 +241,10 @@ public class SpongeCommonEventFactory {
     }
 
     public static void callDropItemDestruct(List<Entity> entities, PhaseContext<?> context) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), entities);
-            SpongeImpl.postEvent(destruct);
-            if (!destruct.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(context, destruct);
-            }
+        final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        SpongeImpl.postEvent(destruct);
+        if (!destruct.isCancelled()) {
+            EntityUtil.processEntitySpawnsFromEvent(context, destruct);
         }
     }
 
@@ -270,7 +265,7 @@ public class SpongeCommonEventFactory {
                 printer.add(" - " + entity);
             }
             printer.add("PhaseContext:");
-            context.printCustom(printer);
+            context.printCustom(printer, 4);
             printer.add();
             printer.add("Exception:");
             printer.add(e);
@@ -411,15 +406,17 @@ public class SpongeCommonEventFactory {
             return Collections.emptyList();
         }
         List<SlotTransaction> trans = new ArrayList<>();
-        Iterator<Inventory> it = inv.slots().iterator();
-        for (int i = 0; i < inventory.getSizeInventory(); i++) {
-            org.spongepowered.api.item.inventory.Slot slot = (org.spongepowered.api.item.inventory.Slot) it.next();
+
+        List<org.spongepowered.api.item.inventory.Slot> slots = inv.slots();
+        for (int i = 0; i < slots.size(); i++) {
+            org.spongepowered.api.item.inventory.Slot slot = slots.get(i);
             ItemStack newStack = inventory.getStackInSlot(i);
             ItemStack prevStack = previous[i];
             if (!ItemStack.areItemStacksEqual(newStack, prevStack)) {
                 trans.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(prevStack), ItemStackUtil.snapshotOf(newStack)));
             }
         }
+
         return trans;
     }
 
@@ -511,15 +508,7 @@ public class SpongeCommonEventFactory {
             final PhaseTracker phaseTracker = PhaseTracker.getInstance();
             final PhaseData data = phaseTracker.getCurrentPhaseData();
             if (source == null) {
-                source = data.context.getSource(LocatableBlock.class).orElse(null);
-                if (source == null) {
-                    // safety measure, return a dummy event
-                    if (DUMMY_BLOCK_PRE_EVENT == null) {
-                        DUMMY_BLOCK_PRE_EVENT =
-                            SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), ImmutableList.of());
-                    }
-                    return DUMMY_BLOCK_PRE_EVENT;
-                }
+                source = data.context.getSource() == null ? worldIn : data.context.getSource();
             }
 
             EntityPlayer player = null;
@@ -750,7 +739,7 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
+    public static InteractItemEvent.Primary callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
         @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
@@ -771,7 +760,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
+    public static InteractItemEvent.Secondary callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
             @Nullable Vector3d hitVec, Object hitTarget) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (hitTarget instanceof Entity) {
@@ -847,6 +836,74 @@ public class SpongeCommonEventFactory {
         }
     }
 
+    public static MoveEntityEvent callMoveEntityEvent(net.minecraft.entity.Entity entity) {
+        // Ignore movement event if entity is dead, a projectile, or item.
+        // Note: Projectiles are handled with CollideBlockEvent.Impact
+        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+            return null;
+        }
+
+        Entity spongeEntity = (Entity) entity;
+
+        if (entity.lastTickPosX != entity.posX
+            || entity.lastTickPosY != entity.posY
+            || entity.lastTickPosZ != entity.posZ
+            || entity.rotationPitch != entity.prevRotationPitch
+            || entity.rotationYaw != entity.prevRotationYaw) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(entity);
+                // yes we have a move event.
+                final double currentPosX = entity.posX;
+                final double currentPosY = entity.posY;
+                final double currentPosZ = entity.posZ;
+    
+                final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
+                final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
+    
+                Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
+                Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
+                final Transform<World> oldTransform = new Transform<>(spongeEntity.getWorld(), oldPositionVector, oldRotationVector,
+                        spongeEntity.getScale());
+                final Transform<World> newTransform = new Transform<>(spongeEntity.getWorld(), currentPositionVector, currentRotationVector,
+                        spongeEntity.getScale());
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), oldTransform, newTransform, spongeEntity);
+    
+                if (SpongeImpl.postEvent(event)) {
+                    entity.posX = entity.lastTickPosX;
+                    entity.posY = entity.lastTickPosY;
+                    entity.posZ = entity.lastTickPosZ;
+                    entity.rotationPitch = entity.prevRotationPitch;
+                    entity.rotationYaw = entity.prevRotationYaw;
+                } else {
+                    Vector3d newPosition = event.getToTransform().getPosition();
+                    if (!newPosition.equals(currentPositionVector)) {
+                        entity.posX = newPosition.getX();
+                        entity.posY = newPosition.getY();
+                        entity.posZ = newPosition.getZ();
+                    }
+                    if (!event.getToTransform().getRotation().equals(currentRotationVector)) {
+                        entity.rotationPitch = (float) currentRotationVector.getX();
+                        entity.rotationYaw = (float) currentRotationVector.getY();
+                    }
+                    //entity.setPositionWithRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
+                        /*
+                        Some thoughts from gabizou: The interesting thing here is that while this is only called
+                        in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
+                        of the entity being handled here. The interesting issue is that since we are setting the transform,
+                        the rider entity (and the rest of the rider entities) are being updated as well with the new position
+                        and potentially world, which results in a dirty world usage (since the world transfer is handled by
+                        us). Now, the thing is, the previous position is not updated either, and likewise, the current position
+                        is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
+                        logic.
+                         */
+                    //((Entity) entity).setTransform(event.getToTransform());
+                }
+                return event;
+            }
+        }
+
+        return null;
+    }
     public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(EntityLivingBase entity, @Nullable DamageSource source, boolean isMainThread) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;
@@ -908,8 +965,10 @@ public class SpongeCommonEventFactory {
 
             if (!(entity instanceof EntityPlayer)) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
-                Optional<User> user = spongeEntity.getCreatorUser();
-                user.ifPresent(user1 -> frame.addContext(EventContextKeys.OWNER, user1));
+                User user = spongeEntity.getCreatorUser().orElse(null);
+                if (user != null) {
+                    frame.addContext(EventContextKeys.OWNER, user);
+                }
             }
 
             // TODO: Add target side support
@@ -920,10 +979,13 @@ public class SpongeCommonEventFactory {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                     final PhaseData peek = phaseTracker.getCurrentPhaseData();
-                    final Optional<User> notifier = peek.context.getNotifier();
-                    if (notifier.isPresent()) {
-                        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
-                        spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                    final User notifier = peek.context.getNotifier().orElse(null);
+                    if (notifier != null) {
+                        IMixinChunk spongeChunk = spongeEntity.getActiveChunk();
+                        if (spongeChunk == null) {
+                            spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
+                        }
+                        spongeChunk.addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
                     }
                 }
             }
@@ -992,11 +1054,10 @@ public class SpongeCommonEventFactory {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().isEmpty() && packetIn.getSlotId() >= 0
                 && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-            Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
+            org.spongepowered.api.item.inventory.Slot slot = ((IMixinContainer) player.openContainer).getContainerSlot(packetIn.getSlotId());
             if (slot != null) {
-                ItemStackSnapshot clickedItem = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
-                : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
-                SlotTransaction slotTransaction = new SlotTransaction(((org.spongepowered.api.item.inventory.Slot) slot), clickedItem, ItemStackSnapshot.NONE);
+                ItemStackSnapshot clickedItem = slot.peek().createSnapshot();
+                SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
@@ -1101,8 +1162,6 @@ public class SpongeCommonEventFactory {
             }
         }
 
-
-
         try {
             if (displayName != null) {
                 ((IMixinEntityPlayerMP) player).setContainerDisplay(displayName);
@@ -1133,6 +1192,9 @@ public class SpongeCommonEventFactory {
                 }
             } else if (inventory instanceof IInventory) {
                 player.displayGUIChest(((IInventory) inventory));
+            } else if (inventory instanceof org.spongepowered.api.item.inventory.Container) {
+                // TODO maybe make it work later
+                return null;
             } else {
                 return null;
             }
@@ -1261,18 +1323,13 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return;
         }
-        Inventory ordered = inv.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
-        if (!(ordered instanceof OrderedInventory)) {
-            ordered = ordered.iterator().next();
-        }
-        if (ordered instanceof OrderedInventory) {
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
-            if (slot.isPresent()) {
-                SlotTransaction trans = new SlotTransaction(slot.get(),
-                        ItemStackUtil.snapshotOf(originalStack),
-                        ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
-                captureIn.getCapturedTransactions().add(trans);
-            }
+
+        Optional<org.spongepowered.api.item.inventory.Slot> slot = inv.getSlot(SlotIndex.of(index));
+        if (slot.isPresent()) {
+            SlotTransaction trans = new SlotTransaction(slot.get(),
+                    ItemStackUtil.snapshotOf(originalStack),
+                    ItemStackUtil.snapshotOf(slot.get().peek()));
+            captureIn.getCapturedTransactions().add(trans);
         }
         // else inventory was missing the slot for some reason
     }
@@ -1292,22 +1349,18 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return transaction.get();
         }
-        Inventory ordered = inv.query(QueryOperationTypes.INVENTORY_TYPE.of(OrderedInventory.class));
-        if (!(ordered instanceof OrderedInventory)) {
-            ordered = ordered.iterator().next();
-        }
-        if (ordered instanceof OrderedInventory) {
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = ((OrderedInventory) ordered).getSlot(SlotIndex.of(index));
-            if (slot.isPresent()) {
-                ItemStackSnapshot original = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-                ItemStack remaining = transaction.get();
-                if (remaining.isEmpty()) {
-                    ItemStackSnapshot replacement = slot.get().peek().map(ItemStackUtil::snapshotOf).orElse(ItemStackSnapshot.NONE);
-                    captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
-                }
-                return remaining;
+
+        Optional<org.spongepowered.api.item.inventory.Slot> slot = inv.getSlot(SlotIndex.of(index));
+        if (slot.isPresent()) {
+            ItemStackSnapshot original = ItemStackUtil.snapshotOf(slot.get().peek());
+            ItemStack remaining = transaction.get();
+            if (remaining.isEmpty()) {
+                ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(slot.get().peek());
+                captureIn.getCapturedTransactions().add(new SlotTransaction(slot.get(), original, replacement));
             }
+            return remaining;
         }
+
         // else inventory was missing the slot for some reason
         return transaction.get();
     }

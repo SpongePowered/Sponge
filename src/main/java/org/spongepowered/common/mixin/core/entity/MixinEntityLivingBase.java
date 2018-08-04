@@ -65,7 +65,6 @@ import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -126,6 +125,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private static final int MAX_DEATH_EVENTS_BEFORE_GIVING_UP = 3;
 
     private int maxAir = 300;
+    private boolean runningCollideWithNearby = false;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -213,6 +213,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow public abstract void heal(float healAmount);
 
+    @Shadow public float randomUnused1;
     private int deathEventsPosted;
 
 
@@ -277,7 +278,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event
         // This will transitively call the forge event
-        final boolean isMainThread = !this.world.isRemote || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        final boolean isMainThread = !((IMixinWorld) this.world).isFake() || Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
         if (!this.isDead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (isMainThread && this.deathEventsPosted <= MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -292,12 +293,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
 
         // Double check that the PhaseTracker is already capturing the Death phase
-        try (final StackFrame frame = isMainThread ? Sponge.getCauseStackManager().pushCauseFrame() : null;
-             final EntityDeathContext context = createOrNullDeathPhase(isMainThread, frame, cause)) {
+        try (final EntityDeathContext context = createOrNullDeathPhase(isMainThread, cause)) {
             // We re-enter the state only if we aren't already in the death state. This can usually happen when
             // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
             // but then again, mods....
-            context.buildAndSwitch();
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             // Sponge End
             if (this.dead) {
                 return;
@@ -365,9 +367,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Nullable
-    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, @Nullable StackFrame frame, DamageSource source) {
+    private EntityDeathContext createOrNullDeathPhase(boolean isMainThread, DamageSource source) {
         boolean tracksEntityDeaths = false;
-        if (((IMixinWorld) this.world).isFake() || !isMainThread || frame == null) { // Short circuit to avoid erroring on handling
+        if (((IMixinWorld) this.world).isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
         final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentPhaseData().state;
@@ -570,8 +572,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         }
 
                         // Sponge Start - notify the cause tracker
-                        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                             final EntityDeathContext context = createOrNullDeathPhase(true, frame, source)) {
+                        try (final EntityDeathContext context = createOrNullDeathPhase(true, source)) {
                             if (context != null) {
                                 context.buildAndSwitch();
                             }

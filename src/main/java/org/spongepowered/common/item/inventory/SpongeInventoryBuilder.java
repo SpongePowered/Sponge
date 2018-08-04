@@ -45,6 +45,7 @@ import java.util.function.Consumer;
 public class SpongeInventoryBuilder implements Inventory.Builder {
 
     private final static Map<Class<?>, InventoryArchetype> inventoryTypes = new HashMap<>();
+    private boolean isVirtual;
 
     public static void registerInventory(Class<? extends IInventory> inventory, InventoryArchetype archetype) {
         inventoryTypes.put(inventory, archetype);
@@ -90,7 +91,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory build(Object plugin) {
-        return (Inventory) new CustomInventory(this.archetype, this.properties, this.carrier, this.listeners,
+        return (Inventory) new CustomInventory(this.archetype, this.properties, this.carrier, this.listeners, this.isVirtual,
                 Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> new IllegalArgumentException(plugin + " is not a plugin")));
     }
 
@@ -122,10 +123,17 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 //        return null;
     }
 
+    // TODO https://github.com/SpongePowered/SpongeAPI/issues/1751
+    public Inventory.Builder virtual() {
+        this.isVirtual = true;
+        return this;
+    }
+
     @Override
     public Inventory.Builder reset() {
         this.archetype = InventoryArchetypes.CHEST;
         this.properties = new HashMap<>();
+        this.isVirtual = false;
         return this;
     }
 

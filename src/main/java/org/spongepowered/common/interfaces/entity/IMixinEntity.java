@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces.entity;
 import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
@@ -35,11 +36,14 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinTrackable;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,11 +51,20 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
+public interface IMixinEntity extends org.spongepowered.api.entity.Entity, IMixinTrackable {
 
     boolean isInConstructPhase();
 
     void firePostConstructEvents();
+
+    /**
+     * Overridden method for Players to determine whether this entity is immune to fire
+     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
+     * take fire damage, nor do they light on fire.
+     *
+     * @return True if this entity is immune to fire.
+     */
+    boolean isImmuneToFireForIgniteEvent();
 
     boolean isTeleporting();
 
@@ -152,4 +165,21 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     default void clearWrappedCaptureList() {
 
     }
+
+    /**
+     * @author gabizou - July 26th, 2018
+     * @reason Due to vanilla logic, a block is removed *after* the held item is set,
+     * so, when the block event gets cancelled, we don't have a chance to cancel the
+     * enderman pickup. Specifically applies to Enderman so far, may have other uses
+     * in the future.
+     *
+     * @param phaseContext The context, for whatever reason in the future
+     */
+    default void onCancelledBlockChange(EntityTickContext phaseContext) {
+
+    }
+
+    void onVanish(EntityTrackerEntry entry);
+
+    void onUnVanish();
 }

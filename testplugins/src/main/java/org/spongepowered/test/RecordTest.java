@@ -41,14 +41,12 @@ public class RecordTest {
 
     @Listener
     public void onPlayerInteract(InteractItemEvent.Secondary event, @Root Player player) {
-        final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND).orElse(null);
-        if (itemStack != null) {
-            final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
-            if (optRecord.isPresent()) {
-                player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
-            } else if (itemStack.getType() == ItemTypes.SPONGE) {
-                player.stopRecord(player.getLocation().getPosition().toInt());
-            }
+        final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
+        final Optional<RecordProperty> optRecord = itemStack.getProperty(RecordProperty.class);
+        if (optRecord.isPresent()) {
+            player.playRecord(player.getLocation().getPosition().toInt(), optRecord.get().getValue());
+        } else if (itemStack.getType() == ItemTypes.SPONGE) {
+            player.stopRecord(player.getLocation().getPosition().toInt());
         }
     }
 }

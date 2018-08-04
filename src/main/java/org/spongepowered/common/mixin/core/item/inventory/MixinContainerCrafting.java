@@ -46,7 +46,8 @@ public abstract class MixinContainerCrafting extends MixinContainer {
 
         if (slotId == 0) {
             // Clicked the result
-            for (IInventory inventory : inventory$getFabric().allInventories()) {
+            // TODO check if still needed in 1.13
+            for (Object inventory : inventory$getFabric().allInventories()) {
                 for (IContainerListener listener : this.listeners) {
                     //listener.sendAllWindowProperties(this$, inventory);
                     listener.sendAllContents((Container) (Object) this, getInventory());

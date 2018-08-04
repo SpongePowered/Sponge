@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public interface Inventory2DLens<TInventory, TStack> extends OrderedInventoryLens<TInventory, TStack> {
+public interface Inventory2DLens extends Lens {
 
     int getWidth();
 
     int getHeight();
 
-    SlotLens<IInventory, ItemStack> getSlot(SlotPos pos);
+    int getStride();
+
+    SlotLens getSlot(SlotPos pos);
 
 }

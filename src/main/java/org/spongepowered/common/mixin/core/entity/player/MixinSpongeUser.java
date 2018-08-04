@@ -29,7 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import net.minecraft.inventory.InventoryEnderChest;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.Player;
@@ -64,6 +66,10 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     @Shadow private float rotationYaw;
 
     @Shadow protected abstract void markDirty();
+
+    @Shadow protected abstract SpongeUser loadEnderInventory();
+
+    @Shadow private InventoryEnderChest enderChest;
 
     @Override
     public GameProfile getProfile() {
@@ -133,6 +139,12 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
         this.markDirty();
         this.rotationPitch = ((float) rotation.getX()) % 360.0F;
         this.rotationYaw = ((float) rotation.getY()) % 360.0F;
+    }
+
+    @Override
+    public Inventory getEnderChestInventory() {
+        this.loadEnderInventory();
+        return ((Inventory) this.enderChest);
     }
 
     @Override

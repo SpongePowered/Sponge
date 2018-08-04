@@ -29,13 +29,13 @@ import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -48,12 +48,15 @@ import java.util.Optional;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
 
-    TileEntityTickPhaseState() {
+    private String name;
+
+    TileEntityTickPhaseState(String name) {
+        this.name = name;
     }
 
     @Override
     public TileEntityTickContext createPhaseContext() {
-        return new TileEntityTickContext()
+        return new TileEntityTickContext(this)
                 .addEntityCaptures()
                 .addEntityDropCaptures()
                 .addBlockCaptures();
@@ -65,15 +68,8 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(TileEntityTickContext context) {
         return true;
-    }
-
-    @Override
-    Location<World> getLocationSourceFromContext(PhaseContext<?> context) {
-        return context.getSource(TileEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
-                .getLocation();
     }
 
     @Override
@@ -152,11 +148,17 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public boolean spawnEntityOrCapture(TileEntityTickContext context, Entity entity, int chunkX, int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
+            .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
+
+        // If we do allow events, but there are no event listeners, just spawn.
+        // Otherwise, if we forbid events, we want to spawn anyways, don't throw an event.
+        if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
+            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
+        }
         // Separate experience from other entities
         if (entity instanceof EntityXPOrb) {
-            try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(tickingTile.getLocatableBlock());
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                 context.addNotifierAndOwnerToCauseStack(frame);
@@ -167,7 +169,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         }
         final List<Entity> nonExpEntities = new ArrayList<>(1);
         nonExpEntities.add(entity);
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(tickingTile.getLocatableBlock());
             frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.getTickedSpawnType());
             context.addNotifierAndOwnerToCauseStack(frame);
@@ -181,8 +183,19 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         return false;
     }
 
+
+    @Override
+    public boolean doesBulkBlockCapture(TileEntityTickContext context) {
+        return context.allowsBulkBlockCaptures();
+    }
+
+    @Override
+    public boolean doesBlockEventTracking(TileEntityTickContext context) {
+        return context.allowsBlockEvents();
+    }
+
     @Override
     public String toString() {
-        return "TileEntityTickPhase";
+        return this.name;
     }
 }

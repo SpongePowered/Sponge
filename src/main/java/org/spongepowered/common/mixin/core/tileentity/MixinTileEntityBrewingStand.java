@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
@@ -43,7 +42,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapt
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FilteringSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
@@ -57,13 +56,13 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(BrewingStandInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
-        return new SlotCollection.Builder().add(5)
+    private SlotProvider generateSlotProvider() {
+        return new SlotLensCollection.Builder().add(5)
                 .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
                         -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
                 .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
@@ -78,8 +77,8 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
     }
 
     @SuppressWarnings("unchecked")
-    private BrewingStandInventoryLens generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
-        return new BrewingStandInventoryLens((InventoryAdapter<IInventory, ItemStack>) this, slots);
+    private BrewingStandInventoryLens generateRootLens(SlotProvider slots) {
+        return new BrewingStandInventoryLens((InventoryAdapter) this, slots);
     }
 
     @Override

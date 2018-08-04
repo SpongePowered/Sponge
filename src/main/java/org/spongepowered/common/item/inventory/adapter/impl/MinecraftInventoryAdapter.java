@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.inventory.adapter.impl;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -33,26 +32,32 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.query.QueryOperation;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.item.inventory.InventoryIterator;
+import org.spongepowered.common.data.property.store.common.InventoryPropertyStore;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.CompoundFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.common.item.inventory.query.Query;
 import org.spongepowered.common.item.inventory.query.operation.LensQueryOperation;
 import org.spongepowered.common.item.inventory.query.operation.SlotLensQueryOperation;
 
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<TInventory, net.minecraft.item.ItemStack> {
+public interface MinecraftInventoryAdapter extends InventoryAdapter {
 
     @Override
     default Translation getName() {
@@ -68,32 +73,28 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
     }
 
     @Override
-    default Optional<ItemStack> poll() {
-        return AdapterLogic.pollSequential(this);
+    default ItemStack poll() {
+        return AdapterLogic.pollSequential(this).orElse(ItemStack.empty());
     }
 
     @Override
-    default Optional<ItemStack> poll(int limit) {
-        return AdapterLogic.pollSequential(this, limit);
+    default ItemStack poll(int limit) {
+        return AdapterLogic.pollSequential(this, limit).orElse(ItemStack.empty());
     }
 
     @Override
-    default Optional<ItemStack> peek() {
-        return AdapterLogic.peekSequential(this);
+    default ItemStack peek() {
+        return AdapterLogic.peekSequential(this).orElse(ItemStack.empty());
     }
 
     @Override
-    default Optional<ItemStack> peek(int limit) {
-        return AdapterLogic.peekSequential(this, limit);
+    default ItemStack peek(int limit) {
+        return AdapterLogic.peekSequential(this, limit).orElse(ItemStack.empty());
     }
 
     @Override
     default InventoryTransactionResult offer(ItemStack stack) {
-        //        try {
         return AdapterLogic.appendSequential(this, stack);
-        //        } catch (Exception ex) {
-        //            return false;
-        //        }
     }
 
     @Override
@@ -149,13 +150,13 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
     @SuppressWarnings("unchecked")
     @Override
     default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
-        return (Collection<T>) AdapterLogic.getProperties(this, child, property);
+        return (Collection<T>) InventoryPropertyStore.getProperties(this, child, property);
     }
 
     @Override
     default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
         if (this.parent() == this) {
-            return AdapterLogic.getRootProperties(this, property);
+            return InventoryPropertyStore.getRootProperties(this, property);
         }
         return this.parent().getProperties(this, property);
     }
@@ -163,7 +164,7 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
     @SuppressWarnings("unchecked")
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        for (InventoryProperty<?, ?> prop : AdapterLogic.getProperties(this, child, property)) {
+        for (InventoryProperty<?, ?> prop : InventoryPropertyStore.getProperties(this, child, property)) {
             if (key.equals(prop.getKey())) {
                 return Optional.of((T)prop);
             }
@@ -174,7 +175,7 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
         if (this.parent() == this) {
-            return AdapterLogic.getRootProperty(this, property, key);
+            return InventoryPropertyStore.getRootProperty(this, property, key);
         }
         return this.parent().getProperty(this, property, key);
     }
@@ -195,14 +196,26 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
     }
 
     @Override
-    default Iterator<Inventory> iterator() {
-        return new InventoryIterator<>(this.getRootLens(), this.getFabric(), this);
+    default List<Inventory> children() {
+        return this.getRootLens().getSpanningChildren().stream()
+                .map(l -> l.getAdapter(this.getFabric(), this))
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default <T extends Inventory> T query(QueryOperation<?>... queries) {
-        return (T) Query.compile(this, queries).execute();
+    default Inventory query(QueryOperation<?>... queries) {
+        return Query.compile(this, queries).execute();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default <T extends Inventory> Optional<T> query(Class<T> inventoryType) {
+        Inventory result = this.query(QueryOperationTypes.INVENTORY_TYPE.of(inventoryType));
+        if (inventoryType.isAssignableFrom(result.getClass())) {
+            return Optional.of((T) result);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -214,14 +227,14 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
     @Override
     default Inventory union(Inventory inventory) {
         CompoundLens.Builder lensBuilder = CompoundLens.builder().add(getRootLens());
-        CompoundFabric fabric = new CompoundFabric((MinecraftFabric) getFabric(), (MinecraftFabric) ((InventoryAdapter) inventory).getFabric());
+        CompoundFabric fabric = new CompoundFabric(this.getFabric(), ((InventoryAdapter) inventory).getFabric());
         CompoundSlotProvider provider = new CompoundSlotProvider().add(this);
-        for (Object inv : inventory) {
+        for (Object inv : inventory.children()) {
             lensBuilder.add(((InventoryAdapter) inv).getRootLens());
             provider.add((InventoryAdapter) inv);
         }
         CompoundLens lens = lensBuilder.build(provider);
-        InventoryAdapter<IInventory, net.minecraft.item.ItemStack> compoundAdapter = lens.getAdapter(fabric, this);
+        InventoryAdapter compoundAdapter = lens.getAdapter(fabric, this);
 
         return Query.compile(compoundAdapter, new SlotLensQueryOperation(ImmutableSet.of(compoundAdapter))).execute();
     }
@@ -238,4 +251,52 @@ public interface MinecraftInventoryAdapter<TInventory> extends InventoryAdapter<
         return InventoryArchetypes.UNKNOWN;
     }
 
+    @Override
+    default Optional<ViewableInventory> asViewable() {
+        if (this instanceof ViewableInventory) {
+            return Optional.of(((ViewableInventory) this));
+        }
+        // TODO Mod-Support
+        return Optional.empty();
+    }
+
+    default SlotLens getSlotLens(SlotIndex index) {
+        int idx = index.getValue().intValue();
+        return this.getRootLens().getSlot(idx);
+    }
+
+    @Override
+    default Optional<Slot> getSlot(SlotIndex index) {
+        return VanillaAdapter.forSlot(this.getFabric(), this.getSlotLens(index), this);
+    }
+
+    @Override
+    default Optional<org.spongepowered.api.item.inventory.ItemStack> poll(SlotIndex index) {
+        return AdapterLogic.pollSequential(this.getFabric(), this.getSlotLens(index));
+    }
+
+    @Override
+    default Optional<org.spongepowered.api.item.inventory.ItemStack> poll(SlotIndex index, int limit) {
+        return AdapterLogic.pollSequential(this.getFabric(), this.getSlotLens(index), limit);
+    }
+
+    @Override
+    default Optional<org.spongepowered.api.item.inventory.ItemStack> peek(SlotIndex index) {
+        return AdapterLogic.peekSequential(this.getFabric(), this.getSlotLens(index));
+    }
+
+    @Override
+    default Optional<org.spongepowered.api.item.inventory.ItemStack> peek(SlotIndex index, int limit) {
+        return AdapterLogic.peekSequential(this.getFabric(), this.getSlotLens(index), limit);
+    }
+
+    @Override
+    default InventoryTransactionResult set(SlotIndex index, org.spongepowered.api.item.inventory.ItemStack stack) {
+        return AdapterLogic.insertSequential(this.getFabric(), this.getSlotLens(index), stack);
+    }
+
+    @Override
+    default InventoryTransactionResult offer(SlotIndex index, org.spongepowered.api.item.inventory.ItemStack stack) {
+        return AdapterLogic.appendSequential(this.getFabric(), this.getSlotLens(index), stack);
+    }
 }

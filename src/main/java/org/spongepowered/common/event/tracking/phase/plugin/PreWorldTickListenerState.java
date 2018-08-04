@@ -43,9 +43,6 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
 
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
-        final IMixinWorldTickEvent worldTickEvent = phaseContext.getTickEvent();
-        final Object listener = phaseContext.getSource(Object.class)
-            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
         phaseContext.getCapturedBlockSupplier().acceptAndClearIfNotEmpty(blocks -> {
             TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
@@ -56,7 +53,7 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getCapturedPlayer().ifPresent(player ->
                 ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
-                        .setBlockNotifier(notifyPos, player.getUniqueId())
+                        .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }
 

@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -35,6 +37,11 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableOccupiedD
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeOccupiedData;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -80,5 +87,10 @@ public abstract class MixinBlockBed extends MixinBlockHorizontal {
     @Override
     public Translation getTranslation() {
         return new SpongeTranslation("item.bed.white.name");
+    }
+
+    @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
+    private static void onHasRoomForPlayer(World world, BlockPos pos, CallbackInfoReturnable<Boolean> ci ) {
+        ci.setReturnValue(ci.getReturnValue() && world.getWorldBorder().contains(pos));
     }
 }

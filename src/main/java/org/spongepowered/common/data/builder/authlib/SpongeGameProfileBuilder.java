@@ -24,10 +24,15 @@
  */
 package org.spongepowered.common.data.builder.authlib;
 
+import com.google.common.collect.Multimap;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.DataQueries;
 
@@ -49,7 +54,18 @@ public class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
         if (!container.contains(DataQueries.USER_NAME)) {
             return Optional.of(GameProfile.of(uuid));
         }
-        return Optional.of(GameProfile.of(uuid, container.getString(DataQueries.USER_NAME).get()));
+
+        GameProfile profile = GameProfile.of(uuid, container.getString(DataQueries.USER_NAME).get());
+        container.getViewList(DataQueries.PROFILE_PROPERTIES).ifPresent(properties -> {
+            Multimap<String, ProfileProperty> propertyMap = profile.getPropertyMap();
+            DataBuilder<ProfileProperty> builder = Sponge.getDataManager().getBuilder(ProfileProperty.class).get();
+
+            for (DataView propertyView: properties) {
+                ProfileProperty property = builder.build(propertyView).get();
+                propertyMap.put(property.getName(), property);
+            }
+        });
+        return Optional.of(profile);
     }
 
     private UUID getUUIDByString(String uuidString) throws InvalidDataException {

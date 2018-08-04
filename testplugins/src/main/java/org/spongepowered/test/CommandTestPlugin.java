@@ -111,6 +111,30 @@ public class CommandTestPlugin {
                             }))
                             .arguments(new TestCommandElement(Text.of("test")))
                             .build(), "test").build(), "commandwithnofallback");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                        .arguments(GenericArguments.userOrSource(Text.of("user")))
+                        .executor(((src, args) -> {
+                            src.sendMessage(Text.of(args.getOne("user").get()));
+                            return CommandResult.success();
+                        })).build(),
+                "user-test");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                        .arguments(GenericArguments.playerOrSource(Text.of("user")))
+                        .executor(((src, args) -> {
+                            src.sendMessage(Text.of(args.getOne("user").get()));
+                            return CommandResult.success();
+                        })).build(),
+                "player-test");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                        .arguments(GenericArguments.userOrSource(Text.of("user")), GenericArguments.integer(Text.of("number")))
+                        .executor(((src, args) -> {
+                            src.sendMessage(Text.of(args.getOne("user").get(), args.getOne("number").get()));
+                            return CommandResult.success();
+                        })).build(),
+                "user-parse");
     }
 
     @NonnullByDefault

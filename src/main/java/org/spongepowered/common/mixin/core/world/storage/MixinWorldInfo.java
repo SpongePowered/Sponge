@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
@@ -43,6 +44,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -64,10 +66,12 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
@@ -167,7 +171,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     //     public WorldInfo(NBTTagCompound nbt)
-    @Inject(method = "<init>*", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN") )
     private void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
         if (!SpongeCommonEventFactory.convertingMapFormat) {
             this.onConstructionCommon();
@@ -175,7 +179,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     //     public WorldInfo(WorldSettings settings, String name)
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At("RETURN"))
     private void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
         if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
             this.isValid = false;
@@ -208,7 +212,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     //     public WorldInfo(WorldInfo worldInformation)
-    @Inject(method = "<init>*", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At("RETURN") )
     private void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
         this.onConstructionCommon();
 
@@ -246,7 +250,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                 new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getConfigPath()
                                 .resolve(this.levelName)
                                 .resolve("world.conf"),
-                        SpongeImpl.ECOSYSTEM_ID);
+                        SpongeImpl.ECOSYSTEM_ID,
+                        ((IMixinDimensionType) getDimensionType()).getDimensionConfig());
         return true;
     }
 
@@ -425,9 +430,21 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         return (Difficulty) (Object) this.difficulty;
     }
 
-    @Inject(method = "setDifficulty", at = @At("HEAD"))
+    @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
     private void onSetDifficultyVanilla(EnumDifficulty newDifficulty, CallbackInfo ci) {
         this.hasCustomDifficulty = true;
+        if (newDifficulty == null) {
+            // This is an error from someone
+            new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
+                .add("Someone (not Sponge) is attempting to set a null difficulty to this WorldInfo setup! Please report to the mod/plugin author!")
+                .add()
+                .addWrapped(60, " %s : %s", "WorldInfo", this)
+                .add()
+                .add(new Exception("Stacktrace"))
+                .log(SpongeImpl.getLogger(), Level.ERROR);
+            ci.cancel(); // We cannot let the null set the field.
+            return;
+        }
 
         // If the difficulty is set, we need to sync it to the players in the world attached to the worldinfo (if any)
         WorldManager.getWorlds()
@@ -603,17 +620,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isEnabled() {
-        boolean isEnabled = true;
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
-            if (dimConfig.isConfigEnabled()) {
-                isEnabled = dimConfig.getWorld().isWorldEnabled();
-            }
-        } else {
-            isEnabled = this.getOrCreateWorldConfig().getConfig().getWorld().isWorldEnabled();
-        }
-
-        return isEnabled;
+        return this.getOrCreateWorldConfig().getConfig().getWorld().isWorldEnabled();
     }
 
     @Override
@@ -623,17 +630,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean loadOnStartup() {
-        Boolean loadOnStartup;
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
-            if (dimConfig.isConfigEnabled()) {
-                loadOnStartup = dimConfig.getWorld().loadOnStartup();
-            } else {
-                loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
-            }
-        } else {
-            loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
-        }
+        Boolean loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
         if (loadOnStartup == null) {
            loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
            this.setLoadOnStartup(loadOnStartup);
@@ -654,23 +651,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        Boolean keepSpawnLoaded;
-        // World config isn't enabled
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
-            if (dimConfig.isConfigEnabled()) {
-                keepSpawnLoaded = dimConfig.getWorld().getKeepSpawnLoaded();
-            } else {
-                keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
-            }
-        } else {
-            keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
-        }
-
+        Boolean keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
         if (keepSpawnLoaded == null) {
             keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldLoadSpawn();
         }
-
         return keepSpawnLoaded;
     }
 
@@ -682,17 +666,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean doesGenerateSpawnOnLoad() {
-        Boolean shouldGenerateSpawn;
-        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
-            if (dimConfig.isConfigEnabled()) {
-                shouldGenerateSpawn = dimConfig.getWorld().getGenerateSpawnOnLoad();
-            } else {
-                shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
-            }
-        } else {
-            shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
-        }
+        Boolean shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
         if (shouldGenerateSpawn == null) {
             shouldGenerateSpawn = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
             this.setGenerateSpawnOnLoad(shouldGenerateSpawn);
@@ -708,7 +682,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isPVPEnabled() {
-        return !this.getOrCreateWorldConfig().getConfig().isConfigEnabled() || this.getOrCreateWorldConfig().getConfig().getWorld().getPVPEnabled();
+        return this.getOrCreateWorldConfig().getConfig().getWorld().getPVPEnabled();
     }
 
     @Override
@@ -916,8 +890,24 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void saveConfig() {
-        if (this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
-            this.getOrCreateWorldConfig().save();
-        }
+        this.getOrCreateWorldConfig().save();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("levelName", this.levelName)
+            .add("terrainType", this.terrainType)
+            .add("uuid", this.uuid)
+            .add("dimensionId", this.dimensionId)
+            .add("dimensionType", this.dimensionType)
+            .add("spawnX", this.spawnX)
+            .add("spawnY", this.spawnY)
+            .add("spawnZ", this.spawnZ)
+            .add("gameType", this.gameType)
+            .add("hardcore", this.hardcore)
+            .add("difficulty", this.difficulty)
+            .add("isMod", this.isMod)
+            .toString();
     }
 }

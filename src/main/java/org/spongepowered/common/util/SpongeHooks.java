@@ -42,11 +42,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -57,12 +60,17 @@ import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
+import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.interfaces.IMixinTrackable;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
-import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
+import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
@@ -99,7 +107,7 @@ public class SpongeHooks {
         if (config.getConfig().getLogging().logWithStackTraces()) {
             Throwable ex = new Throwable();
             ex.fillInStackTrace();
-            ex.printStackTrace();
+            SpongeImpl.getLogger().catching(Level.INFO, ex);
         }
     }
 
@@ -441,15 +449,7 @@ public class SpongeHooks {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
         SpongeConfig<? extends GeneralConfigBase> activeConfig = mixinWorldServer.getActiveConfig();
         if (activeConfig == null || refresh) {
-            final SpongeConfig<WorldConfig> worldConfig = mixinWorldServer.getWorldConfig();
-            final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType()).getDimensionConfig();
-            if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
-                activeConfig = worldConfig;
-            } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-                activeConfig = dimensionConfig;
-            } else {
-                activeConfig = SpongeImpl.getGlobalConfig();
-            }
+            activeConfig = mixinWorldServer.getWorldConfig();
             mixinWorldServer.setActiveConfig(activeConfig);
         }
 
@@ -477,26 +477,32 @@ public class SpongeHooks {
 
         // No in-memory config objects, lookup from disk.
         final Path dimConfPath = dimensionPath.resolve("dimension.conf");
+        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfig());
 
         if (worldFolder != null) {
             final Path worldConfPath = dimensionPath.resolve(worldFolder).resolve("world.conf");
-
-            final SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID);
-            if (worldConfig.getConfig().isConfigEnabled()) {
-                return worldConfig;
-            }
+            return new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID, dimConfig);
         }
 
-        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID);
-        if (dimConfig.getConfig().isConfigEnabled()) {
-            return dimConfig;
-        }
-
-        // Neither in-memory or on-disk enabled configs. Go global.
-        return SpongeImpl.getGlobalConfig();
+        return dimConfig;
     }
 
     public static void refreshActiveConfigs() {
+        for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
+            if (blockType instanceof IModData_Collisions) {
+                ((IModData_Collisions) blockType).requiresCollisionsCacheRefresh(true);
+            }
+            if (blockType instanceof IMixinTrackable) {
+                ((IMixinBlock) blockType).initializeTrackerState();
+            }
+        }
+        for (TileEntityType tileEntityType : TileEntityTypeRegistryModule.getInstance().getAll()) {
+            ((SpongeTileEntityType) tileEntityType).initializeTrackerState();
+        }
+        for (EntityType entityType : EntityTypeRegistryModule.getInstance().getAll()) {
+            ((SpongeEntityType) entityType).initializeTrackerState();
+        }
+
         for (WorldServer world : WorldManager.getWorlds()) {
             ((IMixinWorldServer) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
             for (Entity entity : world.loadedEntityList) {
@@ -506,19 +512,17 @@ public class SpongeHooks {
                 if (entity instanceof IModData_Collisions) {
                     ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
+                if (entity instanceof IMixinTrackable) {
+                    ((IMixinTrackable) entity).refreshCache();
+                }
             }
             for (TileEntity tileEntity : world.loadedTileEntityList) {
                 if (tileEntity instanceof IModData_Activation) {
                     ((IModData_Activation) tileEntity).requiresActivationCacheRefresh(true);
                 }
-            }
-        }
-        for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
-            if (blockType instanceof IModData_Collisions) {
-                ((IModData_Collisions) blockType).requiresCollisionsCacheRefresh(true);
-            }
-            if (blockType instanceof IModData_BlockCapturing) {
-                ((IModData_BlockCapturing) blockType).requiresBlockCapturingRefresh(true);
+                if (tileEntity instanceof IMixinTrackable) {
+                    ((IMixinTrackable) tileEntity).refreshCache();
+                }
             }
         }
         ConfigTeleportHelperFilter.invalidateCache();

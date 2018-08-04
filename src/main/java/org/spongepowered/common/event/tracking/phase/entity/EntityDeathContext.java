@@ -51,24 +51,22 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
         if (!currentPhaseData.context.equals(this)) {
             // at most we should be at a depth of 1.
             // should attempt to complete the existing one to wrap up, before exiting fully.
-            PhaseTracker.getInstance().completePhase(currentPhaseData.state);
+            currentPhaseData.context.close();
         }
         super.close();
     }
 
-    public DamageSource getDamageSource() {
-        return damageSource;
-    }
-
-    public EntityDeathContext setDamageSource(DamageSource damageSource) {
-        this.damageSource = damageSource;
-        return this;
+    @Override
+    public boolean hasCaptures() {
+        // Required for forge mods, such as Draconic Evolution, as drop events must always be fired even when empty
+        return true;
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "DamageSource", this.damageSource);
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "DamageSource", this.damageSource);
     }
 
 }

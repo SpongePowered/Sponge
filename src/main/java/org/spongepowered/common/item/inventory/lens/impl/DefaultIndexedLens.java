@@ -24,45 +24,20 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import static org.spongepowered.api.data.Property.Operator.DELEGATE;
-
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Property;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.AbstractInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
-public class DefaultIndexedLens<TInventory> extends AbstractLens<TInventory, ItemStack> {
+public class DefaultIndexedLens extends SlotBasedLens {
 
-    public DefaultIndexedLens(int offset, int size, Class<? extends Inventory> adapterType, SlotProvider<TInventory, ItemStack> slots) {
-        super(offset, size, adapterType, slots);
-        this.init(slots);
-    }
-
-    public DefaultIndexedLens(int offset, int size, InventoryAdapter<TInventory, ItemStack> adapter, SlotCollection<TInventory> slots) {
-        super(offset, size, adapter, slots);
-        this.init(slots);
+    public DefaultIndexedLens(int base, int size, SlotProvider slots) {
+        super(base, size, 1, BasicInventoryAdapter.class, slots);
     }
 
     @Override
-    protected void init(SlotProvider<TInventory, ItemStack> slots) {
-        for (int slot = 0; slot < this.size; slot++) {
-            this.addSpanningChild(slots.getSlot(slot), new SlotIndexImpl(slot, DELEGATE));
-        }
-    }
-    
-    @Override
-    public int getRealIndex(Fabric<TInventory> inv, int ordinal) {
-        return ordinal >= this.base + this.size ? -1 : Math.max(-1, this.base + ordinal);
-    }
-
-    @Override
-    public InventoryAdapter<TInventory, ItemStack> getAdapter(Fabric<TInventory> inv, Inventory parent) {
-        return new AbstractInventoryAdapter<>(inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+        return new BasicInventoryAdapter(inv, this, parent);
     }
 }

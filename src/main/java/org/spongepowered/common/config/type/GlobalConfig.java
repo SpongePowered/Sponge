@@ -30,6 +30,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
+import org.spongepowered.common.config.category.BrokenModCategory;
 import org.spongepowered.common.config.category.BungeeCordCategory;
 import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
@@ -88,8 +89,15 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting("movement-checks")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
+    @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
+    private BrokenModCategory brokenMods = new BrokenModCategory();
+
     public GlobalConfig() {
         super();
+    }
+
+    public BrokenModCategory getBrokenMods() {
+        return this.brokenMods;
     }
 
     public BungeeCordCategory getBungeeCord() {
@@ -139,12 +147,6 @@ public class GlobalConfig extends GeneralConfigBase {
     @Override
     public GlobalWorldCategory getWorld() {
         return this.world;
-    }
-
-    @Override
-    public boolean isConfigEnabled() {
-        // always return true as there is only 1 global config
-        return true;
     }
 
     public PhaseTrackerCategory getPhaseTracker() {

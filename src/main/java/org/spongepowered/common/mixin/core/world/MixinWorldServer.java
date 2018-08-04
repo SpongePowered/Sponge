@@ -39,6 +39,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -81,7 +82,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -163,6 +163,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.effect.sound.SoundEffectHelper;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -195,10 +196,10 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.world.BlockChangeFlagRegistryModule;
 import org.spongepowered.common.util.NonNullArrayList;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.WorldUtil;
 import org.spongepowered.common.world.border.PlayerBorderListener;
@@ -252,6 +253,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private boolean weatherIceAndSnowEnabled = true;
     private int dimensionId;
     private IMixinChunkProviderServer mixinChunkProviderServer;
+    @Nullable private NextTickListEntry tmpScheduledObj;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -262,6 +264,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int blockEventCacheIndex;
     @Shadow private int updateEntityTick;
 
+    @Shadow protected abstract void saveLevel() throws MinecraftException;
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
@@ -366,7 +369,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "createSpawnPosition", at = @At(value = "RETURN"))
     private void onCreateBonusChestEnd(CallbackInfo ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().getCurrentContext().close();
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -788,6 +791,81 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     /**
+     * @author gabizou - July 8th, 2018
+     * @reason Performs a check on the block update to take place whether it will be
+     * immediately scheduled, and then whether we need to enter {@link TickPhase.Tick#BLOCK} for
+     * the scheduled update. Likewise, this will check whether scheduled updates are immediate
+     * for this method call and then flip the flag off to avoid nested recursion.
+     *
+     * @param block The block to update
+     * @param worldIn The world server, otherwise known as "this" object
+     * @param pos The position
+     * @param state The block state
+     * @param rand The random, otherwise known as "this.rand"
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Redirect(
+        method = "updateBlockTick",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"
+        )
+    )
+    private void spongeBlockUpdateTick(Block block, World worldIn, BlockPos pos, IBlockState state, Random rand) {
+        if (this.scheduledUpdatesAreImmediate) {
+            /*
+            The reason why we are first checking and then resetting the immediate updates flag is
+            because Vanilla will allow block updates to be performed "immediately", but certain blocks
+            will recursively update neighboring blocks/change neighboring blocks such that it can cause
+            a near infinite recursion in a "blob" of re-entrance. This avoids nested immediate block updates
+            within the same method call of the immediate block update.
+            See: https://github.com/SpongePowered/SpongeForge/issues/2273 for further explanation
+             */
+            this.scheduledUpdatesAreImmediate = false;
+        }
+        final PhaseData data = PhaseTracker.getInstance().getCurrentPhaseData();
+        final IPhaseState<?> phaseState = data.state;
+        if (((IPhaseState) phaseState).alreadyCapturingBlockTicks(data.context) || ((IPhaseState) phaseState).ignoresBlockUpdateTick(data.context)) {
+            block.updateTick(worldIn, pos, state, rand);
+            return;
+        }
+        TrackingUtil.updateTickBlock(this, block, pos, state, rand);
+
+    }
+
+    @Redirect(method = "updateBlockTick", // really scheduleUpdate
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
+    private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
+        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+        final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
+
+        if (phaseState.ignoresScheduledUpdates()) {
+            this.tmpScheduledObj = sbu;
+            return;
+        }
+
+        sbu.setPriority(priority);
+        ((IMixinNextTickListEntry) sbu).setWorld((WorldServer) (Object) this);
+        this.tmpScheduledObj = sbu;
+    }
+
+    @Override
+    public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
+        BlockPos pos = new BlockPos(x, y, z);
+        this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
+        ScheduledBlockUpdate sbu = (ScheduledBlockUpdate) this.tmpScheduledObj;
+        this.tmpScheduledObj = null;
+        return sbu;
+    }
+
+    @Override
+    public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
+        // Note: Ignores position argument
+        this.pendingTickListEntriesHashSet.remove(update);
+        this.pendingTickListEntriesTreeSet.remove(update);
+    }
+
+    /**
      * @author blood - August 30th, 2016
      *
      * @reason Always allow entity cleanup to occur. This prevents issues such as a plugin
@@ -811,11 +889,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         super.updateEntities();
     }
 
-    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
-    private void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        this.onUpdateTick(block, worldIn, pos, state, rand);
-    }
-
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
@@ -823,15 +896,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final PhaseData phaseData = phaseTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
-        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData)) {
+        if (phaseState.alreadyCapturingBlockTicks(phaseData.context) || phaseState.ignoresBlockUpdateTick(phaseData.context)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
-
-        IMixinBlock spongeBlock = (IMixinBlock) block;
-        spongeBlock.getTimingsHandler().startTiming();
         TrackingUtil.updateTickBlock(this, block, pos, state, rand);
-        spongeBlock.getTimingsHandler().stopTiming();
     }
 
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReportCategory;addBlockInfo(Lnet/minecraft/crash/CrashReportCategory;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"))
@@ -879,7 +948,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             .build();
 
         blockEvent.setTickBlock(locatable);
-        phaseState.addNotifierToBlockEvent(context, this, pos, blockEvent);
+        phaseState.appendNotifierToBlockEvent(context, this, pos, blockEvent);
         return list.add((BlockEventData) obj);
     }
 
@@ -893,12 +962,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(worldIn, event);
-    }
-
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
-    private boolean onTicktick(IChunkProvider chunkProvider) {
-        // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
-        return this.chunkGCTickInterval <= 0 && chunkProvider.tick();
     }
 
     // Chunk GC
@@ -956,21 +1019,49 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
-    private boolean canChunkProviderSave(ChunkProviderServer chunkProviderServer) {
-        if (chunkProviderServer.canSave()) {
-            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Sponge.getCauseStackManager().getCurrentCause(), this));
-            return true;
-        }
-        return false;
-    }
+    /**
+     * @author blood - July 20th, 2017
+     * @reason This method is critical as it handles world saves and whether to queue chunks for unload if GC is enabled.
+     * It has been overwritten to make it easier to manage for future updates.
+     *
+     * @param all Whether to save all chunks
+     * @param progressCallback The save progress callback
+     */
+    @Overwrite
+    public void saveAllChunks(boolean all, @Nullable IProgressUpdate progressCallback) throws MinecraftException
+    {
+        ChunkProviderServer chunkproviderserver = this.getChunkProvider();
 
-    @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
-    private void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
-        Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Sponge.getCauseStackManager().getCurrentCause(), this));
-        // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
-        if (this.chunkGCTickInterval > 0) {
-            ci.cancel();
+        if (chunkproviderserver.canSave())
+        {
+            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Sponge.getCauseStackManager().getCurrentCause(), this));
+            if (progressCallback != null)
+            {
+                progressCallback.displaySavingString("Saving level");
+            }
+
+            this.saveLevel();
+
+            if (progressCallback != null)
+            {
+                progressCallback.displayLoadingString("Saving chunks");
+            }
+
+            chunkproviderserver.saveChunks(all);
+            Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Sponge.getCauseStackManager().getCurrentCause(), this));
+
+            // The chunk GC handles all queuing for chunk unloads so we return here to avoid it during a save.
+            if (this.chunkGCTickInterval > 0) {
+                return;
+            }
+
+            for (Chunk chunk : Lists.newArrayList(chunkproviderserver.getLoadedChunks()))
+            {
+                if (chunk != null && !this.playerChunkMap.contains(chunk.x, chunk.z))
+                {
+                    chunkproviderserver.queueUnload(chunk);
+                }
+            }
         }
     }
 
@@ -991,46 +1082,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return builder.build();
     }
 
-    @Nullable
-    private NextTickListEntry tmpScheduledObj;
 
-    /*@Redirect(method = "updateBlockTick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
-    private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
-        this.onCreateScheduledBlockUpdate(sbu, priority);
-    }*/
-
-    @Redirect(method = "updateBlockTick", // really scheduleUpdate
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
-    private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> phaseState = phaseTracker.getCurrentState();
-
-        if (phaseState.ignoresScheduledUpdates()) {
-            this.tmpScheduledObj = sbu;
-            return;
-        }
-
-        sbu.setPriority(priority);
-        ((IMixinNextTickListEntry) sbu).setWorld((WorldServer) (Object) this);
-        this.tmpScheduledObj = sbu;
-    }
-
-    @Override
-    public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
-        BlockPos pos = new BlockPos(x, y, z);
-        this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
-        ScheduledBlockUpdate sbu = (ScheduledBlockUpdate) this.tmpScheduledObj;
-        this.tmpScheduledObj = null;
-        return sbu;
-    }
-
-    @Override
-    public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
-        // Note: Ignores position argument
-        this.pendingTickListEntriesHashSet.remove(update);
-        this.pendingTickListEntriesTreeSet.remove(update);
-    }
 
     @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
@@ -1190,8 +1242,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
 
-        try (final PhaseContext<?> phaseContext = PluginPhase.State.CUSTOM_EXPLOSION.createPhaseContext()
-                .explosion(explosion)) {
+        try (final PhaseContext<?> phaseContext = GeneralPhase.State.EXPLOSION.createPhaseContext()
+                .explosion((Explosion) explosion)) {
             phaseContext.buildAndSwitch();
             final Explosion mcExplosion;
             try {
@@ -1269,7 +1321,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntity(net.minecraft.entity.Entity entity) {
-        if (!PhaseTracker.validateEntitySpawn(this, (Entity) entity)) {
+        if (PhaseTracker.isEntitySpawnInvalid((Entity) entity)) {
             return true;
         }
         return canAddEntity(entity) && PhaseTracker.getInstance().spawnEntity(this, EntityUtil.fromNative(entity));
@@ -1291,7 +1343,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the PhaseTracker
-            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, flags);
+            return PhaseTracker.getInstance().setBlockState(this, pos.toImmutable(), newState, BlockChangeFlagRegistryModule.fromNativeInt(flags));
         }
     }
 
@@ -1308,26 +1360,60 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     /**
-     * @author gabizou - March 12th, 2016
+     * @author gabizou - July 25th, 2018
+     * @reason Technically an overwrite for {@link World#destroyBlock(BlockPos, boolean)}
+     * so that we can artificially capture/associate entity spawns from the proposed block
+     * destruction when the actual block event is thrown, whether captures are taking
+     * place or not. In the context of "if block changes are not captured", we do still need
+     * to associate the drops before the actual block is removed
      *
-     * Technically an overwrite to properly track on *server* worlds.
+     * @param pos
+     * @param dropBlock
+     * @return
      */
     @Override
-    public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
-        this.scheduledUpdatesAreImmediate = true;
-        // Sponge start - Cause tracking
-        final PhaseData peek = PhaseTracker.getInstance().getCurrentPhaseData();
-        if (peek.state.ignoresBlockUpdateTick(peek)) {
-            state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
-            // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
-            // No seriously, if this is not set back to false, all future updates are processed immediately
-            // and various things get caught under the Unwinding Phase.
-            this.scheduledUpdatesAreImmediate = false;
-            return;
+    public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
+        IBlockState iblockstate = this.getBlockState(pos);
+        Block block = iblockstate.getBlock();
+
+        if (iblockstate.getMaterial() == Material.AIR) {
+            return false;
         }
-        TrackingUtil.updateTickBlock(this, state.getBlock(), pos, state, random);
-        // Sponge end
-        this.scheduledUpdatesAreImmediate = false;
+        // Sponge Start - Fire the change block pre here, before we bother with drops. If the pre is cancelled, just don't bother.
+        if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
+                return false;
+            }
+        }
+        // Sponge End
+        this.playEvent(2001, pos, Block.getStateId(iblockstate));
+
+        if (dropBlock) {
+            // Sponge Start - since we are going to perform block drops, we need
+            // to notify the current phase state and find out if capture pos is to be used.
+            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+            final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentState();
+            final boolean isCapturingBlockDrops = state.alreadyProcessingBlockItemDrops();
+            final BlockPos previousPos;
+            if (isCapturingBlockDrops) {
+                previousPos = context.getCaptureBlockPos().getPos().orElse(null);
+                context.getCaptureBlockPos().setPos(pos);
+            } else {
+                previousPos = null;
+            }
+            // Sponge End
+            block.dropBlockAsItem((WorldServer) (Object) this, pos, iblockstate, 0);
+            // Sponge Start
+            if (isCapturingBlockDrops) {
+                // we need to reset the capture pos because we've been capturing item and entity drops this way.
+                context.getCaptureBlockPos().setPos(previousPos);
+            }
+            // Sponge End
+
+        }
+
+        // Sponge - reduce the call stack by calling the more direct method.
+        return this.setBlockState(pos, Blocks.AIR.getDefaultState(), BlockChangeFlags.ALL);
     }
 
     /**
@@ -1371,20 +1457,33 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         EnumSet<EnumFacing> directions = EnumSet.copyOf(NOTIFY_DIRECTIONS);
         directions.remove(skipSide);
-        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-        if (event == null || !event.isCancelled()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            for (EnumFacing facing : EnumFacing.values()) {
-                if (event != null) {
-                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                    if (!event.getNeighbors().keySet().contains(direction)) {
-                        continue;
+        // Check for listeners.
+        if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
+            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
+            if (event == null || !event.isCancelled()) {
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                for (EnumFacing facing : EnumFacing.values()) {
+                    if (event != null) {
+                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                        if (!event.getNeighbors().keySet().contains(direction)) {
+                            continue;
+                        }
                     }
-                }
 
-                phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
+                    phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
+                }
             }
+            return;
         }
+
+        // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
+        for (EnumFacing direction : NOTIFY_DIRECTIONS) {
+            if (direction == skipSide) {
+                continue;
+            }
+            PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(direction), blockType, pos);
+        }
+
     }
 
     /**
@@ -1406,18 +1505,25 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
-        if (event == null || !event.isCancelled()) {
-            final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-            for (EnumFacing facing : EnumFacing.values()) {
-                if (event != null) {
-                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                    if (!event.getNeighbors().keySet().contains(direction)) {
-                        continue;
+        if (ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) {
+            final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
+            if (event == null || !event.isCancelled()) {
+                final PhaseTracker phaseTracker = PhaseTracker.getInstance();
+                for (EnumFacing facing : EnumFacing.values()) {
+                    if (event != null) {
+                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                        if (!event.getNeighbors().keySet().contains(direction)) {
+                            continue;
+                        }
                     }
-                }
 
-                phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
+                    phaseTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
+                }
+            }
+        } else {
+            // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
+            for (EnumFacing direction : NOTIFY_DIRECTIONS) {
+                PhaseTracker.getInstance().notifyBlockOfStateChange(this, pos.offset(direction), blockType, pos);
             }
         }
 
@@ -1427,17 +1533,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @SuppressWarnings("Duplicates")
+    @Override
+    public void onDestroyBlock(BlockPos pos, boolean dropBlock, CallbackInfoReturnable<Boolean> cir) {
+        if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos).isCancelled()) {
+            cir.setReturnValue(false);
+        }
+    }
+
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> state = phaseTracker.getCurrentState();
-        if (state.alreadyCapturingEntityTicks()) {
-            entityIn.onUpdate();
-            return;
-        }
-        TrackingUtil.tickEntity(entityIn);
-        updateRotation(entityIn);
+        onCallEntityUpdate(entityIn); // maybe we should combine these injections/redirects?
     }
 
     @Override
@@ -1513,7 +1618,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @param <T> The type of entity list
      * @return The list of entities found
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class<? extends T> clazz, AxisAlignedBB aabb,
         @Nullable Predicate<? super T> filter) {
@@ -1546,10 +1651,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseData currentPhase = PhaseTracker.getInstance().getCurrentPhaseData();
         final PhaseContext<?> context = currentPhase.context;
         final IPhaseState<?> state = currentPhase.state;
-        if (state.doesCaptureEntityDrops() || state.allowEntitySpawns()) {
+        if (((IPhaseState) state).doesCaptureEntityDrops(context) || state.doesAllowEntitySpawns()) {
             // We need to check for entity spawns and entity drops. If either are used, we need to offer them up in the lsit, provided
             // they pass the predicate check
-            if (state.doesCaptureEntityDrops()) {
+            if (((IPhaseState) state).doesCaptureEntityDrops(context)) {
                 for (EntityItem entity : context.getCapturedItems()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
                     if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
@@ -1561,6 +1666,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 for (Entity entity : context.getCapturedEntities()) {
                     // We can ignore the type check because we're already checking the instance class of the entity.
                     if (clazz.isInstance(entity) && EntityUtil.toNative(entity).getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
+                        list.add((T) entity);
+                    }
+                }
+            }
+            if (((IPhaseState) state).doesBulkBlockCapture(context)) {
+                for (net.minecraft.entity.Entity entity : context.getPerBlockEntitySpawnSuppplier().get().values()) {
+                    // We can ignore the type check because we're already checking the instance class of the entity.
+                    if (clazz.isInstance(entity) && entity.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply((T) entity))) {
                         list.add((T) entity);
                     }
                 }
@@ -1615,7 +1728,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "The entity cannot be null!");
-        if (!PhaseTracker.validateEntitySpawn(this, entity)) {
+        if (PhaseTracker.isEntitySpawnInvalid(entity)) {
             return true;
         }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
@@ -1692,7 +1805,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
-        return new SpongeBlockSnapshot(this.builder, (SpongeBlockChangeFlag) updateFlag);
+        this.builder.flag(updateFlag);
+        return new SpongeBlockSnapshot(this.builder);
     }
 
     /**
@@ -1716,7 +1830,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming,
             boolean isSmoking) {
-        Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
+        final Explosion explosion = new Explosion((WorldServer) (Object) this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 
         // Sponge Start - Cause tracking
         try (final ExplosionContext context = GeneralPhase.State.EXPLOSION.createPhaseContext()
@@ -1729,11 +1843,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             // Sponge Start - More cause tracking
             // Set up the pre event
-            final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.world.explosion.Explosion) explosion, this);
-            if (SpongeImpl.postEvent(event)) {
-                this.processingExplosion = false;
-                return explosion;
+            if (ShouldFire.EXPLOSION_EVENT_PRE) {
+                final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                    (org.spongepowered.api.world.explosion.Explosion) explosion, this);
+                if (SpongeImpl.postEvent(event)) {
+                    this.processingExplosion = false;
+                    return explosion;
+                }
             }
             // Sponge End
 

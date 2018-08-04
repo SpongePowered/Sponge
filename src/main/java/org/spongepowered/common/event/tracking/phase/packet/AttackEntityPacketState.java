@@ -53,11 +53,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 final class AttackEntityPacketState extends BasicPacketState implements IEntitySpecificItemDropsState<BasicPacketContext> {
+
+    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
+        ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
+        frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsed().createSnapshot());
+    });
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> getFrameModifier() {
+        return this.ATTACK_MODIFIER;
+    }
 
     @Override
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
@@ -105,7 +116,7 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
             });
         context.getCapturedBlockSupplier()
             .acceptAndClearIfNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
-        context.getPerEntityItemDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
             for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                 final UUID key = entry.getKey();
                 final Optional<Entity> affectedEntity = spongeWorld.getEntity(key);
@@ -138,7 +149,7 @@ final class AttackEntityPacketState extends BasicPacketState implements IEntityS
                 }
             }
         });
-        context.getPerEntityItemEntityDropSupplier().acceptIfNotEmpty(map -> {
+        context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

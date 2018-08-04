@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
@@ -46,7 +45,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapt
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
@@ -64,22 +63,22 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(InputSlotLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
+    private SlotProvider generateSlotProvider() {
         InputSlotLensImpl lens = new InputSlotLensImpl(0, ((Class) TileEntityBeacon.class), itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
-        return new SlotCollection.Builder()
+        return new SlotLensCollection.Builder()
                 .add(InputSlotAdapter.class, i -> lens)
                 .build();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private InputSlotLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
-        return ((InputSlotLens) slots.getSlot(0));
+    private InputSlotLens generateRootLens(SlotProvider slots) {
+        return ((InputSlotLens) slots.getSlotLens(0));
     }
 
     @Override

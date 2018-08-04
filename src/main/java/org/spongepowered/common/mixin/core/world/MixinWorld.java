@@ -288,6 +288,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null; // Shadowed
     }
     @Shadow public abstract int getHeight(int x, int z);
+    @Shadow public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
+        return false; // shadowed
+    }
+    @Shadow protected abstract void playEvent(int i, BlockPos pos, int stateId);
 
     // @formatter:on
 
@@ -1135,6 +1139,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // These are overriden in MixinWorldServer where they should be.
 
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playEvent(ILnet/minecraft/util/math/BlockPos;I)V"), cancellable = true)
+    public void onDestroyBlock(BlockPos pos, boolean dropBlock, CallbackInfoReturnable<Boolean> cir) {
+        
+    }
+
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         entityIn.onUpdate();
@@ -1446,8 +1455,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateEntities() {
-        //this.profiler.startSection("entities"); // Sponge - Don't use the profiler
-        //this.profiler.startSection("global"); // Sponge - Don't use the profiler
+        this.profiler.startSection("entities");
+        this.profiler.startSection("global");
         this.startEntityGlobalTimings(); // Sponge
 
 
@@ -1477,7 +1486,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
-        // this.profiler.endStartSection("remove"); // Sponge - Don't use the profiler
+        this.profiler.endStartSection("remove");
         this.loadedEntityList.removeAll(this.unloadedEntityList);
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
@@ -1500,7 +1509,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.unloadedEntityList.clear();
         this.stopEntityRemovalTiming(); // Sponge
         this.tickPlayers();
-        // this.profiler.endStartSection("regular"); // Sponge - Don't use the profiler
+        this.profiler.endStartSection("regular");
         this.entityActivationCheck();
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
@@ -1515,12 +1524,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity2.dismountRidingEntity();
             }
 
-            // this.profiler.startSection("tick"); // Sponge - Don't use the profiler
+            this.profiler.startSection("tick");
             this.startEntityTickTiming(); // Sponge
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
                 try {
+                    SpongeImplHooks.onEntityTickStart(entity2);
                     this.updateEntity(entity2);
+                    SpongeImplHooks.onEntityTickEnd(entity2);
                 } catch (Throwable throwable1) {
                     this.stopTimingTickEntityCrash(entity2); // Sponge
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
@@ -1531,8 +1542,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityTickSectionBeforeRemove(); // Sponge
-            // this.profiler.endSection(); // Sponge - Don't use the profiler
-            // this.profiler.startSection("remove"); // Sponge - Don't use the profiler
+            this.profiler.endSection();
+            this.profiler.startSection("remove");
             this.startEntityRemovalTick(); // Sponge
 
             if (entity2.isDead) {
@@ -1551,7 +1562,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityRemovalTiming(); // Sponge
-            // this.profiler.endSection(); // Sponge - Don't use the profiler
+            this.profiler.endSection();
         }
 
         // this.profiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
@@ -1568,9 +1579,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
-                        //this.profiler.startSection(tileentity.getClass().getSimpleName());
+                        this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
+                        SpongeImplHooks.onTETickStart(tileentity);
                         ((ITickable) tileentity).update();
                         //this.profiler.endSection();
+                        SpongeImplHooks.onTETickEnd(tileentity);
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
@@ -1624,7 +1637,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
-        // this.profiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
+         this.profiler.endStartSection("pendingBlockEntities");
 
         if (!this.addedTileEntityList.isEmpty()) {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
@@ -1648,8 +1661,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.endPendingTileEntities(); // Sponge
-        // this.profiler.endSection(); // Sponge - Don't use the profiler
-        // this.profiler.endSection(); // Sponge - Don't use the profiler
+        this.profiler.endSection();
+        this.profiler.endSection();
     }
 
     /**

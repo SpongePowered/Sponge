@@ -29,7 +29,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -38,13 +37,25 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
+
+    final BiConsumer<CauseStackManager.StackFrame, BasicEntityContext> DEATH_STATE_MODIFIER = super.getFrameModifier()
+        .andThen((frame, ctx) -> {
+            final Entity dyingEntity =
+                ctx.getSource(Entity.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", ctx));
+            final DamageSource damageSource = ctx.getDamageSource();
+            frame.pushCause(dyingEntity);
+            if (damageSource != null) {
+                frame.pushCause(damageSource);
+            }
+        });
 
     @Override
     public boolean tracksEntityDeaths() {
@@ -58,53 +69,62 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
     }
 
     @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicEntityContext> getFrameModifier() {
+        return this.DEATH_STATE_MODIFIER;
+    }
+
+    @Override
     public void unwind(BasicEntityContext context) {
         final Entity dyingEntity =
             context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
-        final DamageSource damageSource = context.getDamageSource();
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            if (damageSource != null) {
-                frame.pushCause(damageSource);
+
+        final boolean isPlayer = dyingEntity instanceof EntityPlayer;
+        final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
+        context.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> this.standardSpawnCapturedEntities(context, entities));
+
+        // Forge always fires a living drop event even if nothing was captured
+        // This allows mods such as Draconic Evolution to add items to the drop list
+        if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            final ArrayList<Entity> entities = new ArrayList<>();
+            SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+            return;
+        }
+        context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
+            final ArrayList<Entity> entities = new ArrayList<>();
+            for (EntityItem item : items) {
+                entities.add(EntityUtil.fromNative(item));
             }
-            frame.pushCause(dyingEntity);
-            final boolean isPlayer = dyingEntity instanceof EntityPlayer;
-            final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
-            context.getCapturedEntitySupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    // Separate experience orbs from other entity drops
-                    final List<Entity> experience = entities.stream()
-                        .filter(entity -> entity instanceof ExperienceOrb)
-                        .collect(Collectors.toList());
-                    if (!experience.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                        SpongeCommonEventFactory.callSpawnEntity(experience, context);
 
-                    }
-
-                    // Now process other entities, this is separate from item drops specifically
-                    final List<Entity> other = entities.stream()
-                        .filter(entity -> !(entity instanceof ExperienceOrb))
-                        .collect(Collectors.toList());
-                    if (!other.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeRegistryModule.ENTITY_DEATH);
-                        SpongeCommonEventFactory.callSpawnEntity(experience, context);
-                    }
-                });
-
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            // Forge always fires a living drop event even if nothing was captured
-            // This allows mods such as Draconic Evolution to add items to the drop list
-            if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-                return;
+            if (isPlayer) {
+                // Forge and Vanilla always clear items on player death BEFORE drops occur
+                // This will also provide the highest compatibility with mods such as Tinkers Construct
+                entityPlayer.inventory.clear();
             }
-            context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                for (EntityItem item : items) {
-                    entities.add(EntityUtil.fromNative(item));
-                }
+            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+
+            SpongeCommonEventFactory.callDropItemDestruct(entities, context);
+
+            // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
+            // This avoids many issues with mods such as Tinkers Construct's soulbound items.
+        });
+        // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
+        processPerItemDrop(context, dyingEntity, isPlayer, entityPlayer);
+    }
+
+    static void processPerItemDrop(EntityContext<?> context, Entity dyingEntity, boolean isPlayer, EntityPlayer entityPlayer) {
+        context.getPerEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
+            final List<ItemDropData> items = new ArrayList<>();
+            items.addAll(itemStacks);
+
+            if (!items.isEmpty()) {
+                final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
+                final List<Entity> itemEntities = items.stream()
+                    .map(data -> data.create((WorldServer) minecraftEntity.world))
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
 
                 if (isPlayer) {
                     // Forge and Vanilla always clear items on player death BEFORE drops occur
@@ -112,38 +132,14 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                     entityPlayer.inventory.clear();
                 }
 
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-
+                SpongeCommonEventFactory.callDropItemDestruct(itemEntities, context);
 
                 // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
                 // This avoids many issues with mods such as Tinkers Construct's soulbound items.
-            });
-            // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
-            context.getPerEntityItemDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), itemStacks -> {
-                final List<ItemDropData> items = new ArrayList<>();
-                items.addAll(itemStacks);
+            }
 
-                if (!items.isEmpty()) {
-                    final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
-                    final List<Entity> itemEntities = items.stream()
-                        .map(data -> data.create((WorldServer) minecraftEntity.world))
-                        .map(EntityUtil::fromNative)
-                        .collect(Collectors.toList());
-
-                    if (isPlayer) {
-                        // Forge and Vanilla always clear items on player death BEFORE drops occur
-                        // This will also provide the highest compatibility with mods such as Tinkers Construct
-                        entityPlayer.inventory.clear();
-                    }
-
-                    SpongeCommonEventFactory.callDropItemDestruct(itemEntities, context);
-
-                    // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
-                    // This avoids many issues with mods such as Tinkers Construct's soulbound items.
-                }
-
-            });
-        }
+        });
     }
+
 
 }

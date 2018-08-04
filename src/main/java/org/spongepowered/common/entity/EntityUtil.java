@@ -408,8 +408,9 @@ public final class EntityUtil {
                 // Only place entity in portal if one of the following are true :
                 // 1. The teleporter is custom. (not vanilla)
                 // 2. The last known portal vec is known. (Usually set after block collision)
+                // 3. The entity is traveling to end from a non-end world.
                 // Note: We must always use placeInPortal to support mods.
-                if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null) {
+                if (!teleporter.isVanilla() || entityIn.getLastPortalVec() != null || (!(fromWorld.provider instanceof WorldProviderEnd) && toWorld.provider instanceof WorldProviderEnd)) {
                     // In Forge, the entity dimension is already set by this point.
                     // To maintain compatibility with Forge mods, we temporarily
                     // set the entity's dimension to the current target dimension
@@ -1063,7 +1064,7 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (((IPhaseState) currentState).performOrCaptureItemDrop(phaseContext, entity, entityitem)) {
+            if (((IPhaseState) currentState).spawnItemOrCapture(phaseContext, entity, entityitem)) {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
@@ -1130,7 +1131,7 @@ public final class EntityUtil {
                 entityitem.motionZ += Math.sin(f3) * f2;
             }
             // FIFTH - Capture the entity maybe?
-            if (currentState.performOrCaptureItemDrop(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
+            if (currentState.spawnItemOrCapture(phaseContext, EntityUtil.toNative(mixinPlayer), entityitem)) {
                 return entityitem;
             }
             // TODO - Investigate whether player drops are adding to the stat list in captures.

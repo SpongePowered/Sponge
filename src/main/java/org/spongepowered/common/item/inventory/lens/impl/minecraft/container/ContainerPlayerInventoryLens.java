@@ -24,35 +24,45 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ContainerPlayerInventoryLens extends ContainerLens {
 
     private static final int CRAFTING_OUTPUT = 1;
     private static final int CRAFTING_GRID = 2;
 
-    public ContainerPlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(adapter, slots);
+    public ContainerPlayerInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
+        super(adapter, slots, lenses(adapter, slots));
         this.init(slots);
     }
 
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    private static List<Lens> lenses(InventoryAdapter adapter, SlotProvider slots) {
+
         int base = CRAFTING_OUTPUT; // 1
         final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
-        final PlayerInventoryLens player = new PlayerInventoryLens(base, this.size - base, slots);
+        final PlayerInventoryLens player = new PlayerInventoryLens(base, adapter.getFabric().getSize() - base, slots);
 
-        this.viewedInventories = new ArrayList<>(Arrays.asList(crafting, player));
+        return Arrays.asList(crafting, player);
+    }
 
+    @Override
+    protected void init(SlotProvider slots) {
         super.init(slots);
+
+        this.addChild(slots.getSlotLens(base + 0), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
+        this.addChild(slots.getSlotLens(base + 1), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+        this.addChild(slots.getSlotLens(base + 2), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+        this.addChild(slots.getSlotLens(base + 3), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
+        this.addChild(slots.getSlotLens(base + 4 + 4 * 9), new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
     }
 }

@@ -62,7 +62,7 @@ public final class CooldownTrackerTest {
                     }
                     final Player player = (Player) src;
                     final CooldownTracker cooldownTracker = player.getCooldownTracker();
-                    final ItemType itemType = player.getItemInHand(HandTypes.MAIN_HAND).orElse(ItemStack.empty()).getType();
+                    final ItemType itemType = player.getItemInHand(HandTypes.MAIN_HAND).getType();
                     if (!cooldownTracker.hasCooldown(itemType)) {
                         player.sendMessage(Text.of(TextColors.GRAY, "The item type in your hand is not on cooldown!"));
                     } else {
@@ -83,8 +83,7 @@ public final class CooldownTrackerTest {
                     }
                     final Player player = (Player) src;
                     final int cooldown = args.<Integer>getOne("cooldown").orElse(10);
-                    player.getCooldownTracker().setCooldown(player.getItemInHand(HandTypes.MAIN_HAND)
-                            .orElse(ItemStack.empty()).getType(), cooldown);
+                    player.getCooldownTracker().setCooldown(player.getItemInHand(HandTypes.MAIN_HAND).getType(), cooldown);
                     player.sendMessage(Text.of(TextColors.GRAY, "You have given the item type in your hand a cooldown of ",
                             TextColors.GOLD, cooldown, TextColors.GRAY, " tick(s)."));
                     return CommandResult.success();

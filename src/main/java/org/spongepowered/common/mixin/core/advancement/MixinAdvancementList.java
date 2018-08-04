@@ -30,22 +30,24 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.event.tracking.phase.plugin.ListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancementList;
+import org.spongepowered.common.registry.type.advancement.AdvancementMap;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
-import org.spongepowered.common.util.ServerUtils;
+import org.spongepowered.common.registry.type.advancement.RootAdvancementSet;
 
 import java.util.Map;
 import java.util.Set;
@@ -57,8 +59,8 @@ public class MixinAdvancementList implements IMixinAdvancementList {
 
     @Shadow @Final private static Logger LOGGER;
 
-    @Shadow @Final private Map<ResourceLocation, Advancement> advancements;
-    @Shadow @Final private Set<Advancement> roots;
+    @Shadow @Final @Mutable private Map<ResourceLocation, Advancement> advancements = new AdvancementMap();
+    @Shadow @Final @Mutable private Set<Advancement> roots = new RootAdvancementSet();
     @Shadow @Final private Set<Advancement> nonRoots;
     @Shadow @Nullable private AdvancementList.Listener listener;
 
@@ -66,17 +68,18 @@ public class MixinAdvancementList implements IMixinAdvancementList {
             target = "Ljava/util/Map;size()I", remap = false))
     private void onLoadAdvancements(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (!ServerUtils.isCallingFromMainThread()) {
+        if (!SpongeImplHooks.isMainThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
             return;
         }
-        final SpongeGameRegistryRegisterEvent<org.spongepowered.api.advancement.Advancement>
-            event =
-            new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
-                org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance());
         try (ListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
-            .event(event)
-            .source(Sponge.getGame())) {
+                .source(Sponge.getGame())) {
             context.buildAndSwitch();
+
+            SpongeImpl.getCauseStackManager().pushCause(SpongeImpl.getRegistry());
+            final SpongeGameRegistryRegisterEvent<org.spongepowered.api.advancement.Advancement> event =
+                    new SpongeGameRegistryRegisterEvent<>(SpongeImpl.getCauseStackManager().getCurrentCause(),
+                            org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance());
+            context.event(event);
             SpongeImpl.postEvent(event);
         }
     }
@@ -84,17 +87,18 @@ public class MixinAdvancementList implements IMixinAdvancementList {
     @Inject(method = "loadAdvancements", at = @At(value = "RETURN"))
     private void onLoadAdvancementForTrees(Map<ResourceLocation, Advancement.Builder> advancementsIn, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (!ServerUtils.isCallingFromMainThread()) {
+        if (!SpongeImplHooks.isMainThread()) {
             return;
         }
-        final SpongeGameRegistryRegisterEvent<AdvancementTree>
-            event =
-            new SpongeGameRegistryRegisterEvent<>(Cause.of(EventContext.empty(), SpongeImpl.getRegistry()),
-                AdvancementTree.class, AdvancementTreeRegistryModule.getInstance());
         try (ListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext()
-            .event(event)
-            .source(Sponge.getGame())) {
+                .source(Sponge.getGame())) {
             context.buildAndSwitch();
+
+            SpongeImpl.getCauseStackManager().pushCause(SpongeImpl.getRegistry());
+            final SpongeGameRegistryRegisterEvent<AdvancementTree> event =
+                    new SpongeGameRegistryRegisterEvent<>(SpongeImpl.getCauseStackManager().getCurrentCause(),
+                            AdvancementTree.class, AdvancementTreeRegistryModule.getInstance());
+            context.event(event);
             SpongeImpl.postEvent(event);
         }
         LOGGER.info("Loaded " + this.roots.size() + " advancement trees");

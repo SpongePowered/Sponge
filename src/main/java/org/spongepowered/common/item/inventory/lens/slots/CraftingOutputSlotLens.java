@@ -24,6 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.slots;
 
-public interface CraftingOutputSlotLens<TInventory, TStack> extends OutputSlotLens<TInventory, TStack> {
+public interface CraftingOutputSlotLens extends OutputSlotLens {
 
 }

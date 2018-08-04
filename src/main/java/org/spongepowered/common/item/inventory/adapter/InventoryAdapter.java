@@ -28,10 +28,6 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
-import org.spongepowered.common.util.observer.Observer;
-
-import javax.annotation.Nullable;
 
 /**
  * If {@link Inventory} represents the "idea" of an inventory, then an
@@ -50,20 +46,13 @@ import javax.annotation.Nullable;
  * adapters!</i> From this basic premise we can see that nothing should ever
  * directly implement the {@link Inventory} interface, "real" inventories should
  * always implement this interface instead.</p>
- * 
- * @param <TInventory>
  */
-public interface InventoryAdapter<TInventory, TStack> extends Inventory, Observer<InventoryEventArgs> {
+public interface InventoryAdapter extends Inventory {
     
-    SlotProvider<TInventory, TStack> getSlotProvider();
+    SlotProvider getSlotProvider();
 
-    Lens<TInventory, TStack> getRootLens();
+    Lens getRootLens();
 
-    Fabric<TInventory> getFabric();
-
-    Inventory getChild(int index);
-
-    @Nullable
-    Inventory getChild(Lens<TInventory, TStack> lens);
+    Fabric getFabric();
 
 }

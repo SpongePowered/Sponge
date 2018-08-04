@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.slots;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -35,7 +34,7 @@ import org.spongepowered.common.item.inventory.lens.slots.FilteringSlotLens;
 
 import java.util.function.Predicate;
 
-public class FilteringSlotLensImpl extends SlotLensImpl<IInventory> implements FilteringSlotLens<IInventory, net.minecraft.item.ItemStack> {
+public class FilteringSlotLensImpl extends SlotLensImpl implements FilteringSlotLens {
 
     private final Predicate<ItemStack> stackFilter;
     private final Predicate<ItemType> typeFilter;
@@ -52,7 +51,7 @@ public class FilteringSlotLensImpl extends SlotLensImpl<IInventory> implements F
     }
 
     @Override
-    public boolean setStack(Fabric<IInventory> inv, net.minecraft.item.ItemStack stack) {
+    public boolean setStack(Fabric inv, net.minecraft.item.ItemStack stack) {
         return this.getItemStackFilter().test((ItemStack) stack) && super.setStack(inv, stack);
     }
 
@@ -67,7 +66,7 @@ public class FilteringSlotLensImpl extends SlotLensImpl<IInventory> implements F
     }
 
     @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new FilteringSlotAdapter(inv, this, parent);
     }
 

@@ -201,6 +201,10 @@ public class TileEntityActivation {
             return true;
         }
 
+        if (!activeChunk.isActive()) {
+            return false;
+        }
+
         long currentTick = SpongeImpl.getServer().getTickCounter();
         IModData_Activation spongeTileEntity = (IModData_Activation) tileEntity;
         boolean isActive = activeChunk.isPersistedChunk() || spongeTileEntity.getActivatedTick() >= currentTick || spongeTileEntity.getDefaultActivationState();
@@ -222,9 +226,6 @@ public class TileEntityActivation {
     }
 
     public static void addTileEntityToConfig(World world, SpongeTileEntityType type) {
-        checkNotNull(world, "world");
-        checkNotNull(type, "type");
-
         SpongeConfig<? extends GeneralConfigBase> config = ((IMixinWorldServer) world).getActiveConfig();
         if (config == null || type == null || !config.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;

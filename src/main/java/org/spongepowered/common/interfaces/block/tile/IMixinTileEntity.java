@@ -35,12 +35,11 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-
-import java.util.Optional;
+import org.spongepowered.common.interfaces.IMixinTrackable;
 
 import javax.annotation.Nullable;
 
-public interface IMixinTileEntity {
+public interface IMixinTileEntity extends IMixinTrackable {
 
     /**
      * Gets a {@link NBTTagCompound} that can be used to store custom data for
@@ -104,13 +103,23 @@ public interface IMixinTileEntity {
 
     void setSpongeOwner(@Nullable User owner);
 
-    Optional<User> getSpongeOwner();
+    void setSpongeNotifier(@Nullable User notifier);
+
+    @Nullable User getSpongeOwner();
+
+    @Nullable User getSpongeNotifier();
 
     boolean hasSetOwner();
+
+    boolean hasSetNotifier();
 
     @Nullable IMixinChunk getActiveChunk();
 
     void setActiveChunk(IMixinChunk chunk);
 
     boolean shouldTick();
+
+    boolean isTicking();
+
+    void setIsTicking(boolean ticking);
 }

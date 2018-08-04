@@ -42,6 +42,7 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -67,18 +68,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinInteractable;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
+import org.spongepowered.common.item.inventory.adapter.impl.SlotCollection;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.MinecraftFabric;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -90,6 +92,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -106,12 +109,15 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private boolean spectatorChest;
     private boolean dirty = true;
     private boolean dropCancelled = false;
+
     @Nullable private ItemStackSnapshot itemStackSnapshot;
     @Nullable private Slot lastSlotUsed = null;
     @Nullable private CraftItemEvent.Craft lastCraft = null;
     private boolean firePreview;
     @Nullable private Location<org.spongepowered.api.world.World> lastOpenLocation;
     private boolean inUse = false;
+
+    private boolean captureSuccess = false;
 
     @Shadow
     public abstract NonNullList<ItemStack> getInventory();
@@ -132,9 +138,9 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
     private List<SlotTransaction> capturedCraftShiftTransactions = new ArrayList<>();
     private List<SlotTransaction> capturedCraftPreviewTransactions = new ArrayList<>();
-    private Fabric<IInventory> fabric;
-    private SlotProvider<IInventory, ItemStack> slots;
-    private Lens<IInventory, ItemStack> lens;
+    private Fabric fabric;
+    private SlotProvider slots;
+    private Lens lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
     private InventoryArchetype archetype;
@@ -169,8 +175,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
         // If we know the lens, we can cache the adapters now
         if (this.lens != null) {
-            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollectionIterator<>(this, this.fabric, this.lens, this.slots)) {
-                this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
+            for (org.spongepowered.api.item.inventory.Slot slot : new SlotCollection(this, this.fabric, this.lens, this.slots).slots()) {
+                this.adapters.put(((SlotAdapter) slot).getOrdinal(), (SlotAdapter) slot);
             }
         }
 
@@ -216,6 +222,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Overwrite
     public void detectAndSendChanges() {
         this.detectAndSendChanges(false);
+        this.captureSuccess = true; // Detect mod overrides
+    }
+
+    @Override
+    public boolean capturePossible() {
+        return this.captureSuccess;
     }
 
     @Override
@@ -239,10 +251,19 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     org.spongepowered.api.item.inventory.Slot adapter = null;
                     try {
                         adapter = this.getContainerSlot(i);
+                        SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
                         if (this.shiftCraft) {
-                            this.capturedCraftShiftTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                            this.capturedCraftShiftTransactions.add(newTransaction);
                         } else {
-                            this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                            if (!this.capturedCraftPreviewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
+                                SlotTransaction previewTransaction = this.capturedCraftPreviewTransactions.get(0);
+                                if (previewTransaction.equals(newTransaction)) {
+                                    newTransaction = null;
+                                }
+                            }
+                            if (newTransaction != null) {
+                                this.capturedSlotTransactions.add(newTransaction);
+                            }
                         }
                     } catch (IndexOutOfBoundsException e) {
                         SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
@@ -509,17 +530,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         return this.shiftCraft;
     }
 
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+    public SlotProvider inventory$getSlotProvider() {
         this.spongeInit();
         return this.slots;
     }
 
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+    public Lens inventory$getRootLens() {
         this.spongeInit();
         return this.lens;
     }
 
-    public Fabric<IInventory> inventory$getFabric() {
+    public Fabric inventory$getFabric() {
         this.spongeInit();
         return this.fabric;
     }
@@ -595,4 +616,76 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         }
         return false;
     }
+
+    @Override
+    public List<Inventory> getViewed() {
+        List<Inventory> list = new ArrayList<>();
+        for (IInventory inv : this.allInventories.keySet()) {
+            Inventory inventory = InventoryUtil.toInventory(inv, null);
+            list.add(inventory);
+        }
+        return list;
+    }
+
+    @Override
+    public boolean setCursor(org.spongepowered.api.item.inventory.ItemStack item) {
+        if (!this.isOpen()) {
+            return false;
+        }
+        ItemStack nativeStack = ItemStackUtil.toNative(item);
+        this.listeners().stream().findFirst()
+                .ifPresent(p -> p.inventory.setItemStack(nativeStack));
+        return true;
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.item.inventory.ItemStack> getCursor() {
+        return this.listeners().stream().findFirst()
+                .map(p -> p.inventory.getItemStack())
+                .map(ItemStackUtil::fromNative);
+    }
+
+
+    @Override
+    public Player getViewer() {
+        return this.listeners().stream().filter(Player.class::isInstance).map(Player.class::cast).findFirst().orElseThrow(() -> new IllegalStateException("Container without viewer"));
+    }
+
+    @Override
+    public boolean isOpen() {
+        org.spongepowered.api.item.inventory.Container thisContainer = this;
+        return this.getViewer().getOpenInventory().map(c -> c == thisContainer).orElse(false);
+    }
+
+    @Override
+    public List<EntityPlayerMP> listeners() {
+        return this.listeners.stream()
+                .filter(EntityPlayerMP.class::isInstance)
+                .map(EntityPlayerMP.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    @Nullable private Object viewed;
+
+    @Override
+    public void setViewed(Object viewed) {
+        this.viewed = viewed;
+    }
+
+    @Inject(method = "onContainerClosed", at = @At(value = "HEAD"))
+    private void onOnContainerClosed(EntityPlayer player, CallbackInfo ci) {
+        this.unTrackInteractable(this.viewed);
+        this.viewed = null;
+    }
+
+    private void unTrackInteractable(@Nullable Object inventory) {
+        if (inventory instanceof Carrier) {
+            inventory = ((Carrier) inventory).getInventory();
+        }
+        if (inventory instanceof Inventory) {
+            ((Inventory) inventory).asViewable().ifPresent(i -> ((IMixinInteractable) i).removeContainer(((Container)(Object) this)));
+        }
+        // TODO else unknown inventory - try to provide wrapper Interactable
+    }
+
 }

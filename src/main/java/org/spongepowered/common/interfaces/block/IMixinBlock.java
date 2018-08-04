@@ -35,6 +35,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.IMixinTrackable;
 import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 
 import java.util.List;
@@ -55,7 +56,7 @@ import java.util.Optional;
  * simple cast. This is particularly useful for {@link BlockState}s as
  * they already know the type they need to focus on.</p>
  */
-public interface IMixinBlock {
+public interface IMixinBlock extends IMixinTrackable {
 
     // Support methods for MixinStateImplementation
     /**
@@ -139,4 +140,6 @@ public interface IMixinBlock {
 
     boolean requiresBlockCapture();
     ImmutableMap<Class<? extends Property<?,?>>,Property<?,?>> getProperties(IBlockState mixinStateImplementation);
+
+    void initializeTrackerState();
 }

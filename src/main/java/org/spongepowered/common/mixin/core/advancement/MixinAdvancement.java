@@ -48,8 +48,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ICriterion;
-import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeScoreCriterion;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -60,7 +60,6 @@ import org.spongepowered.common.registry.type.advancement.AdvancementRegistryMod
 import org.spongepowered.common.registry.type.advancement.AdvancementTreeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.ServerUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,7 +76,6 @@ import javax.annotation.Nullable;
 public class MixinAdvancement implements org.spongepowered.api.advancement.Advancement, IMixinAdvancement {
 
     @Shadow @Final @Mutable @Nullable private Advancement parent;
-    @Shadow @Final private ResourceLocation id;
     @Shadow @Final @Mutable private String[][] requirements;
     @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
@@ -94,15 +92,19 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
     @Nullable private Advancement tempParent;
 
     private void checkServer() {
-        checkState(ServerUtils.isCallingFromMainThread());
+        checkState(this.isMainThread());
+    }
+
+    private boolean isMainThread() {
+        return SpongeImplHooks.isMainThread();
     }
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(ResourceLocation id, @Nullable Advancement parentIn, @Nullable DisplayInfo displayIn,
             AdvancementRewards rewardsIn, Map<String, Criterion> criteriaIn, String[][] requirementsIn, CallbackInfo ci) {
-        // Don't do anything on the client
-        if (!ServerUtils.isCallingFromMainThread()) {
+        // Don't do anything on the client, unless we're performing registry initialization
+        if (!this.isMainThread()) {
             return;
         }
         if (displayIn != null) {
@@ -114,12 +116,10 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (displayIn != null) {
             this.name = SpongeTexts.toPlain(displayIn.getTitle());
         }
-        if (!PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            AdvancementRegistryModule.getInstance().registerAdditionalCatalog(this);
-        } else {
+        if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
             // Wait to set the parent until the advancement is registered
             this.tempParent = parentIn;
-            this.parent = SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT;
+            this.parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT;
         }
         // This is only possible when REGISTER_ADVANCEMENTS_ON_CONSTRUCT is true
         if (parentIn == null) {
@@ -248,6 +248,8 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             return;
         }
         this.parent = this.tempParent;
+        // The child didn't get added yet to it's actual parent
+        this.parent.addChild((Advancement) (Object) this);
         this.tempParent = null;
     }
 
@@ -257,7 +259,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
         if (this.tempParent != null) {
             return Optional.of((org.spongepowered.api.advancement.Advancement) this.tempParent);
         }
-        if (this.parent == SpongeAdvancementBuilder.DUMMY_ROOT_ADVANCEMENT) {
+        if (this.parent == AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT) {
             return Optional.empty();
         }
         return Optional.ofNullable((org.spongepowered.api.advancement.Advancement) this.parent);

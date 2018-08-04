@@ -67,6 +67,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
@@ -170,6 +171,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     @Shadow protected abstract void spawnShoulderEntities();
+    @Shadow public abstract boolean isCreative();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -790,7 +792,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (((IMixinInventoryPlayer) this.inventory).capturesTransactions()) {
             if (slotIn == EntityEquipmentSlot.MAINHAND) {
                 ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
-                Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
+                Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
                 ItemStack orig = this.inventory.offHandInventory.get(0);
@@ -806,17 +808,21 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     @Redirect(method = "setDead", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/inventory/Container;onContainerClosed(Lnet/minecraft/entity/player/EntityPlayer;)V"))
     private void onOnContainerClosed(Container container, EntityPlayer player) {
-        if (player instanceof EntityPlayerMP) {
+        // Corner case where the server is shutting down on the client, the enitty player mp is also being killed off.
+        if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable() && Sponge.getGame().getState() == GameState.SERVER_STOPPING) {
+            container.onContainerClosed(player);
+            return;
+        }
+        if (player instanceof EntityPlayerMP ) {
             final EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
+
 
             try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
-                    .openContainer(container);
-                    // intentionally missing the lastCursor to not double throw close event
-                    StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    .openContainer(container)) {
+                // intentionally missing the lastCursor to not double throw close event
                 ctx.buildAndSwitch();
-                frame.pushCause(serverPlayer);
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
                 container.onContainerClosed(player);
                 SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, serverPlayer, cursor, ItemStackSnapshot.NONE, false);
@@ -835,5 +841,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public boolean shouldRestoreInventory() {
         return this.shouldRestoreInventory;
+    }
+
+    @Override
+    public boolean isImmuneToFireForIgniteEvent() {
+        return this.isSpectator() || this.isCreative();
     }
 }
