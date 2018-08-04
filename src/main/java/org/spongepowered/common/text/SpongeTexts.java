@@ -44,10 +44,13 @@ public final class SpongeTexts {
     private SpongeTexts() {
     }
 
-    public static Text[] splitChatMessage(TextComponentTranslation component) {
+    public static Text[] splitChatMessage(ITextComponent component) {
+        if (!(component instanceof TextComponentTranslation)){
+            return new Text[] { null, null };
+        }
         Text source = null;
         Text body = null;
-        for (Object arg : component.getFormatArgs()) {
+        for (Object arg : ((TextComponentTranslation) (component)).getFormatArgs()) {
             if (source == null) {
                 if (arg instanceof ITextComponent) {
                     source = SpongeTexts.toText((ITextComponent) arg);
