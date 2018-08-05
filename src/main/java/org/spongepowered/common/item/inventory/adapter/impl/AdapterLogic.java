@@ -45,6 +45,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -300,10 +301,14 @@ public abstract class AdapterLogic{
         adapter = ((InventoryAdapter) adapter.root());
         if (adapter instanceof Container) {
             // If Root is a Container get the viewed inventory
-            Object first = adapter.getFabric().allInventories().iterator().next();
-            if (first instanceof CustomInventory) {
-                // if viewed inventory is a custom inventory get it instead
-                adapter = ((InventoryAdapter) first);
+            Iterator<?> itr = adapter.getFabric().allInventories().iterator();
+
+            if (itr.hasNext()) {
+                Object first = itr.next();
+                if (first instanceof CustomInventory) {
+                    // if viewed inventory is a custom inventory get it instead
+                    adapter = ((InventoryAdapter) first);
+                }
             }
         }
         return adapter;
