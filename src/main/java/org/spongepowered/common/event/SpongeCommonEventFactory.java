@@ -95,6 +95,7 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -131,6 +132,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -1325,7 +1327,7 @@ public class SpongeCommonEventFactory {
             return;
         }
         Inventory ordered = inv.query(OrderedInventory.class);
-        if (!(ordered instanceof OrderedInventory)) {
+        if (!(ordered instanceof OrderedInventory) && !(ordered instanceof EmptyInventory)) {
             ordered = ordered.iterator().next();
         }
         if (ordered instanceof OrderedInventory) {
@@ -1336,8 +1338,9 @@ public class SpongeCommonEventFactory {
                         ItemStackUtil.snapshotOf(slot.get().peek().orElse(org.spongepowered.api.item.inventory.ItemStack.empty())));
                 captureIn.getCapturedTransactions().add(trans);
             }
+        } else {
+            SpongeImpl.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
         }
-        // else inventory was missing the slot for some reason
     }
 
     /**
@@ -1355,8 +1358,9 @@ public class SpongeCommonEventFactory {
         if (captureIn == null || inv == null) {
             return transaction.get();
         }
+
         Inventory ordered = inv.query(OrderedInventory.class);
-        if (!(ordered instanceof OrderedInventory)) {
+        if (!(ordered instanceof OrderedInventory) && !(ordered instanceof EmptyInventory)) {
             ordered = ordered.iterator().next();
         }
         if (ordered instanceof OrderedInventory) {
@@ -1370,8 +1374,9 @@ public class SpongeCommonEventFactory {
                 }
                 return remaining;
             }
+        } else {
+            SpongeImpl.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
         }
-        // else inventory was missing the slot for some reason
         return transaction.get();
     }
 
