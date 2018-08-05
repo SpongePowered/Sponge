@@ -748,17 +748,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Optional<Container> openInventory(Inventory inventory, Text displayName) {
         if (((IMixinContainer) this.openContainer).isInUse()) {
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
-                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    cause.all().forEach(frame::pushCause);
-                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    this.closeInventory(); // Cause close event first. So cursor item is not lost.
-                    this.openInventory(inventory); // Then open the inventory
-                }
-            }).submit(SpongeImpl.getPlugin());
-            return this.getOpenInventory();
+            throw new IllegalStateException("This player is currently modifying an open container. Opening an Inventory during an InventoryEvent "
+                    + "is not supported. Instead schedule opening the inventory.");
         }
         return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer((EntityPlayerMP) (Object) this, inventory, displayName));
     }
@@ -767,16 +758,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
         if (((IMixinContainer) this.openContainer).isInUse()) {
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Sponge.getScheduler().createTaskBuilder().delayTicks(0).execute(() -> {
-                try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    cause.all().forEach(frame::pushCause);
-                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    closeInventory();
-                }
-            }).submit(SpongeImpl.getPlugin());
-            return false;
+            throw new IllegalStateException("This player is currently modifying an open container. Closing an Inventory during an InventoryEvent \n"
+                    + "is not supported. Instead schedule closing the inventory.");
         }
         // Create Close_Window to capture item drops
         try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
