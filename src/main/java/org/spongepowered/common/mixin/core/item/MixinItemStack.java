@@ -60,6 +60,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -108,7 +109,14 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
+    @Shadow private boolean isEmpty;
 
+    // We deliberate do not check isEmpty in onWrite, onRead, and onCopy
+    // Because Vanilla may set an ItemStack's size to 0, and then
+    // back to a positive number, we need to keep the raw manipulator data
+    // stored, even if the ItemStack is empty. However, we never want expose
+    // this data to plugins when the ItemStack is empty - therefore, we do perfomr
+    // isEmpty checks in API methods
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
         if (this.hasManipulators()) {
@@ -186,7 +194,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     public void setRawData(DataView container) throws InvalidDataException {
 
     }
-    
+
     @Override
     public DataHolder copy() {
         return this.itemstack$copy();
@@ -252,6 +260,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
+        if (this.isEmpty) {
+            return Lists.newArrayList();
+        }
         final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
         final Item item = this.shadow$getItem();
         // Null items should be impossible to create
@@ -337,6 +348,10 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings("rawtypes")
     @Override
     public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
+        if (this.isEmpty) {
+            return DataTransactionResult.failResult(manipulator.getValues());
+        }
+
         @Nullable DataManipulator<?, ?> existingManipulator = null;
         for (DataManipulator<?, ?> existing : this.manipulators) {
             if (manipulator.getClass().isInstance(existing)) {
@@ -371,6 +386,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass) {
+        if (this.isEmpty) {
+            return Optional.empty();
+        }
         for (DataManipulator<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
                 return Optional.of((T) existing.copy());
@@ -398,15 +416,18 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
         } else {
             if (hasTagCompound()) {
                 this.getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
-            }
-            if (this.getTagCompound().hasNoTags()) {
-                this.setTagCompound(null);
+                if (this.getTagCompound().hasNoTags()) {
+                    this.setTagCompound(null);
+                }
             }
         }
     }
 
     @Override
     public DataTransactionResult removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
+        if (this.isEmpty) {
+            return DataTransactionResult.failNoData();
+        }
         @Nullable DataManipulator<?, ?> manipulator = null;
         for (DataManipulator<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
@@ -436,6 +457,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
+        if (this.isEmpty) {
+            return DataTransactionResult.failNoData();
+        }
         for (DataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
@@ -468,12 +492,18 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public boolean supportsCustom(Key<?> key) {
+        if (this.isEmpty) {
+            return false;
+        }
         return this.manipulators.stream()
                 .anyMatch(manipulator -> manipulator.supports(key));
     }
 
     @Override
     public <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key) {
+        if (this.isEmpty) {
+            return Optional.empty();
+        }
         return this.manipulators.stream()
                 .filter(manipulator -> manipulator.supports(key))
                 .findFirst()
@@ -482,6 +512,9 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key) {
+        if (this.isEmpty) {
+            return Optional.empty();
+        }
         return this.manipulators.stream()
                 .filter(manipulator -> manipulator.supports(key))
                 .findFirst()
