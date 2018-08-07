@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.registry.type.text;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 
-public final class ChatTypeRegistryModule implements RegistryModule {
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Optional;
+
+public final class ChatTypeRegistryModule implements CatalogRegistryModule<ChatType> {
 
     @RegisterCatalog(ChatTypes.class)
     public static final ImmutableMap<String, ChatType> chatTypeMappings = ImmutableMap.of(
@@ -39,4 +47,13 @@ public final class ChatTypeRegistryModule implements RegistryModule {
             "action_bar", (ChatType) (Object) net.minecraft.util.text.ChatType.GAME_INFO
     );
 
+    @Override
+    public Optional<ChatType> getById(String id) {
+        return Optional.ofNullable(chatTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Collection<ChatType> getAll() {
+        return ImmutableList.copyOf(chatTypeMappings.values());
+    }
 }
