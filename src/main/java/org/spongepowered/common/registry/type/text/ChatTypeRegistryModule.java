@@ -28,32 +28,38 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.ChatType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-public final class ChatTypeRegistryModule implements CatalogRegistryModule<ChatType> {
+@RegisterCatalog(ChatTypes.class)
+public final class ChatTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ChatType,org.spongepowered.api.text.chat.ChatType> {
 
-    @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = ImmutableMap.of(
-            "chat", (ChatType) (Object) net.minecraft.util.text.ChatType.CHAT,
-            "system", (ChatType) (Object) net.minecraft.util.text.ChatType.SYSTEM,
-            "action_bar", (ChatType) (Object) net.minecraft.util.text.ChatType.GAME_INFO
-    );
-
-    @Override
-    public Optional<ChatType> getById(String id) {
-        return Optional.ofNullable(chatTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public ChatTypeRegistryModule() {
+        super(new String[] {"minecraft"});
     }
 
+    @AdditionalRegistration
+    public void customRegistration() {
+        for (ChatType chatType: ChatType.values()) {
+            if (!this.catalogTypeMap.containsKey(enumAs(chatType).getId())) {
+                this.catalogTypeMap.put(enumAs(chatType).getId(), enumAs(chatType));
+            }
+        }
+    }
+
+
     @Override
-    public Collection<ChatType> getAll() {
-        return ImmutableList.copyOf(chatTypeMappings.values());
+    protected ChatType[] getValues() {
+        return ChatType.values();
     }
 }

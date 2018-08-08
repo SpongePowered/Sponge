@@ -26,9 +26,11 @@ package org.spongepowered.common.registry.type.text;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
+import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibilities;
 import org.spongepowered.api.text.chat.ChatVisibility;
@@ -50,7 +52,7 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
         EntityPlayer.EnumChatVisibility SYSTEM = EntityPlayer.EnumChatVisibility.SYSTEM;
         EntityPlayer.EnumChatVisibility HIDDEN = EntityPlayer.EnumChatVisibility.HIDDEN;
 
-        ((IMixinEnumChatVisibility) (Object) FULL).setChatTypes(ImmutableSet.copyOf(ChatTypeRegistryModule.chatTypeMappings.values()));
+        ((IMixinEnumChatVisibility) (Object) FULL).setChatTypes(ImmutableSet.copyOf(Sponge.getRegistry().getAllOf(ChatType.class)));
         ((IMixinEnumChatVisibility) (Object) SYSTEM).setChatTypes(ImmutableSet.of(ChatTypes.SYSTEM, ChatTypes.ACTION_BAR));
         ((IMixinEnumChatVisibility) (Object) HIDDEN).setChatTypes(ImmutableSet.of());
     }
