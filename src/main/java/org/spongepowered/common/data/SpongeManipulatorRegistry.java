@@ -326,8 +326,14 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     @Nullable
     public ValueProcessor<?, ?> getDelegate(Key<?> key) {
         if (this.tempRegistry != null) {
+            List<ValueProcessor<?, ?>> list = this.tempRegistry.valueProcessorMap.get(key);
+
+            if (list == null) {
+                return null;
+            }
+
             // During soft registrations
-            return new ValueProcessorDelegate(key, ImmutableList.copyOf(this.tempRegistry.valueProcessorMap.get(key)));
+            return new ValueProcessorDelegate(key, ImmutableList.copyOf(list));
         }
         return this.valueDelegates.get(key);
     }
