@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.DimensionType;
@@ -37,6 +38,7 @@ import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,7 +56,7 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
         WorldManager.registerVanillaTypesAndDimensions();
         for (net.minecraft.world.DimensionType dimensionType : WorldManager.getDimensionTypes()) {
             final DimensionType apiDimensionType = (DimensionType) (Object) dimensionType;
-            this.dimensionTypeMappings.put(apiDimensionType.getId(), apiDimensionType);
+            this.dimensionTypeMappings.put(apiDimensionType.getKey().toString(), apiDimensionType);
         }
     }
 
@@ -65,7 +67,7 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
 
     @Override
     public void registerAdditionalCatalog(DimensionType dimType) {
-        this.dimensionTypeMappings.put(dimType.getId().toLowerCase(), dimType);
+        this.dimensionTypeMappings.put(dimType.getKey().toString().toLowerCase(Locale.ENGLISH), dimType);
         WorldManager.registerDimensionType((net.minecraft.world.DimensionType) (Object) dimType);
     }
 
@@ -73,7 +75,12 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
     public Optional<DimensionType> getById(String id) {
         checkNotNull(id);
         id = WorldManager.fixDimensionTypeId(id);
-        return Optional.ofNullable(this.dimensionTypeMappings.get(id.toLowerCase()));
+        return Optional.ofNullable(this.dimensionTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Optional<DimensionType> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override
@@ -87,11 +94,11 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
         RegistryHelper.mapFields(DimensionTypes.class, this.dimensionTypeMappings);
     }
 
-    private DimensionTypeRegistryModule() {
+    DimensionTypeRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final DimensionTypeRegistryModule instance = new DimensionTypeRegistryModule();
+        static final DimensionTypeRegistryModule instance = new DimensionTypeRegistryModule();
     }
 }

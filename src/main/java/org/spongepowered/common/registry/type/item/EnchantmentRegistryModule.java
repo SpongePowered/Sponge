@@ -106,7 +106,7 @@ public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogR
     @Override
     public void registerAdditionalCatalog(EnchantmentType extraCatalog) {
         checkNotNull(extraCatalog, "EnchantmentType cannot be null!");
-        this.enchantmentMappings.put(extraCatalog.getId(), extraCatalog);
+        this.enchantmentMappings.put(extraCatalog.getKey().toString(), extraCatalog);
     }
 
     public void registerFromGameData(String s, EnchantmentType obj) {

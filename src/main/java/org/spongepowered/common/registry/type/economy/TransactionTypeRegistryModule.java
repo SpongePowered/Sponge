@@ -48,8 +48,8 @@ public class TransactionTypeRegistryModule
 
     @Override
     public void registerAdditionalCatalog(TransactionType extraCatalog) {
-        if (!this.catalogTypeMap.containsKey(extraCatalog.getId())) {
-            this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
+        if (!this.map.containsKey(extraCatalog.getKey())) {
+            this.map.put(extraCatalog.getKey(), extraCatalog);
         }
     }
 

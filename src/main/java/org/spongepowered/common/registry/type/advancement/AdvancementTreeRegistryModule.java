@@ -48,7 +48,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
     }
 
     public void clear() {
-        this.catalogTypeMap.clear();
+        this.map.clear();
     }
 
     @SuppressWarnings("unchecked")

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.CatalogKey;
@@ -31,12 +32,22 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractCatalogRegistryModule<C extends CatalogType> implements AlternateCatalogRegistryModule<C> {
 
     protected final RegistryMap<C> map = new RegistryMap<>();
+    protected final String defaultModIdToPrepend;
+
+    public AbstractCatalogRegistryModule() {
+        this("minecraft");
+    }
+
+    public AbstractCatalogRegistryModule(String defaultModIdToPrepend) {
+        this.defaultModIdToPrepend = defaultModIdToPrepend;
+    }
 
     protected void register(final C value) {
         this.register(value.getKey(), value);
@@ -54,7 +65,13 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
 
     @Override
     public final Optional<C> getById(final String id) {
-        return AlternateCatalogRegistryModule.super.getById(id);
+        // Here we can check for default prefixes.
+        final String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
+        if (!key.contains(":")) {
+            return get(CatalogKey.of(this.defaultModIdToPrepend, id));
+        }
+        return this.map.getOptional(CatalogKey.resolve(id));
+
     }
 
     @Override
@@ -63,7 +80,7 @@ public abstract class AbstractCatalogRegistryModule<C extends CatalogType> imple
     }
 
     @Override
-    public final Map<String, C> provideCatalogMap() {
+    public Map<String, C> provideCatalogMap() {
         return this.map.forCatalogRegistration();
     }
 }

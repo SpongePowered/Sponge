@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
@@ -71,6 +72,11 @@ public class DataTranslatorRegistryModule implements AlternateCatalogRegistryMod
     }
 
     @Override
+    public Optional<DataTranslator> get(CatalogKey key) {
+        return getById(key.toString());
+    }
+
+    @Override
     public Collection<DataTranslator> getAll() {
         return ImmutableList.copyOf(this.dataTranslatorMappings.values());
     }
@@ -78,9 +84,9 @@ public class DataTranslatorRegistryModule implements AlternateCatalogRegistryMod
     @Override
     public void registerAdditionalCatalog(DataTranslator extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
-        checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.dataTranslatorMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
-        this.dataTranslatorMappings.put(extraCatalog.getId(), extraCatalog);
+        checkArgument(!extraCatalog.getKey().getValue().isEmpty(), "Id cannot be empty");
+        checkArgument(!this.dataTranslatorMappings.containsKey(extraCatalog.getKey().toString()), "Duplicate Id");
+        this.dataTranslatorMappings.put(extraCatalog.getKey().toString(), extraCatalog);
     }
 
     @Override

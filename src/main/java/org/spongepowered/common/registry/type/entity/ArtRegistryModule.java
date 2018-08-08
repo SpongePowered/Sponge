@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.item.EntityPainting;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -36,31 +37,19 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
-
-    @RegisterCatalog(Arts.class)
-    private final Map<String, Art> artMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<Art> getById(String id) {
-        return Optional.ofNullable(this.artMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Art> getAll() {
-        return ImmutableList.copyOf(this.artMappings.values());
-    }
+public final class ArtRegistryModule extends MinecraftEnumBasedCatalogTypeModule<EntityPainting.EnumArt, Art> implements CatalogRegistryModule<Art> {
 
     @Override
     public void registerDefaults() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
+            this.map.put(((Art) (Object) art).getKey(), (Art) (Object) art);
         }
     }
 
@@ -69,16 +58,21 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
         registerDefaults();
         RegistryHelper.mapFields(Arts.class, field -> {
             String name = field.replace("_", "");
-            return this.artMappings.get(name.toLowerCase(Locale.ENGLISH));
+            return this.map.get(CatalogKey.minecraft(name));
         });
     }
 
     @AdditionalRegistration
     public void registerAdditionals() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            if (!this.artMappings.containsValue(art)) {
-                this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
+            if (!this.map.containsValue(art)) {
+                this.map.put(((Art) (Object) art).getKey(), (Art) (Object) art);
             }
         }
+    }
+
+    @Override
+    protected EntityPainting.EnumArt[] getValues() {
+        return EntityPainting.EnumArt.values();
     }
 }

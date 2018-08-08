@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.BlockPaletteTypes;
@@ -49,7 +50,7 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
     @Override
     public void registerAdditionalCatalog(BlockPaletteType extraCatalog) {
         checkNotNull(extraCatalog);
-        String id = extraCatalog.getId();
+        String id = extraCatalog.getKey().toString();
         checkArgument(id.indexOf(' ') == -1, "Palette Type ID " + id + " may not contain a space");
         this.paletteMappings.put(id.toLowerCase(Locale.ENGLISH), extraCatalog);
     }
@@ -57,6 +58,11 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
     @Override
     public Optional<BlockPaletteType> getById(String id) {
         return Optional.ofNullable(this.paletteMappings.get(id));
+    }
+
+    @Override
+    public Optional<BlockPaletteType> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override

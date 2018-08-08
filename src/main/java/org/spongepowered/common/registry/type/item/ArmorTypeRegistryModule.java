@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry.type.item;
 
 import net.minecraft.item.ItemArmor;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.data.type.ArmorTypes;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
@@ -46,8 +47,9 @@ public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogT
     @AdditionalRegistration
     public void customRegistration() {
         for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(armorMaterial).getId())) {
-                this.catalogTypeMap.put(enumAs(armorMaterial).getId(), enumAs(armorMaterial));
+            final CatalogKey key = enumAs(armorMaterial).getKey();
+            if (!this.map.containsKey(key)) {
+                this.map.put(key, enumAs(armorMaterial));
             }
         }
     }

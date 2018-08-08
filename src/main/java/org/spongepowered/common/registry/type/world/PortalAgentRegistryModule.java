@@ -67,8 +67,8 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
     @Override
     public void registerAdditionalCatalog(PortalAgentType portalAgentType) {
-        checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getId()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getId());
-        this.portalAgentTypeMappings.put(portalAgentType.getId().toLowerCase(Locale.ENGLISH), portalAgentType);
+        checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getKey().toString()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getKey().toString());
+        this.portalAgentTypeMappings.put(portalAgentType.getKey().toString().toLowerCase(Locale.ENGLISH), portalAgentType);
         this.portalAgentClassToTypeMappings.put(portalAgentType.getPortalAgentClass(), portalAgentType);
     }
 

@@ -70,7 +70,7 @@ public final class TileEntityTypeRegistryModule
     @Override
     public void registerAdditionalCatalog(TileEntityType extraCatalog) {
         this.tileClassToTypeMappings.put((Class<? extends TileEntity>) extraCatalog.getTileEntityType(), extraCatalog);
-        this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        this.catalogTypeMap.put(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override

@@ -539,10 +539,10 @@ public class SpongeHooks {
             causedBy = causeEntity.getName();
         }else if (rootCause instanceof BlockSnapshot) {
             BlockSnapshot snapshot = (BlockSnapshot) rootCause;
-            causedBy = snapshot.getState().getType().getId();
+            causedBy = snapshot.getState().getType().getKey().toString();
         } else if (rootCause instanceof CatalogType) {
             CatalogType type = (CatalogType) rootCause;
-            causedBy = type.getId();
+            causedBy = type.getKey().toString();
         } else if (rootCause instanceof PluginContainer) {
             PluginContainer plugin = (PluginContainer) rootCause;
             causedBy = plugin.getId();

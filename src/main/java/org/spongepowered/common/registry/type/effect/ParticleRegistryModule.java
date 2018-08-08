@@ -186,7 +186,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
     private void addEffectType(String id, @Nullable EnumParticleTypes internalType, Map<ParticleOption<?>, Object> options) {
         SpongeParticleType particleType = new SpongeParticleType("minecraft:" + id, id, internalType, options);
         this.particleMappings.put(id, particleType);
-        this.particleByName.put(particleType.getId().toLowerCase(Locale.ENGLISH), particleType);
+        this.particleByName.put(particleType.getKey().toString().toLowerCase(Locale.ENGLISH), particleType);
     }
 
     private ParticleRegistryModule() {

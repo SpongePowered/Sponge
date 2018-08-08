@@ -60,9 +60,9 @@ public class DataFormatRegistryModule implements AdditionalCatalogRegistryModule
     @Override
     public void registerAdditionalCatalog(DataFormat extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
-        checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.dataFormatMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
-        this.dataFormatMappings.put(extraCatalog.getId(), extraCatalog);
+        checkArgument(!extraCatalog.getKey().getValue().isEmpty(), "Id cannot be empty");
+        checkArgument(!this.dataFormatMappings.containsKey(extraCatalog.getKey().toString()), "Duplicate Id");
+        this.dataFormatMappings.put(extraCatalog.getKey().toString(), extraCatalog);
     }
 
     @Override

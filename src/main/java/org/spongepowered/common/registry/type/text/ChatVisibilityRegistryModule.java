@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.type.text;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.entity.player.EntityPlayer;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
@@ -58,8 +59,9 @@ public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAltern
     @AdditionalRegistration
     public void customRegistration() {
         for (EntityPlayer.EnumChatVisibility visibility : EntityPlayer.EnumChatVisibility.values()) {
-            if (!this.catalogTypeMap.containsKey(enumAs(visibility).getId())) {
-                this.catalogTypeMap.put(enumAs(visibility).getId(), enumAs(visibility));
+            final CatalogKey key = enumAs(visibility).getKey();
+            if (!this.map.containsKey(key)) {
+                this.map.put(key, enumAs(visibility));
             }
         }
     }

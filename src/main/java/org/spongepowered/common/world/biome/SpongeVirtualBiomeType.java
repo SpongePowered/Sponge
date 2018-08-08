@@ -27,6 +27,7 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -36,14 +37,14 @@ import java.util.function.Function;
 
 public class SpongeVirtualBiomeType implements VirtualBiomeType {
 
-    private final String id;
+    private final CatalogKey id;
     private final String name;
     private final double tempterature;
     private final double humidity;
     private final BiomeType persisted;
     private final Function<World, BiomeGenerationSettings> defaultSettings;
 
-    public SpongeVirtualBiomeType(String id, String name, double t, double h, BiomeType persist, Function<World, BiomeGenerationSettings> func) {
+    public SpongeVirtualBiomeType(CatalogKey id, String name, double t, double h, BiomeType persist, Function<World, BiomeGenerationSettings> func) {
         this.id = checkNotNull(id);
         this.name = checkNotNull(name);
         this.tempterature = t;
@@ -64,6 +65,11 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
 
     @Override
     public String getId() {
+        return this.id.toString();
+    }
+
+    @Override
+    public CatalogKey getKey() {
         return this.id;
     }
 
@@ -90,7 +96,7 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
         if (!(o instanceof VirtualBiomeType)) {
             return false;
         }
-        return this.id == ((VirtualBiomeType) o).getId();
+        return this.id.equals(((VirtualBiomeType) o).getKey());
     }
 
     @Override

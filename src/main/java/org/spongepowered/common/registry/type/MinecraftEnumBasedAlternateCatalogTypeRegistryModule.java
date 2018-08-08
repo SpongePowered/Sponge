@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.type;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 
@@ -57,8 +58,8 @@ public abstract class MinecraftEnumBasedAlternateCatalogTypeRegistryModule<E ext
     @Override
     public Map<String, T> provideCatalogMap() {
         final HashMap<String, T> map = new HashMap<>();
-        for (Map.Entry<String, T> entry : this.catalogTypeMap.entrySet()) {
-            String catalogId = entry.getKey();
+        for (Map.Entry<CatalogKey, T> entry : this.map.entrySet()) {
+            String catalogId = entry.getKey().toString();
             catalogId = catalogId.replace(this.defaultModIdToPrepend + ":", "");
             for (String s : this.modIdToFilter) {
                 catalogId = catalogId.replace(s, "");

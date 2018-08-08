@@ -31,7 +31,7 @@ public interface TypedSpongeStatistic extends SpongeStatistic {
 
     @Override
     default StatisticType getType() {
-        return Sponge.getRegistry().getType(StatisticType.class, getId().substring(0, getId().indexOf("."))).get();
+        return Sponge.getRegistry().getType(StatisticType.class, getKey().toString().substring(0, getId().indexOf("."))).get();
     }
 
 }

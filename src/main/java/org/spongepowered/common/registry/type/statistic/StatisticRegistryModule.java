@@ -66,7 +66,7 @@ public final class StatisticRegistryModule implements SpongeAdditionalCatalogReg
     @Override
     public void registerAdditionalCatalog(Statistic stat) {
         checkNotNull(stat, "null statistic");
-        this.statisticMappings.put(stat.getId().toLowerCase(Locale.ENGLISH), stat);
+        this.statisticMappings.put(stat.getKey().toString().toLowerCase(Locale.ENGLISH), stat);
     }
 
     @Override

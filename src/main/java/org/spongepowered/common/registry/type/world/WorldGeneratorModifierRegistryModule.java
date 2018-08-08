@@ -87,7 +87,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     @Override
     public void registerAdditionalCatalog(WorldGeneratorModifier modifier) {
         checkNotNull(modifier, "modifier");
-        final String id = modifier.getId();
+        final String id = modifier.getKey().toString();
         checkId(id, "World generator ID");
 
         this.modifierMappings.put(id.toLowerCase(Locale.ENGLISH), modifier);
@@ -120,7 +120,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
         final ImmutableList.Builder<String> ids = ImmutableList.builder();
         for (WorldGeneratorModifier modifier : modifiers) {
             checkNotNull(modifier, "modifier (in collection)");
-            final String id = modifier.getId();
+            final String id = modifier.getKey().toString();
             checkArgument(this.modifierMappings.containsKey(id.toLowerCase(Locale.ENGLISH)), "unregistered modifier in collection");
             ids.add(id);
         }

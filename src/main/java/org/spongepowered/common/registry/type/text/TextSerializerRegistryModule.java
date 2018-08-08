@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.text;
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -52,6 +53,11 @@ public final class TextSerializerRegistryModule implements AlternateCatalogRegis
     }
 
     @Override
+    public Optional<TextSerializer> get(CatalogKey key) {
+        return getById(key.toString());
+    }
+
+    @Override
     public Collection<TextSerializer> getAll() {
         return ImmutableList.copyOf(this.textSerializerMappings.values());
     }
@@ -65,12 +71,12 @@ public final class TextSerializerRegistryModule implements AlternateCatalogRegis
     }
 
     private void registerSerializer(TextSerializer serializer) {
-        this.textSerializerMappings.put(serializer.getId(), serializer);
+        this.textSerializerMappings.put(serializer.getKey().toString(), serializer);
     }
 
     @Override
     public void registerAdditionalCatalog(TextSerializer serializer) {
-        this.textSerializerMappings.put(serializer.getId(), serializer);
+        this.textSerializerMappings.put(serializer.getKey().toString(), serializer);
     }
 
     @Override

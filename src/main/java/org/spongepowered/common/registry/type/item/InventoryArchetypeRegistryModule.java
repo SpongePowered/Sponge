@@ -114,7 +114,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
     @Override
     public void registerAdditionalCatalog(InventoryArchetype archetype) {
         checkNotNull(archetype, "archetype");
-        String id = archetype.getId();
+        String id = archetype.getKey().toString();
         this.mapping.put(id.toLowerCase(Locale.ENGLISH), archetype);
     }
 

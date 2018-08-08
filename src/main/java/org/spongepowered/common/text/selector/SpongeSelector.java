@@ -154,7 +154,7 @@ public class SpongeSelector implements Selector {
     private String buildString() {
         StringBuilder result = new StringBuilder();
 
-        result.append('@').append(this.type.getId());
+        result.append('@').append(this.type.getKey().toString());
 
         if (!this.arguments.isEmpty()) {
             result.append('[');

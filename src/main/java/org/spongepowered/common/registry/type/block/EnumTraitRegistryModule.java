@@ -60,7 +60,7 @@ public final class EnumTraitRegistryModule
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
         this.map.put(CatalogKey.resolve(id), property);
-        final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
+        final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.map.put(CatalogKey.resolve(propertyId), property);
     }
 

@@ -37,6 +37,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
@@ -72,7 +73,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     public void registerEntityType(EntityType type) {
-        this.entityTypeMappings.put(type.getId(), type);
+        this.entityTypeMappings.put(type.getKey().toString(), type);
         this.entityClassToTypeMappings.put(((SpongeEntityType) type).entityClass, type);
     }
 
@@ -85,6 +86,11 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             return Optional.of(SpongeEntityType.UNKNOWN);
         }
         return Optional.ofNullable(this.entityTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
+    }
+
+    @Override
+    public Optional<EntityType> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override
@@ -222,7 +228,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             // remove old mapping
             this.entityTypeMappings.remove(fieldName.toLowerCase(Locale.ENGLISH));
             // add new mapping with minecraft id
-            this.entityTypeMappings.put(entityType.getId(), entityType);
+            this.entityTypeMappings.put(entityType.getKey().toString(), entityType);
             return entityType;
         });
         this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
@@ -236,7 +242,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public void registerAdditionalCatalog(EntityType extraCatalog) {
-        this.entityTypeMappings.put(extraCatalog.getId(), extraCatalog);
+        this.entityTypeMappings.put(extraCatalog.getKey().toString(), extraCatalog);
         this.entityClassToTypeMappings.put(((SpongeEntityType) extraCatalog).entityClass, extraCatalog);
     }
 

@@ -82,11 +82,11 @@ public class BlockTypeRegistryModule extends AbstractCatalogRegistryModule<Block
     @Override
     public void registerAdditionalCatalog(BlockType extraCatalog) {
         this.register(extraCatalog);
-        registerBlockTrait(extraCatalog.getId(), extraCatalog);
+        registerBlockTrait(extraCatalog.getKey().toString(), extraCatalog);
     }
 
     public void registerFromGameData(ResourceLocation key, BlockType blockType) {
-        this.map.put((CatalogKey) key, blockType);
+        this.map.put(((CatalogKey) (Object) key), blockType);
         registerBlockTrait(key.toString(), blockType);
     }
 

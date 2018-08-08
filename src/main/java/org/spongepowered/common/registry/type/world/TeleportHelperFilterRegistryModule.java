@@ -64,9 +64,10 @@ public class TeleportHelperFilterRegistryModule implements AdditionalCatalogRegi
     @Override
     public void registerAdditionalCatalog(TeleportHelperFilter extraCatalog) {
         checkNotNull(extraCatalog, "TeleportHelperFilter cannot be null!");
-        checkState(!this.idMap.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH)),
+        final String key = extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH);
+        checkState(!this.idMap.containsKey(key),
                 "TeleportHelperFilter must have a unique id!");
-        this.idMap.put(extraCatalog.getId(), extraCatalog);
+        this.idMap.put(key, extraCatalog);
     }
 
     @Override
@@ -77,7 +78,7 @@ public class TeleportHelperFilterRegistryModule implements AdditionalCatalogRegi
         this.filterMap.put("no_portal", new NoPortalTeleportHelperFilter());
         this.filterMap.put("surface_only", new SurfaceOnlyTeleportHelperFilter());
 
-        this.filterMap.forEach((key, value) -> this.idMap.put(value.getId().toLowerCase(Locale.ENGLISH), value));
+        this.filterMap.forEach((key, value) -> this.idMap.put(value.getKey().toString().toLowerCase(Locale.ENGLISH), value));
     }
 
 }

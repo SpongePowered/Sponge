@@ -68,7 +68,7 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
 
     @Override
     public void registerAdditionalCatalog(Profession extraCatalog) {
-        final String catalogId = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
+        final String catalogId = extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH);
         if (catalogId.equals("smith")) {
             return;
         }

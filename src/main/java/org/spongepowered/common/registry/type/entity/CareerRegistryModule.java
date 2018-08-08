@@ -33,6 +33,7 @@ import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.entity.SpongeCareer;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -44,7 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegistrationDependency(ProfessionRegistryModule.class)
-public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModule<Career> {
+public class CareerRegistryModule extends AbstractCatalogRegistryModule<Career> implements SpongeAdditionalCatalogRegistryModule<Career> {
 
     public final SpongeCareer LEATHERWORKER =
             new SpongeCareer(1, "minecraft:leatherworker", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.leather"));
@@ -79,9 +80,6 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
 
     public static final Comparator<SpongeCareer> CAREER_COMPARATOR = Comparator.comparingInt(o -> o.type);
 
-    @RegisterCatalog(Careers.class)
-    private final Map<String, Career> careerMap = new HashMap<>();
-
     @Override
     public boolean allowsApiRegistration() {
         return false;
@@ -89,29 +87,17 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
 
     @Override
     public void registerAdditionalCatalog(Career extraCatalog) {
-        if (this.forgeSpongeMapping.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH))) {
+        if (this.forgeSpongeMapping.containsKey(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH))) {
             // Basically, forge has alternate names for a minor few vanilla
             // careers and this avoids having duplicate "careers" registered.
             return;
         }
-        if (!this.careerMap.containsKey(extraCatalog.getId())) {
-            this.careerMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        if (!this.map.containsKey(extraCatalog.getKey())) {
+            this.map.put(extraCatalog.getKey(), extraCatalog);
         }
         ProfessionRegistryModule.getInstance().registerCareerForProfession(extraCatalog);
     }
 
-    @Override
-    public Optional<Career> getById(String id) {
-        if (!id.contains(":")) {
-            id = "minecraft:" + id;
-        }
-        return Optional.ofNullable(this.careerMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Career> getAll() {
-        return ImmutableList.copyOf(this.careerMap.values());
-    }
 
     public Career registerCareer(Career career) {
         registerAdditionalCatalog(career);
@@ -127,24 +113,24 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
 
     @Override
     public void registerDefaults() {
-        this.careerMap.put("farmer", registerCareer(this.FARMER));
-        this.careerMap.put("fisherman", registerCareer(this.FISHERMAN));
-        this.careerMap.put("shepherd", registerCareer(this.SHEPHERD));
-        this.careerMap.put("fletcher", registerCareer(this.FLETCHER));
+        register(registerCareer(this.FARMER));
+        register(registerCareer(this.FISHERMAN));
+        register(registerCareer(this.SHEPHERD));
+        register(registerCareer(this.FLETCHER));
 
-        this.careerMap.put("librarian", registerCareer(this.LIBRARIAN));
-        this.careerMap.put("cartographer", registerCareer(this.CARTOGRAPHER));
+        register(registerCareer(this.LIBRARIAN));
+        register(registerCareer(this.CARTOGRAPHER));
 
-        this.careerMap.put("cleric", registerCareer(this.CLERIC));
+        register(registerCareer(this.CLERIC));
 
-        this.careerMap.put("armorer", registerCareer(this.ARMORER));
-        this.careerMap.put("weapon_smith", registerCareer(this.WEAPON_SMITH));
-        this.careerMap.put("tool_smith", registerCareer(this.TOOL_SMITH));
+        register(registerCareer(this.ARMORER));
+        register(registerCareer(this.WEAPON_SMITH));
+        register(registerCareer(this.TOOL_SMITH));
 
-        this.careerMap.put("butcher", registerCareer(this.BUTCHER));
-        this.careerMap.put("leatherworker", registerCareer(this.LEATHERWORKER));
+        register(registerCareer(this.BUTCHER));
+        register(registerCareer(this.LEATHERWORKER));
 
-        this.careerMap.put("nitwit", registerCareer(this.NITWIT));
+        register(registerCareer(this.NITWIT));
     }
 
     CareerRegistryModule() { }

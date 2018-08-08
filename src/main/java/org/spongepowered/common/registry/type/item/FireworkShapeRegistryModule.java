@@ -60,6 +60,6 @@ public class FireworkShapeRegistryModule implements CatalogRegistryModule<Firewo
     public void registerDefaults() {
         this.fireworkShapeMap.putAll(FireworkUtils.shapeMapping.values()
         .stream()
-        .collect(Collectors.toMap(shape -> shape.getId().toLowerCase(Locale.ENGLISH), Function.identity())));
+        .collect(Collectors.toMap(shape -> shape.getKey().toString().toLowerCase(Locale.ENGLISH), Function.identity())));
     }
 }

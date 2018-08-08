@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
@@ -47,9 +48,9 @@ public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<S
 
     @Override
     public void registerAdditionalCatalog(SpawnType extraCatalog) {
-        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH)),
-                "SpawnType with the same id is already registered: {}", extraCatalog.getId());
-        this.spawnTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH)),
+                "SpawnType with the same id is already registered: {}", extraCatalog.getKey().toString());
+        this.spawnTypeMap.put(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
@@ -59,6 +60,11 @@ public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<S
             key = "sponge:" + key; // There are no minecraft based spawn types.
         }
         return Optional.ofNullable(this.spawnTypeMap.get(key));
+    }
+
+    @Override
+    public Optional<SpawnType> get(CatalogKey key) {
+        return getById(key.toString());
     }
 
     @Override

@@ -49,7 +49,7 @@ public class AdvancementRegistryModule extends AbstractPrefixCheckCatalogRegistr
     }
 
     public void clear() {
-        this.catalogTypeMap.clear();
+        this.map.clear();
     }
 
     @Override

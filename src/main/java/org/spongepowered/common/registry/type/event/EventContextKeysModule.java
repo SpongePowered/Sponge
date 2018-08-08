@@ -65,12 +65,12 @@ public final class EventContextKeysModule
 
     @Override
     public void registerAdditionalCatalog(EventContextKey extraCatalog) {
-        final String id = checkNotNull(extraCatalog).getId();
-        final String key = id.toLowerCase(Locale.ENGLISH);
-        checkArgument(!key.contains("sponge:"), "Cannot register spoofed event context key!");
-        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed event context key!");
-        checkArgument(!this.catalogTypeMap.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
-        this.catalogTypeMap.put(key, extraCatalog);
+        final CatalogKey key = extraCatalog.getKey();
+        checkArgument(!key.getNamespace().equals(CatalogKey.SPONGE_NAMESPACE), "Cannot register spoofed event context key!");
+        checkArgument(!key.getNamespace().equals(CatalogKey.MINECRAFT_NAMESPACE), "Cannot register spoofed event context key!");
+        checkArgument(!this.map.containsKey(key), "Cannot register an already registered EventContextKey: %s",
+            key);
+        this.map.put(key, extraCatalog);
 
     }
 
@@ -108,7 +108,7 @@ public final class EventContextKeysModule
 
     private void createKey(String id, String name, Class<?> usedClass) {
         final CatalogKey key = CatalogKey.resolve(id);
-        this.catalogTypeMap.put(id, new SpongeEventContextKey<>(key, name, usedClass));
+        this.map.put(key, new SpongeEventContextKey<>(key, name, usedClass));
     }
 
     private EventContextKeysModule() {

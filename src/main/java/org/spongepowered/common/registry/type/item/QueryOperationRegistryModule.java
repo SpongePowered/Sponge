@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.type.item;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.query.QueryOperationType;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -56,6 +57,11 @@ public final class QueryOperationRegistryModule implements CatalogRegistryModule
     }
 
     @Override
+    public Optional<QueryOperationType> get(CatalogKey key) {
+        return getById(key.toString());
+    }
+
+    @Override
     public Collection<QueryOperationType> getAll() {
         return this.types.values();
     }
@@ -76,6 +82,6 @@ public final class QueryOperationRegistryModule implements CatalogRegistryModule
     }
 
     private void register(QueryOperationType<?> type) {
-        this.types.put(type.getId(), type);
+        this.types.put(type.getKey().toString(), type);
     }
 }

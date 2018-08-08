@@ -75,7 +75,7 @@ public class InstrumentTestPlugin {
                                     .title(Text.of(TextColors.GREEN, "Instrument Types"))
                                     .padding(Text.of(TextColors.DARK_GREEN, "="))
                                     .contents(Sponge.getRegistry().getAllOf(InstrumentType.class).stream()
-                                            .map(i -> Text.of(TextColors.GREEN, "Id: ", TextColors.GRAY, i.getId(),
+                                            .map(i -> Text.of(TextColors.GREEN, "Id: ", TextColors.GRAY, i.getKey().toString(),
                                                     TextColors.GREEN, " Name: ", TextColors.GRAY, i.getName(),
                                                     TextColors.GREEN, " SoundType: ", TextColors.GRAY, i.getSound().getName()))
                                             .collect(ImmutableList.toImmutableList()))

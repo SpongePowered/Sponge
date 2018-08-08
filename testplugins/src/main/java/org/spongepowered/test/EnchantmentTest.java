@@ -98,7 +98,7 @@ public final class EnchantmentTest {
                                 final EnchantmentType type = enchantment.getType();
                                 src.sendMessage(Text.of(TextColors.GOLD, "============================="));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Type: ", TextColors.GRAY, type.getName()));
-                                src.sendMessage(Text.of(TextColors.GOLD, "Type ID: ", TextColors.GRAY, type.getId()));
+                                src.sendMessage(Text.of(TextColors.GOLD, "Type ID: ", TextColors.GRAY, type.getKey().toString()));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Translation: ", TextColors.GRAY, enchantment.getType().getTranslation()));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Level: ", TextColors.GRAY, enchantment.getLevel()));
                                 src.sendMessage(Text.of(TextColors.GOLD, "Maximum level: ", TextColors.GRAY, type.getMaximumLevel()));

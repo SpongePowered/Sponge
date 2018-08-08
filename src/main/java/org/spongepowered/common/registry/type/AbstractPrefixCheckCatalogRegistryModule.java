@@ -26,8 +26,10 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,31 +38,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractPrefixCheckCatalogRegistryModule<T extends CatalogType> implements CatalogRegistryModule<T> {
-
-    protected final Map<String, T> catalogTypeMap = new ConcurrentHashMap<>();
-
-    protected final String defaultModIdToPrepend;
+public abstract class AbstractPrefixCheckCatalogRegistryModule<T extends CatalogType> extends AbstractCatalogRegistryModule<T> implements CatalogRegistryModule<T> {
 
     protected AbstractPrefixCheckCatalogRegistryModule(String defaultModIdToPrepend) {
-        this.defaultModIdToPrepend = defaultModIdToPrepend;
+        super(defaultModIdToPrepend);
     }
 
-    @Override
-    public Optional<T> getById(String id) {
-        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
-        if (!key.contains(":")) {
-            key = this.defaultModIdToPrepend + ":" + key;
-        }
-        return Optional.ofNullable(this.catalogTypeMap.get(key));
-    }
-
-    @Override
-    public Collection<T> getAll() {
-        return Collections.unmodifiableCollection(this.catalogTypeMap.values());
-    }
-
-    protected void register(T catalog) {
-        this.catalogTypeMap.put(catalog.getId(), catalog);
-    }
 }

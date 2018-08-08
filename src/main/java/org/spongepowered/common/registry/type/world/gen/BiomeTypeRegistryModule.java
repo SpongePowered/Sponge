@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -63,32 +64,28 @@ public final class BiomeTypeRegistryModule
     public void registerDefaults() {
         for (Biome biome : Biome.REGISTRY) {
             if (biome != null) {
-                String id = ((BiomeType) biome).getId();
-                if (id == null) {
-                    ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((IMixinBiome) biome).setModId(reg_id.getResourceDomain());
-                    id = reg_id.toString();
-                    ((IMixinBiome) biome).setId(id);
-                }
-                this.biomeTypes.add((BiomeType) biome);
-                this.catalogTypeMap.put(id, (BiomeType) biome);
+                registerBiome(biome);
             }
         }
+    }
+
+    private void registerBiome(Biome biome) {
+        CatalogKey id = ((BiomeType) biome).getKey();
+        if (id == null) {
+            ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
+            ((IMixinBiome) biome).setModId(reg_id.getResourceDomain());
+            id = (CatalogKey) (Object) reg_id;
+            ((IMixinBiome) biome).setId(id);
+        }
+        this.biomeTypes.add((BiomeType) biome);
+        this.map.put(id, (BiomeType) biome);
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (Biome biome : Biome.REGISTRY) {
-            if (biome != null && !this.biomeTypes.contains(biome)) {
-                String id = ((BiomeType) biome).getId();
-                if (id == null) {
-                    ResourceLocation reg_id = Biome.REGISTRY.getNameForObject(biome);
-                    ((IMixinBiome) biome).setModId(reg_id.getResourceDomain());
-                    id = reg_id.toString();
-                    ((IMixinBiome) biome).setId(id);
-                }
-                this.biomeTypes.add((BiomeType) biome);
-                this.catalogTypeMap.put(id, (BiomeType) biome);
+            if (biome != null && !this.biomeTypes.contains((BiomeType) (Object) biome)) {
+                registerBiome(biome);
             }
         }
         // Re-map fields in case mods have changed vanilla world types
@@ -136,7 +133,7 @@ public final class BiomeTypeRegistryModule
     public void registerAdditionalCatalog(BiomeType biome) {
         checkNotNull(biome);
         checkArgument(biome instanceof VirtualBiomeType, "Cannot register non-virtual biomes at this time.");
-        checkArgument(!getById(biome.getId()).isPresent(), "Duplicate biome id");
+        checkArgument(!getById(biome.getKey().toString()).isPresent(), "Duplicate biome id");
 
         this.biomeTypes.add(biome);
     }

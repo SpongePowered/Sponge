@@ -997,7 +997,7 @@ public final class WorldManager {
             for (org.spongepowered.api.world.DimensionType type : Sponge.getRegistry().getAllOf(org.spongepowered.api.world.DimensionType.class)) {
                 String typeId = type.getKey().getValue();
                 if (typeId.equals(name)) {
-                    return type.getId();
+                    return type.getKey().toString();
                     // Note: We don't update the NBT here but instead fix it on next
                     //       world save in case there are 2 types using same name.
                 }

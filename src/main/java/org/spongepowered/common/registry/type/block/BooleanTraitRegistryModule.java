@@ -51,14 +51,14 @@ public final class BooleanTraitRegistryModule
 
     @Override
     public void registerAdditionalCatalog(BooleanTrait extraCatalog) {
-        this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        this.catalogTypeMap.put(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     public void registerBlock(String id, BlockType block, BooleanTrait property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
         this.catalogTypeMap.put(id.toLowerCase(Locale.ENGLISH), property);
-        final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
+        final String propertyId = block.getKey().toString().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.catalogTypeMap.put(propertyId, property);
     }
 

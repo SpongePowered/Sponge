@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.registry.type.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.world.WorldType;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
@@ -63,8 +66,8 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     @AdditionalRegistration(RegistrationPhase.PRE_REGISTRY)
     public void registerAdditional() {
         for (WorldType worldType : WorldType.WORLD_TYPES) {
-            if (worldType != null && !this.catalogTypeMap.values().contains(worldType)) {
-                this.catalogTypeMap.put(worldType.getName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
+            if (worldType != null && !this.map.values().contains(worldType)) {
+                this.map.put(CatalogKey.resolve(worldType.getName().toLowerCase(Locale.ENGLISH)), (GeneratorType) worldType);
             }
         }
         // Re-map fields in case mods have changed vanilla world types
@@ -74,15 +77,15 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
     @Override
     public Map<String, GeneratorType> provideCatalogMap() {
         final HashMap<String, GeneratorType> map = new HashMap<>();
-        for (Map.Entry<String, GeneratorType> entry : this.catalogTypeMap.entrySet()) {
-            String replace = entry.getKey().replace("minecraft:", "").replace("sponge:", "")
-                    .replace("debug_all_block_states", "debug");
-            map.put(replace, entry.getValue());
+        for (Map.Entry<CatalogKey, GeneratorType> entry : this.map.entrySet()) {
+            final String namespace = entry.getKey().getNamespace().replace("minecraft:", "").replace("sponge:", "");
+            final String value = entry.getKey().getValue().replace("debug_all_block_states", "debug");
+            map.put(namespace + ":" + value, entry.getValue());
         }
         return map;
     }
 
-    private GeneratorTypeRegistryModule() {
+    GeneratorTypeRegistryModule() {
         super("minecraft",
             new String[] {"minecraft", "sponge"},
             id -> id.replace("debug_all_block_states", "debug")
@@ -96,9 +99,8 @@ public final class GeneratorTypeRegistryModule extends AbstractPrefixAlternateCa
 
     @Override
     public void registerAdditionalCatalog(GeneratorType extraCatalog) {
-        if (extraCatalog != null) {
-            this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
-        }
+        checkNotNull(extraCatalog);
+        this.map.put(extraCatalog.getKey(), extraCatalog);
     }
 
     private static final class Holder {

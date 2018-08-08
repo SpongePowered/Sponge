@@ -76,7 +76,7 @@ public final class RecordTypeRegistryModule implements CatalogRegistryModule<Rec
     }
 
     private void add(SpongeRecordType recordType) {
-        final String id = recordType.getId();
+        final String id = recordType.getKey().toString();
         this.mappings.put(id, recordType);
         this.byInternalId.put(recordType.getInternalId(), recordType);
     }

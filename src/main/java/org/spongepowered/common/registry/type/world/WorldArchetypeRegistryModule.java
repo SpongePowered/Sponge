@@ -100,7 +100,7 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
     @Override
     public void registerAdditionalCatalog(WorldArchetype extraCatalog) {
         checkNotNull(extraCatalog, "WorldArchetype cannot be null!");
-        final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
+        final String id = extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH);
         //checkArgument(!id.startsWith("minecraft:"), "Plugin trying to register a fake minecraft generation settings!");
         //checkArgument(!id.startsWith("sponge:"), "Plugin trying to register a fake sponge generation settings!");
         this.worldCreationSettingsMap.put(id, extraCatalog);

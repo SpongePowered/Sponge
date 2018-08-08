@@ -62,7 +62,7 @@ public class PopulatorObjectRegistryModule extends AbstractCatalogRegistryModule
     @Override
     public void registerAdditionalCatalog(PopulatorObject extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
-        checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
+        checkArgument(!extraCatalog.getKey().toString().isEmpty(), "Id cannot be empty");
         this.register(extraCatalog);
     }
 

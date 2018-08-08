@@ -41,13 +41,13 @@ public final class GameModeRegistryModule extends MinecraftEnumBasedCatalogTypeM
     @Override
     protected void generateInitialMap() {
         for (GameType enumType: getValues()) {
-            this.catalogTypeMap.put(enumAs(enumType).getId(), enumAs(enumType));
+            this.map.put(enumAs(enumType).getKey(), enumAs(enumType));
         }
     }
 
     public static GameType toGameType(GameMode gamemode) {
         for (GameType gameType : GameType.values()) {
-            if (gameType.getName().equalsIgnoreCase(gamemode.getId())) {
+            if (gameType.getName().equalsIgnoreCase(gamemode.getKey().toString())) {
                 return gameType;
             }
         }

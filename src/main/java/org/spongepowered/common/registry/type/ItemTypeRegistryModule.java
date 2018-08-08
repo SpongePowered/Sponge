@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.Item;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -76,6 +77,11 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
     }
 
     @Override
+    public Optional<ItemType> get(CatalogKey key) {
+        return Optional.ofNullable(this.itemTypeMappings.get(key.toString()));
+    }
+
+    @Override
     public Collection<ItemType> getAll() {
         return ImmutableList.copyOf(this.itemTypeMappings.values());
     }
@@ -91,7 +97,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerAdditionalCatalog(ItemType extraCatalog) {
-        this.itemTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        this.itemTypeMappings.put(extraCatalog.getKey().toString().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override

@@ -77,7 +77,7 @@ public class CatalogKeyBuilder implements CatalogKey.Builder {
     public CatalogKey build() throws IllegalStateException {
         checkState(this.nameSpace != null);
         checkState(this.value != null);
-        return (CatalogKey) new ResourceLocation(this.nameSpace, this.value);
+        return (CatalogKey) (Object) new ResourceLocation(this.nameSpace, this.value);
     }
 
     @Override

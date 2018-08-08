@@ -62,7 +62,7 @@ public final class TeleportTypeRegistryModule implements AlternateCatalogRegistr
 
     @Override
     public void registerAdditionalCatalog(TeleportType extraCatalog) {
-        final String id = checkNotNull(extraCatalog).getId();
+        final String id = checkNotNull(extraCatalog).getKey().toString();
         final String key = id.toLowerCase(Locale.ENGLISH);
         checkArgument(!key.contains("sponge:"), "Cannot register spoofed teleport type!");
         checkArgument(!key.contains("minecraft:"), "Cannot register spoofed teleport type!");

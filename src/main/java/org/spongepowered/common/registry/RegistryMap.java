@@ -40,6 +40,8 @@ import java.util.Optional;
  */
 public final class RegistryMap<V> extends HashMap<CatalogKey, V> {
 
+    private static final long serialVersionUID = 2547984746279946245L;
+
     /**
      * Gets a value by its key.
      *

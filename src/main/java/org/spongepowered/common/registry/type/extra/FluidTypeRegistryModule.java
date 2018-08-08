@@ -64,7 +64,7 @@ public final class FluidTypeRegistryModule implements SpongeAdditionalCatalogReg
 
     public void registerForge(FluidType fluidType) {
         checkNotNull(fluidType, "Someone is registering a null FluidType!");
-        this.fluidTypeMap.put(fluidType.getId(), fluidType);
+        this.fluidTypeMap.put(fluidType.getKey().toString(), fluidType);
     }
 
     @Override

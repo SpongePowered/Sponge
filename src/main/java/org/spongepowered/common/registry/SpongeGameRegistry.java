@@ -160,7 +160,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public CatalogKey resolveKey(final String value) {
         checkNotNull(value, "value");
-        return (CatalogKey) new ResourceLocation(value);
+        return (CatalogKey) (Object) new ResourceLocation(value);
     }
 
     @Override
@@ -219,9 +219,9 @@ public class SpongeGameRegistry implements GameRegistry {
 
                 final Collection<? extends CatalogType> all = module.getSecond().getAll();
                 final List<CatalogType> catalogTypes = new ArrayList<>(all);
-                catalogTypes.sort(Comparator.comparing(CatalogType::getId));
+                catalogTypes.sort(Comparator.comparing(CatalogType::getKey));
                 for (CatalogType catalogType : catalogTypes) {
-                    printer.add("  -%s", catalogType.getId());
+                    printer.add("  -%s", catalogType.getKey().toString());
                 }
                 printer.hr();
             }
@@ -348,7 +348,7 @@ public class SpongeGameRegistry implements GameRegistry {
         ImmutableList.Builder<T> builder = ImmutableList.builder();
         registryModule.getAll()
                 .stream()
-                .filter(type -> pluginId.equals(type.getId().split(":")[0]))
+                .filter(type -> pluginId.equals(type.getKey().getNamespace()))
                 .forEach(builder::add);
 
         return builder.build();
@@ -400,7 +400,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public Optional<EntityStatistic> getEntityStatistic(StatisticType statType, EntityType entityType) {
         checkNotNull(statType, "null stat type");
         checkNotNull(entityType, "null entity type");
-        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get(new ResourceLocation(entityType.getId()));
+        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get((ResourceLocation) (Object) entityType.getKey());
         if (statType.equals(StatisticTypes.ENTITIES_KILLED)) {
             return Optional.of((EntityStatistic) eggInfo.killEntityStat);
         } else if (statType.equals(StatisticTypes.KILLED_BY_ENTITY)) {
@@ -497,7 +497,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
-        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().displaySlotMappings.get(color.getId()));
+        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().displaySlotMappings.get(color.getKey().toString()));
     }
 
     @Override

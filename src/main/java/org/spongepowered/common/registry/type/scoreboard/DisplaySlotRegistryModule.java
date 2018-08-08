@@ -76,7 +76,7 @@ public final class DisplaySlotRegistryModule implements AlternateCatalogRegistry
         this.displaySlotMappings.put("minecraft:below_name", new SpongeDisplaySlot("below_name", null, 2));
 
         for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
-            final String id = entry.getValue().getId().toLowerCase(Locale.ENGLISH);
+            final String id = entry.getValue().getKey().toString().toLowerCase(Locale.ENGLISH);
             final SpongeDisplaySlot value = new SpongeDisplaySlot(id, entry.getValue(), entry.getKey().getColorIndex() + 3);
             this.displaySlotMappings.put("minecraft:" + id, value);
         }

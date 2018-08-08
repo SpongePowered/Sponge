@@ -126,7 +126,7 @@ public final class CooldownTrackerTest {
         final Player player = event.getTargetEntity();
         if (this.enabled.contains(player.getUniqueId())) {
             event.setNewCooldown(event.getOriginalNewCooldown() * 2);
-            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getId() + " are now on cooldown for you for "
+            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getKey().toString() + " are now on cooldown for you for "
                     + event.getNewCooldown() + " ticks!"));
         }
     }
@@ -135,7 +135,7 @@ public final class CooldownTrackerTest {
     public void onCooldownEnd(final CooldownEvent.End event) {
         final Player player = event.getTargetEntity();
         if (this.enabled.contains(player.getUniqueId())) {
-            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getId() + " are no longer on cooldown for you!"));
+            player.sendMessage(Text.of(TextColors.GOLD, event.getItemType().getKey().toString() + " are no longer on cooldown for you!"));
         }
     }
 

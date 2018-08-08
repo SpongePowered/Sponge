@@ -56,8 +56,9 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
 
     void registerBlockState(BlockState blockState) {
         checkNotNull(blockState, "BlockState cannot be null!");
-        if (!this.blockStateMap.containsKey(blockState.getId().toLowerCase(Locale.ENGLISH))) {
-            this.blockStateMap.put(blockState.getId().toLowerCase(Locale.ENGLISH), blockState);
+        final String key = blockState.getKey().toString().toLowerCase(Locale.ENGLISH);
+        if (!this.blockStateMap.containsKey(key)) {
+            this.blockStateMap.put(key, blockState);
         }
     }
 
