@@ -136,7 +136,7 @@ public class MixinAdvancement implements org.spongepowered.api.advancement.Advan
             toastText.add(getDisplayInfo().get().getTitle());
         } else {
             toastText.add(Text.of("Unlocked advancement"));
-            toastText.add(Text.of(getId()));
+            toastText.add(Text.of(getKey().toString()));
         }
         this.toastText = toastText.build();
         final Set<String> scoreCriteria = new HashSet<>();

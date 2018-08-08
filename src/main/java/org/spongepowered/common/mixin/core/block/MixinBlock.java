@@ -47,6 +47,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
@@ -168,6 +169,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public String getId() {
         return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
+    }
+
+    @Override
+    public CatalogKey getKey() {
+        return (CatalogKey) (Object) Block.REGISTRY.getNameForObject((Block) (Object) this);
     }
 
     @Override

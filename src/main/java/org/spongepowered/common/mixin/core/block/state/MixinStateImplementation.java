@@ -34,6 +34,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -83,7 +84,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private ImmutableMap<Key<?>, Object> keyMap;
 
-    private String id;
+    private CatalogKey id;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -316,7 +317,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     public DataContainer toContainer() {
         return DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.BLOCK_STATE, this.getId());
+            .set(DataQueries.BLOCK_STATE, this.getKey());
     }
 
     @Override
@@ -326,28 +327,31 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public void generateId(Block block) {
+        final String nameSpace = ((BlockType) block).getKey().getNamespace();
         StringBuilder builder = new StringBuilder();
-        builder.append(((BlockType) block).getId());
-        if (!this.properties.isEmpty()) {
+        builder.append(((BlockType) block).getKey().getValue());
+
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties = this.getProperties();
+        if (!properties.isEmpty()) {
             builder.append('[');
             Joiner joiner = Joiner.on(',');
             List<String> propertyValues = new ArrayList<>();
-            for (Map.Entry<IProperty<?>, Comparable<?>> entry : this.properties.entrySet()) {
+            for (Map.Entry<IProperty<?>, Comparable<?>> entry : properties.entrySet()) {
                 propertyValues.add(entry.getKey().getName() + "=" + entry.getValue());
             }
             builder.append(joiner.join(propertyValues));
             builder.append(']');
         }
-        this.id = builder.toString();
+        this.id =  CatalogKey.of(nameSpace, builder.toString());
     }
 
     @Override
     public String getId() {
-        return this.id;
+        return this.id.toString();
     }
 
     @Override
     public String getName() {
-        return this.id;
+        return this.id.getValue();
     }
 }

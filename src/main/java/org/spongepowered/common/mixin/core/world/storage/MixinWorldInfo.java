@@ -857,7 +857,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
             this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
             this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
-            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
+            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getKey().toString());
             this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
             if (this.portalAgentType == null) {
                 this.portalAgentType = PortalAgentTypes.DEFAULT;

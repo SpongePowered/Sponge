@@ -742,10 +742,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         SoundEvent event;
         try {
             // Check if the event is registered (ie has an integer ID)
-            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+            event = SoundEvents.getRegisteredSoundEvent(sound.getKey().toString());
         } catch (IllegalStateException e) {
             // Otherwise send it as a custom sound
-            this.connection.sendPacket(new SPacketCustomSound(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
+            this.connection.sendPacket(new SPacketCustomSound(sound.getKey().toString(), (net.minecraft.util.SoundCategory) (Object) category,
                     position.getX(), position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
             return;
         }

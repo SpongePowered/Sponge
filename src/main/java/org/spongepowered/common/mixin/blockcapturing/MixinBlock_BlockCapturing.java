@@ -50,9 +50,8 @@ public abstract class MixinBlock_BlockCapturing implements IModData_BlockCapturi
     public void initializeBlockCapturingState(World worldIn) {
         SpongeConfig<? extends GeneralConfigBase> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
         BlockCapturingCategory blockCapturing = activeConfig.getConfig().getBlockCapturing();
-        String[] ids = this.getId().split(":");
-        String modId = ids[0];
-        String name = ids[1];
+        String modId = this.getKey().getNamespace();
+        String name = this.getKey().getValue();
 
         BlockCapturingModCategory modCapturing = blockCapturing.getModMappings().get(modId);
         if (modCapturing == null && blockCapturing.autoPopulateData()) {

@@ -1004,7 +1004,7 @@ public abstract class MixinEntity implements IMixinEntity {
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
             .getContainer()
-            .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
+            .set(DataQueries.ENTITY_TYPE, this.entityType.getKey())
             .set(DataQueries.UNSAFE_NBT, unsafeNbt);
         final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
@@ -1031,7 +1031,7 @@ public abstract class MixinEntity implements IMixinEntity {
         try {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
-            net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
+            net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName((ResourceLocation) (Object) this.entityType.getKey(), this.world);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (Entity) entity;

@@ -204,7 +204,7 @@ public abstract class MixinItemStack implements DataHolder, IMixinItemStack, IMi
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.ITEM_TYPE, this.itemstack$getType().getId())
+                .set(DataQueries.ITEM_TYPE, this.itemstack$getType().getKey())
                 .set(DataQueries.ITEM_COUNT, this.itemstack$getQuantity())
                 .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.

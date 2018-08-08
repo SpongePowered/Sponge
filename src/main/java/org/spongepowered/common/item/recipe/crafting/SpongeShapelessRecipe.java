@@ -28,11 +28,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
 
 public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogType {
 
     private final String id;
+    private CatalogKey key;
 
     public SpongeShapelessRecipe(String id, String groupName, ItemStack itemStack, NonNullList<Ingredient> ingredients) {
         super(groupName, itemStack, ingredients);
@@ -45,8 +47,16 @@ public class SpongeShapelessRecipe extends ShapelessRecipes implements CatalogTy
     }
 
     @Override
+    public CatalogKey getKey() {
+        if (this.key == null) {
+            this.key = CatalogKey.resolve(this.id);
+        }
+        return this.key;
+    }
+
+    @Override
     public String getName() {
-        return this.getId();
+        return this.getKey().toString();
     }
 
     @Override

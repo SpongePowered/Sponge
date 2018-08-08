@@ -124,7 +124,7 @@ public abstract class MixinWorldType implements GeneratorType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", getId())
+                .add("id", getKey())
                 .add("name", getName())
                 .add("settings", getGeneratorSettings())
                 .toString();

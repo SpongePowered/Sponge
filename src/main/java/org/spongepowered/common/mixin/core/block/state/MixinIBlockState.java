@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.block.state;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -44,6 +46,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -60,9 +63,11 @@ import java.util.function.Function;
 @Mixin(IBlockState.class)
 public interface MixinIBlockState extends IBlockState, BlockState {
 
+    @Shadow Block shadow$getBlock();
+
     @Override
     default BlockType getType() {
-        return (BlockType) getBlock();
+        return (BlockType) shadow$getBlock();
     }
 
     @Override
@@ -141,9 +146,16 @@ public interface MixinIBlockState extends IBlockState, BlockState {
     @SuppressWarnings("unchecked")
     @Override
     default String getId() {
+        return getKey().toString();
+    }
+
+    @Override
+    default CatalogKey getKey() {
+        final String nameSpace = ((BlockType) shadow$getBlock()).getKey().getNamespace();
         StringBuilder builder = new StringBuilder();
-        builder.append(((BlockType) getBlock()).getKey());
-        final ImmutableMap<IProperty<?>, Comparable<?>> properties = (ImmutableMap<IProperty<?>, Comparable<?>>) (ImmutableMap<?, ?>) this.getProperties();
+        builder.append(((BlockType) shadow$getBlock()).getKey().getValue());
+
+        final ImmutableMap<IProperty<?>, Comparable<?>> properties = this.getProperties();
         if (!properties.isEmpty()) {
             builder.append('[');
             Joiner joiner = Joiner.on(',');
@@ -154,12 +166,12 @@ public interface MixinIBlockState extends IBlockState, BlockState {
             builder.append(joiner.join(propertyValues));
             builder.append(']');
         }
-        return builder.toString();
+        return CatalogKey.of(nameSpace, builder.toString());
     }
 
     @Override
     default String getName() {
-        return getId();
+        return getKey().getValue();
     }
 
     @Override
@@ -181,7 +193,7 @@ public interface MixinIBlockState extends IBlockState, BlockState {
     default DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.BLOCK_STATE, getId());
+                .set(DataQueries.BLOCK_STATE, getKey());
     }
 
     @Override

@@ -62,6 +62,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -349,6 +350,14 @@ public final class SpongeImplHooks {
 
     public static Optional<CraftingRecipe> getRecipeById(String id) {
         IRecipe recipe = CraftingManager.REGISTRY.getObject(new ResourceLocation(id));
+        if (recipe == null) {
+            return Optional.empty();
+        }
+        return Optional.of(((CraftingRecipe) recipe));
+    }
+
+    public static Optional<CraftingRecipe> getRecipeById(CatalogKey id) {
+        IRecipe recipe = CraftingManager.REGISTRY.getObject((ResourceLocation) (Object) id);
         if (recipe == null) {
             return Optional.empty();
         }

@@ -10,6 +10,7 @@
         "data.MixinDataContainer",
         "event.cause.damage.MixinAbstractDamageSource",
         "event.cause.damage.MixinAbstractEntityDamageSource",
+        "event.cause.damage.MixinAbstractIndirectEntityDamageSource",
         "item.merchant.MixinMerchant",
         "text.MixinText",
         "text.MixinTextLiteral",

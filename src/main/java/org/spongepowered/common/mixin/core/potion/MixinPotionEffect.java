@@ -84,7 +84,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.POTION_TYPE, this.getType().getId())
+                .set(DataQueries.POTION_TYPE, this.getType().getKey())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
                 .set(DataQueries.POTION_AMBIANCE, this.isAmbient)

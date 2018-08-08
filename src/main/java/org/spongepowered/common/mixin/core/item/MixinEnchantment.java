@@ -137,7 +137,7 @@ public abstract class MixinEnchantment implements IMixinEnchantment, Enchantment
     public String toString() {
         return MoreObjects.toStringHelper("EnchantmentType")
                 .add("Name", shadow$getName())
-                .add("Id", getId())
+                .add("Id", getKey())
                 .toString();
     }
 }

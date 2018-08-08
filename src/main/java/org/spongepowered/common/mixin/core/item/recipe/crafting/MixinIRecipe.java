@@ -32,6 +32,7 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.NonNullList;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -83,10 +84,13 @@ public interface MixinIRecipe extends CraftingRecipe {
     default String getId() {
         return CraftingManager.REGISTRY.getNameForObject(((IRecipe) this)).toString();
     }
-
+    @Override
+    default CatalogKey getKey() {
+        return (CatalogKey) (Object) CraftingManager.REGISTRY.getNameForObject((IRecipe) this);
+    }
     @Override
     default String getName() {
-        return getId();
+        return getKey().getValue();
     }
 
     @Override

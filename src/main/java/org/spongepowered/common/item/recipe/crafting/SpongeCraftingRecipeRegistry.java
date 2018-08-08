@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -98,7 +99,7 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
     public void registerDefaults() {
         for (IRecipe iRecipe : CraftingManager.REGISTRY) {
             CraftingRecipe recipe = (CraftingRecipe) iRecipe;
-            this.recipeMappings.put(recipe.getId(), recipe);
+            this.recipeMappings.put(recipe.getKey().toString(), recipe);
         }
 
         RegistryHelper.setFinalStatic(Ingredient.class, "NONE", net.minecraft.item.crafting.Ingredient.EMPTY);
@@ -110,13 +111,18 @@ public class SpongeCraftingRecipeRegistry implements CraftingRecipeRegistry, Spo
         if (!(recipe instanceof IRecipe)) { // Handle custom implemented Recipe Interfaces
             recipe = new DelegateSpongeCraftingRecipe(recipe);
         }
-        this.recipeMappings.put(recipe.getId(), recipe);
+        this.recipeMappings.put(recipe.getKey().toString(), recipe);
         this.customRecipes.add(recipe);
     }
 
     @Override
     public Optional<CraftingRecipe> getById(String id) {
         return SpongeImplHooks.getRecipeById(id);
+    }
+
+    @Override
+    public Optional<CraftingRecipe> get(CatalogKey key) {
+        return SpongeImplHooks.getRecipeById(key);
     }
 
     @Override
