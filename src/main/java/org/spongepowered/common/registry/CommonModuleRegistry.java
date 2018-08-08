@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -160,6 +161,7 @@ import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyBuilder;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
+import org.spongepowered.common.data.builder.CatalogKeyBuilder;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -370,6 +372,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
             .registerBuilderSupplier(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
             .registerBuilderSupplier(Trigger.Builder.class, SpongeTriggerBuilder::new)
+            .registerBuilderSupplier(CatalogKey.Builder.class, CatalogKeyBuilder::new)
         ;
     }
 

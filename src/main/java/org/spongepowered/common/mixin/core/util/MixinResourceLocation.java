@@ -27,14 +27,19 @@ package org.spongepowered.common.mixin.core.util;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ResourceLocation.class)
-public class MixinResourceLocation implements CatalogKey {
+@Implements(@Interface(iface = CatalogKey.class, prefix = "catalog$"))
+public abstract class MixinResourceLocation implements CatalogKey {
 
     @Final @Shadow protected String resourceDomain;
     @Final @Shadow protected String resourcePath;
+    @Shadow public abstract String shadow$toString();
 
     @Override
     public String getNamespace() {
@@ -45,4 +50,10 @@ public class MixinResourceLocation implements CatalogKey {
     public String getValue() {
         return this.resourcePath;
     }
+
+    @Intrinsic
+    public String catalog$toString() {
+        return shadow$toString();
+    }
+
 }

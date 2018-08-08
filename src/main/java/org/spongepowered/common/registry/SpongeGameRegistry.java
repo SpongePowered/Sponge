@@ -44,14 +44,11 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.value.ValueFactory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
@@ -158,13 +155,6 @@ public class SpongeGameRegistry implements GameRegistry {
     @Inject
     public SpongeGameRegistry(SpongePropertyRegistry propertyRegistry) {
         this.propertyRegistry = propertyRegistry;
-    }
-
-    @Override
-    public CatalogKey createKey(final String namespace, final String value) {
-        checkNotNull(namespace, "namespace");
-        checkNotNull(value, "value");
-        return (CatalogKey) new ResourceLocation(namespace, value);
     }
 
     @Override
