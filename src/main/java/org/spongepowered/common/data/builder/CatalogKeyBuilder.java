@@ -44,21 +44,21 @@ public class CatalogKeyBuilder implements CatalogKey.Builder {
     @Nullable private String value;
 
     @Override
-    public CatalogKey.Builder nameSpace(String nameSpace) {
+    public CatalogKey.Builder namespace(String nameSpace) {
         checkArgument(!checkNotNull(nameSpace).isEmpty());
         this.nameSpace = nameSpace.toLowerCase(Locale.ENGLISH);
         return this;
     }
 
     @Override
-    public CatalogKey.Builder nameSpace(PluginContainer container) {
+    public CatalogKey.Builder namespace(PluginContainer container) {
         checkArgument(!checkNotNull(container).getId().isEmpty());
         this.nameSpace = container.getId();
         return this;
     }
 
     @Override
-    public CatalogKey.Builder nameSpace(Object pluginInstance) {
+    public CatalogKey.Builder namespace(Object pluginInstance) {
         checkNotNull(pluginInstance, "plugin");
         final Optional<PluginContainer> pluginContainer = Sponge.getPluginManager().fromInstance(pluginInstance);
         checkArgument(pluginContainer.isPresent(), "Not a plugin");
