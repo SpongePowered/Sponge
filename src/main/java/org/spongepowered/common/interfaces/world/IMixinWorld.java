@@ -62,4 +62,5 @@ public interface IMixinWorld {
 
     int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType);
 
+    void clearFakeCheck();
 }

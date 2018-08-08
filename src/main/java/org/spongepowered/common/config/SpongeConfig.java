@@ -117,12 +117,31 @@ public class SpongeConfig<T extends ConfigBase> {
     private ObjectMapper<T>.BoundInstance configMapper;
 
     private final String modId;
+    private final boolean isDummy;
+
+    public static SpongeConfig newDummyConfig(Type type) {
+        return new SpongeConfig(type);
+    }
+
+    private SpongeConfig(Type type) {
+        this.type = type;
+        this.parent = null;
+        this.modId = null;
+        this.isDummy = true;
+
+        try {
+            this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
+        } catch (Exception e) {
+            SpongeImpl.getLogger().error("Failed to initialize dummy configuration", e);
+        }
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public SpongeConfig(Type type, Path path, String modId, SpongeConfig<?> parent) {
         this.type = type;
         this.parent = parent;
         this.modId = modId;
+        this.isDummy = false;
 
         try {
             Files.createDirectories(path.getParent());
@@ -145,10 +164,16 @@ public class SpongeConfig<T extends ConfigBase> {
     }
 
     public void save() {
+        if (this.isDummy) {
+            return;
+        }
         SpongeImpl.getConfigSaveManager().save(this);
     }
 
     public boolean saveNow() {
+        if (this.isDummy) {
+            return false;
+        }
         try {
             // save from the mapped object --> node
             CommentedConfigurationNode saveNode = SimpleCommentedConfigurationNode.root(LOADER_OPTIONS);
@@ -172,6 +197,9 @@ public class SpongeConfig<T extends ConfigBase> {
     }
 
     public void reload() {
+        if (this.isDummy) {
+            return;
+        }
         if (!SpongeImpl.getConfigSaveManager().flush(this)) {
             // Can't reload
             SpongeImpl.getLogger().error("Failed to load configuration due to error in flushing config");
@@ -217,6 +245,9 @@ public class SpongeConfig<T extends ConfigBase> {
     }
 
     private void populateInstance() throws ObjectMappingException {
+        if (this.isDummy) {
+            return;
+        }
         this.configMapper.populate(this.data.getNode(this.modId));
     }
 
@@ -230,6 +261,9 @@ public class SpongeConfig<T extends ConfigBase> {
      * @return If the cleanup was able to occur, depending on the state of the 'config-enabled' setting
      */
     private boolean cleanupConfig(CommentedConfigurationNode root) {
+        if (this.isDummy) {
+            return false;
+        }
         // we can't strip values from the global config, there won't be any duplicates there
         if (this.parent == null) {
             return false;
@@ -268,6 +302,9 @@ public class SpongeConfig<T extends ConfigBase> {
      * @param root The node to process
      */
     private void removeDuplicates(CommentedConfigurationNode root) {
+        if (this.isDummy) {
+            return;
+        }
         if (this.parent == null) {
             throw new IllegalStateException("parent is null");
         }

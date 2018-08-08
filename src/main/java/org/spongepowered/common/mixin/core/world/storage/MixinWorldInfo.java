@@ -245,12 +245,17 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
              return false;
         }
 
-        this.worldConfig =
-                new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getConfigPath()
-                                .resolve(this.levelName)
-                                .resolve("world.conf"),
-                        SpongeImpl.ECOSYSTEM_ID,
-                        ((IMixinDimensionType) getDimensionType()).getDimensionConfig());
+        if (this.isValid()) {
+            this.worldConfig =
+                    new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getConfigPath()
+                            .resolve(this.levelName)
+                            .resolve("world.conf"),
+                            SpongeImpl.ECOSYSTEM_ID,
+                            ((IMixinDimensionType) getDimensionType()).getDimensionConfig());
+        } else {
+            this.worldConfig = SpongeConfig.newDummyConfig(SpongeConfig.Type.WORLD);
+        }
+
         return true;
     }
 

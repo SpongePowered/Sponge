@@ -76,6 +76,7 @@ import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -821,6 +822,12 @@ public final class WorldManager {
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
 
         ((IMixinChunkProviderServer) worldServer.getChunkProvider()).setForceChunkRequests(false);
+
+        // While we try to prevnt mods from changing a worlds' WorldInfo, we aren't always
+        // successful. We re-do the fake world check to catch any changes made to WorldInfo
+        // that would make it invalid
+        ((IMixinWorld) worldServer).clearFakeCheck();
+
         return worldServer;
     }
 
