@@ -85,7 +85,7 @@ public class SpongeLaunch {
     }
 
     public static void initPaths(File gameDirIn) {
-        gameDir = gameDirIn.toPath();
+        gameDir = gameDirIn.toPath().normalize();
         pluginsDir = gameDir.resolve("mods");
         configDir = gameDir.resolve("config");
         spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
