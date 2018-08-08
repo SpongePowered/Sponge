@@ -29,9 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Locale;
@@ -39,7 +41,7 @@ import java.util.Locale;
 public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
 
     TypeToken<V> valueToken;
-    String id;
+    CatalogKey id;
     String name;
     DataQuery query;
 
@@ -54,7 +56,20 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
     public Key.Builder<E, V> id(String id) {
         checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!checkNotNull(id, "ID cannot be null!").contains(" "), "Id cannot contain spaces!");
-        this.id = id.toLowerCase(Locale.ENGLISH);
+        String value = id.toLowerCase(Locale.ENGLISH);
+        final PluginContainer parent = SpongeKey.getCurrentContainer();
+        if (value.indexOf(':') == -1) {
+            value = parent.getId() + ':' + value;
+        }
+        this.id = CatalogKey.resolve(value);
+        return this;
+    }
+
+    @Override
+    public Key.Builder<E, V> key(CatalogKey key) {
+        checkState(this.valueToken != null, "Value Token must be set first!");
+        checkArgument(checkNotNull(key).toString().contains(" "), "Id cannot contain spaces!");
+        this.id = key;
         return this;
     }
 

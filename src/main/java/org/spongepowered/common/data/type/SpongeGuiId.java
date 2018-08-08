@@ -45,6 +45,6 @@ public class SpongeGuiId extends SpongeCatalogType implements GuiId {
     }
 
     public String getInternalId() {
-        return this.internalId == null ? this.getId() : this.internalId;
+        return this.internalId == null ? this.getKey().toString() : this.internalId;
     }
 }

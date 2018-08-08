@@ -335,7 +335,7 @@ public final class SpongeImplHooks {
 
     public static void onCraftingRecipeRegister(CraftingRecipe recipe) {
         // Overridden in SF
-        CraftingManager.register(recipe.getId(), ((IRecipe) recipe));
+        CraftingManager.register(recipe.getKey().toString(), ((IRecipe) recipe));
     }
 
     public static Optional<CraftingRecipe> findMatchingRecipe(CraftingGridInventory inventory, org.spongepowered.api.world.World world) {

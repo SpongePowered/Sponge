@@ -103,7 +103,7 @@ public final class SpongeTimings {
      */
     public static Timing getEntityTiming(Entity entity) {
         EntityType type = entity.getType();
-        String entityType = type != null ? type.getId() : entity.getClass().getName();
+        String entityType = type != null ? type.getKey().toString() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType);
     }
 
@@ -114,7 +114,7 @@ public final class SpongeTimings {
      */
     public static Timing getTileEntityTiming(TileEntity entity) {
         TileEntityType type = entity.getType();
-        String entityType = type != null ? type.getId() : entity.getClass().getName();
+        String entityType = type != null ? type.getKey().toString() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType);
     }
 
@@ -144,6 +144,6 @@ public final class SpongeTimings {
 
     public static Timing getBlockTiming(Block block) {
         BlockType type = (BlockType) block;
-        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getId() : block.getUnlocalizedName());
+        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getKey().toString() : block.getUnlocalizedName());
     }
 }

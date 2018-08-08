@@ -59,7 +59,7 @@ public final class SpongeEnchantment implements Enchantment {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(Queries.ENCHANTMENT_ID, this.enchantmentType.getId())
+                .set(Queries.ENCHANTMENT_ID, this.enchantmentType.getKey())
                 .set(Queries.LEVEL, this.level);
     }
 

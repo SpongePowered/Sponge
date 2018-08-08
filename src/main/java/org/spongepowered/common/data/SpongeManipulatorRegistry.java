@@ -37,6 +37,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Multimap;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataRegistrationNotFoundException;
@@ -129,6 +130,12 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
     }
 
     @Override
+    public Optional<DataRegistration<?, ?>> get(CatalogKey key) {
+        final String lookup = key.toString();
+        return Optional.ofNullable(this.registrationMap.get(lookup));
+    }
+
+    @Override
     public Optional<DataRegistration<?, ?>> getById(String id) {
         final DataRegistration<?, ?> dataRegistration = this.registrationMap.get(id);
         return Optional.ofNullable(dataRegistration);
@@ -142,25 +149,25 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
 
     private static final class TemporaryRegistry {
 
-        private final Map<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
+        final Map<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
 
-        private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
+        final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
-        private final Map<Class<? extends DataManipulator<?, ?>>, List<NbtDataProcessor<?, ?>>> nbtProcessorMap = new MapMaker()
+        final Map<Class<? extends DataManipulator<?, ?>>, List<NbtDataProcessor<?, ?>>> nbtProcessorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
-        private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
+        final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
             .concurrencyLevel(4)
             .makeMap();
 
-        private final ConcurrentSkipListSet<SpongeDataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
-            Comparator.comparing(DataRegistration::getId));
+        final ConcurrentSkipListSet<SpongeDataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
+            Comparator.comparing(DataRegistration::getKey));
 
     }
 
@@ -169,7 +176,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
 
     public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> DataRegistration<M, I> getRegistrationFor(
         Class<? extends M> manipulator) {
-        final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator.getClass());
+        final DataRegistration<?, ?> dataRegistration = this.manipulatorRegistrationMap.get(manipulator);
         if (dataRegistration == null) {
             throw new DataRegistrationNotFoundException("Could not locate a DataRegistration for class", manipulator);
         }
@@ -223,9 +230,9 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
 
     <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
         checkState(this.tempRegistry != null);
-        final String dataId = builder.id;
+        final CatalogKey dataId = builder.catalogKey;
         this.tempRegistry.registrations.stream()
-            .filter(registration -> registration.getId().equalsIgnoreCase(dataId))
+            .filter(registration -> registration.getKey().equals(dataId))
             .findFirst()
             .ifPresent(registration -> {
                 throw new IllegalStateException("Existing DataRegistration exists for id: " + dataId);
@@ -427,7 +434,7 @@ public class SpongeManipulatorRegistry implements SpongeAdditionalCatalogRegistr
                 if (!registration.getImmutableImplementationClass().equals(registration.getImmutableManipulatorClass())) {
                     immutableBuilder.put(registration.getImmutableImplementationClass(), registration);
                 }
-                idBuilder.put(registration.getId(), registration);
+                idBuilder.put(registration.getKey().toString(), registration);
                 pluginBuilder.put(registration.getPluginContainer(), registration);
             });
 

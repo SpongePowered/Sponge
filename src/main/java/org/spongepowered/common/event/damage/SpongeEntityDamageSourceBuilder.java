@@ -48,7 +48,7 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
         checkState(this.damageType != null, "Damage type cannot be null!");
         checkState(this.reference.get() != null);
         net.minecraft.util.EntityDamageSource damageSource =
-            new net.minecraft.util.EntityDamageSource(this.damageType.getId(), (net.minecraft.entity.Entity) this.reference.get());
+            new net.minecraft.util.EntityDamageSource(this.damageType.getKey().toString(), (net.minecraft.entity.Entity) this.reference.get());
         if (this.creative) {
             damageSource.setDamageAllowedInCreativeMode();
         }

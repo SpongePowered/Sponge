@@ -71,7 +71,7 @@ public abstract class SpongeCatalogType implements CatalogType {
             return false;
         }
         final CatalogType other = (CatalogType) obj;
-        return getId().equals(other.getId());
+        return getKey().equals(other.getKey());
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
-                .add("id", getId())
+                .add("id", getKey().toString())
                 .add("name", getName());
     }
 

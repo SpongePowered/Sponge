@@ -53,7 +53,7 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
         if (!registration.isPresent()) {
             return content;
         }
-        content.set(DataQueries.DATA_ID, registration.get().getId());
+        content.set(DataQueries.DATA_ID, registration.get().getKey());
         content.remove(DataQueries.DATA_CLASS);
         return content;
     }

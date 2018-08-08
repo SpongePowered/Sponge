@@ -56,7 +56,7 @@ public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourc
         checkState(this.proxy.get() != null);
         checkState(this.damageType != null);
         net.minecraft.util.EntityDamageSourceIndirect damageSource =
-            new net.minecraft.util.EntityDamageSourceIndirect(this.damageType.getId(),
+            new net.minecraft.util.EntityDamageSourceIndirect(this.damageType.getKey().toString(),
                 (net.minecraft.entity.Entity) this.reference.get(),
                 (net.minecraft.entity.Entity) this.proxy.get());
         if (this.creative) {

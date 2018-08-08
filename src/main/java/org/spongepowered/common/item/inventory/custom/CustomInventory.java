@@ -162,13 +162,13 @@ public class CustomInventory implements IInventory, IInteractionObject {
             if (property.getValue() instanceof SpongeGuiId) {
                 return ((SpongeGuiId) property.getValue()).getInternalId(); // Handle Vanilla EntityHorse GuiId
             }
-            return ((GuiIdProperty) property).getValue().getId();
+            return ((GuiIdProperty) property).getValue().getKey().toString();
         }
         GuiId guiId = this.archetype.getProperty(GuiIdProperty.class, key).map(GuiIdProperty::getValue).orElse(GuiIds.CHEST);
         if (guiId instanceof SpongeGuiId) {
             return ((SpongeGuiId) guiId).getInternalId(); // Handle Vanilla EntityHorse GuiId
         }
-        return guiId.getId();
+        return guiId.getKey().toString();
     }
 
     // IInventory delegation

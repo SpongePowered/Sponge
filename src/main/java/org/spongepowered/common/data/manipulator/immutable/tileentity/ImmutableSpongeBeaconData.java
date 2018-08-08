@@ -97,10 +97,10 @@ public class ImmutableSpongeBeaconData extends AbstractImmutableData<ImmutableBe
     public DataContainer toContainer() {
         DataContainer dataContainer = super.toContainer();
         if (this.primaryEffect != null) {
-            dataContainer = dataContainer.set(Keys.BEACON_PRIMARY_EFFECT.getQuery(), this.primaryEffect.getId());
+            dataContainer = dataContainer.set(Keys.BEACON_PRIMARY_EFFECT.getQuery(), this.primaryEffect.getKey());
         }
         if (this.secondaryEffect != null) {
-            dataContainer = dataContainer.set(Keys.BEACON_SECONDARY_EFFECT.getQuery(), this.secondaryEffect.getId());
+            dataContainer = dataContainer.set(Keys.BEACON_SECONDARY_EFFECT.getQuery(), this.secondaryEffect.getKey());
         }
         return dataContainer;
     }

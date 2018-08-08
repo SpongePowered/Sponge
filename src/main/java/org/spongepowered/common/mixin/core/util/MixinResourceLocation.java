@@ -40,6 +40,7 @@ public abstract class MixinResourceLocation implements CatalogKey {
     @Final @Shadow protected String resourceDomain;
     @Final @Shadow protected String resourcePath;
     @Shadow public abstract String shadow$toString();
+    @Shadow public abstract int shadow$compareTo(ResourceLocation location);
 
     @Override
     public String getNamespace() {
@@ -56,4 +57,12 @@ public abstract class MixinResourceLocation implements CatalogKey {
         return shadow$toString();
     }
 
+    @Override
+    @Intrinsic
+    public int compareTo(CatalogKey o) {
+        if (o == null) {
+            return 1;
+        }
+        return shadow$compareTo((ResourceLocation) (Object) o);
+    }
 }

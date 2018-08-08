@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
@@ -44,7 +45,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     private final Class<? extends I> immutableImplementationClass;
     private final DataManipulatorBuilder<M, I> manipulatorBuilder;
     private final PluginContainer container;
-    private final String id;
+    private final CatalogKey id;
     private final String name;
 
     SpongeDataRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
@@ -54,7 +55,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
         this.immutableImplementationClass = builder.immutableImplementation == null ? this.immutableClass : builder.immutableImplementation;
         this.manipulatorBuilder = checkNotNull(builder.manipulatorBuilder, "DataManipulatorBuilder is null!");
         this.container = checkNotNull(builder.container, "PluginContainer is null!");
-        this.id = this.container.getId() + ":" + checkNotNull(builder.id, "Data ID is null!");
+        this.id = CatalogKey.of(this.container.getId(), checkNotNull(builder.id, "Data ID is null!"));
         this.name = checkNotNull(builder.name, "Data name is null!");
     }
 
@@ -90,6 +91,11 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
 
     @Override
     public String getId() {
+        return this.id.toString();
+    }
+
+    @Override
+    public CatalogKey getKey() {
         return this.id;
     }
 
@@ -133,6 +139,6 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
 
     @Override
     public int compareTo(SpongeDataRegistration<?, ?> o) {
-        return this.getId().compareTo(o.getId());
+        return this.getKey().compareTo(o.getKey());
     }
 }

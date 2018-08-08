@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -106,7 +107,8 @@ public final class EventContextKeysModule
     }
 
     private void createKey(String id, String name, Class<?> usedClass) {
-        this.catalogTypeMap.put(id, new SpongeEventContextKey<>(id, name, usedClass));
+        final CatalogKey key = CatalogKey.resolve(id);
+        this.catalogTypeMap.put(id, new SpongeEventContextKey<>(key, name, usedClass));
     }
 
     private EventContextKeysModule() {

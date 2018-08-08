@@ -157,13 +157,13 @@ class TimingsExport extends Thread {
                     return JSONUtil.singleObjectPair(entry.getValue(), entry.getKey());
                 }))
                 .add("tileentity", JSONUtil.mapArrayToObject(blockTypeSet, (blockType) -> {
-                    return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getId());
+                    return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getKey().toString());
                 }))
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> {
                     if (entityType == EntityTypes.UNKNOWN) {
                         return null;
                     }
-                    return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getId());
+                    return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getKey().toString());
                 })));
 
         // Information about loaded plugins

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class PotionEffectContentUpdater implements DataContentUpdater {
 
     private final static ImmutableMap<String, String> map = ImmutableMap.<String, String>builder().putAll(PotionEffectTypeRegistryModule.getInstance().getAll()
-            .stream().collect(Collectors.toMap(CatalogType::getName, CatalogType::getId))).build();
+            .stream().collect(Collectors.toMap(CatalogType::getName, (catalog) -> catalog.getKey().toString()))).build();
 
     @Override
     public int getInputVersion() {

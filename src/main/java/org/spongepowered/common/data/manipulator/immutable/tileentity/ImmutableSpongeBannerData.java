@@ -95,7 +95,7 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getId())
+                .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getKey())
                 .set(Keys.BANNER_PATTERNS, this.layers);
     }
 }

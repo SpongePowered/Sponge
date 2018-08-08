@@ -26,6 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
@@ -46,10 +47,8 @@ import javax.annotation.Nullable;
 
 public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
 
-    private static Set<String> loggedPlugins = new HashSet<>();
-
     private final TypeToken<V> valueToken;
-    private final String id;
+    private final CatalogKey id;
     private final String name;
     private final DataQuery query;
     private final TypeToken<?> elementToken;
@@ -62,17 +61,7 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
         this.query = builder.query;
         this.elementToken = this.valueToken.resolveType(BaseValue.class.getTypeParameters()[0]);
         this.parent = getCurrentContainer();
-        final String id = builder.id;
-        if (id.indexOf(':') == -1) {
-            this.id = this.parent.getId() + ':' + id;
-        } else {
-            this.id = id;
-            if (loggedPlugins.add(this.parent.getId())) {
-                SpongeImpl.getLogger().warn(this.parent.getId() + ": It is no longer required to include the plugin id when specifying a "
-                        + "Key id through Key.Builder#id. This is deprecated and may be removed later. The plugin id will be retrieved from the "
-                        + "current PluginContainer in the cause stack. ");
-            }
-        }
+        this.id = builder.id;
     }
 
     public static PluginContainer getCurrentContainer() {
@@ -104,7 +93,7 @@ public class SpongeKey<V extends BaseValue<?>> implements Key<V> {
     }
 
     @Override
-    public String getId() {
+    public CatalogKey getKey() {
         return this.id;
     }
 

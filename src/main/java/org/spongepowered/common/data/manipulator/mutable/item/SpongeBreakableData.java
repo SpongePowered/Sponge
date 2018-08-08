@@ -51,7 +51,7 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.BREAKABLE_BLOCK_TYPES.getQuery(), getValue().stream()
-                .map(BlockType::getId)
+                .map(BlockType::getKey)
                 .collect(Collectors.toList()));
     }
 

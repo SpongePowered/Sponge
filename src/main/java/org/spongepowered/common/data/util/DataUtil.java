@@ -135,7 +135,7 @@ public final class DataUtil {
         for (T manipulator : manipulators) {
             final DataContainer container = DataContainer.createNew();
             container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
-            container.set(DataQueries.DATA_ID, func.apply(manipulator).getId())
+            container.set(DataQueries.DATA_ID, func.apply(manipulator).getKey())
                      .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             builder.add(container);
         }

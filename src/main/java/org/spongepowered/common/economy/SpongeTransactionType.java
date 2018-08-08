@@ -52,7 +52,7 @@ public class SpongeTransactionType implements TransactionType {
         if (other == null || !(other instanceof TransactionType)) {
             return false;
         }
-        return ((TransactionType) other).getId().equals(this.getId());
+        return ((TransactionType) other).getKey().equals(this.getKey());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class SpongeTransactionType implements TransactionType {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("id", this.getId())
+                .add("id", this.getKey())
                 .toString();
     }
 }

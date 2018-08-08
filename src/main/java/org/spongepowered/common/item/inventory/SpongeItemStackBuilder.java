@@ -214,7 +214,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         reset();
         final BlockType blockType = blockSnapshot.getState().getType();
         final Optional<ItemType> itemType = blockType.getItem();
-        itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockType.getId())));
+        itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockType.getKey())));
         quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
             final Block block = (Block) blockType;

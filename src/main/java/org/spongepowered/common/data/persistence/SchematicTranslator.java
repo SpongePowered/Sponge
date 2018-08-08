@@ -253,7 +253,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             DataQuery paletteQuery = DataQueries.Schematic.PALETTE;
             for (BlockState state : palette.getEntries()) {
                 // getOrAssign to skip the optional, it will never assign
-                data.set(paletteQuery.then(state.getId()), palette.getOrAssign(state));
+                data.set(paletteQuery.then(state.getKey()), palette.getOrAssign(state));
             }
             data.set(DataQueries.Schematic.PALETTE_MAX, palette.getHighestId());
         }
