@@ -69,8 +69,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     BlockState blockState;
     BlockState extendedState;
     UUID worldUuid;
-    UUID creatorUuid;
-    UUID notifierUuid;
+    @Nullable UUID creatorUuid;
+    @Nullable UUID notifierUuid;
     Vector3i coords;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
@@ -134,13 +134,13 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder creator(UUID uuid) {
-        this.creatorUuid = checkNotNull(uuid);
+        this.creatorUuid = uuid;
         return this;
     }
 
     @Override
     public SpongeBlockSnapshotBuilder notifier(UUID uuid) {
-        this.notifierUuid = checkNotNull(uuid);
+        this.notifierUuid = uuid;
         return this;
     }
 
