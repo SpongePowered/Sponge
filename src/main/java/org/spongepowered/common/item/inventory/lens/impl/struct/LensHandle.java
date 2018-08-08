@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.inventory.lens.impl.struct;
 
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.inventory.lens.Lens;
 
 import java.util.ArrayList;
@@ -35,16 +36,13 @@ import java.util.Iterator;
 /**
  * A relationship between a lens and properties for the lens when viewed through
  * another, primarily used as elements in lens collections.
- *  
- * @param <TInventory>
- * @param <TStack>
  */
-public final class LensHandle<TInventory, TStack> {
+public final class LensHandle {
 
     /**
      * The lens
      */
-    public Lens<TInventory, TStack> lens;
+    public Lens lens;
     
     /**
      * Ordinal, when required 
@@ -70,7 +68,7 @@ public final class LensHandle<TInventory, TStack> {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
+    public LensHandle(Lens lens, InventoryProperty<?, ?>... properties) {
         this.lens = lens;
         if (properties != null && properties.length > 0) {
             this.properties = new ArrayList<>();
@@ -85,7 +83,7 @@ public final class LensHandle<TInventory, TStack> {
      * @param lens
      * @param properties
      */
-    public LensHandle(Lens<TInventory, TStack> lens, Collection<InventoryProperty<?, ?>> properties) {
+    public LensHandle(Lens lens, Collection<InventoryProperty<?, ?>> properties) {
         this.lens = lens;
         if (properties != null && properties.size() > 0) {
             this.properties = new ArrayList<>(properties);
@@ -117,9 +115,9 @@ public final class LensHandle<TInventory, TStack> {
 
     public void setProperty(InventoryProperty<?, ?> property) {
         if (this.properties == null) {
-            this.properties = new ArrayList<InventoryProperty<?, ?>>();
+            this.properties = new ArrayList<>();
         } else {
-            this.removeMatchingProperties( property);
+            this.removeMatchingProperties(property);
         }
         this.properties.add(property);
     }
@@ -131,12 +129,11 @@ public final class LensHandle<TInventory, TStack> {
     }
 
     private void removeMatchingProperties(InventoryProperty<?, ?> property) {
-        for (Iterator<InventoryProperty<?, ?>> iter = this.properties.iterator(); iter.hasNext();) {
-            InventoryProperty<?, ?> prop = iter.next();
-            if (prop.getClass() == property.getClass() && prop.getKey().equals(property.getKey())) {
-                iter.remove();
-            }
-        }
+        this.properties.removeIf(prop -> prop.getClass() == property.getClass() && prop.getKey().equals(property.getKey()));
     }
 
+    @Override
+    public String toString() {
+        return this.lens.toString();
+    }
 }

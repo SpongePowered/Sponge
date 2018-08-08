@@ -36,6 +36,7 @@ import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.IMixinITeleporter;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.SpongePortalAgentType;
 
@@ -53,7 +54,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
     @RegisterCatalog(PortalAgentTypes.class)
     private final Map<String, PortalAgentType> portalAgentTypeMappings = new HashMap<>();
-    private Map<Class<? extends PortalAgent>, PortalAgentType> portalAgentClassToTypeMappings = new HashMap<>();
+    private final Map<Class<? extends PortalAgent>, PortalAgentType> portalAgentClassToTypeMappings = new HashMap<>();
 
     @Override
     public Optional<PortalAgentType> getById(String id) {
@@ -77,9 +78,12 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
         return false;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void registerDefaults() {
-        this.portalAgentTypeMappings.put("minecraft:default", new SpongePortalAgentType("Default", "minecraft:default", Teleporter.class));
+        final Class clazz = Teleporter.class;
+        this.portalAgentTypeMappings.put("minecraft:default",
+            new SpongePortalAgentType("minecraft:default", "Default", (Class<? extends IMixinITeleporter>) clazz));
     }
 
     @Override
@@ -91,7 +95,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
         return map;
     }
 
-    PortalAgentRegistryModule() {
+    private PortalAgentRegistryModule() {
     }
 
     @SuppressWarnings("unchecked")
@@ -100,7 +104,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
             try {
                 Class<?> clazz = Class.forName(portalAgentTypeClass);
                 if (Teleporter.class.isAssignableFrom(clazz)) {
-                    return this.validatePortalAgent((Class<? extends Teleporter>) clazz);
+                    return this.validatePortalAgent((Class<? extends IMixinITeleporter>) clazz);
                 }
                 SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world " + worldName +". Falling back to default type...");
             } catch (ClassNotFoundException e) {
@@ -111,12 +115,12 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
         return PortalAgentTypes.DEFAULT;
     }
 
-    public PortalAgentType validatePortalAgent(Teleporter teleporter) {
+    public PortalAgentType validatePortalAgent(IMixinITeleporter teleporter) {
         return this.validatePortalAgent(teleporter.getClass());
     }
 
     @SuppressWarnings("unchecked")
-    public PortalAgentType validatePortalAgent(Class<? extends Teleporter> clazz) {
+    private PortalAgentType validatePortalAgent(Class<? extends IMixinITeleporter> clazz) {
         PortalAgentType portalAgentType = this.portalAgentClassToTypeMappings.get(clazz);
         if (portalAgentType != null) {
             return portalAgentType;

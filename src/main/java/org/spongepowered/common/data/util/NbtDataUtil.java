@@ -63,6 +63,8 @@ public final class NbtDataUtil {
     public static final String BANNER_BASE = "Base";
     public static final String BANNER_PATTERNS = "Patterns";
     public static final String FAILED_CUSTOM_DATA = "FailedData";
+    public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
+    public static final String ARMOR_COLOR_DISPLAY_TAG = "display";
 
     private NbtDataUtil() {
     }
@@ -74,6 +76,7 @@ public final class NbtDataUtil {
         public static final String IS_FLYING = "flying";
 
         public static final String INVENTORY = "Inventory";
+        public static final String ENDERCHEST_INVENTORY = "EnderItems";
 
         public static final String SELECTED_ITEM_SLOT = "SelectedItemSlot";
     }

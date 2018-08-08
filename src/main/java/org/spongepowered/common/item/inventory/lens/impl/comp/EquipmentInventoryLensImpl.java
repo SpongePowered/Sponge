@@ -24,67 +24,44 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.RealLens;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
-public class EquipmentInventoryLensImpl extends OrderedInventoryLensImpl implements EquipmentInventoryLens<IInventory, ItemStack> {
+import java.util.Map;
+import java.util.Optional;
 
-    final ArmorEquipable carrier;
+public class EquipmentInventoryLensImpl extends RealLens implements EquipmentInventoryLens {
 
-    public EquipmentInventoryLensImpl(ArmorEquipable carrier, int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots, boolean isContainer) {
-        super(base, size, stride, EquipmentInventoryAdapter.class, slots);
-        this.carrier = carrier;
-        if (isContainer) {
-            this.initContainer(slots);
-        } else {
-            this.initInventory(slots);
+    public EquipmentInventoryLensImpl(Map<EquipmentType, SlotLens> lenses) {
+        super(0, lenses.size(), EquipmentInventoryAdapter.class);
+        this.init(lenses);
+    }
+
+    private void init(Map<EquipmentType, SlotLens> lenses) {
+        for (Map.Entry<EquipmentType, SlotLens> entry : lenses.entrySet()) {
+            this.addSpanningChild(entry.getValue(), new EquipmentSlotTypeImpl(entry.getKey()));
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
-    }
-
-    private void initInventory(SlotProvider<IInventory, ItemStack> slots) {
-        int index = this.base;
-        int ord = 0;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.BOOTS));
-        index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
-        index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
-        index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
-
-        this.cache();
-    }
-
-    private void initContainer(SlotProvider<IInventory, ItemStack> slots) {
-        int index = this.base;
-        int ord = 0;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.HEADWEAR));
-        index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.CHESTPLATE));
-        index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord++), EquipmentSlotType.of(EquipmentTypes.LEGGINGS));
-        index += this.stride;
-        this.addSpanningChild(slots.getSlot(index), new SlotIndex(ord), EquipmentSlotType.of(EquipmentTypes.BOOTS));
-
-        this.cache();
-    }
-
-    @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new EquipmentInventoryAdapter(this.carrier, inv, this, parent);
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
+        ArmorEquipable carrier = null;
+        if (parent instanceof CarriedInventory) {
+            Optional opt = ((CarriedInventory) parent).getCarrier();
+            if (opt.isPresent() && opt.get() instanceof ArmorEquipable) {
+                carrier = ((ArmorEquipable) opt.get());
+            }
+        }
+        return new EquipmentInventoryAdapter(carrier, inv, this, parent);
     }
 }

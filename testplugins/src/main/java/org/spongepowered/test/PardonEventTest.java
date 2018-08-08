@@ -31,7 +31,7 @@ import org.spongepowered.api.event.user.PardonUserEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 
-@Plugin(id = "pardoneventtest", name = "Pardon Event Test", description = "A plugin to test PardonUserEvent and PardonIpEvent")
+@Plugin(id = "pardoneventtest", name = "Pardon Event Test", description = "A plugin to test PardonUserEvent and PardonIpEvent", version = "0.0.0")
 public class PardonEventTest {
 
     @Listener

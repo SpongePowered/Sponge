@@ -53,6 +53,7 @@ public class TestImplementationModule extends SpongeImplementationModule {
         this.bind(Server.class).to(TestServer.class);
         this.bind(SpongeGame.class).to(TestGame.class);
         Platform platform = mock(Platform.class);
+        when(platform.getExecutionType()).thenReturn(Platform.Type.SERVER);
         PluginContainer mock = mock(PluginContainer.class);
         when(platform.getContainer(any())).thenReturn(mock);
         this.bind(Platform.class).toInstance(platform);

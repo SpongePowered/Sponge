@@ -53,6 +53,7 @@ public class SpongeDamageableData extends AbstractData<DamageableData, Immutable
         super(DamageableData.class);
         this.lastAttacker = lastAttacker;
         this.lastDamage = lastDamage;
+        this.registerGettersAndSetters();
     }
 
     public SpongeDamageableData(@Nullable Living lastAttacker, @Nullable Double lastDamage) {
@@ -87,7 +88,7 @@ public class SpongeDamageableData extends AbstractData<DamageableData, Immutable
 
     @Override
     public ImmutableDamageableData asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDamageableData.class, this.lastAttacker, this.lastDamage);
+        return new ImmutableSpongeDamageableData(this.lastAttacker, this.lastDamage);
     }
 
     @Override

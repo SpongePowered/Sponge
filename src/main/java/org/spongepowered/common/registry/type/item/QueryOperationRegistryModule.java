@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class QueryOperationRegistryModule implements CatalogRegistryModule<QueryOperationType> {
 
     @RegisterCatalog(QueryOperationTypes.class)

@@ -73,8 +73,7 @@ public final class TimingsManager {
     }
 
     /**
-     * Ticked every tick by CraftBukkit to count the number of times a timer
-     * caused TPS loss.
+     * Counts the number of times a timer caused TPS loss.
      */
     static void tick() {
         if (Timings.isTimingsEnabled()) {

@@ -34,6 +34,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
     @Override
     public Optional<FlammableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+        final BlockPos pos = VecHelper.toBlockPos(location);
         final Block block = world.getBlockState(pos).getBlock();
         for (EnumFacing facing : EnumFacing.values()) {
             if (SpongeImplHooks.isBlockFlammable(block, world, pos, facing)) {
@@ -59,7 +60,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
     public Optional<FlammableProperty> getFor(Location<World> location, Direction direction) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final EnumFacing facing = toEnumFacing(direction);
-        final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
+        final BlockPos pos = VecHelper.toBlockPos(location);
         final boolean flammable = SpongeImplHooks.isBlockFlammable(world.getBlockState(pos).getBlock(), world, pos, facing);
         return Optional.of(flammable ? TRUE : FALSE);
     }

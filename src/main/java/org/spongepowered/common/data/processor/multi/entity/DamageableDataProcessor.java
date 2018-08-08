@@ -77,7 +77,8 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityLivingBase dataHolder) {
-        return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(dataHolder.getAttackingEntity()),
+        EntitySnapshot snapshot = dataHolder.getAttackingEntity() != null ? ((Entity) dataHolder.getAttackingEntity()).createSnapshot() : null;
+        return ImmutableMap.of(Keys.LAST_ATTACKER, Optional.ofNullable(snapshot),
                 Keys.LAST_DAMAGE, Optional.ofNullable(dataHolder.getAttackingEntity() == null ? null : ((IMixinEntityLivingBase) dataHolder).getLastDamageTaken()));
     }
 
@@ -86,6 +87,7 @@ public class DamageableDataProcessor extends AbstractEntityDataProcessor<EntityL
         return new SpongeDamageableData();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<DamageableData> fill(DataContainer container, DamageableData damageableData) {
         if (container.contains(Keys.LAST_DAMAGE)) {

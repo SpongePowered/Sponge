@@ -103,8 +103,8 @@ public abstract class MixinWorldEntitySpawner {
         }
 
         try (PhaseContext<?> context = GenerationPhase.State.WORLD_SPAWNER_SPAWNING.createPhaseContext()
-                .world(worldServerIn)
-                .buildAndSwitch()) {
+                .world(worldServerIn)) {
+            context.buildAndSwitch();
             Iterator<Chunk> chunkIterator = this.eligibleSpawnChunks.iterator();
             while (chunkIterator.hasNext()) {
                 Chunk chunk = chunkIterator.next();
@@ -350,7 +350,7 @@ public abstract class MixinWorldEntitySpawner {
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
+        PhaseTracker.getInstance().getCurrentContext().close();
         spawnerEntityType = null;
     }
 

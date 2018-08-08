@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-public interface GridInventoryLens<TInventory, TStack> extends Inventory2DLens<TInventory, TStack> {
+public interface GridInventoryLens extends Inventory2DLens {
 
-    InventoryRowLens<TInventory, TStack> getRow(int row);
+    InventoryRowLens getRow(int row);
 
-    InventoryColumnLens<TInventory, TStack> getColumn(int column);
+    InventoryColumnLens getColumn(int column);
 
 }

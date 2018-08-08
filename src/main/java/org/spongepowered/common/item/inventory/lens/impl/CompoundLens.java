@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import static org.spongepowered.api.data.Property.Operator.DELEGATE;
+
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.VanillaAdapter;
 import org.spongepowered.common.item.inventory.lens.CompoundSlotProvider;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.property.SlotIndexImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,30 +42,29 @@ import java.util.List;
  * A compound-lens composed of multiple lenses.
  * Only contains slot-lenses.
  */
-public class CompoundLens extends ConceptualLens {
+public class CompoundLens extends SlotBasedLens {
 
-    protected final List<Lens<IInventory, ItemStack>> inventories;
+    protected final List<Lens> inventories;
 
-    private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots,
-            List<Lens<IInventory, ItemStack>> lenses) {
-        super(0, size, adapterType, slots);
+    private CompoundLens(int size, Class<? extends Inventory> adapterType, SlotProvider slots,
+            List<Lens> lenses) {
+        super(0, size, 1, adapterType, slots);
         this.inventories = lenses;
         this.init(slots);
     }
 
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    protected void init(SlotProvider slots) {
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
-            if (!this.children.contains(slots.getSlot(slot))) {
-                this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));
+            if (!this.children.has(slots.getSlotLens(slot))) {
+                this.addSpanningChild(slots.getSlotLens(slot), new SlotIndexImpl(ord, DELEGATE));
             }
         }
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new VanillaAdapter(inv, this, parent);
     }
 
@@ -75,13 +74,15 @@ public class CompoundLens extends ConceptualLens {
 
     public static class Builder {
 
-        private final List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
+        private final List<Lens> lenses = new ArrayList<>();
 
+        @SuppressWarnings({"rawtypes", "unchecked"})
         public Builder add(Lens lens) {
             this.lenses.add(lens);
             return this;
         }
 
+        @SuppressWarnings({"rawtypes", "unchecked"})
         public CompoundLens build(CompoundSlotProvider provider) {
             return new CompoundLens(provider.size(), VanillaAdapter.class, provider, this.lenses);
         }

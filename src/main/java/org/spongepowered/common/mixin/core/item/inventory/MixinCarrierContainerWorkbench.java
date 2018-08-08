@@ -48,6 +48,7 @@ public class MixinCarrierContainerWorkbench implements IMixinSingleBlockCarrier 
         return new Location<>(((World) this.world), new Vector3d(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return ((CarriedInventory) this);

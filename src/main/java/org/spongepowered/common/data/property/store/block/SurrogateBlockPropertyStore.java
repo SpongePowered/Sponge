@@ -26,10 +26,13 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.SurrogateBlockProperty;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class SurrogateBlockPropertyStore extends AbstractBlockPropertyStore<SurrogateBlockProperty> {
 
@@ -38,7 +41,7 @@ public class SurrogateBlockPropertyStore extends AbstractBlockPropertyStore<Surr
     }
 
     @Override
-    protected Optional<SurrogateBlockProperty> getForBlock(IBlockState block) {
+    protected Optional<SurrogateBlockProperty> getForBlock(@Nullable Location<?> location, IBlockState block) {
         return Optional.of(new SurrogateBlockProperty(((IMixinBlock) block.getBlock()).isDummy()));
     }
 }

@@ -24,6 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.slots;
 
-public interface FuelSlotLens<TInventory, TStack> extends InputSlotLens<TInventory, TStack> {
+public interface FuelSlotLens<TInventory, TStack> extends InputSlotLens {
 
 }

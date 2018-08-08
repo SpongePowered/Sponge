@@ -68,7 +68,7 @@ public class MixinNetHandlerPlayServer_MovementChecks {
 
     @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 0.0625D, ordinal = 0), slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;move(Lnet/minecraft/entity/MoverType;DDD)V", ordinal = 0),
-            to  = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 1)
+            to  = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", ordinal = 1, remap = false)
     ))
     public double onMovedWronglySecond(double val) {
         if (SpongeImpl.getGlobalConfig().getConfig().getMovementChecks().movedWrongly()) {

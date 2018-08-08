@@ -56,7 +56,7 @@ final class PostServerTickListenerState extends ListenerPhaseState {
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getCapturedPlayer().ifPresent(player ->
                 ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
-                        .setBlockNotifier(notifyPos, player.getUniqueId())
+                        .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }
 
@@ -64,5 +64,28 @@ final class PostServerTickListenerState extends ListenerPhaseState {
     public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack stack, EntityPlayerMP playerMP, ListenerPhaseContext context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
+
+
+    @Override
+    public boolean doesDenyChunkRequests() {
+        return true;
+    }
+
+
+    @Override
+    public boolean doesBulkBlockCapture(ListenerPhaseContext context) {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
+        return false;
+    }
+
+    @Override
+    public boolean doesCaptureEntityDrops(ListenerPhaseContext context) {
+        return false;
+    }
+
 
 }

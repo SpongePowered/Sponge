@@ -28,10 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.Container;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.interfaces.IMixinContainer;
+
+import javax.annotation.Nullable;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
-    private Container container;
+    @Nullable private Container container;
 
     public BasicPacketContext(PacketState<? extends BasicPacketContext> state) {
         super(state);
@@ -43,17 +46,27 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
     }
 
     public Container getOpenContainer() {
-        return checkNotNull(container, "Open Container was null!");
+        return checkNotNull(this.container, "Open Container was null!");
     }
 
-    public Container getContainer() {
-        return container;
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean hasCaptures() {
+        if (this.state == PacketPhase.General.RESOURCE_PACK) {
+            return true;
+        }
+        if (this.state == PacketPhase.General.CLOSE_WINDOW) {
+            return true;
+        }
+
+        return super.hasCaptures();
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "OpenContainer", this.container)
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "OpenContainer", this.container)
             ;
     }
 }

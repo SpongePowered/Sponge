@@ -37,8 +37,6 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
-import java.util.Optional;
-
 public interface IMixinSingleBlockCarrier extends SingleBlockCarrier {
 
     @Override
@@ -46,6 +44,7 @@ public interface IMixinSingleBlockCarrier extends SingleBlockCarrier {
         return getInventory(from, this);
     }
 
+    @SuppressWarnings({"deprecation", "rawtypes"})
     static Inventory getInventory(Direction from, BlockCarrier thisThing) {
         if (thisThing instanceof ISidedInventory) {
             EnumFacing facing = DirectionFacingProvider.getInstance().get(from).get();

@@ -32,13 +32,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Bootstrap.class)
 public class MixinBootstrap {
+
     // TODO(kashike): remove me with 1.13
     @Redirect(
-            method = "register",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lorg/apache/logging/log4j/Logger;isDebugEnabled()Z"
-            )
+        method = "register",
+        at = @At(
+            value = "INVOKE",
+            target = "Lorg/apache/logging/log4j/Logger;isDebugEnabled()Z",
+            remap = false
+        )
     )
     private static boolean no(final Logger logger) {
         return false;

@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
@@ -65,6 +66,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     private ExecutorService lightExecutorService;
     private static final List<Chunk> EMPTY_LIST = new ArrayList<>();
     private static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
+    private boolean isServerChunk;
 
     @Shadow @Final private World world;
     @Shadow @Final private int[] heightMap;
@@ -95,7 +97,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(World worldIn, int x, int z, CallbackInfo ci) {
-        if (!worldIn.isRemote) {
+        this.isServerChunk = !((IMixinWorld) worldIn).isFake();
+        if (this.isServerChunk) {
             this.lightExecutorService = ((IMixinWorldServer) worldIn).getLightingExecutor();
         }
     }
@@ -118,7 +121,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     @Inject(method = "onTick", at = @At("HEAD"), cancellable = true)
     private void onTickHead(boolean skipRecheckGaps, CallbackInfo ci)
     {
-        if (!this.world.isRemote) {
+        if (this.isServerChunk) {
             final List<Chunk> neighbors = this.getSurroundingChunks();
             if (this.isGapLightingUpdated && this.world.provider.hasSkyLight() && !skipRecheckGaps && !neighbors.isEmpty())
             {
@@ -127,9 +130,9 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                 });
                 this.isGapLightingUpdated = false;
             }
-    
+
             this.ticked = true;
-    
+
             if (!this.isLightPopulated && this.isTerrainPopulated && !neighbors.isEmpty())
             {
                 this.lightExecutorService.execute(() -> {
@@ -138,11 +141,11 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                 // set to true to avoid requeuing the same task when not finished
                 this.isLightPopulated = true;
             }
-    
+
             while (!this.tileEntityPosQueue.isEmpty())
             {
-                BlockPos blockpos = (BlockPos)this.tileEntityPosQueue.poll();
-    
+                BlockPos blockpos = this.tileEntityPosQueue.poll();
+
                 if (this.getTileEntity(blockpos, Chunk.EnumCreateEntityType.CHECK) == null && this.getBlockState(blockpos).getBlock().hasTileEntity())
                 {
                     TileEntity tileentity = this.createNewTileEntity(blockpos);
@@ -171,7 +174,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Redirect(method = "updateSkylightNeighborHeight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLightFor(Lnet/minecraft/world/EnumSkyBlock;Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean onCheckLightForSkylightNeighbor(World world, EnumSkyBlock enumSkyBlock, BlockPos pos) {
-        if (world.isRemote) {
+        if (!this.isServerChunk) {
             return world.checkLightFor(enumSkyBlock, pos);
         }
 
@@ -180,7 +183,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Rechecks chunk gaps async.
-     * 
+     *
      * @param neighbors A thread-safe list of surrounding neighbor chunks
      */
     private void recheckGapsAsync(List<Chunk> neighbors) {
@@ -236,7 +239,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Redirect(method = "enqueueRelightChecks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLight(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean onRelightChecksCheckLight(World world, BlockPos pos) {
-        if (!this.world.isRemote) {
+        if (this.isServerChunk) {
             return this.checkWorldLight(pos);
         }
 
@@ -246,7 +249,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     // Avoids grabbing chunk async during light check
     @Redirect(method = "checkLight(II)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLight(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean onCheckLightWorld(World world, BlockPos pos) {
-        if (!world.isRemote) {
+        if (this.isServerChunk) {
             return this.checkWorldLight(pos);
         }
         return world.checkLight(pos);
@@ -254,7 +257,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Inject(method = "checkLight", at = @At("HEAD"), cancellable = true)
     private void checkLightHead(CallbackInfo ci) {
-        if (!this.world.isRemote) {
+        if (this.isServerChunk) {
             if (this.world.getMinecraftServer().isServerStopped() || this.lightExecutorService.isShutdown()) {
                 return;
             }
@@ -289,7 +292,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Checks light async.
-     * 
+     *
      * @param neighbors A thread-safe list of surrounding neighbor chunks
      */
     private void checkLightAsync(List<Chunk> neighbors)
@@ -334,7 +337,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Checks light async.
-     * 
+     *
      * @param x The x position of chunk
      * @param z The z position of chunk
      * @param neighbors A thread-safe list of surrounding neighbor chunks
@@ -382,7 +385,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Thread-safe method to retrieve a chunk during async light updates.
-     * 
+     *
      * @param chunkX The x position of chunk.
      * @param chunkZ The z position of chunk.
      * @param neighbors A thread-safe list of surrounding neighbor chunks
@@ -416,7 +419,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Checks if surrounding chunks are loaded thread-safe.
-     * 
+     *
      * @return True if surrounded chunks are loaded, false if not
      */
     private boolean isAreaLoaded() {
@@ -450,7 +453,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Gets surrounding chunks thread-safe.
-     * 
+     *
      * @return The list of surrounding chunks, empty list if not loaded
      */
     private List<Chunk> getSurroundingChunks() {
@@ -490,7 +493,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     @Inject(method = "relightBlock", at = @At("HEAD"), cancellable = true)
     private void onRelightBlock(int x, int y, int z, CallbackInfo ci) {
-        if (!this.world.isRemote) {
+        if (this.isServerChunk) {
             this.lightExecutorService.execute(() -> {
                 this.relightBlockAsync(x, y, z);
             });
@@ -500,7 +503,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Relight's a block async.
-     * 
+     *
      * @param x The x position
      * @param y The y position
      * @param z The z position
@@ -616,7 +619,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     /**
      * Marks a vertical line of blocks as dirty async.
      * Instead of calling world directly, we pass chunk safely for async light method.
-     * 
+     *
      * @param x1
      * @param z1
      * @param x2
@@ -649,7 +652,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Checks world light thread-safe.
-     * 
+     *
      * @param lightType The type of light to check
      * @param pos The block position
      * @return True if light update was successful, false if not
@@ -669,7 +672,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Checks world light async.
-     * 
+     *
      * @param pos The block position
      * @param neighbors A thread-safe list of surrounding neighbor chunks
      * @return True if light update was successful, false if not
@@ -692,7 +695,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * Gets the list of block positions currently queued for lighting updates.
-     * 
+     *
      * @param type The light type
      * @return The list of queued block positions, empty if none
      */

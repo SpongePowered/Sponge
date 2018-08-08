@@ -44,7 +44,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 @SuppressWarnings("ConstantConditions")
-@Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.")
+@Plugin(id = "instrumenttest", name = "InstrumentTest", description = "Tests instrument types and properties.", version = "0.0.0")
 public class InstrumentTestPlugin {
 
     private static boolean enabled = false;

@@ -24,38 +24,36 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.fabric;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CompoundFabric extends MinecraftFabric {
+public class CompoundFabric implements Fabric {
 
-    private final MinecraftFabric fabric1;
-    private final MinecraftFabric fabric2;
+    private final Fabric fabric1;
+    private final Fabric fabric2;
     private Translation displayName;
 
-    public CompoundFabric(MinecraftFabric fabric1, MinecraftFabric fabric2) {
+    public CompoundFabric(Fabric fabric1, Fabric fabric2) {
         this.fabric1 = fabric1;
         this.fabric2 = fabric2;
         this.displayName = fabric1.getDisplayName();
     }
 
     @Override
-    public Collection<IInventory> allInventories() {
-        Set<IInventory> inv = new HashSet<>();
+    public Collection<?> allInventories() {
+        Set<Object> inv = new HashSet<>();
         inv.addAll(this.fabric1.allInventories());
         inv.addAll(this.fabric2.allInventories());
         return inv;
     }
 
     @Override
-    public IInventory get(int index) {
-
+    public Object get(int index) {
         if (index < this.fabric1.getSize()) {
             return this.fabric1.get(index);
         }

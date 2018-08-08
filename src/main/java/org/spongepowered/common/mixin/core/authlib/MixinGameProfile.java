@@ -28,6 +28,8 @@ import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -35,6 +37,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -78,6 +82,13 @@ public abstract class MixinGameProfile {
 
         if (this.profile$getName().isPresent()) {
             container.set(DataQueries.USER_NAME, this.profile$getName().get());
+        }
+        if (!this.profile$getPropertyMap().isEmpty()) {
+            List<DataView> properties = new ArrayList<>();
+            for (ProfileProperty property: this.profile$getPropertyMap().values()) {
+                properties.add(property.toContainer());
+            }
+            container.set(DataQueries.PROFILE_PROPERTIES, properties);
         }
 
         return container;

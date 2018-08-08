@@ -40,7 +40,7 @@ public final class InventoryPropertyQueryOperation extends SpongeQueryOperation<
     }
 
     @Override
-    public <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent, Fabric<TInventory> inventory) {
+    public boolean matches(Lens lens, Lens parent, Fabric inventory) {
         if (parent == null) {
             return false;
         }

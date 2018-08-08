@@ -42,6 +42,7 @@ import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -79,7 +80,7 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
         List<SlotTransaction> previewTransactions = ((IMixinContainer) player.openContainer).getPreviewTransactions();
         if (previewTransactions.isEmpty()) {
             CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
-            SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek().orElse(ItemStack.empty())));
+            SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(slot.peek()));
             previewTransactions.add(st);
         }
         SpongeCommonEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
@@ -96,11 +97,11 @@ public class PlaceRecipePacketState extends BasicInventoryPacketState {
             Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(cursor, cursor);
             ClickInventoryEvent event;
             if (shift) {
-                event = SpongeEventFactory.createClickInventoryEventShiftPrimary(frame.getCurrentCause(),
-                        cursorTransaction, ((Container) player.openContainer), transactions);
+                event = SpongeEventFactory.createClickInventoryEventRecipeAll(frame.getCurrentCause(),
+                        cursorTransaction, (Recipe) recipe, ((Container) player.openContainer), transactions);
             } else {
-                event = SpongeEventFactory.createClickInventoryEventPrimary(frame.getCurrentCause(),
-                        cursorTransaction, ((Container) player.openContainer), transactions);
+                event = SpongeEventFactory.createClickInventoryEventRecipeSingle(frame.getCurrentCause(),
+                        cursorTransaction, (Recipe) recipe, ((Container) player.openContainer), transactions);
             }
             SpongeImpl.postEvent(event);
             if (event.isCancelled() || !event.getCursorTransaction().isValid()) {

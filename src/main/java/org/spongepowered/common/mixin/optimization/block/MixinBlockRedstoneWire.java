@@ -65,11 +65,11 @@ public abstract class MixinBlockRedstoneWire extends Block {
     }
 
     /** Positions that need to be turned off **/
-    private List<BlockPos> turnOff = Lists.<BlockPos>newArrayList();
+    private List<BlockPos> turnOff = Lists.newArrayList();
     /** Positions that need to be checked to be turned on **/
-    private List<BlockPos> turnOn = Lists.<BlockPos>newArrayList();
+    private List<BlockPos> turnOn = Lists.newArrayList();
     /** Positions of wire that was updated already (Ordering determines update order and is therefore required!) **/
-    private final Set<BlockPos> updatedRedstoneWire = Sets.<BlockPos>newLinkedHashSet();
+    private final Set<BlockPos> updatedRedstoneWire = Sets.newLinkedHashSet();
      
     /** Ordered arrays of the facings; Needed for the update order.
      *  I went with a vertical-first order here, but vertical last would work to.
@@ -81,7 +81,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
     /** Offsets for all surrounding blocks that need to receive updates **/
     private static final Vec3i[] surroundingBlocksOffset;
     static {
-        Set<Vec3i> set = Sets.<Vec3i>newLinkedHashSet();
+        Set<Vec3i> set = Sets.newLinkedHashSet();
         for (EnumFacing facing : facings) {
             set.add(facing.directionVec);
         }
@@ -97,9 +97,9 @@ public abstract class MixinBlockRedstoneWire extends Block {
         surroundingBlocksOffset = set.toArray(new Vec3i[set.size()]);
     }
 
-    @Shadow public boolean canProvidePower;
-    @Shadow public abstract int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength);
-    @Shadow public abstract boolean isPowerSourceAt(IBlockAccess worldIn, BlockPos pos, EnumFacing side);
+    @Shadow private boolean canProvidePower;
+    @Shadow protected abstract int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength);
+    @Shadow protected abstract boolean isPowerSourceAt(IBlockAccess worldIn, BlockPos pos, EnumFacing side);
 
     @Inject(method = "updateSurroundingRedstone", at = @At("HEAD"), cancellable = true)
     private void onUpdateSurroundingRedstone(World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<IBlockState> cir) {
@@ -138,7 +138,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
         }
         // Add all other updates to keep known behaviors
         // They are added in a backwards order because it preserves a commonly used behavior with the update order
-        Iterator<BlockPos> it = Lists.<BlockPos>newLinkedList(this.updatedRedstoneWire).descendingIterator();
+        Iterator<BlockPos> it = Lists.newLinkedList(this.updatedRedstoneWire).descendingIterator();
         while (it.hasNext()) {
             this.addAllSurroundingBlocks(it.next(), blocksNeedingUpdate);
         }
@@ -165,7 +165,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
      */
     private void calculateCurrentChanges(World worldIn, BlockPos position) {
         // Turn off all connected wires first if needed
-        if (worldIn.getBlockState(position).getBlock() == (BlockRedstoneWire) (Object) this) {
+        if (worldIn.getBlockState(position).getBlock() == this) {
             turnOff.add(position);
         } else {
             // In case this wire was removed, check the surrounding wires
@@ -175,7 +175,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
         while (!turnOff.isEmpty()) {
             BlockPos pos = turnOff.remove(0);
             IBlockState state = worldIn.getBlockState(pos);
-            int oldPower = ((Integer) state.getValue(BlockRedstoneWire.POWER)).intValue();
+            int oldPower = state.getValue(BlockRedstoneWire.POWER);
             this.canProvidePower = false;
             int blockPower = worldIn.isBlockIndirectlyGettingPowered(pos);
             this.canProvidePower = true;
@@ -204,7 +204,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
         while (!this.turnOn.isEmpty()) {
             BlockPos pos = this.turnOn.remove(0);
             IBlockState state = worldIn.getBlockState(pos);
-            int oldPower = ((Integer) state.getValue(BlockRedstoneWire.POWER)).intValue();
+            int oldPower = state.getValue(BlockRedstoneWire.POWER);
             this.canProvidePower = false;
             int blockPower = worldIn.isBlockIndirectlyGettingPowered(pos);
             this.canProvidePower = true;
@@ -236,8 +236,8 @@ public abstract class MixinBlockRedstoneWire extends Block {
      */
     private void addWireToList(World worldIn, BlockPos pos, int otherPower) {
         IBlockState state = worldIn.getBlockState(pos);
-        if (state.getBlock() == (BlockRedstoneWire) (Object) this) {
-            int power = ((Integer) state.getValue(BlockRedstoneWire.POWER)).intValue();
+        if (state.getBlock() == this) {
+            int power = state.getValue(BlockRedstoneWire.POWER);
             // Could get powered stronger by the neighbor?
             if (power < (otherPower - 1) && !this.turnOn.contains(pos)) {
                 // Mark for turn on check.
@@ -264,8 +264,8 @@ public abstract class MixinBlockRedstoneWire extends Block {
     private void checkSurroundingWires(World worldIn, BlockPos pos) {
         IBlockState state = worldIn.getBlockState(pos);
         int ownPower = 0;
-        if (state.getBlock() == (BlockRedstoneWire) (Object) this) {
-            ownPower = ((Integer) state.getValue(BlockRedstoneWire.POWER)).intValue();
+        if (state.getBlock() == this) {
+            ownPower = state.getValue(BlockRedstoneWire.POWER);
         }
         // Check wires on the same layer first as they appear closer to the wire
         for (EnumFacing facing : facingsHorizontal) {
@@ -400,13 +400,13 @@ public abstract class MixinBlockRedstoneWire extends Block {
      * @return List of all facings that can get powered by this wire
      */
     private List<EnumFacing> getSidesToPower(World worldIn, BlockPos pos) {
-        List<EnumFacing> retval = Lists.<EnumFacing>newArrayList();
+        List<EnumFacing> retval = Lists.newArrayList();
         for (EnumFacing facing : facingsHorizontal) {
             if (isPowerSourceAt(worldIn, pos, facing))
                 retval.add(facing);
         }
         if (retval.isEmpty())
-            return Lists.<EnumFacing>newArrayList(facingsHorizontal);
+            return Lists.newArrayList(facingsHorizontal);
         boolean northsouth = retval.contains(EnumFacing.NORTH) || retval.contains(EnumFacing.SOUTH);
         boolean eastwest = retval.contains(EnumFacing.EAST) || retval.contains(EnumFacing.WEST);
         if (northsouth) {
@@ -444,7 +444,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
      * @param power Power it should get set to
      */
     private void setWireState(World worldIn, BlockPos pos, IBlockState state, int power) {
-        state = state.withProperty(BlockRedstoneWire.POWER, Integer.valueOf(power));
+        state = state.withProperty(BlockRedstoneWire.POWER, power);
         worldIn.setBlockState(pos, state, 2);
         updatedRedstoneWire.add(pos);
     }
@@ -504,7 +504,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
             return 0;
         } else {
             if (side == EnumFacing.UP || this.getSidesToPower((World) blockAccess, pos).contains(side)) {
-                return ((Integer) blockState.getValue(BlockRedstoneWire.POWER)).intValue();
+                return blockState.getValue(BlockRedstoneWire.POWER);
             } else {
                 return 0;
             }
@@ -522,7 +522,7 @@ public abstract class MixinBlockRedstoneWire extends Block {
         }
         else if (Blocks.UNPOWERED_REPEATER.isSameDiode(blockState))
         {
-            EnumFacing enumfacing = (EnumFacing)blockState.getValue(BlockRedstoneRepeater.FACING);
+            EnumFacing enumfacing = blockState.getValue(BlockRedstoneRepeater.FACING);
             return enumfacing == side || enumfacing.getOpposite() == side;
         }
         else if (Blocks.OBSERVER == blockState.getBlock())

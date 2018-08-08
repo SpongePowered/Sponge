@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.world.EnumDifficulty;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
@@ -79,5 +80,12 @@ public interface IMixinWorldInfo {
     void setScoreboard(ServerScoreboard scoreboard);
 
     boolean isValid();
+
+    boolean hasCustomDifficulty();
+
+    /**
+     * Sets the difficulty without marking it as custom
+     */
+    void forceSetDifficulty(EnumDifficulty difficulty);
 
 }

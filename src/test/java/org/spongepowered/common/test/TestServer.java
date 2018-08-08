@@ -51,6 +51,8 @@ import java.util.concurrent.CompletableFuture;
 @Singleton
 public class TestServer implements Server {
 
+    private TestGameProfileManager gameProfileManager = new TestGameProfileManager();
+
     @Override
     public Collection<Player> getOnlinePlayers() {
         return Collections.emptyList();
@@ -234,7 +236,7 @@ public class TestServer implements Server {
 
     @Override
     public GameProfileManager getGameProfileManager() {
-        throw new NoSuchElementException();
+        return this.gameProfileManager;
     }
 
     @Override

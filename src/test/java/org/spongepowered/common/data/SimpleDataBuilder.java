@@ -55,9 +55,9 @@ class SimpleDataBuilder implements DataBuilder<SimpleData> {
         }
 
         return Optional.of(new SimpleData(testInt.get(),
-                                                      testDouble.get(),
-                                                      testString.get(),
-                                                      testList.get()));
+            testDouble.get(),
+            testString.get(),
+            testList.get()));
     }
 
     @Override

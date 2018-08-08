@@ -40,21 +40,13 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.interfaces.advancement.IMixinAdvancement;
+import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 public class SpongeAdvancementBuilder implements Advancement.Builder {
-
-    private static final Criterion dummyCriterion = new Criterion(new ImpossibleTrigger.Instance());
-    private static final String dummyCriterionName = "dummy_root_criterion";
-    private static final Map<String, Criterion> dummyCriteria = ImmutableMap.of(dummyCriterionName, dummyCriterion);
-    private static final String[][] dummyRequirements = {{ dummyCriterionName }};
-
-    public static final net.minecraft.advancements.Advancement DUMMY_ROOT_ADVANCEMENT = new net.minecraft.advancements.Advancement(
-            new ResourceLocation("sponge", "dummy_root"), null, null,
-            AdvancementRewards.EMPTY, dummyCriteria, dummyRequirements);
 
     @Nullable private Advancement parent;
     private AdvancementCriterion criterion;
@@ -110,7 +102,7 @@ public class SpongeAdvancementBuilder implements Advancement.Builder {
                 (net.minecraft.advancements.DisplayInfo) DisplayInfo.builder().from(this.displayInfo).build(); // Create a copy
         net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
         if (parent == null) {
-            parent = DUMMY_ROOT_ADVANCEMENT; // Attach a dummy root until a tree is constructed
+            parent = AdvancementRegistryModule.DUMMY_ROOT_ADVANCEMENT; // Attach a dummy root until a tree is constructed
         }
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
                 resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());

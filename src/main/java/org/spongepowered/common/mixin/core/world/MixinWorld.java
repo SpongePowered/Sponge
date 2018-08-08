@@ -144,6 +144,7 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeDimension;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
@@ -187,6 +188,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
+    protected SpongeDimension spongeDimensionWrapper;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -286,13 +288,27 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null; // Shadowed
     }
     @Shadow public abstract int getHeight(int x, int z);
+    @Shadow public boolean destroyBlock(BlockPos pos, boolean dropBlock) {
+        return false; // shadowed
+    }
+    @Shadow protected abstract void playEvent(int i, BlockPos pos, int stateId);
 
     // @formatter:on
 
+    @Shadow
+    public boolean isBlockModifiable(EntityPlayer player, BlockPos pos) {
+        return true; // shadowed so we can call from MixinWorldServer in spongeforge.
+    }
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    public void onInit(CallbackInfo ci) {
+        this.spongeDimensionWrapper = new SpongeDimension(this.provider);
+    }
+
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
-            + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
+                                                                     + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
-        if (this.isRemote) {
+        if (this.isFake()) {
             return provider.createWorldBorder();
         }
         return ((IMixinWorldProvider) provider).createServerWorldBorder();
@@ -301,10 +317,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("rawtypes")
     @Inject(method = "getCollisionBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)
     public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis, CallbackInfoReturnable<List<AxisAlignedBB>> cir) {
-        if (this.isRemote || entity == null) {
+        if (this.isFake() || entity == null) {
             return;
         }
-        if (entity.world != null && !entity.world.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
+        if (entity.world != null && !((IMixinWorld) entity.world).isFake() && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList<>());
         }
@@ -541,7 +557,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Dimension getDimension() {
-        return (Dimension) this.provider;
+        return this.spongeDimensionWrapper;
     }
 
     @Override
@@ -558,7 +574,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        if (this.isRemote) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
+        if (this.isFake()) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
             return Collections.emptyList();
         }
         return (List<Chunk>) (List<?>) Lists.newArrayList(((WorldServer) (Object) this).getChunkProvider().getLoadedChunks());
@@ -1123,6 +1139,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // These are overriden in MixinWorldServer where they should be.
 
+    @Inject(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playEvent(ILnet/minecraft/util/math/BlockPos;I)V"), cancellable = true)
+    public void onDestroyBlock(BlockPos pos, boolean dropBlock, CallbackInfoReturnable<Boolean> cir) {
+        
+    }
+
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         entityIn.onUpdate();
@@ -1148,7 +1169,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
                            to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
     private boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
-        if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
+        if (!this.isFake() && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
             return false;
         }
 
@@ -1206,7 +1227,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
     private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
         final net.minecraft.world.chunk.Chunk chunk;
-        if (!this.isRemote) {
+        if (!this.isFake()) {
             chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         } else {
             chunk = this.getChunkFromBlockCoords(pos);
@@ -1256,7 +1277,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Sponge - Don't create or obtain pending tileentity async, simply check if TE exists in chunk
             // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
-            if (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            if (!this.isFake() && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 return this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
             }
             // Sponge end
@@ -1434,8 +1455,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateEntities() {
-        //this.profiler.startSection("entities"); // Sponge - Don't use the profiler
-        //this.profiler.startSection("global"); // Sponge - Don't use the profiler
+        this.profiler.startSection("entities");
+        this.profiler.startSection("global");
         this.startEntityGlobalTimings(); // Sponge
 
 
@@ -1465,7 +1486,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
-        // this.profiler.endStartSection("remove"); // Sponge - Don't use the profiler
+        this.profiler.endStartSection("remove");
         this.loadedEntityList.removeAll(this.unloadedEntityList);
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
@@ -1488,7 +1509,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.unloadedEntityList.clear();
         this.stopEntityRemovalTiming(); // Sponge
         this.tickPlayers();
-        // this.profiler.endStartSection("regular"); // Sponge - Don't use the profiler
+        this.profiler.endStartSection("regular");
         this.entityActivationCheck();
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
@@ -1503,12 +1524,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity2.dismountRidingEntity();
             }
 
-            // this.profiler.startSection("tick"); // Sponge - Don't use the profiler
+            this.profiler.startSection("tick");
             this.startEntityTickTiming(); // Sponge
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
                 try {
+                    SpongeImplHooks.onEntityTickStart(entity2);
                     this.updateEntity(entity2);
+                    SpongeImplHooks.onEntityTickEnd(entity2);
                 } catch (Throwable throwable1) {
                     this.stopTimingTickEntityCrash(entity2); // Sponge
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
@@ -1519,8 +1542,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityTickSectionBeforeRemove(); // Sponge
-            // this.profiler.endSection(); // Sponge - Don't use the profiler
-            // this.profiler.startSection("remove"); // Sponge - Don't use the profiler
+            this.profiler.endSection();
+            this.profiler.startSection("remove");
             this.startEntityRemovalTick(); // Sponge
 
             if (entity2.isDead) {
@@ -1539,7 +1562,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityRemovalTiming(); // Sponge
-            // this.profiler.endSection(); // Sponge - Don't use the profiler
+            this.profiler.endSection();
         }
 
         // this.profiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
@@ -1556,9 +1579,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (((IMixinTileEntity) tileentity).shouldTick() && this.worldBorder.contains(blockpos)) { // Sponge
                     try {
-                        //this.profiler.startSection(tileentity.getClass().getSimpleName());
+                        this.profiler.func_194340_a(() -> String.valueOf(net.minecraft.tileentity.TileEntity.getKey(tileentity.getClass())));
+                        SpongeImplHooks.onTETickStart(tileentity);
                         ((ITickable) tileentity).update();
                         //this.profiler.endSection();
+                        SpongeImplHooks.onTETickEnd(tileentity);
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
@@ -1604,14 +1629,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        if (!this.isRemote) {
-            try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this).buildAndSwitch()) {
+        if (!this.isFake()) {
+            try (final PhaseContext<?> context = BlockPhase.State.TILE_CHUNK_UNLOAD.createPhaseContext().source(this)) {
+                context.buildAndSwitch();
                 this.startPendingTileEntityTimings(); // Sponge
             }
         }
 
         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
-        // this.profiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
+         this.profiler.endStartSection("pendingBlockEntities");
 
         if (!this.addedTileEntityList.isEmpty()) {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
@@ -1635,8 +1661,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.endPendingTileEntities(); // Sponge
-        // this.profiler.endSection(); // Sponge - Don't use the profiler
-        // this.profiler.endSection(); // Sponge - Don't use the profiler
+        this.profiler.endSection();
+        this.profiler.endSection();
     }
 
     /**

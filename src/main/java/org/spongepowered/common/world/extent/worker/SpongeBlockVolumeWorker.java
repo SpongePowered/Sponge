@@ -74,8 +74,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int zMax = unmodifiableVolume.getBlockMax().getZ();
         // a single go, requiring only one event
         try (BasicPluginContext phaseState = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-            .source(this)
-            .buildAndSwitch()) {
+            .source(this)) {
+            phaseState.buildAndSwitch();
             for (int z = zMin; z <= zMax; z++) {
                 for (int y = yMin; y <= yMax; y++) {
                     for (int x = xMin; x <= xMax; x++) {
@@ -107,8 +107,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int zMax = firstUnmodifiableVolume.getBlockMax().getZ();
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
         try (BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-            .source(this)
-            .buildAndSwitch()) {
+            .source(this)) {
+            context.buildAndSwitch();
             for (int z = zMin; z <= zMax; z++) {
                 for (int y = yMin; y <= yMax; y++) {
                     for (int x = xMin; x <= xMax; x++) {
@@ -131,8 +131,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int zMax = this.volume.getBlockMax().getZ();
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
             BasicPluginContext context = PluginPhase.State.BLOCK_WORKER.createPhaseContext()
-                .source(this)
-                .buildAndSwitch()) {
+                .source(this)) {
+            context.buildAndSwitch();
             for (int z = zMin; z <= zMax; z++) {
                 for (int y = yMin; y <= yMax; y++) {
                     for (int x = xMin; x <= xMax; x++) {

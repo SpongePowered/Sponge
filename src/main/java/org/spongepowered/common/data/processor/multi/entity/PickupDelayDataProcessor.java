@@ -78,7 +78,6 @@ public final class PickupDelayDataProcessor extends AbstractEntityDataProcessor<
     @Override
     public Optional<PickupDelayData> fill(DataContainer container, PickupDelayData data) {
         data.set(Keys.PICKUP_DELAY, getData(container, Keys.PICKUP_DELAY));
-        data.set(Keys.INFINITE_PICKUP_DELAY, getData(container, Keys.INFINITE_PICKUP_DELAY));
         return Optional.of(data);
     }
 

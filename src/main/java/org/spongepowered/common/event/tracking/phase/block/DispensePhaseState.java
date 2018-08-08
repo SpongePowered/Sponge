@@ -24,23 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-
-import java.util.ArrayList;
+import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 final class DispensePhaseState extends BlockPhaseState {
 
@@ -57,46 +48,17 @@ final class DispensePhaseState extends BlockPhaseState {
 
     @Override
     public void unwind(GeneralizedContext phaseContext) {
-        final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
-                .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
-        try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(blockSnapshot);
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DISPENSE);
-            phaseContext.addNotifierAndOwnerToCauseStack();
-            phaseContext.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        final ArrayList<Entity> entities = new ArrayList<>();
-                        for (EntityItem item : items) {
-                            entities.add(EntityUtil.fromNative(item));
-                        }
-                        final DropItemEvent.Dispense
-                                event =
-                                SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
-                    });
-            phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final SpawnEntityEvent
-                                event =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                        SpongeImpl.postEvent(event);
-                        final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                if (user != null) {
-                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
-                                }
-                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                            }
-                        }
-                    });
-        }
+            .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
+        phaseContext.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
+            });
+        phaseContext.getCapturedEntitySupplier()
+            .acceptAndClearIfNotEmpty(entities -> {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
+            });
     }
 }

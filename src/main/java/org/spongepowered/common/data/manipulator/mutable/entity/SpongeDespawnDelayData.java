@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
@@ -61,8 +63,17 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
     }
 
     @Override
+    public boolean supports(Key<?> key) {
+        return super.supports(key) || key == Keys.INFINITE_DESPAWN_DELAY;
+    }
+
+    @Override
     public Value<Boolean> infinite() {
-        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
+        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, isInfinite());
+    }
+
+    private boolean isInfinite() {
+        return this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
     }
 
     @Override
@@ -75,4 +86,9 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
         return new ImmutableSpongeDespawnDelayData(this.getValue());
     }
 
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Keys.INFINITE_DESPAWN_DELAY, isInfinite());
+    }
 }

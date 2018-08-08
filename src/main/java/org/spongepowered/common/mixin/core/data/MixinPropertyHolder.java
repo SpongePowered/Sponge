@@ -38,16 +38,12 @@ import org.spongepowered.common.SpongeImpl;
 import java.util.Collection;
 import java.util.Optional;
 
-@Mixin({BlockStateContainer.StateImplementation.class, Block.class, Entity.class, TileEntity.class, ItemStack.class})
+@Mixin({Block.class, Entity.class, TileEntity.class, ItemStack.class})
 public abstract class MixinPropertyHolder implements PropertyHolder {
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongeImpl.getPropertyRegistry().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(this);
-        }
-        return Optional.empty();
+        return SpongeImpl.getPropertyRegistry().getStore(propertyClass).flatMap(p -> p.getFor(this));
     }
 
     @Override

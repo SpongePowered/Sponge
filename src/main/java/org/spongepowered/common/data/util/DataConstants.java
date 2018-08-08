@@ -67,6 +67,7 @@ public final class DataConstants {
     public static final boolean DEFAULT_SHOULD_DROP = true;
     public static final boolean DEFAULT_PISTON_EXTENDED = false;
 
+    public static final int ELYTRA_FLYING_FLAG = 7;
 
     // A bunch of entity defaults (for use in constructing "default" values)
     public static final boolean CAN_FLY_DEFAULT = false;
@@ -100,9 +101,9 @@ public final class DataConstants {
     public static final int DEFAULT_FALLING_BLOCK_FALL_TIME = 1;
     public static final boolean DEFAULT_FALLING_BLOCK_CAN_HURT_ENTITIES = false;
     public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
-    
+
     public static final boolean ANGRY_DEFAULT = false;
-    
+
     // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
     public static final int MAXIMUM_GENERATION = 3;
 
@@ -135,6 +136,10 @@ public final class DataConstants {
     public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
     public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
             (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+
+    public static final byte REDUCED_DEBUG_INFO_ENABLE = 22;
+    public static final byte REDUCED_DEBUG_INFO_DISABLE = 23;
+
 
     public static final class Catalog {
 

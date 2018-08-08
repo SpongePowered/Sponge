@@ -59,6 +59,7 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
         final Block block = Block.getBlockFromItem(item);
 
         return block.equals(Blocks.WOOL)
+                || block.equals(Blocks.STANDING_BANNER)
                 || block.equals(Blocks.STAINED_GLASS)
                 || block.equals(Blocks.CARPET)
                 || block.equals(Blocks.STAINED_GLASS_PANE)
@@ -74,7 +75,9 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
 
     @Override
     protected boolean set(ItemStack container, DyeColor value) {
-        if(container.getItem().equals(Items.DYE)) {
+        Item item = container.getItem();
+
+        if(item.equals(Items.DYE) || item.equals(Items.BANNER)) {
             container.setItemDamage(((EnumDyeColor) (Object) value).getDyeDamage());
         } else {
             container.setItemDamage(((EnumDyeColor) (Object) value).getMetadata());
@@ -84,7 +87,9 @@ public class ItemDyeColorDataProcessor extends AbstractItemSingleDataProcessor<D
 
     @Override
     protected Optional<DyeColor> getVal(ItemStack container) {
-        if(container.getItem().equals(Items.DYE)) {
+        Item item = container.getItem();
+
+        if(item.equals(Items.DYE) || item.equals(Items.BANNER)) {
             return Optional.of((DyeColor) (Object) EnumDyeColor.byDyeDamage(container.getItemDamage()));
         }
         return Optional.of((DyeColor) (Object) EnumDyeColor.byMetadata(container.getItemDamage()));

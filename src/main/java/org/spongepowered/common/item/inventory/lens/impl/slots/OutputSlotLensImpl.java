@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.slots;
 
-import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -36,7 +35,7 @@ import org.spongepowered.common.item.inventory.lens.slots.OutputSlotLens;
 import java.util.function.Predicate;
 
 
-public class OutputSlotLensImpl extends FilteringSlotLensImpl implements OutputSlotLens<IInventory, net.minecraft.item.ItemStack> {
+public class OutputSlotLensImpl extends FilteringSlotLensImpl implements OutputSlotLens {
 
     public OutputSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
         this(index, OutputSlotAdapter.class, stackFilter, typeFilter);
@@ -47,7 +46,7 @@ public class OutputSlotLensImpl extends FilteringSlotLensImpl implements OutputS
     }
 
     @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new OutputSlotAdapter(inv, this, parent);
     }
 }

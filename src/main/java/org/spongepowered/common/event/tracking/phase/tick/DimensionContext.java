@@ -57,9 +57,10 @@ public final class DimensionContext extends TickContext<DimensionContext> {
     }
 
     @Override
-    public PrettyPrinter printCustom(PrettyPrinter printer) {
-        return super.printCustom(printer)
-            .add("    - %s: %s", "World", this.world)
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "World", this.world)
             ;
     }
 }

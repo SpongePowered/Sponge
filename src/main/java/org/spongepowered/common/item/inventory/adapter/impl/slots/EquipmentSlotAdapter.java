@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.slot.EquipmentSlot;
@@ -36,9 +34,9 @@ import java.util.function.Predicate;
 
 public class EquipmentSlotAdapter extends FilteringSlotAdapter implements EquipmentSlot {
     
-    protected final EquipmentSlotLens<IInventory, ItemStack> equipmentSlot; 
+    protected final EquipmentSlotLens equipmentSlot;
 
-    public EquipmentSlotAdapter(Fabric<IInventory> inventory, EquipmentSlotLens<IInventory, ItemStack> lens, Inventory parent) {
+    public EquipmentSlotAdapter(Fabric inventory, EquipmentSlotLens lens, Inventory parent) {
         super(inventory, lens, parent);
         this.equipmentSlot = lens;
     }

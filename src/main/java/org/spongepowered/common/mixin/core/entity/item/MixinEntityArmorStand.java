@@ -132,7 +132,7 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
      */
     private void fireDestroyDamageEvent(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            DamageEventHandler.generateCauseFor(source);
+            DamageEventHandler.generateCauseFor(source, frame);
             DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
                     this, Math.max(1000, this.getHealth()));
             if (SpongeImpl.postEvent(event)) {
@@ -164,8 +164,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityArmorStand;damageArmorStand(F)V"))
     private void fireDamageEventDamage(EntityArmorStand self, float effectiveAmount, DamageSource source, float originalAmount) {
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            DamageEventHandler.generateCauseFor(source);
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
+            DamageEventHandler.generateCauseFor(source, frame);
+            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
                     this, effectiveAmount);
             if (!SpongeImpl.postEvent(event)) {
                 this.damageArmorStand((float) event.getFinalDamage());
@@ -188,8 +188,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
         // While this doesn't technically "damage" the armor stand, it feels
         // like damage in other respects, so fire an event.
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            DamageEventHandler.generateCauseFor(source);
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), new ArrayList<>(),
+            DamageEventHandler.generateCauseFor(source, frame);
+            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), new ArrayList<>(),
                     this, 0);
             if (SpongeImpl.postEvent(event)) {
                 cir.setReturnValue(false);

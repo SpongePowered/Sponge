@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -66,4 +67,14 @@ public interface IMixinContainer extends IMixinInventory {
 
     @Nullable Location<World> getOpenLocation();
     void setOpenLocation(@Nullable Location<World> loc);
+
+    void setInUse(boolean inUse);
+    boolean isInUse();
+
+    List<EntityPlayerMP> listeners();
+
+    void setViewed(Object viewed);
+
+    boolean capturePossible();
+
 }

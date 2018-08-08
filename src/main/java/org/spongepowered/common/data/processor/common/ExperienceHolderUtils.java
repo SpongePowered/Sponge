@@ -59,7 +59,7 @@ public class ExperienceHolderUtils {
         } else if (level > 15) {
             return (int) (2.5 * level * level - 40.5 * level + 360);
         } else {
-            return (int) (level * level + 6 * level);
+            return (level * level + 6 * level);
         }
     }
 

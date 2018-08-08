@@ -36,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
+import org.spongepowered.test.myhomes.data.home.Home;
 
 import java.util.UUID;
 

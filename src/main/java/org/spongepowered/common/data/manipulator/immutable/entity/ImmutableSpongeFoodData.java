@@ -36,15 +36,15 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFoodData, FoodData> implements ImmutableFoodData {
 
     private final int foodLevel;
-    private final float foodSaturationLevel;
-    private final float foodExhaustionLevel;
+    private final double foodSaturationLevel;
+    private final double foodExhaustionLevel;
 
     private final ImmutableBoundedValue<Integer> foodLevelValue;
     private final ImmutableBoundedValue<Double> saturationValue;
     private final ImmutableBoundedValue<Double> exhaustionValue;
 
 
-    public ImmutableSpongeFoodData(int foodLevel, float foodSaturationLevel, float foodExhaustionLevel) {
+    public ImmutableSpongeFoodData(int foodLevel, double foodSaturationLevel, double foodExhaustionLevel) {
         super(ImmutableFoodData.class);
         this.foodLevel = foodLevel;
         this.foodSaturationLevel = foodSaturationLevel;
@@ -59,7 +59,7 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
                 .asImmutable();
 
         this.exhaustionValue = SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
-                .actualValue((double) this.foodExhaustionLevel)
+                .actualValue(this.foodExhaustionLevel)
                 .defaultValue(0D)
                 .minimum(0D)
                 .maximum(Double.MAX_VALUE)
@@ -67,7 +67,7 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
                 .asImmutable();
 
         this.saturationValue = SpongeValueFactory.boundedBuilder(Keys.SATURATION)
-                .actualValue((double) this.foodSaturationLevel)
+                .actualValue(this.foodSaturationLevel)
                 .defaultValue(20D)
                 .minimum(0D)
                 .maximum(Double.MAX_VALUE)
@@ -86,8 +86,8 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.FOOD_LEVEL, this.foodLevel)
-                .set(Keys.SATURATION, (double) this.foodSaturationLevel)
-                .set(Keys.EXHAUSTION, (double) this.foodExhaustionLevel);
+                .set(Keys.SATURATION, this.foodSaturationLevel)
+                .set(Keys.EXHAUSTION, this.foodExhaustionLevel);
     }
 
     @Override

@@ -35,6 +35,10 @@ import org.spongepowered.common.registry.AbstractCatalogRegistryModule;
 @RegisterCatalog(Difficulties.class)
 public final class DifficultyRegistryModule extends AbstractCatalogRegistryModule<Difficulty> {
 
+    public static DifficultyRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
     @Override
     public void registerDefaults() {
         this.register(CatalogKey.minecraft("peaceful"), (Difficulty) (Object) EnumDifficulty.PEACEFUL);
@@ -50,5 +54,9 @@ public final class DifficultyRegistryModule extends AbstractCatalogRegistryModul
                 this.map.put(CatalogKey.resolve(difficulty.name()), (Difficulty) (Object) difficulty);
             }
         }
+    }
+
+    private static final class Holder {
+        static final DifficultyRegistryModule INSTANCE = new DifficultyRegistryModule();
     }
 }

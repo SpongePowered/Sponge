@@ -36,12 +36,12 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 @Mixin(BlockFalling.class)
 public class MixinBlockFalling {
@@ -58,10 +58,10 @@ public class MixinBlockFalling {
                 Vector3d position = new Vector3d(actualPos.getX() + 0.5D, actualPos.getY(), actualPos.getZ() + 0.5D);
                 BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().pushCause(snapshot);
-                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.FALLING_BLOCK);
+                    frame.pushCause(snapshot);
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
                     Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
-                    ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                    ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
                             fallingBlock, worldTransform);
                     SpongeImpl.postEvent(event);
                     return !event.isCancelled();

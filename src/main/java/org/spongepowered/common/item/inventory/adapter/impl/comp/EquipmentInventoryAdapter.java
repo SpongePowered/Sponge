@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.entity.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -34,71 +33,68 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.property.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.common.item.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
 
 import java.util.Optional;
 
-public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implements EquipmentInventory {
+public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements EquipmentInventory {
 
-    private final ArmorEquipable carrier;
-    private final EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> lens;
+    private final Equipable carrier;
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
-        super(inventory, root);
-        this.carrier = carrier;
-        this.lens = root;
-    }
-
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, EquipmentInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public EquipmentInventoryAdapter(Equipable carrier, Fabric inventory, EquipmentInventoryLens root, Inventory parent) {
         super(inventory, root, parent);
         this.carrier = carrier;
-        this.lens = root;
     }
 
     @Override
-    public Optional<ArmorEquipable> getCarrier() {
+    public Optional<Equipable> getCarrier() {
         return Optional.ofNullable(this.carrier);
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentSlotType equipmentType) {
-        return this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType)).poll();
+        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
+        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.poll());
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentSlotType equipmentType, int limit) {
-        return this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType)).poll(limit);
+        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
+        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.poll(limit));
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType) {
-        return this.poll(new EquipmentSlotType(equipmentType));
+        return this.poll(EquipmentSlotType.of(equipmentType));
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType, int limit) {
-        return this.poll(new EquipmentSlotType(equipmentType), limit);
+        return this.poll(EquipmentSlotType.of(equipmentType), limit);
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentSlotType equipmentType) {
-        return this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType)).peek();
+        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
+        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.peek());
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentSlotType equipmentType, int limit) {
-        return this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType)).peek(limit);
+        Inventory r = this.query(QueryOperationTypes.INVENTORY_PROPERTY.of(equipmentType));
+        return r.capacity() == 0 ? Optional.empty() : Optional.of(r.peek(limit));
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType) {
-        return this.peek(new EquipmentSlotType(equipmentType));
+        return this.peek(EquipmentSlotType.of(equipmentType));
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType, int limit) {
-        return this.peek(new EquipmentSlotType(equipmentType), limit);
+        return this.peek(EquipmentSlotType.of(equipmentType), limit);
     }
 
     @Override
@@ -108,7 +104,7 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
-        return this.set(new EquipmentSlotType(equipmentType), stack);
+        return this.set(EquipmentSlotType.of(equipmentType), stack);
     }
 
     @Override
@@ -122,6 +118,6 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public Optional<Slot> getSlot(EquipmentType equipmentType) {
-        return this.getSlot(new EquipmentSlotType(equipmentType));
+        return this.getSlot(EquipmentSlotType.of(equipmentType));
     }
 }

@@ -24,11 +24,36 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import javax.annotation.Nullable;
+
 public class EntityContext<E extends EntityContext<E>> extends PhaseContext<E> {
+
+    @Nullable protected DamageSource damageSource;
+
     public EntityContext(IPhaseState<? extends E> state) {
         super(state);
+    }
+
+    @Nullable
+    public DamageSource getDamageSource() {
+        return this.damageSource;
+    }
+
+    @SuppressWarnings("unchecked")
+    public E setDamageSource(DamageSource damageSource) {
+        this.damageSource = damageSource;
+        return (E) this;
+    }
+
+    @Override
+    public PrettyPrinter printCustom(PrettyPrinter printer, int indent) {
+        String s = String.format("%1$"+indent+"s", "");
+        return super.printCustom(printer, indent)
+            .add(s + "- %s: %s", "DamageSource", this.damageSource);
     }
 }

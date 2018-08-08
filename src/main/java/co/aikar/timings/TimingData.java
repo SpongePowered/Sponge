@@ -49,7 +49,7 @@ class TimingData {
     private long lagTotalTime = 0;
 
     int curTickCount = 0;
-    int curTickTotal = 0;
+    long curTickTotal = 0;
 
     TimingData(int id) {
         this.id = id;
@@ -104,5 +104,29 @@ class TimingData {
                     this.lagTotalTime));
         }
         return array;
+    }
+
+    boolean hasData() {
+        return count > 0;
+    }
+
+    long getTotalTime() {
+        return totalTime;
+    }
+
+    int getCurTickCount() {
+        return curTickCount;
+    }
+
+    void setCurTickCount(int curTickCount) {
+        this.curTickCount = curTickCount;
+    }
+
+    long getCurTickTotal() {
+        return curTickTotal;
+    }
+
+    void setCurTickTotal(long curTickTotal) {
+        this.curTickTotal = curTickTotal;
     }
 }

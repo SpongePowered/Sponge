@@ -33,10 +33,12 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Comparator;
@@ -48,12 +50,8 @@ import java.util.stream.Collectors;
 
 public final class BlockUtil {
 
-    public static final Comparator<BlockState> BLOCK_STATE_COMPARATOR = new BlockStateComparator();
     public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    public static boolean setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
-        return setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);
-    }
 
     public static boolean setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
         return world.setBlockState(position, toNative(state), notifyNeighbors ? 3 : 2);
@@ -67,7 +65,7 @@ public final class BlockUtil {
         if (notifyNeighbors) { // delegate to world
             return setBlockState(chunk.getWorld(), position, state, true);
         }
-        return chunk.setBlockState(position, toNative(state)) != null;
+        return ((IMixinChunk) chunk).setBlockState(position, toNative(state), chunk.getBlockState(position), null, BlockChangeFlags.ALL.withUpdateNeighbors(notifyNeighbors)) != null;
     }
 
     public static IBlockState toNative(BlockState state) {
@@ -96,71 +94,15 @@ public final class BlockUtil {
         return toNative(state).getBlock();
     }
 
-    public static IBlockState getBlockState(org.spongepowered.api.world.World world, Vector3i blockPos) {
-        if (!(world instanceof World)) {
-            throw new IllegalArgumentException("World : " + world.getName() + " is not appropriate for this implementation!");
-        }
-        return ((World) world).getBlockState(VecHelper.toBlockPos(blockPos));
+    public static IMixinBlock toMixin(BlockState blockState) {
+        return (IMixinBlock) toNative(blockState).getBlock();
+    }
+
+    public static IMixinBlock toMixin(IBlockState blockState) {
+        return (IMixinBlock) blockState.getBlock();
     }
 
     private BlockUtil() {
     }
 
-    private static final class BlockStateComparator implements Comparator<BlockState> {
-
-        BlockStateComparator() {
-        }
-
-        @Override
-        public int compare(BlockState spongeA, BlockState spongeB) {
-            IBlockState a = (IBlockState) spongeA;
-            IBlockState b = (IBlockState) spongeB;
-            ComparisonChain chain = ComparisonChain.start();
-            // compare IDs
-            chain = chain.compare(a.getBlock().getUnlocalizedName(), b.getBlock().getUnlocalizedName());
-            // compare block traits
-            Map<BlockTrait<?>, ?> aTraits = spongeA.getTraitMap();
-            Map<BlockTrait<?>, ?> bTraits = spongeA.getTraitMap();
-            chain = chain.compare(aTraits.size(), bTraits.size());
-            if (chain.result() != 0) {
-                // avoid potentially expensive ops
-                return chain.result();
-            }
-            MapDifference<BlockTrait<?>, ?> diff = Maps.difference(aTraits, bTraits);
-            if (diff.areEqual()) {
-                // When the Maps are equal the end-result is 0, so chain.result
-                // is the same
-                return chain.result();
-            }
-            // Check the keys, see if they match
-            int onLeft = diff.entriesOnlyOnLeft().size();
-            int onRight = diff.entriesOnlyOnRight().size();
-            chain = chain.compare(onLeft, onRight);
-            if (chain.result() != 0) {
-                // avoid potentially expensive ops
-                return chain.result();
-            }
-            // Ok, keys match. Check values. Guaranteed difference here due to
-            // equality check above.
-            List<BlockTrait<?>> checkOrder = sortTraits(diff.entriesDiffering().keySet());
-            for (BlockTrait<?> trait : checkOrder) {
-                Comparable<?> aTraitValue = (Comparable<?>) aTraits.get(trait);
-                Comparable<?> bTraitValue = (Comparable<?>) bTraits.get(trait);
-                chain = chain.compare(aTraitValue, bTraitValue);
-                if (chain.result() != 0) {
-                    return chain.result();
-                }
-            }
-            // Impossible.
-            throw new IllegalStateException("Some object's equals() violates contract!");
-        }
-
-        /**
-         * Sorts {@code traits} by the trait IDs.
-         */
-        private List<BlockTrait<?>> sortTraits(Set<BlockTrait<?>> traits) {
-            return traits.stream().sorted(Comparator.comparing(CatalogType::getKey)).collect(Collectors.toList());
-        }
-
-    }
 }

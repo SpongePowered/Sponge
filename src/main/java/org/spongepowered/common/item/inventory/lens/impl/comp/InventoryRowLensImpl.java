@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.InventoryRowAdapter;
@@ -34,35 +32,18 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
 
 
-public class InventoryRowLensImpl extends Inventory2DLensImpl implements InventoryRowLens<IInventory, net.minecraft.item.ItemStack> {
+public class InventoryRowLensImpl extends Inventory2DLensImpl implements InventoryRowLens {
 
-    public InventoryRowLensImpl(int base, int width, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, 0, 0, InventoryRowAdapter.class, slots);
-    }
-
-    public InventoryRowLensImpl(int base, int width, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, 0, 0, adapterType, slots);
-    }
-    
-    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, SlotProvider slots) {
         this(base, width, xBase, yBase, InventoryRowAdapter.class, slots);
     }
     
-    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        super(base, width, 1, width, xBase, yBase, adapterType, slots);
+    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
+        super(base, width, 1, 1, xBase, yBase, adapterType, slots);
     }
     
     @Override
-    public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
-        if (!this.checkOrdinal(ordinal)) {
-            return -1;
-        }
-
-        return this.base + ordinal;
-    }
-
-    @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new InventoryRowAdapter(inv, this, parent);
     }
 

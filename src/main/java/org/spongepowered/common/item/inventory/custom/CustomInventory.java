@@ -38,7 +38,6 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
-import org.spongepowered.api.item.inventory.property.AbstractInventoryProperty;
 import org.spongepowered.api.item.inventory.property.GuiId;
 import org.spongepowered.api.item.inventory.property.GuiIdProperty;
 import org.spongepowered.api.item.inventory.property.GuiIds;
@@ -50,6 +49,7 @@ import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.type.SpongeGuiId;
 import org.spongepowered.common.item.inventory.archetype.CompositeInventoryArchetype;
+import org.spongepowered.common.item.inventory.property.AbstractInventoryProperty;
 
 import java.util.HashSet;
 import java.util.List;
@@ -69,15 +69,18 @@ public class CustomInventory implements IInventory, IInteractionObject {
     protected InventoryArchetype archetype;
     private Map<String, InventoryProperty<?, ?>> properties;
     private Carrier carrier;
+    private final boolean isVirtual;
 
     private Set<EntityPlayer> viewers = new HashSet<>();
 
     @SuppressWarnings("deprecation")
     public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
-            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin) {
+            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, boolean isVirtual,
+            PluginContainer plugin) {
         this.archetype = archetype;
         this.properties = properties;
         this.carrier = carrier;
+        this.isVirtual = isVirtual;
 
         int count;
         InventoryDimension size = (InventoryDimension)properties.get(INVENTORY_DIMENSION); // TODO INVENTORY_CAPACITY
@@ -276,5 +279,9 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     public Carrier getCarrier() {
         return this.carrier;
+    }
+
+    public boolean isVirtual() {
+        return isVirtual;
     }
 }

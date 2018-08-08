@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.interfaces.inventory;
 
-import org.spongepowered.common.interfaces.inventory.trait.IInventoryObservable;
-
-public interface IMixinSlot extends IInventoryObservable {
+public interface IMixinSlot {
     
     int getSlotIndex();
 

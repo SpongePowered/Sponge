@@ -67,7 +67,9 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -81,6 +83,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -116,6 +119,7 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -149,7 +153,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
-    @Shadow public abstract void addStat(StatBase stat, int amount);
+    @Shadow public abstract void addStat(@Nullable StatBase stat, int amount);
     @Shadow public abstract void addStat(StatBase stat);
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
@@ -167,6 +171,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
 
     @Shadow protected abstract void spawnShoulderEntities();
+    @Shadow public abstract boolean isCreative();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -280,6 +285,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     @Override
     public void onDeath(DamageSource cause) {
+        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
+        Optional<DestructEntityEvent.Death>
+                event = SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayer) (Object) this, cause, isMainThread);
+        if (event.map(Cancellable::isCancelled).orElse(true)) {
+            return;
+        }
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
@@ -378,59 +389,61 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @reason When a player drops an item, all methods flow through here instead of {@link Entity#dropItem(Item, int)}
      * because of the idea of {@code dropAround} and {@code traceItem}.
      *
-     * @param droppedItem
-     * @param dropAround
-     * @param traceItem
-     * @return
+     * @param droppedItem The item to drop
+     * @param dropAround If true, the item is dropped around the player, otherwise thrown in front of the player
+     * @param traceItem If true, the item is thrown as the player
+     * @return The entity, if spawned correctly and not captured in any way
      */
     @Nullable
     @Overwrite
     public EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (droppedItem.isEmpty()) {
             return null;
-        } else if (this.world.isRemote) {
-            double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
-            EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
-            entityitem.setPickupDelay(40);
-
-            if (traceItem) {
-                entityitem.setThrower(this.getName());
-            }
-
-            if (dropAround) {
-                float f = this.rand.nextFloat() * 0.5F;
-                float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-                entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
-                entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
-                entityitem.motionY = 0.20000000298023224D;
-            } else {
-                float f2 = 0.3F;
-                entityitem.motionX =
-                        (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
-                entityitem.motionZ =
-                        (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
-                entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
-                float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-                f2 = 0.02F * this.rand.nextFloat();
-                entityitem.motionX += Math.cos((double) f3) * (double) f2;
-                entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
-                entityitem.motionZ += Math.sin((double) f3) * (double) f2;
-            }
-
-            ItemStack itemstack = this.dropItemAndGetStack(entityitem);
-
-            if (traceItem) {
-                if (!itemstack.isEmpty()) {
-                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
-                }
-
-                this.addStat(StatList.DROP);
-            }
-
-            return entityitem;
-        } else {
+        }
+        // Sponge Start - redirect to our handling to capture and throw events.
+        if (!((IMixinWorld) this.world).isFake()) {
             return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
         }
+        // Sponge end
+        double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
+        EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
+        entityitem.setPickupDelay(40);
+
+        if (traceItem) {
+            entityitem.setThrower(this.getName());
+        }
+
+        if (dropAround) {
+            float f = this.rand.nextFloat() * 0.5F;
+            float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
+            entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
+            entityitem.motionY = 0.20000000298023224D;
+        } else {
+            float f2 = 0.3F;
+            entityitem.motionX =
+                (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionZ =
+                (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+            f2 = 0.02F * this.rand.nextFloat();
+            entityitem.motionX += Math.cos((double) f3) * (double) f2;
+            entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
+            entityitem.motionZ += Math.sin((double) f3) * (double) f2;
+        }
+
+        ItemStack itemstack = this.dropItemAndGetStack(entityitem);
+
+        if (traceItem) {
+            if (itemstack != null && !itemstack.isEmpty()) { // Sponge - add null check
+                this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
+            }
+
+            this.addStat(StatList.DROP);
+        }
+
+        return entityitem;
     }
 
     /**
@@ -450,7 +463,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
-    public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
+    private void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
         this.collidingEntityUuid = entity.getUniqueID();
         entity.onCollideWithPlayer(player);
         this.collidingEntityUuid = null;
@@ -470,7 +483,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * when the {@link DamageSourceRegistryModule#IGNORED_DAMAGE_SOURCE} is being used.
      */
     @Inject(method = "attackEntityFrom", cancellable = true, at = @At(value = "HEAD"))
-    public void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (source == DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
             // Taken from the original method, wake the player up if they are about to die.
             if (this.isPlayerSleeping() && !this.world.isRemote) {
@@ -514,6 +527,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param targetEntity The target entity
      */
     @Overwrite
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
         if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
@@ -660,11 +674,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                     final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
                                     try (final StackFrame frame = isMainthread ? Sponge.getCauseStackManager().pushCauseFrame() : null) {
                                         if (isMainthread) {
-                                            Sponge.getCauseStackManager().pushCause(sweepingAttackSource);
+                                            frame.pushCause(sweepingAttackSource);
                                         }
                                         final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
                                         if (isMainthread) {
-                                            Sponge.getCauseStackManager().addContext(EventContextKeys.WEAPON, heldSnapshot);
+                                            frame.addContext(EventContextKeys.WEAPON, heldSnapshot);
                                         }
                                         final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
                                                 .cause(Cause.of(EventContext.empty(), heldSnapshot))
@@ -778,7 +792,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (((IMixinInventoryPlayer) this.inventory).capturesTransactions()) {
             if (slotIn == EntityEquipmentSlot.MAINHAND) {
                 ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
-                Slot slot = ((PlayerInventory) this.inventory).getMain().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
+                Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(SlotIndex.of(this.inventory.currentItem)).get();
                 ((IMixinInventoryPlayer) this.inventory).getCapturedTransactions().add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
                 ItemStack orig = this.inventory.offHandInventory.get(0);
@@ -794,17 +808,21 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     @Redirect(method = "setDead", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/inventory/Container;onContainerClosed(Lnet/minecraft/entity/player/EntityPlayer;)V"))
     private void onOnContainerClosed(Container container, EntityPlayer player) {
-        if (player instanceof EntityPlayerMP) {
+        // Corner case where the server is shutting down on the client, the enitty player mp is also being killed off.
+        if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable() && Sponge.getGame().getState() == GameState.SERVER_STOPPING) {
+            container.onContainerClosed(player);
+            return;
+        }
+        if (player instanceof EntityPlayerMP ) {
             final EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
+
 
             try (PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext()
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
-                    .openContainer(container)
-                    // intentionally missing the lastCursor to not double throw close event
-                    .buildAndSwitch();
-                    StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(serverPlayer);
+                    .openContainer(container)) {
+                // intentionally missing the lastCursor to not double throw close event
+                ctx.buildAndSwitch();
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
                 container.onContainerClosed(player);
                 SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, serverPlayer, cursor, ItemStackSnapshot.NONE, false);
@@ -823,5 +841,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public boolean shouldRestoreInventory() {
         return this.shouldRestoreInventory;
+    }
+
+    @Override
+    public boolean isImmuneToFireForIgniteEvent() {
+        return this.isSpectator() || this.isCreative();
     }
 }

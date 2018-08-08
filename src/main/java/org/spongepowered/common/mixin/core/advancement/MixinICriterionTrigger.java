@@ -59,7 +59,7 @@ public interface MixinICriterionTrigger extends ITrigger {
         players.forEach(this::trigger);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     default Class<FilteredTriggerConfiguration> getConfigurationType() {
         return (Class) UnknownFilteredTriggerConfiguration.class;

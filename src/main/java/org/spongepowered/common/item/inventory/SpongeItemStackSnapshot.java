@@ -51,6 +51,7 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -100,6 +101,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             compound = compound.copy();
         }
         if (compound != null) {
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                }
+            }
             NbtDataUtil.filterSpongeCustomData(compound);
             if (!compound.hasNoTags()) {
                 this.compound = compound;
@@ -159,6 +166,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if(this.compound != null) {
             nativeStack.setTagCompound(this.compound.copy());
         }
+        for (ImmutableDataManipulator<?, ?> manipulator : this.manipulators) {
+            ((ItemStack) nativeStack).offer(manipulator.asMutable());
+        }
         return ItemStackUtil.fromNative(nativeStack);
     }
 
@@ -169,7 +179,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public int getContentVersion() {
-        return 1;
+        return DataVersions.ItemStackSnapshot.CURRENT_VERSION;
     }
 
     @Override

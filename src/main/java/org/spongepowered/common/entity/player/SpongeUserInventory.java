@@ -44,10 +44,10 @@ public class SpongeUserInventory implements IInventory {
     // sourced from InventoryPlayer
 
     /** An array of 36 item stacks indicating the main player inventory (including the visible bar). */
-    final NonNullList<ItemStack> mainInventory = NonNullList.<ItemStack>withSize(36, ItemStack.EMPTY);
+    final NonNullList<ItemStack> mainInventory = NonNullList.withSize(36, ItemStack.EMPTY);
     /** An array of 4 item stacks containing the currently worn armor pieces. */
-    final NonNullList<ItemStack> armorInventory = NonNullList.<ItemStack>withSize(4, ItemStack.EMPTY);
-    final NonNullList<ItemStack> offHandInventory = NonNullList.<ItemStack>withSize(1, ItemStack.EMPTY);
+    final NonNullList<ItemStack> armorInventory = NonNullList.withSize(4, ItemStack.EMPTY);
+    final NonNullList<ItemStack> offHandInventory = NonNullList.withSize(1, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> allInventories;
     /** The index of the currently held item (0-8). */
     public int currentItem;
@@ -56,7 +56,7 @@ public class SpongeUserInventory implements IInventory {
     private boolean dirty = false;
 
     public SpongeUserInventory(SpongeUser playerIn) {
-        this.allInventories = Arrays.<NonNullList<ItemStack>>asList(this.mainInventory, this.armorInventory, this.offHandInventory);
+        this.allInventories = Arrays.asList(this.mainInventory, this.armorInventory, this.offHandInventory);
         this.player = playerIn;
     }
 
@@ -81,7 +81,7 @@ public class SpongeUserInventory implements IInventory {
             index -= nonnulllist.size();
         }
 
-        return list != null && !((ItemStack) list.get(index)).isEmpty() ? ItemStackHelper.getAndSplit(list, index, count) : ItemStack.EMPTY;
+        return list != null && !list.get(index).isEmpty() ? ItemStackHelper.getAndSplit(list, index, count) : ItemStack.EMPTY;
     }
 
     /**
@@ -101,7 +101,7 @@ public class SpongeUserInventory implements IInventory {
             index -= nonnulllist1.size();
         }
 
-        if (nonnulllist != null && !((ItemStack) nonnulllist.get(index)).isEmpty()) {
+        if (nonnulllist != null && !nonnulllist.get(index).isEmpty()) {
             ItemStack itemstack = nonnulllist.get(index);
             nonnulllist.set(index, ItemStack.EMPTY);
             return itemstack;
@@ -138,28 +138,28 @@ public class SpongeUserInventory implements IInventory {
      */
     public NBTTagList writeToNBT(NBTTagList nbtTagListIn) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
-            if (!((ItemStack) this.mainInventory.get(i)).isEmpty()) {
+            if (!this.mainInventory.get(i).isEmpty()) {
                 NBTTagCompound nbttagcompound = new NBTTagCompound();
                 nbttagcompound.setByte("Slot", (byte) i);
-                ((ItemStack) this.mainInventory.get(i)).writeToNBT(nbttagcompound);
+                this.mainInventory.get(i).writeToNBT(nbttagcompound);
                 nbtTagListIn.appendTag(nbttagcompound);
             }
         }
 
         for (int j = 0; j < this.armorInventory.size(); ++j) {
-            if (!((ItemStack) this.armorInventory.get(j)).isEmpty()) {
+            if (!this.armorInventory.get(j).isEmpty()) {
                 NBTTagCompound nbttagcompound1 = new NBTTagCompound();
                 nbttagcompound1.setByte("Slot", (byte) (j + 100));
-                ((ItemStack) this.armorInventory.get(j)).writeToNBT(nbttagcompound1);
+                this.armorInventory.get(j).writeToNBT(nbttagcompound1);
                 nbtTagListIn.appendTag(nbttagcompound1);
             }
         }
 
         for (int k = 0; k < this.offHandInventory.size(); ++k) {
-            if (!((ItemStack) this.offHandInventory.get(k)).isEmpty()) {
+            if (!this.offHandInventory.get(k).isEmpty()) {
                 NBTTagCompound nbttagcompound2 = new NBTTagCompound();
                 nbttagcompound2.setByte("Slot", (byte) (k + 150));
-                ((ItemStack) this.offHandInventory.get(k)).writeToNBT(nbttagcompound2);
+                this.offHandInventory.get(k).writeToNBT(nbttagcompound2);
                 nbtTagListIn.appendTag(nbttagcompound2);
             }
         }
@@ -265,7 +265,7 @@ public class SpongeUserInventory implements IInventory {
      */
     @Override
     public ITextComponent getDisplayName() {
-        return this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName(), new Object[0]);
+        return this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName());
     }
 
     /**

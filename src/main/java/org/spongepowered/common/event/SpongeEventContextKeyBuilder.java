@@ -31,11 +31,13 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.common.registry.type.event.EventContextKeysModule;
 
+import javax.annotation.Nullable;
+
 public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
 
-    Class<T> typeClass;
-    CatalogKey key;
-    String name;
+    @Nullable Class<T> typeClass;
+    @Nullable CatalogKey key;
+    @Nullable String name;
 
     @Override
     public SpongeEventContextKeyBuilder<T> type(Class<T> aClass) {
@@ -73,7 +75,7 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
 
     @SuppressWarnings("rawtypes")
     @Override
-    public SpongeEventContextKeyBuilder<T> from(EventContextKey value) throws UnsupportedOperationException {
+    public SpongeEventContextKeyBuilder<T> from(EventContextKey<T> value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Cannot create a new EventContextKey based on another key!");
     }
 

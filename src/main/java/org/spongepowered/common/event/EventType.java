@@ -43,6 +43,10 @@ public final class EventType<T extends Event> {
         this.eventType = eventType;
     }
 
+    public EventType(Class<T> eventType) {
+        this(eventType, null);
+    }
+
     public Class<T> getType() {
         return this.eventType;
     }
@@ -61,6 +65,7 @@ public final class EventType<T extends Event> {
         return value;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(@Nullable Object o) {
         if (!(o instanceof EventType)) {

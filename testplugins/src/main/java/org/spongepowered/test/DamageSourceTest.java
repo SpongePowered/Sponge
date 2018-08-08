@@ -46,7 +46,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "damagesourcetest", name = "Damage Source Test", description = "A plugin to test damage sources")
+@Plugin(id = "damagesourcetest", name = "Damage Source Test", description = "A plugin to test damage sources", version = "0.0.0")
 public final class DamageSourceTest {
 
     private final Set<UUID> activated = new HashSet<>();

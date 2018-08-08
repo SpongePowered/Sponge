@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
-import org.spongepowered.common.data.manipulator.mutable.block.SpongeWireAttachementData;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeWireAttachmentData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
@@ -62,6 +62,7 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
         this.eastValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_EAST, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.EAST));
         this.westValue = ImmutableSpongeValue.cachedOf(Keys.WIRE_ATTACHMENT_WEST, WireAttachmentTypes.NONE, wireAttachmentMap.get(Direction.WEST));
 
+        this.registerGetters();
     }
 
     @Override
@@ -91,7 +92,7 @@ public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<Imm
 
     @Override
     public WireAttachmentData asMutable() {
-        return new SpongeWireAttachementData(this.wireAttachmentMap);
+        return new SpongeWireAttachmentData(this.wireAttachmentMap);
     }
 
     @Override

@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.ContainerRepair;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
@@ -35,22 +33,34 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(ContainerRepair.class)
-public abstract class MixinContainerRepair extends MixinContainer implements LensProvider<IInventory, ItemStack> {
+public abstract class MixinContainerRepair extends MixinContainer implements LensProvider {
 
     @Override
-    public Lens<IInventory, ItemStack> rootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        return new OrderedInventoryLensImpl(0, 3, 1, inventory$getSlotProvider());
+    public Lens rootLens(Fabric fabric, InventoryAdapter adapter) {
+        List<Lens> lenses = new ArrayList<>();
+        lenses.add(new DefaultIndexedLens(0, 3, inventory$getSlotProvider()));
+        lenses.add(new PrimaryPlayerInventoryLens(3, inventory$getSlotProvider(), true));
+        return new ContainerLens(adapter, inventory$getSlotProvider(), lenses);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public SlotProvider<IInventory, ItemStack> slotProvider(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
-        SlotCollection.Builder builder = new SlotCollection.Builder()
-                .add(2, InputSlotAdapter.class)
-                .add(1, OutputSlotAdapter.class);
+    public SlotProvider slotProvider(Fabric fabric, InventoryAdapter adapter) {
+        SlotLensCollection.Builder builder = new SlotLensCollection.Builder()
+                .add(2, InputSlotAdapter.class, i -> new InputSlotLensImpl(i, s -> true, t -> true))
+                .add(1, OutputSlotAdapter.class, i -> new OutputSlotLensImpl(i, s -> false, t -> false))
+                .add(36);
         return builder.build();
     }
 }

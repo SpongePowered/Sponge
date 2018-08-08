@@ -32,11 +32,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
@@ -71,9 +69,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
 
-    default boolean forceSpawnEntity(Entity entity) {
-        return forceSpawnEntity(EntityUtil.fromNative(entity));
-    }
 
     void onSpongeEntityAdded(Entity entity);
 
@@ -112,13 +107,5 @@ public interface IMixinWorldServer extends IMixinWorld {
     void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
 
     void doChunkGC();
-
-    default WorldServer asMinecraftWorld() {
-        return (WorldServer) this;
-    }
-
-    default World asSpongeWorld() {
-        return (World) this;
-    }
 
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntity;
@@ -37,7 +36,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.interfaces.IMixinInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingGridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.IInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
@@ -50,21 +48,34 @@ public final class InventoryUtil {
 
     private InventoryUtil() {}
 
+    @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(InventoryCrafting inv) {
         IInventoryFabric fabric = new IInventoryFabric(inv);
-        CraftingGridInventoryLens lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), inv.getWidth(), SlotLensImpl::new);
+        CraftingGridInventoryLensImpl lens = new CraftingGridInventoryLensImpl(0, inv.getWidth(), inv.getHeight(), SlotLensImpl::new);
 
         return new CraftingGridInventoryAdapter(fabric, lens);
     }
 
     public static InventoryCrafting toNativeInventory(CraftingGridInventory inv) {
-        Fabric<IInventory> fabric = ((CraftingGridInventoryAdapter) inv).getFabric();
-        for (IInventory inventory : fabric.allInventories()) {
+        Fabric fabric = ((CraftingGridInventoryAdapter) inv).getFabric();
+        for (Object inventory : fabric.allInventories()) {
             if (inventory instanceof InventoryCrafting) {
                 return ((InventoryCrafting) inventory);
             }
         }
-        throw new IllegalStateException("Invalid CraftingGridInventory. Could not find InventoryCrafting.");
+
+        // Gather Debug Info...
+        StringBuilder sb = new StringBuilder();
+        sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
+          .append("Fabric was: ")
+          .append(fabric.getClass().getSimpleName()).append(" Name: ")
+          .append(fabric.getDisplayName() == null ? "unknown" : fabric.getDisplayName().get())
+          .append("Viewed:");
+        for (Object iInventory : fabric.allInventories()) {
+            sb.append("\n").append(iInventory.getClass().getName());
+        }
+
+        throw new IllegalStateException(sb.toString());
     }
 
     public static Optional<Inventory> getDoubleChestInventory(TileEntityChest chest) {

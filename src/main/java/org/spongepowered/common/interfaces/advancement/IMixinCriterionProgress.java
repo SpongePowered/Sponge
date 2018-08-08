@@ -32,4 +32,6 @@ public interface IMixinCriterionProgress {
     void setCriterion(AdvancementCriterion criterion);
 
     AdvancementProgress getAdvancementProgress();
+
+    boolean isCriterionAvailable();
 }

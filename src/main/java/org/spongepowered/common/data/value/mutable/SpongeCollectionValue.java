@@ -132,6 +132,9 @@ public abstract class SpongeCollectionValue<Element,
     public abstract ImmutableType asImmutable();
 
     @Override
+    public abstract CollectionValueType copy();
+
+    @Override
     public Optional<CollectionType> getDirect() {
         return Optional.of(this.actualValue);
     }

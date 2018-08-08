@@ -42,7 +42,6 @@ public abstract class SpongeQueryOperation<T> implements QueryOperation<T> {
         return this.type;
     }
 
-    public abstract <TInventory, TStack> boolean matches(Lens<TInventory, TStack> lens, Lens<TInventory, TStack> parent,
-            Fabric<TInventory> inventory);
+    public abstract boolean matches(Lens lens, Lens parent, Fabric inventory);
 
 }

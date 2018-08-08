@@ -24,57 +24,45 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.MainPlayerInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.item.inventory.property.EquipmentSlotTypeImpl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ContainerPlayerInventoryLens extends ContainerLens {
 
     private static final int CRAFTING_OUTPUT = 1;
     private static final int CRAFTING_GRID = 2;
-    private static final int EQUIPMENT = 4;
-    private static final int INVENTORY_WIDTH = 9;
-    private static final int MAIN_INVENTORY_HEIGHT = 3;
-    private static final int HOTBAR = 1;
-    private static final int OFFHAND = 1;
 
-    public ContainerPlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(adapter, slots);
+    public ContainerPlayerInventoryLens(InventoryAdapter adapter, SlotProvider slots) {
+        super(adapter, slots, lenses(adapter, slots));
         this.init(slots);
     }
 
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+    private static List<Lens> lenses(InventoryAdapter adapter, SlotProvider slots) {
+
         int base = CRAFTING_OUTPUT; // 1
         final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
-        // TODO pass player for carrier to EquipmentInventory
-        final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots, true);
-        base += EQUIPMENT; // 4
-        final MainPlayerInventoryLensImpl main = new MainPlayerInventoryLensImpl(base, slots, true);
-        base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH + HOTBAR * INVENTORY_WIDTH; // 9
-        final SlotLens<IInventory, ItemStack> offHand = slots.getSlot(base);
-        base += OFFHAND;
+        final PlayerInventoryLens player = new PlayerInventoryLens(base, adapter.getFabric().getSize() - base, slots);
 
-        this.viewedInventories = new ArrayList<>(Arrays.asList(crafting, armor, offHand, main));
+        return Arrays.asList(crafting, player);
+    }
 
-        int additionalSlots = this.size - base - 1;
-        if (additionalSlots > 0) {
-            viewedInventories.add(new OrderedInventoryLensImpl(base, additionalSlots, 1, slots));
-        }
-
-        // TODO actual Container order is:
-        // CraftingOutput (1) -> Crafting (4) -> ArmorSlots (4) -> MainInventory (27) -> Hotbar (9) -> Offhand (1)
-        // how to handle issues like in #939? ; e.g. Inventory#offer using a different insertion order
+    @Override
+    protected void init(SlotProvider slots) {
         super.init(slots);
+
+        this.addChild(slots.getSlotLens(base + 0), new EquipmentSlotTypeImpl(EquipmentTypes.HEADWEAR));
+        this.addChild(slots.getSlotLens(base + 1), new EquipmentSlotTypeImpl(EquipmentTypes.CHESTPLATE));
+        this.addChild(slots.getSlotLens(base + 2), new EquipmentSlotTypeImpl(EquipmentTypes.LEGGINGS));
+        this.addChild(slots.getSlotLens(base + 3), new EquipmentSlotTypeImpl(EquipmentTypes.BOOTS));
+        this.addChild(slots.getSlotLens(base + 4 + 4 * 9), new EquipmentSlotTypeImpl(EquipmentTypes.OFF_HAND));
     }
 }

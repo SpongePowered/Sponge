@@ -428,7 +428,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
             Entity newEntity = world.get().createEntity(getType(), this.position);
             if (newEntity != null) {
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;

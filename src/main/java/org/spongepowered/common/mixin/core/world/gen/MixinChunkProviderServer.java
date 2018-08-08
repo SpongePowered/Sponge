@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -60,6 +61,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
@@ -96,6 +98,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
+        if (((IMixinWorld) worldObjIn).isFake()) {
+            return;
+        }
         this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         SpongeConfig<? extends GeneralConfigBase> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
         ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
@@ -190,12 +195,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", shift = Shift.AFTER))
     private void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().getCurrentContext().close();
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
     private void onError(CallbackInfoReturnable<Chunk> ci) {
-        PhaseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+        PhaseTracker.getInstance().getCurrentContext().close();
     }
 
     private boolean canDenyChunkRequest() {
@@ -208,7 +213,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState currentState = phaseTracker.getCurrentState();
+        final IPhaseState<?> currentState = phaseTracker.getCurrentState();
         // TODO - write a tristate for whether the state can deny chunks
         // States that cannot deny chunks
         if (currentState == TickPhase.Tick.PLAYER
@@ -272,7 +277,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Overwrite
     public boolean tick()
     {
-        if (!this.world.disableLevelSaving)
+        if (!this.world.disableLevelSaving && !((IMixinWorld) this.world).isFake())
         {
             ((IMixinWorldServer) this.world).getTimingsHandler().doChunkUnload.startTiming();
             Iterator<Chunk> iterator = this.id2ChunkMap.values().iterator();

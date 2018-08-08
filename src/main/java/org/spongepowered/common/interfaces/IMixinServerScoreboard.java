@@ -29,7 +29,7 @@ import net.minecraft.network.Packet;
 
 public interface IMixinServerScoreboard extends IMixinScoreboard {
 
-    void addPlayer(EntityPlayerMP player);
+    void addPlayer(EntityPlayerMP player, boolean sendPackets);
 
     void removePlayer(EntityPlayerMP player, boolean sendPackets);
 

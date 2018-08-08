@@ -31,6 +31,7 @@ import net.minecraft.block.BlockPortal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockPattern;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -66,7 +67,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     private int searchRadius = 128;
     private int creationRadius = 16;
     private boolean createNetherPortal = true;
-    private PortalAgentType portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent((Teleporter) (Object) this);
+    private PortalAgentType portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(this);
 
     @Shadow @Final private WorldServer world;
     @Shadow @Final private Random random;
@@ -167,12 +168,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
      */
     @Overwrite
     public boolean placeInExistingPortal(Entity entityIn, float rotationYaw) {
-        if (entityIn == null) {
-            return false;
-        }
-
         org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entityIn;
-        Optional<Location<World>> location = findPortal(spongeEntity.getLocation());
+        Optional<Location<World>> location = this.findPortal(spongeEntity.getLocation());
         if (location.isPresent()) {
             // last minute adjustments for portal exit
             this.handleEntityPortalExit(entityIn, location.get(), rotationYaw);
@@ -198,7 +195,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             teleporter$portalposition.lastUpdateTime = this.world.getTotalWorldTime();
             addToCache = false;
         } else {
-            BlockPos blockSearchPosition = ((IMixinLocation) (Object) searchLocation).getBlockPos();
+            BlockPos blockSearchPosition = VecHelper.toBlockPos(searchLocation);
 
             for (int i1 = -this.searchRadius; i1 <= this.searchRadius; ++i1) {
                 BlockPos blockpos2;
@@ -228,19 +225,18 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
         if (closest >= 0.0D) {
             if (addToCache) {
-                this.destinationCoordinateCache.put(targetPosition,
-                        ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getTotalWorldTime()));
+                this.destinationCoordinateCache.put(targetPosition, ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getTotalWorldTime()));
             }
 
-            return Optional.of(new Location<World>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
+            return Optional.of(new Location<>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
         }
         return Optional.empty();
     }
 
     private void handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
-        BlockPos blockPos = ((IMixinLocation) (Object) portalLocation).getBlockPos();
+        BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
         double xTarget = portalLocation.getX() + 0.5D;
-        double yTarget = portalLocation.getY() + 0.5D;
+        double yTarget;
         double zTarget = portalLocation.getZ() + 0.5D;
         BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.world, blockPos);
         boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
@@ -298,20 +294,17 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
      */
     @Overwrite
     public boolean makePortal(Entity entityIn) {
-        if (createPortal(((org.spongepowered.api.entity.Entity) entityIn).getLocation()).isPresent()) {
-            return true;
-        }
+        return this.createPortal(((org.spongepowered.api.entity.Entity) entityIn).getLocation()).isPresent();
 
-        return false;
     }
 
     @Override
     public Optional<Location<World>> createPortal(Location<World> toLocation) {
-        return createTeleporter(toLocation, false);
+        return this.createTeleporter(toLocation);
     }
 
     // Adds boolean to turn on special tracking if called from API
-    public Optional<Location<World>> createTeleporter(Location<World> nearLocation, boolean plugin) {
+    private Optional<Location<World>> createTeleporter(Location<World> nearLocation) {
 //        IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
 //        final PhaseTracker causeTracker = PhaseTracker.getInstance();
 //        if (plugin) {
@@ -489,27 +482,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             }
         }
 
-        if (plugin) {
-//            boolean portalResult = causeTracker.handleBlockCaptures();
-//            // if portal ChangeBlockEvent was allowed, return the start location
-//            if (portalResult) {
-//                causeTracker.handleDroppedItems();
-//                causeTracker.handleSpawnedEntities();
-//                causeTracker.removeCurrentCause();
-//                causeTracker.setSpecificCapture(false);
-//                return Optional.of(new Location<World>((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
-//            } else { // portal ChangeBlockEvent was cancelled
-//                causeTracker.getCapturedSpawnedEntities().clear();
-//                causeTracker.getCapturedSpawnedEntityItems().clear();
-//                causeTracker.removeCurrentCause();
-//                causeTracker.setSpecificCapture(false);
-//                // update cache
-//                this.removePortalPositionFromCache(ChunkPos.asLong(xFinalTarget, zFinalTarget));
-//                return Optional.empty();
-//            }
-        }
-
-        return Optional.of(new Location<World>((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
+        return Optional.of(new Location<>((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
     }
 
     @Override
@@ -529,10 +502,15 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     @Override
     public void setNetherPortalType(boolean isNetherPortal) {
-        if (isNetherPortal) {
-            this.createNetherPortal = true;
+        this.createNetherPortal = isNetherPortal;
+    }
+
+    @Override
+    public void placeEntity(net.minecraft.world.World world, Entity entity, float yaw) {
+        if (entity instanceof EntityPlayerMP) {
+            this.placeInPortal(entity, yaw);
         } else {
-            this.createNetherPortal = false;
+            this.placeInExistingPortal(entity, yaw);
         }
     }
 
@@ -544,11 +522,11 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("PortalAgent")
-                .add("PortalAgentType", this.portalAgentType)
-                .add("SearchRadius", this.searchRadius)
-                .add("CreationRadius", this.creationRadius)
-                .add("World", this.world.getWorldInfo().getWorldName())
-                .add("DimensionId", ((IMixinWorldServer) this.world).getDimensionId())
+                .add("type", this.portalAgentType)
+                .add("searchRadius", this.searchRadius)
+                .add("creationRadius", this.creationRadius)
+                .add("world", this.world.getWorldInfo().getWorldName())
+                .add("dimension", ((IMixinWorldServer) this.world).getDimensionId())
                 .toString();
     }
 }

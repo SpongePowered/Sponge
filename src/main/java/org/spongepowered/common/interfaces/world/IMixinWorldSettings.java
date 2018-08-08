@@ -32,6 +32,8 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 
+import javax.annotation.Nullable;
+
 public interface IMixinWorldSettings {
 
     void setId(String id);
@@ -54,7 +56,7 @@ public interface IMixinWorldSettings {
 
     void setLoadOnStartup(boolean state);
 
-    void setKeepSpawnLoaded(boolean state);
+    void setKeepSpawnLoaded(@Nullable Boolean state);
 
     void setGenerateSpawnOnLoad(boolean state);
 
@@ -70,5 +72,6 @@ public interface IMixinWorldSettings {
 
     void setRandomSeed(boolean state);
 
+    @Nullable
     Boolean internalKeepSpawnLoaded();
 }

@@ -32,6 +32,7 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
+@SuppressWarnings("rawtypes")
 @RegisterCatalog(Triggers.class)
 public class TriggerTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Trigger>
         implements AdditionalCatalogRegistryModule<Trigger> {

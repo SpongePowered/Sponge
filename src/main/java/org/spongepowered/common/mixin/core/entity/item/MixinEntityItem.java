@@ -122,12 +122,17 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Override
     public int getDespawnDelay() {
-        return this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age;
+        return 6000 - (this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age);
+    }
+
+    @Override
+    public void setDespawnDelay(int delay) {
+        this.age = 6000 - delay;
     }
 
     @Override
     public void setDespawnDelay(int delay, boolean infinite) {
-        this.age = delay;
+        this.age = 6000 - delay;
         boolean previous = this.infiniteDespawnDelay;
         this.infiniteDespawnDelay = infinite;
         if (infinite && !previous) {

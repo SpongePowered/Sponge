@@ -32,6 +32,8 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.populator.Ore;
@@ -43,6 +45,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
+import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.populators.MesaBiomeGenerationPopulator;
 
 import java.util.Random;
@@ -57,16 +61,11 @@ public abstract class MixinBiomeMesa extends MixinBiome {
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.brycePillars, this.hasForest));
         super.buildPopulators(world, gensettings);
-        String s = world.getWorldInfo().getGeneratorOptions();
-        ChunkGeneratorSettings settings;
-        if (s != null) {
-            settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
-        } else {
-            settings = ChunkGeneratorSettings.Factory.jsonToFactory("").build();
-        }
+        final String s = world.getWorldInfo().getGeneratorOptions();
+        final ChunkGeneratorSettings settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
 
         // Extra gold is generated in mesa biomes
-        Ore gold = Ore.builder()
+        final Ore gold = Ore.builder()
                 .ore((BlockState) Blocks.GOLD_ORE.getDefaultState())
                 .size(settings.goldSize)
                 .perChunk(20)
@@ -74,15 +73,17 @@ public abstract class MixinBiomeMesa extends MixinBiome {
                 .build();
         gensettings.getPopulators().add(gold);
 
-        BiomeDecorator theBiomeDecorator = this.decorator;
+        final BiomeDecorator theBiomeDecorator = this.decorator;
         gensettings.getGroundCoverLayers().clear();
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        Forest.Builder forest = Forest.builder();
-        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 1);
-        gensettings.getPopulators().add(0, forest.build());
+        final Forest forest = Forest.builder()
+          .perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1))
+          .type(BiomeTreeTypes.OAK.getPopulatorObject(), 1)
+          .build();
+        gensettings.getPopulators().add(0, forest);
+
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Cactus.class));
-        Cactus cactus = Cactus.builder()
+        final Cactus cactus = Cactus.builder()
                 .cactiPerChunk(VariableAmount.baseWithOptionalAddition(0,
                         VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithOptionalAddition(2, 3, 0.25)), 0.4))
                 .build();
@@ -93,9 +94,14 @@ public abstract class MixinBiomeMesa extends MixinBiome {
      * Cancel the call to place the terrain blocks as this is instead handled
      * through our custom genpop.
      */
-    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") , cancellable = true)
-    public void genTerrainBlocks(World world, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise, CallbackInfo ci) {
-        ci.cancel();
+    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") ,
+      cancellable = true)
+    private void genTerrainBlocks(World world, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise, CallbackInfo ci) {
+        final SpongeChunkGenerator generator = (SpongeChunkGenerator) ((org.spongepowered.api.world.World) world).getWorldGenerator();
+        final BiomeGenerationSettings biomeSettings = generator.getBiomeSettings((BiomeType) this);
+        // If trhis isn't our settings type then this isn't our generation, allow this to continue
+        if (!(biomeSettings instanceof SpongeBiomeGenerationSettings)) {
+            ci.cancel();
+        }
     }
-
 }

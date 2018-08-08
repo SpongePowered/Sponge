@@ -45,4 +45,6 @@ public interface IModData_Collisions {
     String getModDataId();
 
     void setModDataId(String id);
+
+    boolean isRunningCollideWithNearby();
 }

@@ -38,12 +38,14 @@ import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.util.Locale;
 
-public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
+import javax.annotation.Nullable;
 
-    TypeToken<V> valueToken;
-    CatalogKey id;
-    String name;
-    DataQuery query;
+public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
+
+    @Nullable TypeToken<V> valueToken;
+    @Nullable CatalogKey id;
+    @Nullable String name;
+    @Nullable DataQuery query;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -54,7 +56,6 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
 
     @Override
     public Key.Builder<E, V> id(String id) {
-        checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!checkNotNull(id, "ID cannot be null!").contains(" "), "Id cannot contain spaces!");
         String value = id.toLowerCase(Locale.ENGLISH);
         final PluginContainer parent = SpongeKey.getCurrentContainer();
@@ -75,7 +76,6 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
 
     @Override
     public Key.Builder<E, V> name(String name) {
-        checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!checkNotNull(name).isEmpty(), "Name cannot be empty!");
         this.name = name;
         return this;
@@ -83,7 +83,6 @@ public class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<
 
     @Override
     public Key.Builder<E, V> query(DataQuery query) {
-        checkState(this.valueToken != null, "Value Token must be set first!");
         checkArgument(!query.getParts().isEmpty(), "DataQuery cannot be null!");
         this.query = query;
         return this;

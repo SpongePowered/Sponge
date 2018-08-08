@@ -25,8 +25,6 @@
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -36,32 +34,24 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 
 
-public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens<IInventory, net.minecraft.item.ItemStack> {
+public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens {
 
-    public HotbarLensImpl(int base, int width, SlotProvider<IInventory, ItemStack> slots) {
+    public HotbarLensImpl(int base, int width, SlotProvider slots) {
         this(base, width, 0, 0, HotbarAdapter.class, slots);
     }
 
-    public HotbarLensImpl(int base, int width, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, 0, 0, adapterType, slots);
-    }
-    
-    public HotbarLensImpl(int base, int width, int xBase, int yBase, SlotProvider<IInventory, ItemStack> slots) {
-        this(base, width, xBase, yBase, HotbarAdapter.class, slots);
-    }
-    
-    public HotbarLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public HotbarLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider slots) {
         super(base, width, xBase, yBase, adapterType, slots);
     }
 
     @Override
-    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+    public InventoryAdapter getAdapter(Fabric inv, Inventory parent) {
         return new HotbarAdapter(inv, this, parent);
     }
 
     @Override
-    public int getSelectedSlotIndex(Fabric<IInventory> inv) {
-        for (IInventory inner : inv.allInventories()) {
+    public int getSelectedSlotIndex(Fabric inv) {
+        for (Object inner : inv.allInventories()) {
             if (inner instanceof InventoryPlayer) {
                 return ((InventoryPlayer) inner).currentItem;
             }
@@ -70,10 +60,11 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens<I
     }
 
     @Override
-    public void setSelectedSlotIndex(Fabric<IInventory> inv, int index) {
-        inv.allInventories().stream().filter(inner -> inner instanceof IMixinInventoryPlayer).forEach(inner -> {
-            ((IMixinInventoryPlayer) inner).setSelectedItem(index, true);
-        });
+    public void setSelectedSlotIndex(Fabric inv, int index) {
+        inv.allInventories().stream()
+                .filter(IMixinInventoryPlayer.class::isInstance)
+                .map(IMixinInventoryPlayer.class::cast)
+                .forEach(inner -> inner.setSelectedItem(index, true));
     }
 
 }

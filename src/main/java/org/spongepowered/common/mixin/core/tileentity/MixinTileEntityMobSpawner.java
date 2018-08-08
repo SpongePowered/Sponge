@@ -30,13 +30,13 @@ import org.spongepowered.api.block.tileentity.MobSpawner;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
 import org.spongepowered.common.data.processor.common.SpawnerUtils;
 import org.spongepowered.common.interfaces.IMixinMobSpawner;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 
@@ -88,6 +88,6 @@ public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implemen
 
     @Override
     public SpawnType getTickedSpawnType() {
-        return InternalSpawnTypes.MOB_SPAWNER;
+        return SpawnTypes.MOB_SPAWNER;
     }
 }

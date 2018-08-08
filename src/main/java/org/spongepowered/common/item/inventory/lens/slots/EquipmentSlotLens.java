@@ -28,7 +28,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 
 import java.util.function.Predicate;
 
-public interface EquipmentSlotLens<TInventory, TStack> extends FilteringSlotLens<TInventory, TStack> {
+public interface EquipmentSlotLens extends FilteringSlotLens {
 
     Predicate<EquipmentType> getEquipmentTypeFilter();
     

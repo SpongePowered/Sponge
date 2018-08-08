@@ -89,8 +89,20 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
         final List<String> lines = container.getStringList(Keys.SIGN_LINES.getQuery()).get();
         final List<Text> textLines = Lists.newArrayListWithCapacity(4);
         try {
-            for (int i = 0; i < 4; i++) {
-                textLines.set(i, TextSerializers.JSON.deserialize(lines.get(i)));
+            if (lines.isEmpty()) {
+                for (int i = 0; i < 4; i++) {
+                    textLines.set(i, Text.of());
+                }
+
+            } else {
+                int lineNum = 0;
+                for (String line : lines) {
+                    if (lineNum >= 4) {
+                        break;
+                    }
+                    lineNum++;
+                    textLines.add(TextSerializers.JSON.deserialize(line));
+                }
             }
         } catch (Exception e) {
             throw new InvalidDataException("Could not translate text json lines", e);

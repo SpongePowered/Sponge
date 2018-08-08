@@ -31,31 +31,25 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -74,15 +68,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void associateNeighborStateNotifier(BlockEventTickContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        if (sourcePos == null) {
-            LocatableBlock locatableBlock =  context.getSource(LocatableBlock.class).orElse(null);
-            if (locatableBlock == null) {
-                TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
-                locatableBlock = tileEntity.getLocatableBlock();
-            }
-            sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
-        }
-        final User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(minecraftWorld, sourcePos));
+        // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
+        final User user = context.getNotifier().orElse(null);
         if (user != null) {
             final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
             mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
@@ -91,32 +78,22 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public boolean spawnEntityOrCapture(BlockEventTickContext context, Entity entity, int chunkX, int chunkZ) {
-        final Optional<User> notifier = context.getNotifier();
-        final Optional<User> owner = context.getOwner();
-        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
 
             final List<Entity> entities = new ArrayList<>(1);
             entities.add(entity);
-            final SpawnEntityEvent spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
-            SpongeImpl.postEvent(spawnEntityEvent);
-            if (!spawnEntityEvent.isCancelled()) {
-                for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                    if (entityCreator != null) {
-                        EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
-                    }
-                    EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
-                }
-                return true;
-            }
+            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
+    }
+
+    @Override
+    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
+    public void postBlockTransactionApplication(BlockChange blockChange,
         Transaction<BlockSnapshot> snapshotTransaction, BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
@@ -132,29 +109,18 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void unwind(BlockEventTickContext phaseContext) {
-        final Optional<User> notifier = phaseContext.getNotifier();
-        final Optional<User> owner = phaseContext.getOwner();
-        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+    public void unwind(BlockEventTickContext context) {
         try (StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            phaseContext.getCapturedBlockSupplier()
-                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
-            phaseContext.getCapturedItemsSupplier()
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
+            context.getCapturedBlockSupplier()
+                    .acceptAndClearIfNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
+            context.getCapturedItemsSupplier()
                     .acceptAndClearIfNotEmpty(items -> {
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
                             capturedEntities.add(EntityUtil.fromNative(entity));
                         }
-                        final SpawnEntityEvent spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (entityCreator != null) {
-                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                            }
-                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-                        }
+                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
                     });
         }
     }

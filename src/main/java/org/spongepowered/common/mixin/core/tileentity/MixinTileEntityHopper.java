@@ -54,13 +54,14 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinInventory;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotLensCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 import java.util.ArrayList;
@@ -69,6 +70,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
 public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinInventory {
@@ -96,19 +98,19 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @SuppressWarnings("unchecked")
     @Override
-    public ReusableLens<?> generateLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+    public ReusableLens<?> generateLens(Fabric fabric, InventoryAdapter adapter) {
         return ReusableLens.getLens(GridInventoryLens.class, ((InventoryAdapter) this), this::generateSlotProvider, this::generateRootLens);
     }
 
     @SuppressWarnings("unchecked")
-    private SlotProvider<IInventory, ItemStack> generateSlotProvider() {
-        return new SlotCollection.Builder().add(5).build();
+    private SlotProvider generateSlotProvider() {
+        return new SlotLensCollection.Builder().add(5).build();
     }
 
     @SuppressWarnings("unchecked")
-    private GridInventoryLens<IInventory, ItemStack> generateRootLens(SlotProvider<IInventory, ItemStack> slots) {
+    private GridInventoryLens generateRootLens(SlotProvider slots) {
         Class<? extends InventoryAdapter> thisClass = ((Class) this.getClass());
-        return new GridInventoryLensImpl(0, 5, 1, 5, thisClass, slots);
+        return new GridInventoryLensImpl(0, 5, 1, thisClass, slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"))
@@ -116,9 +118,8 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         ((IMixinEntity) entityItem).getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
-                BlockPos pos = te.getPos();
-                IMixinChunk spongeChunk = (IMixinChunk) te.getWorld().getChunkFromBlockCoords(pos);
-                spongeChunk.addTrackedBlockPosition(te.getBlockType(), pos, owner, PlayerTracker.Type.NOTIFIER);
+                IMixinChunk spongeChunk = ((IMixinTileEntity) te).getActiveChunk();
+                spongeChunk.addTrackedBlockPosition(te.getBlockType(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
             }
         });
     }

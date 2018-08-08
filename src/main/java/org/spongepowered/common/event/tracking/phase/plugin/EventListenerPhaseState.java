@@ -33,7 +33,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
 
 import javax.annotation.Nullable;
 
@@ -43,6 +42,8 @@ final class EventListenerPhaseState extends ListenerPhaseState {
 
     EventListenerPhaseState() {
     }
+
+
 
     @Override
     public void unwind(ListenerPhaseContext phaseContext) {
@@ -60,12 +61,14 @@ final class EventListenerPhaseState extends ListenerPhaseState {
 
     }
 
+    // TODO - even listeners can be better managed with regards to entity captures and item drops.
+
     @Override
     public void associateNeighborBlockNotifier(ListenerPhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                                                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         context.getCapturedPlayer().ifPresent(player ->
                 ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
-                        .setBlockNotifier(notifyPos, player.getUniqueId())
+                        .addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER)
         );
     }
 

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context;
 
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.lang.ref.WeakReference;
@@ -88,5 +90,13 @@ public final class CaptureBlockPos {
     @Override
     public int hashCode() {
         return com.google.common.base.Objects.hashCode(this.pos);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("pos", this.pos)
+                .add("world", this.getMixinWorld().map(w -> ((World) w).getName()))
+                .toString();
     }
 }

@@ -29,13 +29,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Random;
@@ -45,11 +48,14 @@ public abstract class MixinBlockFire extends MixinBlock {
 
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", ordinal = 1))
     private boolean onFireSpread(World world, BlockPos pos, IBlockState state, int updateFlag) {
-        if (!world.isRemote) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {
-                return false;
+        if (!((IMixinWorld) world).isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.FIRE_SPREAD, (org.spongepowered.api.world.World) world);
+                if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos).isCancelled()) {
+                    return false;
+                }
             }
+
         }
         return world.setBlockState(pos, state, updateFlag);
     }

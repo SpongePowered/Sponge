@@ -120,14 +120,14 @@ public class EntityActivationRange {
     }
 
     /**
-     * These entities are excluded from Activation range checks.
+     * Initialize entity activation state.
      *
      * @param entity Entity to check
-     * @return boolean If it should always tick.
      */
-    public static boolean initializeEntityActivationState(Entity entity) {
+    public static void initializeEntityActivationState(Entity entity) {
+        final IModData_Activation spongeEntity = (IModData_Activation) entity;
         if (((IMixinWorld) entity.world).isFake()) {
-            return true;
+            return;
         }
 
         // types that should always be active
@@ -143,15 +143,14 @@ public class EntityActivationRange {
             || entity instanceof EntityFireworkRocket
             || entity instanceof EntityFallingBlock) // Always tick falling blocks
         {
-            return true;
+            return;
         }
 
         EntityActivationRangeCategory config = ((IMixinWorldServer) entity.world).getActiveConfig().getConfig().getEntityActivationRange();
         EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
-
-        IModData_Activation spongeEntity = (IModData_Activation) entity;
         if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType)) {
-            return false;
+            spongeEntity.setDefaultActivationState(true);
+            return;
         }
         final SpongeEntityType spongeType = (SpongeEntityType) type;
         final byte activationType = spongeEntity.getActivationType();
@@ -165,31 +164,29 @@ public class EntityActivationRange {
         if (entityMod == null) {
             // use default activation range
             spongeEntity.setActivationRange(defaultActivationRange);
-            if (defaultActivationRange <= 0) {
-                return true;
+            if (defaultActivationRange > 0) {
+                spongeEntity.setDefaultActivationState(false);
             }
-            return false;
-        } else if (!entityMod.isEnabled()) {
-            spongeEntity.setActivationRange(defaultActivationRange);
-            return true;
-        }
+        } else {
+            if (!entityMod.isEnabled()) {
+                spongeEntity.setDefaultActivationState(true);
+                return;
+            }
 
-        Integer defaultModActivationRange = entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType));
-        Integer entityActivationRange = entityMod.getEntityList().get(type.getName().toLowerCase());
-        if (defaultModActivationRange != null && entityActivationRange == null) {
-            spongeEntity.setActivationRange(defaultModActivationRange);
-            if (defaultModActivationRange <= 0) {
-                return true;
-            }
-            return false;
-        } else if (entityActivationRange != null) {
-            spongeEntity.setActivationRange(entityActivationRange);
-            if (entityActivationRange <= 0) {
-                return true;
+            Integer defaultModActivationRange = entityMod.getDefaultRanges().get(activationTypeMappings.get(activationType));
+            Integer entityActivationRange = entityMod.getEntityList().get(type.getName().toLowerCase());
+            if (defaultModActivationRange != null && entityActivationRange == null) {
+                spongeEntity.setActivationRange(defaultModActivationRange);
+                if (defaultModActivationRange > 0) {
+                    spongeEntity.setDefaultActivationState(false);
+                }
+            } else if (entityActivationRange != null) {
+                spongeEntity.setActivationRange(entityActivationRange);
+                if (entityActivationRange > 0) {
+                    spongeEntity.setDefaultActivationState(false);
+                }
             }
         }
-
-        return false;
     }
 
     /**
@@ -263,27 +260,30 @@ public class EntityActivationRange {
             for (Object o : chunk.getEntityLists()[i]) {
                 Entity entity = (Entity) o;
                 EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
+                final IModData_Activation spongeEntity = (IModData_Activation) entity;
                 long currentTick = SpongeImpl.getServer().getTickCounter();
+                if (!((IMixinEntity) entity).shouldTick()) {
+                    continue;
+                }
                 if (type == EntityTypes.UNKNOWN) {
-                    ((IModData_Activation) entity).setActivatedTick(currentTick);
+                    spongeEntity.setActivatedTick(currentTick);
                     continue;
                 }
 
-                if (currentTick > ((IModData_Activation) entity).getActivatedTick()) {
-                    if (((IModData_Activation) entity).getDefaultActivationState()) {
-                        ((IModData_Activation) entity).setActivatedTick(currentTick);
+                if (currentTick > spongeEntity.getActivatedTick()) {
+                    if (spongeEntity.getDefaultActivationState()) {
+                        spongeEntity.setActivatedTick(currentTick);
                         continue;
                     }
 
-                    IModData_Activation spongeEntity = (IModData_Activation) entity;
                     // check if activation cache needs to be updated
                     if (spongeEntity.requiresActivationCacheRefresh()) {
                         EntityActivationRange.initializeEntityActivationState(entity);
                         spongeEntity.requiresActivationCacheRefresh(false);
                     }
                     // check for entity type overrides
-                    byte activationType = ((IModData_Activation) entity).getActivationType();
-                    int bbActivationRange = ((IModData_Activation) entity).getActivationRange();
+                    byte activationType = spongeEntity.getActivationType();
+                    int bbActivationRange = spongeEntity.getActivationRange();
 
                     if (activationType == 5) {
                         growBb(miscBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
@@ -297,31 +297,31 @@ public class EntityActivationRange {
                         growBb(monsterBB, player.getEntityBoundingBox(), bbActivationRange, 256, bbActivationRange);
                     }
 
-                    switch (((IModData_Activation) entity).getActivationType()) {
+                    switch (spongeEntity.getActivationType()) {
                         case 1:
                             if (monsterBB.intersects(entity.getEntityBoundingBox())) {
-                                ((IModData_Activation) entity).setActivatedTick(currentTick);
+                                spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 2:
                             if (creatureBB.intersects(entity.getEntityBoundingBox())) {
-                                ((IModData_Activation) entity).setActivatedTick(currentTick);
+                                spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 3:
                             if (aquaticBB.intersects(entity.getEntityBoundingBox())) {
-                                ((IModData_Activation) entity).setActivatedTick(currentTick);
+                                spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 4:
                             if (ambientBB.intersects(entity.getEntityBoundingBox())) {
-                                ((IModData_Activation) entity).setActivatedTick(currentTick);
+                                spongeEntity.setActivatedTick(currentTick);
                             }
                             break;
                         case 5:
                         default:
                             if (miscBB.intersects(entity.getEntityBoundingBox())) {
-                                ((IModData_Activation) entity).setActivatedTick(currentTick);
+                                spongeEntity.setActivatedTick(currentTick);
                             }
                     }
                 }
@@ -391,6 +391,10 @@ public class EntityActivationRange {
         if (activeChunk == null) {
             // Should never happen but just in case for mods, always tick
             return true;
+        }
+
+        if (!activeChunk.isActive()) {
+            return false;
         }
 
         // If in forced chunk or is player
