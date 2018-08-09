@@ -130,6 +130,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 @Singleton
+@SuppressWarnings("deprecation")
 public class SpongeGameRegistry implements GameRegistry {
 
     public static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
@@ -185,22 +186,7 @@ public class SpongeGameRegistry implements GameRegistry {
             addToGraph(module, graph);
         }
 
-        try {
-            this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
-        } catch (CyclicGraphException e) {
-            StringBuilder msg = new StringBuilder();
-            msg.append("Registry module dependencies are cyclical!\n");
-            msg.append("Dependency loops are:\n");
-            for (DataNode<?>[] cycle : e.getCycles()) {
-                msg.append("[");
-                for (DataNode<?> node : cycle) {
-                    msg.append(node.getData().toString()).append(" ");
-                }
-                msg.append("]\n");
-            }
-            SpongeImpl.getLogger().fatal(msg.toString());
-            throw new RuntimeException("Registry modules dependencies error.");
-        }
+        topologicalSort(graph);
 
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
@@ -274,6 +260,10 @@ public class SpongeGameRegistry implements GameRegistry {
             addToGraph(aModule, graph);
         }
         this.orderedModules.clear();
+        topologicalSort(graph);
+    }
+
+    private void topologicalSort(DirectedGraph<Class<? extends RegistryModule>> graph) {
         try {
             this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
         } catch (CyclicGraphException e) {

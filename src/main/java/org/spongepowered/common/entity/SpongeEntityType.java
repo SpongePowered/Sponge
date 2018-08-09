@@ -96,9 +96,9 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public SpongeEntityType(int id, ResourceLocation spongeKey, ResourceLocation minecraftId, Class<? extends Entity> clazz, Translation translation) {
         super((CatalogKey) (Object) spongeKey, check(translation));
         this.entityTypeId = id;
-        this.entityName = minecraftId.getResourcePath();
+        this.entityName = minecraftId.getPath();
         this.entityClass = clazz;
-        this.modId = minecraftId.getResourceDomain();
+        this.modId = minecraftId.getNamespace();
         this.initializeTrackerState();
     }
 

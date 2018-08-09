@@ -43,7 +43,7 @@ public abstract class MixinSoundEvent implements SoundType {
 
     @Override
     public String getName() {
-        return this.soundName.getResourcePath();
+        return this.soundName.getNamespace();
     }
 
 }

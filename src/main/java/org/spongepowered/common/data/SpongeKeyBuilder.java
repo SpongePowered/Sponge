@@ -40,7 +40,7 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("deprecated")
+@SuppressWarnings("deprecation")
 public final class SpongeKeyBuilder<E, V extends BaseValue<E>> implements Key.Builder<E, V> {
 
     @Nullable TypeToken<V> valueToken;
