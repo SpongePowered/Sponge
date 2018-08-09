@@ -42,10 +42,18 @@ public class DebugCategory extends ConfigCategory {
     @Setting(value = "concurrent-entity-checks", comment = "Detect and prevent certain attempts to use entities concurrently. \n"
                                                          + "WARNING: May drastically decrease server performance. Only set this to 'true' "
                                                          + "to debug a pre-existing issue.")
-    private boolean concurrentChecks = false;
+    private boolean concurrentEntityChecks = false;
 
-    public boolean doConcurrentChecks() {
-        return this.concurrentChecks;
+    @Setting(value = "concurrent-chunk-map-checks", comment = "Detect and prevent parts of PlayerChunkMap being called off the main thread.\n"
+            + "This may decrease sever preformance, so you should only enable it when debugging a specific issue.")
+    private boolean concurrentChunkMapChecks = false;
+
+    public boolean doConcurrentEntityChecks() {
+        return this.concurrentEntityChecks;
+    }
+
+    public boolean doConcurrentChunkMapChecks() {
+        return this.concurrentChunkMapChecks;
     }
 
     public boolean isEnableThreadContentionMonitoring() {

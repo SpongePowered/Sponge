@@ -6,7 +6,8 @@
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinClassInheritanceMultiMap"
+    "MixinClassInheritanceMultiMap",
+    "MixinPlayerChunkMap_ConcurrentChecks"
   ],
   "injectors": {
     "defaultRequire": 1
