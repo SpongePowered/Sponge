@@ -340,11 +340,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Intrinsic
-    public String worldproperties$getWorldName() {
-        return this.levelName;
-    }
-
-    @Intrinsic
     public boolean worldproperties$isRaining() {
         return this.raining;
     }
@@ -886,9 +881,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         }
     }
 
+    // In development, this methos is replaced
+    // by the overwrite below.
+    // In production, this method calls the (re-obfuscated)
+    // overwritten method below
+    public String worldproperties$getWorldName() {
+        return this.getWorldName();
+    }
 
     /**
-     * @reason Some mods set a null levelName, which is incompatible with Sponge's policy
+     * @reason Some mods set a null levelName, which is incompatible with Spongne's policy
      * of never returning null from our API. Since this method has the same deobfuscated
      * name as an API method, I'm choosing to overwrite it to keep development and production
      * consistent. If we end up breaking mods because of this, we'll probably need to switch
